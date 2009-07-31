@@ -1,0 +1,84 @@
+ul,ol,li,h1,h2,h3,h4,h5,h6,pre,form,body,html,p,blockquote,fieldset,input
+{ margin: 0; padding: 0; }
+a img,:link img,:visited img { border: none; }
+
+a
+{
+  text-decoration: none;
+}
+
+a:hover
+{
+  text-decoration: underline;
+}
+
+body
+{
+  font-size: 12px;
+  font-family: "Lucida Grande", Verdana, Arial, sans-serif;
+  padding: 20px;
+}
+
+#appTitle
+{
+	padding-bottom: 1px;
+	padding-left: 20px;
+	background-color: #003862;
+	padding-top: 4px;
+	font-weight: bold;
+	text-shadow: 2px 2px 1px black;
+	color: white;
+	font-size: 180%;
+}
+
+#compound
+{
+    padding-bottom: 1px;
+    padding-top: 1px;
+    padding-left: 25px;
+    padding-right: 25px;
+    border-top: thick double #ffffff;
+    color: white;
+    font-size: 15px;
+    background-color: #4b6d87;
+}
+
+#south
+{
+	padding-left: 20px;
+	padding-bottom: 3px;
+	padding-right: 3px;
+	padding-top: 3px;
+	height: 26px;
+	color: white;
+	background-color: #004375;
+}
+
+#center
+{
+	padding-left: 20px;
+	padding-bottom: 4px;
+	padding-right: 20px;
+	padding-top: 4px;
+}
+
+.buttonstyle
+{
+    color:#aaaaaa; 
+    font: bold 84% "Lucida Grande", Verdana, Arial, sans-serif; 
+    background-color:#003862; 
+    border: 1px solid; 
+    border-color: #aaaaaa #222222 #222222 #aaaaaa; 
+}
+
+.buttonstyle:hover
+{
+    color:#ffffff;
+    background-color:#4b6d87;
+}
+
+.x-item-disabled {
+color:black;
+cursor:default;
+opacity:0.6;
+}
