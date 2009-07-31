@@ -114,6 +114,8 @@ if "DJANGODEV" in os.environ:
     DATABASE_PASSWORD = 'madasapp'         # Not used with sqlite3.
     DATABASE_HOST = 'eowyn.localdomain'             # Set to empty string for localhost. Not used with sqlite3.
     SSL_ENABLED = True
+    if "LOCALDEV" in os.environ:
+        SSL_ENABLED = False
     DEV_SERVER = True
 
     # debug site table
