@@ -23,6 +23,7 @@
 <link rel="shortcut icon" href="/favicon.ico" />
 <link rel="stylesheet" type="text/css" href="static/css/main.css"></link>
 <link rel="stylesheet" type="text/css" href="static/js/ext/resources/css/ext-all.css"></link>
+<link rel="stylesheet" type="text/css" href="static/css/file-upload.css"></link>
 <!-- Ext scripts -->
 <script type="text/javascript" src="static/js/ext/adapter/ext/ext-base.js"></script>
 <script type="text/javascript" src="static/js/ext/ext-all-debug.js"></script>
