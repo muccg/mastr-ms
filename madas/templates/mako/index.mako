@@ -53,25 +53,32 @@ function callbacker(){
     }
     
     Ext.madasInitApplication('${ APP_SECURE_URL }', '${ username }', '${ mainContentFunction }', '${ params }');
-
+    document.getElementById("appLoad").style.display = "none";
+    document.getElementById("hidePass").style.display = "block";
+    document.getElementById("hideUser").style.display = "block";
 }
 </script>
 
 </head>
 <body onLoad="callbacker();">
+
 <div id="north"><div id="appTitle">Metabolomics Australia User and Quote Management System</div><div id="toolbar"/></div></div>
+
 <div id="south">(c) CCG 2009</div>
-<div id="centerDiv"></div>
-<form id="hiddenForm"></form>
+
+
+<div style="position:relative;">
+<div id="appLoad" style="z-index:1;position:absolute;left:0px;top:0px;width:400px;height:200px;background:white;padding:200px;"><img src="static/js/ext/resources/images/default/shared/large-loading.gif"> Loading...</div>
 <div id="loginDiv">
 <form id="loginForm" action="login/processLogin" method="POST">
-<div class="x-form-item"><label class="x-form-item-label">Email address:</label>
+<div class="x-form-item" id="hideUser" style="display:none;"><label class="x-form-item-label">Email address:</label>
 <div class="x-form-element">
 <input id="username" name="username">
 </div>
+</div>
 <div class="x-form-clear-left">
 </div>
-<div class="x-form-item"><label class="x-form-item-label">Password:</label>
+<div class="x-form-item" id="hidePass" style="display:none;"><label class="x-form-item-label">Password:</label>
 <div class="x-form-element">
 <input id="password" name="password" type="password">
 </div>
@@ -80,6 +87,13 @@ function callbacker(){
 <input type="submit" value="Login" style="margin-left:200px;">
 </form>
 </div>
+</div>
+
+<div id="centerDiv"></div>
+
+
+
+<form id="hiddenForm"></form>
 
 </body>
 </html>
