@@ -16,6 +16,11 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
 #    (r'^(.*)/authorize', 'madas.madas.views.authorize'),
 #    (r'^(.*)/index', 'madas.madas.views.serveIndex'),
+
+    # madasrepo
+    (r'^ws/', include('madas.repository.wsurls')),
+
+    # madas
     (r'^djangoadmin/(.*)', admin.site.root),
     (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root' : settings.MEDIA_ROOT}),
     (r'^javascript/(?P<path>.*)$', 'django.views.static.serve', {'document_root' : settings.MEDIA_ROOT}),
