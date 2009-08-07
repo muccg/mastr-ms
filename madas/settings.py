@@ -210,7 +210,8 @@ INSTALLED_APPS = (
     'madas.login',
     'madas.quote',
     'madas.users',
-    'madas.admin'
+    'madas.admin',
+    'madas.repository',
 )
 
 
