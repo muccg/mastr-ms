@@ -41,7 +41,7 @@ Ext.madasAccess = {
                     tbar: [{
                         text: 'add user',
                         cls: 'x-btn-text-icon',
-                        icon:'images/add.gif',
+                        icon:'static/repo/images/add.gif',
                         handler : function(){
                                 userStore.add(new Ext.data.Record({'user':'', 'type':'1', 'additional_info':''}));
                             }
@@ -49,7 +49,7 @@ Ext.madasAccess = {
                         {
                         text: 'remove user',
                         cls: 'x-btn-text-icon',
-                        icon:'images/no.gif',
+                        icon:'static/repo/images/no.gif',
                         handler : function(){
                            var grid = Ext.getCmp('involvedUsersGrid');
                            var delIds = []; 

@@ -1,5 +1,6 @@
 //var wsBaseUrl = "http://boromir5.localdomain/madasrepo/ntakayama/ws/";
-var wsBaseUrl = "http://localhost:8000/ws/";
+var baseUrl = "http://localhost:8000/";
+var wsBaseUrl = baseUrl + "ws/";
 var storesNeededForRendering = {"tissueCombo":"init", "locationCombo":"init"};
 
 Ext.madasDSLoaded = function(ds, recs, opts) {

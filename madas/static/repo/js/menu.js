@@ -104,7 +104,7 @@ Ext.madasMenuHandler = function(item) {
     var vpl = Ext.getCmp('center-panel').getLayout();
 
     //we authorize every access to check for session timeout and authorization to specific pages
-    //Ext.madasAuthorize(item.id);
+    
     switch (item.id) {
         case 'experiment:my':
             experimentListStore.reload();
@@ -117,7 +117,11 @@ Ext.madasMenuHandler = function(item) {
             Ext.getCmp('expNav').getSelectionModel().selectFirstRow();
 
             break;
+        case 'login':
+            Ext.madasChangeMainContent('login');
+            break;
         default:
+            Ext.madasAuthorize(item.id);
             break;
     }
     
@@ -129,9 +133,6 @@ Ext.madasMenuHide = function() {
     Ext.get('dashboard').hide();
     Ext.get('admin').hide();
     Ext.get('userMenu').hide();
-    Ext.getCmp('quote:list').hide();
-    Ext.getCmp('quote:listAll').hide();
-    Ext.getCmp('quote:listFormal').hide();
     Ext.getCmp('helpadmin:screencasts').disable();
 
 }
