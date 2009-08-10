@@ -192,7 +192,7 @@ Ext.madasBioSource = {
                     tbar: [{
                         text: 'add organ',
                         cls: 'x-btn-text-icon',
-                        icon:'images/add.gif',
+                        icon:'static/repo/images/add.gif',
                         handler : function() {
                            Ext.madasCRUDSomething('create/organ/', {'source_id':Ext.madasCurrentBioSourceId()}, function() { var expId = Ext.madasCurrentExperimentId(); organStore.proxy.conn.url = wsBaseUrl + 'records/organ/source__experiment__id/' + expId;
                                                   organStore.load(); });
@@ -201,7 +201,7 @@ Ext.madasBioSource = {
                         {
                         text: 'remove organ',
                         cls: 'x-btn-text-icon',
-                        icon:'images/no.gif',
+                        icon:'static/repo/images/no.gif',
                         handler : function(){
                             var grid = Ext.getCmp('organs');
                             var delIds = []; 
@@ -298,7 +298,7 @@ Ext.madasBioSource = {
                     tbar: [{
                         text: 'add genotype',
                         cls: 'x-btn-text-icon',
-                        icon:'images/add.gif',
+                        icon:'static/repo/images/add.gif',
                         handler : function(){
                            Ext.madasCRUDSomething('create/genotype/', {'source_id':Ext.madasCurrentBioSourceId()}, function() { var expId = Ext.madasCurrentExperimentId(); genotypeStore.proxy.conn.url = wsBaseUrl + 'records/genotype/source__experiment__id/' + expId;
                                                   genotypeStore.load(); });
@@ -307,7 +307,7 @@ Ext.madasBioSource = {
                         {
                         text: 'remove genotype',
                         cls: 'x-btn-text-icon',
-                        icon:'images/no.gif',
+                        icon:'static/repo/images/no.gif',
                         handler : function(){
                            var grid = Ext.getCmp('genotypes');
                            var delIds = []; 

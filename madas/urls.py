@@ -18,6 +18,7 @@ urlpatterns = patterns('',
 #    (r'^(.*)/index', 'madas.madas.views.serveIndex'),
 
     # madasrepo
+    (r'^repo/', include('madas.repository.urls')),
     (r'^ws/', include('madas.repository.wsurls')),
 
     # madas

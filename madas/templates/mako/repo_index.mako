@@ -1,34 +1,34 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
 <head>
-    <link rel="stylesheet" href="ext-3.0.0/resources/css/ext-all.css"/>
-    <link rel="stylesheet" href="main.css"/>
-    <link rel="stylesheet" href="ext-3.0.0/examples/ux/css/RowEditor.css"/>
-    <script src="ext-3.0.0/adapter/ext/ext-base.js" type="text/javascript"></script>
-    <script src="ext-3.0.0/ext-all-debug.js"></script>
-    <script src="ext-3.0.0/examples/ux/RowEditor.js"></script>
+    <link rel="stylesheet" href="static/repo/ext-3.0.0/resources/css/ext-all.css"/>
+    <link rel="stylesheet" href="static/repo/main.css"/>
+    <link rel="stylesheet" href="static/repo/ext-3.0.0/examples/ux/css/RowEditor.css"/>
+    <script src="static/repo/ext-3.0.0/adapter/ext/ext-base.js" type="text/javascript"></script>
+    <script src="static/repo/ext-3.0.0/ext-all-debug.js"></script>
+    <script src="static/repo/ext-3.0.0/examples/ux/RowEditor.js"></script>
 
 <!--    <link rel="stylesheet" href="ext-2.2.1/resources/css/ext-all.css"/>
-    <script src="ext-2.2.1/adapter/ext/ext-base.js" type="text/javascript"></script>
-    <script src="ext-2.2.1/ext-all-debug.js"></script>-->
+    <script src="static/repo/ext-2.2.1/adapter/ext/ext-base.js" type="text/javascript"></script>
+    <script src="static/repo/ext-2.2.1/ext-all-debug.js"></script>-->
 
 <!--    <script src="js/uxDateTime.js" type="text/javascript"></script> -->
 
-    <script src="js/madasJsonReader.js" type="text/javascript"></script>
+    <script src="static/repo/js/madasJsonReader.js" type="text/javascript"></script>
 <!--    <script src="js/madasBufferedJsonReader.js" type="text/javascript"></script>-->
-    <script src="js/menucontroller.js" type="text/javascript"></script>
-    <script src="js/login.js" type="text/javascript"></script>
-    <script src="js/datastores.js" type="text/javascript"></script>
-    <script src="js/renderers.js" type="text/javascript"></script>
-    <script src="js/samples.js" type="text/javascript"></script>
-    <script src="js/biosource.js" type="text/javascript"></script>
-    <script src="js/growth.js" type="text/javascript"></script>
-    <script src="js/treatment.js" type="text/javascript"></script>
-    <script src="js/sampleprep.js" type="text/javascript"></script>
-    <script src="js/access.js" type="text/javascript"></script>
-    <script src="js/experimentlist.js" type="text/javascript"></script>
-    <script src="js/controller.js" type="text/javascript"></script>
-    <script src="js/menu.js" type="text/javascript"></script>
+    <script src="static/repo/js/menucontroller.js" type="text/javascript"></script>
+    <script src="static/repo/js/login.js" type="text/javascript"></script>
+    <script src="static/repo/js/datastores.js" type="text/javascript"></script>
+    <script src="static/repo/js/renderers.js" type="text/javascript"></script>
+    <script src="static/repo/js/samples.js" type="text/javascript"></script>
+    <script src="static/repo/js/biosource.js" type="text/javascript"></script>
+    <script src="static/repo/js/growth.js" type="text/javascript"></script>
+    <script src="static/repo/js/treatment.js" type="text/javascript"></script>
+    <script src="static/repo/js/sampleprep.js" type="text/javascript"></script>
+    <script src="static/repo/js/access.js" type="text/javascript"></script>
+    <script src="static/repo/js/experimentlist.js" type="text/javascript"></script>
+    <script src="static/repo/js/controller.js" type="text/javascript"></script>
+    <script src="static/repo/js/menu.js" type="text/javascript"></script>
 
 <script>
 var callbackCount = 0;
@@ -82,31 +82,31 @@ function callbacker(){
     <form id="hiddenForm"></form>
     <ul id="experiment-nav" class="x-hidden" onclick="javascript:Ext.madasActions['expDetails'];">
     	<li>
-			<img src="images/s.gif" class="icon-show-active"/>
+			<img src="static/repo/images/s.gif" class="icon-show-active"/>
     		<a id="expDetails" href="#">experiment details</a>
     	</li>
     	<li onclick="javascript:Ext.madasActions['expSamples'];">
-			<img src="images/s.gif" class="icon-show-active"/>
+			<img src="static/repo/images/s.gif" class="icon-show-active"/>
     		<a id="expSamples" href="#">samples/classes</a>
     	</li>
     	<li>
-			<img src="images/s.gif" class="icon-show-active"/>
+			<img src="static/repo/images/s.gif" class="icon-show-active"/>
     		<a id="expBioSource" href="#">biological source</a>
     	</li>
     	<li>
-			<img src="images/s.gif" class="icon-show-active"/>
+			<img src="static/repo/images/s.gif" class="icon-show-active"/>
     		<a id="expGrowth" href="#">growth</a>
     	</li>
     	<li>
-			<img src="images/s.gif" class="icon-show-active"/>
+			<img src="static/repo/images/s.gif" class="icon-show-active"/>
     		<a id="expTreat" href="#">treatment</a>
     	</li>
     	<li>
-			<img src="images/s.gif" class="icon-show-active"/>
+			<img src="static/repo/images/s.gif" class="icon-show-active"/>
     		<a id="expPrep" href="#">sample prep</a>
     	</li>
     	<li>
-			<img src="images/s.gif" class="icon-show-active"/>
+			<img src="static/repo/images/s.gif" class="icon-show-active"/>
     		<a id="expAccess" href="#">access</a>
     	</li>
 

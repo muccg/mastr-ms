@@ -76,7 +76,7 @@ Ext.madasTreatment = {
                             tbar: [{
                                 text: 'add date',
                                 cls: 'x-btn-text-icon',
-                                icon:'images/add.gif',
+                                icon:'static/repo/images/add.gif',
                                 handler : function(){
                                     Ext.madasCRUDSomething('create/sampletimeline/', {'source_id':Ext.madasCurrentBioSourceId()}, function() { var expId = Ext.madasCurrentExperimentId(); timelineStore.proxy.conn.url = wsBaseUrl + 'records/sampletimeline/source__experiment__id/' + expId;
                                                           timelineStore.load(); });
@@ -85,7 +85,7 @@ Ext.madasTreatment = {
                                 {
                                 text: 'remove date',
                                 cls: 'x-btn-text-icon',
-                                icon:'images/no.gif',
+                                icon:'static/repo/images/no.gif',
                                 handler : function(){
                                    var grid = Ext.getCmp('dates');
                                    var delIds = []; 
@@ -170,7 +170,7 @@ Ext.madasTreatment = {
                             tbar: [{
                                 text: 'add treatment',
                                 cls: 'x-btn-text-icon',
-                                icon:'images/add.gif',
+                                icon:'static/repo/images/add.gif',
                                 handler : function(){
                                    Ext.madasCRUDSomething('create/treatment/', {'source_id':Ext.madasCurrentBioSourceId()}, function() { var expId = Ext.madasCurrentExperimentId(); treatmentStore.proxy.conn.url = wsBaseUrl + 'records/treatment/source__experiment__id/' + expId;
                                                           treatmentStore.load(); });
@@ -179,7 +179,7 @@ Ext.madasTreatment = {
                                 {
                                 text: 'remove treatment',
                                 cls: 'x-btn-text-icon',
-                                icon:'images/no.gif',
+                                icon:'static/repo/images/no.gif',
                                 handler : function(){
                                    var grid = Ext.getCmp('othertreat');
                                    var delIds = []; 
@@ -253,7 +253,7 @@ Ext.madasTreatment = {
                             tbar: [{
                                 text: 'add specific treatment',
                                 cls: 'x-btn-text-icon',
-                                icon:'images/add.gif',
+                                icon:'static/repo/images/add.gif',
                                 handler : function(){
                                    Ext.madasCRUDSomething('create/treatmentvariation/', {'treatment_id':Ext.madasCurrentTreatmentId()}, function() { var treatId = Ext.madasCurrentTreatmentId(); treatmentVariationStore.proxy.conn.url = wsBaseUrl + 'records/treatmentvariation/treatment__id/' + treatId;
                                                           treatmentVariationStore.load(); });
@@ -262,7 +262,7 @@ Ext.madasTreatment = {
                                 {
                                 text: 'remove specific treatment',
                                 cls: 'x-btn-text-icon',
-                                icon:'images/no.gif',
+                                icon:'static/repo/images/no.gif',
                                 handler : function(){
                                    var grid = Ext.getCmp('specifictreat');
                                    var delIds = []; 

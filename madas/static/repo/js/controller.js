@@ -457,7 +457,7 @@ Ext.madasLoadExperiment = function(expId) {
  */
 Ext.madasInitApplication = function() {
     //various global settings for Ext
-    Ext.BLANK_IMAGE_URL = 'ext-3.0.0/resources/images/default/s.gif';
+    Ext.BLANK_IMAGE_URL = 'static/repo/ext-3.0.0/resources/images/default/s.gif';
     Ext.QuickTips.init();
     
     // turn on validation errors beside the field globally
@@ -492,8 +492,13 @@ Ext.madasInitUI = function() {
                 id:'center-panel',
                 layout: 'card',
                 activeItem:1,
-                items: [Ext.madasExperimentCmp, Ext.madasExperimentListCmp]
-            }
+                items: [Ext.madasExperimentCmp, Ext.madasExperimentListCmp, Ext.madasLoginCmp]
+            },
+               new Ext.BoxComponent({
+                                    region:'south',
+                                    el: 'south',
+                                    height:24
+                                    })
             ]
     });
 };

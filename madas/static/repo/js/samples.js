@@ -120,7 +120,7 @@ Ext.madasExperimentSamples = {
             tbar: [{
                 text: 'add sample',
                 cls: 'x-btn-text-icon',
-                icon:'images/add.gif',
+                icon:'static/repo/images/add.gif',
                 handler : function(){
                    Ext.madasCRUDSomething('create/sample/', {'sample_class_id':Ext.madasCurrentSampleClassId()}, function() { var scId = Ext.madasCurrentSampleClassId(); sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/sample_class__id/' + scId;
                                           sampleStore.load(); });
@@ -129,7 +129,7 @@ Ext.madasExperimentSamples = {
                 {
                 text: 'remove sample',
                 cls: 'x-btn-text-icon',
-                icon:'images/no.gif',
+                icon:'static/repo/images/no.gif',
                 handler : function(){
                    var grid = Ext.getCmp('samples');
                    var delIds = []; 

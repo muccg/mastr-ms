@@ -8,7 +8,7 @@ Ext.madasExperimentListCmp = {
     tbar: [{
         text: 'new experiment',
         cls: 'x-btn-text-icon',
-        icon:'images/add.gif',
+        icon:'static/repo/images/add.gif',
         handler : function(){
                 Ext.madasMenuHandler({'id':'experiment:new'});
             }
@@ -16,10 +16,29 @@ Ext.madasExperimentListCmp = {
         {
         text: 'remove experiment',
         cls: 'x-btn-text-icon',
-        icon:'images/no.gif',
+        icon:'static/repo/images/no.gif',
         handler : function(){
-            //TODO delete hook
-        }
+           var grid = Ext.getCmp('experiments');
+           var delIds = []; 
+           
+           var selections = grid.getSelectionModel().getSelections();
+           if (!Ext.isArray(selections)) {
+           selections = [selections];
+           }
+           
+           for (var index = 0; index < selections.length; index++) {
+           if (!Ext.isObject(selections[index])) {
+           continue;
+           }
+           
+           delIds.push(selections[index].data.id);
+           }
+           console.log(delIds);
+           for (var i = 0; i < delIds.length; i++) {
+               Ext.madasCRUDSomething('delete/experiment/'+delIds[i], {}, function() { experimentListStore.load(); });
+           }                        
+           }
+           
         }
     ],
     items: [

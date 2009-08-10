@@ -54,7 +54,7 @@ Ext.madasSamplePrep = {
                     tbar: [{
                         text: 'add SOP',
                         cls: 'x-btn-text-icon',
-                        icon:'images/add.gif',
+                        icon:'static/repo/images/add.gif',
                         handler : function(){
                                 sopStore.add(new Ext.data.Record({'id':'', 'description':''}));
                             }
@@ -62,7 +62,7 @@ Ext.madasSamplePrep = {
                         {
                         text: 'remove SOP',
                         cls: 'x-btn-text-icon',
-                        icon:'images/no.gif',
+                        icon:'static/repo/images/no.gif',
                         handler : function(){
                             var grid = Ext.getCmp('standop');
                             var store = Ext.StoreMgr.get('sopStore');
