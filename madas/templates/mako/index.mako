@@ -21,24 +21,24 @@
     <title>Metabolomics Australia User and Quote Management System</title>
 
 <link rel="shortcut icon" href="/favicon.ico" />
-<link rel="stylesheet" type="text/css" href="static/css/main.css"></link>
-<link rel="stylesheet" type="text/css" href="static/js/ext/resources/css/ext-all.css"></link>
-<link rel="stylesheet" type="text/css" href="static/css/file-upload.css"></link>
+<link rel="stylesheet" type="text/css" href="${wh.url('static/css/main.css')}"></link>
+<link rel="stylesheet" type="text/css" href="${wh.url('static/js/ext/resources/css/ext-all.css')}"></link>
+<link rel="stylesheet" type="text/css" href="${wh.url('static/css/file-upload.css')}"></link>
 <!-- Ext scripts -->
-<script type="text/javascript" src="static/js/ext/adapter/ext/ext-base.js"></script>
-<script type="text/javascript" src="static/js/ext/ext-all-debug.js"></script>
+<script type="text/javascript" src="${wh.url('static/js/ext/adapter/ext/ext-base.js')}"></script>
+<script type="text/javascript" src="${wh.url('static/js/ext/ext-all-debug.js')}"></script>
 
 <!-- Madas scripts -->
-<script type="text/javascript" src="static/js/FileUploadField.js"></script>
-<script type="text/javascript" src="static/js/GridSearch.js"></script>
-<script type="text/javascript" src="static/js/menu.js"></script>
-<script type="text/javascript" src="static/js/login.js"></script>
-<script type="text/javascript" src="static/js/controller.js"></script>
-<script type="text/javascript" src="static/js/dashboard.js"></script>
-<script type="text/javascript" src="static/js/admin.js"></script>
-<script type="text/javascript" src="static/js/user.js"></script>
-<script type="text/javascript" src="static/js/madasJsonReader.js"></script>
-<script type="text/javascript" src="static/js/quote.js"></script>
+<script type="text/javascript" src="${wh.url('static/js/FileUploadField.js')}"></script>
+<script type="text/javascript" src="${wh.url('static/js/GridSearch.js')}"></script>
+<script type="text/javascript" src="${wh.url('static/js/menu.js')}"></script>
+<script type="text/javascript" src="${wh.url('static/js/login.js')}"></script>
+<script type="text/javascript" src="${wh.url('static/js/controller.js')}"></script>
+<script type="text/javascript" src="${wh.url('static/js/dashboard.js')}"></script>
+<script type="text/javascript" src="${wh.url('static/js/admin.js')}"></script>
+<script type="text/javascript" src="${wh.url('static/js/user.js')}"></script>
+<script type="text/javascript" src="${wh.url('static/js/madasJsonReader.js')}"></script>
+<script type="text/javascript" src="${wh.url('static/js/quote.js')}"></script>
 
 
 <script>
@@ -69,7 +69,7 @@ function callbacker(){
 
 
 <div style="position:relative;">
-<div id="appLoad" style="z-index:1;position:absolute;left:0px;top:0px;width:400px;height:200px;background:white;padding:200px;"><img src="static/js/ext/resources/images/default/shared/large-loading.gif"> Loading...</div>
+<div id="appLoad" style="z-index:1;position:absolute;left:0px;top:0px;width:400px;height:200px;background:white;padding:200px;"><img src="${wh.url('static/js/ext/resources/images/default/shared/large-loading.gif')}"> Loading...</div>
 <div id="loginDiv">
 <form id="loginForm" action="login/processLogin" method="POST">
 <div class="x-form-item" id="hideUser" style="display:none;"><label class="x-form-item-label">Email address:</label>

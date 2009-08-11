@@ -173,6 +173,7 @@ def redirectMain(request, *args, **kwargs):
 from django.conf import settings
 from webhelpers import siteurl
 from string import *
+import webhelpers
 def serveIndex(request, *args, **kwargs):
     for k in kwargs:
         print '%s : %s' % (k, kwargs[k])
@@ -226,6 +227,7 @@ def serveIndex(request, *args, **kwargs):
                         APP_SECURE_URL = siteurl(request),#settings.APP_SECURE_URL,
                         username = request.user.username,
                         mainContentFunction = request.session.get('mainContentFunction', 'dashboard'),
+                        wh = webhelpers,
                         params = '' # params[1] #None #['quote:viewformal', {'qid': 83}]
                       )
 
