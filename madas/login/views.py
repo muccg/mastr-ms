@@ -105,7 +105,7 @@ def processLogin(request, *args):
         setRequestVars(request, success=success, authorized = authorized, authenticated = authenticated, mainContentFunction = mainContentFunction)
 
     print '*** processLogin : exit ***'
-    return HttpResponseRedirect(siteurl(request)) 
+    return success 
 
 def index(request, *args):
     return jsonResponse(request, args) 

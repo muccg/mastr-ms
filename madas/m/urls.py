@@ -32,7 +32,7 @@ urlpatterns = patterns(
     
     #(r'^quote/viewformal', 'madas.m.views.redirectMain'),
     #login
-    (r'^login/processLogin', 'madas.login.views.processLogin', {'SSL':True}),
+    (r'^login/processLogin', 'madas.m.views.login', {'SSL':True}),
     (r'^login/processLogout', 'madas.login.views.processLogout', {'SSL':True}),
     (r'^login/processForgotPassword', 'madas.login.views.processForgotPassword', {'SSL':True}),
     (r'^login/populateResetPasswordForm', 'madas.login.views.populateResetPasswordForm', {'SSL':True}),
