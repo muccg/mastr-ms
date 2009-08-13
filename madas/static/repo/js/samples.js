@@ -46,11 +46,15 @@ Ext.madasExperimentSamples = {
                                                        
                                                        var grid = Ext.getCmp("samples");
                                                        grid.enable();
+                                                       Ext.getCmp('addsamplebutton').enable();
+                                                       Ext.getCmp('removesamplebutton').enable();
                                                        },
                                                        'selectionchange':{buffer:10, fn:function(sm) {
                                                        if (! sm.hasSelection()) {
                                                        var grid = Ext.getCmp("samples");
                                                        grid.disable();
+                                                       Ext.getCmp('addsamplebutton').disable();
+                                                       Ext.getCmp('removesamplebutton').disable();
                                                        Ext.madasCurrentSampleClassIdValue = undefined;
                                                        }
                                                        }}                        }
@@ -120,6 +124,8 @@ Ext.madasExperimentSamples = {
             tbar: [{
                 text: 'add sample',
                 cls: 'x-btn-text-icon',
+                   disabled:true,
+                   id:'addsamplebutton',
                 icon:'static/repo/images/add.gif',
                 handler : function(){
                    Ext.madasCRUDSomething('create/sample/', {'sample_class_id':Ext.madasCurrentSampleClassId()}, function() { var scId = Ext.madasCurrentSampleClassId(); sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/sample_class__id/' + scId;
@@ -129,6 +135,8 @@ Ext.madasExperimentSamples = {
                 {
                 text: 'remove sample',
                 cls: 'x-btn-text-icon',
+                   disabled:true,
+                   id:'removesamplebutton',
                 icon:'static/repo/images/no.gif',
                 handler : function(){
                    var grid = Ext.getCmp('samples');
