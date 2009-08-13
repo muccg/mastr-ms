@@ -203,7 +203,7 @@ Ext.madasAuthorize = function(requestedView, params) {
         },
         failure: function (form, action) {
             //load up the menu and next content area as declared in response
-            alert(action);
+            alert(action.response.responseText);
             Ext.madasChangeMainContent(action.result.mainContentFunction, action.result.params);
         }
     };

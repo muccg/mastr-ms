@@ -12,7 +12,7 @@ from madas.login.views import processLogin
 
 def login(request, *args):
     success = processLogin(request, args)
-    return HttpResponseRedirect(siteurl(request)) 
+    return HttpResponseRedirect(siteurl(request) + 'repo/') 
 
 def authorize(request, module='/', perms = [], internal = False):
     print '*** authorize : enter ***'
@@ -228,7 +228,7 @@ def serveIndex(request, *args, **kwargs):
     from django.utils import simplejson
     m = simplejson.encoder.JSONEncoder()
     paramstr = m.encode(params)
-    return render_mako('index.mako', 
+    return render_mako('repo_index.mako', 
                         APP_SECURE_URL = siteurl(request),#settings.APP_SECURE_URL,
                         username = request.user.username,
                         mainContentFunction = request.session.get('mainContentFunction', 'dashboard'),
