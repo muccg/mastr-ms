@@ -463,10 +463,12 @@ Ext.madasInitApplication = function() {
     // turn on validation errors beside the field globally
     Ext.form.Field.prototype.msgTarget = 'side';
     
-    var username = "ntakayama";
+    var username = "";
     Ext.madasMenuRender(username);
 
-//    Ext.madasAuthorize(mainContentFunction, paramArray);
+    Ext.madasInitUI();
+    
+    Ext.madasAuthorize('experiment:my', []);
 };
 
 Ext.madasInitUI = function() {
@@ -491,7 +493,7 @@ Ext.madasInitUI = function() {
                 region:'center',
                 id:'center-panel',
                 layout: 'card',
-                activeItem:1,
+                activeItem:2,
                 items: [Ext.madasExperimentCmp, Ext.madasExperimentListCmp, Ext.madasLoginCmp]
             },
                new Ext.BoxComponent({
@@ -501,6 +503,7 @@ Ext.madasInitUI = function() {
                                     })
             ]
     });
+    
 };
 
 Ext.madasUpdateNav = function() {

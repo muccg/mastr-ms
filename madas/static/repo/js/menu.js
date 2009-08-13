@@ -94,36 +94,13 @@ Ext.madasMenuShow = function() {
     Ext.get('login').hide();
     Ext.get('dashboard').show();
     Ext.get('userMenu').show();
-    Ext.getCmp('quote:list').show();
-    Ext.getCmp('quote:listAll').show();
-    Ext.getCmp('quote:listFormal').show();
 
 }
 
 Ext.madasMenuHandler = function(item) {
-    var vpl = Ext.getCmp('center-panel').getLayout();
-
     //we authorize every access to check for session timeout and authorization to specific pages
     
-    switch (item.id) {
-        case 'experiment:my':
-            experimentListStore.reload();
-            vpl.setActiveItem(1);
-            break;
-        case 'experiment:new':
-            Ext.madasLoadExperiment(0);
-        case 'experiment:view':
-            vpl.setActiveItem(0);
-            Ext.getCmp('expNav').getSelectionModel().selectFirstRow();
-
-            break;
-        case 'login':
-            Ext.madasChangeMainContent('login');
-            break;
-        default:
-            Ext.madasAuthorize(item.id);
-            break;
-    }
+    Ext.madasAuthorize(item.id);
     
 }
 
