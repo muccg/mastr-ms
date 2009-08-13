@@ -120,39 +120,16 @@ Ext.madasChangeMainContent = function(contentName, paramArray){
             Ext.madasMessage(paramArray);
             break;
             
-        case "quote:request":
-            Ext.madasRequestQuoteInit();
-            Ext.getCmp('center-panel').layout.setActiveItem('requestquote-container-panel');
-            affectMenu = false;
-            showMenu = false;
+        case 'experiment:my':
+            experimentListStore.reload();
+            Ext.getCmp('center-panel').layout.setActiveItem('experiment-list');
             break;
-            
-        case "quote:list":
-            Ext.madasQuoteRequestListInit();
-            Ext.getCmp('center-panel').layout.setActiveItem('quoterequests-panel');
+        case 'experiment:new':
+            Ext.madasLoadExperiment(0);
+        case 'experiment:view':
+            Ext.getCmp('center-panel').layout.setActiveItem('experimentTitle');
+            Ext.getCmp('expNav').getSelectionModel().selectFirstRow();            
             break;
-            
-        case "quote:edit":
-            Ext.madasQuoteRequestEditInit(paramArray);
-            Ext.getCmp('center-panel').layout.setActiveItem('quoterequestedit-container-panel');
-            break;
-            
-        case "quote:listAll":
-            Ext.madasQuoteRequestListAllInit();
-            Ext.getCmp('center-panel').layout.setActiveItem('quoterequestsall-panel');
-            break;
-            
-        case "quote:viewformal":
-            Ext.madasViewFormalInit(paramArray);
-            Ext.getCmp('center-panel').layout.setActiveItem('viewformalquote-container-panel');
-            affectMenu = false;
-            showMenu = false;
-            break;
-            
-        case "quote:listFormal":
-        	Ext.madasFormalQuoteUserListInit();
-        	Ext.getCmp('center-panel').layout.setActiveItem('fquolist-panel');
-        	break;
             
         default:
             cancelBackTarget = false;

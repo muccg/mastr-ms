@@ -99,7 +99,7 @@ Ext.madasAuthorize = function(requestedView, params) {
         }
     }
     };
-    alert(simple.url);
+
     simple.submit(submitOptions);
 };
 

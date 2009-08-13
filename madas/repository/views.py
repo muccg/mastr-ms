@@ -236,6 +236,15 @@ def serveIndex(request, *args, **kwargs):
                         params = '' # params[1] #None #['quote:viewformal', {'qid': 83}]
                       )
 
+def processLogout(request, *args):
+    from django.contrib.auth import logout
+    print '*** processLogout : enter***'
+    print '\tlogging out (django)'
+    logout(request) #let Django log the user out
+    setRequestVars(request, success=True, mainContentFunction = 'login')
+    print '*** processLogout : exit***'
+    return jsonResponse(request, [])
+
 def serverinfo(request):
     return render_mako('serverinfo.mako', s=settings, request=request, g=globals() )
 

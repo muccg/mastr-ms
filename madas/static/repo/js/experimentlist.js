@@ -3,6 +3,7 @@ Ext.madasExperimentListCmp = {
     region: 'center',
     cmargins: '0 0 0 0',
     collapsible: false,
+id:'experiment-list',
     bodyStyle: 'padding:0px;',
     layout:'fit',
     tbar: [{
