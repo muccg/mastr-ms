@@ -396,7 +396,7 @@ var humanStore = new Ext.data.JsonStore(
 var organismTypeComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'organismTypeCombo',
-                            autoLoad: false,
+                            autoLoad: true,
                             url: wsBaseUrl + 'populate_select/organismtype/id/name/',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
@@ -437,7 +437,7 @@ var organismComboStore = new Ext.data.JsonStore(
 var genderComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'genderCombo',
-                            autoLoad: false,
+                            autoLoad: true,
                             url: wsBaseUrl + 'populate_select/gender/id/name/',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
@@ -653,7 +653,7 @@ var sopComboStore = new Ext.data.JsonStore(
 var userComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'userCombo',
-                            autoLoad: false,
+                            autoLoad: true,
                             url: wsBaseUrl + 'populate_select/user/id/username',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
@@ -665,7 +665,7 @@ var userComboStore = new Ext.data.JsonStore(
 var involvementComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'involvementCombo',
-                            autoLoad: false,
+                            autoLoad: true,
                             url: wsBaseUrl + 'populate_select/userinvolvementtype/id/name',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
