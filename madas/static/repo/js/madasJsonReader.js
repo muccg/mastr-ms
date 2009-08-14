@@ -29,7 +29,6 @@ Ext.madasAjaxMetadataProcess = function(ajaxData) {
     //look for specific sentinel values in the json
     //var authenticated = ajaxData.response.value.authenticated;
     //var authorized = ajaxData.response.value.authorized;
-    console.log('hurdy durdy');
     var authenticated = ajaxData.authenticated;
     var authorized = ajaxData.authorized;
     
@@ -41,7 +40,6 @@ Ext.madasAjaxMetadataProcess = function(ajaxData) {
         
         Ext.madasChangeMainContent('login');
         //return false to tell the JsonReader to abort
-        console.log('44');
         return false;
     }
     
@@ -49,11 +47,9 @@ Ext.madasAjaxMetadataProcess = function(ajaxData) {
         //trigger a notauthorized page
         Ext.madasChangeMainContent('notauthorized');
         //return false to tell the JsonReader to abort
-        console.log('52');
         return false;
     }
     
-    console.log('56');
     return true;
     
 }
@@ -61,7 +57,6 @@ Ext.madasAjaxMetadataProcess = function(ajaxData) {
 
 
 Ext.madasJsonReader = function(meta, recordType){
-    console.log("init mjr");
     Ext.madasJsonReader.superclass.constructor.call(this, meta, recordType);
 };
 
@@ -99,11 +94,9 @@ Ext.extend(Ext.madasJsonReader, Ext.data.JsonReader, {
      */
     readRecords : function(oc)
     {
-           console.log("blah");
         // o is the ajax response, already evald
         //we pass on to the generic AJAX metadata processor to intercept 
         var aaPass = Ext.madasAjaxMetadataProcess(oc);
-           console.log("grrr");
         if (aaPass) {
             //from here below is a copy-and-paste of the Ext standard code
         
