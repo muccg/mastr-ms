@@ -346,7 +346,7 @@ var plantStore = new Ext.madasJsonStore(
                                           }
                                           );
                     
-var animalStore = new v(
+var animalStore = new Ext.madasJsonStore(
                         {
                             storeId: 'animal',
                             autoLoad: false,

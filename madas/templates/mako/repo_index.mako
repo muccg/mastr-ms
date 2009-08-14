@@ -50,7 +50,7 @@ function callbacker(){
     <div id="north"><div id="appTitle">MASTR MS</div><div id="toolbar"></div></div>
 
 <div style="position:relative;">
-<div id="appLoad" style="z-index:1;position:absolute;left:0px;top:0px;width:400px;height:200px;background:white;padding:200px;"><img src="static/js/ext/resources/images/default/shared/large-loading.gif"> Loading...</div>
+<div id="appLoad" style="display:none;z-index:1;position:absolute;left:0px;top:0px;width:400px;height:200px;background:white;padding:200px;"><img src="static/js/ext/resources/images/default/shared/large-loading.gif"> Loading...</div>
 <div id="loginDiv">
 <form id="loginForm" action="login/processLogin" method="POST">
 <div class="x-form-item" id="hideUser" style="display:none;"><label class="x-form-item-label">Email address:</label>
