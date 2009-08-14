@@ -348,11 +348,14 @@ def recordsSampleClasses(request, experiment_id):
 
     # basic json that we will fill in
     output = {'metaData': { 'totalProperty': 'results',
+                            'successProperty': 'success',
                             'root': 'rows',
                             'id': 'id',
                             'fields': [{'name':'id'}, {'name':'class_id'}, {'name':'treatments'}, {'name':'timeline'}, {'name':'origin'}, {'name':'organ'}, {'name':'genotype'}, {'name':'enabled'}]
                             },
               'results': 0,
+              'authenticated': True,
+              'authorized': True,
               'success': True,
               'rows': []
               }
