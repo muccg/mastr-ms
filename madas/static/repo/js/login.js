@@ -143,3 +143,4 @@ Ext.madasLogoutInit = function(){
     simple.submit(submitOptions);
     
 };
+

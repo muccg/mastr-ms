@@ -19,8 +19,49 @@
  * along with Madas.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * madasAjaxMetadataProcess
+ * look at the other headers in the header of an ajax request for a livegrid or other Object
+ * assessing whether the user has timed-out or is not authorized to perform that action
+ */
+Ext.madasAjaxMetadataProcess = function(ajaxData) {
+    
+    //look for specific sentinel values in the json
+    //var authenticated = ajaxData.response.value.authenticated;
+    //var authorized = ajaxData.response.value.authorized;
+    console.log('hurdy durdy');
+    var authenticated = ajaxData.authenticated;
+    var authorized = ajaxData.authorized;
+    
+    if (authenticated != 1) {
+        //trigger the login page
+        Ext.madasIsLoggedIn = false;
+        Ext.madasIsAdmin = false;
+        Ext.getCmp('userMenu').setText('User: none');
+        
+        Ext.madasChangeMainContent('login');
+        //return false to tell the JsonReader to abort
+        console.log('44');
+        return false;
+    }
+    
+    if (authorized != 1) {
+        //trigger a notauthorized page
+        Ext.madasChangeMainContent('notauthorized');
+        //return false to tell the JsonReader to abort
+        console.log('52');
+        return false;
+    }
+    
+    console.log('56');
+    return true;
+    
+}
+
+
 
 Ext.madasJsonReader = function(meta, recordType){
+    console.log("init mjr");
     Ext.madasJsonReader.superclass.constructor.call(this, meta, recordType);
 };
 
@@ -35,17 +76,17 @@ Ext.extend(Ext.madasJsonReader, Ext.data.JsonReader, {
 
     read : function(response){
         var json = response.responseText;
-        var o = eval("("+json+")");
-        if(!o) {
+        var ob = eval("("+json+")");
+        if(!ob) {
             throw {message: "JsonReader.read: Json object not found"};
         }
-        if(o.metaData){
+        if(ob.metaData){
             delete this.ef;
-            this.meta = o.metaData;
-            this.recordType = Ext.data.Record.create(o.metaData.fields);
-            this.onMetaChange(this.meta, this.recordType, o);
+            this.meta = ob.metaData;
+            this.recordType = Ext.data.Record.create(ob.metaData.fields);
+            this.onMetaChange(this.meta, this.recordType, ob);
         }
-        return this.readRecords(o);
+        return this.readRecords(ob);
     },
 
     /**
@@ -56,11 +97,13 @@ Ext.extend(Ext.madasJsonReader, Ext.data.JsonReader, {
      * @return {Object} data A data block which is used by an Ext.data.Store object as
      * a cache of Ext.data.Records.
      */
-    readRecords : function(o)
+    readRecords : function(oc)
     {
+           console.log("blah");
         // o is the ajax response, already evald
         //we pass on to the generic AJAX metadata processor to intercept 
-        var aaPass = Ext.madasAjaxMetadataProcess(o);
+        var aaPass = Ext.madasAjaxMetadataProcess(oc);
+           console.log("grrr");
         if (aaPass) {
             //from here below is a copy-and-paste of the Ext standard code
         
@@ -69,7 +112,7 @@ Ext.extend(Ext.madasJsonReader, Ext.data.JsonReader, {
              * loaded or there is a load exception this property will be undefined.
              * @type Object
              */
-            this.jsonData = o;
+            this.jsonData = oc;
             var s = this.meta, Record = this.recordType,
                 f = Record.prototype.fields, fi = f.items, fl = f.length;
     
@@ -99,15 +142,15 @@ Ext.extend(Ext.madasJsonReader, Ext.data.JsonReader, {
                 }
             }
     
-            var root = this.getRoot(o), c = root.length, totalRecords = c, success = true;
+            var root = this.getRoot(oc), c = root.length, totalRecords = c, success = true;
             if(s.totalProperty){
-                var v = parseInt(this.getTotal(o), 10);
+                var v = parseInt(this.getTotal(oc), 10);
                 if(!isNaN(v)){
                     totalRecords = v;
                 }
             }
             if(s.successProperty){
-                var v = this.getSuccess(o);
+                var v = this.getSuccess(oc);
                 if(v === false || v === 'false'){
                     success = false;
                 }
@@ -133,7 +176,7 @@ Ext.extend(Ext.madasJsonReader, Ext.data.JsonReader, {
             };    
             
         } else {
-            return null;
+           return { success : false, records : [], totalRecords : 0 };
         } 
     }
     

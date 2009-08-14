@@ -166,38 +166,3 @@ Ext.madasMessage = function(paramArray) {
     
 }
 
-/**
- * madasAjaxMetadataProcess
- * look at the other headers in the header of an ajax request for a livegrid or other Object
- * assessing whether the user has timed-out or is not authorized to perform that action
- */
-Ext.madasAjaxMetadataProcess = function(ajaxData) {
-    
-    //look for specific sentinel values in the json
-    //var authenticated = ajaxData.response.value.authenticated;
-    //var authorized = ajaxData.response.value.authorized;
-    
-    var authenticated = ajaxData.authenticated;
-    var authorized = ajaxData.authorized;
-    
-    if (authenticated != 1) {
-        //trigger the login page
-        Ext.madasIsLoggedIn = false;
-        Ext.madasIsAdmin = false;
-        Ext.getCmp('userMenu').setText('User: none');
-        
-        Ext.madasChangeMainContent('login');
-        //return false to tell the JsonReader to abort
-        return false;
-    }
-    
-    if (authorized != 1) {
-        //trigger a notauthorized page
-        Ext.madasChangeMainContent('notauthorized');
-        //return false to tell the JsonReader to abort
-        return false;
-    }
-    
-    return true;
-    
-}

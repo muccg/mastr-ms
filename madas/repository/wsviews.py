@@ -8,6 +8,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.db.models import get_model
 from json_util import makeJsonFriendly
+from madas.utils import setRequestVars, jsonResponse
 
 
 def create_object(request, model):
@@ -117,14 +118,23 @@ def dissociate_object(request, model, association, parent_id, id):
     
 
 def records(request, model, field, value):
+    ### Authorisation Check ###
+    authenticated = request.user.is_authenticated()   
+    if not authenticated == True:
+        return jsonResponse(request, [])
+    ### End Authorisation Check ###
 
     # basic json that we will fill in
     output = {'metaData': { 'totalProperty': 'results',
                             'root': 'rows',
                             'id': 'id',
+                            'successProperty': 'success',
                             'fields': []
                             },
               'results': 0,
+              'authenticated': True,
+              'authorized': True,
+              'success': True,
               'rows': []
               }
 
@@ -343,6 +353,7 @@ def recordsSampleClasses(request, experiment_id):
                             'fields': [{'name':'id'}, {'name':'class_id'}, {'name':'treatments'}, {'name':'timeline'}, {'name':'origin'}, {'name':'organ'}, {'name':'genotype'}, {'name':'enabled'}]
                             },
               'results': 0,
+              'success': True,
               'rows': []
               }
 
