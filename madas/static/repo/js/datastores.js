@@ -267,7 +267,7 @@ var experimentStore = new Ext.data.JsonStore(
 var sampleClassStore = new Ext.data.JsonStore(
                                              {
                                              storeId: 'sampleclass',
-                                              reader: Ext.madasJsonReader,
+                                              reader: new Ext.madasJsonReader(),
                                              autoLoad: false,
                                              url: wsBaseUrl + 'records/sampleclass/biological_source__experiment__id/0',
                                              listeners: {'load':Ext.madasDSLoaded,
@@ -275,11 +275,10 @@ var sampleClassStore = new Ext.data.JsonStore(
                                              }
                                              );
 
-var sampleStore = new Ext.data.JsonStore(
+var sampleStore = new Ext.madasJsonStore(
                                               {
                                               storeId: 'samples',
                                               autoLoad: false,
-                                         reader: Ext.madasJsonReader,
                                               url: wsBaseUrl + 'records/sample/sample_class__id/0',
                                               listeners: {'load':Ext.madasDSLoaded,
                                               'loadexception':Ext.madasDSLoadException}

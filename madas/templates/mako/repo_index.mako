@@ -8,14 +8,9 @@
     <script src="static/repo/ext-3.0.0/ext-all-debug.js"></script>
     <script src="static/repo/ext-3.0.0/examples/ux/RowEditor.js"></script>
 
-<!--    <link rel="stylesheet" href="ext-2.2.1/resources/css/ext-all.css"/>
-    <script src="static/repo/ext-2.2.1/adapter/ext/ext-base.js" type="text/javascript"></script>
-    <script src="static/repo/ext-2.2.1/ext-all-debug.js"></script>-->
-
-<!--    <script src="js/uxDateTime.js" type="text/javascript"></script> -->
-
     <script src="static/repo/js/madasJsonReader.js" type="text/javascript"></script>
-<!--    <script src="js/madasBufferedJsonReader.js" type="text/javascript"></script>-->
+    <script src="static/repo/js/madasJsonStore.js" type="text/javascript"></script>
+
     <script src="static/repo/js/menucontroller.js" type="text/javascript"></script>
     <script src="static/repo/js/login.js" type="text/javascript"></script>
     <script src="static/repo/js/datastores.js" type="text/javascript"></script>
@@ -35,8 +30,8 @@ var callbackCount = 0;
 function callbacker(){
     var username = document.getElementById('username').value;
     
-    if (username == "" && callbackCount < 5) {
-        //console.log("waiting...");
+    if (username == "" && callbackCount < 10) {
+        console.log("waiting...");
         callbackCount += 1;
         window.setTimeout("callbacker();", 100);
         return;
