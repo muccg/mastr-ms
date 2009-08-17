@@ -251,6 +251,10 @@ Ext.madasExperimentDetails = {
                                                    );
                             
                             Ext.getCmp('speciesfield').bindStore(organismComboStore);
+                            Ext.getCmp('speciesfield').clearValue();
+                            Ext.getCmp('rankfield').setValue("");
+                            Ext.getCmp('upperrankfield').setValue("");
+                            Ext.getCmp('ncbifield').setValue("");
                             
                             Ext.madasExperimentShowFieldsets(r.data.key); 
                             }}
