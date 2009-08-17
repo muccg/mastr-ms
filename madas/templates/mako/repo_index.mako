@@ -9,7 +9,7 @@
     <script src="static/repo/ext-3.0.0/examples/ux/RowEditor.js"></script>
 
     <script>
-    var baseUrl = '${ APP_SECURE_URL }repo/';
+    var baseUrl = '${ APP_SECURE_URL }';
     </script>
 
     <script src="static/repo/js/madasJsonReader.js" type="text/javascript"></script>
