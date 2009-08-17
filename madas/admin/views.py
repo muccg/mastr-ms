@@ -147,7 +147,7 @@ def rejected_user_search(request, *args):
     
     if 'Administrators' not in g and 'Node Reps' in g:
         from madas.users import views
-        searchgroup = views.getNodeMemberships(request, g)
+        searchgroup = views.getNodeMemberships(g)
     searchgroup.append('Rejected') #What about if this is already in there?
 
     print '\tsearch group was ', searchgroup
@@ -196,7 +196,7 @@ def deleted_user_search(request, *args):
     searchgroup = [] 
     if 'Administrators' not in g and 'Node Reps' in g:
         from madas.users import views
-        searchgroup = views.getNodeMemberships(request, g)
+        searchgroup = views.getNodeMemberships(g)
     searchgroup.append('Deleted') #What about if this is already in there?
 
     print '\tsearch group was ', searchgroup

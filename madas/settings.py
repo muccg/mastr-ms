@@ -103,7 +103,6 @@ CAPTCHA_ROOT = os.path.join(MEDIA_ROOT, 'captchas')
 CAPTCHA_URL = os.path.join(MEDIA_URL, 'captchas')
 
 
-
 # development deployment
 if "DJANGODEV" in os.environ:
     DEBUG = True if os.path.exists(os.path.join(PROJECT_DIRECTORY,".debug")) else ("DJANGODEBUG" in os.environ)
@@ -124,7 +123,8 @@ if "DJANGODEV" in os.environ:
     #####################################################################################################
     # Application Variables
     #####################################################################################################
-    APPEND_SLASH = False                    #This is a django config variable. 
+    
+    APPEND_SLASH = True                    #This is a django config variable. 
     SITE_NAME = 'madas'
     RETURN_EMAIL = 'bpower@ccg.murdoch.edu.au'
     DEFAULT_GROUP = 'madas'  #this needs to exist in the database.
