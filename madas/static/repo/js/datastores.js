@@ -1,5 +1,5 @@
 //var wsBaseUrl = "http://boromir5.localdomain/madasrepo/ntakayama/ws/";
-var baseUrl = "http://localhost:8000/";
+//var baseUrl = "/madas/ntakayama/repo/";
 var wsBaseUrl = baseUrl + "ws/";
 var storesNeededForRendering = [];
 
