@@ -207,7 +207,7 @@ def processResetPassword(request, *args):
         #get existing details
         ld = LDAPHandler(userdn=settings.LDAPADMINUSERNAME, password=settings.LDAPADMINPASSWORD)
         userdetails = ld.ldap_get_user_details(request.REQUEST['email'])
-        if userdetails.has_key('groups')
+        if userdetails.has_key('groups'):
             del userdetails['groups'] #remove 'groups' - they don't belong in an update.
         if userdetails.has_key('pager') and len(userdetails['pager']) == 1 and userdetails['pager'][0] == vk:
             #clear out the pager vk
