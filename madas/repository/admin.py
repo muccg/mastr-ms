@@ -1,4 +1,4 @@
-from madasrepo.repository.models import *
+from madas.repository.models import *
 from django.contrib import admin
 
 class OrganismAdmin(admin.ModelAdmin):

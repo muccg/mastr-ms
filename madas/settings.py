@@ -211,7 +211,7 @@ INSTALLED_APPS = (
     'madas.quote',
     'madas.users',
     'madas.admin',
-    #'madas.repository',
+    'madas.repository',
 )
 
 
