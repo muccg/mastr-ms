@@ -8,17 +8,16 @@ Ext.madasBioSourceInit = function() {
         humanStore.load();
         Ext.getCmp("organismBioSourceHumanFieldset").show();
         Ext.getCmp("organismBioSourceAnimalFieldset").hide();
-    }
-    
-    if (orgType == 3) {
+    } else if (orgType == 3) {
         animalStore.proxy.conn.url = wsBaseUrl + 'records/animal/experiment__id/' + expId;
         animalStore.load();
         Ext.getCmp("organismBioSourceAnimalFieldset").show();
         Ext.getCmp("organismBioSourceHumanFieldset").hide();
-    }
-    
-    if (orgType == 2) {
+    } else if (orgType == 2) {
         Ext.getCmp("organismBioSourceAnimalFieldset").hide();
+    } else {
+        Ext.getCmp("organismBioSourceAnimalFieldset").hide();
+        Ext.getCmp("organismBioSourceHumanFieldset").hide();
     }
     
     organStore.proxy.conn.url = wsBaseUrl + 'records/organ/source__experiment__id/' + expId;

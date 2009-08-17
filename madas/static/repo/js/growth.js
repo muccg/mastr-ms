@@ -7,13 +7,14 @@ Ext.madasGrowthInit = function() {
         animalOriginStore.load();
         Ext.getCmp("animalOrigins").show();
         Ext.getCmp("growthConditions").hide();
-    }
-    
-    if (orgType == 2) {
+    } else if (orgType == 2) {
         growthConditionStore.proxy.conn.url = wsBaseUrl + 'records/growthcondition/source__experiment__id/' + expId;
         growthConditionStore.load();
         Ext.getCmp("animalOrigins").hide();
         Ext.getCmp("growthConditions").show();
+    } else {
+        Ext.getCmp("animalOrigins").hide();
+        Ext.getCmp("growthConditions").hide();
     }
 }
 
