@@ -131,6 +131,10 @@ Ext.madasChangeMainContent = function(contentName, paramArray){
             Ext.getCmp('expNav').getSelectionModel().selectFirstRow();            
             break;
             
+        case 'admin:db':
+            window.location = "../djangoadmin/";
+            break;
+            
         default:
             cancelBackTarget = false;
     }
