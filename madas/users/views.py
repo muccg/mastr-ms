@@ -284,7 +284,13 @@ def _usersave(request, username, admin=False):
                 #only remove from admin group if logged in name doesnt match name of user being updated.
                 #i.e. don't let an admin user un-admin themselves
                 if request.user.username != username:
-                    ld.ldap_remove(username, 'Administrators')
+                    ld.ldap_remove_user_from_group(username, 'Administrators')
+        else:
+            print 'isAdmin was False!'
+            #only remove from admin group if logged in name doesnt match name of user being updated.
+            #i.e. don't let an admin user un-admin themselves
+            if request.user.username != username:
+                ld.ldap_remove_user_from_group(username, 'Administrators')
         
         print '\tperforming node updates for ', username
         print '\tnewnode: ', newnode
@@ -314,7 +320,11 @@ def _usersave(request, username, admin=False):
             else:
                 print 'isNodeRep was False!'
                 #remove from node reps group
-                ld.ldap.remove_user_from_group(username, 'Node Reps')
+                ld.ldap_remove_user_from_group(username, 'Node Reps')
+        else:
+            print 'isNodeRep was False!'
+            #remove from node reps group
+            ld.ldap_remove_user_from_group(username, 'Node Reps')
 
         
         #do status changes

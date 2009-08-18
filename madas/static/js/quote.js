@@ -1351,10 +1351,28 @@ Ext.madasViewFormalInit = function(paramArray){
     var quoteRequestEditCmp = Ext.getCmp('fquouserdetails-panel');
     var formalQuoteCmp = Ext.getCmp('formalquoteview-panel');
 
+    //if node rep or admin, disable the user edit fields
+    for (var i = 0; i < quoteRequestEditCmp.items.length; i++) {
+        if (Ext.madasIsNodeRep || Ext.madasIsAdmin) {
+            if (quoteRequestEditCmp.items.get(i).getId() != 'quov-qid' &&
+                quoteRequestEditCmp.items.get(i).getId() != 'fquoadminmode') {
+                quoteRequestEditCmp.items.get(i).disable();
+            }
+        } else {
+            quoteRequestEditCmp.items.get(i).enable();
+        }
+    }
+    
+    if (Ext.madasIsNodeRep || Ext.madasIsAdmin) {
+        Ext.getCmp('fquoadminmode').show();
+    } else {
+        Ext.getCmp('fquoadminmode').hide();
+    }
+    
     //fetch user details
     quoteRequestEditCmp.load({url: 'quote/load', params: {'qid': id}, waitMsg:'Loading'});
     formalQuoteCmp.load({url: 'quote/formalload', params: {'qid': id}, waitMsg:'Loading'});
-}
+};
 
 Ext.madasViewFormalCmp =
 {   id:'viewformalquote-container-panel',
@@ -1389,6 +1407,14 @@ Ext.madasViewFormalCmp =
         waitMsgTarget: true,
         
         items: [
+                { xtype:'panel',
+                id:'fquoadminmode',
+                width:350,
+                style:'margin-bottom:10px;',
+                frame:true,
+                title:'Admin/node rep mode',
+                html:'As you are logged in as an admin or node rep, you may Accept/Reject this formal quote on behalf of the user, but user edit fields have been disabled.'
+                },
             {  
                 name: 'id',
                 id: 'quov-qid',

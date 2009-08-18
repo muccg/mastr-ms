@@ -658,8 +658,13 @@ def formalAccept(request, *args):
             #here we want to store the user details
             #TODO: this section needs some help - can edit arbitrary user details via this form...
             u = request.REQUEST.get('email')
-            from madas.users.views import _usersave
-            _usersave(request, u)
+            
+            from madas.m.views import authorize
+            from settings import MADAS_STATUS_GROUPS, MADAS_ADMIN_GROUPS
+            (auth_result, auth_response) = authorize(request, module = 'quote', internal=True, perms=MADAS_ADMIN_GROUPS)
+            if auth_result is not True:  #allow node reps to accept quotes but not edit the user details
+                from madas.users.views import _usersave
+                _usersave(request, u)
 
             #and then...
             #mark the formal quote as accepted:
