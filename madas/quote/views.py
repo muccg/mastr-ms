@@ -327,6 +327,12 @@ def load(request, *args):
     suc = True
     if qid is not None:
         qr = _loadQuoteRequest(qid)
+        
+        #mark as read
+        quote = Quoterequest.objects.get(id = qid)
+        quote.unread = False
+        quote.save()
+        
         suc = True
     else:
         suc = False
