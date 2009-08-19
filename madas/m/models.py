@@ -20,6 +20,7 @@ class Quoterequest(models.Model):
     officephone = models.CharField(max_length=50)
     country = models.CharField(max_length=100)
     attachment = models.TextField()
+    
     class Meta:
         db_table = u'quoterequest'
 
