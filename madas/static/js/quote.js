@@ -1374,8 +1374,8 @@ Ext.madasViewFormalInit = function(paramArray){
     formalQuoteCmp.load({url: 'quote/formalload', params: {'qid': id}, waitMsg:'Loading'});
 };
 
-Ext.madasViewFormalCmp =
-{   id:'viewformalquote-container-panel',
+Ext.madasViewFormalCmp = {   
+    id:'viewformalquote-container-panel',
     autoScroll:true,
     layout:'column',
     bodyStyle:'padding:5px 5px 0px 0px',

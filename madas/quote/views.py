@@ -245,6 +245,13 @@ def listAll(request, *args):
         for ql in quoteslist:
             ql['email'] = ql['emailaddressid__emailaddress']
             del ql['emailaddressid__emailaddress']
+            
+            #find the time when this quote was marked as completed (if it is)
+            if ql['completed'] == True:
+                qh = Quotehistory.objects.filter(oldcompleted = False, completed = True)
+                qh = qh[0]
+                ql['changetimestamp'] = qh.changetimestamp
+            
             results.append(ql)
     except Exception, e:
         print '\texception getting quotes: ', str(e)
@@ -256,6 +263,13 @@ def listAll(request, *args):
         for ql in adminlist:
             ql['email'] = ql['emailaddressid__emailaddress']
             del ql['emailaddressid__emailaddress']
+            
+            #find the time when this quote was marked as completed (if it is)
+            if ql['completed'] == True:
+                qh = Quotehistory.objects.filter(oldcompleted = False, completed = True)
+                qh = qh[0]
+                ql['changetimestamp'] = qh.changetimestamp
+            
             results.append(ql)
         print '\tkey renaming finished'
 
