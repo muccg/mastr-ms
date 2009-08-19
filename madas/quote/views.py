@@ -241,7 +241,7 @@ def listAll(request, *args):
     results = [] 
 
     try:
-        quoteslist = Quoterequest.objects.filter(completed=True).values('id', 'completed', 'unread', 'tonode', 'firstname', 'lastname', 'officephone', 'details', 'requesttime', 'emailaddressid__emailaddress' )
+        quoteslist = Quoterequest.objects.all().values('id', 'completed', 'unread', 'tonode', 'firstname', 'lastname', 'officephone', 'details', 'requesttime', 'emailaddressid__emailaddress' )
         for ql in quoteslist:
             ql['email'] = ql['emailaddressid__emailaddress']
             del ql['emailaddressid__emailaddress']
