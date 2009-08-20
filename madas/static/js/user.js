@@ -52,7 +52,7 @@ Ext.madasUserEditValidatePassword = function (textfield, event) {
         confirmEl.markInvalid('Password and Confirm Password must match');
         submitEl.disable();
         return false;
-    };
+    }
 };
 
 Ext.madasUserEditCmp = {id:'useredit-container-panel', 
