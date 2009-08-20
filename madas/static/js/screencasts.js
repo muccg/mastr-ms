@@ -18,6 +18,7 @@
 Ext.madasScreencastsInit = function (vidFile) {
     var s = new SWFObject(Ext.madasBaseUrl + "static/screencasts/flvplayer.swf","player","1280","740","7");
 	s.addParam("allowfullscreen","true");
+    s.addParam("wmode", "opaque");
 	s.addVariable("file",vidFile);
 	s.addVariable("width","1024");
 	s.addVariable("height","762");
