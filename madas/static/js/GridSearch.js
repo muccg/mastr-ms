@@ -173,7 +173,7 @@ Ext.extend(Ext.ux.grid.Search, Ext.util.Observable, {
 
         // add input field (TwinTriggerField in fact)
         //ntt 2008/06/23 changed to a normal triggerfield due to rendering issues, and hiding trigger
-        this.field = new Ext.form.TriggerField({
+        this.field = new Ext.form.TwinTriggerField({
              width:this.width
             ,selectOnFocus:undefined === this.selectOnFocus ? true : this.selectOnFocus
             ,trigger1Class:'x-form-clear-trigger'
