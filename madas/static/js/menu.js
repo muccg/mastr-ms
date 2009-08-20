@@ -29,6 +29,27 @@ Ext.madasMenuRender = function(username) {
                     ]
                     }
                 },
+                { xtype: 'tbbutton', text:'Help', menu:{
+                    items: [
+                            {text:'Screencasts', id:'help:screencasts', menu: {
+                            items: [
+                                    {text:'Requesting a Quote', id:'help:screencasts-quoterequest', handler: Ext.madasMenuHandler}
+                                    ]
+                            } 
+                            },
+                            {text:'Admin screencasts', id:'helpadmin:screencasts', menu: {
+                            items: [
+                                    {text:'Accepting/rejecting users', id:'helpadmin:screencasts-authrequest', handler: Ext.madasMenuHandler},
+                                    {text:'Forwarding a Quote Request', id:'helpadmin:screencasts-forwardquoterequest', handler: Ext.madasMenuHandler},
+                                    {text:'Sending a Formal Quote', id:'helpadmin:screencasts-forwardformal', handler: Ext.madasMenuHandler},
+                                    {text:'Replacing a Formal Quote', id:'helpadmin:screencasts-replaceformal', handler: Ext.madasMenuHandler}
+                                    ]
+                            } 
+                            }
+                            ]
+                    }
+                },
+                    
                 { xtype: 'tbfill'},
                 { xtype: 'tbbutton', text:userText, id: 'userMenu', menu:{
                     items: [
@@ -59,13 +80,18 @@ Ext.madasMenuShow = function() {
     //disable certain menu items if the user is not an admin
     if (!Ext.madasIsAdmin) {
         Ext.getCmp('admin:nodelist').disable();
-        if (!Ext.madasIsNodeRep)
+        if (!Ext.madasIsNodeRep) {
 	        Ext.get('admin').hide();
-        else
+            Ext.getCmp('helpadmin:screencasts').disable();
+        }
+        else {
         	Ext.get('admin').show();
+            Ext.getCmp('helpadmin:screencasts').enable();
+        }
     } else {
         Ext.getCmp('admin:nodelist').enable();
         Ext.get('admin').show();
+        Ext.getCmp('helpadmin:screencasts').enable();
     }
 
     Ext.get('login').hide();
@@ -79,8 +105,11 @@ Ext.madasMenuShow = function() {
 
 Ext.madasMenuHandler = function(item) {
     //we authorize every access to check for session timeout and authorization to specific pages
-    Ext.madasAuthorize(item.id);
-
+    if (item.id.substr(0,4) == "help") {
+        Ext.madasChangeMainContent(item.id);
+    } else {
+        Ext.madasAuthorize(item.id);
+    }
 }
 
 Ext.madasLogoutHandler = function() {
@@ -96,5 +125,6 @@ Ext.madasMenuHide = function() {
     Ext.getCmp('quote:list').hide();
     Ext.getCmp('quote:listAll').hide();
     Ext.getCmp('quote:listFormal').hide();
+    Ext.getCmp('helpadmin:screencasts').disable();
 }
 
