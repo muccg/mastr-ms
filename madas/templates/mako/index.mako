@@ -39,6 +39,8 @@
 <script type="text/javascript" src="${wh.url('/static/js/user.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/madasJsonReader.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/quote.js')}"></script>
+<script type="text/javascript" src="${wh.url('/static/js/swfobject.js')}"></script>
+<script type="text/javascript" src="${wh.url('/static/js/screencasts.js')}"></script>
 
 
 <script>

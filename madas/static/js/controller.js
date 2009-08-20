@@ -154,7 +154,33 @@ Ext.madasChangeMainContent = function(contentName, paramArray){
         	Ext.madasFormalQuoteUserListInit();
         	Ext.getCmp('center-panel').layout.setActiveItem('fquolist-panel');
         	break;
-   
+
+    	case "help:screencasts-quoterequest":
+    	    Ext.madasScreencastsInit('madas_requesting_quote.flv');
+    	    Ext.getCmp('center-panel').layout.setActiveItem('screencasts-container-panel');
+    	    break;
+    	    
+        case "helpadmin:screencasts-forwardquoterequest":
+    	    Ext.madasScreencastsInit('madas_forwarding_quoterequest.flv');
+    	    Ext.getCmp('center-panel').layout.setActiveItem('screencasts-container-panel');
+    	    break;
+    	    
+	    case "helpadmin:screencasts-forwardformal":
+    	    Ext.madasScreencastsInit('madas_sending_formalquote.flv');
+    	    Ext.getCmp('center-panel').layout.setActiveItem('screencasts-container-panel');
+    	    break;
+    	    
+	    case "helpadmin:screencasts-replaceformal":
+    	    Ext.madasScreencastsInit('madas_fixing_formalquote.flv');
+    	    Ext.getCmp('center-panel').layout.setActiveItem('screencasts-container-panel');
+    	    break;
+    	    
+	    case "helpadmin:screencasts-authrequest":
+    	    Ext.madasScreencastsInit('madas_auth_request.flv');
+    	    Ext.getCmp('center-panel').layout.setActiveItem('screencasts-container-panel');
+    	    break;
+            
+            
         default:
             cancelBackTarget = false;
     }
@@ -192,6 +218,7 @@ Ext.madasInitApplication = function(appSecureUrl, username, mainContentFunction,
    //various global settings for Ext
    Ext.BLANK_IMAGE_URL = '/javascript/ext-2.0/resources/images/default/s.gif';
    Ext.QuickTips.init();
+    Ext.madasBaseUrl = appSecureUrl;
    
    Ext.madasLoginSubmitURL = appSecureUrl + 'login/processLogin';
    Ext.madasInitFunction = mainContentFunction;
@@ -223,7 +250,8 @@ Ext.madasInitApplication = function(appSecureUrl, username, mainContentFunction,
                 activeItem:0,
                 items: [Ext.madasDashboardCmp, Ext.madasLoginCmp, Ext.madasNotAuthorizedCmp, Ext.madasAdminUserEditCmp, 
                         Ext.madasUserEditCmp, Ext.madasForgotPasswordCmp, Ext.madasResetPasswordCmp, Ext.madasNodeManagementCmp, 
-                        Ext.madasRequestQuoteCmp, Ext.madasQuoteRequestEditCmp, Ext.madasViewFormalCmp]
+                        Ext.madasRequestQuoteCmp, Ext.madasQuoteRequestEditCmp, Ext.madasViewFormalCmp,
+                        Ext.madasScreencastsCmp]
             }
             ]
     });
