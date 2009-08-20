@@ -481,6 +481,9 @@ def formalLoad(request, *args, **kwargs):
                 'fromemail' : '',
                 'details' : '',
                 'pdf' : '',
+                'fromname' : '',
+                'officePhone' : '',
+                'tonode' : '',
               }
 
     if qid is not '' or fqid is not '':
@@ -502,16 +505,19 @@ def formalLoad(request, *args, **kwargs):
 
                 #get the details of the auth user in the toemail
                 ld = LDAPHandler()
-                d = ld.ldap_get_user_details(retvals['toemail'])
+                d = ld.ldap_get_user_details(retvals['fromemail'])
                 if len(d) > 0:
                     #TODO: isnt this dict meant to go through some sort of translation function so that I don't have to access 
                     #       raw LDAP fields here?
                     from madas.users.views import _translate_ldap_to_madas
                     d = _translate_ldap_to_madas(d)
                     print '\tRetrieved user details: ', d
-                    retvals['fromname'] = d['givenname'][0] + ' ' + d['sn'][0]
-                    retvals['officePhone'] = d['telephonenumber']
-                    retvals['tonode'] = d['groups'][0]
+                    retvals['fromname'] = d['firstname'][0] + ' ' + d['lastname'][0]
+                    retvals['officePhone'] = d['telephoneNumber']
+                    
+                    qr = Quoterequest.objects.get(id=retvals['quoterequestid'])
+                    
+                    retvals['tonode'] = qr.tonode
                 retvals['pdf'] = retvals['details']
 
             else:
