@@ -32,6 +32,7 @@ Ext.madasScreencastsInit = function (vidFile) {
 Ext.madasScreencastsCmp = {
     id:'screencasts-container-panel', 
     layout:'absolute', 
+    style:'z-index:0',
     items: [
         { html:'<p id="screencast-placeholder">You must have flash installed to view this screencast</p>'
         }
