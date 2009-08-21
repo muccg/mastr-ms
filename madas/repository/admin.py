@@ -62,9 +62,6 @@ class OrganismTypeAdmin(admin.ModelAdmin):
 class UserExperimentAdmin(admin.ModelAdmin):
     list_display = ('user', 'experiment', 'type')   
 
-class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'institute')  
-    
 class UserInvolvementTypeAdmin(admin.ModelAdmin):
     list_display = ('id', 'name')   
 
@@ -87,7 +84,6 @@ class SampleClassAdmin(admin.ModelAdmin):
 admin.site.register(OrganismType, OrganismTypeAdmin)
 admin.site.register(Organism, OrganismAdmin)
 admin.site.register(Gender, GenderAdmin)
-admin.site.register(User, UserAdmin)
 admin.site.register(UserInvolvementType, UserInvolvementTypeAdmin)
 admin.site.register(Organ, OrganAdmin)
 admin.site.register(BiologicalSource, BiologicalSourceAdmin)
