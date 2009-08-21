@@ -9,6 +9,7 @@ from madas.utils import setRequestVars, jsonResponse
 from django.shortcuts import render_to_response, render_mako
 from webhelpers import siteurl
 from madas.login.views import processLogin
+from django.contrib.auth.models import User
 
 def login(request, *args):
     success = processLogin(request, args)
@@ -219,6 +220,11 @@ def serveIndex(request, *args, **kwargs):
             return redirectMain(request, module = modname, submodule = funcname, params = params)
         else:
             params = request.session.get('params', [])
+
+    #get or create the user
+    user, created = User.objects.get_or_create(username=request.user.username)
+    if created is True:
+        user.save()
 
     #print 'serve index...' 
     #print settings.APP_SECURE_URL

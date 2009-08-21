@@ -1,10 +1,6 @@
 from django.db import models
-from django.contrib.auth.models import User as AuthUser
+from django.contrib.auth.models import User
 from datetime import datetime, date, time
-
-class User(AuthUser):
-    institute = models.CharField(max_length=255)
-    # needed? campus_member = models.BooleanField(default=False)
 
 class OrganismType(models.Model):
     """Currently, Microorganism, Plant, Animal or Human"""
@@ -134,7 +130,7 @@ class Experiment(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(null=True)
     comment = models.TextField(null=True)
-    users = models.ManyToManyField(AuthUser, through='UserExperiment', null=True)
+    users = models.ManyToManyField(User, through='UserExperiment', null=True)
     status = models.ForeignKey(ExperimentStatus, null=True)
     # ? files
 
@@ -221,7 +217,7 @@ class UserInvolvementType(models.Model):
         return self.name
 
 class UserExperiment(models.Model):
-    user = models.ForeignKey(AuthUser)
+    user = models.ForeignKey(User)
     experiment = models.ForeignKey(Experiment)
     type = models.ForeignKey(UserInvolvementType)
     additional_info = models.TextField(null=True, blank=True)

@@ -1,8 +1,9 @@
 from django.http import HttpResponse, HttpResponseNotFound
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
-from madas.repository.models import Experiment, ExperimentStatus, Organism, Organ, Genotype, Gender, Animal, Location, OriginDetails, User, TreatmentVariation, Treatment, StandardOperationProcedureCategory , BiologicalSource, SampleClass, GrowthCondition
+from madas.repository.models import Experiment, ExperimentStatus, Organism, Organ, Genotype, Gender, Animal, Location, OriginDetails, TreatmentVariation, Treatment, StandardOperationProcedureCategory , BiologicalSource, SampleClass, GrowthCondition, UserInvolvementType, UserExperiment
 from django.utils import webhelpers
+from django.contrib.auth.models import User
 from django.utils import simplejson as json
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
@@ -28,6 +29,15 @@ def create_object(request, model):
         obj.__setattr__(key, args[key])
 
     obj.save()
+
+    if model == 'experiment':
+        uit, created = UserInvolvementType.objects.get_or_create(name='Principal Investigator')
+        user = User.objects.get(username=request.user.username)
+        ue = UserExperiment()
+        ue.experiment=obj
+        ue.type=uit
+        ue.user=user
+        ue.save()    
     
     if model == 'biologicalsource':
         return records(request, 'organism', 'id', obj.organism.id)
@@ -180,7 +190,7 @@ def populate_select(request, model=None, key=None, value=None, field=None, match
                        'treatmentvariation': ['id','name','treatment'],
                        'treatment': ['id','name','source','description','type'],
                        'treatmenttype': ['id','name'],
-                       'user': ['id','username','first_name','last_name','email','institute'],
+                       'user': ['id','username'],
                        'standardoperationprocedure' : ['id', 'label'],
                        'organismtype' : ['id','name'],
                        'userinvolvementtype' : ['id', 'name'],
@@ -204,7 +214,10 @@ def populate_select(request, model=None, key=None, value=None, field=None, match
         if model not in model_whitelist.keys():
             raise ObjectDoesNotExist()
 
-        model_obj = get_model('repository', model)
+        if model == 'user':
+            model_obj = get_model('auth', 'user')
+        else:
+            model_obj = get_model('repository', model)
         
         if field and match:
             params = {str(field):str(match)}
