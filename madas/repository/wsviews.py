@@ -421,6 +421,21 @@ def recordsSampleClasses(request, experiment_id):
     return HttpResponse(json.dumps(output))
     
     
+def filesList(request, id, path=None):
+    
+    output = []
+
+    import os, settings
+
+    for filename in os.listdir(settings.REPO_FILES_ROOT):
+        file = {}
+        file['text'] = filename
+        file['leaf'] = True
+        output.append(file)
+        
+    return HttpResponse(json.dumps(output))
+    
+    
 def sample_class_enable(request, id):
     
     sc = SampleClass.objects.get(id=id)

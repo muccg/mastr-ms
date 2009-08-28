@@ -410,7 +410,7 @@ Ext.madasExperimentCmp = {
                             {
                                 storeId:"navDS",
                                 fields: ["nav", "init", "blur", "enabled"],
-                                data: [ ["experiment details", Ext.madasExperimentInit, Ext.madasExperimentBlur, true], ["samples/classes", Ext.madasExperimentSamplesInit, Ext.madasBlur, false], ["source", Ext.madasBioSourceInit, Ext.madasBioSourceBlur, false], ["growth",Ext.madasGrowthInit, Ext.madasBlur,false], ["treatment",Ext.madasTreatmentInit, Ext.madasBlur,false], ["sample prep",Ext.madasSamplePrepInit, Ext.madasBlur,false], ["access",Ext.madasAccessInit, Ext.madasBlur,false] ],
+                                data: [ ["experiment details", Ext.madasExperimentInit, Ext.madasExperimentBlur, true], ["samples/classes", Ext.madasExperimentSamplesInit, Ext.madasBlur, false], ["source", Ext.madasBioSourceInit, Ext.madasBioSourceBlur, false], ["growth",Ext.madasGrowthInit, Ext.madasBlur,false], ["treatment",Ext.madasTreatmentInit, Ext.madasBlur,false], ["sample prep",Ext.madasSamplePrepInit, Ext.madasBlur,false], ["files", Ext.madasFilesInit, Ext.madasBlur, false], ["access",Ext.madasAccessInit, Ext.madasBlur,false] ],
                             }
                         ),
                         listeners:{"render":function(a){window.setTimeout("Ext.getCmp('expNav').getSelectionModel().selectFirstRow();", 500);}}
@@ -441,6 +441,7 @@ Ext.madasExperimentCmp = {
             Ext.madasGrowth,
             Ext.madasTreatment,
             Ext.madasSamplePrep,
+            Ext.madasFiles,
             Ext.madasAccess
         ]
     }]
@@ -522,7 +523,7 @@ Ext.madasUpdateNav = function() {
         valid = (ot.getValue() == "")?false:true;
     }
         
-    for (counter = 1; counter <= 6; counter++) {
+    for (counter = 1; counter <= 7; counter++) {
         ds.getAt(counter).set("enabled", (en.getValue() != '' && valid));
     }
     
