@@ -18,6 +18,7 @@
     <script src="static/repo/js/menucontroller.js" type="text/javascript"></script>
     <script src="static/repo/js/login.js" type="text/javascript"></script>
     <script src="static/repo/js/datastores.js" type="text/javascript"></script>
+
     <script src="static/repo/js/renderers.js" type="text/javascript"></script>
     <script src="static/repo/js/samples.js" type="text/javascript"></script>
     <script src="static/repo/js/biosource.js" type="text/javascript"></script>
@@ -26,6 +27,8 @@
     <script src="static/repo/js/sampleprep.js" type="text/javascript"></script>
     <script src="static/repo/js/access.js" type="text/javascript"></script>
     <script src="static/repo/js/experimentlist.js" type="text/javascript"></script>
+    <script src="static/repo/js/files.js" type="text/javascript"></script>
+    
     <script src="static/repo/js/controller.js" type="text/javascript"></script>
     <script src="static/repo/js/menu.js" type="text/javascript"></script>
 

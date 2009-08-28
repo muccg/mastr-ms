@@ -139,6 +139,8 @@ if "DJANGODEV" in os.environ:
     MADAS_STATUS_GROUPS = ['User', 'Pending', 'Deleted', 'Rejected']
     MADAS_ADMIN_GROUPS = ['Administrators', 'Node Reps']
     SESSION_TIMEOUT = 600 #10 minute session timeout
+    
+    REPO_FILES_ROOT = '/tmp/'
     #####################################################################################################
 
 
@@ -177,6 +179,8 @@ else:
     MADAS_STATUS_GROUPS = ['User', 'Pending', 'Deleted', 'Rejected']
     MADAS_ADMIN_GROUPS = ['Administrators', 'Node Reps']
     SESSION_TIMEOUT = 600 #10 minute session timeout
+    
+    REPO_FILES_ROOT = '/tmp/'
     #####################################################################################################
 
 
