@@ -22,16 +22,18 @@ items:[
                {
                xtype:'treepanel',
                border: false,
+               autoScroll: true,
                id:'filesTree',
                enableDD: true,
                animate: true,
                useArrows: true,
-               dataUrl:wsBaseUrl + 'files/experiment_id/5',
+               dataUrl:wsBaseUrl + 'files',
+               requestMethod:'GET',
                root: {
                    nodeType: 'async',
                    text: 'experiment',
                    draggable: false,
-                   id: 'source'
+                   id: 'experimentRoot'
                },
                tbar: [{
                       text: 'add files',
@@ -43,7 +45,8 @@ items:[
                       }
                 ]
                }
-               ]
+               ],
+       listeners:{render: function() {Ext.getCmp('filesTree').getRootNode().expand();}}
        }
        ]
 };

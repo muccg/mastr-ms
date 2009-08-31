@@ -421,17 +421,41 @@ def recordsSampleClasses(request, experiment_id):
     return HttpResponse(json.dumps(output))
     
     
-def filesList(request, id, path=None):
+def filesList(request):
+    
+    args = request.GET
+    path = args['node']
+    
+    if path == 'experimentRoot':
+        path = ''
     
     output = []
 
     import os, settings
+    
+    #verify that there is no up-pathing hack happening
+    if len(os.path.abspath(settings.REPO_FILES_ROOT)) > len(os.path.commonprefix((settings.REPO_FILES_ROOT, os.path.abspath(settings.REPO_FILES_ROOT + path)))):
+        return HttpResponse(json.dumps(output))
 
-    for filename in os.listdir(settings.REPO_FILES_ROOT):
-        file = {}
-        file['text'] = filename
-        file['leaf'] = True
-        output.append(file)
+    files = os.listdir(settings.REPO_FILES_ROOT + path)
+    files.sort()
+    
+    for filename in files:
+        filepath = settings.REPO_FILES_ROOT + filename
+        if not path == '':
+            filepath = settings.REPO_FILES_ROOT + path + '/' + filename
+            
+        if os.access(filepath, os.R_OK):
+            file = {}
+            file['text'] = filename
+            if os.path.isdir(filepath):
+                file['leaf'] = False
+            else:
+                file['leaf'] = True
+            file['id'] = filename
+            if not path == '':
+                file['id'] = path + '/' + filename
+            output.append(file)
         
     return HttpResponse(json.dumps(output))
     
