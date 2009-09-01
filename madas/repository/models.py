@@ -132,7 +132,18 @@ class Experiment(models.Model):
     comment = models.TextField(null=True)
     users = models.ManyToManyField(User, through='UserExperiment', null=True)
     status = models.ForeignKey(ExperimentStatus, null=True)
+    created_on = models.DateField(null=False, default=date.today)
     # ? files
+    
+    def ensure_dir(self):
+        import settings, os
+        
+        yearpath = settings.REPO_FILES_ROOT + 'experiments/' + str(self.created_on.year)
+        monthpath = yearpath + '/' + str(self.created_on.month)
+        exppath = monthpath + '/' + str(self.id)
+        
+        if not os.path.exists(exppath):
+            os.makedirs(exppath)
 
     def __unicode__(self):
         return self.title

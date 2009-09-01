@@ -12,5 +12,6 @@ urlpatterns = patterns('madas.repository.wsviews',
     (r'^dissociate/(?P<model>\w+)/(?P<association>\w+)/(?P<parent_id>\w+)/(?P<id>\w+)[/]*$', 'dissociate_object', {'SSL':True}),
     (r'^recreate_sample_classes/(?P<experiment_id>\w+)[/]*$', 'recreate_sample_classes', {'SSL':True}),
     (r'^sample_class_enable/(?P<id>\w+)[/]*$', 'sample_class_enable', {'SSL':True}),
-    (r'^files[/]*$', 'filesList', {'SSL':True}),
+    (r'^files[/]*$', 'experimentFilesList', {'SSL':True}),
+    (r'^pendingfiles[/]*$', 'pendingFilesList', {'SSL':True}),
 )
