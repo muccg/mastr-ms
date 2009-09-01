@@ -421,7 +421,7 @@ def recordsSampleClasses(request, experiment_id):
     return HttpResponse(json.dumps(output))
     
     
-def filesList(request):
+def experimentFilesList(request):
     
     args = request.GET
     path = args['node']
@@ -429,21 +429,54 @@ def filesList(request):
     if path == 'experimentRoot':
         path = ''
     
+    if args['experiment'] == 0:
+        return HttpResponse('[]')
+        
+    exp = Experiment.objects.get(id=args['experiment'])
+    exp.ensure_dir()
+        
+    import settings
+    
+    exppath = settings.REPO_FILES_ROOT + 'experiments/' + str(exp.created_on.year) + '/' + str(exp.created_on.month) + '/' + str(exp.id) + '/'
+    
+    return _fileList(request, exppath, path)
+    
+    
+def pendingFilesList(request):
+    
+    args = request.GET
+    path = args['node']
+    
+    if path == 'pendingRoot':
+        path = ''
+
+    import settings
+    
+    basepath = settings.REPO_FILES_ROOT + 'pending/'
+    
+    return _fileList(request, basepath, path)
+    
+    
+def _fileList(request, basepath, path):
+
+    import os
+
     output = []
 
-    import os, settings
-    
     #verify that there is no up-pathing hack happening
-    if len(os.path.abspath(settings.REPO_FILES_ROOT)) > len(os.path.commonprefix((settings.REPO_FILES_ROOT, os.path.abspath(settings.REPO_FILES_ROOT + path)))):
+    if len(os.path.abspath(basepath)) > len(os.path.commonprefix((basepath, os.path.abspath(basepath + path)))):
         return HttpResponse(json.dumps(output))
 
-    files = os.listdir(settings.REPO_FILES_ROOT + path)
+    if not os.path.exists(basepath + path):
+        return HttpResponse('[]')
+
+    files = os.listdir(basepath + path)
     files.sort()
     
     for filename in files:
-        filepath = settings.REPO_FILES_ROOT + filename
+        filepath = basepath + filename
         if not path == '':
-            filepath = settings.REPO_FILES_ROOT + path + '/' + filename
+            filepath = basepath + path + '/' + filename
             
         if os.access(filepath, os.R_OK):
             file = {}
