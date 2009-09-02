@@ -4,8 +4,8 @@
     <link rel="stylesheet" href="static/repo/ext-3.0.0/resources/css/ext-all.css"/>
     <link rel="stylesheet" href="static/repo/main.css"/>
     <link rel="stylesheet" href="static/repo/ext-3.0.0/examples/ux/css/RowEditor.css"/>
-    <script src="static/repo/ext-3.0.0/adapter/ext/ext-base.js" type="text/javascript"></script>
-    <script src="static/repo/ext-3.0.0/ext-all.js"></script>
+    <script src="static/repo/ext-3.0.0/adapter/ext/ext-base-debug.js" type="text/javascript"></script>
+    <script src="static/repo/ext-3.0.0/ext-all-debug.js"></script>
     <script src="static/repo/ext-3.0.0/examples/ux/RowEditor.js"></script>
 
     <script>

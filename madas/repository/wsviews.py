@@ -420,6 +420,39 @@ def recordsSampleClasses(request, experiment_id):
 
     return HttpResponse(json.dumps(output))
     
+
+def moveFile(request):
+    
+    output = {'success':'', 'newlocation':''}
+    
+    args = request.GET
+    target = args['target']
+    file = args['file']
+    
+    exp = Experiment.objects.get(id=args['experiment_id'])
+    exp.ensure_dir()
+        
+    import settings, os
+    
+    exppath = settings.REPO_FILES_ROOT + 'experiments' + os.sep + str(exp.created_on.year) + os.sep + str(exp.created_on.month) + os.sep + str(exp.id) + os.sep
+    pendingPath = settings.REPO_FILES_ROOT + 'pending' + os.sep + file
+
+    (path, filename) = os.path.split(pendingPath)
+    
+    destpath = exppath
+    if not target == '':
+        if not target == 'experimentRoot':
+            destpath = destpath + target + os.sep
+    
+    #see if pendingpath exists
+    if os.path.exists(pendingPath):
+        os.rename(pendingPath, destpath + filename)
+    
+    output['success'] = True
+    output['newlocation'] = exppath + filename
+    
+    return HttpResponse(json.dumps(output))
+
     
 def experimentFilesList(request):
     
@@ -435,9 +468,9 @@ def experimentFilesList(request):
     exp = Experiment.objects.get(id=args['experiment'])
     exp.ensure_dir()
         
-    import settings
+    import settings, os
     
-    exppath = settings.REPO_FILES_ROOT + 'experiments/' + str(exp.created_on.year) + '/' + str(exp.created_on.month) + '/' + str(exp.id) + '/'
+    exppath = settings.REPO_FILES_ROOT + 'experiments' + os.sep + str(exp.created_on.year) + os.sep + str(exp.created_on.month) + os.sep + str(exp.id) + os.sep
     
     return _fileList(request, exppath, path)
     
@@ -450,9 +483,9 @@ def pendingFilesList(request):
     if path == 'pendingRoot':
         path = ''
 
-    import settings
+    import settings, os
     
-    basepath = settings.REPO_FILES_ROOT + 'pending/'
+    basepath = settings.REPO_FILES_ROOT + 'pending' + os.sep
     
     return _fileList(request, basepath, path)
     
@@ -476,7 +509,7 @@ def _fileList(request, basepath, path):
     for filename in files:
         filepath = basepath + filename
         if not path == '':
-            filepath = basepath + path + '/' + filename
+            filepath = basepath + path + os.sep + filename
             
         if os.access(filepath, os.R_OK):
             file = {}
@@ -487,7 +520,7 @@ def _fileList(request, basepath, path):
                 file['leaf'] = True
             file['id'] = filename
             if not path == '':
-                file['id'] = path + '/' + filename
+                file['id'] = path + os.sep + filename
             output.append(file)
         
     return HttpResponse(json.dumps(output))

@@ -38,22 +38,34 @@ items:[
                    draggable: false,
                    id: 'experimentRoot'
                },
-               tbar: [{
-                      text: 'add files',
-                      cls: 'x-btn-text-icon',
-                      icon:'static/repo/images/add.gif',
-                      handler : function(){
-//                      userStore.add(new Ext.data.Record({'user':'', 'type':'1', 'additional_info':''}));
-                      }
-                      }
-                      ],
+               //tbar: [{
+//                      text: 'add files',
+//                      cls: 'x-btn-text-icon',
+//                      icon:'static/repo/images/add.gif',
+//                      handler : function(){
+////                      userStore.add(new Ext.data.Record({'user':'', 'type':'1', 'additional_info':''}));
+//                      }
+//                      }
+//                      ],
                listeners:{
                     render: function() {
                         Ext.getCmp('filesTree').getLoader().on("beforeload", function(treeLoader, node) {
                             treeLoader.baseParams.experiment = Ext.madasCurrentExperimentId();
                             }, this);
                         Ext.getCmp('filesTree').getRootNode().expand();
-                    }
+                    },
+               nodedrop: function(de) {
+                    Ext.Ajax.request({
+                                     method:'GET',
+                                url: wsBaseUrl + 'moveFile',
+                                     success: function() { alert('moved'); },
+                                     failure: function() { alert('failed'); },
+                                headers: {
+//                                'my-header': 'foo'
+                                },
+                                     params: { file: de.dropNode.id, target: de.target.id, experiment_id: Ext.madasCurrentExperimentId() }
+                                });
+               }
                 }
                },
                
@@ -68,8 +80,10 @@ items:[
                width:200,
                title:'pending files',
                collapsible:true,
+               titleCollapse:false,
                animate: true,
                useArrows: true,
+               dropConfig: { allowContainerDrop: false },
                dataUrl:wsBaseUrl + 'pendingfiles',
                requestMethod:'GET',
                root: {
@@ -81,6 +95,9 @@ items:[
                listeners:{
                render: function() {
                Ext.getCmp('pendingFilesTree').getRootNode().expand();
+               },
+               nodedrop: function(de) {
+               console.log(de);
                }
                }
                }

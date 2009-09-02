@@ -14,4 +14,6 @@ urlpatterns = patterns('madas.repository.wsviews',
     (r'^sample_class_enable/(?P<id>\w+)[/]*$', 'sample_class_enable', {'SSL':True}),
     (r'^files[/]*$', 'experimentFilesList', {'SSL':True}),
     (r'^pendingfiles[/]*$', 'pendingFilesList', {'SSL':True}),
+    (r'^moveFile[/]*$', 'moveFile', {'SSL':True}),
+
 )
