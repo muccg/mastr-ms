@@ -30,6 +30,7 @@ items:[
                animate: true,
                region:'center',
                useArrows: true,
+               dropConfig: { appendOnly: true },
                dataUrl:wsBaseUrl + 'files',
                requestMethod:'GET',
                root: {
