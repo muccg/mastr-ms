@@ -107,7 +107,7 @@ items:[
                    Ext.getCmp('pendingFilesTree').getRootNode().expand();
                    },
                    nodedrop: function(de) {
-                   console.log(de);
+                       //console.log(de);
                    }
                    }
                    },
