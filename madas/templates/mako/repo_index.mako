@@ -4,9 +4,13 @@
     <link rel="stylesheet" href="static/repo/ext-3.0.0/resources/css/ext-all.css"/>
     <link rel="stylesheet" href="static/repo/main.css"/>
     <link rel="stylesheet" href="static/repo/ext-3.0.0/examples/ux/css/RowEditor.css"/>
+    <link rel="stylesheet" type="text/css" href="static/css/file-upload.css"/>
+
     <script src="static/repo/ext-3.0.0/adapter/ext/ext-base-debug.js" type="text/javascript"></script>
     <script src="static/repo/ext-3.0.0/ext-all-debug.js"></script>
     <script src="static/repo/ext-3.0.0/examples/ux/RowEditor.js"></script>
+    <script type="text/javascript" src="static/js/FileUploadField.js"></script>
+
 
     <script>
     var baseUrl = '${ APP_SECURE_URL }';

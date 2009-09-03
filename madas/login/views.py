@@ -28,7 +28,9 @@ def processLogin(request, *args):
         user = None
         from django.contrib.auth import authenticate, login
         try: 
+            print 'auth begin'
             user = authenticate(username = username, password = password)
+            print 'auth done'
         except Exception, e:
             print str(e)
 
