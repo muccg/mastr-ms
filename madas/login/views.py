@@ -13,6 +13,8 @@ def processLogin(request, *args):
     print '\tredirectMainContentFunction is %s' % (redirectMainContentFunction)
     print '\tparams is %s' % (params)
 
+    success = False
+
     if request.method == "POST":
         post = request.POST.copy()
    
@@ -30,7 +32,6 @@ def processLogin(request, *args):
         except Exception, e:
             print str(e)
 
-        success = False
         authenticated = 0
         authorized = 0
         if user is not None:
