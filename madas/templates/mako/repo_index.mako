@@ -42,7 +42,7 @@ function callbacker(){
     var username = document.getElementById('username').value;
     
     if (username == "" && callbackCount < 10) {
-        console.log("waiting...");
+        //console.log("waiting...");
         callbackCount += 1;
         window.setTimeout("callbacker();", 100);
         return;
