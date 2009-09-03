@@ -20,7 +20,7 @@ Ext.madasDSLoaded = function(ds, recs, opts) {
 };
 
 Ext.madasDSLoadException = function() {
-    console.log("load exception: "+this.storeId);
+    //console.log("load exception: "+this.storeId);
     
     storesNeededForRendering[this.storeId] = 'loaded';
     Ext.madasDSLoaded(this, null, null);
@@ -318,8 +318,8 @@ var speciesStore = new Ext.madasJsonStore(
                                                     organismComboStore.proxy.conn.url = wsBaseUrl + "populate_select/organism/id/name/type/" + rs[0].data.type;
                                                     organismComboStore.load();
                                                 } else {
-                                                    console.log("error finding organism type in");
-                                          console.log(rs[0]);
+                                          //console.log("error finding organism type in");
+                                          //console.log(rs[0]);
                                                 }
                                             }
                                             
