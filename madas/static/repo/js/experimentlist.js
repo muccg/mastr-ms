@@ -34,7 +34,7 @@ id:'experiment-list',
            
            delIds.push(selections[index].data.id);
            }
-           console.log(delIds);
+           //console.log(delIds);
            for (var i = 0; i < delIds.length; i++) {
                Ext.madasCRUDSomething('delete/experiment/'+delIds[i], {}, function() { experimentListStore.load(); });
            }                        

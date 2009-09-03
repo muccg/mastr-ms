@@ -109,7 +109,7 @@ Ext.madasGrowth = {
                            
                                delIds.push(selections[index].data.id);
                            }
-                           console.log(delIds);
+                           //console.log(delIds);
                            for (var i = 0; i < delIds.length; i++) {
                            Ext.madasCRUDSomething('delete/origindetails/'+delIds[i], {}, function() { var expId = Ext.madasCurrentExperimentId(); animalOriginStore.proxy.conn.url = wsBaseUrl + 'records/origindetails/source__experiment__id/' + expId;
                                                   animalOriginStore.load(); });
@@ -202,7 +202,7 @@ Ext.madasGrowth = {
                            
                            delIds.push(selections[index].data.id);
                            }
-                           console.log(delIds);
+                           //console.log(delIds);
                            for (var i = 0; i < delIds.length; i++) {
                            Ext.madasCRUDSomething('delete/growthcondition/'+delIds[i], {}, function() { var expId = Ext.madasCurrentExperimentId(); growthConditionStore.proxy.conn.url = wsBaseUrl + 'records/growthcondition/source__experiment__id/' + expId;
                                                   growthConditionStore.load(); });

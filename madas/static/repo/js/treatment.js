@@ -102,7 +102,7 @@ Ext.madasTreatment = {
                                    
                                    delIds.push(selections[index].data.id);
                                    }
-                                   console.log(delIds);
+                                   //console.log(delIds);
                                    for (var i = 0; i < delIds.length; i++) {
                                    Ext.madasCRUDSomething('delete/sampletimeline/'+delIds[i], {}, function() { var expId = Ext.madasCurrentExperimentId(); timelineStore.proxy.conn.url = wsBaseUrl + 'records/sampletimeline/source__experiment__id/' + expId;
                                                           timelineStore.load(); });
