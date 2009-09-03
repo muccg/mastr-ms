@@ -83,6 +83,10 @@ Ext.madasMenuShow = function() {
 //        Ext.getCmp('helpadmin:screencasts').enable();
     }
 
+    //TEMP hide admin menu from all users
+    Ext.get('admin').hide();
+
+    
     Ext.get('login').hide();
     Ext.get('userMenu').show();
     Ext.get('experimentMenu').show();
