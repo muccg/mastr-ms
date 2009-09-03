@@ -415,13 +415,6 @@ Ext.madasExperimentCmp = {
                         ),
                         listeners:{"render":function(a){window.setTimeout("Ext.getCmp('expNav').getSelectionModel().selectFirstRow();", 500);}}
                       }
-//                    },
-//                    { 
-//                        xtype:'button',
-//                        style:'margin:10px;margin-left:30px;',
-//                        text:'Save and Exit',
-//                        handler:function(e, t){Ext.getCmp("expNav").getSelectionModel().selectRow(0);}
-//                    }
                 ]
             }
         ]

@@ -3,15 +3,15 @@ Ext.madasAccessInit = function() {
     
     userStore.proxy.conn.url = wsBaseUrl + 'records/userexperiment/experiment__id/' + expId;
     userStore.load();
-}
+};
 
 Ext.madasSaveAccessRow = function(roweditor, changes, rec, i) {
     var bundledData = {};
     
-    bundledData['experiment_id'] = Ext.madasCurrentExperimentId();
-    bundledData['user_id'] = rec.data.user;
-    bundledData['type_id'] = rec.data.type;
-    bundledData['additional_info'] = rec.data.additional_info;
+    bundledData.experiment_id = Ext.madasCurrentExperimentId();
+    bundledData.user_id = rec.data.user;
+    bundledData.type_id = rec.data.type;
+    bundledData.additional_info = rec.data.additional_info;
     
     Ext.madasSaveRowLiterals('userexperiment', roweditor, bundledData, rec, i, function() { var expId = Ext.madasCurrentExperimentId(); userStore.proxy.conn.url = wsBaseUrl + 'records/userexperiment/experiment__id/' + expId; userStore.load();});
 };

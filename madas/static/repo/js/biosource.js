@@ -25,37 +25,38 @@ Ext.madasBioSourceInit = function() {
     
     genotypeStore.proxy.conn.url = wsBaseUrl + 'records/genotype/source__experiment__id/' + expId;
     genotypeStore.load();
-}
+};
 
 Ext.madasBioSourceBlur = function(invoker) {
     var expId = Ext.madasCurrentExperimentId();
     Ext.madasExperimentDeferredInvocation = invoker;
+    var humanGender, humanDob, humanBmi, humanDiagnosis, animalGender, animalAge, animalParentalLine;
 
     if (Ext.madasCurrentOrganismType() == '4') { //human
-        var humanGender = Ext.getCmp("humanGender").getValue();
-        var humanDob = Ext.util.Format.date(Ext.getCmp("human_dob").getValue(), 'Y-m-d');
-        var humanBmi = Ext.getCmp("human_bmi").getValue();
-        var humanDiagnosis = Ext.getCmp("human_diagnosis").getValue();
+        humanGender = Ext.getCmp("humanGender").getValue();
+        humanDob = Ext.util.Format.date(Ext.getCmp("human_dob").getValue(), 'Y-m-d');
+        humanBmi = Ext.getCmp("human_bmi").getValue();
+        humanDiagnosis = Ext.getCmp("human_diagnosis").getValue();
         
         //hook up new load handler
         humanStore.on("load", Ext.madasBioSourceBlurSuccess);
         
-        humanStore.proxy.conn.url = wsBaseUrl + 'update/human/'+escape(Ext.madasCurrentBioSourceId())+'/?sex_id='+escape(humanGender)+((humanDob === undefined || humanDob == '')?'':'&date_of_birth='+escape(humanDob))+((humanBmi === undefined || humanBmi == '')?'':'&bmi='+escape(humanBmi))+((humanDiagnosis === undefined || humanDiagnosis == '')?'':'&diagnosis='+escape(humanDiagnosis));
+        humanStore.proxy.conn.url = wsBaseUrl + 'update/human/'+escape(Ext.madasCurrentBioSourceId())+'/?sex_id='+escape(humanGender)+((humanDob === undefined || humanDob === '')?'':'&date_of_birth='+escape(humanDob))+((humanBmi === undefined || humanBmi === '')?'':'&bmi='+escape(humanBmi))+((humanDiagnosis === undefined || humanDiagnosis === '')?'':'&diagnosis='+escape(humanDiagnosis));
         humanStore.load();
     } else if (Ext.madasCurrentOrganismType() == '3') { //animal
-        var animalGender = Ext.getCmp("animalGender").getValue();
-        var animalAge = Ext.getCmp("animalAge").getValue();
-        var animalParentalLine = Ext.getCmp("animalParentalLine").getRawValue();
+        animalGender = Ext.getCmp("animalGender").getValue();
+        animalAge = Ext.getCmp("animalAge").getValue();
+        animalParentalLine = Ext.getCmp("animalParentalLine").getRawValue();
 
         //hook up new load handler
         animalStore.on("load", Ext.madasBioSourceBlurSuccess);
 
-        animalStore.proxy.conn.url = wsBaseUrl + 'update/human/'+escape(Ext.madasCurrentBioSourceId())+'/?sex_id='+escape(animalGender)+((animalAge === undefined || animalAge == '')?'':'&age='+escape(animalAge))+((animalParentalLine === undefined || animalParentalLine == '')?'':'&parental_line='+escape(animalParentalLine));
+        animalStore.proxy.conn.url = wsBaseUrl + 'update/human/'+escape(Ext.madasCurrentBioSourceId())+'/?sex_id='+escape(animalGender)+((animalAge === undefined || animalAge === '')?'':'&age='+escape(animalAge))+((animalParentalLine === undefined || animalParentalLine === '')?'':'&parental_line='+escape(animalParentalLine));
 animalStore.load();
    } else {
         Ext.madasBioSourceBlurSuccess();
     }
-}
+};
 
 Ext.madasBioSourceBlurSuccess = function() {
     experimentStore.un("load", Ext.madasBioSourceBlurSuccess);
@@ -75,10 +76,10 @@ Ext.madasBioSourceBlurSuccess = function() {
 Ext.madasSaveOrganRow = function(roweditor, changes, rec, i) {
     var bundledData = {};
     
-    bundledData['name'] = rec.data.name;
-    bundledData['tissue'] = rec.data.tissue;
-    bundledData['cell_type'] = rec.data.cell_type;
-    bundledData['subcellular_cell_type'] = rec.data.subcellular_cell_type;
+    bundledData.name = rec.data.name;
+    bundledData.tissue = rec.data.tissue;
+    bundledData.cell_type = rec.data.cell_type;
+    bundledData.subcellular_cell_type = rec.data.subcellular_cell_type;
     
     Ext.madasSaveRowLiterals('organ', roweditor, bundledData, rec, i, function() { var expId = Ext.madasCurrentExperimentId(); organStore.proxy.conn.url = wsBaseUrl + 'records/organ/source__experiment__id/' + expId; organStore.load();});
 };
@@ -86,7 +87,7 @@ Ext.madasSaveOrganRow = function(roweditor, changes, rec, i) {
 Ext.madasSaveGenotypeRow = function(roweditor, changes, rec, i) {
     var bundledData = {};
     
-    bundledData['name'] = rec.data.name;
+    bundledData.name = rec.data.name;
 
     Ext.madasSaveRowLiterals('genotype', roweditor, bundledData, rec, i, function() { var expId = Ext.madasCurrentExperimentId(); genotypeStore.proxy.conn.url = wsBaseUrl + 'records/genotype/source__experiment__id/' + expId; genotypeStore.load();});
 };
