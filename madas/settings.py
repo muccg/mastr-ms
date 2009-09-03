@@ -141,6 +141,8 @@ if "DJANGODEV" in os.environ:
     SESSION_TIMEOUT = 600 #10 minute session timeout
     
     REPO_FILES_ROOT = '/usr/local/php5/ccgapps/madas/filedata/'
+    if "LOCALDEV" in os.environ:
+        REPO_FILES_ROOT = '/tmp/madas/filedata/'
     #####################################################################################################
 
 
@@ -180,7 +182,7 @@ else:
     MADAS_ADMIN_GROUPS = ['Administrators', 'Node Reps']
     SESSION_TIMEOUT = 600 #10 minute session timeout
     
-    REPO_FILES_ROOT = '/tmp/'
+    REPO_FILES_ROOT = '/usr/local/python/ccgapps/madas/files'
     #####################################################################################################
 
 

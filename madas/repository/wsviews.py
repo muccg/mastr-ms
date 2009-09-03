@@ -526,6 +526,49 @@ def _fileList(request, basepath, path):
     return HttpResponse(json.dumps(output))
     
     
+def uploadFile(request):
+    ############# FILE UPLOAD ########################
+    output = { 'success': True }
+    
+    try:
+        #TODO handle file uploads - check for error values
+        print request.FILES.keys()
+        if request.FILES.has_key('attachfile'):
+            f = request.FILES['attachfile']
+            print '\tuploaded file name: ', f._get_name()
+            translated_name = f._get_name().replace(' ', '_')
+            print '\ttranslated name: ', translated_name
+            _handle_uploaded_file(f, translated_name)
+            attachmentname = translated_name
+        else:
+            print '\tNo file attached.'
+    except Exception, e:
+        print '\tException: ', str(e)
+        output = { 'success': False }
+        
+    return HttpResponse(json.dumps(output))
+    
+    
+def _handle_uploaded_file(f, name):
+    '''Handles a file upload to the projects WRITABLE_DIRECTORY
+       Expects a django InMemoryUpload object, and a filename'''
+    print '*** _handle_uploaded_file: enter ***'
+    retval = False
+    try:
+        import os, settings
+        
+        destination = open(settings.REPO_FILES_ROOT + os.sep + 'pending' + os.sep + name, 'wb+')
+        for chunk in f.chunks():
+            destination.write(chunk)
+        destination.close()
+        retval = True
+    except Exception, e:
+        retval = False
+        print '\tException in file upload: ', str(e)
+    print '*** _handle_uploaded_file: exit ***'
+    return retval
+    
+    
 def sample_class_enable(request, id):
     
     sc = SampleClass.objects.get(id=id)
