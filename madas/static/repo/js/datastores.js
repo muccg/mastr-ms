@@ -105,7 +105,6 @@ var organStore = new Ext.madasJsonStore(
                         {
                             storeId: 'organism',
                             autoLoad: false,
-                                        method:'GET',
                             url: wsBaseUrl + 'records/organ/source__experiment__id/0',
                             listeners: {'load':Ext.madasDSLoaded,
                                         'loadexception':Ext.madasDSLoadException}
@@ -116,7 +115,6 @@ var genotypeStore = new Ext.madasJsonStore(
                         {
                             storeId: 'genotype',
                             autoLoad: false,
-                                           method:'GET',
                             url: wsBaseUrl + 'records/genotype/source__experiment__id/0',
                             listeners: {'load':Ext.madasDSLoaded,
                                         'loadexception':Ext.madasDSLoadException}
@@ -126,7 +124,6 @@ var genotypeStore = new Ext.madasJsonStore(
 var animalOriginStore = new Ext.madasJsonStore(
                         {
                             storeId: 'animalOrigin',
-                                               method:'GET',
                             autoLoad: false,
                             url: wsBaseUrl + 'records/origindetails/source__experiment__id/0',
                             listeners: {'load':Ext.madasDSLoaded,
@@ -138,7 +135,6 @@ var timelineStore = new Ext.madasJsonStore(
                         {
                             storeId: 'timeline',
                             autoLoad: false,
-                                           method:'GET',
                             url: wsBaseUrl + 'records/sampletimeline/source__experiment__id/0',
                             listeners: {'load':Ext.madasDSLoaded,
                                         'loadexception':Ext.madasDSLoadException}
@@ -149,7 +145,6 @@ var treatmentStore = new Ext.madasJsonStore(
                         {
                             storeId: 'treatment',
                             autoLoad: false,
-                                            method:'GET',
                             url: wsBaseUrl + 'records/treatment/source__experiment__id/0',
                             listeners: {'load':Ext.madasDSLoaded,
                                         'loadexception':Ext.madasDSLoadException}
@@ -159,7 +154,6 @@ var treatmentStore = new Ext.madasJsonStore(
 var treatmentVariationStore = new Ext.madasJsonStore(
                         {
                             storeId: 'treatmentVariation',
-                                                     method:'GET',
                             autoLoad: false,
                             url: wsBaseUrl + 'records/treatmentvariation/treatment__id/0',
                             listeners: {'load':Ext.madasDSLoaded,
@@ -171,7 +165,6 @@ var sopStore = new Ext.madasJsonStore(
                         {
                             storeId: 'sop',
                             autoLoad: false,
-                                      method:'GET',
                             url: wsBaseUrl + 'records/standardoperationprocedure/experiments__id/0',
                             listeners: {'load':Ext.madasDSLoaded,
                                         'loadexception':Ext.madasDSLoadException}
@@ -182,7 +175,6 @@ var sopLookupStore = new Ext.madasJsonStore(
                         {
                             storeId: 'sopLookup',
                             autoLoad: false,
-                                            method:'GET',
                             url: wsBaseUrl + 'records/standardoperationprocedure/id__gte/0',
                             listeners: {'load':Ext.madasDSLoaded,
                                         'loadexception':Ext.madasDSLoadException}
@@ -192,7 +184,6 @@ var sopLookupStore = new Ext.madasJsonStore(
 var growthConditionStore = new Ext.madasJsonStore(
                                             {
                                             storeId: 'growthCondition',
-                                                  method:'GET',
                                             autoLoad: false,
                                             url: wsBaseUrl + 'records/growthcondition/source__experiment__id/0',
                                             listeners: {'load':Ext.madasDSLoaded,
@@ -204,7 +195,6 @@ var userStore = new Ext.madasJsonStore(
                         {
                             storeId: 'user',
                             autoLoad: false,
-                                       method:'GET',
                             url: wsBaseUrl + 'records/userexperiment/experiment__id/0',
                             listeners: {'load':Ext.madasDSLoaded,
                                         'loadexception':Ext.madasDSLoadException}
@@ -215,7 +205,6 @@ var experimentListStore = new Ext.madasJsonStore(
                         {
                             storeId: 'experimentList',
                             autoLoad: false,
-                                                 method:'GET',
                             url: wsBaseUrl + 'records/experiment/id__gte/0',
                             listeners: {'load':Ext.madasDSLoaded,
                                         'loadexception':Ext.madasDSLoadException}
@@ -226,7 +215,6 @@ var organismStore = new Ext.madasJsonStore(
                         {
                             storeId: 'organism',
                             autoLoad: false,
-                                           method:'GET',
                             url: wsBaseUrl + 'records/organism/id/0',
                             listeners: {'load':Ext.madasDSLoaded,
                                         'load':function(t, rs, o) {
@@ -255,7 +243,6 @@ var experimentStore = new Ext.madasJsonStore(
                         {
                             storeId: 'experiment',
                             autoLoad: false,
-                                             method:'GET',
                             url: wsBaseUrl + 'records/experiment/id/0',
                             listeners: {'load':Ext.madasDSLoaded,
                                         'load':Ext.madasExperimentReload,
@@ -267,7 +254,6 @@ var sampleClassStore = new Ext.madasJsonStore(
                                              {
                                              storeId: 'sampleclass',
                                              autoLoad: false,
-                                              method:'GET',
                                              url: wsBaseUrl + 'records/sampleclass/biological_source__experiment__id/0',
                                              listeners: {'load':Ext.madasDSLoaded,
                                              'loadexception':Ext.madasDSLoadException}
@@ -277,7 +263,6 @@ var sampleClassStore = new Ext.madasJsonStore(
 var sampleStore = new Ext.madasJsonStore(
                                               {
                                               storeId: 'samples',
-                                         method:'GET',
                                               autoLoad: false,
                                               url: wsBaseUrl + 'records/sample/sample_class__id/0',
                                               listeners: {'load':Ext.madasDSLoaded,
@@ -290,7 +275,6 @@ var biologicalSourceStore = new Ext.madasJsonStore(
                                           {
                                           storeId: 'biologicalSource',
                                           autoLoad: false,
-                                                   method:'GET',
                                           url: wsBaseUrl + 'records/biologicalsource/experiment__id/0',
                                           listeners: {'load':Ext.madasDSLoaded,
                                           'load':function(t, rs, o) {
@@ -314,7 +298,6 @@ var speciesStore = new Ext.madasJsonStore(
                         {
                             storeId: 'species',
                             autoLoad: false,
-                                          method:'GET',
                             url: wsBaseUrl + 'records/organism/biologicalsource__id/0',
                             listeners: {'load':Ext.madasDSLoaded,
                                         'load':function(t, rs, o) {
@@ -351,7 +334,6 @@ var speciesStore = new Ext.madasJsonStore(
 var plantStore = new Ext.madasJsonStore(
                                           {
                                           storeId: 'plant',
-                                        method:'GET',
                                           autoLoad: false,
                                           url: wsBaseUrl + 'records/plant/id/0',
                                           listeners: {'load':Ext.madasDSLoaded,
@@ -367,7 +349,6 @@ var plantStore = new Ext.madasJsonStore(
 var animalStore = new Ext.madasJsonStore(
                         {
                             storeId: 'animal',
-                                         method:'GET',
                             autoLoad: false,
                             url: wsBaseUrl + 'records/animal/experiment__id/0',
                             listeners: {'load':Ext.madasDSLoaded,
@@ -390,7 +371,6 @@ var animalStore = new Ext.madasJsonStore(
 var humanStore = new Ext.madasJsonStore(
                                          {
                                          storeId: 'human',
-                                        method:'GET',
                                          autoLoad: false,
                                          url: wsBaseUrl + 'records/human/experiment__id/0',
                                          listeners: {'load':Ext.madasDSLoaded,
@@ -415,7 +395,6 @@ var humanStore = new Ext.madasJsonStore(
 // ---------- COMBO STORES ---------- (used for comboboxes)
 var organismTypeComboStore = new Ext.data.JsonStore(
                         {
-                                                    method:'GET',
                             storeId: 'organismTypeCombo',
                             autoLoad: true,
                             url: wsBaseUrl + 'populate_select/organismtype/id/name/',
@@ -428,7 +407,6 @@ var organismTypeComboStore = new Ext.data.JsonStore(
 
 var plantComboStore = new Ext.data.JsonStore(
                                                     {
-                                             method:'GET',
                                                     storeId: 'plantCombo',
                                                     autoLoad: false,
                                                     url: wsBaseUrl + 'populate_select/plant/development_stage/',
@@ -441,7 +419,6 @@ var plantComboStore = new Ext.data.JsonStore(
 
 var organismComboStore = new Ext.data.JsonStore(
                         {
-                                                method:'GET',
                             storeId: 'organismCombo',
                             autoLoad: false,
                             url: wsBaseUrl + 'populate_select/organism/id/name/',
@@ -460,7 +437,6 @@ var organismComboStore = new Ext.data.JsonStore(
 var genderComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'genderCombo',
-                                              method:'GET',
                             autoLoad: true,
                             url: wsBaseUrl + 'populate_select/gender/id/name/',
                             root: 'response.value.items',
@@ -473,7 +449,6 @@ var genderComboStore = new Ext.data.JsonStore(
 var animalComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'animalCombo',
-                                              method:'GET',
                             autoLoad: false,
                             url: wsBaseUrl + 'populate_select/animal/parental_line/',
                             root: 'response.value.items',
@@ -486,7 +461,6 @@ var animalComboStore = new Ext.data.JsonStore(
 var organNameComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'organNameCombo',
-                                                 method:'GET',
                             autoLoad: false,
                             url: wsBaseUrl + 'populate_select/organ/name',
                             root: 'response.value.items',
@@ -499,7 +473,6 @@ var organNameComboStore = new Ext.data.JsonStore(
 var tissueComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'tissueCombo',
-                                              method:'GET',
                             autoLoad: false,
                             url: wsBaseUrl + 'populate_select/organ/tissue',
                             root: 'response.value.items',
@@ -512,7 +485,6 @@ var tissueComboStore = new Ext.data.JsonStore(
 var cellTypeComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'celltypeCombo',
-                                                method:'GET',
                             autoLoad: false,
                             url: wsBaseUrl + 'populate_select/organ/cell_type',
                             root: 'response.value.items',
@@ -525,7 +497,6 @@ var cellTypeComboStore = new Ext.data.JsonStore(
 var subcellularCellTypeComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'subcellularcelltypeCombo',
-                                                           method:'GET',
                             autoLoad: false,
                             url: wsBaseUrl + 'populate_select/organ/subcellular_cell_type',
                             root: 'response.value.items',
@@ -539,7 +510,6 @@ var genotypeComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'genotypeCombo',
                             autoLoad: false,
-                                                method:'GET',
                             url: wsBaseUrl + 'populate_select/genotype/id/name',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
@@ -551,7 +521,6 @@ var genotypeComboStore = new Ext.data.JsonStore(
 var locationComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'locationCombo',
-                                                method:'GET',
                             autoLoad: false,
                             url: wsBaseUrl + 'populate_select/location/id/name',
                             root: 'response.value.items',
@@ -565,7 +534,6 @@ var detailedLocationComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'detailedLocationCombo',
                             autoLoad: false,
-                                                        method:'GET',
                             url: wsBaseUrl + 'populate_select/origindetails/detailed_location',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
@@ -577,7 +545,6 @@ var detailedLocationComboStore = new Ext.data.JsonStore(
 var plantDetailedLocationComboStore = new Ext.data.JsonStore(
                                                         {
                                                         storeId: 'plantDetailedLocationCombo',
-                                                             method:'GET',
                                                         autoLoad: false,
                                                         url: wsBaseUrl + 'populate_select/growthcondition/detailed_location',
                                                         root: 'response.value.items',
@@ -591,7 +558,6 @@ var plantGrowingPlaceComboStore = new Ext.data.JsonStore(
                                                              {
                                                              storeId: 'plantGrowingPlaceCombo',
                                                              autoLoad: false,
-                                                         method:'GET',
                                                              url: wsBaseUrl + 'populate_select/growthcondition/growing_place',
                                                              root: 'response.value.items',
                                                              fields: ['value', 'key'],
@@ -603,7 +569,6 @@ var plantGrowingPlaceComboStore = new Ext.data.JsonStore(
 var locationInformationComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'locationInformationCombo',
-                                                           method:'GET',
                             autoLoad: false,
                             url: wsBaseUrl + 'populate_select/origindetails/information',
                             root: 'response.value.items',
@@ -617,7 +582,6 @@ var treatmentComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'treatmentCombo',
                             autoLoad: false,
-                                                 method:'GET',
                             url: wsBaseUrl + 'populate_select/treatment/name',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
@@ -630,7 +594,6 @@ var lightSourceComboStore = new Ext.data.JsonStore(
                                                  {
                                                  storeId: 'lightSourceCombo',
                                                  autoLoad: false,
-                                                   method:'GET',
                                                  url: wsBaseUrl + 'populate_select/lamptype/id/name',
                                                  root: 'response.value.items',
                                                  fields: ['value', 'key'],
@@ -643,7 +606,6 @@ var lampDetailsComboStore = new Ext.data.JsonStore(
                                                    {
                                                    storeId: 'lampDetailsCombo',
                                                    autoLoad: false,
-                                                   method:'GET',
                                                    url: wsBaseUrl + 'populate_select/growthcondition/lamp_details',
                                                    root: 'response.value.items',
                                                    fields: ['value', 'key'],
@@ -655,7 +617,6 @@ var lampDetailsComboStore = new Ext.data.JsonStore(
 var treatmentTypeComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'treatmentTypeCombo',
-                                                     method:'GET',
                             autoLoad: true,
                             url: wsBaseUrl + 'populate_select/treatmenttype/id/name',
                             root: 'response.value.items',
@@ -669,7 +630,6 @@ var treatmentVariationComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'treatmentVariationCombo',
                             autoLoad: false,
-                                                          method:'GET',
                             url: wsBaseUrl + 'populate_select/treatmentvariation/name',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
@@ -682,7 +642,6 @@ var sopComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'sopCombo',
                             autoLoad: false,
-                                           method:'GET',
                             url: wsBaseUrl + 'populate_select/standardoperationprocedure/id/label',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
@@ -695,7 +654,6 @@ var userComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'userCombo',
                             autoLoad: true,
-                                            method:'GET',
                             url: wsBaseUrl + 'populate_select/user/id/username',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
@@ -708,7 +666,6 @@ var involvementComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'involvementCombo',
                             autoLoad: true,
-                                                   method:'GET',
                             url: wsBaseUrl + 'populate_select/userinvolvementtype/id/name',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
