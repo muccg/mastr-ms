@@ -91,6 +91,16 @@ items:[
                    region:'center',
                    title:'pending files',
                    
+                       tbar: [{
+                             text: 'refresh',
+                             handler : function(){
+                                  //reload the pending files tree
+                                  Ext.getCmp('pendingFilesTree').getLoader().load(Ext.getCmp('pendingFilesTree').getRootNode());
+                                  Ext.getCmp('pendingFilesTree').getRootNode().expand();
+                             }
+                             }
+                            ],
+                       
                    animate: true,
                    useArrows: true,
                    dropConfig: { allowContainerDrop: false },
