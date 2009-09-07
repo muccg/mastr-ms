@@ -462,7 +462,7 @@ def experimentFilesList(request):
     if path == 'experimentRoot':
         path = ''
     
-    if args['experiment'] == 0:
+    if args['experiment'] == '0':
         return HttpResponse('[]')
         
     exp = Experiment.objects.get(id=args['experiment'])
