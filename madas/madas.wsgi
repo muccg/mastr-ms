@@ -16,7 +16,7 @@ if VIRTUAL_PYTHON:
     # virtual python env setup
     import site
 
-site.addsitedir(os.path.join(PROJECT_DIR,"virtualpython","lib","python2.5","site-packages"))
+site.addsitedir(os.path.join(PROJECT_DIR,"virtualpython","lib","python2.6","site-packages"))
 site.addsitedir(PROJECT_DIR)
 
 # the parent directory to search
