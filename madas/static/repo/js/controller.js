@@ -37,6 +37,7 @@ Ext.madasCRUDSomething = function(remainderURL, params, callbackfn) {
     var crudStore = new Ext.data.JsonStore( 
                                              {
                                              autoLoad: false,
+                                           method:'GET',
                                              url: wsBaseUrl + remainderURL + paramString,
                                              listeners: {
                                                 'load':Ext.madasDSLoaded,
@@ -236,6 +237,7 @@ Ext.madasExperimentDetails = {
                             organismComboStore = new Ext.data.JsonStore(
                                                    {
                                                    storeId: 'organismCombo',
+                                                                        method:'GET',
                                                    autoLoad: true,
                                                    url: wsBaseUrl + 'populate_select/organism/id/name/type/' + r.data.key,
                                                    root: 'response.value.items',

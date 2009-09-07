@@ -118,7 +118,10 @@ Ext.madasTreatment = {
                                       { header: "time sample taken",  sortable:false, menuDisabled:true, editor:new Ext.form.TimeField({
                                                                                                                                        editable:true,
                                                                                                                                        allowBlank:false,
-                                                                                                                                       format:'H:m'
+                                                                                                                                       minValue: '0:00',
+                                                                                                                                       maxValue: '23:59',
+                                                                                                                                       increment: 1,
+                                                                                                                                       format:'H:i'
                                                                                                                                        }), dataIndex:'taken_at' }
                             ],
                             store: timelineStore
