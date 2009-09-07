@@ -397,6 +397,7 @@ var organismTypeComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'organismTypeCombo',
                             autoLoad: true,
+                                                    method:'GET',
                             url: wsBaseUrl + 'populate_select/organismtype/id/name/',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
