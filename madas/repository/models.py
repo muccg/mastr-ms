@@ -138,7 +138,7 @@ class Experiment(models.Model):
     def ensure_dir(self):
         import settings, os
         
-        yearpath = settings.REPO_FILES_ROOT + 'experiments/' + str(self.created_on.year)
+        yearpath = settings.REPO_FILES_ROOT + os.sep + 'experiments/' + str(self.created_on.year)
         monthpath = yearpath + '/' + str(self.created_on.month)
         exppath = monthpath + '/' + str(self.id)
         
