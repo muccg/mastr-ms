@@ -485,7 +485,7 @@ def pendingFilesList(request):
 
     import settings, os
     
-    basepath = settings.REPO_FILES_ROOT + 'pending' + os.sep
+    basepath = settings.REPO_FILES_ROOT + os.sep + 'pending' + os.sep
     
     return _fileList(request, basepath, path)
     
