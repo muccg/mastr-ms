@@ -434,8 +434,8 @@ def moveFile(request):
         
     import settings, os
     
-    exppath = settings.REPO_FILES_ROOT + 'experiments' + os.sep + str(exp.created_on.year) + os.sep + str(exp.created_on.month) + os.sep + str(exp.id) + os.sep
-    pendingPath = settings.REPO_FILES_ROOT + 'pending' + os.sep + file
+    exppath = settings.REPO_FILES_ROOT + os.sep + 'experiments' + os.sep + str(exp.created_on.year) + os.sep + str(exp.created_on.month) + os.sep + str(exp.id) + os.sep
+    pendingPath = settings.REPO_FILES_ROOT + os.sep + 'pending' + os.sep + file
 
     (path, filename) = os.path.split(pendingPath)
     
@@ -470,7 +470,7 @@ def experimentFilesList(request):
         
     import settings, os
     
-    exppath = settings.REPO_FILES_ROOT + 'experiments' + os.sep + str(exp.created_on.year) + os.sep + str(exp.created_on.month) + os.sep + str(exp.id) + os.sep
+    exppath = settings.REPO_FILES_ROOT + os.sep + 'experiments' + os.sep + str(exp.created_on.year) + os.sep + str(exp.created_on.month) + os.sep + str(exp.id) + os.sep
     
     return _fileList(request, exppath, path)
     
