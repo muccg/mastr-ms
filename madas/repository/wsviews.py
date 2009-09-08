@@ -501,6 +501,7 @@ def _fileList(request, basepath, path):
         return HttpResponse(json.dumps(output))
 
     if not os.path.exists(basepath + path):
+        print 'error accessing path: ' + basepath + path
         return HttpResponse('[]')
 
     files = os.listdir(basepath + path)
