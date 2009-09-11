@@ -33292,7 +33292,6 @@ Ext.extend(Ext.data.JsonReader, Ext.data.DataReader, {
      * a cache of Ext.data.Records.
      */
     read : function(response){
-           console.log("Extjs read");
         var json = response.responseText;
         var o = Ext.decode(json);
         if(!o) {
