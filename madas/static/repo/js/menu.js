@@ -17,7 +17,7 @@ Ext.madasMenuRender = function(username) {
                 },
                 { xtype: 'tbbutton', text:'Admin', id:'admin', menu:{
                     items: [
-                        {text:'Admin Database', id:'admin:db', handler: Ext.madasMenuHandler},
+                        {text:'Admin Database', id:'admin:db', handler: Ext.madasMenuHandler}
                     ]
                     }
                 },
@@ -54,14 +54,15 @@ Ext.madasMenuRender = function(username) {
     );
     tb.render('toolbar');
 
-}
+};
 
 Ext.madasMenuEnsure = function() {
-    if (Ext.madasIsLoggedIn) 
+    if (Ext.madasIsLoggedIn) {
         Ext.madasMenuShow();
-    else 
+    } else {
         Ext.madasMenuHide();
-}
+    }
+};
 
 Ext.madasMenuShow = function() {
 
@@ -91,14 +92,14 @@ Ext.madasMenuShow = function() {
     Ext.get('userMenu').show();
     Ext.get('experimentMenu').show();
 
-}
+};
 
 Ext.madasMenuHandler = function(item) {
     //we authorize every access to check for session timeout and authorization to specific pages
     
     Ext.madasAuthorize(item.id);
     
-}
+};
 
 Ext.madasMenuHide = function() {
 
@@ -109,5 +110,5 @@ Ext.madasMenuHide = function() {
 
     //    Ext.getCmp('helpadmin:screencasts').disable();
 
-}
+};
 

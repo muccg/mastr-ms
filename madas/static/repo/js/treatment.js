@@ -6,13 +6,13 @@ Ext.madasTreatmentInit = function() {
 
     treatmentStore.proxy.conn.url = wsBaseUrl + 'records/treatment/source__experiment__id/' + expId;
     treatmentStore.load();
-}
+};
 
 Ext.madasSaveTimelineRow = function(roweditor, changes, rec, i) {
     var bundledData = {};
     
-    bundledData['taken_on'] = Ext.util.Format.date(rec.data.taken_on, 'Y-m-d');
-    bundledData['taken_at'] = rec.data.taken_at;
+    bundledData.taken_on = Ext.util.Format.date(rec.data.taken_on, 'Y-m-d');
+    bundledData.taken_at = rec.data.taken_at;
     
     Ext.madasSaveRowLiterals('sampletimeline', roweditor, bundledData, rec, i, function() { var expId = Ext.madasCurrentExperimentId(); timelineStore.proxy.conn.url = wsBaseUrl + 'records/sampletimeline/source__experiment__id/' + expId; timelineStore.load();});
 };
@@ -20,9 +20,9 @@ Ext.madasSaveTimelineRow = function(roweditor, changes, rec, i) {
 Ext.madasSaveTreatmentRow = function(roweditor, changes, rec, i) {
     var bundledData = {};
     
-    bundledData['name'] = rec.data.name;
-    bundledData['type_id'] = rec.data.type;
-    bundledData['description'] = rec.data.description;
+    bundledData.name = rec.data.name;
+    bundledData.type_id = rec.data.type;
+    bundledData.description = rec.data.description;
     
     Ext.madasSaveRowLiterals('treatment', roweditor, bundledData, rec, i, function() { var expId = Ext.madasCurrentExperimentId(); treatmentStore.proxy.conn.url = wsBaseUrl + 'records/treatment/source__experiment__id/' + expId; treatmentStore.load();});
 };
@@ -30,7 +30,7 @@ Ext.madasSaveTreatmentRow = function(roweditor, changes, rec, i) {
 Ext.madasSaveTreatmentVariationRow = function(roweditor, changes, rec, i) {
     var bundledData = {};
     
-    bundledData['name'] = rec.data.name;
+    bundledData.name = rec.data.name;
     
     Ext.madasSaveRowLiterals('treatmentvariation', roweditor, bundledData, rec, i, function() { var treatId = Ext.madasCurrentTreatmentId(); treatmentVariationStore.proxy.conn.url = wsBaseUrl + 'records/treatmentvariation/treatment__id/' + treatId; treatmentVariationStore.load();});
 };
@@ -157,8 +157,9 @@ Ext.madasTreatment = {
                                         grid.expand(true);
                                     },
                                     'selectionchange':{buffer:10, fn:function(sm) {
+                                                               var grid;
                                         if (! sm.hasSelection()) {
-                                            var grid = Ext.getCmp("specifictreat");
+                                            grid = Ext.getCmp("specifictreat");
                                             grid.disable();
                                             grid.collapse(true);
                                         }

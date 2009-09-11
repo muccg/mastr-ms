@@ -166,7 +166,7 @@ Ext.madasChangeMainContent = function(contentName, paramArray){
 
 Ext.madasMessage = function(paramArray) {
     
-    Ext.Msg.alert("", paramArray['message']);
+    Ext.Msg.alert("", paramArray.message);
     
-}
+};
 

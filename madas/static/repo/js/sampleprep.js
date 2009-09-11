@@ -3,11 +3,11 @@ Ext.madasSamplePrepInit = function() {
     
     sopStore.proxy.conn.url = wsBaseUrl + 'records/standardoperationprocedure/experiments__id/' + expId;
     sopStore.load();
-}
+};
 
 Ext.madasSaveSOPRow = function(changes) {
     
-    if (changes.originalValue !== undefined && changes.originalValue != "" && changes.originalValue !== null && changes.originalValue != 0) {
+    if (changes.originalValue !== undefined && changes.originalValue !== "" && changes.originalValue !== null && changes.originalValue !== 0) {
         Ext.madasCRUDSomething('dissociate/standardoperationprocedure/experiment/'+changes.value+'/'+Ext.madasCurrentExperimentId(), {}, Ext.madasNull);
     }
     Ext.madasCRUDSomething('associate/standardoperationprocedure/experiment/'+changes.value+'/'+Ext.madasCurrentExperimentId(), {}, Ext.madasSamplePrepInit);

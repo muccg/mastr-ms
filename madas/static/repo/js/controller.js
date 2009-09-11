@@ -56,7 +56,7 @@ Ext.madasExperimentBlur = function(invoker) {
     
     Ext.madasExperimentDeferredInvocation = invoker;
 
-    if (expId == 0 && expName != "") {
+    if (expId === 0 && expName !== "") {
         
         //unhook the default load handler
         experimentStore.un("load", Ext.madasExperimentReload);
@@ -127,12 +127,12 @@ Ext.madasSyncBiologicalSource = function() {
     biologicalSourceStore.on("load", Ext.madasExperimentBlurSuccess);
     biologicalSourceStore.on("load", function() {biologicalSourceStore.on("load", Ext.madasExperimentBlurSuccess);});
     
-    if (loadedBioSource === null && organismId != '') {
+    if (loadedBioSource === null && organismId !== '') {
         //save the species details
 
         biologicalSourceStore.proxy.conn.url = wsBaseUrl + 'create/' + table + '/?organism_id='+escape(organismId)+'&experiment_id='+escape(expId)+additionalValues;
         biologicalSourceStore.load();
-    } else if (loadedBioSource !== null && organismId != '') {
+    } else if (loadedBioSource !== null && organismId !== '') {
         //save the species details
         
         biologicalSourceStore.proxy.conn.url = wsBaseUrl + 'update/' + table + '/'+loadedBioSource+'/?organism_id='+escape(organismId)+'&experiment_id='+escape(expId)+additionalValues;
@@ -151,8 +151,9 @@ Ext.madasExperimentShowFieldsets = function(organismType) {
     Ext.getCmp('upperrankfield').setVisible(false);
     Ext.getCmp('ncbifield').setVisible(false);
     
-    if (organismType === undefined) 
+    if (organismType === undefined) {
         return;
+    }
     
     if (organismType > 4) {  //4 here refers to food & beverage, or synthetic compound. everything else is an organism
         Ext.getCmp('rankfield').hide();
@@ -412,7 +413,7 @@ Ext.madasExperimentCmp = {
                             {
                                 storeId:"navDS",
                                 fields: ["nav", "init", "blur", "enabled"],
-                                data: [ ["experiment details", Ext.madasExperimentInit, Ext.madasExperimentBlur, true], ["samples/classes", Ext.madasExperimentSamplesInit, Ext.madasBlur, false], ["source", Ext.madasBioSourceInit, Ext.madasBioSourceBlur, false], ["growth",Ext.madasGrowthInit, Ext.madasBlur,false], ["treatment",Ext.madasTreatmentInit, Ext.madasBlur,false], ["sample prep",Ext.madasSamplePrepInit, Ext.madasBlur,false], ["files", Ext.madasFilesInit, Ext.madasBlur, false], ["access",Ext.madasAccessInit, Ext.madasBlur,false] ],
+                                data: [ ["experiment details", Ext.madasExperimentInit, Ext.madasExperimentBlur, true], ["samples/classes", Ext.madasExperimentSamplesInit, Ext.madasBlur, false], ["source", Ext.madasBioSourceInit, Ext.madasBioSourceBlur, false], ["growth",Ext.madasGrowthInit, Ext.madasBlur,false], ["treatment",Ext.madasTreatmentInit, Ext.madasBlur,false], ["sample prep",Ext.madasSamplePrepInit, Ext.madasBlur,false], ["files", Ext.madasFilesInit, Ext.madasBlur, false], ["access",Ext.madasAccessInit, Ext.madasBlur,false] ]
                             }
                         ),
                         listeners:{"render":function(a){window.setTimeout("Ext.getCmp('expNav').getSelectionModel().selectFirstRow();", 500);}}
@@ -515,14 +516,14 @@ Ext.madasUpdateNav = function() {
     //console.log(ot.isValid() + " " + ot.getValue());
     var valid = ot.isValid();
     if (valid) {
-        valid = (ot.getValue() == "")?false:true;
+        valid = (ot.getValue() === "")?false:true;
     }
         
     for (counter = 1; counter <= 7; counter++) {
-        ds.getAt(counter).set("enabled", (en.getValue() != '' && valid));
+        ds.getAt(counter).set("enabled", (en.getValue() !== '' && valid));
     }
     
-    if (en.getValue() == '') {
+    if (en.getValue() === '') {
         et.setTitle('new experiment');
     } else {
         et.setTitle('experiment: '+en.getValue());

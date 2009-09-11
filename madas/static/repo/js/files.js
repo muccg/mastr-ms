@@ -5,7 +5,7 @@ Ext.madasFilesInit = function() {
     Ext.getCmp('filesTree').getLoader().load(Ext.getCmp('filesTree').getRootNode());
     
     Ext.getCmp('pendingFilesTree').getLoader().load(Ext.getCmp('pendingFilesTree').getRootNode());
-}
+};
 
 Ext.madasFiles = {
 baseCls: 'x-plain',
