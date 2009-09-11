@@ -111,7 +111,7 @@ def json_encode(data):
 
 def json_decode(data):
     try:
-        m = simplejson.decoder.JSONDecoder()
+        m = simplejson.JSONDecoder()
         d = m.decode(data)
         return d
     except Exception, e:
