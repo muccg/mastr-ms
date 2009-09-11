@@ -49,7 +49,8 @@ def authorize(request, module='/', perms = [], internal = False):
     loggedin = request.session.get('loggedin', False)
     if not loggedin:
         if not request.user.is_anonymous():
-            request.user.logout() #session gets flushed here
+            if request.user:
+                request.user.logout() #session gets flushed here
             request.session.flush()
         else:
             #print request.session.__dict__
