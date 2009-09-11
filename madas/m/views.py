@@ -226,7 +226,7 @@ def serveIndex(request, *args, **kwargs):
     #print request.session.get('mainContentFunction', '')
     request.params = params
     from django.utils import simplejson
-    m = simplejson.encoder.JSONEncoder()
+    m = simplejson.JSONEncoder()
     paramstr = m.encode(params)
     return render_mako('index.mako', 
                         APP_SECURE_URL = siteurl(request),#settings.APP_SECURE_URL,
