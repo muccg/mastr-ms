@@ -47,8 +47,9 @@ Ext.madasNotAuthorizedCmp = { id: 'notauthorized-panel', title: 'Not Authorized'
  * used to check if the user is still logged in, and if they can access the requested view
  */
 Ext.madasAuthorize = function(requestedView, params) {
-    if (requestedView == 'notauthorized')
+    if (requestedView === 'notauthorized') {
         return Ext.madasChangeMainContent(requestedView, params);
+    }
     
     //the module we need to auth against is the first part of the requestedView
     //ie admin/adminrequest
@@ -128,7 +129,7 @@ Ext.madasLogoutInit = function(){
             Ext.madasIsLoggedIn = false;
             
             Ext.Msg.alert('Successfully logged out', '(this dialog will auto-close in 3 seconds)');
-            setTimeout('Ext.Msg.hide()', 3000);
+            setTimeout(Ext.Msg.hide, 3000);
             
             //load up the menu and next content area as declared in response
             Ext.madasChangeMainContent(action.result.mainContentFunction);
@@ -136,7 +137,7 @@ Ext.madasLogoutInit = function(){
     },
     failure: function (form, action) {
         Ext.Msg.alert('Logout failure', '(this dialog will auto-close in 3 seconds)');
-        setTimeout('Ext.Msg.hide()', 3000);
+        setTimeout(Ext.Msg.hide, 3000);
     }
     };
     

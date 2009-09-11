@@ -27,7 +27,7 @@ Ext.madasDSLoadException = function() {
 };
 
 Ext.madasSaveRowLiterals = function(table, roweditor, changes, rec, i, callback) {
-    if (rec.data.id === undefined || rec.data.id == "" || rec.data.id == 0) {
+    if (rec.data.id === undefined || rec.data.id === "" || rec.data.id === 0) {
         Ext.madasCRUDSomething('create/' + table + '/', changes, callback);
     } else {
         Ext.madasCRUDSomething('update/' + table + '/' + rec.data.id + '/', changes, callback);
@@ -83,11 +83,12 @@ Ext.madasExperimentReload = function(t, rs, o) {
     var desc = Ext.getCmp('experimentDescription');
     var comment = Ext.getCmp('experimentComment');
     
-    if (!namefield || !desc || !comment) 
+    if (!namefield || !desc || !comment) {
         return;
+    }
     
     namefield.setValue('');
-    desc.setValue('')
+    desc.setValue('');
     comment.setValue('');
     //console.log(rs);
     if (rs.length > 0) {
@@ -222,11 +223,12 @@ var organismStore = new Ext.madasJsonStore(
                                             var upperrankfield = Ext.getCmp('upperrankfield');
                                             var ncbifield = Ext.getCmp('ncbifield');
                                             
-                                            if (!rankfield || !upperrankfield || !ncbifield) 
+                                            if (!rankfield || !upperrankfield || !ncbifield) {
                                                 return;
+                                            }
                                                 
                                             rankfield.setValue('');
-                                            upperrankfield.setValue('')
+                                           upperrankfield.setValue('');
                                             ncbifield.setValue('');
                                             
                                             if (rs.length > 0) {

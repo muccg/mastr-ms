@@ -3,13 +3,13 @@ Ext.madasExperimentSamplesInit = function() {
     
     sampleClassStore.proxy.conn.url = wsBaseUrl + 'recreate_sample_classes/' + expId;
     sampleClassStore.load();
-}
+};
 
 Ext.madasSaveSampleRow = function(roweditor, changes, rec, i) {
     var bundledData = {};
     
-    bundledData['label'] = rec.data.label;
-    bundledData['comment'] = rec.data.comment;
+    bundledData.label = rec.data.label;
+    bundledData.comment = rec.data.comment;
     
     Ext.madasSaveRowLiterals('sample', roweditor, bundledData, rec, i, function() { var scId = Ext.madasCurrentSampleClassId(); sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/sample_class__id/' + scId; sampleStore.load();});
 };
@@ -50,8 +50,9 @@ Ext.madasExperimentSamples = {
                                                        Ext.getCmp('removesamplebutton').enable();
                                                        },
                                                        'selectionchange':{buffer:10, fn:function(sm) {
+                                                       var grid;
                                                        if (! sm.hasSelection()) {
-                                                       var grid = Ext.getCmp("samples");
+                                                            grid = Ext.getCmp("samples");
                                                        grid.disable();
                                                        Ext.getCmp('addsamplebutton').disable();
                                                        Ext.getCmp('removesamplebutton').disable();
