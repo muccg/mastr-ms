@@ -160,7 +160,7 @@ def processForgotPassword(request, *args):
     #$this->getRequest()->setAttribute('params', json_encode(array('message' => 'An email has been sent to '.$email.'. Please follow the instructions in that email to continue')));
 
     from django.utils import simplejson
-    m = simplejson.encoder.JSONEncoder()
+    m = simplejson.JSONEncoder()
     p = {}
     p['message'] = "An email has been sent to %s. Please follow the instructions in that email to continue" % (emailaddress)
 
