@@ -456,7 +456,11 @@ def moveFile(request):
     
 def experimentFilesList(request):
     
-    args = request.GET
+    if request.GET:
+        args = request.GET
+    else:
+        args = request.POST
+
     path = args['node']
     
     if path == 'experimentRoot':
