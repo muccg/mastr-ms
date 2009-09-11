@@ -90,7 +90,6 @@ class Origin(models.Model):
     
 class OriginDetails(Origin):
     # either location or freetext_location should have a value
-    source = models.ForeignKey(BiologicalSource)
     location = models.ForeignKey(Location, null=True)
     detailed_location = models.TextField(null=True)
     information = models.TextField()
