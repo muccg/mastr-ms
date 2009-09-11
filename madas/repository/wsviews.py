@@ -19,8 +19,12 @@ def create_object(request, model):
     #in some cases, look up the value
     
     #get args and remove the id from it if it exists
-    args = request.GET
-
+    
+    if request.GET:
+        args = request.GET
+    else:
+        args = request.POST
+       
     #create model object
     model_obj = get_model('repository', model)
     obj = model_obj()
@@ -55,13 +59,16 @@ def create_object(request, model):
     
 
 def update_object(request, model, id):
-
+    
+    if request.GET:
+        args = request.GET
+    else:
+        args = request.POST
+       
     #fetch the object and update all values
     model_obj = get_model('repository', model) # try to get app name dynamically at some point
     params = {'id':id}
     rows = model_obj.objects.filter(**params)
-    
-    args = request.GET
     
     for row in rows:
         for key in args:
@@ -73,12 +80,16 @@ def update_object(request, model, id):
     
 def delete_object(request, model, id):
 
+    if request.GET:
+        args = request.GET
+    else:
+        args = request.POST
+       
+
     #fetch the object and update all values
     model_obj = get_model('repository', model) # try to get app name dynamically at some point
     params = {'id':id}
     rows = model_obj.objects.filter(**params)
-    
-    args = request.GET
     
     rows.delete()
 
@@ -86,6 +97,12 @@ def delete_object(request, model, id):
     
     
 def associate_object(request, model, association, parent_id, id):
+
+    if request.GET:
+        args = request.GET
+    else:
+        args = request.POST
+       
 
     #fetch the object and update all values
     model_obj = get_model('repository', model) # try to get app name dynamically at some point
@@ -110,6 +127,12 @@ def associate_object(request, model, association, parent_id, id):
 
 def dissociate_object(request, model, association, parent_id, id):
 
+    if request.GET:
+        args = request.GET
+    else:
+        args = request.POST
+       
+
     #fetch the object and update all values
     model_obj = get_model('repository', model) # try to get app name dynamically at some point
     params = {'id':parent_id}
@@ -128,6 +151,13 @@ def dissociate_object(request, model, association, parent_id, id):
     
 
 def records(request, model, field, value):
+
+    if request.GET:
+        args = request.GET
+    else:
+        args = request.POST
+       
+
     ### Authorisation Check ###
     authenticated = request.user.is_authenticated()   
     if not authenticated == True:
@@ -179,6 +209,12 @@ def records(request, model, field, value):
 
 
 def populate_select(request, model=None, key=None, value=None, field=None, match=None):
+
+    if request.GET:
+        args = request.GET
+    else:
+        args = request.POST
+       
 
     model_whitelist = {'organism': ['id', 'name', 'type'],
                        'organ': ['id', 'name', 'source_id', 'tissue', 'cell_type', 'subcellular_cell_type'],
@@ -251,6 +287,12 @@ def populate_select(request, model=None, key=None, value=None, field=None, match
 
 
 def recreate_sample_classes(request, experiment_id):
+
+    if request.GET:
+        args = request.GET
+    else:
+        args = request.POST
+       
 
     combos = []
 
@@ -359,6 +401,12 @@ def recreate_sample_classes(request, experiment_id):
 
 def recordsSampleClasses(request, experiment_id):
 
+    if request.GET:
+        args = request.GET
+    else:
+        args = request.POST
+       
+
     # basic json that we will fill in
     output = {'metaData': { 'totalProperty': 'results',
                             'successProperty': 'success',
@@ -425,7 +473,11 @@ def moveFile(request):
     
     output = {'success':'', 'newlocation':''}
     
-    args = request.GET
+    if request.GET:
+        args = request.GET
+    else:
+        args = request.POST
+       
     target = args['target']
     file = args['file']
     
@@ -481,7 +533,11 @@ def experimentFilesList(request):
     
 def pendingFilesList(request):
     
-    args = request.GET
+    if request.GET:
+        args = request.GET
+    else:
+        args = request.POST
+        
     path = args['node']
     
     if path == 'pendingRoot':
@@ -532,6 +588,12 @@ def _fileList(request, basepath, path):
     
     
 def uploadFile(request):
+
+    if request.GET:
+        args = request.GET
+    else:
+        args = request.POST
+
     ############# FILE UPLOAD ########################
     output = { 'success': True }
     
@@ -576,6 +638,11 @@ def _handle_uploaded_file(f, name):
     
 def sample_class_enable(request, id):
     
+    if request.GET:
+        args = request.GET
+    else:
+        args = request.POST
+
     sc = SampleClass.objects.get(id=id)
     
     if sc.enabled:
