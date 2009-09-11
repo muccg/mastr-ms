@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="static/repo/ext-3.0.0/examples/ux/css/RowEditor.css"/>
     <link rel="stylesheet" type="text/css" href="static/css/file-upload.css"/>
 
-    <!-- <script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script> -->
+    <script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>
 
     <script src="static/repo/ext-3.0.0/adapter/ext/ext-base-debug.js" type="text/javascript"></script>
     <script src="static/repo/ext-3.0.0/ext-all-debug.js"></script>
