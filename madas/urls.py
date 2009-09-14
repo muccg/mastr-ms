@@ -22,7 +22,7 @@ urlpatterns = patterns('',
     (r'^ws/', include('madas.repository.wsurls')),
 
     # madas
-    (r'^repoadmin/(.*)', admin.site.root),
+    (r'^repoadmin[/]*(.*)', admin.site.root),
     (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root' : settings.MEDIA_ROOT}),
     (r'^javascript/(?P<path>.*)$', 'django.views.static.serve', {'document_root' : settings.MEDIA_ROOT}),
     (r'^', include('madas.m.urls')),
