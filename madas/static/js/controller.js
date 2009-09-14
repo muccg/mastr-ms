@@ -216,7 +216,7 @@ Ext.madasChangeMainContent = function(contentName, paramArray){
  */
 Ext.madasInitApplication = function(appSecureUrl, username, mainContentFunction, params) {
    //various global settings for Ext
-   Ext.BLANK_IMAGE_URL = '/javascript/ext-2.0/resources/images/default/s.gif';
+    Ext.BLANK_IMAGE_URL = appSecureUrl + 'static/js/ext/resources/images/default/s.gif';
    Ext.QuickTips.init();
     Ext.madasBaseUrl = appSecureUrl;
    
