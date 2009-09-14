@@ -132,7 +132,7 @@ Ext.madasChangeMainContent = function(contentName, paramArray){
             break;
             
         case 'admin:db':
-            window.location = "../djangoadmin/";
+            window.location = "../repoadmin/";
             break;
             
         default:

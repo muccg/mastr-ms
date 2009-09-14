@@ -268,7 +268,7 @@ def jsonResponse(request, *args):
 
 
     a['mainContentFunction'] = get_var(s, 'mainContentFunction', '')
-    a['params'] = s.get('params', [])
+    a['params'] = json_decode(s.get('params', []))
     retdata = json_encode(a)
     return HttpResponse(retdata)
 

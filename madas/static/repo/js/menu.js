@@ -15,12 +15,12 @@ Ext.madasMenuRender = function(username) {
                         ]
                     }
                 },
-                { xtype: 'tbbutton', text:'Admin', id:'admin', menu:{
-                    items: [
-                        {text:'Admin Database', id:'admin:db', handler: Ext.madasMenuHandler}
-                    ]
-                    }
-                },
+//                { xtype: 'tbbutton', text:'Admin', id:'admin', menu:{
+//                    items: [
+//                        {text:'Admin Database', id:'admin:db', handler: Ext.madasMenuHandler}
+//                    ]
+//                    }
+//                },
 //                { xtype: 'tbbutton', text:'Help', menu:{
 //                    items: [
 //                        {text:'Screencasts', id:'help:screencasts', menu: {
@@ -72,10 +72,10 @@ Ext.madasMenuShow = function() {
     if (!Ext.madasIsAdmin) {
         Ext.getCmp('admin:nodelist').disable();
         if (!Ext.madasIsNodeRep) {
-	        Ext.get('admin').hide();
+            //	        Ext.get('admin').hide();
 //            Ext.getCmp('helpadmin:screencasts').disable();
         } else {
-        	Ext.get('admin').show();
+            //        	Ext.get('admin').show();
 //            Ext.getCmp('helpadmin:screencasts').enable();
         }
     } else {
@@ -85,7 +85,7 @@ Ext.madasMenuShow = function() {
     }
 
     //TEMP hide admin menu from all users
-    Ext.get('admin').hide();
+    //    Ext.get('admin').hide();
 
     
     Ext.get('login').hide();
@@ -104,7 +104,7 @@ Ext.madasMenuHandler = function(item) {
 Ext.madasMenuHide = function() {
 
     Ext.get('login').show();
-    Ext.get('admin').hide();
+    //    Ext.get('admin').hide();
     Ext.get('userMenu').hide();
     Ext.get('experimentMenu').hide();
 
