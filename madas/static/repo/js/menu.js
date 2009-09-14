@@ -80,7 +80,7 @@ Ext.madasMenuShow = function() {
         }
     } else {
 //        Ext.getCmp('admin:nodelist').enable();
-        Ext.get('admin').show();
+//        Ext.get('admin').show();
 //        Ext.getCmp('helpadmin:screencasts').enable();
     }
 
