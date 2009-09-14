@@ -652,6 +652,10 @@ class LDAPBackend():
         #username = username.replace('@', '_')
         try:
             user = User.objects.get(username__exact=username)
+            user.is_staff = True
+            user.is_superuser = True  #TODO don't do this
+            user.save()
+            
         except User.DoesNotExist:
 
             try:
