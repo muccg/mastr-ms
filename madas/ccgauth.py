@@ -611,6 +611,10 @@ class LDAPHandler():
 class LDAPBackend():
     def authenticate(self, username=None, password=None):
         
+        if not password:
+            print 'Empty password supplied. Access denied'
+            return None
+        
         user = None
         # anonymous bind to server
         ld = LDAPHandler()
