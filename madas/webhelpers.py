@@ -32,7 +32,7 @@ def siteurl(request):
     d = request.__dict__
     if d['META'].has_key('HTTP_X_FORWARDED_HOST'):
         #The request has come from outside, so respect X_FORWARDED_HOST
-        u = d['META']['wsgi.url_scheme'] + '://' + d['META']['HTTP_X_FORWARDED_HOST'] + '/'
+        u = d['META']['wsgi.url_scheme'] + '://' + d['META']['HTTP_X_FORWARDED_HOST'] + wsgibase() + '/'
     else:
         #Otherwise, its an internal request
         u = d['META']['wsgi.url_scheme'] + '://' + d['META']['HTTP_HOST'] + wsgibase() + '/' 
