@@ -63,6 +63,9 @@ class LDAPBackend():
             #
             try:
                 user = User.objects.get(username__exact=username)
+                user.is_staff = True
+                user.save()
+
             except User.DoesNotExist:
 
                 try:
