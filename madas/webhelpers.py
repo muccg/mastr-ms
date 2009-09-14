@@ -30,8 +30,6 @@ def url( relpath ):
 
 def siteurl(request):
     d = request.__dict__
-    #If we have the 'DEV_SERVER' flag set, we can use the 'HTTP_HOST'.
-    #Otherwise we should use ccg.murdoch.edu.au
     if d['META'].has_key('HTTP_X_FORWARDED_HOST'):
         #The request has come from outside, so respect X_FORWARDED_HOST
         u = d['META']['wsgi.url_scheme'] + '://' + d['META']['HTTP_X_FORWARDED_HOST'] + '/'
@@ -41,6 +39,8 @@ def siteurl(request):
 
 
     '''
+    #If we have the 'DEV_SERVER' flag set, we can use the 'HTTP_HOST'.
+    #Otherwise we should use ccg.murdoch.edu.au
     if settings.DEV_SERVER:
         u = d['META']['wsgi.url_scheme'] + '://' + d['META']['HTTP_HOST'] + wsgibase() + '/' 
     else:
