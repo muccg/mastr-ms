@@ -1,0 +1,15 @@
+1. Install on windows, when you run rsync for the first time it asks if you want to 'unblock' it. A user can probably click on the dialogue, but it would be good if there was a way to automatically fix this.
+2. Rsync on unix (probably windows too) wants hosts authed for knownhosts file. Prompt for 'yes/no' answer, and then for passphrase :(
+3. The remote file structure needs to exist. The remote rsync fails if the path to the remote dump location isn't completely created first.
+    The remote side needed syncdir/org/sitename created. It seemed happy to create installationmame/* itself.
+4. Dealing with errors on the gui client - popup a window? Have obvious ways of fixing errors, with a 'make it all better' button?
+
+
+INSTALLER
+----------
+Needs to install:
+python
+wx
+cwrsync (ssh?)   #"cwrsync_install.exe /S" for silent mode works beautifully.
+the ssh private keys
+the app code.
