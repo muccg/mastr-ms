@@ -50,7 +50,20 @@ def listRestrictedGroups(request, *args):
         from madas.users.views import getNodeMemberships
         n = getNodeMemberships(g)
         print 'NodeMemberships: ', n
-        setRequestVars(request, items=n, totalRows=len(n), authenticated=True, authorized=True)
+        groups = []
+        
+        from settings import MADAS_STATUS_GROUPS, MADAS_ADMIN_GROUPS
+
+        for groupname in n:
+
+            #Cull out the admin groups and the status groups
+            if groupname not in MADAS_STATUS_GROUPS and groupname not in MADAS_ADMIN_GROUPS:
+                d = {'name':groupname, 'submitValue':groupname}
+                groups.append(d) 
+            
+            groups.append({'name':'Don\'t Know', 'submitValue':''})
+        
+        setRequestVars(request, items=groups, totalRows=len(groups), authenticated=True, authorized=True)
         retval = jsonResponse(request, [])
     print '*** list Restricted Groups : exit ***'
     return retval 
@@ -441,12 +454,16 @@ def save(request, *args):
         toNode = qr.tonode
     print '\ttoNode is ', toNode
     #if the node has changed, email the administrator(s) for the new node
-    if toNode != qr.tonode:
-        targetuser = _findAdminOrNodeRepEmailTarget(groupname = toNode)
-        #email the administrators for the node
-        targetemail = targetuser['uid'][0]
-        from mail_functions import sendQuoteRequestToAdminEmail
-        sendQuoteRequestToAdminEmail(request, id, targetemail) 
+    
+    try:
+        if toNode != qr.tonode:
+            targetuser = _findAdminOrNodeRepEmailTarget(groupname = toNode)
+            #email the administrators for the node
+            targetemail = targetuser['uid'][0]
+            from mail_functions import sendQuoteRequestToAdminEmail
+            sendQuoteRequestToAdminEmail(request, id, targetemail) 
+    except Exception, e:
+        print 'Exception emailing change to quote request: ', str(e) 
 
     _updateQuoteRequestStatus(qr, toNode, completed=completed, unread=0);       
 
