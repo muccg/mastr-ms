@@ -21,12 +21,12 @@
     <title>Metabolomics Australia User and Quote Management System</title>
 
 <link rel="shortcut icon" href="/favicon.ico" />
-<link rel="stylesheet" type="text/css" href="${wh.url('/static/css/main.css')}"></link>
-<link rel="stylesheet" type="text/css" href="${wh.url('/static/js/ext/resources/css/ext-all.css')}"></link>
-<link rel="stylesheet" type="text/css" href="${wh.url('/static/css/file-upload.css')}"></link>
-<!-- Ext scripts -->
-<script type="text/javascript" src="${wh.url('/static/js/ext/adapter/ext/ext-base.js')}"></script>
-<script type="text/javascript" src="${wh.url('/static/js/ext/ext-all-debug.js')}"></script>
+<link rel="stylesheet" type="text/css" href="${wh.url('/static/css/main.css')}"/>
+<link rel="stylesheet" href="static/repo/ext-3.0.0/resources/css/ext-all.css"/>
+<link rel="stylesheet" href="static/repo/ext-3.0.0/examples/ux/css/RowEditor.css"/>
+<link rel="stylesheet" type="text/css" href="static/css/file-upload.css"/>
+<script src="static/repo/ext-3.0.0/adapter/ext/ext-base-debug.js" type="text/javascript"></script>
+<script src="static/repo/ext-3.0.0/ext-all-debug.js"></script>
 
 <!-- Madas scripts -->
 <script type="text/javascript" src="${wh.url('/static/js/FileUploadField.js')}"></script>
@@ -65,7 +65,7 @@ function callbacker(){
 </head>
 <body onLoad="callbacker();">
 
-<div id="north"><div id="appTitle">Metabolomics Australia User and Quote Management System</div><div id="toolbar"/></div></div>
+<div id="north"><div id="appTitle">Metabolomics Australia User and Quote Management System</div><div id="toolbar"></div></div>
 
 <div id="south">(c) CCG 2009</div>
 

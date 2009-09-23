@@ -234,7 +234,7 @@ def jsonResponse(request, *args):
     #print 'Using jsonResponse'
     s = request.session.get('store', {} )
     a = {}
-    a['success'] =          get_var(s, 'success', False)
+    a['success'] =          get_var(s, 'success', True)
     a['data'] =             get_var(s, 'data', None)
     a['totalRows'] =        get_var(s, 'totalRows', 0)
     a['authenticated'] =    get_var(s, 'authenticated', 0)
