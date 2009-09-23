@@ -366,6 +366,7 @@ Ext.madasRequestQuoteCmp =
                     triggerAction:'all',
                     listWidth:230,
                     store: new Ext.data.JsonStore({
+                        storeId:'sendToStore',
                         url: 'quote/listGroups',
                         root: 'response.value.items',
                         fields: ['name', 'submitValue']

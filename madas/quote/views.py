@@ -36,7 +36,7 @@ def listGroups(request, *args):
             groups.append(d)       
     
          
-    setRequestVars(request, items=groups, totalRows=len(groups), authenticated=True, authorized=True)
+    setRequestVars(request, success=True, items=groups, totalRows=len(groups), authenticated=True, authorized=True)
     return jsonResponse(request, [])
     
 
@@ -63,7 +63,7 @@ def listRestrictedGroups(request, *args):
             
             groups.append({'name':'Don\'t Know', 'submitValue':''})
         
-        setRequestVars(request, items=groups, totalRows=len(groups), authenticated=True, authorized=True)
+        setRequestVars(request, items=groups, success=True, totalRows=len(groups), authenticated=True, authorized=True)
         retval = jsonResponse(request, [])
     print '*** list Restricted Groups : exit ***'
     return retval 
@@ -226,7 +226,7 @@ def listQuotes(request, *args):
         print '\tEXCEPTION when constructing unique list:', str(e) 
     print '\tfinished generating quoteslist' 
 
-    setRequestVars(request, items=resultsset, totalRows=len(resultsset), authenticated=True, authorized=True) 
+    setRequestVars(request, items=resultsset, totalRows=len(resultsset), success=True, authenticated=True, authorized=True) 
     print '*** quote/listQuotes : exit *** '
     return jsonResponse(request, [])       
     
@@ -298,7 +298,7 @@ def listAll(request, *args):
 #        $sql .= "LEFT JOIN emailmap em ON em.id = qr.emailaddressid WHERE qr.tonode = :tonode";
     #$sql = "select qr.id, qr.completed, qr.unread, qr.tonode, qr.firstname, qr.lastname, qr.officephone, qr.details, to_char(qr.requesttime, 'YYYY/MM/DD HH24:MI:SS') as requesttime, em.emailaddress as email, to_char(qrh.changetimestamp, 'YYYY/MM/DD HH24:MI:SS') as changetimestamp from quoterequest as qr left join (select max(changetimestamp) as changetimestamp, quoteid from quotehistory where completed = true group by quoteid) as qrh on qr.id = qrh.quoteid left join emailmap em on em.id = qr.emailaddressid";
 
-    setRequestVars(request, items=resultsset, totalRows=len(resultsset), authenticated=True, authorized=True) 
+    setRequestVars(request, items=resultsset, success=True, totalRows=len(resultsset), authenticated=True, authorized=True) 
     print '*** quote/listAll - exit ***'
     return jsonResponse(request, []) 
 
@@ -319,7 +319,7 @@ def listFormal(request, *args):
 
     fquoteslist = Formalquote.objects.filter(Q(fromemail=uname)|Q(toemail=uname)).values('id', 'quoterequestid', 'details', 'created', 'fromemail', 'toemail', 'status')        
 
-    setRequestVars(request, items=fquoteslist, totalRows=len(fquoteslist), authenticated=True, authorized=True)
+    setRequestVars(request, success=True, items=fquoteslist, totalRows=len(fquoteslist), authenticated=True, authorized=True)
  
     print '*** listFormal : exit ***'
     return jsonResponse(request, []) 
