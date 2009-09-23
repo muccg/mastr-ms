@@ -22325,7 +22325,8 @@ new Ext.Panel({
                                 //right broken in both, center on IE
                                 if(!(this.buttonAlign == 'center' && Ext.isWebKit) && (!strict || (!Ext.isIE8 && strict))){
                                     (function(){
-                                        f.setWidth(f.getEl().child('.x-toolbar-ct').getWidth());
+                                     f.setWidth(w - 16); //ntt HACK to make Safari and IE work properly, at least
+                                     //f.setWidth(f.getEl().child('.x-toolbar-ct').getWidth());
                                     }).defer(1);
                                 }else{
                                     fWidth = 'auto';

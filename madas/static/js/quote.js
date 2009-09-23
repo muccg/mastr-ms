@@ -21,6 +21,8 @@ Ext.madasRequestQuoteInit = function () {
     //fetch user details
     reqQuoCmp.load({url: 'user/userload', waitMsg:'Loading'});
 
+    reqQuoCmp.doLayout();
+    
     return;
 };
 
