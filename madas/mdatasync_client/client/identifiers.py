@@ -1,0 +1,14 @@
+#Identifiers used in main window
+ID_TEST_CONNECTION = 101
+ID_CHECK_NOW = 102
+ID_MINIMISE = 103
+ID_QUIT = 104
+ID_PREFERENCES = 201
+ID_PYCRUST = 202
+
+#Preferences window
+ID_NODESELECTOR_DIALOG = 204
+ID_CHOOSENODE_BUTTON = 205
+#Node config selector window
+
+

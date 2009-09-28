@@ -52,6 +52,7 @@ class MSDataSyncAPI(object):
            Obviously one doesn't block, and one does.
            Either way, the callback is called once done.'''
         if hasattr( self, "_thread" ) and self._thread != None:
+            print 'Using thread'
             self._tasks.put_nowait( ( callback, command, args, kwargs ) )
         else:
             result = None
@@ -63,7 +64,7 @@ class MSDataSyncAPI(object):
                 callback( result )
 
     #Actual API methods that DO something
-    def checkRsync(self, sourcedir, remotehost, remotedir, returnFn = None):
+    def checkRsync(self, callingWindow, statuschange, notused, returnFn = None):
         if returnFn is None:
             returnFn = self.defaultReturn
         c = self.config.getConfig()
@@ -82,7 +83,6 @@ class MSDataSyncAPI(object):
         self.log('Synchub config: %s' % jsonret)
         j = simplejson.loads(jsonret)
         self.log('Synchub config loaded object is: %s' % j)
-        from django.utils import simplejson
         d = simplejson.loads(jsonret)
         print 'Returned Json Obj: ', d
         localdir = self.config.getValue('localdir')
@@ -91,11 +91,45 @@ class MSDataSyncAPI(object):
         #remotedir = self.config.getValue('remotedir')
         remotehost = d['host']
         remotedir = d['path']
+
+        callingWindow.setState(statuschange)
+
         self._appendTask(returnFn, self._impl.checkRsync, localdir, user, j['host'], j['path'], rules=[j['rules']])
 
     def defaultReturn(self, *args):
         #print 'rsync returned: ', retval
         self.log('Default return callback:%s' % (str(args)), Debug=True)
+
+    
+    #------- WORKER CLASS-----------------------
+    import threading
+    class Worker( threading.Thread ):
+        SLEEP_TIME = 0.1
+
+        #-----------------------------------------------------------------------
+        def __init__( self, tasks ):
+            import threading
+            threading.Thread.__init__( self )
+            self._isDying = False
+            self._tasks = tasks
+
+        #-----------------------------------------------------------------------
+        def run( self ):
+            while not self._isDying:
+                ( callback, command, args, kwargs ) = self._tasks.get()
+                result = None
+                try:
+                    result = command( *args )
+                except:
+                    result = None
+                if callback != None:
+                    callback( result )
+                self._tasks.task_done()
+
+        #-----------------------------------------------------------------------
+        def die( self ):
+            self._isDying = True
+
 
 class MSDSImpl(object):
     '''the implementation of the MSDataSyncAPI'''
@@ -115,7 +149,8 @@ class MSDSImpl(object):
 
         cmd = []
         cmd.extend(cmdhead)
-        cmd.extend(rules)
+        for r in rules:
+            cmd.extend(r)
         cmd.extend(cmdtail)
 
         print 'cmd is %s' % str(cmd)

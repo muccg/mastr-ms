@@ -3,6 +3,9 @@ from StatusBar import StatusBar
 from SysTrayIcon import SystrayIcon
 from FileList import ListCtrlPanel
 import time
+
+from identifiers import *
+
 class Log(wx.PyLog):
     def __init__(self, textCtrl, logTime=0):
         wx.PyLog.__init__(self)
@@ -71,17 +74,18 @@ class MainWindow(wx.Frame):
         self.SystrayIcon.SetIconTimer()
       
         self.setState(APPSTATE.IDLE)
-    
+   
+        #Create a timer.
+        self.timer = wx.Timer(self, -1)
+        self.Bind(wx.EVT_TIMER, self.OnTimerTick, self.timer)
+        self.timer.Start(milliseconds = 1000, oneShot = False)
+        self.secondsUntilNextSync = 0
+        self.syncFreq = 0 #local cache of syncfreq
+        
 
         #menu bar
         self.menuBar = wx.MenuBar()
         fileMenu = wx.Menu()
-        ID_TEST_CONNECTION = 101
-        ID_CHECK_NOW = 102
-        ID_MINIMISE = 103
-        ID_QUIT = 104
-        ID_PREFERENCES = 201
-        ID_PYCRUST = 202
         fileMenu.Append(ID_TEST_CONNECTION, "&Test Connection", "Test your connection to the server")
         fileMenu.Append(ID_CHECK_NOW, "&Check Now", "Check for required uploads now")
         fileMenu.AppendSeparator()
@@ -112,6 +116,12 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
         self.log.WriteText('Finished loading application')
         self.log.WriteText('Testing Debug', Debug=True)
+
+    def resetTimeTillNextSync(self, forceReset = False):
+        f = int(self.config.getValue('syncfreq'))
+        if forceReset or self.syncFreq != f:
+            self.syncFreq = f
+            self.secondsUntilNextSync = 60 * f
 
     def setState(self, state):
         self.state = state
@@ -153,8 +163,8 @@ class MainWindow(wx.Frame):
 
     def OnCheckNow(self, evt):
         #MSDSCheckFn is defined by the main app - MDataSyncApp. It just sets the method in a hacky way :(
-        self.setState(APPSTATE.UPLOADING_DATA)
-        self.MSDSCheckFn('notused', 'notused', 'notused', self.CheckReturnFn)
+        self.setState(APPSTATE.CHECKING_SYNCHUB)
+        self.MSDSCheckFn(self, APPSTATE.UPLOADING_DATA, 'notused', self.CheckReturnFn)
 
     def CheckReturnFn(self, *args):
         self.setState(APPSTATE.IDLE)
@@ -175,3 +185,11 @@ class MainWindow(wx.Frame):
         self.log.WriteText('Called Exit. Cleaning up...')
         self.Destroy()
 
+    def OnTimerTick(self, event):
+        if self.secondsUntilNextSync > 0:
+            self.secondsUntilNextSync -= 1
+            self.StatusBar.SetStatusText("Next sync in %s" % (str(self.secondsUntilNextSync) ), 1 )
+        else:
+            self.resetTimeTillNextSync(forceReset = True)
+            self.OnCheckNow(None)
+        
