@@ -10,14 +10,23 @@ class MDataSyncApp(wx.PySimpleApp):
         #wx.Log_SetActiveTarget( wx.LogStderr() )
         #wx.Log_SetActiveTarget( wx.LogGui() )
         win = MainWindow(None)
-        msds = MSDataSyncAPI( win.getLog() ) 
-        win.MSDSCheckFn = msds.checkRsync
-        win.config = msds.config #TODO make this weakref
+        self.msds = MSDataSyncAPI( win.getLog() ) 
+        
+        #let the jobs execute in threads
+        #disable this for debugging
+        #msds.startThread() 
+        
+        win.MSDSCheckFn = self.msds.checkRsync
+        win.config = self.msds.config #TODO make this weakref
+        win.resetTimeTillNextSync()
         #wx.Log_SetActiveTarget( wx.LogWindow(None, 'loggin...') )
         win.Show(True)
         self.SetTopWindow(win)
         return True
 
+    
+
 
 m = MDataSyncApp()
 m.MainLoop()
+m.msds.stopThread() #stop the thread if there is one.
