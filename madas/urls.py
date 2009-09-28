@@ -17,10 +17,10 @@ urlpatterns = patterns('',
 #    (r'^(.*)/authorize', 'madas.madas.views.authorize'),
 #    (r'^(.*)/index', 'madas.madas.views.serveIndex'),
 
+    (r'^sync/', include('madas.mdatasync_server.urls')),
     # madasrepo
     (r'^repo/', include('madas.repository.urls')),
     (r'^ws/', include('madas.repository.wsurls')),
-
     # madas
     (r'^repoadmin[/]*(.*)', admin.site.root),
     (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root' : settings.MEDIA_ROOT, 'SSL' : True}),
