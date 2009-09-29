@@ -903,7 +903,7 @@ Ext.madasQuoteRequestEditCmp =
                     disabled: true,
                     store: new Ext.data.JsonStore({
                         storeId: 'redirectQuoteNodeDS',
-                        url: 'quote/listRestrictedGroups',
+                        url: 'quote/listGroups',
                         root: 'response.value.items',
                         fields: ['name', 'submitValue']
                     })

@@ -102,8 +102,8 @@ def _findAdminOrNodeRepEmailTarget(groupname = 'Administrators'): #TODO use MADA
    
     #NOTE: If this function finds multiple users to email, it only returns the
     #      first one. If we ever need to change this, here is the place to do it!
-    retval = users[0]
-    print 'returning 0th record: ', retval
+    retval = users
+    print 'returning all records: ', retval
     print '*** _findAdminOrNodeRepEmailTarget : exit ***'
     return retval 
 
@@ -162,9 +162,10 @@ def sendRequest(request, *args):
         sendQuoteRequestConfirmationEmail(request, qr.id, email) 
         
         #email the administrator(s) for the node 
-        targetUser = _findAdminOrNodeRepEmailTarget(groupname = toNode)
+        targetUsers = _findAdminOrNodeRepEmailTarget(groupname = toNode)
         from madas.mail_functions import sendQuoteRequestToAdminEmail
-        sendQuoteRequestToAdminEmail(request, qr.id, targetUser['uid'][0]) #toemail should be a string, but ldap returns are all lists
+        for targetUser in targetUsers:
+            sendQuoteRequestToAdminEmail(request, qr.id, targetUser['uid'][0]) #toemail should be a string, but ldap returns are all lists
     except Exception, e:
         print 'Bad: ', str(e)
 
@@ -457,11 +458,12 @@ def save(request, *args):
     
     try:
         if toNode != qr.tonode:
-            targetuser = _findAdminOrNodeRepEmailTarget(groupname = toNode)
+            targetusers = _findAdminOrNodeRepEmailTarget(groupname = toNode)
             #email the administrators for the node
-            targetemail = targetuser['uid'][0]
-            from mail_functions import sendQuoteRequestToAdminEmail
-            sendQuoteRequestToAdminEmail(request, id, targetemail) 
+            for targetuser in targetusers:
+                targetemail = targetuser['uid'][0]
+                from mail_functions import sendQuoteRequestToAdminEmail
+                sendQuoteRequestToAdminEmail(request, id, targetemail) 
     except Exception, e:
         print 'Exception emailing change to quote request: ', str(e) 
 
@@ -712,11 +714,12 @@ def formalAccept(request, *args):
             _addQuoteHistory(qr, qrvalues['email'], qr.tonode, qr.tonode, 'Formal quote accepted', qr.completed, qr.completed)
 
         #email the node rep
-            targetuser = _findAdminOrNodeRepEmailTarget(groupname = qr.tonode)
+            targetusers = _findAdminOrNodeRepEmailTarget(groupname = qr.tonode)
             from django.core.mail import send_mail
             from madas.mail_functions import sendFormalStatusEmail
-            toemail = targetuser['uid'][0]
-            sendFormalStatusEmail(request, qid, 'accepted', toemail, fromemail = qrvalues['email'])
+            for targetuser in targetusers:
+                toemail = targetuser['uid'][0]
+                sendFormalStatusEmail(request, qid, 'accepted', toemail, fromemail = qrvalues['email'])
         except Exception, e:
             print '\tException: ', str(e)
             failed = True
@@ -745,11 +748,12 @@ def formalReject(request, *args):
             #leave rejection in the quote history
             _addQuoteHistory(qr, qrvalues['emailaddressid__emailaddress'], qr.tonode, qr.tonode, 'Formal quote rejected', qr.completed, qr.completed)
             #email the node rep
-            targetuser = _findAdminOrNodeRepEmailTarget(groupname = qr.tonode)
+            targetusers = _findAdminOrNodeRepEmailTarget(groupname = qr.tonode)
             from django.core.mail import send_mail
             from madas.mail_functions import sendFormalStatusEmail
-            toemail = targetuser['uid'][0]
-            sendFormalStatusEmail(request, qid, 'rejected', toemail, fromemail = qrvalues['emailaddressid__emailaddress'])
+            for targetuser in targetusers:
+                toemail = targetuser['uid'][0]
+                sendFormalStatusEmail(request, qid, 'rejected', toemail, fromemail = qrvalues['emailaddressid__emailaddress'])
         except Exception, e:
             print 'DEBUG Exception: ', str(e)
     #TODO: base success on email success? qr != None?
