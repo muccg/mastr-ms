@@ -242,7 +242,7 @@ def _usersave(request, username, admin=False):
     print 'Node is ', node
 
     #don't let a non-admin change their node
-    if request.session['isAdmin']:
+    if request.session['isAdmin'] and admin:
         #TODO do something with the new status
         if node != '': #and node not in oldnode: 
             newnode = [node] #only allow one 'newnode'
@@ -272,7 +272,7 @@ def _usersave(request, username, admin=False):
    
     
     #only trust the isAdmin checkbox if editing user is an admin
-    if request.session['isAdmin']:
+    if request.session['isAdmin'] and admin:
         #honour 'isAdmin' checkbox
         if isAdmin is not None:
             if isAdmin:
@@ -310,7 +310,7 @@ def _usersave(request, username, admin=False):
     else: #user wasnt an admin
         print 'Non admin user. No node updates performed'
 
-    if request.session['isAdmin'] or request.session['isNodeRep']:
+    if admin and (request.session['isAdmin'] or request.session['isNodeRep']):
         #honour 'isNodeRep' checkbox
         if isNodeRep is not None:
             if isNodeRep: 
@@ -324,7 +324,9 @@ def _usersave(request, username, admin=False):
         else:
             print 'isNodeRep was False!'
             #remove from node reps group
-            ld.ldap_remove_user_from_group(username, 'Node Reps')
+            #i.e. don't let a noderep user un-admin themselves
+            if request.user.username != username:
+                ld.ldap_remove_user_from_group(username, 'Node Reps')
 
         
         #do status changes
