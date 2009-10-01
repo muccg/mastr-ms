@@ -272,7 +272,7 @@ def jsonResponse(request, *args):
     retdata = json_encode(a)
     
     # clear out session vars
-    setRequestVars(request, success=a['success'], authenticated=a['authenticated'], authorized=a['authorized'], mainContentFunction=a['mainContentFunction'], params=None) 
+    setRequestVars(request, success=a['success'], authenticated=a['authenticated'], authorized=a['authorized'], mainContentFunction='', params=None) 
     
     return HttpResponse(retdata)
 
