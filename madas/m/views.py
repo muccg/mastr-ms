@@ -43,11 +43,7 @@ def authorize(request, module='/', perms = [], internal = False):
         #passing through params of None means the request params are used anyway
 
     print '\tcachedparams: ', cachedparams
-    s = request.REQUEST.get('subaction', '')
-    
-    if cachedparams[0] == 'quote:viewformal':
-        module = 'quote'
-        s = 'viewformal'
+
 
     #check if the session is still valid. If not, log the user out.
     loggedin = request.session.get('loggedin', False)
@@ -97,6 +93,7 @@ def authorize(request, module='/', perms = [], internal = False):
         destination = module 
         print '\tauthorize: destination was ', destination
         
+        s = request.REQUEST.get('subaction', '')
         print '\tsubaction was "%s"' % (s)        
         #we want to take them to the login page, UNLESS the destination:subaction was 
         #quote:request or login:forgotpassword or login:<nothing>
@@ -104,7 +101,7 @@ def authorize(request, module='/', perms = [], internal = False):
             #if not internal and
             if ( destination != 'quote' and s != 'request' and\
                  destination != 'login' and s != 'resetpassword' and\
-                 destination != 'login' and s != 'forgotpassword' ):
+                 destination != 'login' and s != 'forgotpassword'):
                 print '\tDestination is now login'
                 destination = 'login'
             else:
@@ -139,8 +136,6 @@ def authorize(request, module='/', perms = [], internal = False):
         if destination == 'login':
             print 'destination was login, so we are setting our request vars'
         setRequestVars(request, success=True, authenticated=authenticated, authorized=authorized, mainContentFunction=destination, params=params) 
-    if destination == 'quote:viewformal':
-        setRequestVars(request, success=True, authenticated=authenticated, authorized=authorized, mainContentFunction=destination, params=params[1]) 
     if destination == 'dashboard':
         request.session['redirectMainContentFunction'] = None
         request.session['params'] = None
