@@ -270,9 +270,5 @@ def jsonResponse(request, *args):
     a['mainContentFunction'] = get_var(s, 'mainContentFunction', '')
     a['params'] = json_decode(s.get('params', []))
     retdata = json_encode(a)
-    
-    # clear out session vars
-    setRequestVars(request, success=a['success'], authenticated=a['authenticated'], authorized=a['authorized'], mainContentFunction='', params=None) 
-    
     return HttpResponse(retdata)
 
