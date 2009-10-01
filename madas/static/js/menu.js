@@ -45,7 +45,8 @@ Ext.madasMenuRender = function(username) {
                                     {text:'Replacing a Formal Quote', id:'helpadmin:screencasts-replaceformal', handler: Ext.madasMenuHandler}
                                     ]
                             } 
-                            }
+                            },
+                            {text:'Contact Us', id:'help:contactus', handler: Ext.madasMenuHandler }
                             ]
                     }
                 },

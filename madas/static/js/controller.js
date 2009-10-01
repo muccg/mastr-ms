@@ -159,6 +159,12 @@ Ext.madasChangeMainContent = function(contentName, paramArray){
     	    Ext.madasScreencastsInit('madas_requesting_quote.flv');
     	    Ext.getCmp('center-panel').layout.setActiveItem('screencasts-container-panel');
     	    break;
+            
+        case "help:contactus":
+            cancelBackTarget = false;
+            affectMenu = false;
+            Ext.madasMessage({'message':"For any queries and issues please contact,<br><br>Dr.Saravanan Dayalan<br>sdayalan@unimelb.edu.au<br>+61 3 8344 2201"});
+            break;
     	    
         case "helpadmin:screencasts-forwardquoterequest":
     	    Ext.madasScreencastsInit('madas_forwarding_quoterequest.flv');
