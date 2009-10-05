@@ -10,10 +10,11 @@ class MSDSConfig(object):
         #e.g.:
         #'user' : ['jsmith', 'Username', 'The username with which to logon to the remote server']
         self.store = { 'user' : ['bpower', 'Username', 'The username with which to logon to the remote server.'],
-                 'remotehost' : ['127.0.0.1', 'Remote Host', 'The address of the remote rsync machine.'],
-                  'remotedir' : ['syncdir_dest', 'Dest Dir'],
-                  'sitename'  : ['teststation', 'Site Name', 'A name to identify this installation, e.g. Lab #1.', False],
-              'organisation'  : ['testnode',  'Organisation', 'Identifies which organisation your site belongs to. It is important that this is correct.', False],
+                 #'remotehost' : ['127.0.0.1', 'Remote Host', 'The address of the remote rsync machine.'],
+                 # 'remotedir' : ['syncdir_dest', 'Dest Dir'],
+                  'sitename'  : ['defaultsite', 'Site Name', 'A name to identify this installation, e.g. Lab #1.', False],
+                  'stationname'  : ['defaultstation', 'Stationname', 'A name to identify this installation, e.g. Lab #1.', False],
+              'organisation'  : ['defaultorg',  'Organisation', 'Identifies which organisation your site belongs to. It is important that this is correct.', False],
                    'localdir' : ['../syncdir','Data root directory', 'The local root directory for the data.'],
                    'synchub'  : ['http://127.0.0.1:8001/sync/', 'SyncHub Address', 'The web address of the synchub server'],
                    'logfile'  : ['rsync_log.txt', 'Local Log File', 'Sync operations are logged to this file'],
@@ -83,6 +84,8 @@ class MSDSConfig(object):
     def getShowVar(self, key):
         try:
             return self.store[key][3]
-        except Exception, e:
-            print key, e
+        except:
             return True
+
+
+

@@ -30,8 +30,6 @@ class AutoPreferences(wx.Dialog):
         label.SetHelpText("Preference settings for the DataSync application")
         sizer.Add(label, 0, wx.ALIGN_CENTER|wx.ALL, 5)
 
-
-
         #get the data
         f = urllib.urlopen(self.config.getValue('synchub') + 'nodes/')
         jsonret = f.read()
@@ -41,23 +39,20 @@ class AutoPreferences(wx.Dialog):
 
         #node chooser
         self.nodeconfigselector = NodeConfigSelector.NodeConfigSelector(self, ID_NODESELECTOR_DIALOG, self.log, j) 
-
         k = self.config.getConfig().keys()
         k.sort()
         
         #report current node config name, and give button to choose
         box = wx.BoxSizer(wx.HORIZONTAL)
-        configname = "%s.%s.%s" % (self.config.getValue('organisation'), self.config.getValue('sitename'), self.config.getValue('stationname') )
-        label = wx.StaticText(self, -1, "Node is currently %s" % (configname) ) 
+        self.nodeconfiglabel = wx.StaticText(self, -1, "" ) 
+        self.setNodeConfigLabel()
         box.Add(label, 0, wx.ALIGN_LEFT|wx.ALL, 5)
         btn = wx.Button(self, ID_CHOOSENODE_BUTTON)
         btn.SetLabel("Choose")
         btn.Bind(wx.EVT_BUTTON, self.openNodeChooser)
         box.Add(btn, 0,  wx.ALIGN_RIGHT|wx.ALL, 5)
 
-        
         sizer.Add(box, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
-
 
         self.fields = {}
         for key in k:
@@ -85,7 +80,7 @@ class AutoPreferences(wx.Dialog):
         btn.SetHelpText("The OK button completes the dialog")
         btn.SetDefault()
         btnsizer.AddButton(btn)
-        btn.Bind(wx.EVT_BUTTON, self.save)
+        btn.Bind(wx.EVT_BUTTON, self.OKPressed)
 
 
         btn = wx.Button(self, wx.ID_CANCEL)
@@ -103,6 +98,10 @@ class AutoPreferences(wx.Dialog):
         sizer.Fit(self)
         #self.Layout()
 
+    def OKPressed(self, *args):
+        self.save(args)
+        self.EndModal(0)
+
     def save(self, *args):
         k = self.config.getConfig().keys()
         for key in k:
@@ -113,6 +112,21 @@ class AutoPreferences(wx.Dialog):
         #call the method that will serialise the config.
         self.config.save()
         self.parentApp.resetTimeTillNextSync()
+
+
+    def setNodeConfigLabel(self):
+        configname = "%s.%s.%s" % (self.config.getValue('organisation'), self.config.getValue('sitename'), self.config.getValue('stationname') )
+        self.nodeconfiglabel.SetLabel("Current Node: %s" % (configname) ) 
+
+    #this function gets called by the node chooser dialog,
+    #and uses the data it passes to put values into the config, which arent 
+    #collected in the 'save' method above.
+    def setNodeConfigName(self, datadict):
+        for k in datadict.keys():
+            self.config.setValue(k, datadict[k])
+        self.setNodeConfigLabel()
+        
+
        
     def openNodeChooser(self, *args):
         self.nodeconfigselector.ShowModal()

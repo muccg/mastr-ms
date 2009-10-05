@@ -35,6 +35,8 @@ class NodeConfigSelector(wx.Dialog):
         btn.SetDefault()
         btnsizer.AddButton(btn)
         btn.Bind(wx.EVT_BUTTON, self.OnOKClicked)
+        btn.Enable(False)
+        self.OKButton = btn
 
         #Cancel Button
         btn = wx.Button(self, wx.ID_CANCEL)
@@ -47,8 +49,11 @@ class NodeConfigSelector(wx.Dialog):
         self.SetSizer(sizer)
         sizer.Layout()
 
+        self.nodeconfigdict = {}
+
     def OnOKClicked(self, *args):
-        pass
+        self.parentApp.setNodeConfigName(self.nodeconfigdict)
+        self.EndModal(0)
 
     def GetItemText(self, item):
         if item:
@@ -59,13 +64,13 @@ class NodeConfigSelector(wx.Dialog):
     #once you are sure you have a leaf node, use this function to get 
     #the stationname, sitename, and organisation name
     def getNodeConfigName(self, item):
-        d = {}
-        d['stationname'] = self.GetItemText(item)
+        
+        self.nodeconfigdict['stationname'] = self.GetItemText(item)
         p = self.tree.GetItemParent(item)
-        d['sitename'] = self.GetItemText(p)
+        self.nodeconfigdict['sitename'] = self.GetItemText(p)
         p = self.tree.GetItemParent(p)
-        d['organisation'] = self.GetItemText(p)
-        return d
+        self.nodeconfigdict['organisation'] = self.GetItemText(p)
+        return self.nodeconfigdict
         
 
     def OnItemExpanded(self, evt):
@@ -79,6 +84,10 @@ class NodeConfigSelector(wx.Dialog):
         item = evt.GetItem()
         if self.tree.GetChildrenCount(item) == 0:
             print self.getNodeConfigName(item)
+            self.OKButton.Enable(True)
+
+        else:
+            self.OKButton.Enable(False)
         print "OnSelChanged: ", self.GetItemText(evt.GetItem())
 
     #
