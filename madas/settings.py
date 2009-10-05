@@ -145,7 +145,7 @@ if "DJANGODEV" in os.environ:
     SITE_NAME = 'madas'
     RETURN_EMAIL = 'bpower@ccg.murdoch.edu.au'
     DEFAULT_GROUP = 'madas'  #this needs to exist in the database.
-    AUTH_LDAP_SERVER = 'ldaps://fdsdev'
+    AUTH_LDAP_SERVER = 'ldaps://fdsdev.localdomain'
     AUTH_LDAP_ADMIN_BASE = 'dc=ccg,dc=murdoch,dc=edu,dc=au'
     AUTH_LDAP_BASE = 'ou=People,dc=ccg,dc=murdoch,dc=edu,dc=au'
     AUTH_LDAP_GROUP_BASE = 'ou=NEMA,ou=Web Groups,dc=ccg,dc=murdoch,dc=edu,dc=au'
