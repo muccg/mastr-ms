@@ -129,7 +129,7 @@ if "DJANGODEV" in os.environ:
         PERSISTENT_FILESTORE = os.path.normpath('/tmp/madas/filedata')
     else:
         #Dev Server persistent filestore is at appdir/../../filestore
-        PERSISTENT_FILESTORE = os.path.normpath(join(PROJECT_DIRECTORY, '..', '..', 'filedata') )
+        PERSISTENT_FILESTORE = os.path.normpath(os.path.join(PROJECT_DIRECTORY, '..', '..', 'filedata') )
 
     DEV_SERVER = True
     # debug site table
@@ -180,7 +180,7 @@ else:
     DEV_SERVER = False
 
     #Production persistent filestore is at appdir/../../filedata
-    PERSISTENT_FILESTORE = os.path.normpath(join(PROJECT_DIRECTORY, '..', '..', 'filedata') )
+    PERSISTENT_FILESTORE = os.path.normpath(os.path.join(PROJECT_DIRECTORY, '..', '..', 'filedata') )
 
     # production site id
     SITE_ID = 1
