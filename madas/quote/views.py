@@ -70,13 +70,13 @@ def listRestrictedGroups(request, *args):
 
 
 def _handle_uploaded_file(f, name):
-    '''Handles a file upload to the projects WRITABLE_DIRECTORY
+    '''Handles a file upload to the projects QUOTE_FILES_ROOT
        Expects a django InMemoryUpload object, and a filename'''
     print '*** _handle_uploaded_file: enter ***'
     retval = False
     try:
         import os
-        destination = open(os.path.join(settings.WRITABLE_DIRECTORY, name ), 'wb+')
+        destination = open(os.path.join(settings.QUOTE_FILES_ROOT, name ), 'wb+')
         for chunk in f.chunks():
             destination.write(chunk)
         destination.close()
@@ -782,7 +782,7 @@ def downloadPDF(request, *args):
     fqr = fqr[0]
     import os
     import madas
-    filename = os.path.join(madas.settings.WRITABLE_DIRECTORY, fqr['details'])
+    filename = os.path.join(madas.settings.QUOTE_FILES_ROOT, fqr['details'])
     print '\tThe filename is: ', filename
      
    
@@ -816,7 +816,7 @@ def downloadAttachment(request, *args):
     
     import os
     import madas
-    filename = os.path.join(madas.settings.WRITABLE_DIRECTORY, qr.attachment)
+    filename = os.path.join(madas.settings.QUOTE_FILES_ROOT, qr.attachment)
     from django.core.servers.basehttp import FileWrapper
     from django.http import HttpResponse
 

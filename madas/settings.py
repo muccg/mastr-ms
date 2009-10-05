@@ -61,8 +61,20 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.ssl.SSLRedirect'
 )
 
-# a directory that will be writable by the webserver, for storing various files...
+
+
+
+# a directory that will be writable by the webserver, for storing temporary files...
 WRITABLE_DIRECTORY = os.path.join(PROJECT_DIRECTORY,"scratch")
+
+# a directory for persistent storage on the filesystem for this app. 
+# it is 'DECLARED' here for readability, set below based on whether 
+# the site is being run locally, on a dev server, or on a production server,
+# and then asserted towards the end of this file. 
+# It should be created outside of PROJECT_DIR, and the application should fail 
+# on startup if it does not exist (hence the assert)
+
+PERSISTENT_FILESTORE = None
 
 # Captcha image directory
 CAPTCHA_IMAGES = os.path.join(WRITABLE_DIRECTORY, "captcha")
@@ -106,17 +118,24 @@ if "DJANGODEV" in os.environ:
     DEBUG = True if os.path.exists(os.path.join(PROJECT_DIRECTORY,".debug")) else ("DJANGODEBUG" in os.environ)
     TEMPLATE_DEBUG = DEBUG
     DATABASE_ENGINE = 'postgresql_psycopg2'           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'ado_mssql'.
-    DATABASE_NAME = 'dev_madas'             # Or path to database file if using sqlite3.
+    DATABASE_NAME = 'dev_madas'            # Or path to database file if using sqlite3.
     DATABASE_USER = 'madasapp'             # Not used with sqlite3.
     DATABASE_PASSWORD = 'madasapp'         # Not used with sqlite3.
-    DATABASE_HOST = 'eowyn.localdomain'             # Set to empty string for localhost. Not used with sqlite3.
+    DATABASE_HOST = 'eowyn.localdomain'    # Set to empty string for localhost. Not used with sqlite3.
     SSL_ENABLED = True
     if "LOCALDEV" in os.environ:
         SSL_ENABLED = False
-    DEV_SERVER = True
+        #localdev persistent filestore is at /tmp/SCRIPT_NAME/filestore
+        PERSISTENT_FILESTORE = os.path.normpath('/tmp/madas/filedata')
+    else:
+        #Dev Server persistent filestore is at appdir/../../filestore
+        PERSISTENT_FILESTORE = os.path.normpath.join(PROJECT_DIRECTORY, '..', '..', 'filedata')
 
+    DEV_SERVER = True
     # debug site table
     SITE_ID = 1
+
+    
 
     #####################################################################################################
     # Application Variables
@@ -126,7 +145,7 @@ if "DJANGODEV" in os.environ:
     SITE_NAME = 'madas'
     RETURN_EMAIL = 'bpower@ccg.murdoch.edu.au'
     DEFAULT_GROUP = 'madas'  #this needs to exist in the database.
-    AUTH_LDAP_SERVER = 'ldaps://fds3.localdomain'
+    AUTH_LDAP_SERVER = 'ldaps://fdsdev'
     AUTH_LDAP_ADMIN_BASE = 'dc=ccg,dc=murdoch,dc=edu,dc=au'
     AUTH_LDAP_BASE = 'ou=People,dc=ccg,dc=murdoch,dc=edu,dc=au'
     AUTH_LDAP_GROUP_BASE = 'ou=NEMA,ou=Web Groups,dc=ccg,dc=murdoch,dc=edu,dc=au'
@@ -138,9 +157,11 @@ if "DJANGODEV" in os.environ:
     MADAS_ADMIN_GROUPS = ['Administrators', 'Node Reps']
     SESSION_TIMEOUT = 600 #10 minute session timeout
     
-    REPO_FILES_ROOT = '/usr/local/python/ccgapps/madas/files'
-    if "LOCALDEV" in os.environ:
-        REPO_FILES_ROOT = '/tmp/madas/filedata'
+    REPO_FILES_ROOT = PERSISTENT_FILESTORE
+    QUOTE_FILES_ROOT = os.path.join(PERSISTENT_FILESTORE, 'quotes')
+    #REPO_FILES_ROOT = '/usr/local/python/ccgapps/madas/files'
+    #if "LOCALDEV" in os.environ:
+    #    REPO_FILES_ROOT = '/tmp/madas/filedata'
     #####################################################################################################
 
 
@@ -157,6 +178,9 @@ else:
     DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
     SSL_ENABLED = True
     DEV_SERVER = False
+
+    #Production persistent filestore is at appdir/../../filedata
+    PERSISTENT_FILESTORE = os.path.normpath.join(PROJECT_DIRECTORY, '..', '..', 'filedata')
 
     # production site id
     SITE_ID = 1
@@ -180,7 +204,8 @@ else:
     MADAS_ADMIN_GROUPS = ['Administrators', 'Node Reps']
     SESSION_TIMEOUT = 600 #10 minute session timeout
     
-    REPO_FILES_ROOT = '/usr/local/python/ccgapps/madas/files'
+    REPO_FILES_ROOT = PERSISTENT_FILESTORE
+    QUOTE_FILES_ROOT = os.path.join(PERSISTENT_FILESTORE, 'quotes')
     #####################################################################################################
 
 
@@ -229,3 +254,7 @@ AUTHENTICATION_BACKENDS = (
 
 # for local development, this is set to the static serving directory. For deployment use Apache Alias
 STATIC_SERVER_PATH = os.path.join(PROJECT_DIRECTORY,"static")
+
+#Ensure the persistent storage dir exits. If it doesn't, exit noisily.
+assert os.path.exists(PERSISTENT_FILESTORE), "This application cannot start: It expects a writeable directory at %s to use as a persistent filestore" % (PERSISTENT_FILESTORE) 
+

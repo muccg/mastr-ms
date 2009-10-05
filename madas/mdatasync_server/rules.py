@@ -43,16 +43,22 @@ class NodeConfig(object):
     def __init__(self):
         self.nodes = {}
 
-    def AddNode(self, name):
-        if self.nodes.has_key(name):
-            print "AddNode: warning: node name already existed."
-        self.nodes[name] = {}
+    def AddOrganisation(self, orgname):
+        if self.nodes.has_key(org):
+            print "AddOrganisation: warning: node name already existed."
+        self.nodes[orgname] = {}
 
-    def AddStation(self, nodename, stationname):
+    def AddSite(self, orgname, sitename):
+        if not self.nodes.has_key(orgname):
+            pass #incomplete code, abandoned class
+
+    def AddStation(self, orgname, sitename, stationname):
         if not self.nodes.has_key(nodename):
             print 'AddStation: warning: needed to create node ', nodename
         if not self.nodes[nodename].has_key(stationname):
             self.nodes[nodename][stationname] = [] 
+
+
 
     def AddRule(self, nodename, stationname, ruletarget, ruleaction):
         #first try to create the rule.

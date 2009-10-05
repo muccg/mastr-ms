@@ -72,12 +72,13 @@ class MSDataSyncAPI(object):
         #get the local file list
         #TODO: Call this in the correct manner, using 'Tasks'
         files = self.config.getValue('localdir')
-        node = self.config.getValue('organisation')
-        station = self.config.getValue('sitename')
+        organisation = self.config.getValue('organisation')
+        station = self.config.getValue('stationname')
+        sitename = self.config.getValue('sitename')
 
         import urllib
         import simplejson
-        postvars = {'files' : simplejson.dumps(files), 'node' : simplejson.dumps(node), 'station': simplejson.dumps(station)}
+        postvars = {'files' : simplejson.dumps(files), 'organisation' : simplejson.dumps(organisation), 'sitename' : simplejson.dumps(sitename), 'stationname': simplejson.dumps(station)}
         f = urllib.urlopen(self.config.getValue('synchub'), urllib.urlencode(postvars))
         jsonret = f.read()
         self.log('Synchub config: %s' % jsonret)
@@ -138,7 +139,7 @@ class MSDSImpl(object):
     
     def checkRsync(self, sourcedir, remoteuser, remotehost, remotedir, rules = []):
         self.log('checkRsync implementation entered!', Debug=True)
-        
+        self.log('fsdsd') 
         
         from subprocess import Popen, PIPE
         logfile = 'rsync_log.txt'
@@ -149,11 +150,18 @@ class MSDSImpl(object):
 
         cmd = []
         cmd.extend(cmdhead)
-        for r in rules:
-            cmd.extend(r)
+    
+        print 'Rules is ', rules
+        
+        if rules is not None and len(rules) > 0:
+            for r in rules:
+                if r is not None:
+                    cmd.extend(r)
+            
         cmd.extend(cmdtail)
 
         print 'cmd is %s' % str(cmd)
+        self.log('cmd is %s ' % str(cmd))
 
         #for rule in rules:
         p = Popen( cmd,
