@@ -180,7 +180,7 @@ else:
     DEV_SERVER = False
 
     #Production persistent filestore is at appdir/../../filedata
-    PERSISTENT_FILESTORE = os.path.normpath(os.path.join(PROJECT_DIRECTORY, '..', '..', 'filedata') )
+    PERSISTENT_FILESTORE = os.path.normpath(os.path.join(PROJECT_DIRECTORY, '..', '..', 'files') )
 
     # production site id
     SITE_ID = 1
