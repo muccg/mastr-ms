@@ -55,7 +55,7 @@ function callbacker(){
         return;
     }
     
-    Ext.madasInitApplication('${ APP_SECURE_URL }', '${ username }', '${ mainContentFunction }', '${ params }');
+    Ext.madasInitApplication('${ APP_SECURE_URL }', '${ username }', '${ mainContentFunction }', "${ params }");
     document.getElementById("appLoad").style.display = "none";
     document.getElementById("hidePass").style.display = "block";
     document.getElementById("hideUser").style.display = "block";

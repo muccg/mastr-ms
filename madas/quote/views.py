@@ -482,13 +482,7 @@ def save(request, *args):
 def formalLoad(request, *args, **kwargs):
     '''allow loading either by quote id, or formalquoteid'''
     print '***formalLoad : enter ***'#, args, kwargs
-    ### Authorisation Check ###
-    from madas.m.views import authorize
-    from settings import MADAS_STATUS_GROUPS, MADAS_ADMIN_GROUPS
-    (auth_result, auth_response) = authorize(request, module = 'quote', internal=True)
-    if auth_result is not True:
-        return auth_response
-    ### End Authorisation Check ###    
+  
     #get qid from quargs, then request, then blank 
     qid = kwargs.get('qid', request.REQUEST.get('qid', '') )
     fqid = request.REQUEST.get('fqid', '')
@@ -538,6 +532,16 @@ def formalLoad(request, *args, **kwargs):
                     
                     retvals['tonode'] = qr.tonode
                 retvals['pdf'] = retvals['details']
+                
+                e = ld.ldap_get_user_details(retvals['toemail'])
+                if len(e) > 0:
+                    ### Authorisation Check ### we do this here because we need to allow auth if the request is for a formal quote sent to an unregistered user
+                    from madas.m.views import authorize
+                    from settings import MADAS_STATUS_GROUPS, MADAS_ADMIN_GROUPS
+                    (auth_result, auth_response) = authorize(request, module = 'quote', internal=True)
+                    if auth_result is not True:
+                        return auth_response
+                    ### End Authorisation Check ###  
 
             else:
                 print '\tNo formal quotes.'
