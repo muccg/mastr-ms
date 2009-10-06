@@ -23,7 +23,7 @@ def authorize(request, module='/', perms = [], internal = False):
     #A variable used to determine if we bother using any of the params (session or request)
     #that we see here. Default should be no, unless under specific circumstances
     #namely doing a password reset or viewing a quote from an external link.
-    usecachedparams = True 
+    usecachedparams = False 
     cachedparams = ''
 
         #from django.core import serializers
@@ -133,7 +133,7 @@ def authorize(request, module='/', perms = [], internal = False):
     if usecachedparams:
         params = cachedparams 
     else:
-        params = None
+        params = request.POST['params']
 
     if authenticated or destination.startswith('login') or destination.startswith('quote'):
         if destination == 'login':
