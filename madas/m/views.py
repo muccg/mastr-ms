@@ -37,10 +37,13 @@ def authorize(request, module='/', perms = [], internal = False):
         #    params = None
     redirectMainContentFunction = request.session.get('redirectMainContentFunction', None)
     if redirectMainContentFunction is not None:
-        print '\tUsing session params'
+        print '\tUsing session params ', redirectMainContentFunction
         cachedparams = request.session.get('params', None)
     #else:
         #passing through params of None means the request params are used anyway
+
+    if module == 'quote':
+        cachedparams = request.session.get('params', None)
 
     print '\tcachedparams: ', cachedparams
 
@@ -120,7 +123,7 @@ def authorize(request, module='/', perms = [], internal = False):
         #redirectMainControlFunction here in authorise, but for the moment this works.
         if redirectMainContentFunction is not None:
             if redirectMainContentFunction == 'login:resetpassword':
-                print '\tUsing redirectMainContentFunction because it was login:resetpassword'
+                print '\tUsing redirectMainContentFunction because it was something useful'
                 destination = redirectMainContentFunction
                 request.session['redirectMainContentFunction'] = None
 
@@ -136,6 +139,11 @@ def authorize(request, module='/', perms = [], internal = False):
         if destination == 'login':
             print 'destination was login, so we are setting our request vars'
         setRequestVars(request, success=True, authenticated=authenticated, authorized=authorized, mainContentFunction=destination, params=params) 
+    
+    if destination == 'quote:viewformal':
+        print 'rejigging for viewformal'
+        setRequestVars(request, success=True, authenticated=authenticated, authorized=authorized, mainContentFunction=destination, params=cachedparams[1])
+    
     if destination == 'dashboard':
         request.session['redirectMainContentFunction'] = None
         request.session['params'] = None
@@ -229,12 +237,22 @@ def serveIndex(request, *args, **kwargs):
     from django.utils import simplejson
     m = simplejson.JSONEncoder()
     paramstr = m.encode(params)
+    
+    if params:
+        sendparams = params[1]
+    else:
+        sendparams = None
+    
+    mcf = request.session.get('redirectMainContentFunction', 'dashboard')
+    
+    request.session['redirectMainContentFunction'] = None
+    
     return render_mako('index.mako', 
                         APP_SECURE_URL = siteurl(request),#settings.APP_SECURE_URL,
                         username = request.user.username,
-                        mainContentFunction = request.session.get('mainContentFunction', 'dashboard'),
+                        mainContentFunction = mcf,
                         wh = webhelpers,
-                        params = '' # params[1] #None #['quote:viewformal', {'qid': 83}]
+                        params = sendparams # params[1] #None #['quote:viewformal', {'qid': 83}]
                       )
 
 def serverinfo(request):
