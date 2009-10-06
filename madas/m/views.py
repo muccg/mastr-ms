@@ -133,7 +133,8 @@ def authorize(request, module='/', perms = [], internal = False):
     if usecachedparams:
         params = cachedparams 
     else:
-        params = request.POST['params']
+        params = request.REQUEST.get('params', '')
+        print params
 
     if authenticated or destination.startswith('login') or destination.startswith('quote'):
         if destination == 'login':
