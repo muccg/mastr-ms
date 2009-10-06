@@ -24,7 +24,7 @@ def authorize(request, module='/', perms = [], internal = False):
     #that we see here. Default should be no, unless under specific circumstances
     #namely doing a password reset or viewing a quote from an external link.
     usecachedparams = True 
-    cachedparams = []
+    cachedparams = ''
 
         #from django.core import serializers
         #json_serializer = serializers.get_serializer("json")()
@@ -227,7 +227,7 @@ def serveIndex(request, *args, **kwargs):
             print 'redirecting'
             return redirectMain(request, module = modname, submodule = funcname, params = params)
         else:
-            params = request.session.get('params', [])
+            params = request.session.get('params', '')
 
     #print 'serve index...' 
     #print settings.APP_SECURE_URL
@@ -241,7 +241,7 @@ def serveIndex(request, *args, **kwargs):
     if params:
         sendparams = params[1]
     else:
-        sendparams = []
+        sendparams = ''
     
     mcf = request.session.get('redirectMainContentFunction', 'dashboard')
     
