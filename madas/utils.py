@@ -149,11 +149,12 @@ def getGroupsForSession(request, force_reload = False):
         request.session['isNodeRep'] = False
         request.session['isAdmin'] = False
 
-        for group in cachedgroups:
-            if group == 'Administrators':
-                request.session['isAdmin'] = True
-            if group == 'Node Reps':
-                request.session['isNodeRep'] = True
+        if cachedgroups:
+            for group in cachedgroups:
+                if group == 'Administrators':
+                    request.session['isAdmin'] = True
+                if group == 'Node Reps':
+                    request.session['isNodeRep'] = True
 
     return cachedgroups 
 
