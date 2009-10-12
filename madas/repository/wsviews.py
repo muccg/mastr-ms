@@ -440,7 +440,7 @@ def recordsSampleClasses(request, experiment_id):
         d['enabled'] = row.enabled
         
         if row.treatments:
-            d['treatments'] = row.treatments.name
+            d['treatments'] = row.treatments.summaryName()
         
         if row.timeline:
             d['timeline'] = str(row.timeline)
