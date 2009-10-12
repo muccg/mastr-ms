@@ -697,36 +697,36 @@ def formalAccept(request, *args):
         failed = True
 
     if not failed:
-        try:
-            #here we want to store the user details
-            #TODO: this section needs some help - can edit arbitrary user details via this form...
-            u = request.REQUEST.get('email')
-            
-            from madas.m.views import authorize
-            from settings import MADAS_STATUS_GROUPS, MADAS_ADMIN_GROUPS
-            (auth_result, auth_response) = authorize(request, module = 'quote', internal=True, perms=MADAS_ADMIN_GROUPS)
-            if auth_result is not True:  #allow node reps to accept quotes but not edit the user details
-                from madas.users.views import _usersave
-                _usersave(request, u)
+        #try:
+        #here we want to store the user details
+        #TODO: this section needs some help - can edit arbitrary user details via this form...
+        u = request.REQUEST.get('email')
+        
+        from madas.m.views import authorize
+        from settings import MADAS_STATUS_GROUPS, MADAS_ADMIN_GROUPS
+        (auth_result, auth_response) = authorize(request, module = 'quote', internal=True, perms=MADAS_ADMIN_GROUPS)
+        if auth_result is not True:  #allow node reps to accept quotes but not edit the user details
+            from madas.users.views import _usersave
+            _usersave(request, u)
 
-            #and then...
-            #mark the formal quote as accepted:
-            fq = setFormalQuoteStatus(qr, 'accepted')
-            
+        #and then...
+        #mark the formal quote as accepted:
+        fq = setFormalQuoteStatus(qr, 'accepted')
+        
 
-            #leave acceptance in the quote history
-            _addQuoteHistory(qr, qrvalues['email'], qr.tonode, qr.tonode, 'Formal quote accepted', qr.completed, qr.completed)
+        #leave acceptance in the quote history
+        _addQuoteHistory(qr, qrvalues['email'], qr.tonode, qr.tonode, 'Formal quote accepted', qr.completed, qr.completed)
 
-        #email the node rep
-            targetusers = _findAdminOrNodeRepEmailTarget(groupname = qr.tonode)
-            from django.core.mail import send_mail
-            from madas.mail_functions import sendFormalStatusEmail
-            for targetuser in targetusers:
-                toemail = targetuser['uid'][0]
-                sendFormalStatusEmail(request, qid, 'accepted', toemail, fromemail = qrvalues['email'])
-        except Exception, e:
-            print '\tException: ', str(e)
-            failed = True
+    #email the node rep
+        targetusers = _findAdminOrNodeRepEmailTarget(groupname = qr.tonode)
+        from django.core.mail import send_mail
+        from madas.mail_functions import sendFormalStatusEmail
+        for targetuser in targetusers:
+            toemail = targetuser['uid'][0]
+            sendFormalStatusEmail(request, qid, 'accepted', toemail, fromemail = qrvalues['email'])
+        #except Exception, e:
+        #    print '\tException: ', str(e)
+        #    failed = True
 
 
     setRequestVars(request, success=not failed, data = None, totalRows = 0, authenticated = True, authorized = True, mainContentFunction='dashboard')

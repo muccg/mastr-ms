@@ -135,13 +135,15 @@ def get_madas_user_groups(username, include_status_groups = False):
     a = ld.ldap_get_user_groups(username)
     groups = []
     status = []
-    for name in a:
-        if include_status_groups or name not in MADAS_STATUS_GROUPS:
-            groups.append(name)
+    
+    if a:
+        for name in a:
+            if include_status_groups or name not in MADAS_STATUS_GROUPS:
+                groups.append(name)
 
-        #set the status group (even if being shown in 'groups')
-        if name in MADAS_STATUS_GROUPS:
-            status.append(name)
+            #set the status group (even if being shown in 'groups')
+            if name in MADAS_STATUS_GROUPS:
+                status.append(name)
              
     return {'groups': groups, 'status': status}
 	
@@ -242,7 +244,7 @@ def _usersave(request, username, admin=False):
     print 'Node is ', node
 
     #don't let a non-admin change their node
-    if request.session['isAdmin'] and admin:
+    if request.session.has_key('isAdmin') and request.session['isAdmin'] and admin:
         #TODO do something with the new status
         if node != '': #and node not in oldnode: 
             newnode = [node] #only allow one 'newnode'
@@ -272,7 +274,7 @@ def _usersave(request, username, admin=False):
    
     
     #only trust the isAdmin checkbox if editing user is an admin
-    if request.session['isAdmin'] and admin:
+    if request.session.has_key('isAdmin') and request.session['isAdmin'] and admin:
         #honour 'isAdmin' checkbox
         if isAdmin is not None:
             if isAdmin:
