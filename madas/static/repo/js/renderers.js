@@ -14,6 +14,10 @@ function renderProgress(v, p, record) {
 	var text_front;
 	var text_back;
 	
+    if (!Ext.isDefined(v)) {
+        v = '';
+    }
+    
 	text_front = (v <55)?'':v+text_post;
 	text_back = (v >=55)?'':v+text_post;		
 
