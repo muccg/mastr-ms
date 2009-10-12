@@ -204,7 +204,10 @@ class SampleTimeline(models.Model):
     taken_on = models.DateField(default=date.today)
     
     def __unicode__(self):
-        return str(self.taken_on) + ' ' + str(self.taken_at)
+        if self.taken_at == None:
+            return str(self.taken_on)
+        else:
+            return str(self.taken_on) + ' ' + str(self.taken_at)
 
 class SampleClass(models.Model):
     class_id = models.CharField(max_length=255)
