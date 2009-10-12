@@ -14,6 +14,7 @@ Ext.madasBioSourceInit = function() {
         Ext.getCmp("organismBioSourceAnimalFieldset").show();
         Ext.getCmp("organismBioSourceHumanFieldset").hide();
     } else if (orgType == 2) {
+        Ext.getCmp("organismBioSourceHumanFieldset").hide();
         Ext.getCmp("organismBioSourceAnimalFieldset").hide();
     } else {
         Ext.getCmp("organismBioSourceAnimalFieldset").hide();
