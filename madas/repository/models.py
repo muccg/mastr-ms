@@ -191,6 +191,9 @@ class Treatment(models.Model):
 class TreatmentVariation(models.Model):
     name = models.CharField(max_length=255)
     treatment = models.ForeignKey(Treatment)
+    
+    def summaryName(self):
+        return str(self.treatment.name) + ' (' + str(self.name) + ')'
 
     def __unicode__(self):
         return self.name
