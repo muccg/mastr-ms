@@ -203,10 +203,19 @@ Ext.madasGrowth = {
                            delIds.push(selections[index].data.id);
                            }
                            //console.log(delIds);
+                           
+                           var delCount = 0;
                            for (var i = 0; i < delIds.length; i++) {
-                           Ext.madasCRUDSomething('delete/growthcondition/'+delIds[i], {}, function() { var expId = Ext.madasCurrentExperimentId(); growthConditionStore.proxy.conn.url = wsBaseUrl + 'records/growthcondition/source__experiment__id/' + expId;
-                                                  growthConditionStore.load(); });
+                            if (Ext.isDefined(delIds[i]) && Ext.isNumber(delIds[i])) {
+                               Ext.madasCRUDSomething('delete/growthcondition/'+delIds[i], {}, function() { var expId = Ext.madasCurrentExperimentId(); growthConditionStore.proxy.conn.url = wsBaseUrl + 'records/growthcondition/source__experiment__id/' + expId;
+                                                      growthConditionStore.load(); });
+                           delCount++;
+                                }
                            }
+                           if (delCount == 0) {
+                           growthConditionStore.reload();
+                           }
+                           
                            }
                            }
                            ],
