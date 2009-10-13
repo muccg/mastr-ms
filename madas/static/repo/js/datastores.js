@@ -524,7 +524,7 @@ var genotypeComboStore = new Ext.data.JsonStore(
 var locationComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'locationCombo',
-                            autoLoad: false,
+                            autoLoad: true,
                             url: wsBaseUrl + 'populate_select/location/id/name',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
