@@ -1,6 +1,5 @@
 import wx
-import urllib
-import simplejson
+
 import NodeConfigSelector
 
 from identifiers import *
@@ -11,6 +10,9 @@ class AutoPreferences(wx.Dialog):
         # so we can set an extra style that must be set before
         # creation, and then we create the GUI object using the Create
         # method.
+
+        self.preference_keys = ['localdir', 'logfile', 'syncfreq', 'user']
+
         pre = wx.PreDialog()
         pre.SetExtraStyle(wx.DIALOG_EX_CONTEXTHELP)
         pre.Create(parent, ID, 'Preferences', wx.DefaultPosition, wx.DefaultSize, wx.DEFAULT_FRAME_STYLE)
@@ -30,18 +32,11 @@ class AutoPreferences(wx.Dialog):
         label.SetHelpText("Preference settings for the DataSync application")
         sizer.Add(label, 0, wx.ALIGN_CENTER|wx.ALL, 5)
 
-        #get the data
-        f = urllib.urlopen(self.config.getValue('synchub') + 'nodes/')
-        jsonret = f.read()
-        print 'node config: %s' % jsonret 
-        j = simplejson.loads(jsonret)
-        print 'node config loaded object is: %s' % j 
-
-        #node chooser
-        self.nodeconfigselector = NodeConfigSelector.NodeConfigSelector(self, ID_NODESELECTOR_DIALOG, self.log, j) 
+        self.nodeconfigselector = None 
+        #Get the rest of the config
         k = self.config.getConfig().keys()
         k.sort()
-        
+
         #report current node config name, and give button to choose
         box = wx.BoxSizer(wx.HORIZONTAL)
         self.nodeconfiglabel = wx.StaticText(self, -1, "" ) 
@@ -55,7 +50,7 @@ class AutoPreferences(wx.Dialog):
         sizer.Add(box, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
 
         self.fields = {}
-        for key in k:
+        for key in self.preference_keys:
             if self.config.getShowVar(key):
                 box = wx.BoxSizer(wx.HORIZONTAL)
                 label = wx.StaticText(self, -1, self.config.getFormalName(key))
@@ -81,30 +76,25 @@ class AutoPreferences(wx.Dialog):
         btn.SetDefault()
         btnsizer.AddButton(btn)
         btn.Bind(wx.EVT_BUTTON, self.OKPressed)
-
-
+        
         btn = wx.Button(self, wx.ID_CANCEL)
         btn.SetHelpText("Cancel changes")
         btnsizer.AddButton(btn)
         btnsizer.Realize()
-
-
-
+        
         sizer.Add(btnsizer, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
 
-        #self.SetAutoLayout(True)
         self.SetSizer(sizer)
-        #sizer.Layout()
         sizer.Fit(self)
-        #self.Layout()
 
+    
     def OKPressed(self, *args):
         self.save(args)
         self.EndModal(0)
 
     def save(self, *args):
-        k = self.config.getConfig().keys()
-        for key in k:
+        #k = self.config.getConfig().keys()
+        for key in self.preference_keys:
             if self.config.getShowVar(key): #if this is var shown on this dialog (not in the tree)
                 print 'Setting config at %s to %s' % (str(key), self.fields[key].GetValue())
                 self.config.setValue(key, self.fields[key].GetValue())
@@ -129,5 +119,8 @@ class AutoPreferences(wx.Dialog):
 
        
     def openNodeChooser(self, *args):
+        self.nodeconfigselector = NodeConfigSelector.NodeConfigSelector(self, ID_NODESELECTOR_DIALOG, self.log, None)
+
+        self.nodeconfigselector.createTree()
         self.nodeconfigselector.ShowModal()
         self.nodeconfigselector.Destroy()
