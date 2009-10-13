@@ -212,9 +212,10 @@ def serveIndex(request, *args, **kwargs):
             qsargs = strip(qsargs, '?') #strip off ?
             vars = split(qsargs, '&')
             for var in vars:
-                (key,val) = split(var, '=')
-                if key is not None and val is not None:
-                    argsdict[key] = val
+                if len(split(var, '=')) > 1:
+                    (key,val) = split(var, '=')
+                    if key is not None and val is not None:
+                        argsdict[key] = val
 
 
             from utils import param_remap
