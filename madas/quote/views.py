@@ -211,7 +211,7 @@ def listQuotes(request, *args):
     if 'Administrators' in g:
         print '\tchecking administrators'
         print '\tRetrieving quotes for: Administrators' 
-        adminlist = Quoterequest.objects.filter(tonode='Administrators').values('id', 'completed', 'unread', 'tonode', 'firstname', 'lastname', 'officephone', 'details', 'requesttime', 'emailaddressid__emailaddress' )
+        adminlist = Quoterequest.objects.filter(tonode='').values('id', 'completed', 'unread', 'tonode', 'firstname', 'lastname', 'officephone', 'details', 'requesttime', 'emailaddressid__emailaddress' )
         print '\tadmini query finished'
         for ql in adminlist:
             ql['email'] = ql['emailaddressid__emailaddress']
