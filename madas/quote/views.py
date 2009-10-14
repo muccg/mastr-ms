@@ -380,7 +380,9 @@ def history(request, *args):
     else:
         qh = []
  
-    qh = list(qh)    
+    qh = list(qh)
+    qh.sort(key=id)
+    qh.reverse()
     print '\t', qh 
     setRequestVars(request, data=qh, totalRows=len(qh), success = True, authenticated = True, authorized = True )
     print '***quote/history : exit***'
