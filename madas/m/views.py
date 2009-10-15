@@ -141,7 +141,7 @@ def authorize(request, module='/', perms = [], internal = False):
             print 'destination was login, so we are setting our request vars'
         setRequestVars(request, success=True, authenticated=authenticated, authorized=authorized, mainContentFunction=destination, params=params) 
     
-    if destination == 'quote:viewformal':
+    if destination == 'quote:viewformal' and cachedparams:
         print 'rejigging for viewformal'
         setRequestVars(request, success=True, authenticated=authenticated, authorized=authorized, mainContentFunction=destination, params=cachedparams[1])
     
