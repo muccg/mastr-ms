@@ -318,7 +318,7 @@ def listFormal(request, *args):
     
     uname = request.user.username
 
-    fquoteslist = Formalquote.objects.filter(Q(fromemail=uname)|Q(toemail=uname)).values('id', 'quoterequestid', 'details', 'created', 'fromemail', 'toemail', 'status')        
+    fquoteslist = Formalquote.objects.filter(Q(fromemail__iexact=uname)|Q(toemail__iexact=uname)).values('id', 'quoterequestid', 'details', 'created', 'fromemail', 'toemail', 'status')        
 
     setRequestVars(request, success=True, items=fquoteslist, totalRows=len(fquoteslist), authenticated=True, authorized=True)
  
