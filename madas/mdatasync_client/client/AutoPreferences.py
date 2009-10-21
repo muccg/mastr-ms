@@ -3,6 +3,7 @@ import wx
 import NodeConfigSelector
 
 from identifiers import *
+import  wx.lib.filebrowsebutton as filebrowse
 
 class AutoPreferences(wx.Dialog):
     def __init__(self, parent, ID, config, log):
@@ -30,7 +31,7 @@ class AutoPreferences(wx.Dialog):
         sizer = wx.BoxSizer(wx.VERTICAL)
         label = wx.StaticText(self, -1, "DataSync Preferences")
         label.SetHelpText("Preference settings for the DataSync application")
-        sizer.Add(label, 0, wx.ALIGN_CENTER|wx.ALL, 5)
+        sizer.Add(label, 0, wx.ALIGN_CENTER|wx.ALL, 2)
 
         self.nodeconfigselector = None 
         #Get the rest of the config
@@ -47,23 +48,27 @@ class AutoPreferences(wx.Dialog):
         btn.Bind(wx.EVT_BUTTON, self.openNodeChooser)
         box.Add(btn, 0,  wx.ALIGN_RIGHT|wx.ALL, 5)
 
-        sizer.Add(box, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+        sizer.Add(box, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 2)
 
         self.fields = {}
         for key in self.preference_keys:
             if self.config.getShowVar(key):
                 box = wx.BoxSizer(wx.HORIZONTAL)
-                label = wx.StaticText(self, -1, self.config.getFormalName(key))
-                label.SetHelpText(self.config.getHelpText(key))
-                box.Add(label, 0, wx.ALIGN_LEFT|wx.ALL, 5)
-                #the text entry field
-                text = wx.TextCtrl(self, -1, str(self.config.getValue(key)), size=(80,-1))
-                text.SetHelpText(self.config.getHelpText(key))
-                box.Add(text, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
-                sizer.Add(box, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+                if key == 'localdir':
+                    ctrl = filebrowse.DirBrowseButton(self, -1, size=(450, -1), changeCallback = None, labelText=self.config.getFormalName(key), startDirectory = str(self.config.getValue(key)) )
+                    ctrl.SetValue(str(self.config.getValue(key)) )
+                else: 
+                    label = wx.StaticText(self, -1, self.config.getFormalName(key))
+                    label.SetHelpText(self.config.getHelpText(key))
+                    box.Add(label, 0, wx.ALIGN_LEFT|wx.ALL, 2)
+                    #the text entry field
+                    ctrl = wx.TextCtrl(self, -1, str(self.config.getValue(key)), size=(80,-1))
+                    ctrl.SetHelpText(self.config.getHelpText(key))
+                box.Add(ctrl, 1, wx.ALIGN_CENTRE|wx.ALL, 2)
+                sizer.Add(box, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 2)
                 
                 #store the field so we can serialise it later
-                self.fields[key] = text
+                self.fields[key] = ctrl
 
         btnsizer = wx.StdDialogButtonSizer()
         
@@ -82,7 +87,7 @@ class AutoPreferences(wx.Dialog):
         btnsizer.AddButton(btn)
         btnsizer.Realize()
         
-        sizer.Add(btnsizer, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+        sizer.Add(btnsizer, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 2)
 
         self.SetSizer(sizer)
         sizer.Fit(self)

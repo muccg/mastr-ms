@@ -145,7 +145,7 @@ class MSDSImpl(object):
         logfile = 'rsync_log.txt'
         #Popen('rsync -t %s %s:%s' % (sourcedir, remotehost, remotedir) )
         
-        cmdhead = ['rsync', '-tavz']
+        cmdhead = ['rsync', '-tavzR']
         cmdtail = ['--log-file=%s' % (logfile), sourcedir, '%s@%s:%s' % (remoteuser, remotehost, remotedir)]
 
         cmd = []

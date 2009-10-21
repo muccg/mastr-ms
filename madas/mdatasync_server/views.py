@@ -4,6 +4,8 @@ from django.utils import simplejson
 from mdatasync_server.models import *
 from mdatasync_server.rules import *
 from django.conf import settings
+import os
+import os.path
 
 def jsonResponse(data):
     jdata = simplejson.dumps(data)
@@ -49,14 +51,30 @@ def defaultpage(request, *args):
         #try to get a config for this node/station
         try:
             ncs = NodeClient.objects.filter(organisation_name = porganisation, site_name = psitename, station_name = pstation)
+            rulesset = NodeRules.objects.filter(parent_node = ncs)
         except:
             print 'Could not get a matching nodeclient'
         n = ncs[0]
         print 'Current nodeconfig is : ', n 
-        rules = None
+        rules = [x.__unicode__() for x in rulesset]
+        path = '%s/pending/%s/%s/%s' % (settings.PERSISTENT_FILESTORE, porganisation, psitename, pstation)
+        
+        #make sure the path exists
+        if not os.path.exists(path):
+            print 'Creating %s' % (path)
+            try:
+                os.makedirs(path)
+            except:
+                print 'Could not make the path!'
+
+        import webhelpers
+        host = request.__dict__['META']['SERVER_NAME'] #might not be right name
+        #host = request.__dict__['META']['REMOTE_ADDR'] #might be client address?
+        #host = request.__dict__['META']['HTTP_HOST'] #would include port
+
         #hardcoded return
-        d = {'host':'127.0.0.1',
-             'path':'%s/pending/%s/%s/%s' % (settings.PERSISTENT_FILESTORE, porganisation, psitename, pstation),
+        d = {'host':host,
+             'path':path,
              'rules' : rules
              #'rules' : None 
             }

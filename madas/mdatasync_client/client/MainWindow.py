@@ -51,7 +51,7 @@ wx.HelpProvider.Set(provider)
 class MainWindow(wx.Frame):
     def __init__(self, parent):
 
-        wx.Frame.__init__(self, parent, -1, 'Test sync window')
+        wx.Frame.__init__(self, parent, -1, 'MS Datasync Application')
         
         #First thing, set up the log.
         self.logTextCtrl = wx.TextCtrl(self, -1, 
@@ -108,14 +108,13 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnMenuMinimise, id=ID_MINIMISE )
         self.Bind(wx.EVT_MENU, self.OnMenuQuit, id=ID_QUIT)
         self.Bind(wx.EVT_MENU, self.OnMenuPreferences, id=ID_PREFERENCES )
-        self.Bind(wx.EVT_MENU, self.__testMenuFunction, id=ID_PYCRUST )
+        self.Bind(wx.EVT_MENU, self.pycrust, id=ID_PYCRUST )
         
 
         
         self.SetSize((640,480))
         self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
         self.log.WriteText('Finished loading application')
-        self.log.WriteText('Testing Debug', Debug=True)
 
     def resetTimeTillNextSync(self, forceReset = False):
         f = int(self.config.getValue('syncfreq'))
@@ -193,3 +192,7 @@ class MainWindow(wx.Frame):
             self.resetTimeTillNextSync(forceReset = True)
             self.OnCheckNow(None)
         
+    def pycrust(self,event):
+        import wx.py as py
+        w= py.crust.CrustFrame(parent = self)
+        w.Show()

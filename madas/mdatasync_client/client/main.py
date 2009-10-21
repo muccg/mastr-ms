@@ -1,6 +1,7 @@
 import wx
 from MainWindow import MainWindow
 from MSDataSyncAPI import MSDataSyncAPI #, MSDSCheckFn
+import sys
 
 
 class MDataSyncApp(wx.PySimpleApp):
@@ -10,6 +11,7 @@ class MDataSyncApp(wx.PySimpleApp):
         #wx.Log_SetActiveTarget( wx.LogStderr() )
         #wx.Log_SetActiveTarget( wx.LogGui() )
         win = MainWindow(None)
+        self.win = win
         self.msds = MSDataSyncAPI( win.getLog() ) 
         
         #let the jobs execute in threads
@@ -28,5 +30,6 @@ class MDataSyncApp(wx.PySimpleApp):
 
 
 m = MDataSyncApp()
+sys.stdout = m.win.log 
 m.MainLoop()
 m.msds.stopThread() #stop the thread if there is one.
