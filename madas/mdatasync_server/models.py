@@ -11,6 +11,9 @@ class NodeClient(models.Model):
     date_created = models.DateTimeField(auto_now_add=True) #generate 'now' on INSERT
     last_modified = models.DateTimeField(auto_now = True) #generate 'now' on UPDATE
 
+    def __unicode__(self):
+        return "[%s]-[%s]-[%s]" % (self.organisation_name, self.site_name, self.station_name)
+
 NODE_RULE_CHOICES = (
     (ActionType.EXCLUDE, 'EXCLUDE'),
     (ActionType.INCLUDE, 'INCLUDE'),
@@ -22,3 +25,6 @@ class NodeRules(models.Model):
     parent_node = models.ForeignKey(NodeClient)
     rule_category = models.IntegerField(choices = NODE_RULE_CHOICES)
     rule_text = models.TextField()
+
+    def __unicode__(self):
+        return "%s%s" % (ActionType.CommandLookup[self.rule_category], self.rule_text)
