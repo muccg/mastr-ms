@@ -141,17 +141,17 @@ class MSDSImpl(object):
         self.log('checkRsync implementation entered!', Debug=True)
         self.log('fsdsd') 
         
-        from subprocess import Popen, PIPE
+        from subprocess import Popen, PIPE, STDOUT
         logfile = 'rsync_log.txt'
         #Popen('rsync -t %s %s:%s' % (sourcedir, remotehost, remotedir) )
         
-        cmdhead = ['rsync', '-tavzR']
+        cmdhead = ['rsync', '-tavz']
         cmdtail = ['--log-file=%s' % (logfile), sourcedir, '%s@%s:%s' % (remoteuser, remotehost, remotedir)]
 
         cmd = []
         cmd.extend(cmdhead)
     
-        print 'Rules is ', rules
+        self.log('Rules is %s' %(str(rules)) )
         
         if rules is not None and len(rules) > 0:
             for r in rules:
@@ -160,12 +160,16 @@ class MSDSImpl(object):
             
         cmd.extend(cmdtail)
 
-        print 'cmd is %s' % str(cmd)
         self.log('cmd is %s ' % str(cmd))
 
-        #for rule in rules:
         p = Popen( cmd,
-                   stdout=PIPE)
+                   stdout=PIPE, stdin=PIPE, stderr = STDOUT, bufsize=1)
+        for line in p.stdout:
+            self.log(line)
+        #p = Popen( cmd,
+        #           stdout=self.log, stderr=self.log, stdin=PIPE)
+        #p = Popen( cmd,
+        #           stdout=self.log, stderr=self.log, stdin=PIPE)
 
 
         retcode = p.communicate()[0]

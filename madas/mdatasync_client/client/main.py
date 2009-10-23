@@ -30,6 +30,6 @@ class MDataSyncApp(wx.PySimpleApp):
 
 
 m = MDataSyncApp()
-sys.stdout = m.win.log 
+#sys.stdout = m.win.log 
 m.MainLoop()
 m.msds.stopThread() #stop the thread if there is one.
