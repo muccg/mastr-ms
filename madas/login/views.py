@@ -3,7 +3,9 @@ from django.http import HttpResponse, HttpResponseRedirect
 from webhelpers import siteurl
 
 from madas.utils import setRequestVars, jsonResponse
-import madas.ccgauth
+from django.contrib.auth.ldap_helper import LDAPHandler
+
+
 def processLogin(request, *args):
     print '***processLogin : enter ***' 
 
@@ -130,7 +132,6 @@ def processForgotPassword(request, *args):
     '''
     print '*** processForgotPassword : enter***'
     emailaddress = request.REQUEST['username'].strip()
-    from madas.ccgauth import LDAPHandler 
     from madas import settings
     ld = LDAPHandler(userdn=settings.LDAPADMINUSERNAME, password=settings.LDAPADMINPASSWORD)
     u = ld.ldap_get_user_details(emailaddress)
@@ -198,7 +199,6 @@ def populateResetPasswordForm(request, *args):
 
 def processResetPassword(request, *args):
     print '***populateResetPasswordForm***: enter'
-    from madas.ccgauth import LDAPHandler 
     from madas import settings
     
     username = request.REQUEST.get('email', '')

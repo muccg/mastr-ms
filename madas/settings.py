@@ -116,6 +116,8 @@ else:
 # development deployment
 if "DJANGODEV" in os.environ:
     DEBUG = True if os.path.exists(os.path.join(PROJECT_DIRECTORY,".debug")) else ("DJANGODEBUG" in os.environ)
+    #LOGS = ['mango_ldap']
+    LOG_DIRECTORY = os.path.join(PROJECT_DIRECTORY, 'logs')
     TEMPLATE_DEBUG = DEBUG
     DATABASE_ENGINE = 'postgresql_psycopg2'           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'ado_mssql'.
     DATABASE_NAME = 'dev_madas'            # Or path to database file if using sqlite3.
@@ -248,8 +250,8 @@ INSTALLED_APPS = (
 
 
 AUTHENTICATION_BACKENDS = (
- 'madas.ccgauth.LDAPBackend',
- 'django.contrib.auth.backends.ModelBackend',
+ 'django.contrib.auth.backends.LDAPBackend',
+ #'django.contrib.auth.backends.NoAuthModelBackend',
 )
 
 # for local development, this is set to the static serving directory. For deployment use Apache Alias
