@@ -1,5 +1,5 @@
 # Create your views here.
-from ccgauth import LDAPHandler
+from django.contrib.auth.ldap_helper import LDAPHandler
 from madas.utils import setRequestVars, jsonResponse, translate_dict, makeJsonFriendly
 from django.conf import settings
 
@@ -55,8 +55,8 @@ def _userload(username):
         return {}
 
     #Now we do some app specific key renaming
-    for key in r.keys():
-        print '\t', key, ':', r[key]    
+    #for key in r.keys():
+    #    print '\t', key, ':', r[key]    
 
     d = _translate_ldap_to_madas(r) 
     d['originalEmail'] = d['email']
@@ -72,7 +72,7 @@ def _userload(username):
         #repackage 'groups' as 'node'
         gr = g['groups']
         nodes = getNodeMemberships(gr)
-        print 'userload: nodes are:', nodes
+        #print 'userload: nodes are:', nodes
         if len(nodes) > 0:
             d['node'] = nodes[0]
         else:

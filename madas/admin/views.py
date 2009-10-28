@@ -1,6 +1,6 @@
 # Create your views here.
 from django.db import models
-from ccgauth import LDAPHandler
+from django.contrib.auth.ldap_helper import LDAPHandler
 
 from madas.utils import setRequestVars, jsonResponse, json_encode, translate_dict
 from madas.m.models import Quoterequest, Formalquote
