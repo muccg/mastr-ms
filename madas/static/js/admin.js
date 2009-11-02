@@ -341,7 +341,7 @@ Ext.madasAdminUserEditInit = function (paramArray) {
     var adminUserEditCmp = Ext.getCmp('adminuseredit-panel');   
 
     //fetch user details
-    adminUserEditCmp.load({url: 'admin/userload', params: {'username': username}, waitMsg:'Loading'});
+    adminUserEditCmp.load({url: Ext.madasBaseUrl + 'admin/userload', params: {'username': username}, waitMsg:'Loading'});
     
     //attach validator that ext cannot deal with
     Ext.getCmp("adminUserEditPassword").on('blur', Ext.madasAdminUserEditValidatePassword);

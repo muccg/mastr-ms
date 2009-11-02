@@ -19,7 +19,7 @@ Ext.madasRequestQuoteInit = function () {
 	var reqQuoCmp = Ext.getCmp('requestquote-panel');   
 
     //fetch user details
-    reqQuoCmp.load({url: 'user/userload', waitMsg:'Loading'});
+    reqQuoCmp.load({url: Ext.madasBaseUrl + 'user/userload', waitMsg:'Loading'});
 
     reqQuoCmp.doLayout();
     
@@ -33,7 +33,7 @@ Ext.madasRequestQuoteCmp =
             {  xtype:'form', 
             labelWidth: 100, // label settings here cascade unless overridden
             id:'requestquote-panel',
-            url:'quote/sendRequest',
+            url:Ext.madasBaseUrl + 'quote/sendRequest',
             method:'POST',
             frame:true,
             fileUpload: true,
@@ -369,7 +369,7 @@ Ext.madasRequestQuoteCmp =
                     listWidth:230,
                     store: new Ext.data.JsonStore({
                         storeId:'sendToStore',
-                        url: 'quote/listGroups',
+                        url: Ext.madasBaseUrl + 'quote/listGroups',
                         root: 'response.value.items',
                         fields: ['name', 'submitValue']
                     })
@@ -523,13 +523,13 @@ Ext.madasQuoteRequestEditInit = function (paramArray) {
     Ext.getCmp('formalquoteedit-panel').getForm().reset();
 
     //fetch user details
-    quoteRequestEditCmp.load({url: 'quote/load', params: {'qid': id}, waitMsg:'Loading'});
-    formalQuoteCmp.load({url: 'quote/formalload', params: {'qid': id}, waitMsg:'Loading'});
+    quoteRequestEditCmp.load({url: Ext.madasBaseUrl + 'quote/load', params: {'qid': id}, waitMsg:'Loading'});
+    formalQuoteCmp.load({url: Ext.madasBaseUrl + 'quote/formalload', params: {'qid': id}, waitMsg:'Loading'});
 
     var quoteHistoryCmp = Ext.getCmp('qre-history');
 
     //fetch history
-    quoteHistoryCmp.load({url:'quote/history', params:{'qid':id}, callback:Ext.madasRenderQuoteHistory, text:'Loading...'});
+    quoteHistoryCmp.load({url:Ext.madasBaseUrl + 'quote/history', params:{'qid':id}, callback:Ext.madasRenderQuoteHistory, text:'Loading...'});
 
     //reload the combobox   
     if (Ext.StoreMgr.containsKey('redirectQuoteNodeDS')) {
@@ -563,7 +563,7 @@ Ext.madasQuoteRequestEditCmp =
             {  xtype:'form',
             labelWidth: 100, // label settings here cascade unless overridden
             id:'quoterequestedit-panel',
-            url:'quote/save',
+            url:Ext.madasBaseUrl + 'quote/save',
             method:'POST',
             frame:true,
             reader: Ext.madasJsonReader({successProperty:'success', root: 'data'}, 
@@ -903,7 +903,7 @@ Ext.madasQuoteRequestEditCmp =
                     disabled: true,
                     store: new Ext.data.JsonStore({
                         storeId: 'redirectQuoteNodeDS',
-                        url: 'quote/listGroups',
+                        url: Ext.madasBaseUrl + 'quote/listGroups',
                         root: 'response.value.items',
                         fields: ['name', 'submitValue']
                     })
@@ -1019,7 +1019,7 @@ Ext.madasQuoteRequestEditCmp =
                 xtype:'form',
                 labelWidth: 100, // label settings here cascade unless overridden
                 id:'formalquoteedit-panel',
-                url:'quote/formalsave',
+                url:Ext.madasBaseUrl + 'quote/formalsave',
                 method:'POST',
                 fileUpload: true,
                 reader: Ext.madasJsonReader({successProperty:'success', root: 'data'}, 
@@ -1373,8 +1373,8 @@ Ext.madasViewFormalInit = function(paramArray){
     }
     
     //fetch user details
-    quoteRequestEditCmp.load({url: 'quote/load', params: {'qid': id}, waitMsg:'Loading'});
-    formalQuoteCmp.load({url: 'quote/formalload', params: {'qid': id}, waitMsg:'Loading'});
+    quoteRequestEditCmp.load({url: Ext.madasBaseUrl + 'quote/load', params: {'qid': id}, waitMsg:'Loading'});
+    formalQuoteCmp.load({url: Ext.madasBaseUrl + 'quote/formalload', params: {'qid': id}, waitMsg:'Loading'});
 };
 
 Ext.madasViewFormalCmp = {   
@@ -1386,7 +1386,7 @@ Ext.madasViewFormalCmp = {
        {   xtype:'form', 
         labelWidth: 100, // label settings here cascade unless overridden
         id:'fquouserdetails-panel',
-        url:'quote/formalaccept',
+        url:Ext.madasBaseUrl + 'quote/formalaccept',
         style:'margin-left:30px;margin-top:20px;',
         method:'POST',
         frame:true,
@@ -1783,7 +1783,7 @@ Ext.madasViewFormalCmp = {
                 handler: function(){
                     //use a different form to submit to avoid validation requirements
                     var simple = new Ext.BasicForm('hiddenForm', {
-                        url:'quote/formalreject',
+                        url:Ext.madasBaseUrl + 'quote/formalreject',
                         baseParams:{'qid':Ext.getCmp('quov-qid').value},
                         method:'POST'
                         });

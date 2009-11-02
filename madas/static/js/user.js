@@ -20,7 +20,7 @@ Ext.madasUserEditInit = function () {
     var userEditCmp = Ext.getCmp('useredit-panel');   
 
     //fetch user details
-    userEditCmp.load({url: 'user/userload', waitMsg:'Loading'});
+    userEditCmp.load({url: Ext.madasBaseUrl + 'user/userload', waitMsg:'Loading'});
     
     //attach validator that ext cannot deal with
     Ext.getCmp("userEditPassword").on('blur', Ext.madasUserEditValidatePassword);
@@ -61,7 +61,7 @@ Ext.madasUserEditCmp = {id:'useredit-container-panel',
                     {  xtype:'form', 
                     labelWidth: 100, // label settings here cascade unless overridden
                     id:'useredit-panel',
-                    url:'user/userSave',
+                    url:Ext.madasBaseUrl + 'user/userSave',
                     method:'POST',
                     frame:true,
                     reader: Ext.madasJsonReader,
