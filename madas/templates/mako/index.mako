@@ -28,6 +28,11 @@
 <script src="${wh.url('/static/repo/ext-3.0.0/adapter/ext/ext-base-debug.js')}" type="text/javascript"></script>
 <script src="${wh.url('/static/repo/ext-3.0.0/ext-all-debug.js')}"></script>
 
+<!-- setup variable -->
+<script>
+Ext.madasBaseUrl = '${ APP_SECURE_URL }';
+</script>
+
 <!-- Madas scripts -->
 <script type="text/javascript" src="${wh.url('/static/js/FileUploadField.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/GridSearch.js')}"></script>
