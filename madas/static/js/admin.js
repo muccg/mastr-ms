@@ -16,7 +16,7 @@
  */
 Ext.madasAdminRequestsInit = function(){
 
-	var dataurl = "admin/adminrequests";
+	var dataurl = Ext.madasBaseUrl + "admin/adminrequests";
 
     var madasReader = new Ext.madasJsonReader({
         root            : 'response.value.items',
@@ -94,7 +94,7 @@ Ext.madasAdminRequestsInit = function(){
 
 Ext.madasUserSearchInit = function(){
 
-	var dataurl = "admin/usersearch";
+	var dataurl = Ext.madasBaseUrl + "admin/usersearch";
 
     var madasReader = new Ext.madasJsonReader({
         root            : 'response.value.items',
@@ -181,7 +181,7 @@ Ext.madasUserSearchInit = function(){
 
 Ext.madasRejectedUserSearchInit = function(){
 
-	var dataurl = "admin/rejectedUsersearch";
+	var dataurl = Ext.madasBaseUrl + "admin/rejectedUsersearch";
 
     var madasReader = new Ext.madasJsonReader({
         root            : 'response.value.items',
@@ -259,7 +259,7 @@ Ext.madasRejectedUserSearchInit = function(){
 
 Ext.madasDeletedUserSearchInit = function(){
 
-	var dataurl = "admin/deletedUsersearch";
+	var dataurl = Ext.madasBaseUrl + "admin/deletedUsersearch";
 
     var madasReader = new Ext.madasJsonReader({
         root            : 'response.value.items',
@@ -396,7 +396,7 @@ Ext.madasAdminUserEditCmp = {id:'adminuseredit-container-panel',
                     {  xtype:'form', 
                     labelWidth: 100, // label settings here cascade unless overridden
                     id:'adminuseredit-panel',
-                    url:'admin/userSave',
+                    url:Ext.madasBaseUrl + 'admin/userSave',
                     method:'POST',
                     frame:true,
                     reader: Ext.madasJsonReader,
@@ -489,7 +489,7 @@ Ext.madasAdminUserEditCmp = {id:'adminuseredit-container-panel',
                             listWidth:230,
                             store: new Ext.data.JsonStore({
                                 storeId: 'adminUserEditNodeDS',
-                                url: 'admin/listGroups',
+                                url: Ext.madasBaseUrl + 'admin/listGroups',
                                 root: 'response.value.items',
                                 fields: ['name', 'submitValue']
                             })
@@ -902,7 +902,7 @@ Ext.madasNodeManagementDeleteTool = function(event, toolEl, panel) {
             //execute the delete
             //submit form   
             var simple = new Ext.BasicForm('hiddenForm', {
-                url:'admin/nodeDelete',
+                url:Ext.madasBaseUrl + 'admin/nodeDelete',
                 baseParams:{'name':nodename},
                 method:'POST'
                 });         
@@ -955,7 +955,7 @@ Ext.madasNodeDetailsCmp = {
                     xtype:'form',
                     labelWidth: 100, // label settings here cascade unless overridden
                     id:'nodedetails-panel',
-                    url:'admin/nodesave',
+                    url:Ext.madasBaseUrl + 'admin/nodesave',
                     region: 'center',
                     method:'POST',
                     reader: Ext.madasJsonReader,
@@ -1010,7 +1010,7 @@ Ext.madasNodeManagementCmp = {
                     { id: 'minus', qtip: 'Delete currently selected node', handler: Ext.madasNodeManagementDeleteTool }
                 ],
                 store: new Ext.data.JsonStore({
-                        url: 'admin/listGroups',
+                        url: Ext.madasBaseUrl + 'admin/listGroups',
                         baseParams: { 'ignoreNone' : 'on' },
                         root: 'response.value.items',
                         fields: ['name', 'submitValue']
