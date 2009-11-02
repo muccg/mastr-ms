@@ -92,7 +92,7 @@ Ext.madasLoginCmp = {id:'login-container-panel',
                     {  xtype:'form', 
                     labelWidth: 75, // label settings here cascade unless overridden
                     id:'login-panel',
-                    url:'login/processLogin',
+                    url:Ext.madasBaseUrl + 'login/processLogin',
                     method:'POST',
                     frame:true,
                     title: 'Login',
@@ -122,7 +122,7 @@ Ext.madasForgotPasswordCmp = {id:'forgot-password-container-panel',
                     {  xtype:'form', 
                     labelWidth: 75, // label settings here cascade unless overridden
                     id:'forgot-password-panel',
-                    url:'login/processForgotPassword',
+                    url:Ext.madasBaseUrl + 'login/processForgotPassword',
                     method:'POST',
                     frame:true,
                     title: 'Forgot Password',
@@ -178,7 +178,7 @@ Ext.madasAuthorize = function(requestedView, params) {
 
     //submit form
     var simple = new Ext.BasicForm('hiddenForm', {
-        url:module+'/authorize',
+        url:Ext.madasBaseUrl + module+'/authorize',
         baseParams:{'subaction':action, 'params':Ext.util.JSON.encode(params)},
         method:'POST'
         });
@@ -229,7 +229,7 @@ Ext.madasForgotPasswordInit = function() {
 Ext.madasLogoutInit = function(){
 
     var simple = new Ext.BasicForm('hiddenForm', {
-        url:'login/processLogout',
+        url:Ext.madasBaseUrl + 'login/processLogout',
         method:'POST'
         });
 
@@ -286,7 +286,7 @@ Ext.madasResetPasswordInit = function() {
     var resetPasswordCmp = Ext.getCmp('resetpassword-panel');   
 
     //fetch details for this request
-    resetPasswordCmp.load({url: 'login/populateResetPasswordForm', waitMsg:'Loading'});
+    resetPasswordCmp.load({url: Ext.madasBaseUrl + 'login/populateResetPasswordForm', waitMsg:'Loading'});
     
     //attach validator that ext cannot deal with
     Ext.getCmp("resetPasswordPassword").on('blur', Ext.madasResetPasswordValidatePassword);
@@ -303,7 +303,7 @@ Ext.madasResetPasswordCmp = {id:'resetpassword-container-panel',
                     {  xtype:'form', 
                     labelWidth: 100, // label settings here cascade unless overridden
                     id:'resetpassword-panel',
-                    url:'login/processResetPassword',
+                    url:Ext.madasBaseUrl + 'login/processResetPassword',
                     method:'POST',
                     frame:true,
                     reader: Ext.madasJsonReader,
