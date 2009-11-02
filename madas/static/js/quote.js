@@ -426,7 +426,7 @@ Ext.madasRequestQuoteCmp =
 
 Ext.madasQuoteRequestListInit = function(){
         
-    var dataurl = "quote/list";
+    var dataurl = Ext.madasBaseUrl + "quote/list";
         
     var madasReader = new Ext.madasJsonReader({
         root            : 'response.value.items',
