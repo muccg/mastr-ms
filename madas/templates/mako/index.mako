@@ -22,11 +22,11 @@
 
 <link rel="shortcut icon" href="/favicon.ico" />
 <link rel="stylesheet" type="text/css" href="${wh.url('/static/css/main.css')}"/>
-<link rel="stylesheet" href="static/repo/ext-3.0.0/resources/css/ext-all.css"/>
-<link rel="stylesheet" href="static/repo/ext-3.0.0/examples/ux/css/RowEditor.css"/>
-<link rel="stylesheet" type="text/css" href="static/css/file-upload.css"/>
-<script src="static/repo/ext-3.0.0/adapter/ext/ext-base-debug.js" type="text/javascript"></script>
-<script src="static/repo/ext-3.0.0/ext-all-debug.js"></script>
+<link rel="stylesheet" href="${wh.url('/static/repo/ext-3.0.0/resources/css/ext-all.css')}"/>
+<link rel="stylesheet" href="${wh.url('/static/repo/ext-3.0.0/examples/ux/css/RowEditor.css')}"/>
+<link rel="stylesheet" type="text/css" href="${wh.url('/static/css/file-upload.css')}"/>
+<script src="${wh.url('/static/repo/ext-3.0.0/adapter/ext/ext-base-debug.js')}" type="text/javascript"></script>
+<script src="${wh.url('/static/repo/ext-3.0.0/ext-all-debug.js')}"></script>
 
 <!-- Madas scripts -->
 <script type="text/javascript" src="${wh.url('/static/js/FileUploadField.js')}"></script>
