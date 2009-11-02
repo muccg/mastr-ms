@@ -1141,7 +1141,7 @@ Ext.madasRenderQuoteHistory = function(el, success, response, options) {
 
 Ext.madasQuoteRequestListAllInit = function(){
         
-    var dataurl = "quote/listAll";
+    var dataurl = Ext.madasBaseUrl + "quote/listAll";
         
     var madasReader = new Ext.madasJsonReader({
         root            : 'response.value.items',
@@ -1237,7 +1237,7 @@ Ext.madasQuoteRequestListAllInit = function(){
 
 Ext.madasFormalQuoteUserListInit = function(){
         
-    var dataurl = "quote/listFormal";
+    var dataurl = Ext.madasBaseUrl + "quote/listFormal";
         
     var madasReader = new Ext.madasJsonReader({
         root            : 'response.value.items',
