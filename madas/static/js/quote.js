@@ -944,7 +944,7 @@ Ext.madasQuoteRequestEditCmp =
 	            		id:'downloadattachbutton',
 	            		text:'Download Attachment',
 	            		handler: function() {
-	            				window.location = 'quote/downloadAttachment?quoterequestid=' + Ext.getCmp('qre-id').value;
+	            				window.location = Ext.madasBaseUrl + 'quote/downloadAttachment?quoterequestid=' + Ext.getCmp('qre-id').value;
 	            			}
 	            		}
 	            	]
@@ -1888,7 +1888,7 @@ Ext.madasViewFormalCmp = {
             		xtype:'button',
             		text:'Download Quote PDF',
             		handler: function() {
-            				window.location = 'quote/downloadPDF?quoterequestid=' + Ext.getCmp('fquov-qid').value;
+            				window.location = Ext.madasBaseUrl + 'quote/downloadPDF?quoterequestid=' + Ext.getCmp('fquov-qid').value;
             			}
             		}
             	]
