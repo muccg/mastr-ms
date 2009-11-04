@@ -9,6 +9,11 @@ from django.db.models import Q
 
 from madas import settings
 
+QUOTE_STATE_DOWNLOADED = 'downloaded'
+QUOTE_STATE_NEW = 'new' #is the default on the DB column
+QUOTE_STATE_ACCEPTED = 'accepted'
+QUOTE_STATE_REJECTED = 'rejected'
+
 def listGroups(request, *args):
     ### Authorisation Check ###
     from madas.m.views import authorize
@@ -381,7 +386,9 @@ def history(request, *args):
         qh = []
  
     qh = list(qh)
-    qh.sort(key=id)
+    #ensure we have a sorted list by date. Most likely this wont change the list order
+    #anyway, because they were probably retrieved in order.
+    qh.sort(lambda x,y: cmp(x['changetimestamp'],y['changetimestamp']))
     qh.reverse()
     print '\t', qh 
     setRequestVars(request, data=qh, totalRows=len(qh), success = True, authenticated = True, authorized = True )
@@ -675,6 +682,12 @@ def setFormalQuoteStatus(quoteobject, status):
     retval = None
     try:
         fq = Formalquote.objects.get(quoterequestid = quoteobject.id)
+        #Here we do a quick check.
+        #Don't set a quote's state to 'downloaded' unless its previous 
+        #state was new.
+        if status == QUOTE_STATE_DOWNLOADED and fq.status == QUOTE_STATE_NEW:
+            return retval
+
         fq.status = status
         fq.save()
         retval = fq
@@ -713,7 +726,7 @@ def formalAccept(request, *args):
 
         #and then...
         #mark the formal quote as accepted:
-        fq = setFormalQuoteStatus(qr, 'accepted')
+        fq = setFormalQuoteStatus(qr, QUOTE_STATE_ACCEPTED)
         
 
         #leave acceptance in the quote history
@@ -750,7 +763,7 @@ def formalReject(request, *args):
 
     if qr is not None:
         try:
-            fq = setFormalQuoteStatus(qr, 'rejected') 
+            fq = setFormalQuoteStatus(qr, QUOTE_STATE_REJECTED) 
             #leave rejection in the quote history
             _addQuoteHistory(qr, qrvalues['emailaddressid__emailaddress'], qr.tonode, qr.tonode, 'Formal quote rejected', qr.completed, qr.completed)
             #email the node rep
@@ -802,7 +815,7 @@ def downloadPDF(request, *args):
         response['Content-Length'] = os.path.getsize(filename)
         
         if fqr['fromemail'] != request.user.username:
-            setFormalQuoteStatus(qrobj, 'downloaded')
+            setFormalQuoteStatus(qrobj, QUOTE_STATE_DOWNLOADED)
         
         _addQuoteHistory(qrobj, qr['emailaddressid__emailaddress'], qrobj.tonode, qrobj.tonode, 'Formal quote downloaded', qrobj.completed, qrobj.completed)    
 
