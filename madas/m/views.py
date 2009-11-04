@@ -10,6 +10,9 @@ from django.shortcuts import render_to_response, render_mako
 from webhelpers import siteurl
 from madas.login.views import processLogin
 
+def check_default(request):
+    return True
+
 def login(request, *args):
     success = processLogin(request, args)
     return HttpResponseRedirect(siteurl(request)) 
@@ -183,7 +186,6 @@ def redirectMain(request, *args, **kwargs):
 
     print 'redirectMain is redirecting to ', siteurl(request)
     return HttpResponseRedirect(siteurl(request))
-
     
 from django.conf import settings
 from webhelpers import siteurl

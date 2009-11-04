@@ -136,6 +136,9 @@ if "DJANGODEV" in os.environ:
     DEV_SERVER = True
     # debug site table
     SITE_ID = 1
+    #functions to evaluate for status checking
+    from status_checks import *
+    STATUS_CHECKS = [check_default]
 
     
 
@@ -186,6 +189,10 @@ else:
 
     # production site id
     SITE_ID = 1
+    #functions to evaluate for status checking
+    from status_checks import *
+    STATUS_CHECKS = [check_default]
+
 
     #####################################################################################################
     # Application Variables
@@ -194,7 +201,7 @@ else:
     SITE_NAME = 'madas'
     RETURN_EMAIL = 'techs@ccg.murdoch.edu.au'
     DEFAULT_GROUP = 'madas'  #this needs to exist in the database.
-    AUTH_LDAP_SERVER = 'ldaps://fds3.localdomain'
+    AUTH_LDAP_SERVER = ('ldaps://fds3.localdomain', 'ldaps://fds2.localdomain', 'ldaps://fds1.localdomain')
     AUTH_LDAP_ADMIN_BASE = 'dc=ccg,dc=murdoch,dc=edu,dc=au'
     AUTH_LDAP_BASE = 'ou=People,dc=ccg,dc=murdoch,dc=edu,dc=au'
     AUTH_LDAP_GROUP_BASE = 'ou=NEMA,ou=Web Groups,dc=ccg,dc=murdoch,dc=edu,dc=au'
