@@ -139,7 +139,7 @@ if "DJANGODEV" in os.environ:
     #functions to evaluate for status checking
     from status_checks import *
     STATUS_CHECKS = [check_default]
-
+    
     
 
     #####################################################################################################
@@ -254,7 +254,7 @@ INSTALLED_APPS = (
 )
 
 
-
+SESSION_COOKIE_PATH = url('/')
 
 AUTHENTICATION_BACKENDS = (
  'django.contrib.auth.backends.LDAPBackend',
