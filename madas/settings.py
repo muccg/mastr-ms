@@ -254,7 +254,7 @@ INSTALLED_APPS = (
 )
 
 
-SESSION_COOKIE_PATH = url('/')
+SESSION_COOKIE_PATH = url('/?')
 
 AUTHENTICATION_BACKENDS = (
  'django.contrib.auth.backends.LDAPBackend',
