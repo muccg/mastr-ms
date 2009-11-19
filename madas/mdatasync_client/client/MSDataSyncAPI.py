@@ -79,8 +79,13 @@ class MSDataSyncAPI(object):
         import urllib
         import simplejson
         postvars = {'files' : simplejson.dumps(files), 'organisation' : simplejson.dumps(organisation), 'sitename' : simplejson.dumps(sitename), 'stationname': simplejson.dumps(station)}
-        f = urllib.urlopen(self.config.getValue('synchub'), urllib.urlencode(postvars))
-        jsonret = f.read()
+        try:
+            f = urllib.urlopen(self.config.getValue('synchub'), urllib.urlencode(postvars))
+            jsonret = f.read()
+        except Exception, e:
+            returnFn(retcode = False, retstring = "Could not connect %s" % (str(e)) )
+            return
+
         self.log('Synchub config: %s' % jsonret)
         j = simplejson.loads(jsonret)
         self.log('Synchub config loaded object is: %s' % j)
@@ -97,7 +102,7 @@ class MSDataSyncAPI(object):
 
         self._appendTask(returnFn, self._impl.checkRsync, localdir, user, j['host'], j['path'], rules=[j['rules']])
 
-    def defaultReturn(self, *args):
+    def defaultReturn(self, *args, **kwargs):
         #print 'rsync returned: ', retval
         self.log('Default return callback:%s' % (str(args)), Debug=True)
 
@@ -145,7 +150,7 @@ class MSDSImpl(object):
         logfile = 'rsync_log.txt'
         #Popen('rsync -t %s %s:%s' % (sourcedir, remotehost, remotedir) )
         
-        cmdhead = ['rsync', '-tavz']
+        cmdhead = ['rsync', '-tavz'] #t, i=itemize-changes,a=archive,v=verbose,z=zip
         cmdtail = ['--log-file=%s' % (logfile), sourcedir, '%s@%s:%s' % (remoteuser, remotehost, remotedir)]
 
         cmd = []
@@ -162,12 +167,13 @@ class MSDSImpl(object):
 
         self.log('cmd is %s ' % str(cmd))
 
+        #p = Popen( cmd, stdout=PIPE, stderr=PIPE, stdin=PIPE)
+        #for line in p.stdout:
+        #    self.log(line)
+        
         p = Popen( cmd,
-                   stdout=PIPE, stdin=PIPE, stderr = STDOUT, bufsize=1)
-        for line in p.stdout:
-            self.log(line)
-        #p = Popen( cmd,
-        #           stdout=self.log, stderr=self.log, stdin=PIPE)
+                   stdout=self.log, stderr=self.log, stdin=PIPE)
+        
         #p = Popen( cmd,
         #           stdout=self.log, stderr=self.log, stdin=PIPE)
 

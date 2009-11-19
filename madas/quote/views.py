@@ -322,8 +322,16 @@ def listFormal(request, *args):
     ### End Authorisation Check ###
     
     uname = request.user.username
+    ld = LDAPHandler()
+    g =  ld.ldap_get_user_groups(request.user.username)
+    from madas.users import views
+
+    nodelist = views.getNodeMemberships(g)
 
     fquoteslist = Formalquote.objects.filter(Q(fromemail__iexact=uname)|Q(toemail__iexact=uname)).values('id', 'quoterequestid', 'details', 'created', 'fromemail', 'toemail', 'status')        
+    #fquoteslist = Formalquote.objects.filter(Q(fromemail__iexact=uname)|Q(toemail__iexact=uname)|Q(quoterequestid__tonode=nodelist[0])).values('id', 'quoterequestid', 'details', 'created', 'fromemail', 'toemail', 'status')        
+    
+
 
     setRequestVars(request, success=True, items=fquoteslist, totalRows=len(fquoteslist), authenticated=True, authorized=True)
  
