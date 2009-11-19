@@ -156,9 +156,6 @@ def _usersave(request, username, admin=False):
     r = request.REQUEST
     u = username
    
-
-
-    #TODO: need error checking on these to prevent users corrupting their userrecord.
     originalEmail = str(u)
     username = str(r.get('email', originalEmail)) #if empty, set to originalEmail
     email = str(r.get('email', originalEmail)) #if empty, set to originalEmail
@@ -246,11 +243,11 @@ def _usersave(request, username, admin=False):
     #don't let a non-admin change their node
     if request.session.has_key('isAdmin') and request.session['isAdmin'] and admin:
         #TODO do something with the new status
-        if node != '': #and node not in oldnode: 
+        if node != '': #empty string is 'Don't Know' 
             newnode = [node] #only allow one 'newnode'
             print 'Got new node %s and was admin' % (node)
         else:
-            newnode = oldnode
+            newnode = []
     else:
         #TODO use the old status, don't capture whatever was POSTed.
         newnode = oldnode

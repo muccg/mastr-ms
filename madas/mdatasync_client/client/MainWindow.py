@@ -165,9 +165,12 @@ class MainWindow(wx.Frame):
         self.setState(APPSTATE.CHECKING_SYNCHUB)
         self.MSDSCheckFn(self, APPSTATE.UPLOADING_DATA, 'notused', self.CheckReturnFn)
 
-    def CheckReturnFn(self, *args):
+    def CheckReturnFn(self, retcode = True, retstring = "", *args):
         self.setState(APPSTATE.IDLE)
-        self.log.WriteText('Check function returned')
+        if retcode:
+            self.log.WriteText('Check function returned')
+        else:
+            self.log.WriteText(retstring)
 
 
     def __testMenuFunction(self, event):
