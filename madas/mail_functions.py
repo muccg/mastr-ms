@@ -46,6 +46,23 @@ def sendQuoteRequestConfirmationEmail(request, qid, toemail, fromemail = RETURN_
         send_mail(subject, body, fromemail, [toemail],fail_silently = False)
     except Exception, e:
         print 'Error sending quote acknowlegement mail to', toemail, ':', str(e)
+        
+def sendRegistrationToAdminEmail(request, toemail, fromemail=RETURN_EMAIL):
+    #This email should always come from 'the system' - i.e. the RETURN_EMAIL
+    #The request goes 'TO' an admin or node rep, which is passed in in 'toemail'.
+    print '\tSending email'
+    try:
+        subject = 'New Madas Registration'
+        body = 'A new user has registered for Madas. Please follow the link below to review this request.\r\n\r\n'
+        body += "Please click the following link to login to Madas.\r\n\r\n"
+        body += "%s" % (siteurl(request))
+       #TODO: Testing settings: toemail overridden. Remove this line to use the live data
+        print 'Test email settings. Would have sent to ', toemail
+        #toemail = 'bpower@ccg.murdoch.edu.au'
+        print '\tSending email from: %s, to: %s' % (fromemail, toemail)
+        send_mail(subject, body, fromemail, [toemail],fail_silently = False)
+    except Exception, e:
+        print 'Error sending mail to Node Reps/Admin: ', toemail , ':', str(e)
 
 def sendQuoteRequestToAdminEmail(request, qid, toemail, fromemail=RETURN_EMAIL):
     #This email should always come from 'the system' - i.e. the RETURN_EMAIL

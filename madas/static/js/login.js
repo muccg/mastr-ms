@@ -107,7 +107,7 @@ Ext.madasLoginCmp = {id:'login-container-panel',
                             xtype:'panel',
                             el:"loginDiv"
                         },
-                        {xtype:'panel', width: 350, style:'padding-top:4px;padding-left:80px;', html: '<a href="/madas-registration/">Click here</a> to register for an account' },
+                            {xtype:'panel', width: 350, style:'padding-top:4px;padding-left:80px;', html: '<a href="#" onclick="Ext.madasChangeMainContent(\'registration\')">Click here</a> to register for an account' },
                         {xtype:'panel', width: 350, style:'padding-top:4px;padding-left:80px;', html: '<a href="#" onclick="Ext.madasAuthorize(\'login:forgotpassword\')">Forgot your password?</a>' }
                     ]}
                     ]

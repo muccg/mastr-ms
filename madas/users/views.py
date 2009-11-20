@@ -259,17 +259,18 @@ def _usersave(request, username, admin=False):
     r = None
     try:
         if previous_details == {}: #the user didnt exist
-            objclasses = ['top', 'inetOrgPerson', 'simpleSecurityObject', 'organizationalPerson', 'person']
-            worked = ld.ldap_add_user(username, detailsDict, objectclasses=[])
+            #objclasses = ['top', 'inetOrgPerson', 'simpleSecurityObject', 'organizationalPerson', 'person']
+            objclasses = 'inetorgperson'
+            worked = ld.ldap_add_user(username, updateDict, objectclasses=objclasses, usercontainer='ou=NEMA', userdn='ou=People', basedn='dc=ccg,dc=murdoch,dc=edu,dc=au')
+            ld.ldap_add_user_to_group(username, 'Pending')
             if not worked:
                 raise Exception, 'Could not add user %s' % (username)
-
-        r = ld.ldap_update_user(u, username, password, updateDict, pwencoding='md5')
+        else:
+            r = ld.ldap_update_user(u, username, password, updateDict, pwencoding='md5')
         print '\tUser update successful for %s' % (u) 
     except Exception, e:
         print '\tException when updating user %s: %s' % (u, str(e))
    
-    
     #only trust the isAdmin checkbox if editing user is an admin
     if request.session.has_key('isAdmin') and request.session['isAdmin'] and admin:
         #honour 'isAdmin' checkbox

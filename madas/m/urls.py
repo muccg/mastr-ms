@@ -49,7 +49,10 @@ urlpatterns = patterns(
     (r'^admin/nodeDelete', 'madas.admin.views.node_delete', {'SSL':True}),
     (r'^admin/userload', 'madas.admin.views.user_load', {'SSL':True}), 
     (r'^admin/userSave', 'madas.admin.views.user_save', {'SSL':True}), 
-
+    
+    #registration
+    (r'^registration/submit', 'madas.registration.views.submit', {'SSL':True}), 
+    
     #(r'serverinfo', 'madas.m.views.serverinfo'),
     #default
     #(r'^(?P<modname>.*)/(?P<submodname.*>)?(P<args>.*)$', 'madas.m.views.serveIndex', {module=modname, submodule=submodname, args=args}),
