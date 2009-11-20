@@ -46,7 +46,13 @@ Ext.madasChangeMainContent = function(contentName, paramArray){
             //default
             Ext.getCmp('center-panel').layout.setActiveItem('dashboard-panel'); 
             break;
-    
+
+        case "registration":
+            showMenu = false;
+            cancelBackTarget = false;
+            Ext.getCmp('center-panel').layout.setActiveItem('registration-container-panel');
+            break;
+            
         case "login":
             showMenu = false;
             cancelBackTarget = false;
@@ -254,7 +260,7 @@ Ext.madasInitApplication = function(appSecureUrl, username, mainContentFunction,
                 id:'center-panel',
                 layout: 'card',
                 activeItem:0,
-                items: [Ext.madasDashboardCmp, Ext.madasLoginCmp, Ext.madasNotAuthorizedCmp, Ext.madasAdminUserEditCmp, 
+                items: [Ext.madasDashboardCmp, Ext.madasLoginCmp, Ext.madasRegistrationCmp, Ext.madasNotAuthorizedCmp, Ext.madasAdminUserEditCmp, 
                         Ext.madasUserEditCmp, Ext.madasForgotPasswordCmp, Ext.madasResetPasswordCmp, Ext.madasNodeManagementCmp, 
                         Ext.madasRequestQuoteCmp, Ext.madasQuoteRequestEditCmp, Ext.madasViewFormalCmp,
                         Ext.madasScreencastsCmp]

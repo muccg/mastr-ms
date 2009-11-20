@@ -37,6 +37,7 @@ Ext.madasBaseUrl = '${ APP_SECURE_URL }';
 <script type="text/javascript" src="${wh.url('/static/js/FileUploadField.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/GridSearch.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/menu.js')}"></script>
+<script type="text/javascript" src="${wh.url('/static/js/registration.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/login.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/controller.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/dashboard.js')}"></script>
