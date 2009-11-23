@@ -160,7 +160,7 @@ if "DJANGODEV" in os.environ:
     LDAPADMINPASSWORD = 'nr2WovGfkWR'
     MADAS_STATUS_GROUPS = ['User', 'Pending', 'Deleted', 'Rejected']
     MADAS_ADMIN_GROUPS = ['Administrators', 'Node Reps']
-    SESSION_TIMEOUT = 1500 #30 minute session timeout
+    SESSION_TIMEOUT = 1800 #30 minute session timeout
     
     REPO_FILES_ROOT = PERSISTENT_FILESTORE
     QUOTE_FILES_ROOT = os.path.join(PERSISTENT_FILESTORE, 'quotes')
@@ -211,7 +211,7 @@ else:
     LDAPADMINPASSWORD = 'nr2WovGfkWR'
     MADAS_STATUS_GROUPS = ['User', 'Pending', 'Deleted', 'Rejected']
     MADAS_ADMIN_GROUPS = ['Administrators', 'Node Reps']
-    SESSION_TIMEOUT = 1500 #30 minute session timeout
+    SESSION_TIMEOUT = 1800 #30 minute session timeout
     
     REPO_FILES_ROOT = PERSISTENT_FILESTORE
     QUOTE_FILES_ROOT = os.path.join(PERSISTENT_FILESTORE, 'quotes')
