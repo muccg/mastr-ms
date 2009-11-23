@@ -328,8 +328,12 @@ def listFormal(request, *args):
 
     nodelist = views.getNodeMemberships(g)
 
-    fquoteslist = Formalquote.objects.filter(Q(fromemail__iexact=uname)|Q(toemail__iexact=uname)).values('id', 'quoterequestid', 'details', 'created', 'fromemail', 'toemail', 'status')        
-    #fquoteslist = Formalquote.objects.filter(Q(fromemail__iexact=uname)|Q(toemail__iexact=uname)|Q(quoterequestid__tonode=nodelist[0])).values('id', 'quoterequestid', 'details', 'created', 'fromemail', 'toemail', 'status')        
+    #if a noderep or admin, and you have a node:
+    if ('Administrators' in g or 'Node Reps' in g) and len(nodelist) > 0:
+        fquoteslist = Formalquote.objects.filter(Q(fromemail__iexact=uname)|Q(toemail__iexact=uname)|Q(quoterequestid__tonode=nodelist[0])).values('id', 'quoterequestid', 'details', 'created', 'fromemail', 'toemail', 'status')        
+    #otherwise show all quotes to me, from me, or from this node.
+    else:
+        fquoteslist = Formalquote.objects.filter(Q(fromemail__iexact=uname)|Q(toemail__iexact=uname)).values('id', 'quoterequestid', 'details', 'created', 'fromemail', 'toemail', 'status') 
     
 
 
