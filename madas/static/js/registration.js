@@ -389,7 +389,7 @@ items:[
                                                                                ['Zambia', 'Zambia'],
                                                                                ['Zimbabwe', 'Zimbabwe']]
                                                                        })
-                                       }),
+                                       })
                ],
        buttons: [
                  {
