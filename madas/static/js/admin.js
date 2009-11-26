@@ -50,7 +50,7 @@ Ext.madasAdminRequestsInit = function(){
     };
     var topToolbar = new Ext.Toolbar({
             items   : [
-                {  id: 'adminrequestsEditBtn', text: 'Edit', handler: editHandler, disabled: true }
+                {  id: 'adminrequestsEditBtn', text: 'Edit', handler: editHandler, disabled: true, }
             ]
         });
     var selectionModel = new Ext.grid.RowSelectionModel({ singleSelect: true });
