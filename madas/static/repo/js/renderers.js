@@ -5,23 +5,16 @@ function renderSampleClass(value, p, record){
             value.text);
 }
 
-function renderProgress(v, p, record) {
-	var text_post = '%';
-	
-	if(this.text){
-        text_post = this.text;
+function renderStatus(v, p, record) {
+	var numeric = v;
+    var value = "";
+    if (numeric == "1") {
+        value = "New";
+    } else if (numeric == "2") {
+        value = "Designed";
     }
-	var text_front;
-	var text_back;
-	
-    if (!Ext.isDefined(v)) {
-        v = '';
-    }
-    
-	text_front = (v <55)?'':v+text_post;
-	text_back = (v >=55)?'':v+text_post;		
 
-	return String.format('<div class="x-progress-wrap" style="height:14px;"><div class="x-progress-inner"><div class="x-progress-bar" style="width:{0}%;"><div class="x-progress-text" style="width:100%;height:12px;">{1}</div></div><div class="x-progress-text x-progress-text-back" style="width:100%;">{2}</div></div></div>',v,text_front,text_back);		
+	return value;
 }
 
 function renderOrganism(val) {

@@ -16,7 +16,8 @@ Ext.madasMenuRender = function(username) {
                         {text:'Rejected User Search', id:'admin:rejectedUsersearch', handler: Ext.madasMenuHandler},
                         {text:'Deleted User Search', id:'admin:deletedUsersearch', handler: Ext.madasMenuHandler},
                         new Ext.menu.Separator(),
-                        {text:'Node Management', id:'admin:nodelist', handler: Ext.madasMenuHandler}
+                        {text:'Node Management', id:'admin:nodelist', handler: Ext.madasMenuHandler},
+                        {text:'Organisation Management', id:'admin:orglist', handler: Ext.madasMenuHandler}
                     ]
                     }
                 },

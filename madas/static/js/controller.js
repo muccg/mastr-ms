@@ -104,6 +104,11 @@ Ext.madasChangeMainContent = function(contentName, paramArray){
             Ext.getCmp('center-panel').layout.setActiveItem('nodeManagementCmp');
             break;
             
+        case "admin:orglist":
+            Ext.madasOrgManagementInit();
+            Ext.getCmp('center-panel').layout.setActiveItem('orgManagementCmp');
+            break;
+            
         case "admin:useredit":
             cancelBackTarget = false;
             Ext.madasAdminUserEditInit(paramArray);
@@ -261,7 +266,8 @@ Ext.madasInitApplication = function(appSecureUrl, username, mainContentFunction,
                 layout: 'card',
                 activeItem:0,
                 items: [Ext.madasDashboardCmp, Ext.madasLoginCmp, Ext.madasRegistrationCmp, Ext.madasNotAuthorizedCmp, Ext.madasAdminUserEditCmp, 
-                        Ext.madasUserEditCmp, Ext.madasForgotPasswordCmp, Ext.madasResetPasswordCmp, Ext.madasNodeManagementCmp, 
+                        Ext.madasUserEditCmp, Ext.madasForgotPasswordCmp, Ext.madasResetPasswordCmp, Ext.madasNodeManagementCmp,
+                        Ext.madasOrgManagementCmp,
                         Ext.madasRequestQuoteCmp, Ext.madasQuoteRequestEditCmp, Ext.madasViewFormalCmp,
                         Ext.madasScreencastsCmp]
             }

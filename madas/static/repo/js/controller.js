@@ -1,18 +1,4 @@
 Ext.madasExperimentInit = function() {
-    if (Ext.madasDenyReInit) { return; }
-        
-    Ext.madasDenyReInit = true;
-    var expId = Ext.madasCurrentExperimentId();
-
-    //hide/show relevant fieldsets
-    Ext.madasExperimentShowFieldsets();
-    
-    biologicalSourceStore.proxy.conn.url = wsBaseUrl + 'records/biologicalsource/experiment__id/' + expId;
-    biologicalSourceStore.load();
-    Ext.getCmp("expNav").getView().refresh();
-    Ext.madasDenyReInit = false;
-    
-    Ext.madasUpdateNav();
 };
 
 Ext.madasBlur = function(invoker) {
@@ -53,33 +39,35 @@ Ext.madasExperimentBlur = function(invoker) {
     var expName = Ext.getCmp("experimentName").getValue();
     var expDescription = Ext.getCmp("experimentDescription").getValue();
     var expComment = Ext.getCmp("experimentComment").getValue();
+    var expClientId = Ext.getCmp("client").getValue();
+    if (expClientId === null) {
+        expClientId = '';
+    }
     
     Ext.madasExperimentDeferredInvocation = invoker;
 
     if (expId === 0 && expName !== "") {
         
-        //unhook the default load handler
-        experimentStore.un("load", Ext.madasExperimentReload);
-        //hook up new load handler
-        experimentStore.on("load", Ext.madasSyncBiologicalSource);
-        
-        experimentStore.proxy.conn.url = wsBaseUrl + 'create/experiment/?title='+escape(expName)+'&description='+escape(expDescription)+'&comment='+escape(expComment)+'&status_id=2';
-        experimentStore.load();
+        var saver = new Ajax.Request(wsBaseUrl + 'create/experiment/?title='+escape(expName)+'&description='+escape(expDescription)+'&comment='+escape(expComment)+'&status_id=2&client_id='+escape(expClientId), 
+                                             { 
+                                             asynchronous:true, 
+                                             evalJSON:'force',
+                                     onSuccess:     Ext.madasExperimentBlurSuccess
+                                     });
     } else {
-        //unhook the default load handler
-        experimentStore.un("load", Ext.madasExperimentReload);
-        //hook up new load handler
-        experimentStore.on("load", Ext.madasSyncBiologicalSource);
-        
-        experimentStore.proxy.conn.url = wsBaseUrl + 'update/experiment/'+expId+'/?title='+escape(expName)+'&description='+escape(expDescription)+'&comment='+escape(expComment)+'&status_id=2';
-        experimentStore.load();
-    
-        Ext.madasExperimentBlurSuccess();
+        var saver = new Ajax.Request(wsBaseUrl + 'update/experiment/'+expId+'/?title='+escape(expName)+'&description='+escape(expDescription)+'&comment='+escape(expComment)+'&status_id=2&client_id='+escape(expClientId), 
+                                     { 
+                                     asynchronous:true, 
+                                     evalJSON:'force',
+                                     onSuccess:     Ext.madasExperimentBlurSuccess
+                                     });
     }
 };
 
-Ext.madasExperimentBlurSuccess = function() {
-    experimentStore.un("load", Ext.madasExperimentBlurSuccess);
+Ext.madasExperimentBlurSuccess = function(response) {
+    if (Ext.isDefined(response)) {
+        Ext.madasCurrentExpId = response.responseJSON.rows[0].id;
+    }
     
     var index = Ext.madasExperimentDeferredInvocation.index;
 
@@ -91,57 +79,6 @@ Ext.madasExperimentBlurSuccess = function() {
     Ext.madasExperimentDeferredInvocation.init();
     
     Ext.madasExperimentDeferredInvocation = {'index':-1, 'init':Ext.madasNull};
-};
-
-Ext.madasSyncBiologicalSource = function() {
-    var organismId = Ext.getCmp("speciesfield").getValue();
-    var expId = Ext.madasCurrentExperimentId();
-    var loadedBioSource = null;
-    var organismType = Ext.getCmp("organismType").getValue();
-    var table = 'biologicalsource';
-    var additionalValues = '';
-    //console.log("sync bio");
-    
-    if (biologicalSourceStore.getTotalCount() > 0) {
-        loadedBioSource = biologicalSourceStore.getAt(0).get("id");
-    }
-
-    //plant 2
-    if (Ext.getCmp("organismType").getValue() == "2") {
-        table = "plant";
-        additionalValues = '&development_stage='+escape(Ext.getCmp('development_stage').getValue());
-    }
-    
-    //animal 3
-    if (Ext.getCmp("organismType").getValue() == "3") {
-        table = "animal";
-        additionalValues = "&sex_id=1";
-    }
-    
-    //human 4
-    if (Ext.getCmp("organismType").getValue() == "4") {
-        table = "human";
-        additionalValues = "&sex_id=1";
-    }
-
-    biologicalSourceStore.on("load", Ext.madasExperimentBlurSuccess);
-    biologicalSourceStore.on("load", function() {biologicalSourceStore.on("load", Ext.madasExperimentBlurSuccess);});
-    
-    if (loadedBioSource === null && organismId !== '') {
-        //save the species details
-
-        biologicalSourceStore.proxy.conn.url = wsBaseUrl + 'create/' + table + '/?organism_id='+escape(organismId)+'&experiment_id='+escape(expId)+additionalValues;
-        biologicalSourceStore.load();
-    } else if (loadedBioSource !== null && organismId !== '') {
-        //save the species details
-        
-        biologicalSourceStore.proxy.conn.url = wsBaseUrl + 'update/' + table + '/'+loadedBioSource+'/?organism_id='+escape(organismId)+'&experiment_id='+escape(expId)+additionalValues;
-        biologicalSourceStore.load();
-    }
-    
-    //rehook original callback handler
-    experimentStore.un("load", Ext.madasSyncBiologicalSource);
-    experimentStore.on("load", Ext.madasExperimentReload);
 };
 
 Ext.madasExperimentShowFieldsets = function(organismType) {
@@ -207,136 +144,27 @@ Ext.madasExperimentDetails = {
                 items: [
                     { xtype:'textfield', fieldLabel:'experiment name', enableKeyEvents:true, id:'experimentName', allowBlank:false, listeners:{'keydown':function(t, e){ Ext.madasUpdateNav(); return true; }, 'keyup':function(t, e){ Ext.madasUpdateNav(); return true; }}},
                     { xtype:'textarea', fieldLabel:'description', id:'experimentDescription', width:400 },
-                    { xtype:'textarea', fieldLabel:'comment', id:'experimentComment', width:400 }
-                    ]
-                },
-                    { xtype:'fieldset',
-                    title:'source type',
-                    autoheight:true,
-                    items: [
-                            { xtype:'combo', 
-                            fieldLabel:'type',
-                            editable:false,
-                            id:'organismType',
-                            forceSelection:true,
-                            displayField:'value',
-                            valueField:'key',
-                            hiddenName:'organismtype',
-                            lazyRender:true,
-                            allowBlank:false,
-                            typeAhead:false,
-                            triggerAction:'all',
-                            listWidth:230,
-                            store: organismTypeComboStore,
-                            listeners:{'select':function(f, r, i) {
-                            if (r === undefined || r.data.key === undefined) {
-                            return;
-                            }
-                            
-                            Ext.madasCurrentOrganismTypeValue = r.data.key;
-                            
-                            organismComboStore = new Ext.data.JsonStore(
-                                                   {
-                                                   storeId: 'organismCombo',
-                                                                        method:'GET',
-                                                   autoLoad: true,
-                                                   url: wsBaseUrl + 'populate_select/organism/id/name/type/' + r.data.key,
-                                                   root: 'response.value.items',
-                                                   fields: ['value', 'key'],
-                                                   listeners: {'load':Ext.madasDSLoaded,
-                                                   'load':function(){
-                                                   if (Ext.getCmp('speciesfield')) {
-                                                   Ext.getCmp('speciesfield').setValue(Ext.getCmp('speciesfield').getValue());
-                                                   }
-                                                   },
-                                                   'loadexception':Ext.madasDSLoadException}
-                                                   }
-                                                   );
-                            
-                            Ext.getCmp('speciesfield').bindStore(organismComboStore);
-                            Ext.getCmp('speciesfield').clearValue();
-                            Ext.getCmp('rankfield').setValue("");
-                            Ext.getCmp('upperrankfield').setValue("");
-                            Ext.getCmp('ncbifield').setValue("");
-                            
-                            Ext.madasExperimentShowFieldsets(r.data.key); 
-                            }}
-                            }
-                        ]
-                    },
-                { xtype:'fieldset', 
-                title:'specific info',
-                id:'organismFieldset',
-                autoHeight:true,
-                //hidden:true,
-                items: [
-                    
-                    { xtype:'combo', 
-                        fieldLabel:'specific type',
-                        id:'speciesfield',
+                    { xtype:'textarea', fieldLabel:'comment', id:'experimentComment', width:400 },
+                    new Ext.form.ComboBox({
+                        fieldLabel: 'client',
+                        id: 'client',
+                        name: 'clientText',
                         editable:false,
-                        disabled:true,
                         forceSelection:true,
                         displayField:'value',
                         valueField:'key',
-                        hiddenName:'species',
+                        hiddenName:'clientValue',
                         lazyRender:true,
-                        allowBlank:false,
-                        typeAhead:false,
+                        allowBlank:true,
+                        typeAhead:true,
                         triggerAction:'all',
                         listWidth:230,
-                        store: organismComboStore,
-                        listeners:{'select':function(f, r, i) {
-                            organismStore.proxy.conn.url = wsBaseUrl + "records/organism/id/" + r.data.key;
-                            organismStore.load();
-
-                            Ext.madasUpdateNav();
-
-                        }}
-                    },
-                    { xtype:'textfield', 
-                        fieldLabel:'rank',
-                        id:'rankfield',
-                        readOnly:true,
-                        style:'background:transparent;'
-                        },
-                    { xtype:'textfield', 
-                        fieldLabel:'upper rank',
-                        id:'upperrankfield',
-                        readOnly:true,
-                        style:'background:transparent;'
-                        },
-                    { xtype:'textfield', 
-                        fieldLabel:'NCBI ID',
-                        id:'ncbifield',
-                        readOnly:true,
-                        style:'background:transparent;'
-                        }
+                        disabled: false,
+                        mode:'local',
+                        store: new Ext.data.ArrayStore({fields:['key', 'value'], data:[]})
+                    })
                     ]
-                },
-                    { xtype:'fieldset', 
-                    title:'plant info',
-                    id:'plantFieldset',
-                    autoHeight:true,
-                    //hidden:true,
-                    items: [
-                            
-                            { xtype:'combo', 
-                            fieldLabel:'development stage',
-                            id:'development_stage',
-                            editable:true,
-                            forceSelection:false,
-                            displayField:'value',
-                            valueField:undefined,
-                            lazyRender:true,
-                            allowBlank:false,
-                            typeAhead:false,
-                            triggerAction:'all',
-                            listWidth:230,
-                            store: plantComboStore
-                            }
-                        ]
-                    }
+                }
             ]
         }
     ]
@@ -413,7 +241,7 @@ Ext.madasExperimentCmp = {
                             {
                                 storeId:"navDS",
                                 fields: ["nav", "init", "blur", "enabled"],
-                                data: [ ["experiment details", Ext.madasExperimentInit, Ext.madasExperimentBlur, true], ["samples/classes", Ext.madasExperimentSamplesInit, Ext.madasBlur, false], ["source", Ext.madasBioSourceInit, Ext.madasBioSourceBlur, false], ["growth",Ext.madasGrowthInit, Ext.madasBlur,false], ["treatment",Ext.madasTreatmentInit, Ext.madasBlur,false], ["sample prep",Ext.madasSamplePrepInit, Ext.madasBlur,false], ["files", Ext.madasFilesInit, Ext.madasBlur, false], ["access",Ext.madasAccessInit, Ext.madasBlur,false] ]
+                                data: [ ["experiment details", Ext.madasExperimentInit, Ext.madasExperimentBlur, true], ["source", Ext.madasBioSourceInit, Ext.madasBioSourceBlur, false], ["treatment",Ext.madasTreatmentInit, Ext.madasBlur,false], ["sample prep",Ext.madasSamplePrepInit, Ext.madasBlur,false], ["samples/classes", Ext.madasExperimentSamplesInit, Ext.madasBlur, false], ["files", Ext.madasFilesInit, Ext.madasBlur, false], ["access",Ext.madasAccessInit, Ext.madasBlur,false] ]
                             }
                         ),
                         listeners:{"render":function(a){window.setTimeout("Ext.getCmp('expNav').getSelectionModel().selectFirstRow();", 500);}}
@@ -432,11 +260,10 @@ Ext.madasExperimentCmp = {
         bodyStyle:'padding:0px;',
         items:[
             Ext.madasExperimentDetails,
-            Ext.madasExperimentSamples,
             Ext.madasBioSource,
-            Ext.madasGrowth,
             Ext.madasTreatment,
             Ext.madasSamplePrep,
+            Ext.madasExperimentSamples,
             Ext.madasFiles,
             Ext.madasAccess
         ]
@@ -444,12 +271,68 @@ Ext.madasExperimentCmp = {
 };
 
 Ext.madasLoadExperiment = function(expId) {
-    Ext.getCmp('speciesfield').disable();
+    if (expId == Ext.madasCurrentExpId) {
+        return;
+    }
+    
+    var clientsLoader = new Ajax.Request(wsBaseUrl + 'populate_select/organisation/id/name/', 
+                                     { 
+                                     asynchronous:true, 
+                                     evalJSON:'force',
+                                     onSuccess: function(response) {
+                                         var clientCombo = Ext.getCmp('client');
+                                         var data = response.responseJSON.response.value.items;
+                                         var massagedData = [];
 
-    experimentStore.proxy.conn.url = wsBaseUrl + "records/experiment/id/" + expId;
-    experimentStore.load();
+                                         for (var idx in data) {
+                                             massagedData[idx] = [data[idx]['key'], data[idx]['value']];
+                                         }
+                                         
+                                         clientCombo.getStore().loadData(massagedData);
+                                         
+                                         clientCombo.setValue(clientCombo.getValue());
+                                         }
+                                     }
+                                     );
+    
+    var expLoader = new Ajax.Request(wsBaseUrl + "records/experiment/id/" + expId, 
+                                     { 
+                                     asynchronous:true, 
+                                     evalJSON:'force',
+                                     onSuccess: function(response) {
+                                             var namefield = Ext.getCmp('experimentName');
+                                             var desc = Ext.getCmp('experimentDescription');
+                                             var comment = Ext.getCmp('experimentComment');
+                                             var client = Ext.getCmp('client');
+                                             
+                                             if (!namefield || !desc || !comment || !client) {
+                                                 return;
+                                             }
+                                             
+                                             namefield.setValue('');
+                                             desc.setValue('');
+                                             comment.setValue('');
+                                             client.setValue('');
+                                             
+                                             var rs = response.responseJSON.rows;
+                                             
+                                             if (rs.length > 0) {
+                                                 namefield.setValue(rs[0].title);
+                                                 desc.setValue(rs[0].description);
+                                                 comment.setValue(rs[0].comment);
+                                                 client.setValue(rs[0].client);
+                                             }
+                                     
+                                             Ext.madasUpdateNav();
+
+                                         }
+                                     }
+                                     );
+    
+    Ext.madasCurrentExpId = expId;
     
     Ext.madasMenuHandler({ id:'experiment:view' });
+    
 };
 
 /**
@@ -509,18 +392,12 @@ Ext.madasInitUI = function() {
 
 Ext.madasUpdateNav = function() {
     var en = Ext.getCmp("experimentName");
-    var ot = Ext.getCmp("speciesfield");
     var ds = Ext.StoreMgr.get("navDS");
     var et = Ext.getCmp("experimentTitle");
     var counter = 1;
-    //console.log(ot.isValid() + " " + ot.getValue());
-    var valid = ot.isValid();
-    if (valid) {
-        valid = (ot.getValue() === "")?false:true;
-    }
         
-    for (counter = 1; counter <= 7; counter++) {
-        ds.getAt(counter).set("enabled", (en.getValue() !== '' && valid));
+    for (counter = 1; counter <= 6; counter++) {
+        ds.getAt(counter).set("enabled", (en.getValue() !== ''));
     }
     
     if (en.getValue() === '') {
@@ -530,5 +407,4 @@ Ext.madasUpdateNav = function() {
     }
     
     Ext.getCmp("expNav").getView().refresh();
-//    en.focus();
 };

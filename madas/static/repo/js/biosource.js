@@ -1,6 +1,13 @@
 Ext.madasBioSourceInit = function() {
     var expId = Ext.madasCurrentExperimentId();
     
+    var loader = new Ajax.Request(wsBaseUrl + 'records/biologicalsource/experiment__id/'+expId, 
+                                 { 
+                                 asynchronous:true, 
+                                 evalJSON:'force',
+                                 onSuccess:     Ext.madasBioLoadSuccess
+                                 });
+    
     var orgType = Ext.madasCurrentOrganismType();
     //console.log("init for orgtype "+orgType);
     if (orgType == 4) {
@@ -21,46 +28,48 @@ Ext.madasBioSourceInit = function() {
         Ext.getCmp("organismBioSourceHumanFieldset").hide();
     }
     
-    organStore.proxy.conn.url = wsBaseUrl + 'records/organ/source__experiment__id/' + expId;
+    organStore.proxy.conn.url = wsBaseUrl + 'records/organ/experiment__id/' + expId;
     organStore.load();
-    
-    genotypeStore.proxy.conn.url = wsBaseUrl + 'records/genotype/source__experiment__id/' + expId;
-    genotypeStore.load();
+
+};
+
+Ext.madasBioLoadSuccess = function(response) {
+    Ext,madasCurrentSingleSourceId = response.responseJSON.rows[0].id;
+    Ext.getCmp('sourceType').setValue( response.responseJSON.rows[0].type );
+    Ext.getCmp('sourceInfo').setValue( response.responseJSON.rows[0].information );
+    Ext.getCmp('sourceNCBI').setValue( response.responseJSON.rows[0].ncbi_id );
 };
 
 Ext.madasBioSourceBlur = function(invoker) {
     var expId = Ext.madasCurrentExperimentId();
     Ext.madasExperimentDeferredInvocation = invoker;
     var humanGender, humanDob, humanBmi, humanDiagnosis, animalGender, animalAge, animalParentalLine;
-
+    var sourceType, sourceInfo, sourceNCBI;
+    
+    sourceType = Ext.getCmp('sourceType').getValue();
+    sourceInfo = Ext.getCmp('sourceInfo').getValue();
+    sourceNCBI = Ext.getCmp('sourceNCBI').getValue();
+    
+    //TODO process new form field elements
     if (Ext.madasCurrentOrganismType() == '4') { //human
-        humanGender = Ext.getCmp("humanGender").getValue();
-        humanDob = Ext.util.Format.date(Ext.getCmp("human_dob").getValue(), 'Y-m-d');
-        humanBmi = Ext.getCmp("human_bmi").getValue();
-        humanDiagnosis = Ext.getCmp("human_diagnosis").getValue();
-        
-        //hook up new load handler
-        humanStore.on("load", Ext.madasBioSourceBlurSuccess);
-        
-        humanStore.proxy.conn.url = wsBaseUrl + 'update/human/'+escape(Ext.madasCurrentBioSourceId())+'/?sex_id='+escape(humanGender)+((humanDob === undefined || humanDob === '')?'':'&date_of_birth='+escape(humanDob))+((humanBmi === undefined || humanBmi === '')?'':'&bmi='+escape(humanBmi))+((humanDiagnosis === undefined || humanDiagnosis === '')?'':'&diagnosis='+escape(humanDiagnosis));
-        humanStore.load();
     } else if (Ext.madasCurrentOrganismType() == '3') { //animal
-        animalGender = Ext.getCmp("animalGender").getValue();
-        animalAge = Ext.getCmp("animalAge").getValue();
-        animalParentalLine = Ext.getCmp("animalParentalLine").getRawValue();
-
-        //hook up new load handler
-        animalStore.on("load", Ext.madasBioSourceBlurSuccess);
-
-        animalStore.proxy.conn.url = wsBaseUrl + 'update/human/'+escape(Ext.madasCurrentBioSourceId())+'/?sex_id='+escape(animalGender)+((animalAge === undefined || animalAge === '')?'':'&age='+escape(animalAge))+((animalParentalLine === undefined || animalParentalLine === '')?'':'&parental_line='+escape(animalParentalLine));
-animalStore.load();
-   } else {
-        Ext.madasBioSourceBlurSuccess();
+    } else {
     }
+
+    //this request should ask the server to rejig the single biosource that we currently permit
+    var saver = new Ajax.Request(wsBaseUrl + 'updateSingleSource/'+expId+'/?type='+escape(sourceType)+'&information='+escape(sourceInfo)+'&ncbi_id='+escape(sourceNCBI), 
+                                 { 
+                                 asynchronous:true, 
+                                 evalJSON:'force',
+                                 onSuccess:     Ext.madasBioSourceBlurSuccess
+                                 });
+};
+
+Ext.madasSourceTypeSelect = function() {
+    //display the appropriate fieldset
 };
 
 Ext.madasBioSourceBlurSuccess = function() {
-    experimentStore.un("load", Ext.madasBioSourceBlurSuccess);
     
     var index = Ext.madasExperimentDeferredInvocation.index;
     
@@ -78,19 +87,9 @@ Ext.madasSaveOrganRow = function(roweditor, changes, rec, i) {
     var bundledData = {};
     
     bundledData.name = rec.data.name;
-    bundledData.tissue = rec.data.tissue;
-    bundledData.cell_type = rec.data.cell_type;
-    bundledData.subcellular_cell_type = rec.data.subcellular_cell_type;
+    bundledData.detail = rec.data.detail;
     
-    Ext.madasSaveRowLiterals('organ', roweditor, bundledData, rec, i, function() { var expId = Ext.madasCurrentExperimentId(); organStore.proxy.conn.url = wsBaseUrl + 'records/organ/source__experiment__id/' + expId; organStore.load();});
-};
-
-Ext.madasSaveGenotypeRow = function(roweditor, changes, rec, i) {
-    var bundledData = {};
-    
-    bundledData.name = rec.data.name;
-
-    Ext.madasSaveRowLiterals('genotype', roweditor, bundledData, rec, i, function() { var expId = Ext.madasCurrentExperimentId(); genotypeStore.proxy.conn.url = wsBaseUrl + 'records/genotype/source__experiment__id/' + expId; genotypeStore.load();});
+    Ext.madasSaveRowLiterals('organ', roweditor, bundledData, rec, i, function() { var expId = Ext.madasCurrentExperimentId(); organStore.proxy.conn.url = wsBaseUrl + 'records/organ/experiment__id/' + expId; organStore.load();});
 };
 
 Ext.madasBioSource = {
@@ -109,7 +108,45 @@ Ext.madasBioSource = {
             layout:'form',
             autoScroll:true,
             minSize: 75,
-            items: [ 
+            items: [
+                    { 
+                        xtype: 'combo', 
+                        fieldLabel:'source type',
+                        id:'sourceType',
+                        name:'typeText',
+                        editable:false,
+                        forceSelection:true,
+                        displayField:'value',
+                        valueField:'key',
+                        hiddenName:'sourceTypeValue',
+                        lazyRender:true,
+                        value:'Microbial',
+                        mode:'local',
+                        allowBlank:false,
+                        typeAhead:false,
+                        triggerAction:'all',
+                        listWidth:230,
+                        store: new Ext.data.ArrayStore({
+                                                   fields: ['value', 'key'],
+                                                   data : [['Microbial', 1],
+                                                           ['Plant', 2],
+                                                           ['Animal', 3],
+                                                           ['Human', 4]]
+                                                   }),
+                        listeners: {
+                            'select': Ext.madasSourceTypeSelect
+                        }
+                    },
+                    {
+                        fieldLabel:'information',
+                        id:'sourceInfo',
+                        xtype:'textfield'
+                    },
+                    {
+                        fieldLabel:'ncbi id',
+                        id:'sourceNCBI',
+                        xtype:'textfield'
+                    },
                     { xtype:'fieldset', 
                     title:'animal info',
                     id:'organismBioSourceAnimalFieldset',
@@ -120,17 +157,24 @@ Ext.madasBioSource = {
                         { xtype:'combo', 
                             fieldLabel:'gender',
                             id:'animalGender',
+                            name:'genderText',
                             editable:false,
                             forceSelection:true,
                             displayField:'value',
                             valueField:'key',
-                            hiddenName:'node',
+                            hiddenName:'gender',
                             lazyRender:true,
                             allowBlank:false,
+                            mode:'local',
                             typeAhead:false,
                             triggerAction:'all',
                             listWidth:230,
-                            store: genderComboStore
+                            store: new Ext.data.ArrayStore({
+                                                            fields: ['value', 'key'],
+                                                            data : [['Male', 'M'],
+                                                                    ['Female', 'F'],
+                                                                    ['Unknown', 'U']]
+                                                            })
                         }, 
                         { xtype:'textfield', fieldLabel:'age', id:'animalAge', maskRe:/^[0-9]*$/}, 
                         { xtype:'combo', 
@@ -170,17 +214,23 @@ Ext.madasBioSource = {
                         typeAhead:false,
                         triggerAction:'all',
                         listWidth:230,
-                        store: genderComboStore
+                        store: new Ext.data.ArrayStore({
+                                                       fields: ['value', 'key'],
+                                                       data : [['Male', 'M'],
+                                                               ['Female', 'F'],
+                                                               ['Unknown', 'U']]
+                                                       })
+                        
                         }, 
                         { xtype:'datefield', fieldLabel:'Date of birth', id:'human_dob', format:'d/m/Y'}, 
                         { xtype:'textfield', fieldLabel:'BMI', id:'human_bmi', maskRe:/^[0-9]*\.*[0-9]*$/ },
                         { xtype:'textfield', fieldLabel:'Diagnosis', id:'human_diagnosis' }
                         ]
                 },
-                { xtype:'editorgrid', 
+                { xtype:'grid', 
                     id:'organs',
                     style:'margin-top:10px;margin-bottom:10px;',
-                    title:'organs',
+                    title:'organs/parts',
                     border: true,
                     height:200,
                     trackMouseOver: false,
@@ -191,16 +241,16 @@ Ext.madasBioSource = {
                         autoFill:true
                     },
                     tbar: [{
-                        text: 'add organ',
+                        text: 'add organ/part',
                         cls: 'x-btn-text-icon',
                         icon:'static/repo/images/add.gif',
                         handler : function() {
-                           Ext.madasCRUDSomething('create/organ/', {'source_id':Ext.madasCurrentBioSourceId()}, function() { var expId = Ext.madasCurrentExperimentId(); organStore.proxy.conn.url = wsBaseUrl + 'records/organ/source__experiment__id/' + expId;
+                           Ext.madasCRUDSomething('create/organ/', {'experiment_id':Ext.madasCurrentExperimentId()}, function() { var expId = Ext.madasCurrentExperimentId(); organStore.proxy.conn.url = wsBaseUrl + 'records/organ/experiment__id/' + expId;
                                                   organStore.load(); });
                         }
                         }, 
                         {
-                        text: 'remove organ',
+                        text: 'remove organ/part',
                         cls: 'x-btn-text-icon',
                         icon:'static/repo/images/no.gif',
                         handler : function(){
@@ -221,7 +271,7 @@ Ext.madasBioSource = {
                             }
 
                            for (var i = 0; i < delIds.length; i++) {
-                           Ext.madasCRUDSomething('delete/organ/'+delIds[i], {}, function() { var expId = Ext.madasCurrentExperimentId(); organStore.proxy.conn.url = wsBaseUrl + 'records/organ/source__experiment__id/' + expId;
+                           Ext.madasCRUDSomething('delete/organ/'+delIds[i], {}, function() { var expId = Ext.madasCurrentExperimentId(); organStore.proxy.conn.url = wsBaseUrl + 'records/organ/experiment__id/' + expId;
                                                   organStore.load(); });
                             }
                         }
@@ -241,117 +291,21 @@ Ext.madasBioSource = {
                                 listWidth:230,
                                 store: organNameComboStore
                             }), dataIndex:'name' },
-                        { header: "tissue", sortable:false, menuDisabled:true, editor:new Ext.form.ComboBox({
+                        { header: "detail", sortable:false, menuDisabled:true, editor:new Ext.form.TextField({
                                 editable:true,
                                 forceSelection:false,
                                 displayField:'value',
                                 valueField:undefined,
-                                hiddenName:'tissue',
+                                hiddenName:'detailValue',
                                 lazyRender:true,
                                 allowBlank:true,
                                 typeAhead:false,
                                 triggerAction:'all',
                                 listWidth:230,
-                                store: tissueComboStore
-                            }), dataIndex:'tissue'
-                        },
-                        { header: "cell type", sortable:false, menuDisabled:true, editor:new Ext.form.ComboBox({
-                                editable:true,
-                                forceSelection:false,
-                                displayField:'value',
-                                valueField:undefined,
-                                hiddenName:'node',
-                                lazyRender:true,
-                                allowBlank:true,
-                                typeAhead:false,
-                                triggerAction:'all',
-                                listWidth:230,
-                                store: cellTypeComboStore
-                            }),  dataIndex:"cell_type" },
-                        { header: "subcellular cell type", sortable:false, menuDisabled:true, editor:new Ext.form.ComboBox({
-                                editable:true,
-                                forceSelection:false,
-                                displayField:'value',
-                                valueField:undefined,
-                                hiddenName:'node',
-                                lazyRender:true,
-                                allowBlank:true,
-                                typeAhead:false,
-                                triggerAction:'all',
-                                listWidth:230,
-                                store: subcellularCellTypeComboStore
-                            }), dataIndex:'subcellular_cell_type' }
+                            }), dataIndex:'detail'
+                        }
                     ],
                     store: organStore
-                },
-                { xtype:'editorgrid', 
-                    id:'genotypes',
-                    border: true,
-                    title:'genotypes',
-                    trackMouseOver: false,
-                    height:200,
-                    plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':Ext.madasSaveGenotypeRow}})],
-                    sm: new Ext.grid.RowSelectionModel(),
-                    viewConfig: {
-                        forceFit: true,
-                        autoFill:true
-                    },
-                    tbar: [{
-                        text: 'add genotype',
-                        cls: 'x-btn-text-icon',
-                        icon:'static/repo/images/add.gif',
-                        handler : function(){
-                           Ext.madasCRUDSomething('create/genotype/', {'source_id':Ext.madasCurrentBioSourceId()}, function() { var expId = Ext.madasCurrentExperimentId(); genotypeStore.proxy.conn.url = wsBaseUrl + 'records/genotype/source__experiment__id/' + expId;
-                                                  genotypeStore.load(); });
-                            }
-                        },
-                        {
-                        text: 'remove genotype',
-                        cls: 'x-btn-text-icon',
-                        icon:'static/repo/images/no.gif',
-                        handler : function(){
-                           var grid = Ext.getCmp('genotypes');
-                           var delIds = []; 
-                           
-                           var selections = grid.getSelectionModel().getSelections();
-                           if (!Ext.isArray(selections)) {
-                           selections = [selections];
-                           }
-                           
-                           for (var index = 0; index < selections.length; index++) {
-                           if (!Ext.isObject(selections[index])) {
-                           continue;
-                           }
-                           
-                           delIds.push(selections[index].data.id);
-                           }
-
-                           for (var i = 0; i < delIds.length; i++) {
-                           Ext.madasCRUDSomething('delete/genotype/'+delIds[i], {}, function() { var expId = Ext.madasCurrentExperimentId(); genotypeStore.proxy.conn.url = wsBaseUrl + 'records/genotype/source__experiment__id/' + expId;
-                                                  genotypeStore.load(); });
-                           }
-                        }
-                        }
-                    ],
-                    columns: [
-                        { header: "name", sortable:false, menuDisabled:true, 
-                            editor:new Ext.form.ComboBox({
-                                 editable:true,
-                                 forceSelection:false,
-                                 displayField:'value',
-                                 valueField:undefined,
-                                 hiddenName:'node',
-                                 lazyRender:true,
-                                 allowBlank:false,
-                                 typeAhead:false,
-                                 triggerAction:'all',
-                                 listWidth:230,
-                                 store: genotypeComboStore
-                            }), 
-                            dataIndex:'name'
-                        }
-                    ],
-                    store: genotypeStore
                 }
             ]
         }

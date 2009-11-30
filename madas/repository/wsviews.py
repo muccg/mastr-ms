@@ -1,7 +1,8 @@
 from django.http import HttpResponse, HttpResponseNotFound
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
-from madas.repository.models import Experiment, ExperimentStatus, Organism, Organ, Genotype, Gender, Animal, Location, OriginDetails, TreatmentVariation, Treatment, StandardOperationProcedureCategory , BiologicalSource, SampleClass, GrowthCondition, UserInvolvementType, UserExperiment
+from madas.repository.models import Experiment, ExperimentStatus, Organ, Animal, Treatment,  BiologicalSource, SampleClass, UserInvolvementType, UserExperiment
+from madas.m.models import Organisation
 from django.utils import webhelpers
 from django.contrib.auth.models import User
 from django.utils import simplejson as json
@@ -49,11 +50,6 @@ def create_object(request, model):
     if model == 'animal' or model == 'plant' or model == 'human':
         o = Organ(source=obj, name='Unknown')
         o.save()
-        
-    if model == 'treatment':
-        #create a variation immediately
-        tv = TreatmentVariation(name='standard', treatment=obj);
-        tv.save()
 
     return records(request, model, 'id', obj.id)
     
@@ -232,7 +228,8 @@ def populate_select(request, model=None, key=None, value=None, field=None, match
                        'userinvolvementtype' : ['id', 'name'],
                        'plant' : ['development_stage'],
                        'growthcondition' : ['id', 'greenhouse_id', 'greenhouse__name', 'detailed_location', 'lamp_details'],
-                       'lamptype': ['id', 'name']
+                       'lamptype': ['id', 'name'],
+                       'organisation': ['id', 'name']
                        }
 
 
@@ -250,7 +247,9 @@ def populate_select(request, model=None, key=None, value=None, field=None, match
         if model not in model_whitelist.keys():
             raise ObjectDoesNotExist()
 
-        if model == 'user':
+        if model == 'organisation':
+            model_obj = get_model('m', 'organisation')
+        elif model == 'user':
             model_obj = get_model('auth', 'user')
         else:
             model_obj = get_model('repository', model)
@@ -285,6 +284,17 @@ def populate_select(request, model=None, key=None, value=None, field=None, match
         output = select_widget_json(authenticated=authenticated,authorized=authorized,main_content_function=main_content_function,success=False,input=[])
         return HttpResponseNotFound(output)
 
+
+def update_single_source(request, experiment_id):
+
+    args = request.REQUEST
+    
+    output = {}
+    
+    
+    
+    return HttpResponse(json.dumps(output))
+    
 
 def recreate_sample_classes(request, experiment_id):
 
@@ -335,14 +345,6 @@ def recreate_sample_classes(request, experiment_id):
 
                 acombos = newcombos[:]
 
-            newcombos = []
-            for genotype in biosource.genotype_set.all():
-                for combo in acombos:
-                    tmp = combo.copy()
-                    tmp['geno'] = genotype.id
-                    newcombos.append(tmp.copy())
-                acombos = newcombos[:]
-                
             zcombos = zcombos + acombos
         
         combos = combos + zcombos
@@ -427,7 +429,7 @@ def recordsSampleClasses(request, experiment_id):
         return HttpResponse(json.dumps(output), status=401)
 
 
-    rows = SampleClass.objects.filter(biological_source__experiment__id=experiment_id) 
+    rows = SampleClass.objects.filter(experiment__id=experiment_id) 
 
     # add row count
     output['results'] = len(rows);

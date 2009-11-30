@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class Emailmap(models.Model):
     id = models.AutoField(primary_key=True) # This field type is a guess.
@@ -52,3 +53,10 @@ class Quotehistory(models.Model):
         db_table = u'quotehistory'
 
 
+class Organisation(models.Model):
+    name = models.CharField(max_length=100)
+    abn = models.CharField(max_length=100)
+    
+class UserOrganisation(models.Model):
+    user = models.ForeignKey(User)
+    organisation = models.ForeignKey(Organisation)

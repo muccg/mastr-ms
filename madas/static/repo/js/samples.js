@@ -108,9 +108,8 @@ Ext.madasExperimentSamples = {
                               { header: "Treatment Variation",  sortable:false, menuDisabled:true, dataIndex:"treatments" },
                               { header: "Timeline",  sortable:false, menuDisabled:true, dataIndex:"timeline" },
                               { header: "Origin",  sortable:false, menuDisabled:true, dataIndex:"origin" },
-                              { header: "Organ",  sortable:false, menuDisabled:true, dataIndex:"organ" },
-                              { header: "Genotype",  sortable:false, menuDisabled:true, dataIndex:"genotype"}
-                    ],
+                              { header: "Organ",  sortable:false, menuDisabled:true, dataIndex:"organ" }
+                      ],
                     store: sampleClassStore
                 }
             ]
@@ -168,7 +167,7 @@ Ext.madasExperimentSamples = {
                     border: false,
                     id:'samples',
                     trackMouseOver: false,
-                    plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':Ext.madasSaveSampleRow}})],
+//                    plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':Ext.madasSaveSampleRow}})],
                     sm: new Ext.grid.RowSelectionModel(),
 //                    autoHeight:true,
                     viewConfig: {
