@@ -3,7 +3,7 @@
         "pk": 1, 
         "model": "repository.organismtype", 
         "fields": {
-            "name": "Microorganism"
+            "name": "Microbial"
         }
     }, 
     {
@@ -29,85 +29,17 @@
     }, 
     {
         "pk": 1, 
-        "model": "repository.organism", 
-        "fields": {
-            "upper_rank_name": "testtest", 
-            "type": 4, 
-            "name": "test", 
-            "rank": "1", 
-            "ncbi_id": 100
-        }
-    }, 
-    {
-        "pk": 2, 
-        "model": "repository.organism", 
-        "fields": {
-            "upper_rank_name": "species", 
-            "type": 3, 
-            "name": "Sample", 
-            "rank": "2", 
-            "ncbi_id": 22
-        }
-    }, 
-    {
-        "pk": 1, 
-        "model": "repository.gender", 
-        "fields": {
-            "name": "Male"
-        }
-    }, 
-    {
-        "pk": 2, 
-        "model": "repository.gender", 
-        "fields": {
-            "name": "Female"
-        }
-    }, 
-    {
-        "pk": 1, 
-        "model": "repository.biologicalsource", 
-        "fields": {
-            "experiment": 1, 
-            "organism": 1
-        }
-    }, 
-    {
-        "pk": 2, 
-        "model": "repository.biologicalsource", 
-        "fields": {
-            "experiment": 1, 
-            "organism": 1
-        }
-    }, 
-    {
-        "pk": 2, 
-        "model": "repository.animal", 
-        "fields": {
-            "parental_line": "testparentalline", 
-            "age": 100, 
-            "sex": 1
-        }
-    }, 
-    {
-        "pk": 1, 
-        "model": "repository.locationtype", 
-        "fields": {
-            "name": "Farm"
-        }
-    }, 
-    {
-        "pk": 1, 
-        "model": "repository.location", 
-        "fields": {
-            "type": 1, 
-            "name": "testlocation"
-        }
-    }, 
-    {
-        "pk": 1, 
         "model": "repository.experimentstatus", 
         "fields": {
-            "name": "Done", 
+            "name": "New", 
+            "description": "test"
+        }
+    },
+    {
+        "pk": 2, 
+        "model": "repository.experimentstatus", 
+        "fields": {
+            "name": "Designed", 
             "description": "test"
         }
     }, 
@@ -119,38 +51,6 @@
             "status": 1, 
             "description": "test", 
             "title": "test"
-        }
-    }, 
-    {
-        "pk": 1, 
-        "model": "repository.treatmenttype", 
-        "fields": {
-            "name": "Diet"
-        }
-    }, 
-    {
-        "pk": 2, 
-        "model": "repository.treatmenttype", 
-        "fields": {
-            "name": "Other"
-        }
-    }, 
-    {
-        "pk": 1, 
-        "model": "repository.treatment", 
-        "fields": {
-            "source": 1, 
-            "type": 1, 
-            "name": "more food", 
-            "description": "more food"
-        }
-    }, 
-    {
-        "pk": 1, 
-        "model": "repository.treatmentvariation", 
-        "fields": {
-            "name": "lots more food", 
-            "treatment": 1
         }
     }, 
     {

@@ -35,11 +35,11 @@ Ext.madasSaveRowLiterals = function(table, roweditor, changes, rec, i, callback)
 };
 
 Ext.madasCurrentExperimentId = function() {
-    if (experimentStore.getTotalCount() < 1) {
+    if (!Ext.madasCurrentExpId) {
         return 0;
     }
     
-    return experimentStore.getAt(0).get("id");
+    return Ext.madasCurrentExpId;
 };
 
 Ext.madasCurrentBioSourceId = function() {
@@ -78,55 +78,12 @@ Ext.madasCurrentSampleClassId = function() {
     return 0;
 };
 
-Ext.madasExperimentReload = function(t, rs, o) {
-    var namefield = Ext.getCmp('experimentName');
-    var desc = Ext.getCmp('experimentDescription');
-    var comment = Ext.getCmp('experimentComment');
-    
-    if (!namefield || !desc || !comment) {
-        return;
-    }
-    
-    namefield.setValue('');
-    desc.setValue('');
-    comment.setValue('');
-    //console.log(rs);
-    if (rs.length > 0) {
-        namefield.setValue(rs[0].data.title);
-        desc.setValue(rs[0].data.description);
-        comment.setValue(rs[0].data.comment);
-    }
-    
-    Ext.madasExperimentInit();
-    
-};
-
 // ---------- TABLE STORES ---------- (used for tables, entities)
 var organStore = new Ext.madasJsonStore(
                         {
                             storeId: 'organism',
                             autoLoad: false,
-                            url: wsBaseUrl + 'records/organ/source__experiment__id/0',
-                            listeners: {'load':Ext.madasDSLoaded,
-                                        'loadexception':Ext.madasDSLoadException}
-                            }
-                    );
-                    
-var genotypeStore = new Ext.madasJsonStore(
-                        {
-                            storeId: 'genotype',
-                            autoLoad: false,
-                            url: wsBaseUrl + 'records/genotype/source__experiment__id/0',
-                            listeners: {'load':Ext.madasDSLoaded,
-                                        'loadexception':Ext.madasDSLoadException}
-                            }
-                    );
-                    
-var animalOriginStore = new Ext.madasJsonStore(
-                        {
-                            storeId: 'animalOrigin',
-                            autoLoad: false,
-                            url: wsBaseUrl + 'records/origindetails/source__experiment__id/0',
+                            url: wsBaseUrl + 'records/organ/experiment__id/0',
                             listeners: {'load':Ext.madasDSLoaded,
                                         'loadexception':Ext.madasDSLoadException}
                             }
@@ -136,7 +93,7 @@ var timelineStore = new Ext.madasJsonStore(
                         {
                             storeId: 'timeline',
                             autoLoad: false,
-                            url: wsBaseUrl + 'records/sampletimeline/source__experiment__id/0',
+                            url: wsBaseUrl + 'records/sampletimeline/experiment__id/0',
                             listeners: {'load':Ext.madasDSLoaded,
                                         'loadexception':Ext.madasDSLoadException}
                             }
@@ -146,17 +103,7 @@ var treatmentStore = new Ext.madasJsonStore(
                         {
                             storeId: 'treatment',
                             autoLoad: false,
-                            url: wsBaseUrl + 'records/treatment/source__experiment__id/0',
-                            listeners: {'load':Ext.madasDSLoaded,
-                                        'loadexception':Ext.madasDSLoadException}
-                            }
-                    );
-                    
-var treatmentVariationStore = new Ext.madasJsonStore(
-                        {
-                            storeId: 'treatmentVariation',
-                            autoLoad: false,
-                            url: wsBaseUrl + 'records/treatmentvariation/treatment__id/0',
+                            url: wsBaseUrl + 'records/treatment/experiment__id/0',
                             listeners: {'load':Ext.madasDSLoaded,
                                         'loadexception':Ext.madasDSLoadException}
                             }
@@ -182,16 +129,6 @@ var sopLookupStore = new Ext.madasJsonStore(
                             }
                     );
 
-var growthConditionStore = new Ext.madasJsonStore(
-                                            {
-                                            storeId: 'growthCondition',
-                                            autoLoad: false,
-                                            url: wsBaseUrl + 'records/growthcondition/source__experiment__id/0',
-                                            listeners: {'load':Ext.madasDSLoaded,
-                                            'loadexception':Ext.madasDSLoadException}
-                                            }
-                                            );
-                    
 var userStore = new Ext.madasJsonStore(
                         {
                             storeId: 'user',
@@ -212,51 +149,16 @@ var experimentListStore = new Ext.madasJsonStore(
                             }
                     );
                     
-var organismStore = new Ext.madasJsonStore(
-                        {
-                            storeId: 'organism',
-                            autoLoad: false,
-                            url: wsBaseUrl + 'records/organism/id/0',
-                            listeners: {'load':Ext.madasDSLoaded,
-                                        'load':function(t, rs, o) {
-                                            var rankfield = Ext.getCmp('rankfield');
-                                            var upperrankfield = Ext.getCmp('upperrankfield');
-                                            var ncbifield = Ext.getCmp('ncbifield');
-                                            
-                                            if (!rankfield || !upperrankfield || !ncbifield) {
-                                                return;
-                                            }
-                                                
-                                            rankfield.setValue('');
-                                           upperrankfield.setValue('');
-                                            ncbifield.setValue('');
-                                            
-                                            if (rs.length > 0) {
-                                                rankfield.setValue(rs[0].data.rank);
-                                                upperrankfield.setValue(rs[0].data.upper_rank_name);
-                                                ncbifield.setValue(rs[0].data.ncbi_id);
-                                            }
-                                        },
-                                        'loadexception':Ext.madasDSLoadException}
-                            }
-                    );
-
-var experimentStore = new Ext.madasJsonStore(
-                        {
-                            storeId: 'experiment',
-                            autoLoad: false,
-                            url: wsBaseUrl + 'records/experiment/id/0',
-                            listeners: {'load':Ext.madasDSLoaded,
-                                        'load':Ext.madasExperimentReload,
-                                        'loadexception':Ext.madasDSLoadException}
-                            }
-                    );
+var experimentStore = new Ext.data.ArrayStore({
+                                             storeId:'experiment',
+                                             fields: ['id', 'title', 'description', 'comment', 'status_id', 'created_on', 'client_id']
+});
 
 var sampleClassStore = new Ext.madasJsonStore(
                                              {
                                              storeId: 'sampleclass',
                                              autoLoad: false,
-                                             url: wsBaseUrl + 'records/sampleclass/biological_source__experiment__id/0',
+                                             url: wsBaseUrl + 'records/sampleclass/experiment__id/0',
                                              listeners: {'load':Ext.madasDSLoaded,
                                              'loadexception':Ext.madasDSLoadException}
                                              }
@@ -271,67 +173,6 @@ var sampleStore = new Ext.madasJsonStore(
                                               'loadexception':Ext.madasDSLoadException}
                                               }
                                               );
-
-
-var biologicalSourceStore = new Ext.madasJsonStore(
-                                          {
-                                          storeId: 'biologicalSource',
-                                          autoLoad: false,
-                                          url: wsBaseUrl + 'records/biologicalsource/experiment__id/0',
-                                          listeners: {'load':Ext.madasDSLoaded,
-                                          'load':function(t, rs, o) {
-                                               Ext.getCmp('organismType').clearValue();
-                                                   //console.log("cleared? "+Ext.getCmp("organismType").getValue());
-                                               Ext.getCmp('speciesfield').clearValue();
-                                               Ext.getCmp('rankfield').setValue('');
-                                               Ext.getCmp('upperrankfield').setValue('');
-                                               Ext.getCmp('ncbifield').setValue('');
-                                               if (rs.length > 0) {
-                                                   speciesStore.proxy.conn.url = wsBaseUrl + 'records/organism/biologicalsource__id/' + rs[0].data.id;
-                                                   speciesStore.load();
-                                               }
-                                          },
-                                          'loadexception':Ext.madasDSLoadException}
-                                          }
-                                          );
-
-
-var speciesStore = new Ext.madasJsonStore(
-                        {
-                            storeId: 'species',
-                            autoLoad: false,
-                            url: wsBaseUrl + 'records/organism/biologicalsource__id/0',
-                            listeners: {'load':Ext.madasDSLoaded,
-                                        'load':function(t, rs, o) {
-                                            if (rs.length > 0) {
-                                                Ext.getCmp('organismType').setValue(rs[0].data.type);
-                                                Ext.getCmp('speciesfield').setValue(rs[0].data.id);
-                                                Ext.getCmp('rankfield').setValue(rs[0].data.rank);
-                                                Ext.getCmp('upperrankfield').setValue(rs[0].data.upper_rank_name);
-                                                Ext.getCmp('ncbifield').setValue(rs[0].data.ncbi_id);
-                                          
-                                                Ext.madasCurrentOrganismTypeValue = rs[0].data.type;
-                                                Ext.madasExperimentShowFieldsets(rs[0].data.type);
-                                          
-                                                //load up the organism-type specific data here, ie plant development_stage
-                                                if (rs[0].data.type !== undefined) {
-                                                    Ext.madasLoadOrganismInfo(rs[0].data.type, Ext.madasCurrentBioSourceId());
-                                              
-                                                    organismComboStore.proxy.conn.url = wsBaseUrl + "populate_select/organism/id/name/type/" + rs[0].data.type;
-                                                    organismComboStore.load();
-                                                } else {
-                                          //console.log("error finding organism type in");
-                                          //console.log(rs[0]);
-                                                }
-                                            }
-                                            
-                                            Ext.getCmp('speciesfield').enable();
-                                            
-                                            Ext.madasUpdateNav();
-                                        },
-                                        'loadexception':Ext.madasDSLoadException}
-                            }
-                    );
 
 var plantStore = new Ext.madasJsonStore(
                                           {
@@ -420,35 +261,6 @@ var plantComboStore = new Ext.data.JsonStore(
                                                     }
                                                     );
 
-var organismComboStore = new Ext.data.JsonStore(
-                        {
-                            storeId: 'organismCombo',
-                            autoLoad: false,
-                            url: wsBaseUrl + 'populate_select/organism/id/name/',
-                            root: 'response.value.items',
-                            fields: ['value', 'key'],
-                            listeners: {'load':Ext.madasDSLoaded,
-                                        'load':function(){
-                                            if (Ext.getCmp('speciesfield')) {
-                                                Ext.getCmp('speciesfield').setValue(Ext.getCmp('speciesfield').getValue());
-                                            }
-                                        },
-                                        'loadexception':Ext.madasDSLoadException}
-                        }
-                    );
-                    
-var genderComboStore = new Ext.data.JsonStore(
-                        {
-                            storeId: 'genderCombo',
-                            autoLoad: true,
-                            url: wsBaseUrl + 'populate_select/gender/id/name/',
-                            root: 'response.value.items',
-                            fields: ['value', 'key'],
-                            listeners: {'load':Ext.madasDSLoaded,
-                                        'loadexception':Ext.madasDSLoadException}
-                        }
-                    );
-                    
 var animalComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'animalCombo',
@@ -509,77 +321,18 @@ var subcellularCellTypeComboStore = new Ext.data.JsonStore(
                         }
                     );
                     
-var genotypeComboStore = new Ext.data.JsonStore(
-                        {
-                            storeId: 'genotypeCombo',
-                            autoLoad: false,
-                            url: wsBaseUrl + 'populate_select/genotype/id/name',
-                            root: 'response.value.items',
-                            fields: ['value', 'key'],
-                            listeners: {'load':Ext.madasDSLoaded,
-                                        'loadexception':Ext.madasDSLoadException}
-                        }
-                    );
-                    
-var locationComboStore = new Ext.data.JsonStore(
-                        {
-                            storeId: 'locationCombo',
-                            autoLoad: true,
-                            url: wsBaseUrl + 'populate_select/location/id/name',
-                            root: 'response.value.items',
-                            fields: ['value', 'key'],
-                            listeners: {'load':Ext.madasDSLoaded,
-                                        'loadexception':Ext.madasDSLoadException}
-                        }
-                    );
-                    
-var detailedLocationComboStore = new Ext.data.JsonStore(
-                        {
-                            storeId: 'detailedLocationCombo',
-                            autoLoad: false,
-                            url: wsBaseUrl + 'populate_select/origindetails/detailed_location',
-                            root: 'response.value.items',
-                            fields: ['value', 'key'],
-                            listeners: {'load':Ext.madasDSLoaded,
-                                        'loadexception':Ext.madasDSLoadException}
-                        }
-                    );
-
-var plantDetailedLocationComboStore = new Ext.data.JsonStore(
-                                                        {
-                                                        storeId: 'plantDetailedLocationCombo',
-                                                        autoLoad: false,
-                                                        url: wsBaseUrl + 'populate_select/growthcondition/detailed_location',
-                                                        root: 'response.value.items',
-                                                        fields: ['value', 'key'],
-                                                        listeners: {'load':Ext.madasDSLoaded,
-                                                        'loadexception':Ext.madasDSLoadException}
-                                                        }
-                                                        );
-
+                   
 var plantGrowingPlaceComboStore = new Ext.data.JsonStore(
                                                              {
                                                              storeId: 'plantGrowingPlaceCombo',
                                                              autoLoad: false,
-                                                             url: wsBaseUrl + 'populate_select/growthcondition/growing_place',
+                                                             url: wsBaseUrl + 'populate_select/plant/id/location',
                                                              root: 'response.value.items',
                                                              fields: ['value', 'key'],
                                                              listeners: {'load':Ext.madasDSLoaded,
                                                              'loadexception':Ext.madasDSLoadException}
                                                              }
                                                              );
-                    
-var locationInformationComboStore = new Ext.data.JsonStore(
-                        {
-                            storeId: 'locationInformationCombo',
-                            autoLoad: false,
-                            url: wsBaseUrl + 'populate_select/origindetails/information',
-                            root: 'response.value.items',
-                            fields: ['value', 'key'],
-                            listeners: {'load':Ext.madasDSLoaded,
-                                        'loadexception':Ext.madasDSLoadException}
-                        }
-                    );
                     
 var treatmentComboStore = new Ext.data.JsonStore(
                         {
@@ -593,54 +346,6 @@ var treatmentComboStore = new Ext.data.JsonStore(
                         }
                     );
 
-var lightSourceComboStore = new Ext.data.JsonStore(
-                                                 {
-                                                 storeId: 'lightSourceCombo',
-                                                 autoLoad: false,
-                                                 url: wsBaseUrl + 'populate_select/lamptype/id/name',
-                                                 root: 'response.value.items',
-                                                 fields: ['value', 'key'],
-                                                 listeners: {'load':Ext.madasDSLoaded,
-                                                 'loadexception':Ext.madasDSLoadException}
-                                                 }
-                                                 );
-
-var lampDetailsComboStore = new Ext.data.JsonStore(
-                                                   {
-                                                   storeId: 'lampDetailsCombo',
-                                                   autoLoad: false,
-                                                   url: wsBaseUrl + 'populate_select/growthcondition/lamp_details',
-                                                   root: 'response.value.items',
-                                                   fields: ['value', 'key'],
-                                                   listeners: {'load':Ext.madasDSLoaded,
-                                                   'loadexception':Ext.madasDSLoadException}
-                                                   }
-                                                   );
-                    
-var treatmentTypeComboStore = new Ext.data.JsonStore(
-                        {
-                            storeId: 'treatmentTypeCombo',
-                            autoLoad: true,
-                            url: wsBaseUrl + 'populate_select/treatmenttype/id/name',
-                            root: 'response.value.items',
-                            fields: ['value', 'key'],
-                            listeners: {'load':Ext.madasDSLoaded,
-                                        'loadexception':Ext.madasDSLoadException}
-                        }
-                    );
-                    
-var treatmentVariationComboStore = new Ext.data.JsonStore(
-                        {
-                            storeId: 'treatmentVariationCombo',
-                            autoLoad: false,
-                            url: wsBaseUrl + 'populate_select/treatmentvariation/name',
-                            root: 'response.value.items',
-                            fields: ['value', 'key'],
-                            listeners: {'load':Ext.madasDSLoaded,
-                                        'loadexception':Ext.madasDSLoadException}
-                        }
-                    );
-                    
 var sopComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'sopCombo',

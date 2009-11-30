@@ -57,7 +57,7 @@ id:'experiment-list',
                 { header: "id", sortable:false, menuDisabled:true, dataIndex:'id' },
                 { header: "title", sortable:false, menuDisabled:true, dataIndex:'title' },
                 { header: "description", sortable:false, menuDisabled:true, width:300, dataIndex:'description' },
-                { header: "progress", sortable:false, menuDisabled:true, renderer:renderProgress, dataIndex:'progress' }
+                { header: "status", sortable:false, menuDisabled:true, renderer:renderStatus, dataIndex:'status' }
             ],
             store: experimentListStore,
             listeners: {

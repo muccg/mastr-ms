@@ -73,8 +73,10 @@ Ext.madasAccess = {
                            userStore.load();
                            
                            for (var i = 0; i < delIds.length; i++) {
+                           if (Ext.isDefined(delIds[i])) {
                            Ext.madasCRUDSomething('delete/userexperiment/'+delIds[i], {}, function() { var expId = Ext.madasCurrentExperimentId(); userStore.proxy.conn.url = wsBaseUrl + 'records/userexperiment/experiment__id/' + expId;
                                                   userStore.load(); });
+                           }
                            }
                             }
                         }

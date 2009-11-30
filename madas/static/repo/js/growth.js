@@ -74,7 +74,7 @@ Ext.madasGrowth = {
                     height:200,
                     border: true,
                     trackMouseOver: false,
-                    plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':Ext.madasSaveAnimalOriginRow}})],
+//                    plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':Ext.madasSaveAnimalOriginRow}})],
                     sm: new Ext.grid.RowSelectionModel(),
                     viewConfig: {
                         forceFit: true,
@@ -117,46 +117,7 @@ Ext.madasGrowth = {
                         }
                     ],
                     columns: [
-                        { header: "location",  sortable:false, menuDisabled:true, editor:new Ext.form.ComboBox({
-                               editable:true,
-                               forceSelection:true,
-                               displayField:'value',
-                               valueField:'key',
-                               hiddenName:'node',
-                               lazyRender:true,
-                               allowBlank:false,
-                               typeAhead:true,
-                               triggerAction:'all',
-                               listWidth:230,
-                                store: locationComboStore
-                            }), dataIndex: 'location',
-                            renderer: renderLocation },
-                        { header: "detailedLocation", sortable:false, menuDisabled:true, editor:new Ext.form.ComboBox({
-                              editable:true,
-                              forceSelection:false,
-                              displayField:'value',
-                              valueField:undefined,
-                              hiddenName:'node',
-                              lazyRender:true,
-                              allowBlank:false,
-                              typeAhead:false,
-                              triggerAction:'all',
-                              listWidth:230,
-                                store: detailedLocationComboStore
-                            }), dataIndex:'detailed_location' },
-                        { header: "information", sortable:false, menuDisabled:true, editor:new Ext.form.ComboBox({
-                                 editable:true,
-                                 forceSelection:false,
-                                 displayField:'value',
-                                 valueField:undefined,
-                                 hiddenName:'node',
-                                 lazyRender:true,
-                                 allowBlank:false,
-                                 typeAhead:false,
-                                 triggerAction:'all',
-                                 listWidth:230,
-                                store: locationInformationComboStore
-                            }), dataIndex:'information' }
+                        { header: "location",  sortable:false, menuDisabled:true }
                     ],
                     store: animalOriginStore
                 },
@@ -168,7 +129,7 @@ Ext.madasGrowth = {
                     border: true,
                     height:200,
                     trackMouseOver: false,
-                    plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':Ext.madasSaveGrowthConditionRow}})],
+                    //plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':Ext.madasSaveGrowthConditionRow}})],
                     sm: new Ext.grid.RowSelectionModel(),
                     viewConfig: {
                     forceFit: true,

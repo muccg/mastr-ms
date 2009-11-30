@@ -8,8 +8,10 @@
 
     <!-- <script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script> -->
 
-    <script src="static/repo/ext-3.0.0/adapter/ext/ext-base-debug.js" type="text/javascript"></script>
-    <script src="static/repo/ext-3.0.0/ext-all-debug.js"></script>
+    <script src="static/repo/js/prototype.js" type="text/javascript"></script>
+    <script src="static/repo/js/scriptaculous/scriptaculous.js" type="text/javascript"></script>
+    <script src="static/repo/ext-3.0.0/adapter/prototype/ext-prototype-adapter.js" type="text/javascript"></script>
+    <script src="static/repo/ext-3.0.0/ext-all.js"></script>
     <script src="static/repo/ext-3.0.0/examples/ux/RowEditor.js"></script>
     <script type="text/javascript" src="static/js/FileUploadField.js"></script>
 
@@ -28,7 +30,6 @@
     <script src="static/repo/js/renderers.js" type="text/javascript"></script>
     <script src="static/repo/js/samples.js" type="text/javascript"></script>
     <script src="static/repo/js/biosource.js" type="text/javascript"></script>
-    <script src="static/repo/js/growth.js" type="text/javascript"></script>
     <script src="static/repo/js/treatment.js" type="text/javascript"></script>
     <script src="static/repo/js/sampleprep.js" type="text/javascript"></script>
     <script src="static/repo/js/access.js" type="text/javascript"></script>
