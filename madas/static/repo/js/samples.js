@@ -105,7 +105,7 @@ Ext.madasExperimentSamples = {
                     columns: [
                         { header: "id",  sortable:false, menuDisabled:true, dataIndex:"id" },
                         { header: "Class",  sortable:false, menuDisabled:true, dataIndex:"class_id" },
-                              { header: "Treatment Variation",  sortable:false, menuDisabled:true, dataIndex:"treatments" },
+                              { header: "Treatment Variation",  sortable:false, menuDisabled:true, dataIndex:"treatment" },
                               { header: "Timeline",  sortable:false, menuDisabled:true, dataIndex:"timeline" },
                               { header: "Origin",  sortable:false, menuDisabled:true, dataIndex:"origin" },
                               { header: "Organ",  sortable:false, menuDisabled:true, dataIndex:"organ" }
@@ -128,7 +128,7 @@ Ext.madasExperimentSamples = {
                    id:'addsamplebutton',
                 icon:'static/repo/images/add.gif',
                 handler : function(){
-                   Ext.madasCRUDSomething('create/sample/', {'sample_class_id':Ext.madasCurrentSampleClassId()}, function() { var scId = Ext.madasCurrentSampleClassId(); sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/sample_class__id/' + scId;
+                   Ext.madasCRUDSomething('create/sample/', {'sample_class_id':Ext.madasCurrentSampleClassId(), 'experiment_id':Ext.madasCurrentExperimentId()}, function() { var scId = Ext.madasCurrentSampleClassId(); sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/sample_class__id/' + scId;
                                           sampleStore.load(); });
                    }
                 },
@@ -167,7 +167,7 @@ Ext.madasExperimentSamples = {
                     border: false,
                     id:'samples',
                     trackMouseOver: false,
-//                    plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':Ext.madasSaveSampleRow}})],
+                    plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':Ext.madasSaveSampleRow}})],
                     sm: new Ext.grid.RowSelectionModel(),
 //                    autoHeight:true,
                     viewConfig: {

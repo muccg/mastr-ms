@@ -19,7 +19,8 @@ class BiologicalSource(models.Model):
     label = models.CharField(max_length=50, null=True, blank=True)
 
     
-class Animal(BiologicalSource):
+class AnimalInfo(models.Model):
+    source = models.ForeignKey(BiologicalSource)
     GENDER_CHOICES = (
         (u'M', u'Male'),
         (u'F', u'Female'),
@@ -35,7 +36,8 @@ class Animal(BiologicalSource):
         return u"%s - %s - %s" % (self.sex, str(self.age), self.parental_line)
 
 
-class Plant(BiologicalSource):
+class PlantInfo(models.Model):
+    source = models.ForeignKey(BiologicalSource)
     development_stage = models.CharField(max_length=255, null=True, blank=True)
     location = models.CharField(max_length=255, null=True, blank=True)
     growing_place = models.CharField(max_length=255, null=True, blank=True)
@@ -50,7 +52,8 @@ class Plant(BiologicalSource):
     light_source = models.TextField(null=True, blank=True)
     lamp_details = models.TextField(null=True, blank=True)
 
-class Human(BiologicalSource):
+class HumanInfo(models.Model):
+    source = models.ForeignKey(BiologicalSource)
     GENDER_CHOICES = (
         (u'M', u'Male'),
         (u'F', u'Female'),
@@ -62,7 +65,8 @@ class Human(BiologicalSource):
     location = models.CharField(max_length=255, null=True, blank=True)
     notes = models.TextField(null=True)
 
-class Microbial(BiologicalSource):
+class MicrobialInfo(models.Model):
+    source = models.ForeignKey(BiologicalSource)
     genus = models.CharField(max_length=255, null=True, blank=True)
     species = models.CharField(max_length=255, null=True, blank=True)
     culture_collection_id = models.CharField(max_length=255, null=True, blank=True)

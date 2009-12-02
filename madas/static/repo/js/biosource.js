@@ -42,27 +42,32 @@ Ext.madasBioLoadSuccess = function(response) {
 
 Ext.madasBioSourceBlur = function(invoker) {
     var expId = Ext.madasCurrentExperimentId();
-    Ext.madasExperimentDeferredInvocation = invoker;
-    var humanGender, humanDob, humanBmi, humanDiagnosis, animalGender, animalAge, animalParentalLine;
-    var sourceType, sourceInfo, sourceNCBI;
     
-    sourceType = Ext.getCmp('sourceType').getValue();
-    sourceInfo = Ext.getCmp('sourceInfo').getValue();
-    sourceNCBI = Ext.getCmp('sourceNCBI').getValue();
-    
-    //TODO process new form field elements
-    if (Ext.madasCurrentOrganismType() == '4') { //human
-    } else if (Ext.madasCurrentOrganismType() == '3') { //animal
+    if (expId == 0) {
+        Ext.madasBioSourceBlurSuccess();
     } else {
-    }
+        Ext.madasExperimentDeferredInvocation = invoker;
+        var humanGender, humanDob, humanBmi, humanDiagnosis, animalGender, animalAge, animalParentalLine;
+        var sourceType, sourceInfo, sourceNCBI;
+        
+        sourceType = Ext.getCmp('sourceType').getValue();
+        sourceInfo = Ext.getCmp('sourceInfo').getValue();
+        sourceNCBI = Ext.getCmp('sourceNCBI').getValue();
+        
+        //TODO process new form field elements
+        if (Ext.madasCurrentOrganismType() == '4') { //human
+        } else if (Ext.madasCurrentOrganismType() == '3') { //animal
+        } else {
+        }
 
-    //this request should ask the server to rejig the single biosource that we currently permit
-    var saver = new Ajax.Request(wsBaseUrl + 'updateSingleSource/'+expId+'/?type='+escape(sourceType)+'&information='+escape(sourceInfo)+'&ncbi_id='+escape(sourceNCBI), 
+        //this request should ask the server to rejig the single biosource that we currently permit
+        var saver = new Ajax.Request(wsBaseUrl + 'updateSingleSource/'+expId+'/?type='+escape(sourceType)+'&information='+escape(sourceInfo)+'&ncbi_id='+escape(sourceNCBI), 
                                  { 
                                  asynchronous:true, 
                                  evalJSON:'force',
                                  onSuccess:     Ext.madasBioSourceBlurSuccess
                                  });
+    }
 };
 
 Ext.madasSourceTypeSelect = function() {

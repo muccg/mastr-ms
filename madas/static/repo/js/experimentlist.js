@@ -54,8 +54,10 @@ id:'experiment-list',
                 autoFill:true
             },
             columns: [
-                { header: "id", sortable:false, menuDisabled:true, dataIndex:'id' },
+                      { header: "id", sortable:false, menuDisabled:true, dataIndex:'id', width:50 },
                 { header: "title", sortable:false, menuDisabled:true, dataIndex:'title' },
+                      { header: "Principal", sortable:false, menuDisabled:true, dataIndex:'principal' },
+                      { header: "Client", sortable:false, menuDisabled:true, dataIndex:'client' },
                 { header: "description", sortable:false, menuDisabled:true, width:300, dataIndex:'description' },
                 { header: "status", sortable:false, menuDisabled:true, renderer:renderStatus, dataIndex:'status' }
             ],

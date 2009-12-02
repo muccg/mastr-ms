@@ -49,7 +49,10 @@ urlpatterns = patterns(
     (r'^admin/nodeDelete', 'madas.admin.views.node_delete', {'SSL':True}),
     (r'^admin/userload', 'madas.admin.views.user_load', {'SSL':True}), 
     (r'^admin/userSave', 'madas.admin.views.user_save', {'SSL':True}), 
-    
+    (r'^admin/orgsave[/]*$', 'madas.admin.views.org_save', {'SSL':True}), 
+    (r'^admin/orgDelete[/]*$', 'madas.admin.views.org_delete', {'SSL':True}), 
+    (r'^admin/listOrganisations', 'madas.admin.views.list_organisations', {'SSL':True}),
+
     #registration
     (r'^registration/submit', 'madas.registration.views.submit', {'SSL':True}), 
     

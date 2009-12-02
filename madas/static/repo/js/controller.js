@@ -333,6 +333,9 @@ Ext.madasLoadExperiment = function(expId) {
     
     Ext.madasMenuHandler({ id:'experiment:view' });
     
+    Ext.getCmp('expContent').getLayout().setActiveItem(0);
+
+    
 };
 
 /**

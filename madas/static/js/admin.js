@@ -1042,13 +1042,15 @@ items: [
 Ext.madasOrgManagementSelectionManager = function(selModel) { 
     if (selModel.hasSelection()) { 
         Ext.getCmp('orgdetails-name').setValue(selModel.getSelected().data['name']);
-        Ext.getCmp('orgdetails-originalName').setValue(selModel.getSelected().data['name']);
+        Ext.getCmp('orgdetails-id').setValue(selModel.getSelected().data['id']);
+        Ext.getCmp('orgdetails-abn').setValue(selModel.getSelected().data['abn']);
         
         Ext.getCmp('orgdetails-panel').enable(); 
     } else { 
         //clear details when nothing is selected
         Ext.getCmp('orgdetails-name').setValue('');
-        Ext.getCmp('orgdetails-originalName').setValue('');
+        Ext.getCmp('orgdetails-id').setValue('');
+        Ext.getCmp('orgdetails-abn').setValue('');
         
         Ext.getCmp('orgdetails-panel').disable(); 
     } 
@@ -1065,7 +1067,8 @@ Ext.madasOrgManagementAddTool = function(event, toolEl, panel) {
     Ext.getCmp('orgListGrid').getSelectionModel().clearSelections();
     
     Ext.getCmp('orgdetails-name').setValue('New Organisation');
-    Ext.getCmp('orgdetails-originalName').setValue('');
+    Ext.getCmp('orgdetails-id').setValue('0');
+    Ext.getCmp('orgdetails-abn').setValue('');
     
     Ext.getCmp('orgdetails-panel').enable();
 };
@@ -1079,16 +1082,16 @@ Ext.madasOrgManagementDeleteTool = function(event, toolEl, panel) {
     var orgname = Ext.getCmp('orgListGrid').getSelectionModel().getSelected().data['name'];
     
     //only perform the deletion if the user confirms their action
-    Ext.Msg.confirm('Confirm deletion', 'Are you sure you wish to delete the organisation: ' + organisation + ' ?', function(btn, text) {
+    Ext.Msg.confirm('Confirm deletion', 'Are you sure you wish to delete the organisation: ' + orgname + ' ?', function(btn, text) {
                     if (btn == 'yes'){
                     
-                    var orgname = Ext.getCmp('orgListGrid').getSelectionModel().getSelected().data['name'];
+                    var orgid = Ext.getCmp('orgListGrid').getSelectionModel().getSelected().data['id'];
                     
                     //execute the delete
                     //submit form   
                     var simple = new Ext.BasicForm('hiddenForm', {
                                                    url:Ext.madasBaseUrl + 'admin/orgDelete',
-                                                   baseParams:{'name':orgname},
+                                                   baseParams:{'id':orgid},
                                                    method:'POST'
                                                    });         
                     
@@ -1096,6 +1099,7 @@ Ext.madasOrgManagementDeleteTool = function(event, toolEl, panel) {
                     successProperty: 'success',
                     success: function (form, action) {
                     //display a success alert that auto-closes in 5 seconds
+                    Ext.getCmp('orgListGrid').getStore().reload();
                     Ext.Msg.alert("Organisation deleted successfully", "(this message will auto-close in 5 seconds)");
                     setTimeout("Ext.Msg.hide()", 5000);
                     
@@ -1115,7 +1119,8 @@ Ext.madasOrgManagementDeleteTool = function(event, toolEl, panel) {
                     Ext.getCmp('orgListGrid').getSelectionModel().clearSelections();
                     
                     Ext.getCmp('orgdetails-name').setValue('');
-                    Ext.getCmp('orgdetails-originalName').setValue('');
+                    Ext.getCmp('orgdetails-abn').setValue('');
+                    Ext.getCmp('orgdetails-id').setValue('0');
                     
                     Ext.getCmp('orgdetails-panel').disable();
                     
@@ -1130,7 +1135,7 @@ Ext.madasOrgManagementInit = function() {
     Ext.getCmp('orgListGrid').getStore().reload();
     
     //enable/disable the details panel when selection is changed (and load the details for the selected item)
-    Ext.getCmp('orgListGrid').getSelectionModel().on('selectionchange', Ext.madasorgManagementSelectionManager );
+    Ext.getCmp('orgListGrid').getSelectionModel().on('selectionchange', Ext.madasOrgManagementSelectionManager );
     
     //disable the node details panel by default
     Ext.getCmp('orgdetails-panel').disable();
@@ -1153,9 +1158,9 @@ trackResetOnLoad: true,
 waitMsgTarget: true,
     
 items: [
-        {   name: 'originalName', id: 'orgdetails-originalName', xtype: 'hidden' },
+        {   name: 'id', id: 'orgdetails-id', xtype: 'hidden' },
         {   name: 'name', id: 'orgdetails-name', fieldLabel: 'Organisation Name', maskRe: /[^,=]/ },
-        {   name: 'ABN', id: 'orgdetails-abn', fieldLabel: 'ABN', maskRe: /[^,=]/ }
+        {   name: 'abn', id: 'orgdetails-abn', fieldLabel: 'ABN', maskRe: /[^,=]/ }
         ],
 buttons: [
           { text: 'Reset', handler: Ext.madasOrgManagementClearForm },
@@ -1164,6 +1169,7 @@ buttons: [
                                                                                                 success: function (form, action) {
                                                                                                 if (action.result.success === true) {
                                                                                                 //display a success alert that auto-closes in 5 seconds
+                                                                                                Ext.getCmp('orgListGrid').getStore().reload();
                                                                                                 Ext.Msg.alert("Organisation details saved successfully", "(this message will auto-close in 5 seconds)");
                                                                                                 setTimeout("Ext.Msg.hide()", 5000);
                                                                                                 

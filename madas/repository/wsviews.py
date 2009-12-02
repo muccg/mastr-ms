@@ -1,7 +1,7 @@
 from django.http import HttpResponse, HttpResponseNotFound
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
-from madas.repository.models import Experiment, ExperimentStatus, Organ, Animal, Treatment,  BiologicalSource, SampleClass, UserInvolvementType, UserExperiment
+from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, Treatment,  BiologicalSource, SampleClass, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType
 from madas.m.models import Organisation
 from django.utils import webhelpers
 from django.contrib.auth.models import User
@@ -42,7 +42,14 @@ def create_object(request, model):
         ue.experiment=obj
         ue.type=uit
         ue.user=user
-        ue.save()    
+        ue.save()   
+        #default source and organ
+        source = BiologicalSource(experiment=obj)
+        source.type_id=1
+        source.save()
+        organ = Organ(experiment=obj)
+        organ.name='Unknown'
+        organ.save() 
     
     if model == 'biologicalsource':
         return records(request, 'organism', 'id', obj.organism.id)
@@ -285,13 +292,41 @@ def populate_select(request, model=None, key=None, value=None, field=None, match
         return HttpResponseNotFound(output)
 
 
-def update_single_source(request, experiment_id):
+def update_single_source(request, exp_id):
 
     args = request.REQUEST
     
-    output = {}
+    output = {'metaData': { 'totalProperty': 'results',
+                            'successProperty': 'success',
+                            'root': 'rows',
+                            'id': 'id',
+                            'fields': []
+                            },
+              'results': 0,
+              'authenticated': True,
+              'authorized': True,
+              'success': True,
+              'rows': []
+              }
     
+    e = Experiment.objects.get(id=exp_id)
     
+    if e is None:
+        output['success'] = False
+    else:
+        try:
+            bs = BiologicalSource.objects.get(experiment=e)
+        except ObjectDoesNotExist:
+            bs = BiologicalSource(experiment=e)
+        
+        bs.type = OrganismType.objects.get(id=args['type'])
+        bs.information = args['information']
+        try:
+            bs.ncbi_id = int(args['ncbi_id'])
+        except:
+            bs.ncbi_id = None
+        #bs.label = args['label']
+        bs.save()
     
     return HttpResponse(json.dumps(output))
     
@@ -308,41 +343,29 @@ def recreate_sample_classes(request, experiment_id):
 
     for biosource in BiologicalSource.objects.filter(experiment__id=experiment_id):
         zcombos = []
-        for organ in biosource.organ_set.all():
+        for organ in Organ.objects.filter(experiment__id=experiment_id):
             acombos = []
 
             base = { 'bs': biosource.id, 'o': organ.id }
             bcombos = [base]
 
             newcombos = []
-            for treatment in biosource.treatment_set.all():
-                if treatment.treatmentvariation_set.all():
-                    for variation in treatment.treatmentvariation_set.all():
-                        for combo in bcombos:
-                            tmp = combo.copy()
-                            tmp['var'] = variation.id
-                            newcombos.append(tmp.copy())
+            for treatment in Treatment.objects.filter(experiment__id=experiment_id):
+                for combo in bcombos:
+                    tmp = combo.copy()
+                    tmp['treatment'] = treatment.id
+                    newcombos.append(tmp.copy())
             if len(newcombos) == 0:
                 newcombos = bcombos[:]
                 
             acombos = acombos + newcombos
             
             newcombos = []
-            for timeline in biosource.sampletimeline_set.all():
+            for timeline in SampleTimeline.objects.filter(experiment__id=experiment_id):
                 for combo in acombos:
                     tmp = combo.copy()
                     tmp['time'] = timeline.id
                     newcombos.append(tmp.copy())
-                acombos = newcombos[:]
-
-            newcombos = []
-            if len(biosource.origin_set.all()) > 0:
-                for origin in biosource.origin_set.all():
-                    for combo in acombos:
-                        tmp = combo.copy()
-                        tmp['origin'] = origin.id
-                        newcombos.append(tmp.copy())
-
                 acombos = newcombos[:]
 
             zcombos = zcombos + acombos
@@ -364,15 +387,13 @@ def recreate_sample_classes(request, experiment_id):
         
         #item for adding
         sc = SampleClass()
+        sc.experiment_id = experiment_id
         sc.class_id = 'sample class'
         
         for key in combo.keys():
-            if key == 'var':
+            if key == 'treatment':
                 sc.treatments_id = combo[key]
                 a = a.filter(treatments__id = combo[key])
-            elif key == 'geno':
-                sc.genotype_id = combo[key]
-                a = a.filter(genotype__id = combo[key])
             elif key == 'bs':
                 sc.biological_source_id = combo[key]
                 a = a.filter(biological_source__id = combo[key])
@@ -382,9 +403,6 @@ def recreate_sample_classes(request, experiment_id):
             elif key == 'time':
                 sc.timeline_id = combo[key]
                 a = a.filter(timeline__id = combo[key])
-            elif key == 'origin':
-                sc.origin_id = combo[key]
-                a = a.filter(origin__id = combo[key])
 
         if a:
             combo['id'] = a[0].id
@@ -414,7 +432,7 @@ def recordsSampleClasses(request, experiment_id):
                             'successProperty': 'success',
                             'root': 'rows',
                             'id': 'id',
-                            'fields': [{'name':'id'}, {'name':'class_id'}, {'name':'treatments'}, {'name':'timeline'}, {'name':'origin'}, {'name':'organ'}, {'name':'genotype'}, {'name':'enabled'}]
+                            'fields': [{'name':'id'}, {'name':'class_id'}, {'name':'treatment'}, {'name':'timeline'}, {'name':'organ'},  {'name':'enabled'}]
                             },
               'results': 0,
               'authenticated': True,
@@ -442,27 +460,73 @@ def recordsSampleClasses(request, experiment_id):
         d['enabled'] = row.enabled
         
         if row.treatments:
-            d['treatments'] = row.treatments.summaryName()
+            d['treatment'] = row.treatments.name
         
         if row.timeline:
             d['timeline'] = str(row.timeline)
         else:
             d['timeline'] = ''
             
-        if row.origin:
-            d['origin_id'] = row.origin.id
-            
-            if GrowthCondition.objects.filter(id=row.origin.id):
-                d['origin'] = GrowthCondition.objects.get(id=row.origin.id).detailed_location
-            if OriginDetails.objects.filter(id=row.origin.id):
-                d['origin'] = OriginDetails.objects.get(id=row.origin.id).detailed_location    
-        
         if row.organ:
             d['organ'] = row.organ.name
-        
-        if row.genotype:
-            d['genotype'] = row.genotype.name
-            
+
+        output['rows'].append(d)
+
+
+    output = makeJsonFriendly(output)
+
+    return HttpResponse(json.dumps(output))
+    
+    
+def recordsExperiments(request):
+
+    if request.GET:
+        args = request.GET
+    else:
+        args = request.POST
+       
+
+    # basic json that we will fill in
+    output = {'metaData': { 'totalProperty': 'results',
+                            'successProperty': 'success',
+                            'root': 'rows',
+                            'id': 'id',
+                            'fields': [{'name':'id'}, {'name':'status'}, {'name':'title'}, {'name':'job_number'}, {'name':'client'},  {'name':'principal'}]
+                            },
+              'results': 0,
+              'authenticated': True,
+              'authorized': True,
+              'success': True,
+              'rows': []
+              }
+
+    authenticated = request.user.is_authenticated()
+    authorized = True # need to change this
+    if not authenticated or not authorized:
+        return HttpResponse(json.dumps(output), status=401)
+
+
+    rows = Experiment.objects.all() 
+
+    # add row count
+    output['results'] = len(rows);
+
+    # add rows
+    for row in rows:
+        d = {}
+        d['id'] = row.id
+        d['status'] = row.status.id
+        d['title'] = row.title
+        d['job_number'] = row.job_number
+        try:
+            d['client'] = row.client.name
+        except:
+            d['client'] = ''
+        try:
+            d['principal'] = UserExperiment.objects.filter(type__id=1, experiment__id=row.id)[0].user.username
+        except:
+            d['principal'] = ''
+
         output['rows'].append(d)
 
 

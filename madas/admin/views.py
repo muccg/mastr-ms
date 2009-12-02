@@ -1,10 +1,13 @@
 # Create your views here.
 from django.db import models
+from django.http import HttpResponse, HttpResponseNotFound
 from django.contrib.auth.ldap_helper import LDAPHandler
 
 from madas.utils import setRequestVars, jsonResponse, json_encode, translate_dict
-from madas.m.models import Quoterequest, Formalquote
+from madas.m.models import Quoterequest, Formalquote, Organisation
 from django.db.models import Q
+from madas.repository.json_util import makeJsonFriendly
+from django.utils import simplejson as json
 
 from django.conf import settings
 
@@ -368,3 +371,77 @@ def node_delete(request, *args):
     print '*** node_delete : enter ***'
     return jsonResponse(request, []) 
 
+def org_save(request):
+
+    args = request.REQUEST
+
+    org_id = args['id']
+
+    if org_id == '0':
+        org = Organisation()
+    else:
+        org = Organisation.objects.get(id=org_id)
+        
+    org.name = args['name']
+    org.abn = args['abn']
+    
+    org.save()
+        
+    return jsonResponse(request, [])
+    
+def org_delete(request):
+
+    args = request.REQUEST
+    org_id = args['id']
+
+    rows = Organisation.objects.filter(id=org_id)
+    rows.delete()
+
+    return jsonResponse(request, [])
+
+def list_organisations(request):
+
+    if request.GET:
+        args = request.GET
+    else:
+        args = request.POST
+       
+
+    # basic json that we will fill in
+    output = {'metaData': { 'totalProperty': 'results',
+                            'successProperty': 'success',
+                            'root': 'rows',
+                            'id': 'id',
+                            'fields': [{'name':'id'}, {'name':'name'}, {'name':'abn'}]
+                            },
+              'results': 0,
+              'authenticated': True,
+              'authorized': True,
+              'success': True,
+              'rows': []
+              }
+
+    authenticated = request.user.is_authenticated()
+    authorized = True # need to change this
+    if not authenticated or not authorized:
+        return HttpResponse(json.dumps(output), status=401)
+
+
+    rows = Organisation.objects.all() 
+
+    # add row count
+    output['results'] = len(rows);
+
+    # add rows
+    for row in rows:
+        d = {}
+        d['id'] = row.id
+        d['name'] = row.name
+        d['abn'] = row.abn
+
+        output['rows'].append(d)
+
+
+    output = makeJsonFriendly(output)
+
+    return HttpResponse(json.dumps(output))
