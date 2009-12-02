@@ -143,7 +143,7 @@ var experimentListStore = new Ext.madasJsonStore(
                         {
                             storeId: 'experimentList',
                             autoLoad: false,
-                            url: wsBaseUrl + 'records/experiment/id__gte/0',
+                            url: wsBaseUrl + 'recordsExperiments',
                             listeners: {'load':Ext.madasDSLoaded,
                                         'loadexception':Ext.madasDSLoadException}
                             }

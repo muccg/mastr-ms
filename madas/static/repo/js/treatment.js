@@ -56,7 +56,7 @@ Ext.madasTreatment = {
                             height:200,
                             border: true,
                             trackMouseOver: false,
-//                            plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':Ext.madasSaveTimelineRow}})],
+                            plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':Ext.madasSaveTimelineRow}})],
                             sm: new Ext.grid.RowSelectionModel(),
                             viewConfig: {
                                 forceFit: true,
@@ -67,7 +67,7 @@ Ext.madasTreatment = {
                                 cls: 'x-btn-text-icon',
                                 icon:'static/repo/images/add.gif',
                                 handler : function(){
-                                    Ext.madasCRUDSomething('create/sampletimeline/', {'source_id':Ext.madasCurrentBioSourceId()}, function() { var expId = Ext.madasCurrentExperimentId(); timelineStore.proxy.conn.url = wsBaseUrl + 'records/sampletimeline/source__experiment__id/' + expId;
+                                    Ext.madasCRUDSomething('create/sampletimeline/', {'experiment_id':Ext.madasCurrentExperimentId()}, function() { var expId = Ext.madasCurrentExperimentId(); timelineStore.proxy.conn.url = wsBaseUrl + 'records/sampletimeline/experiment__id/' + expId;
                                                           timelineStore.load(); });
                                     }
                                 },
@@ -93,7 +93,7 @@ Ext.madasTreatment = {
                                    }
                                    //console.log(delIds);
                                    for (var i = 0; i < delIds.length; i++) {
-                                   Ext.madasCRUDSomething('delete/sampletimeline/'+delIds[i], {}, function() { var expId = Ext.madasCurrentExperimentId(); timelineStore.proxy.conn.url = wsBaseUrl + 'records/sampletimeline/source__experiment__id/' + expId;
+                                   Ext.madasCRUDSomething('delete/sampletimeline/'+delIds[i], {}, function() { var expId = Ext.madasCurrentExperimentId(); timelineStore.proxy.conn.url = wsBaseUrl + 'records/sampletimeline/experiment__id/' + expId;
                                                           timelineStore.load(); });
                                    }                        }
                                    }
@@ -130,7 +130,7 @@ Ext.madasTreatment = {
                             height:200,
                             border: true,
                             trackMouseOver: false,
-//                            plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':Ext.madasSaveTreatmentRow}})],
+                            plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':Ext.madasSaveTreatmentRow}})],
                             store:treatmentStore,
                             viewConfig: {
                                 forceFit: true,
@@ -141,7 +141,7 @@ Ext.madasTreatment = {
                                 cls: 'x-btn-text-icon',
                                 icon:'static/repo/images/add.gif',
                                 handler : function(){
-                                   Ext.madasCRUDSomething('create/treatment/', {'source_id':Ext.madasCurrentBioSourceId()}, function() { var expId = Ext.madasCurrentExperimentId(); treatmentStore.proxy.conn.url = wsBaseUrl + 'records/treatment/source__experiment__id/' + expId;
+                                   Ext.madasCRUDSomething('create/treatment/', {'experiment_id':Ext.madasCurrentExperimentId()}, function() { var expId = Ext.madasCurrentExperimentId(); treatmentStore.proxy.conn.url = wsBaseUrl + 'records/treatment/experiment__id/' + expId;
                                                           treatmentStore.load(); });
                                    }
                                 },
@@ -166,7 +166,7 @@ Ext.madasTreatment = {
                                    delIds.push(selections[index].data.id);
                                    }
                                    for (var i = 0; i < delIds.length; i++) {
-                                   Ext.madasCRUDSomething('delete/treatment/'+delIds[i], {}, function() { var expId = Ext.madasCurrentExperimentId(); treatmentStore.proxy.conn.url = wsBaseUrl + 'records/treatment/source__experiment__id/' + expId;
+                                   Ext.madasCRUDSomething('delete/treatment/'+delIds[i], {}, function() { var expId = Ext.madasCurrentExperimentId(); treatmentStore.proxy.conn.url = wsBaseUrl + 'records/treatment/experiment__id/' + expId;
                                                           treatmentStore.load(); });
                                    }
                                 }

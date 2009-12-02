@@ -16,7 +16,7 @@ class ExperimentStatusAdmin(admin.ModelAdmin):
     list_display = ('name', 'description')
     search_fields = ['name']
 
-class AnimalAdmin(admin.ModelAdmin):
+class AnimalInfoAdmin(admin.ModelAdmin):
     list_display = ('sex', 'age', 'parental_line')
 
 class TreatmentAdmin(admin.ModelAdmin):
@@ -40,7 +40,7 @@ class UserExperimentAdmin(admin.ModelAdmin):
 class UserInvolvementTypeAdmin(admin.ModelAdmin):
     list_display = ('id', 'name')   
 
-class PlantAdmin(admin.ModelAdmin):
+class PlantInfoAdmin(admin.ModelAdmin):
     list_display = ('id', 'development_stage')
     
 class SampleClassAdmin(admin.ModelAdmin):
@@ -53,11 +53,11 @@ admin.site.register(Organ, OrganAdmin)
 admin.site.register(BiologicalSource, BiologicalSourceAdmin)
 admin.site.register(Experiment, ExperimentAdmin)
 admin.site.register(ExperimentStatus, ExperimentStatusAdmin)
-admin.site.register(Animal, AnimalAdmin)
+admin.site.register(AnimalInfo, AnimalInfoAdmin)
 admin.site.register(Treatment, TreatmentAdmin)
 admin.site.register(Sample,SampleAdmin)
 admin.site.register(SampleTimeline,SampleTimelineAdmin)
 admin.site.register(StandardOperationProcedure,StandardOperationProcedureAdmin)
 admin.site.register(UserExperiment,UserExperimentAdmin)
-admin.site.register(Plant, PlantAdmin)
+admin.site.register(PlantInfo, PlantInfoAdmin)
 admin.site.register(SampleClass, SampleClassAdmin)
