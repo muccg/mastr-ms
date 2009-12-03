@@ -3,6 +3,8 @@ Ext.madasExperimentSamplesInit = function() {
     
     sampleClassStore.proxy.conn.url = wsBaseUrl + 'recreate_sample_classes/' + expId;
     sampleClassStore.load();
+    
+    sampleStore.removeAll();
 };
 
 Ext.madasSaveSampleRow = function(roweditor, changes, rec, i) {
@@ -184,4 +186,90 @@ Ext.madasExperimentSamples = {
             ]
         }
     ]
+};
+
+Ext.madasExperimentSamplesOnlyInit = function() {
+    var expId = Ext.madasCurrentExperimentId();
+    
+    sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/experiment__id/' + expId;
+    sampleStore.load();
+};
+
+Ext.madasSaveSampleOnlyRow = function(roweditor, changes, rec, i) {
+    var bundledData = {};
+    
+    bundledData.label = rec.data.label;
+    bundledData.comment = rec.data.comment;
+    
+    Ext.madasSaveRowLiterals('sample', roweditor, bundledData, rec, i, function() { var eId = Ext.madasCurrentExperimentId(); sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/experiment__id/' + eId;
+                             sampleStore.load();});
+};
+
+Ext.madasExperimentSamplesOnly = {
+    title: 'samples',
+    region: 'center',
+    cmargins: '0 0 0 0',
+    collapsible: false,
+    bodyStyle: 'padding:0px;',
+    layout:'fit',
+    tbar: [{
+           text: 'add sample',
+           cls: 'x-btn-text-icon',
+           id:'addsamplesbutton',
+           icon:'static/repo/images/add.gif',
+           handler : function(){
+           Ext.madasCRUDSomething('create/sample/', {'experiment_id':Ext.madasCurrentExperimentId()}, function() { var eId = Ext.madasCurrentExperimentId(); sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/experiment__id/' + eId;
+                                  sampleStore.load(); });
+           }
+           },
+           {
+           text: 'remove sample',
+           cls: 'x-btn-text-icon',
+           id:'removesamplesbutton',
+           icon:'static/repo/images/no.gif',
+           handler : function(){
+           var grid = Ext.getCmp('samplesOnly');
+           var delIds = []; 
+           
+           var selections = grid.getSelectionModel().getSelections();
+           if (!Ext.isArray(selections)) {
+           selections = [selections];
+           }
+           
+           for (var index = 0; index < selections.length; index++) {
+           if (!Ext.isObject(selections[index])) {
+           continue;
+           }
+           
+           delIds.push(selections[index].data.id);
+           }
+           
+           for (var i = 0; i < delIds.length; i++) {
+           Ext.madasCRUDSomething('delete/sample/'+delIds[i], {}, function() { var eId = Ext.madasCurrentExperimentId(); sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/experiment__id/' + eId;
+                                  sampleStore.load(); });
+           }                        }
+           }
+           ],
+    items: [
+            {
+            xtype:'editorgrid',
+            border: false,
+            id:'samplesOnly',
+            trackMouseOver: false,
+            plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':Ext.madasSaveSampleOnlyRow}})],
+            sm: new Ext.grid.RowSelectionModel(),
+            //                    autoHeight:true,
+            viewConfig: {
+            forceFit: true,
+            autoFill:true
+            },
+            columns: [
+                      { header: "id", sortable:false, menuDisabled:true, dataIndex:'id' },
+                      { header: "label", sortable:false, menuDisabled:true, editor:new Ext.form.TextField(), dataIndex:'label' },
+                      { header: "comment", sortable:false, menuDisabled:true, width:300, editor:new Ext.form.TextField(), dataIndex:'comment' },
+                      { header: "last status", sortable:false, menuDisabled:true, width:300, dataIndex:'status' }
+                      ],
+            store: sampleStore
+            }
+            ]
 };

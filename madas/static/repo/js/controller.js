@@ -39,23 +39,27 @@ Ext.madasExperimentBlur = function(invoker) {
     var expName = Ext.getCmp("experimentName").getValue();
     var expDescription = Ext.getCmp("experimentDescription").getValue();
     var expComment = Ext.getCmp("experimentComment").getValue();
-    var expClientId = Ext.getCmp("client").getValue();
-    if (expClientId === null) {
-        expClientId = '';
+    var expFQuoteId = Ext.getCmp("formalQuote").getValue();
+    if (expFQuoteId === null) {
+        expFQuoteId = '';
+    }
+    var expJobNumber = Ext.getCmp("jobNumber").getValue();
+    if (expJobNumber === null) {
+        expJobNumber = '';
     }
     
     Ext.madasExperimentDeferredInvocation = invoker;
 
     if (expId === 0 && expName !== "") {
         
-        var saver = new Ajax.Request(wsBaseUrl + 'create/experiment/?title='+escape(expName)+'&description='+escape(expDescription)+'&comment='+escape(expComment)+'&status_id=2&client_id='+escape(expClientId), 
+        var saver = new Ajax.Request(wsBaseUrl + 'create/experiment/?title='+escape(expName)+'&description='+escape(expDescription)+'&comment='+escape(expComment)+'&status_id=2&formal_quote_id='+escape(expFQuoteId)+'&job_number='+escape(expJobNumber), 
                                              { 
                                              asynchronous:true, 
                                              evalJSON:'force',
                                      onSuccess:     Ext.madasExperimentBlurSuccess
                                      });
     } else {
-        var saver = new Ajax.Request(wsBaseUrl + 'update/experiment/'+expId+'/?title='+escape(expName)+'&description='+escape(expDescription)+'&comment='+escape(expComment)+'&status_id=2&client_id='+escape(expClientId), 
+        var saver = new Ajax.Request(wsBaseUrl + 'update/experiment/'+expId+'/?title='+escape(expName)+'&description='+escape(expDescription)+'&comment='+escape(expComment)+'&status_id=2&formal_quote_id='+escape(expFQuoteId)+'&job_number='+escape(expJobNumber), 
                                      { 
                                      asynchronous:true, 
                                      evalJSON:'force',
@@ -145,24 +149,9 @@ Ext.madasExperimentDetails = {
                     { xtype:'textfield', fieldLabel:'experiment name', enableKeyEvents:true, id:'experimentName', allowBlank:false, listeners:{'keydown':function(t, e){ Ext.madasUpdateNav(); return true; }, 'keyup':function(t, e){ Ext.madasUpdateNav(); return true; }}},
                     { xtype:'textarea', fieldLabel:'description', id:'experimentDescription', width:400 },
                     { xtype:'textarea', fieldLabel:'comment', id:'experimentComment', width:400 },
-                    new Ext.form.ComboBox({
-                        fieldLabel: 'client',
-                        id: 'client',
-                        name: 'clientText',
-                        editable:false,
-                        forceSelection:true,
-                        displayField:'value',
-                        valueField:'key',
-                        hiddenName:'clientValue',
-                        lazyRender:true,
-                        allowBlank:true,
-                        typeAhead:true,
-                        triggerAction:'all',
-                        listWidth:230,
-                        disabled: false,
-                        mode:'local',
-                        store: new Ext.data.ArrayStore({fields:['key', 'value'], data:[]})
-                    })
+                        { xtype:'textfield', fieldLabel:'formal quote', id:'formalQuote', disabled:true},
+                        { xtype:'textfield', fieldLabel:'organisation', id:'expOrg', disabled:true},
+                        { xtype:'textfield', fieldLabel:'job number', id:'jobNumber' }
                     ]
                 }
             ]
@@ -241,7 +230,7 @@ Ext.madasExperimentCmp = {
                             {
                                 storeId:"navDS",
                                 fields: ["nav", "init", "blur", "enabled"],
-                                data: [ ["experiment details", Ext.madasExperimentInit, Ext.madasExperimentBlur, true], ["source", Ext.madasBioSourceInit, Ext.madasBioSourceBlur, false], ["treatment",Ext.madasTreatmentInit, Ext.madasBlur,false], ["sample prep",Ext.madasSamplePrepInit, Ext.madasBlur,false], ["samples/classes", Ext.madasExperimentSamplesInit, Ext.madasBlur, false], ["files", Ext.madasFilesInit, Ext.madasBlur, false], ["access",Ext.madasAccessInit, Ext.madasBlur,false] ]
+                                data: [ ["experiment details", Ext.madasExperimentInit, Ext.madasExperimentBlur, true], ["source", Ext.madasBioSourceInit, Ext.madasBioSourceBlur, false], ["treatment",Ext.madasTreatmentInit, Ext.madasBlur,false], ["sample prep",Ext.madasSamplePrepInit, Ext.madasBlur,false], ["sample classes", Ext.madasExperimentSamplesInit, Ext.madasBlur, false], ["samples", Ext.madasExperimentSamplesOnlyInit, Ext.madasBlur, false], ["files", Ext.madasFilesInit, Ext.madasBlur, false], ["access",Ext.madasAccessInit, Ext.madasBlur,false] ]
                             }
                         ),
                         listeners:{"render":function(a){window.setTimeout("Ext.getCmp('expNav').getSelectionModel().selectFirstRow();", 500);}}
@@ -264,6 +253,7 @@ Ext.madasExperimentCmp = {
             Ext.madasTreatment,
             Ext.madasSamplePrep,
             Ext.madasExperimentSamples,
+            Ext.madasExperimentSamplesOnly,
             Ext.madasFiles,
             Ext.madasAccess
         ]
@@ -275,25 +265,25 @@ Ext.madasLoadExperiment = function(expId) {
         return;
     }
     
-    var clientsLoader = new Ajax.Request(wsBaseUrl + 'populate_select/organisation/id/name/', 
-                                     { 
-                                     asynchronous:true, 
-                                     evalJSON:'force',
-                                     onSuccess: function(response) {
-                                         var clientCombo = Ext.getCmp('client');
-                                         var data = response.responseJSON.response.value.items;
-                                         var massagedData = [];
-
-                                         for (var idx in data) {
-                                             massagedData[idx] = [data[idx]['key'], data[idx]['value']];
-                                         }
-                                         
-                                         clientCombo.getStore().loadData(massagedData);
-                                         
-                                         clientCombo.setValue(clientCombo.getValue());
-                                         }
-                                     }
-                                     );
+//    var clientsLoader = new Ajax.Request(wsBaseUrl + 'populate_select/organisation/id/name/', 
+//                                     { 
+//                                     asynchronous:true, 
+//                                     evalJSON:'force',
+//                                     onSuccess: function(response) {
+//                                         var clientCombo = Ext.getCmp('client');
+//                                         var data = response.responseJSON.response.value.items;
+//                                         var massagedData = [];
+//
+//                                         for (var idx in data) {
+//                                             massagedData[idx] = [data[idx]['key'], data[idx]['value']];
+//                                         }
+//                                         
+//                                         clientCombo.getStore().loadData(massagedData);
+//                                         
+//                                         clientCombo.setValue(clientCombo.getValue());
+//                                         }
+//                                     }
+//                                     );
     
     var expLoader = new Ajax.Request(wsBaseUrl + "records/experiment/id/" + expId, 
                                      { 
@@ -303,24 +293,27 @@ Ext.madasLoadExperiment = function(expId) {
                                              var namefield = Ext.getCmp('experimentName');
                                              var desc = Ext.getCmp('experimentDescription');
                                              var comment = Ext.getCmp('experimentComment');
-                                             var client = Ext.getCmp('client');
+                                             var formalQuote = Ext.getCmp('formalQuote');
+                                             var jobNumber = Ext.getCmp('jobNumber');
                                              
-                                             if (!namefield || !desc || !comment || !client) {
+                                             if (!namefield || !desc || !comment || !formalQuote || !jobNumber) {
                                                  return;
                                              }
                                              
                                              namefield.setValue('');
                                              desc.setValue('');
                                              comment.setValue('');
-                                             client.setValue('');
-                                             
+                                             formalQuote.setValue('');
+                                             jobNumber.setValue('');
+                                     
                                              var rs = response.responseJSON.rows;
                                              
                                              if (rs.length > 0) {
                                                  namefield.setValue(rs[0].title);
                                                  desc.setValue(rs[0].description);
                                                  comment.setValue(rs[0].comment);
-                                                 client.setValue(rs[0].client);
+                                                 formalQuote.setValue(rs[0].formal_quote);
+                                                 jobNumber.setValue(rs[0].job_number);
                                              }
                                      
                                              Ext.madasUpdateNav();
@@ -399,7 +392,7 @@ Ext.madasUpdateNav = function() {
     var et = Ext.getCmp("experimentTitle");
     var counter = 1;
         
-    for (counter = 1; counter <= 6; counter++) {
+    for (counter = 1; counter <= 7; counter++) {
         ds.getAt(counter).set("enabled", (en.getValue() !== ''));
     }
     

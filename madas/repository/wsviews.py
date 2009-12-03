@@ -519,7 +519,7 @@ def recordsExperiments(request):
         d['title'] = row.title
         d['job_number'] = row.job_number
         try:
-            d['client'] = row.client.name
+            d['client'] = UserExperiment.objects.filter(type__id=3, experiment__id=row.id)[0].user.username
         except:
             d['client'] = ''
         try:
