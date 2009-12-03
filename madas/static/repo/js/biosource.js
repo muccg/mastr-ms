@@ -125,7 +125,7 @@ Ext.madasBioSource = {
                         valueField:'key',
                         hiddenName:'sourceTypeValue',
                         lazyRender:true,
-                        value:'Microbial',
+                        value:'1',
                         mode:'local',
                         allowBlank:false,
                         typeAhead:false,

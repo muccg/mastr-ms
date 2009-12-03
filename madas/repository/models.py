@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime, date, time
-from m.models import Organisation
+from m.models import Organisation, Formalquote
 
 class OrganismType(models.Model):
     """Currently, Microorganism, Plant, Animal or Human"""
@@ -104,8 +104,7 @@ class Experiment(models.Model):
     users = models.ManyToManyField(User, through='UserExperiment', null=True)
     status = models.ForeignKey(ExperimentStatus, null=True)
     created_on = models.DateField(null=False, default=date.today)
-    client = models.ForeignKey(Organisation, null=True)
-    quote_number = models.CharField(max_length=30)
+    formal_quote = models.ForeignKey(Formalquote, null=True)
     job_number = models.CharField(max_length=30)
     # ? files
     

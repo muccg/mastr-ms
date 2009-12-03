@@ -66,5 +66,12 @@
         "fields": {
             "name": "Involved User"
         }
+    }, 
+    {
+        "pk": 3, 
+        "model": "repository.userinvolvementtype", 
+        "fields": {
+            "name": "Client"
+        }
     }
 ]
