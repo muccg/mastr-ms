@@ -235,8 +235,8 @@ def populate_select(request, model=None, key=None, value=None, field=None, match
                        'userinvolvementtype' : ['id', 'name'],
                        'plant' : ['development_stage'],
                        'growthcondition' : ['id', 'greenhouse_id', 'greenhouse__name', 'detailed_location', 'lamp_details'],
-                       'lamptype': ['id', 'name'],
-                       'organisation': ['id', 'name']
+                       'organisation': ['id', 'name'],
+                       'sampleclass': ['id', 'class_id', 'experiment__id']
                        }
 
 
@@ -491,7 +491,7 @@ def recordsExperiments(request):
                             'successProperty': 'success',
                             'root': 'rows',
                             'id': 'id',
-                            'fields': [{'name':'id'}, {'name':'status'}, {'name':'title'}, {'name':'job_number'}, {'name':'client'},  {'name':'principal'}]
+                            'fields': [{'name':'id'}, {'name':'status'}, {'name':'title'}, {'name':'job_number'}, {'name':'client'},  {'name':'principal'}, {'name':'description'}]
                             },
               'results': 0,
               'authenticated': True,
@@ -517,6 +517,7 @@ def recordsExperiments(request):
         d['id'] = row.id
         d['status'] = row.status.id
         d['title'] = row.title
+        d['description'] = row.description
         d['job_number'] = row.job_number
         try:
             d['client'] = UserExperiment.objects.filter(type__id=3, experiment__id=row.id)[0].user.username

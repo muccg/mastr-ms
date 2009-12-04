@@ -34,6 +34,10 @@ function renderUser(val) {
     return renderValueOnly(userComboStore, val);   
 }
 
+function renderClass(val) {
+    return renderValueOnly(Ext.StoreMgr.get('classCombo'), val);   
+}
+
 function renderGenotype(val) {
     return renderValueOnly(genotypeComboStore, val);   
 }
