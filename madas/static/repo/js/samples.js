@@ -12,6 +12,7 @@ Ext.madasSaveSampleRow = function(roweditor, changes, rec, i) {
     
     bundledData.label = rec.data.label;
     bundledData.comment = rec.data.comment;
+    bundledData.weight = rec.data.weight;
     
     Ext.madasSaveRowLiterals('sample', roweditor, bundledData, rec, i, function() { var scId = Ext.madasCurrentSampleClassId(); sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/sample_class__id/' + scId; sampleStore.load();});
 };
@@ -179,6 +180,7 @@ Ext.madasExperimentSamples = {
                     columns: [
                         { header: "id", sortable:false, menuDisabled:true, dataIndex:'id' },
                         { header: "label", sortable:false, menuDisabled:true, editor:new Ext.form.TextField(), dataIndex:'label' },
+                          { header: "weight", sortable:false, menuDisabled:true, editor:new Ext.form.NumberField({editable:true}), dataIndex:'weight' },
                         { header: "comment", sortable:false, menuDisabled:true, width:300, editor:new Ext.form.TextField(), dataIndex:'comment' }
                     ],
                     store: sampleStore
@@ -200,6 +202,7 @@ Ext.madasSaveSampleOnlyRow = function(roweditor, changes, rec, i) {
     
     bundledData.label = rec.data.label;
     bundledData.comment = rec.data.comment;
+    bundledData.weight = rec.data.weight;
     
     Ext.madasSaveRowLiterals('sample', roweditor, bundledData, rec, i, function() { var eId = Ext.madasCurrentExperimentId(); sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/experiment__id/' + eId;
                              sampleStore.load();});
@@ -266,6 +269,7 @@ Ext.madasExperimentSamplesOnly = {
             columns: [
                       { header: "id", sortable:false, menuDisabled:true, dataIndex:'id' },
                       { header: "label", sortable:false, menuDisabled:true, editor:new Ext.form.TextField(), dataIndex:'label' },
+                      { header: "weight", sortable:false, menuDisabled:true, editor:new Ext.form.NumberField({editable:true}), dataIndex:'weight' },
                       { header: "comment", sortable:false, menuDisabled:true, width:300, editor:new Ext.form.TextField(), dataIndex:'comment' },
                       { header: "last status", sortable:false, menuDisabled:true, width:300, dataIndex:'status' }
                       ],
