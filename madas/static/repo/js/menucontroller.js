@@ -121,6 +121,7 @@ Ext.madasChangeMainContent = function(contentName, paramArray){
             break;
             
         case 'experiment:my':
+            Ext.madasCurrentExpId = 0;
             experimentListStore.reload();
             Ext.getCmp('center-panel').layout.setActiveItem('experiment-list');
             break;
