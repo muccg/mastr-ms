@@ -17,6 +17,14 @@ Ext.madasSaveSampleRow = function(roweditor, changes, rec, i) {
     Ext.madasSaveRowLiterals('sample', roweditor, bundledData, rec, i, function() { var scId = Ext.madasCurrentSampleClassId(); sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/sample_class__id/' + scId; sampleStore.load();});
 };
 
+Ext.madasSaveSampleClassRow = function(roweditor, changes, rec, i) {
+    var bundledData = {};
+    
+    bundledData.class_id = rec.data.class_id;
+
+    Ext.madasSaveRowLiterals('sampleclass', roweditor, bundledData, rec, i, Ext.madasExperimentSamplesInit);
+};
+
 Ext.madasExperimentSamples = {
     baseCls: 'x-plain',
     border:'false',
@@ -40,6 +48,7 @@ Ext.madasExperimentSamples = {
                     border: false,
                     id:'sampleClasses',
                     trackMouseOver: false,
+                    plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':Ext.madasSaveSampleClassRow}})],
                     sm: new Ext.grid.RowSelectionModel({
                                                        listeners:{'rowselect':function(sm, idx, rec) {
                                                        sampleStore.proxy.conn.url = wsBaseUrl + "records/sample/sample_class__id/" + rec.data.id;
@@ -107,7 +116,7 @@ Ext.madasExperimentSamples = {
                     },
                     columns: [
                         { header: "id",  sortable:false, menuDisabled:true, dataIndex:"id" },
-                        { header: "Class",  sortable:false, menuDisabled:true, dataIndex:"class_id" },
+                        { header: "Class",  sortable:false, menuDisabled:true, editor:new Ext.form.TextField(), dataIndex:"class_id" },
                               { header: "Treatment Variation",  sortable:false, menuDisabled:true, dataIndex:"treatment" },
                               { header: "Timeline",  sortable:false, menuDisabled:true, dataIndex:"timeline" },
                               { header: "Origin",  sortable:false, menuDisabled:true, dataIndex:"origin" },
@@ -193,6 +202,24 @@ Ext.madasExperimentSamples = {
 Ext.madasExperimentSamplesOnlyInit = function() {
     var expId = Ext.madasCurrentExperimentId();
     
+    var classLoader = new Ajax.Request(wsBaseUrl + 'populate_select/sampleclass/id/class_id/experiment__id/'+escape(expId), 
+                                     { 
+                                     asynchronous:true, 
+                                     evalJSON:'force',
+                                     onSuccess: function(response) {
+                                         var classComboStore = Ext.StoreMgr.get('classCombo');
+                                         var data = response.responseJSON.response.value.items;
+                                         var massagedData = [];
+
+                                         for (var idx in data) {
+                                             massagedData[idx] = [data[idx]['key'], data[idx]['value']];
+                                         }
+                                         
+                                         classComboStore.loadData(massagedData);
+                                         }
+                                     }
+                                     );
+    
     sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/experiment__id/' + expId;
     sampleStore.load();
 };
@@ -203,6 +230,7 @@ Ext.madasSaveSampleOnlyRow = function(roweditor, changes, rec, i) {
     bundledData.label = rec.data.label;
     bundledData.comment = rec.data.comment;
     bundledData.weight = rec.data.weight;
+    bundledData.sample_class_id = rec.data.sample_class;
     
     Ext.madasSaveRowLiterals('sample', roweditor, bundledData, rec, i, function() { var eId = Ext.madasCurrentExperimentId(); sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/experiment__id/' + eId;
                              sampleStore.load();});
@@ -271,6 +299,19 @@ Ext.madasExperimentSamplesOnly = {
                       { header: "label", sortable:false, menuDisabled:true, editor:new Ext.form.TextField(), dataIndex:'label' },
                       { header: "weight", sortable:false, menuDisabled:true, editor:new Ext.form.NumberField({editable:true}), dataIndex:'weight' },
                       { header: "comment", sortable:false, menuDisabled:true, width:300, editor:new Ext.form.TextField(), dataIndex:'comment' },
+                      { header: "class", sortable:false, menuDisabled:true, dataIndex:'sample_class', editor:new Ext.form.ComboBox({
+                               editable:true,
+                               forceSelection:false,
+                               displayField:'value',
+                               valueField:'key',
+                               lazyRender:true,
+                               allowBlank:true,
+                               typeAhead:false,
+                               triggerAction:'all',
+                               listWidth:230,
+                               mode:'local',
+                               store: new Ext.data.ArrayStore({storeId:'classCombo', fields: ['key', 'value']})                               }),
+                      renderer:renderClass },
                       { header: "last status", sortable:false, menuDisabled:true, width:300, dataIndex:'status' }
                       ],
             store: sampleStore
