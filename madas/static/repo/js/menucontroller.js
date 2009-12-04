@@ -126,7 +126,19 @@ Ext.madasChangeMainContent = function(contentName, paramArray){
             Ext.getCmp('center-panel').layout.setActiveItem('experiment-list');
             break;
         case 'experiment:new':
-            Ext.madasLoadExperiment(0);
+            Ext.madasCurrentExpId = 0;
+            var namefield = Ext.getCmp('experimentName');
+            var desc = Ext.getCmp('experimentDescription');
+            var comment = Ext.getCmp('experimentComment');
+            var formalQuote = Ext.getCmp('formalQuote');
+            var jobNumber = Ext.getCmp('jobNumber');
+            
+            namefield.setValue('');
+            desc.setValue('');
+            comment.setValue('');
+            formalQuote.setValue('');
+            jobNumber.setValue('');
+            //fall through to force render of new experiment
         case 'experiment:view':
             Ext.getCmp('center-panel').layout.setActiveItem('experimentTitle');
             Ext.getCmp('expNav').getSelectionModel().selectFirstRow();            

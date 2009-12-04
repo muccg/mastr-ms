@@ -50,7 +50,7 @@ Ext.madasExperimentBlur = function(invoker) {
     
     Ext.madasExperimentDeferredInvocation = invoker;
 
-    if (expId === 0 && expName !== "") {
+    if (expId === 0) {
         
         var saver = new Ajax.Request(wsBaseUrl + 'create/experiment/?title='+escape(expName)+'&description='+escape(expDescription)+'&comment='+escape(expComment)+'&status_id=2&formal_quote_id='+escape(expFQuoteId)+'&job_number='+escape(expJobNumber), 
                                              { 
