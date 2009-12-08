@@ -150,6 +150,7 @@ Ext.madasExperimentDetails = {
                     { xtype:'textarea', fieldLabel:'description', id:'experimentDescription', width:400 },
                     { xtype:'textarea', fieldLabel:'comment', id:'experimentComment', width:400 },
                         new Ext.form.ComboBox({
+                                              width:300,
                                               fieldLabel:'formal quote',
                                               id:'formalQuote', 
                                               editable:true,
@@ -161,11 +162,11 @@ Ext.madasExperimentDetails = {
                                               allowBlank:true,
                                               typeAhead:false,
                                               triggerAction:'all',
-                                              listWidth:230,
+                                              listWidth:300,
                                               mode:'local',
                                               store: new Ext.data.ArrayStore({fields: ['key', 'value']})
                                               }),
-                        { xtype:'textfield', fieldLabel:'organisation', id:'expOrg', disabled:true},
+                        { xtype:'displayfield', fieldLabel:'organisation', id:'expOrg', disabled:true},
                         { xtype:'textfield', fieldLabel:'job number', id:'jobNumber' }
                     ]
                 }
