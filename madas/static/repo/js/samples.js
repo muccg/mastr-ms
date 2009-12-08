@@ -204,7 +204,7 @@ Ext.madasExperimentSamplesOnlyInit = function() {
     
     var classLoader = new Ajax.Request(wsBaseUrl + 'populate_select/sampleclass/id/class_id/experiment__id/'+escape(expId), 
                                      { 
-                                     asynchronous:true, 
+                                     asynchronous:false, 
                                      evalJSON:'force',
                                      onSuccess: function(response) {
                                          var classComboStore = Ext.StoreMgr.get('classCombo');
@@ -229,6 +229,9 @@ Ext.madasSaveSampleOnlyRow = function(roweditor, changes, rec, i) {
     
     bundledData.label = rec.data.label;
     bundledData.comment = rec.data.comment;
+    if (rec.data.weight == '') {
+        rec.data.weight = '0.00';
+    }
     bundledData.weight = rec.data.weight;
     bundledData.sample_class_id = rec.data.sample_class;
     

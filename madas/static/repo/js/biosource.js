@@ -8,26 +8,7 @@ Ext.madasBioSourceInit = function() {
                                  onSuccess:     Ext.madasBioLoadSuccess
                                  });
     
-    var orgType = Ext.madasCurrentOrganismType();
-    //console.log("init for orgtype "+orgType);
-    if (orgType == 4) {
-        humanStore.proxy.conn.url = wsBaseUrl + 'records/human/experiment__id/' + expId;
-        humanStore.load();
-        Ext.getCmp("organismBioSourceHumanFieldset").show();
-        Ext.getCmp("organismBioSourceAnimalFieldset").hide();
-    } else if (orgType == 3) {
-        animalStore.proxy.conn.url = wsBaseUrl + 'records/animal/experiment__id/' + expId;
-        animalStore.load();
-        Ext.getCmp("organismBioSourceAnimalFieldset").show();
-        Ext.getCmp("organismBioSourceHumanFieldset").hide();
-    } else if (orgType == 2) {
-        Ext.getCmp("organismBioSourceHumanFieldset").hide();
-        Ext.getCmp("organismBioSourceAnimalFieldset").hide();
-    } else {
-        Ext.getCmp("organismBioSourceAnimalFieldset").hide();
-        Ext.getCmp("organismBioSourceHumanFieldset").hide();
-    }
-    
+       
     organStore.proxy.conn.url = wsBaseUrl + 'records/organ/experiment__id/' + expId;
     organStore.load();
 
@@ -38,6 +19,8 @@ Ext.madasBioLoadSuccess = function(response) {
     Ext.getCmp('sourceType').setValue( response.responseJSON.rows[0].type );
     Ext.getCmp('sourceInfo').setValue( response.responseJSON.rows[0].information );
     Ext.getCmp('sourceNCBI').setValue( response.responseJSON.rows[0].ncbi_id );
+    
+    Ext.madasSourceTypeSelect();
 };
 
 Ext.madasBioSourceBlur = function(invoker) {
@@ -47,17 +30,28 @@ Ext.madasBioSourceBlur = function(invoker) {
         Ext.madasBioSourceBlurSuccess();
     } else {
         Ext.madasExperimentDeferredInvocation = invoker;
-        var humanGender, humanDob, humanBmi, humanDiagnosis, animalGender, animalAge, animalParentalLine;
+        var extraParams;
         var sourceType, sourceInfo, sourceNCBI;
         
         sourceType = Ext.getCmp('sourceType').getValue();
         sourceInfo = Ext.getCmp('sourceInfo').getValue();
         sourceNCBI = Ext.getCmp('sourceNCBI').getValue();
         
-        //TODO process new form field elements
-        if (Ext.madasCurrentOrganismType() == '4') { //human
-        } else if (Ext.madasCurrentOrganismType() == '3') { //animal
-        } else {
+        var src = Ext.getCmp('sourceType');
+        switch (src.getValue()) {
+            case 1:
+                extraParams = "&genus=" + escape(Ext.getCmp('microbial_genus').getValue());
+                break;
+            case 2:
+                break;
+            case 3:
+                Ext.getCmp('organismBioSourceAnimalFieldset').show();
+                break;
+            case 4:
+                Ext.getCmp('organismBioSourceHumanFieldset').show();
+                break;
+            default:
+                break;
         }
 
         //this request should ask the server to rejig the single biosource that we currently permit
@@ -72,6 +66,27 @@ Ext.madasBioSourceBlur = function(invoker) {
 
 Ext.madasSourceTypeSelect = function() {
     //display the appropriate fieldset
+    var src = Ext.getCmp('sourceType');
+    
+    Ext.getCmp('organismBioSourceMicrobialFieldset').hide();
+    Ext.getCmp('organismBioSourceAnimalFieldset').hide();
+    Ext.getCmp('organismBioSourceHumanFieldset').hide();
+    
+    switch (src.getValue()) {
+        case 1:
+            Ext.getCmp('organismBioSourceMicrobialFieldset').show();
+            break;
+        case 2:
+            break;
+        case 3:
+            Ext.getCmp('organismBioSourceAnimalFieldset').show();
+            break;
+        case 4:
+            Ext.getCmp('organismBioSourceHumanFieldset').show();
+            break;
+        default:
+            break;
+    }
 };
 
 Ext.madasBioSourceBlurSuccess = function() {
@@ -153,6 +168,28 @@ Ext.madasBioSource = {
                         xtype:'textfield'
                     },
                     { xtype:'fieldset', 
+                    title:'microbial info',
+                    id:'organismBioSourceMicrobialFieldset',
+                    autoHeight:true,
+                    labelWidth:150,
+                    items: [
+                            { xtype:'textfield', fieldLabel:'Genus', id:'microbial_genus' },
+                            { xtype:'textfield', fieldLabel:'Species', id:'microbial_species' },
+                            { xtype:'textfield', fieldLabel:'Culture collection ID', id:'microbial_culture' },
+                            { xtype:'textfield', fieldLabel:'Media', id:'microbial_media' },
+                            { xtype:'textfield', fieldLabel:'Fermentation vessel', id:'microbial_vessel' },
+                            { xtype:'textfield', fieldLabel:'Fermentation mode', id:'microbial_mode' },
+                            { xtype:'textfield', fieldLabel:'Innoculation density', id:'microbial_density', maskRe:/^[0-9]*\.*[0-9]*$/ },
+                            { xtype:'textfield', fieldLabel:'Fermentation volume', id:'microbial_volume', maskRe:/^[0-9]*\.*[0-9]*$/ },
+                            { xtype:'textfield', fieldLabel:'Temperature', id:'microbial_temperature', maskRe:/^[0-9]*\.*[0-9]*$/ },
+                            { xtype:'textfield', fieldLabel:'Agitation', id:'microbial_agitation', maskRe:/^[0-9]*\.*[0-9]*$/ },
+                            { xtype:'textfield', fieldLabel:'pH', id:'microbial_ph', maskRe:/^[0-9]*\.              [0-9]*$/ },
+                            { xtype:'textfield', fieldLabel:'Gas type', id:'microbial_gastype' },
+                            { xtype:'textfield', fieldLabel:'Gas flow rate', id:'microbial_flowrate', maskRe:/^[0-9]*\.*[0-9]*$/ },
+                            { xtype:'textfield', fieldLabel:'Gas delivery method', id:'microbial_delivery' }
+                            ]
+                    },
+                    { xtype:'fieldset', 
                     title:'animal info',
                     id:'organismBioSourceAnimalFieldset',
                     autoHeight:true,
@@ -196,7 +233,9 @@ Ext.madasBioSource = {
                             triggerAction:'all',
                             listWidth:230,
                             store: animalComboStore    
-                        }
+                            },
+                            { xtype:'textfield', fieldLabel:'Location', id:'animal_location' },
+                            { xtype:'textarea', fieldLabel:'Notes', id:'animal_notes', width:500 }
                     ]
                 },
                 { xtype:'fieldset', 
@@ -217,6 +256,7 @@ Ext.madasBioSource = {
                         lazyRender:true,
                         allowBlank:false,
                         typeAhead:false,
+                        mode:'local',
                         triggerAction:'all',
                         listWidth:230,
                         store: new Ext.data.ArrayStore({
@@ -229,7 +269,9 @@ Ext.madasBioSource = {
                         }, 
                         { xtype:'datefield', fieldLabel:'Date of birth', id:'human_dob', format:'d/m/Y'}, 
                         { xtype:'textfield', fieldLabel:'BMI', id:'human_bmi', maskRe:/^[0-9]*\.*[0-9]*$/ },
-                        { xtype:'textfield', fieldLabel:'Diagnosis', id:'human_diagnosis' }
+                        { xtype:'textfield', fieldLabel:'Diagnosis', id:'human_diagnosis' },
+                        { xtype:'textfield', fieldLabel:'Location', id:'human_location' },
+                        { xtype:'textarea', fieldLabel:'Notes', id:'human_notes', width:500 }
                         ]
                 },
                 { xtype:'grid', 
