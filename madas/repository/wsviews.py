@@ -2,7 +2,7 @@ from django.http import HttpResponse, HttpResponseNotFound
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, Treatment,  BiologicalSource, SampleClass, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType
-from madas.m.models import Organisation
+from madas.m.models import Organisation, Formalquote
 from django.utils import webhelpers
 from django.contrib.auth.models import User
 from django.utils import simplejson as json
@@ -236,7 +236,8 @@ def populate_select(request, model=None, key=None, value=None, field=None, match
                        'plant' : ['development_stage'],
                        'growthcondition' : ['id', 'greenhouse_id', 'greenhouse__name', 'detailed_location', 'lamp_details'],
                        'organisation': ['id', 'name'],
-                       'sampleclass': ['id', 'class_id', 'experiment__id']
+                       'sampleclass': ['id', 'class_id', 'experiment__id'],
+                       'formalquote': ['id', 'toemail']
                        }
 
 
@@ -258,6 +259,8 @@ def populate_select(request, model=None, key=None, value=None, field=None, match
             model_obj = get_model('m', 'organisation')
         elif model == 'user':
             model_obj = get_model('auth', 'user')
+        elif model == 'formalquote':
+            model_obj = get_model('m', 'formalquote')
         else:
             model_obj = get_model('repository', model)
         

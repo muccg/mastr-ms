@@ -149,7 +149,22 @@ Ext.madasExperimentDetails = {
                     { xtype:'textfield', fieldLabel:'experiment name', enableKeyEvents:true, id:'experimentName', allowBlank:false, listeners:{'keydown':function(t, e){ Ext.madasUpdateNav(); return true; }, 'keyup':function(t, e){ Ext.madasUpdateNav(); return true; }}},
                     { xtype:'textarea', fieldLabel:'description', id:'experimentDescription', width:400 },
                     { xtype:'textarea', fieldLabel:'comment', id:'experimentComment', width:400 },
-                        { xtype:'textfield', fieldLabel:'formal quote', id:'formalQuote', disabled:true},
+                        new Ext.form.ComboBox({
+                                              fieldLabel:'formal quote',
+                                              id:'formalQuote', 
+                                              editable:true,
+                                              forceSelection:false,
+                                              displayField:'value',
+                                              valueField:undefined,
+                                              hiddenName:'formalQuote',
+                                              lazyRender:true,
+                                              allowBlank:true,
+                                              typeAhead:false,
+                                              triggerAction:'all',
+                                              listWidth:230,
+                                              mode:'local',
+                                              store: new Ext.data.ArrayStore({fields: ['key', 'value']})
+                                              }),
                         { xtype:'textfield', fieldLabel:'organisation', id:'expOrg', disabled:true},
                         { xtype:'textfield', fieldLabel:'job number', id:'jobNumber' }
                     ]
@@ -265,25 +280,25 @@ Ext.madasLoadExperiment = function(expId) {
         return;
     }
     
-//    var clientsLoader = new Ajax.Request(wsBaseUrl + 'populate_select/organisation/id/name/', 
-//                                     { 
-//                                     asynchronous:true, 
-//                                     evalJSON:'force',
-//                                     onSuccess: function(response) {
-//                                         var clientCombo = Ext.getCmp('client');
-//                                         var data = response.responseJSON.response.value.items;
-//                                         var massagedData = [];
-//
-//                                         for (var idx in data) {
-//                                             massagedData[idx] = [data[idx]['key'], data[idx]['value']];
-//                                         }
-//                                         
-//                                         clientCombo.getStore().loadData(massagedData);
-//                                         
-//                                         clientCombo.setValue(clientCombo.getValue());
-//                                         }
-//                                     }
-//                                     );
+    var fquoLoader = new Ajax.Request(wsBaseUrl + 'populate_select/formalquote/id/toemail/', 
+                                     { 
+                                     asynchronous:true, 
+                                     evalJSON:'force',
+                                     onSuccess: function(response) {
+                                         var fquoCombo = Ext.getCmp('formalQuote');
+                                         var data = response.responseJSON.response.value.items;
+                                         var massagedData = [];
+
+                                         for (var idx in data) {
+                                             massagedData[idx] = [data[idx]['key'], data[idx]['value']];
+                                         }
+                                         
+                                         fquoCombo.getStore().loadData(massagedData);
+                                         
+                                         fquoCombo.setValue(fquoCombo.getValue());
+                                         }
+                                     }
+                                     );
     
     var expLoader = new Ajax.Request(wsBaseUrl + "records/experiment/id/" + expId, 
                                      { 
