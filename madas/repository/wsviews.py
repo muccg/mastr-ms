@@ -330,6 +330,52 @@ def update_single_source(request, exp_id):
             bs.ncbi_id = None
         #bs.label = args['label']
         bs.save()
+        
+        #process additional info
+        if int(args['type']) == 1:
+            #check for existing items
+            if bs.microbialinfo_set.count() == 0:
+                mi = MicrobialInfo()
+                mi.genus = args['genus']
+                mi.species = args['species']
+                mi.culture_collection_id = args['culture']
+                mi.media = args['media']
+                mi.fermentation_vessel = args['vessel']
+                mi.fermentation_mode = args['mode']
+                mi.innoculation_density = args['density']
+                mi.fermentation_volume = args['volume']
+                mi.temperature = args['temperature']
+                mi.agitation = args['agitation']
+                mi.ph = args['ph']
+                mi.gas_type = args['gastype']
+                mi.gas_flow_rate = args['flowrate']
+                mi.gas_delivery_method = args['delivery']
+                
+                bs.microbialinfo_set.add(mi)
+            else:
+                mi = bs.microbialinfo_set.all()[0]
+                mi.genus = args['genus']
+                mi.species = args['species']
+                mi.culture_collection_id = args['culture']
+                mi.media = args['media']
+                mi.fermentation_vessel = args['vessel']
+                mi.fermentation_mode = args['mode']
+                mi.innoculation_density = str(float(args['density']))
+                mi.fermentation_volume = str(float(args['volume']))
+                mi.temperature = str(float(args['temperature']))
+                mi.agitation = str(float(args['agitation']))
+                mi.ph = str(float(args['ph']))
+                mi.gas_type = args['gastype']
+                mi.gas_flow_rate = str(float(args['flowrate']))
+                mi.gas_delivery_method = args['delivery']
+                
+                mi.save()
+        elif int(args['type']) == 2:
+            pass
+        elif int(args['type']) == 3:
+            pass
+        elif int(args['type']) == 4:
+            pass
     
     return HttpResponse(json.dumps(output))
     

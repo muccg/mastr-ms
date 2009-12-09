@@ -1,4 +1,5 @@
 Ext.madasExperimentInit = function() {
+    Ext.madasLoadExperiment(Ext.madasCurrentExperimentId());
 };
 
 Ext.madasBlur = function(invoker) {
@@ -277,9 +278,9 @@ Ext.madasExperimentCmp = {
 };
 
 Ext.madasLoadExperiment = function(expId) {
-    if (expId == Ext.madasCurrentExpId) {
-        return;
-    }
+    //if (expId == Ext.madasCurrentExpId) {
+//        return;
+//    }
     
     var fquoLoader = new Ajax.Request(wsBaseUrl + 'populate_select/formalquote/id/toemail/', 
                                      { 
