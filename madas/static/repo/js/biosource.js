@@ -15,12 +15,45 @@ Ext.madasBioSourceInit = function() {
 };
 
 Ext.madasBioLoadSuccess = function(response) {
-    Ext,madasCurrentSingleSourceId = response.responseJSON.rows[0].id;
+    Ext.madasCurrentSingleSourceId = response.responseJSON.rows[0].id;
     Ext.getCmp('sourceType').setValue( response.responseJSON.rows[0].type );
     Ext.getCmp('sourceInfo').setValue( response.responseJSON.rows[0].information );
     Ext.getCmp('sourceNCBI').setValue( response.responseJSON.rows[0].ncbi_id );
     
+    Ext.madasCurrentSourceType = response.responseJSON.rows[0].type;
+    
+    //load the source info
+    switch ( response.responseJSON.rows[0].type ) {
+        case 1:
+            var loader = new Ajax.Request(wsBaseUrl + 'records/microbialinfo/source__id/'+Ext.madasCurrentSingleSourceId, 
+                                  { 
+                                  asynchronous:true, 
+                                  evalJSON:'force',
+                                  onSuccess:     Ext.madasSourceInfoLoadSuccess
+                                  });
+            break;
+        default:
+            break;
+    }
+    
     Ext.madasSourceTypeSelect();
+};
+
+Ext.madasSourceInfoLoadSuccess = function(response) {
+    Ext.getCmp('microbial_genus').setValue(response.responseJSON.rows[0].genus);
+    Ext.getCmp('microbial_species').setValue(response.responseJSON.rows[0].species);
+    Ext.getCmp('microbial_culture').setValue(response.responseJSON.rows[0].culture_collection_id);
+    Ext.getCmp('microbial_media').setValue(response.responseJSON.rows[0].media);
+    Ext.getCmp('microbial_vessel').setValue(response.responseJSON.rows[0].fermentation_vessel);
+    Ext.getCmp('microbial_mode').setValue(response.responseJSON.rows[0].fermentation_mode);
+    Ext.getCmp('microbial_density').setValue(response.responseJSON.rows[0].innoculation_density);
+    Ext.getCmp('microbial_volume').setValue(response.responseJSON.rows[0].fermentation_volume);
+    Ext.getCmp('microbial_temperature').setValue(response.responseJSON.rows[0].temperature);
+    Ext.getCmp('microbial_agitation').setValue(response.responseJSON.rows[0].agitation);
+    Ext.getCmp('microbial_ph').setValue(response.responseJSON.rows[0].ph);
+    Ext.getCmp('microbial_gastype').setValue(response.responseJSON.rows[0].gas_type);
+    Ext.getCmp('microbial_flowrate').setValue(response.responseJSON.rows[0].gas_flow_rate);
+    Ext.getCmp('microbial_delivery').setValue(response.responseJSON.rows[0].gas_delivery_method);
 };
 
 Ext.madasBioSourceBlur = function(invoker) {
@@ -30,7 +63,7 @@ Ext.madasBioSourceBlur = function(invoker) {
         Ext.madasBioSourceBlurSuccess();
     } else {
         Ext.madasExperimentDeferredInvocation = invoker;
-        var extraParams;
+        var extraParams = "";
         var sourceType, sourceInfo, sourceNCBI;
         
         sourceType = Ext.getCmp('sourceType').getValue();
@@ -41,6 +74,19 @@ Ext.madasBioSourceBlur = function(invoker) {
         switch (src.getValue()) {
             case 1:
                 extraParams = "&genus=" + escape(Ext.getCmp('microbial_genus').getValue());
+                extraParams += "&species=" + escape(Ext.getCmp('microbial_species').getValue());
+                extraParams += "&culture=" + escape(Ext.getCmp('microbial_culture').getValue());
+                extraParams += "&media=" + escape(Ext.getCmp('microbial_media').getValue());
+                extraParams += "&vessel=" + escape(Ext.getCmp('microbial_vessel').getValue());
+                extraParams += "&mode=" + escape(Ext.getCmp('microbial_mode').getValue());
+                extraParams += "&density=" + escape(Ext.getCmp('microbial_density').getValue());
+                extraParams += "&volume=" + escape(Ext.getCmp('microbial_volume').getValue());
+                extraParams += "&temperature=" + escape(Ext.getCmp('microbial_temperature').getValue());
+                extraParams += "&agitation=" + escape(Ext.getCmp('microbial_agitation').getValue());
+                extraParams += "&ph=" + escape(Ext.getCmp('microbial_ph').getValue());
+                extraParams += "&gastype=" + escape(Ext.getCmp('microbial_gastype').getValue());
+                extraParams += "&flowrate=" + escape(Ext.getCmp('microbial_flowrate').getValue());
+                extraParams += "&delivery=" + escape(Ext.getCmp('microbial_delivery').getValue());
                 break;
             case 2:
                 break;
@@ -55,7 +101,7 @@ Ext.madasBioSourceBlur = function(invoker) {
         }
 
         //this request should ask the server to rejig the single biosource that we currently permit
-        var saver = new Ajax.Request(wsBaseUrl + 'updateSingleSource/'+expId+'/?type='+escape(sourceType)+'&information='+escape(sourceInfo)+'&ncbi_id='+escape(sourceNCBI), 
+        var saver = new Ajax.Request(wsBaseUrl + 'updateSingleSource/'+expId+'/?type='+escape(sourceType)+'&information='+escape(sourceInfo)+'&ncbi_id='+escape(sourceNCBI)+extraParams, 
                                  { 
                                  asynchronous:true, 
                                  evalJSON:'force',
@@ -183,7 +229,7 @@ Ext.madasBioSource = {
                             { xtype:'textfield', fieldLabel:'Fermentation volume', id:'microbial_volume', maskRe:/^[0-9]*\.*[0-9]*$/ },
                             { xtype:'textfield', fieldLabel:'Temperature', id:'microbial_temperature', maskRe:/^[0-9]*\.*[0-9]*$/ },
                             { xtype:'textfield', fieldLabel:'Agitation', id:'microbial_agitation', maskRe:/^[0-9]*\.*[0-9]*$/ },
-                            { xtype:'textfield', fieldLabel:'pH', id:'microbial_ph', maskRe:/^[0-9]*\.              [0-9]*$/ },
+                            { xtype:'textfield', fieldLabel:'pH', id:'microbial_ph', maskRe:/^[0-9]*\.*[0-9]*$/ },
                             { xtype:'textfield', fieldLabel:'Gas type', id:'microbial_gastype' },
                             { xtype:'textfield', fieldLabel:'Gas flow rate', id:'microbial_flowrate', maskRe:/^[0-9]*\.*[0-9]*$/ },
                             { xtype:'textfield', fieldLabel:'Gas delivery method', id:'microbial_delivery' }

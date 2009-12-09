@@ -140,7 +140,7 @@ Ext.madasChangeMainContent = function(contentName, paramArray){
             jobNumber.setValue('');
             //fall through to force render of new experiment
         case 'experiment:view':
-            Ext.getCmp('center-panel').layout.setActiveItem('experimentTitle');
+            Ext.getCmp('center-panel').layout.setActiveItem(0);
             Ext.getCmp('expNav').getSelectionModel().selectFirstRow();            
             break;
             
