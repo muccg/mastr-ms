@@ -84,6 +84,7 @@ Ext.madasSourceInfoLoadSuccess = function(response) {
             break;
         case 2:
             //plant
+            Ext.getCmp('plant_development_stage').setValue(response.responseJSON.rows[0].development_stage);
             break;
         case 3:
             //animal
@@ -141,6 +142,7 @@ Ext.madasBioSourceBlur = function(invoker) {
                 extraParams += "&delivery=" + escape(Ext.getCmp('microbial_delivery').getValue());
                 break;
             case 2:
+                extraParams = "&development_stage=" + escape(Ext.getCmp('plant_development_stage').getValue());
                 break;
             case 3:
                 extraParams = "&sex=" + escape(Ext.getCmp('animalGender').getValue());
@@ -176,6 +178,7 @@ Ext.madasSourceTypeSelect = function() {
     var src = Ext.getCmp('sourceType');
     
     Ext.getCmp('organismBioSourceMicrobialFieldset').hide();
+    Ext.getCmp('organismBioSourcePlantFieldset').hide();
     Ext.getCmp('organismBioSourceAnimalFieldset').hide();
     Ext.getCmp('organismBioSourceHumanFieldset').hide();
     
@@ -184,6 +187,7 @@ Ext.madasSourceTypeSelect = function() {
             Ext.getCmp('organismBioSourceMicrobialFieldset').show();
             break;
         case 2:
+            Ext.getCmp('organismBioSourcePlantFieldset').show();
             break;
         case 3:
             Ext.getCmp('organismBioSourceAnimalFieldset').show();
@@ -294,6 +298,15 @@ Ext.madasBioSource = {
                             { xtype:'textfield', fieldLabel:'Gas type', id:'microbial_gastype' },
                             { xtype:'textfield', fieldLabel:'Gas flow rate', id:'microbial_flowrate', maskRe:/^[0-9]*\.*[0-9]*$/ },
                             { xtype:'textfield', fieldLabel:'Gas delivery method', id:'microbial_delivery' }
+                            ]
+                    },
+                    { xtype:'fieldset', 
+                    title:'plant info',
+                    id:'organismBioSourcePlantFieldset',
+                    autoHeight:true,
+                    labelWidth:150,
+                    items: [
+                            { xtype:'textfield', fieldLabel:'Development stage', id:'plant_development_stage' }
                             ]
                     },
                     { xtype:'fieldset', 
