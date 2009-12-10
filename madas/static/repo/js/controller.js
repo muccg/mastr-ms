@@ -292,7 +292,7 @@ Ext.madasLoadExperiment = function(expId) {
                                          var massagedData = [];
 
                                          for (var idx in data) {
-                                             massagedData[idx] = [data[idx]['key'], data[idx]['value']];
+                                      massagedData[idx] = [data[idx]['key'], '#'+data[idx]['key']+'  '+data[idx]['value']];
                                          }
                                          
                                          fquoCombo.getStore().loadData(massagedData);
