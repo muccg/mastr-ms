@@ -132,6 +132,8 @@ Ext.madasChangeMainContent = function(contentName, paramArray){
             var comment = Ext.getCmp('experimentComment');
             var formalQuote = Ext.getCmp('formalQuote');
             var jobNumber = Ext.getCmp('jobNumber');
+            var et = Ext.getCmp("experimentTitle");
+            et.setTitle('new experiment');
             
             namefield.setValue('');
             desc.setValue('');

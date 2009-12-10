@@ -413,7 +413,7 @@ Ext.madasUpdateNav = function() {
         ds.getAt(counter).set("enabled", (en.getValue() !== ''));
     }
     
-    if (en.getValue() === '') {
+    if (Ext.madasCurrentExperimentId() == 0) {
         et.setTitle('new experiment');
     } else {
         et.setTitle('experiment: '+en.getValue());

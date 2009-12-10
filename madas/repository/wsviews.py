@@ -1,7 +1,7 @@
 from django.http import HttpResponse, HttpResponseNotFound
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
-from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, Treatment,  BiologicalSource, SampleClass, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType
+from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType
 from madas.m.models import Organisation, Formalquote
 from django.utils import webhelpers
 from django.contrib.auth.models import User
@@ -342,13 +342,32 @@ def update_single_source(request, exp_id):
                 mi.media = args['media']
                 mi.fermentation_vessel = args['vessel']
                 mi.fermentation_mode = args['mode']
-                mi.innoculation_density = args['density']
-                mi.fermentation_volume = args['volume']
-                mi.temperature = args['temperature']
-                mi.agitation = args['agitation']
-                mi.ph = args['ph']
+                try:
+                    mi.innoculation_density = str(float(args['density']))
+                except:
+                    pass
+                try:
+                    mi.fermentation_volume = str(float(args['volume']))
+                except:
+                    pass
+                try:
+                    mi.temperature = str(float(args['temperature']))
+                except:
+                    pass
+                try:
+                    mi.agitation = str(float(args['agitation']))
+                except:
+                    pass
+                try:
+                    mi.ph = str(float(args['ph']))
+                except:
+                    pass
                 mi.gas_type = args['gastype']
-                mi.gas_flow_rate = args['flowrate']
+                try:
+                    mi.gas_flow_rate = str(float(args['flowrate']))
+                except:
+                    pass
+                mi.gas_delivery_method = args['delivery']
                 mi.gas_delivery_method = args['delivery']
                 
                 bs.microbialinfo_set.add(mi)
@@ -360,21 +379,79 @@ def update_single_source(request, exp_id):
                 mi.media = args['media']
                 mi.fermentation_vessel = args['vessel']
                 mi.fermentation_mode = args['mode']
-                mi.innoculation_density = str(float(args['density']))
-                mi.fermentation_volume = str(float(args['volume']))
-                mi.temperature = str(float(args['temperature']))
-                mi.agitation = str(float(args['agitation']))
-                mi.ph = str(float(args['ph']))
+                try:
+                    mi.innoculation_density = str(float(args['density']))
+                except:
+                    pass
+                try:
+                    mi.fermentation_volume = str(float(args['volume']))
+                except:
+                    pass
+                try:
+                    mi.temperature = str(float(args['temperature']))
+                except:
+                    pass
+                try:
+                    mi.agitation = str(float(args['agitation']))
+                except:
+                    pass
+                try:
+                    mi.ph = str(float(args['ph']))
+                except:
+                    pass
                 mi.gas_type = args['gastype']
-                mi.gas_flow_rate = str(float(args['flowrate']))
+                try:
+                    mi.gas_flow_rate = str(float(args['flowrate']))
+                except:
+                    pass
                 mi.gas_delivery_method = args['delivery']
                 
                 mi.save()
         elif int(args['type']) == 2:
             pass
         elif int(args['type']) == 3:
+            if bs.animalinfo_set.count() == 0:
+                ai = AnimalInfo()
+                ai.sex = args['sex']
+                try:
+                    ai.age = str(int(args['age']))
+                except:
+                    pass
+                ai.parental_line = args['parental_line']
+                ai.location = args['location']
+                ai.notes = args['notes']
+                bs.animalinfo_set.add(ai)
+            else:
+                ai = bs.animalinfo_set.all()[0]
+                ai.sex = args['sex']
+                try:
+                    ai.age = str(int(args['age']))
+                except:
+                    pass
+                ai.parental_line = args['parental_line']
+                ai.location = args['location']
+                ai.notes = args['notes']
+                ai.save()
             pass
         elif int(args['type']) == 4:
+            if bs.humaninfo_set.count() == 0:
+                hi = HumanInfo()
+                hi.sex = args['sex']
+                hi.date_of_birth = args['date_of_birth']
+                hi.bmi = args['bmi']
+                hi.diagnosis = args['diagnosis']
+                hi.location = args['location']
+                hi.notes = args['notes']
+                bs.humaninfo_set.add(hi)
+            else:
+                hi = bs.humaninfo_set.all()[0]
+                hi.sex = args['sex']
+                hi.date_of_birth = args['date_of_birth']
+                hi.bmi = args['bmi']
+                hi.diagnosis = args['diagnosis']
+                hi.location = args['location']
+                hi.notes = args['notes']
+                hi.save()
             pass
     
     return HttpResponse(json.dumps(output))
