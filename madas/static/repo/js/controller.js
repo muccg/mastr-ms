@@ -154,7 +154,7 @@ Ext.madasExperimentDetails = {
                                               width:300,
                                               fieldLabel:'formal quote',
                                               id:'formalQuote', 
-                                              editable:true,
+                                              editable:false,
                                               forceSelection:true,
                                               displayField:'value',
                                               valueField:'key',
