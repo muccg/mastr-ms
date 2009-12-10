@@ -408,7 +408,14 @@ def update_single_source(request, exp_id):
                 
                 mi.save()
         elif int(args['type']) == 2:
-            pass
+            if bs.plantinfo_set.count() == 0:
+                pi = PlantInfo()
+                pi.development_stage = args['development_stage']
+                bs.plantinfo_set.add(pi)
+            else:
+                pi = bs.plantinfo_set.all()[0]
+                pi.development_stage = args['development_stage']
+                pi.save()
         elif int(args['type']) == 3:
             if bs.animalinfo_set.count() == 0:
                 ai = AnimalInfo()
@@ -432,7 +439,6 @@ def update_single_source(request, exp_id):
                 ai.location = args['location']
                 ai.notes = args['notes']
                 ai.save()
-            pass
         elif int(args['type']) == 4:
             if bs.humaninfo_set.count() == 0:
                 hi = HumanInfo()
@@ -452,7 +458,6 @@ def update_single_source(request, exp_id):
                 hi.location = args['location']
                 hi.notes = args['notes']
                 hi.save()
-            pass
     
     return HttpResponse(json.dumps(output))
     
