@@ -23,7 +23,7 @@ Ext.madasBioLoadSuccess = function(response) {
     Ext.madasCurrentSourceType = response.responseJSON.rows[0].type;
     
     //load the source info
-    switch ( response.responseJSON.rows[0].type ) {
+    switch ( Ext.madasCurrentSourceType ) {
         case 1:
             var loader = new Ajax.Request(wsBaseUrl + 'records/microbialinfo/source__id/'+Ext.madasCurrentSingleSourceId, 
                                   { 
@@ -31,6 +31,30 @@ Ext.madasBioLoadSuccess = function(response) {
                                   evalJSON:'force',
                                   onSuccess:     Ext.madasSourceInfoLoadSuccess
                                   });
+            break;
+        case 2:
+            var loader = new Ajax.Request(wsBaseUrl + 'records/plantinfo/source__id/'+Ext.madasCurrentSingleSourceId, 
+                                          { 
+                                          asynchronous:true, 
+                                          evalJSON:'force',
+                                          onSuccess:     Ext.madasSourceInfoLoadSuccess
+                                          });
+            break;
+        case 3:
+            var loader = new Ajax.Request(wsBaseUrl + 'records/animalinfo/source__id/'+Ext.madasCurrentSingleSourceId, 
+                                          { 
+                                          asynchronous:true, 
+                                          evalJSON:'force',
+                                          onSuccess:     Ext.madasSourceInfoLoadSuccess
+                                          });
+            break;
+        case 4:
+            var loader = new Ajax.Request(wsBaseUrl + 'records/humaninfo/source__id/'+Ext.madasCurrentSingleSourceId, 
+                                          { 
+                                          asynchronous:true, 
+                                          evalJSON:'force',
+                                          onSuccess:     Ext.madasSourceInfoLoadSuccess
+                                          });
             break;
         default:
             break;
@@ -40,26 +64,54 @@ Ext.madasBioLoadSuccess = function(response) {
 };
 
 Ext.madasSourceInfoLoadSuccess = function(response) {
-    Ext.getCmp('microbial_genus').setValue(response.responseJSON.rows[0].genus);
-    Ext.getCmp('microbial_species').setValue(response.responseJSON.rows[0].species);
-    Ext.getCmp('microbial_culture').setValue(response.responseJSON.rows[0].culture_collection_id);
-    Ext.getCmp('microbial_media').setValue(response.responseJSON.rows[0].media);
-    Ext.getCmp('microbial_vessel').setValue(response.responseJSON.rows[0].fermentation_vessel);
-    Ext.getCmp('microbial_mode').setValue(response.responseJSON.rows[0].fermentation_mode);
-    Ext.getCmp('microbial_density').setValue(response.responseJSON.rows[0].innoculation_density);
-    Ext.getCmp('microbial_volume').setValue(response.responseJSON.rows[0].fermentation_volume);
-    Ext.getCmp('microbial_temperature').setValue(response.responseJSON.rows[0].temperature);
-    Ext.getCmp('microbial_agitation').setValue(response.responseJSON.rows[0].agitation);
-    Ext.getCmp('microbial_ph').setValue(response.responseJSON.rows[0].ph);
-    Ext.getCmp('microbial_gastype').setValue(response.responseJSON.rows[0].gas_type);
-    Ext.getCmp('microbial_flowrate').setValue(response.responseJSON.rows[0].gas_flow_rate);
-    Ext.getCmp('microbial_delivery').setValue(response.responseJSON.rows[0].gas_delivery_method);
+    switch ( Ext.madasCurrentSourceType ) {
+        case 1:
+            //microbial
+            Ext.getCmp('microbial_genus').setValue(response.responseJSON.rows[0].genus);
+            Ext.getCmp('microbial_species').setValue(response.responseJSON.rows[0].species);
+            Ext.getCmp('microbial_culture').setValue(response.responseJSON.rows[0].culture_collection_id);
+            Ext.getCmp('microbial_media').setValue(response.responseJSON.rows[0].media);
+            Ext.getCmp('microbial_vessel').setValue(response.responseJSON.rows[0].fermentation_vessel);
+            Ext.getCmp('microbial_mode').setValue(response.responseJSON.rows[0].fermentation_mode);
+            Ext.getCmp('microbial_density').setValue(response.responseJSON.rows[0].innoculation_density);
+            Ext.getCmp('microbial_volume').setValue(response.responseJSON.rows[0].fermentation_volume);
+            Ext.getCmp('microbial_temperature').setValue(response.responseJSON.rows[0].temperature);
+            Ext.getCmp('microbial_agitation').setValue(response.responseJSON.rows[0].agitation);
+            Ext.getCmp('microbial_ph').setValue(response.responseJSON.rows[0].ph);
+            Ext.getCmp('microbial_gastype').setValue(response.responseJSON.rows[0].gas_type);
+            Ext.getCmp('microbial_flowrate').setValue(response.responseJSON.rows[0].gas_flow_rate);
+            Ext.getCmp('microbial_delivery').setValue(response.responseJSON.rows[0].gas_delivery_method);
+            break;
+        case 2:
+            //plant
+            break;
+        case 3:
+            //animal
+            Ext.getCmp('animalGender').setValue(response.responseJSON.rows[0].sex);
+            Ext.getCmp('animalAge').setValue(response.responseJSON.rows[0].age);
+            Ext.getCmp('animalParentalLine').setValue(response.responseJSON.rows[0].parental_line);
+            Ext.getCmp('animal_location').setValue(response.responseJSON.rows[0].location);
+            Ext.getCmp('animal_notes').setValue(response.responseJSON.rows[0].notes);
+            break;
+        case 4:
+            //human
+            Ext.getCmp('humanGender').setValue(response.responseJSON.rows[0].sex);
+            Ext.getCmp('human_dob').setValue(response.responseJSON.rows[0].date_of_birth);
+            Ext.getCmp('human_bmi').setValue(response.responseJSON.rows[0].bmi);
+            Ext.getCmp('human_diagnosis').setValue(response.responseJSON.rows[0].diagnosis);
+            Ext.getCmp('human_location').setValue(response.responseJSON.rows[0].location);
+            Ext.getCmp('human_notes').setValue(response.responseJSON.rows[0].notes);
+            break;
+        default:
+            break;
+    }
 };
 
 Ext.madasBioSourceBlur = function(invoker) {
     var expId = Ext.madasCurrentExperimentId();
     
     if (expId == 0) {
+        Ext.madasExperimentDeferredInvocation = invoker;
         Ext.madasBioSourceBlurSuccess();
     } else {
         Ext.madasExperimentDeferredInvocation = invoker;
@@ -91,10 +143,19 @@ Ext.madasBioSourceBlur = function(invoker) {
             case 2:
                 break;
             case 3:
-                Ext.getCmp('organismBioSourceAnimalFieldset').show();
+                extraParams = "&sex=" + escape(Ext.getCmp('animalGender').getValue());
+                extraParams += "&age=" + escape(Ext.getCmp('animalAge').getValue());
+                extraParams += "&parental_line=" + escape(Ext.getCmp('animalParentalLine').getValue());
+                extraParams += "&location=" + escape(Ext.getCmp('animal_location').getValue());
+                extraParams += "&notes=" + escape(Ext.getCmp('animal_notes').getValue());
                 break;
             case 4:
-                Ext.getCmp('organismBioSourceHumanFieldset').show();
+                extraParams = "&sex=" + escape(Ext.getCmp('humanGender').getValue());
+                extraParams += "&date_of_birth=" + escape(Ext.util.Format.date(Ext.getCmp('human_dob').getValue(), 'Y-m-d'));
+                extraParams += "&bmi=" + escape(Ext.getCmp('human_bmi').getValue());
+                extraParams += "&diagnosis=" + escape(Ext.getCmp('human_diagnosis').getValue());
+                extraParams += "&location=" + escape(Ext.getCmp('human_location').getValue());
+                extraParams += "&notes=" + escape(Ext.getCmp('human_notes').getValue());
                 break;
             default:
                 break;
@@ -136,10 +197,10 @@ Ext.madasSourceTypeSelect = function() {
 };
 
 Ext.madasBioSourceBlurSuccess = function() {
-    
     var index = Ext.madasExperimentDeferredInvocation.index;
-    
+
     if (index >= 0) {
+
         Ext.getCmp("expContent").getLayout().setActiveItem(index); 
         Ext.currentExperimentNavItem = index;
     }
