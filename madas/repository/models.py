@@ -172,6 +172,18 @@ class Sample(models.Model):
     label = models.CharField(max_length=255)
     comment = models.TextField(null=True)
     weight = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    
+class SampleLog(models.Model):
+    LOG_TYPES = (
+            (0, u'Comment'),
+            (1, u'Relocation'),
+            (2, u'Method')
+        )
+    type = models.PositiveIntegerField(choices=LOG_TYPES, default=0)
+    changetimestamp = models.DateTimeField(auto_now=True)
+    description = models.CharField(max_length=255)
+    user = models.ForeignKey(User, null=True)
+    sample = models.ForeignKey(Sample)
 
 class UserInvolvementType(models.Model):
     """Principal Investigator or Involved User"""
