@@ -220,7 +220,7 @@ Ext.madasExperimentSamplesOnlyInit = function() {
                                      }
                                      );
     
-    sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/experiment__id/' + expId;
+    sampleStore.proxy.conn.url = wsBaseUrl + 'recordsSamples/experiment__id/' + expId;
     sampleStore.load();
 };
 
@@ -279,7 +279,7 @@ Ext.madasExperimentSamplesOnly = {
            }
            
            for (var i = 0; i < delIds.length; i++) {
-           Ext.madasCRUDSomething('delete/sample/'+delIds[i], {}, function() { var eId = Ext.madasCurrentExperimentId(); sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/experiment__id/' + eId;
+           Ext.madasCRUDSomething('delete/sample/'+delIds[i], {}, function() { var eId = Ext.madasCurrentExperimentId(); sampleStore.proxy.conn.url = wsBaseUrl + 'recordsSamples/experiment__id/' + eId;
                                   sampleStore.load(); });
            }                        }
            }
@@ -315,7 +315,7 @@ Ext.madasExperimentSamplesOnly = {
                                mode:'local',
                                store: new Ext.data.ArrayStore({storeId:'classCombo', fields: ['key', 'value']})                               }),
                       renderer:renderClass },
-                      { header: "last status", sortable:false, menuDisabled:true, width:300, dataIndex:'status' }
+                      { header: "last status", sortable:false, menuDisabled:true, width:300, dataIndex:'last_status' }
                       ],
             store: sampleStore
             }

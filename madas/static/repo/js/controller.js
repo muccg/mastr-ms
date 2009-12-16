@@ -247,7 +247,7 @@ Ext.madasExperimentCmp = {
                             {
                                 storeId:"navDS",
                                 fields: ["nav", "init", "blur", "enabled"],
-                                data: [ ["experiment details", Ext.madasExperimentInit, Ext.madasExperimentBlur, true], ["source", Ext.madasBioSourceInit, Ext.madasBioSourceBlur, false], ["treatment",Ext.madasTreatmentInit, Ext.madasBlur,false], ["sample prep",Ext.madasSamplePrepInit, Ext.madasBlur,false], ["sample classes", Ext.madasExperimentSamplesInit, Ext.madasBlur, false], ["samples", Ext.madasExperimentSamplesOnlyInit, Ext.madasBlur, false], ["files", Ext.madasFilesInit, Ext.madasBlur, false], ["access",Ext.madasAccessInit, Ext.madasBlur,false] ]
+                                data: [ ["experiment details", Ext.madasExperimentInit, Ext.madasExperimentBlur, true], ["source", Ext.madasBioSourceInit, Ext.madasBioSourceBlur, false], ["treatment",Ext.madasTreatmentInit, Ext.madasBlur,false], ["sample prep",Ext.madasSamplePrepInit, Ext.madasBlur,false], ["sample classes", Ext.madasExperimentSamplesInit, Ext.madasBlur, false], ["samples", Ext.madasExperimentSamplesOnlyInit, Ext.madasBlur, false], ["sample tracking", Ext.madasExperimentSamplesOnlyInit, Ext.madasBlur, false], ["files", Ext.madasFilesInit, Ext.madasBlur, false], ["access",Ext.madasAccessInit, Ext.madasBlur,false] ]
                             }
                         ),
                         listeners:{"render":function(a){window.setTimeout("Ext.getCmp('expNav').getSelectionModel().selectFirstRow();", 500);}}
@@ -271,6 +271,7 @@ Ext.madasExperimentCmp = {
             Ext.madasSamplePrep,
             Ext.madasExperimentSamples,
             Ext.madasExperimentSamplesOnly,
+            Ext.madasSampleTracking,
             Ext.madasFiles,
             Ext.madasAccess
         ]
@@ -312,6 +313,12 @@ Ext.madasLoadExperiment = function(expId) {
                                              var comment = Ext.getCmp('experimentComment');
                                              var formalQuote = Ext.getCmp('formalQuote');
                                              var jobNumber = Ext.getCmp('jobNumber');
+
+                                             //update the fields on the ssample tracking page
+                                             var tnamefield = Ext.getCmp('trackingExperimentName');
+                                             var tcomment = Ext.getCmp('trackingExperimentComment');
+                                             var tformalQuote = Ext.getCmp('trackingFormalQuote');
+                                             var tjobNumber = Ext.getCmp('trackingJobNumber');
                                              
                                              if (!namefield || !desc || !comment || !formalQuote || !jobNumber) {
                                                  return;
@@ -322,7 +329,13 @@ Ext.madasLoadExperiment = function(expId) {
                                              comment.setValue('');
                                              formalQuote.setValue('');
                                              jobNumber.setValue('');
-                                     
+                                                
+                                             //tracking fields
+                                             tnamefield.setValue('');
+                                             tcomment.setValue('');
+                                             tformalQuote.setValue('');
+                                             tjobNumber.setValue('');
+
                                              var rs = response.responseJSON.rows;
                                              
                                              if (rs.length > 0) {
@@ -331,6 +344,12 @@ Ext.madasLoadExperiment = function(expId) {
                                                  comment.setValue(rs[0].comment);
                                                  formalQuote.setValue(rs[0].formal_quote);
                                                  jobNumber.setValue(rs[0].job_number);
+                                                 
+                                                 //tracking fields
+                                                 tnamefield.setValue(rs[0].title);
+                                                 tcomment.setValue(rs[0].comment);
+                                                 tformalQuote.setValue(rs[0].formal_quote);
+                                                 tjobNumber.setValue(rs[0].job_number);
                                              }
                                      
                                              Ext.madasUpdateNav();
@@ -409,7 +428,7 @@ Ext.madasUpdateNav = function() {
     var et = Ext.getCmp("experimentTitle");
     var counter = 1;
         
-    for (counter = 1; counter <= 7; counter++) {
+    for (counter = 1; counter <= 8; counter++) {
         ds.getAt(counter).set("enabled", (en.getValue() !== ''));
     }
     
