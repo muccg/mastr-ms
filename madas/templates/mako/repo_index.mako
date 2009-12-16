@@ -29,6 +29,7 @@
 
     <script src="static/repo/js/renderers.js" type="text/javascript"></script>
     <script src="static/repo/js/samples.js" type="text/javascript"></script>
+    <script src="static/repo/js/tracking.js" type="text/javascript"></script>
     <script src="static/repo/js/biosource.js" type="text/javascript"></script>
     <script src="static/repo/js/treatment.js" type="text/javascript"></script>
     <script src="static/repo/js/sampleprep.js" type="text/javascript"></script>
