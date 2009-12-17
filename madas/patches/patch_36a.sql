@@ -29,6 +29,18 @@ CREATE TABLE repository_samplelog (
 
 ALTER TABLE public.repository_samplelog OWNER TO madasapp;
 
+-- Name: repository_samplelog_id_seq; Type: SEQUENCE; Schema: public; Owner: madasapp
+--
+
+CREATE SEQUENCE repository_samplelog_id_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.repository_samplelog_id_seq OWNER TO madasapp;
+
 --
 -- Name: id; Type: DEFAULT; Schema: public; Owner: madasapp
 --
