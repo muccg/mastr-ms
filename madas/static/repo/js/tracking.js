@@ -45,7 +45,7 @@ Ext.madasSampleTracking = {
             tbar: {
                 items: [
                     { xtype:'tbtext', text:'mark selected samples as ' },
-                    {xtype: 'tbspacer', width: 15},
+                    { xtype: 'tbspacer', width: 15 },
                     { 
                         xtype: 'combo', 
                         id:'sampleLogType',
@@ -68,9 +68,9 @@ Ext.madasSampleTracking = {
                                                            ['Method', 2]]
                                                    })
                         },
-                    {xtype: 'tbspacer', width: 15},
-                    { xtype:'textfield', id:'sampleLogComment' },
-                    {xtype: 'tbspacer', width: 15},
+                    { xtype: 'tbspacer', width: 15 },
+                    { xtype:'textfield', id:'sampleLogComment', width:200 },
+                    { xtype: 'tbspacer', width: 15 },
                     { 
                         text:'save',
                         listeners: {
@@ -107,12 +107,12 @@ Ext.madasSampleTracking = {
             },
             columns: [
                       Ext.madasTrackingSm,
-                      { header: "id", sortable:false, menuDisabled:true, dataIndex:'id' },
-                      { header: "label", sortable:false, menuDisabled:true, dataIndex:'label' },
-                      { header: "weight", sortable:false, menuDisabled:true, dataIndex:'weight' },
-                      { header: "comment", sortable:false, menuDisabled:true, width:300, dataIndex:'comment' },
-                      { header: "class", sortable:false, menuDisabled:true, dataIndex:'sample_class', renderer:renderClass },
-                      { header: "last status", sortable:false, menuDisabled:true, width:300, dataIndex:'last_status' }
+                      { header: "id", sortable:true, menuDisabled:true, dataIndex:'id' },
+                      { header: "label", sortable:true, menuDisabled:true, dataIndex:'label' },
+                      { header: "weight", sortable:true, menuDisabled:true, dataIndex:'weight' },
+                      { header: "comment", sortable:true, menuDisabled:true, width:300, dataIndex:'comment' },
+                      { header: "class", sortable:true, menuDisabled:true, dataIndex:'sample_class', renderer:renderClass },
+                      { header: "last status", sortable:true, menuDisabled:true, width:300, dataIndex:'last_status' }
                       ],
             store: sampleStore
             }
