@@ -184,6 +184,9 @@ class SampleLog(models.Model):
     description = models.CharField(max_length=255)
     user = models.ForeignKey(User, null=True)
     sample = models.ForeignKey(Sample)
+    
+    def __unicode__(self):
+        return str(self.LOG_TYPES[self.type][1]) + ': ' + str(self.description)
 
 class UserInvolvementType(models.Model):
     """Principal Investigator or Involved User"""

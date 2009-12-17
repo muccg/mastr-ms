@@ -710,7 +710,7 @@ def recordsSamples(request, experiment_id):
         d['sample_class'] = row.sample_class_id
         try:
             status = row.samplelog_set.all().order_by('-changetimestamp')[0]
-            d['last_status'] = status.description
+            d['last_status'] = str(status)
         except:
             d['last_status'] = ''
 
