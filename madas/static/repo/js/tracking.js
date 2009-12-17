@@ -15,6 +15,7 @@ Ext.madasSampleTracking = {
     collapsible: false,
     bodyStyle: 'padding:0px;background:transparent;',
     layout:'fit',
+    autoScroll:true,
     items: [
             { 
             xtype:'fieldset', 
