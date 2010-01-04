@@ -82,17 +82,17 @@ items:[
                },{
                fieldLabel: 'Position',
                name: 'title',
-               allowBlank:true,
+               allowBlank:false,
                maskRe: /[^,=]/
                },{
                fieldLabel: 'Department',
                name: 'dept',
-               allowBlank:true,
+               allowBlank:false,
                maskRe: /[^,=]/
                },{ 
                fieldLabel: 'Institute',
                name: 'institute',
-               allowBlank:true,
+               allowBlank:false,
                maskRe: /[^,=]/
                },{
                fieldLabel: 'Address',
