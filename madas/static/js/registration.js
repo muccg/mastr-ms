@@ -70,12 +70,12 @@ items:[
                allowBlank:true,
                validator: Ext.madasRegistrationValidatePassword
                },{
-               fieldLabel: 'Office Phone',
+               fieldLabel: 'Office Phone (with area code)',
                name: 'telephoneNumber',
                allowBlank:false,
                maskRe: /[^,=]/
                },{
-               fieldLabel: 'Home Phone',
+               fieldLabel: 'Home Phone (with area code)',
                name: 'homephone',
                allowBlank:true,
                maskRe: /[^,=]/
