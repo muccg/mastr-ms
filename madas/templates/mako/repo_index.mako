@@ -1,18 +1,19 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
 <head>
-    <link rel="stylesheet" href="static/repo/ext-3.0.0/resources/css/ext-all.css"/>
+    <link rel="stylesheet" href="static/repo/ext-3.1.0/resources/css/ext-all.css"/>
     <link rel="stylesheet" href="static/repo/main.css"/>
-    <link rel="stylesheet" href="static/repo/ext-3.0.0/examples/ux/css/RowEditor.css"/>
+    <link rel="stylesheet" href="static/repo/ext-3.1.0/examples/ux/css/RowEditor.css"/>
     <link rel="stylesheet" type="text/css" href="static/css/file-upload.css"/>
 
     <!-- <script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script> -->
 
     <script src="static/repo/js/prototype.js" type="text/javascript"></script>
     <script src="static/repo/js/scriptaculous/scriptaculous.js" type="text/javascript"></script>
-    <script src="static/repo/ext-3.0.0/adapter/prototype/ext-prototype-adapter.js" type="text/javascript"></script>
-    <script src="static/repo/ext-3.0.0/ext-all.js"></script>
-    <script src="static/repo/ext-3.0.0/examples/ux/RowEditor.js"></script>
+    <script src="static/repo/ext-3.1.0/adapter/prototype/ext-prototype-adapter.js" type="text/javascript"></script>
+<!--    <script src="static/repo/ext-3.1.0/adapter/ext/ext-base-debug.js" type="text/javascript"></script>-->
+    <script src="static/repo/ext-3.1.0/ext-all-debug.js"></script>
+    <script src="static/repo/ext-3.1.0/examples/ux/RowEditor.js"></script>
     <script type="text/javascript" src="static/js/FileUploadField.js"></script>
 
 

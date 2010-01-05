@@ -5,7 +5,7 @@ Ext.madasMenuRender = function(username) {
     var tb = new Ext.Toolbar(
 
         {
-            id: 'toolbar',
+            id: 'toolbarA',
             items: [
                 { xtype: 'tbbutton', text:'Login', id:'login', handler: Ext.madasMenuHandler},
                 { xtype: 'tbbutton', text:'Experiment', id:'experimentMenu', menu:{
