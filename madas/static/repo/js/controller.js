@@ -182,7 +182,7 @@ Ext.madasExperimentCmp = {
     title:'new experiment',
     layout:'border',
     defaults: {
-        collapsible: true,
+        collapsible: false,
         split: true,
         bodyStyle: 'padding:15px'
     },

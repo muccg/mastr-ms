@@ -189,7 +189,7 @@ Ext.madasExperimentSamples = {
                     columns: [
                         { header: "id", sortable:false, menuDisabled:true, dataIndex:'id' },
                         { header: "label", sortable:false, menuDisabled:true, editor:new Ext.form.TextField(), dataIndex:'label' },
-                          { header: "weight", sortable:false, menuDisabled:true, editor:new Ext.form.NumberField({editable:true}), dataIndex:'weight' },
+                          { header: "weight", sortable:false, menuDisabled:true, editor:new Ext.form.NumberField({editable:true, maxValue:9999.99}), dataIndex:'weight' },
                         { header: "comment", sortable:false, menuDisabled:true, width:300, editor:new Ext.form.TextField(), dataIndex:'comment' }
                     ],
                     store: sampleStore
@@ -300,7 +300,7 @@ Ext.madasExperimentSamplesOnly = {
             columns: [
                       { header: "id", sortable:false, menuDisabled:true, dataIndex:'id' },
                       { header: "label", sortable:false, menuDisabled:true, editor:new Ext.form.TextField(), dataIndex:'label' },
-                      { header: "weight", sortable:false, menuDisabled:true, editor:new Ext.form.NumberField({editable:true}), dataIndex:'weight' },
+                      { header: "weight", sortable:false, menuDisabled:true, editor:new Ext.form.NumberField({editable:true, maxValue:9999.99}), dataIndex:'weight' },
                       { header: "comment", sortable:false, menuDisabled:true, width:300, editor:new Ext.form.TextField(), dataIndex:'comment' },
                       { header: "class", sortable:false, menuDisabled:true, dataIndex:'sample_class', editor:new Ext.form.ComboBox({
                                editable:true,
