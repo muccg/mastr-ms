@@ -338,7 +338,7 @@ Ext.madasBioSource = {
                                                                     ['Unknown', 'U']]
                                                             })
                         }, 
-                        { xtype:'textfield', fieldLabel:'age', id:'animalAge', maskRe:/^[0-9]*$/}, 
+                        { xtype:'numberfield', fieldLabel:'age', id:'animalAge', maxValue:9999}, 
                         { xtype:'combo', 
                             fieldLabel:'parental line',
                             editable:true,
@@ -388,7 +388,7 @@ Ext.madasBioSource = {
                         
                         }, 
                         { xtype:'datefield', fieldLabel:'Date of birth', id:'human_dob', format:'d/m/Y'}, 
-                        { xtype:'textfield', fieldLabel:'BMI', id:'human_bmi', maskRe:/^[0-9]*\.*[0-9]*$/ },
+                        { xtype:'numberfield', fieldLabel:'BMI', id:'human_bmi', maxValue:9999.99 },
                         { xtype:'textfield', fieldLabel:'Diagnosis', id:'human_diagnosis' },
                         { xtype:'textfield', fieldLabel:'Location', id:'human_location' },
                         { xtype:'textarea', fieldLabel:'Notes', id:'human_notes', width:500 }
