@@ -102,11 +102,13 @@ Ext.madasTreatment = {
                                       { header: "date sample taken",  sortable:false, menuDisabled:true, editor:new Ext.form.DateField({
                                                    editable:true,
                                                    allowBlank:false,
+                                                   initDate: new Date(),
                                                    format:'Y/m/d'
                                                    }), dataIndex:'taken_on' },
                                       { header: "time sample taken",  sortable:false, menuDisabled:true, editor:new Ext.form.TimeField({
                                                    editable:true,
                                                    allowBlank:false,
+                                                   initDate: new Date(),
                                                    minValue: '0:00',
                                                    maxValue: '23:59',
                                                    increment: 1,
