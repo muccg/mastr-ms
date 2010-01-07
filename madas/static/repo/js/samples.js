@@ -115,12 +115,12 @@ Ext.madasExperimentSamples = {
                         }
                     },
                     columns: [
-                        { header: "id",  sortable:false, menuDisabled:true, dataIndex:"id" },
-                        { header: "Class",  sortable:false, menuDisabled:true, editor:new Ext.form.TextField(), dataIndex:"class_id" },
-                              { header: "Treatment Variation",  sortable:false, menuDisabled:true, dataIndex:"treatment" },
-                              { header: "Timeline",  sortable:false, menuDisabled:true, dataIndex:"timeline" },
-                              { header: "Origin",  sortable:false, menuDisabled:true, dataIndex:"origin" },
-                              { header: "Organ",  sortable:false, menuDisabled:true, dataIndex:"organ" }
+                        { header: "id", sortable:true, dataIndex:"id" },
+                        { header: "Class", sortable:true, editor:new Ext.form.TextField(), dataIndex:"class_id" },
+                              { header: "Treatment Variation", sortable:true, dataIndex:"treatment" },
+                              { header: "Timeline", sortable:true, dataIndex:"timeline" },
+                              { header: "Origin", sortable:true, dataIndex:"origin" },
+                              { header: "Organ", sortable:true, dataIndex:"organ" }
                       ],
                     store: sampleClassStore
                 }
@@ -187,10 +187,10 @@ Ext.madasExperimentSamples = {
                         autoFill:true
                     },
                     columns: [
-                        { header: "id", sortable:false, menuDisabled:true, dataIndex:'id' },
-                        { header: "label", sortable:false, menuDisabled:true, editor:new Ext.form.TextField(), dataIndex:'label' },
-                          { header: "weight", sortable:false, menuDisabled:true, editor:new Ext.form.NumberField({editable:true, maxValue:9999.99}), dataIndex:'weight' },
-                        { header: "comment", sortable:false, menuDisabled:true, width:300, editor:new Ext.form.TextField(), dataIndex:'comment' }
+                        { header: "id", sortable:true, dataIndex:'id' },
+                        { header: "label", sortable:true, editor:new Ext.form.TextField(), dataIndex:'label' },
+                          { header: "weight", sortable:true, editor:new Ext.form.NumberField({editable:true, maxValue:9999.99}), dataIndex:'weight' },
+                        { header: "comment", sortable:false, sortable:true, width:300, editor:new Ext.form.TextField(), dataIndex:'comment' }
                     ],
                     store: sampleStore
                 }
@@ -298,11 +298,11 @@ Ext.madasExperimentSamplesOnly = {
             autoFill:true
             },
             columns: [
-                      { header: "id", sortable:false, menuDisabled:true, dataIndex:'id' },
-                      { header: "label", sortable:false, menuDisabled:true, editor:new Ext.form.TextField(), dataIndex:'label' },
-                      { header: "weight", sortable:false, menuDisabled:true, editor:new Ext.form.NumberField({editable:true, maxValue:9999.99}), dataIndex:'weight' },
-                      { header: "comment", sortable:false, menuDisabled:true, width:300, editor:new Ext.form.TextField(), dataIndex:'comment' },
-                      { header: "class", sortable:false, menuDisabled:true, dataIndex:'sample_class', editor:new Ext.form.ComboBox({
+                      { header: "id", sortable:true, dataIndex:'id' },
+                      { header: "label", sortable:true, editor:new Ext.form.TextField(), dataIndex:'label' },
+                      { header: "weight", sortable:true, editor:new Ext.form.NumberField({editable:true, maxValue:9999.99}), dataIndex:'weight' },
+                      { header: "comment", sortable:false, sortable:true, width:300, editor:new Ext.form.TextField(), dataIndex:'comment' },
+                      { header: "class", sortable:true, dataIndex:'sample_class', editor:new Ext.form.ComboBox({
                                editable:true,
                                forceSelection:false,
                                displayField:'value',
@@ -315,7 +315,7 @@ Ext.madasExperimentSamplesOnly = {
                                mode:'local',
                                store: new Ext.data.ArrayStore({storeId:'classCombo', fields: ['key', 'value']})                               }),
                       renderer:renderClass },
-                      { header: "last status", sortable:false, menuDisabled:true, width:300, dataIndex:'last_status' }
+                      { header: "last status", sortable:true, width:300, dataIndex:'last_status' }
                       ],
             store: sampleStore
             }
