@@ -21,8 +21,8 @@
     var baseUrl = '${ APP_SECURE_URL }';
     </script>
 
-    <script src="static/repo/js/madasJsonReader.js" type="text/javascript"></script>
-    <script src="static/repo/js/madasJsonStore.js" type="text/javascript"></script>
+<!--    <script src="static/repo/js/data.JsonReader.js" type="text/javascript"></script>-->
+<!--    <script src="static/repo/js/madasJsonStore.js" type="text/javascript"></script>-->
 
     <script src="static/repo/js/menucontroller.js" type="text/javascript"></script>
     <script src="static/repo/js/login.js" type="text/javascript"></script>

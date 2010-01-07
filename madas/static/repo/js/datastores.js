@@ -79,7 +79,7 @@ Ext.madasCurrentSampleClassId = function() {
 };
 
 // ---------- TABLE STORES ---------- (used for tables, entities)
-var organStore = new Ext.madasJsonStore(
+var organStore = new Ext.data.JsonStore(
                         {
                             storeId: 'organism',
                             autoLoad: false,
@@ -89,7 +89,7 @@ var organStore = new Ext.madasJsonStore(
                             }
                     );
                     
-var timelineStore = new Ext.madasJsonStore(
+var timelineStore = new Ext.data.JsonStore(
                         {
                             storeId: 'timeline',
                             autoLoad: false,
@@ -99,7 +99,7 @@ var timelineStore = new Ext.madasJsonStore(
                             }
                     );
                     
-var treatmentStore = new Ext.madasJsonStore(
+var treatmentStore = new Ext.data.JsonStore(
                         {
                             storeId: 'treatment',
                             autoLoad: false,
@@ -109,7 +109,7 @@ var treatmentStore = new Ext.madasJsonStore(
                             }
                     );
                     
-var sopStore = new Ext.madasJsonStore(
+var sopStore = new Ext.data.JsonStore(
                         {
                             storeId: 'sop',
                             autoLoad: false,
@@ -119,7 +119,7 @@ var sopStore = new Ext.madasJsonStore(
                             }
                     );
                     
-var sopLookupStore = new Ext.madasJsonStore(
+var sopLookupStore = new Ext.data.JsonStore(
                         {
                             storeId: 'sopLookup',
                             autoLoad: false,
@@ -129,7 +129,7 @@ var sopLookupStore = new Ext.madasJsonStore(
                             }
                     );
 
-var userStore = new Ext.madasJsonStore(
+var userStore = new Ext.data.JsonStore(
                         {
                             storeId: 'user',
                             autoLoad: false,
@@ -139,7 +139,7 @@ var userStore = new Ext.madasJsonStore(
                             }
                     );
                     
-var experimentListStore = new Ext.madasJsonStore(
+var experimentListStore = new Ext.data.JsonStore(
                         {
                             storeId: 'experimentList',
                             autoLoad: false,
@@ -154,7 +154,7 @@ var experimentStore = new Ext.data.ArrayStore({
                                              fields: ['id', 'title', 'description', 'comment', 'status_id', 'created_on', 'client_id']
 });
 
-var sampleClassStore = new Ext.madasJsonStore(
+var sampleClassStore = new Ext.data.JsonStore(
                                              {
                                              storeId: 'sampleclass',
                                              autoLoad: false,
@@ -164,7 +164,7 @@ var sampleClassStore = new Ext.madasJsonStore(
                                              }
                                              );
 
-var sampleStore = new Ext.madasJsonStore(
+var sampleStore = new Ext.data.JsonStore(
                                               {
                                               storeId: 'samples',
                                               autoLoad: false,
@@ -174,7 +174,7 @@ var sampleStore = new Ext.madasJsonStore(
                                               }
                                               );
 
-var plantStore = new Ext.madasJsonStore(
+var plantStore = new Ext.data.JsonStore(
                                           {
                                           storeId: 'plant',
                                           autoLoad: false,
@@ -189,7 +189,7 @@ var plantStore = new Ext.madasJsonStore(
                                           }
                                           );
                     
-var animalStore = new Ext.madasJsonStore(
+var animalStore = new Ext.data.JsonStore(
                         {
                             storeId: 'animal',
                             autoLoad: false,
@@ -211,7 +211,7 @@ var animalStore = new Ext.madasJsonStore(
                             }
                     );
 
-var humanStore = new Ext.madasJsonStore(
+var humanStore = new Ext.data.JsonStore(
                                          {
                                          storeId: 'human',
                                          autoLoad: false,

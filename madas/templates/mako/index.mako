@@ -22,11 +22,11 @@
 
 <link rel="shortcut icon" href="/favicon.ico" />
 <link rel="stylesheet" type="text/css" href="${wh.url('/static/css/main.css')}"/>
-<link rel="stylesheet" href="${wh.url('/static/repo/ext-3.0.0/resources/css/ext-all.css')}"/>
-<link rel="stylesheet" href="${wh.url('/static/repo/ext-3.0.0/examples/ux/css/RowEditor.css')}"/>
+<link rel="stylesheet" href="${wh.url('/static/repo/ext-3.1.0/resources/css/ext-all.css')}"/>
+<link rel="stylesheet" href="${wh.url('/static/repo/ext-3.1.0/examples/ux/css/RowEditor.css')}"/>
 <link rel="stylesheet" type="text/css" href="${wh.url('/static/css/file-upload.css')}"/>
-<script src="${wh.url('/static/repo/ext-3.0.0/adapter/ext/ext-base-debug.js')}" type="text/javascript"></script>
-<script src="${wh.url('/static/repo/ext-3.0.0/ext-all-debug.js')}"></script>
+<script src="${wh.url('/static/repo/ext-3.1.0/adapter/ext/ext-base-debug.js')}" type="text/javascript"></script>
+<script src="${wh.url('/static/repo/ext-3.1.0/ext-all-debug.js')}"></script>
 
 <!-- setup variable -->
 <script>
@@ -34,6 +34,9 @@ Ext.madasBaseUrl = '${ APP_SECURE_URL }';
 </script>
 
 <!-- Madas scripts -->
+<script type="text/javascript" src="${wh.url('/static/js/madasJsonReader.js')}"></script>
+
+
 <script type="text/javascript" src="${wh.url('/static/js/FileUploadField.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/GridSearch.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/menu.js')}"></script>
@@ -43,7 +46,6 @@ Ext.madasBaseUrl = '${ APP_SECURE_URL }';
 <script type="text/javascript" src="${wh.url('/static/js/dashboard.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/admin.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/user.js')}"></script>
-<script type="text/javascript" src="${wh.url('/static/js/madasJsonReader.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/quote.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/swfobject.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/screencasts.js')}"></script>
@@ -65,6 +67,7 @@ function callbacker(){
     document.getElementById("appLoad").style.display = "none";
     document.getElementById("hidePass").style.display = "block";
     document.getElementById("hideUser").style.display = "block";
+    document.getElementById('loginDiv').style.display = 'none';
 }
 </script>
 

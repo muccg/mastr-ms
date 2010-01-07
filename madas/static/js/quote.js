@@ -29,6 +29,8 @@ Ext.madasRequestQuoteInit = function () {
 Ext.madasRequestQuoteCmp = 
     {   id:'requestquote-container-panel', 
         autoScroll:true,
+        deferredRender:false,
+        forceLayout:true,
         items:[
             {  xtype:'form', 
             labelWidth: 100, // label settings here cascade unless overridden
@@ -37,7 +39,7 @@ Ext.madasRequestQuoteCmp =
             method:'POST',
             frame:true,
             fileUpload: true,
-            reader: Ext.madasJsonReader({successProperty:'success', root: 'data'}, 
+            reader: new Ext.madasJsonReader({successProperty:'success', root: 'data'}, 
                                           [ {name: 'firstname', mapping: 'firstname'}, 
                                             {name: 'lastname', mapping: 'lastname'},
                                             {name: 'telephoneNumber', mapping: 'telephoneNumber'},
@@ -559,6 +561,8 @@ Ext.madasQuoteRequestEditCmp =
     {   id:'quoterequestedit-container-panel',
         autoScroll:true,
         layout:'column',
+        deferredRender:false,
+        forceLayout:true,
         items:[
             {  xtype:'form',
             labelWidth: 100, // label settings here cascade unless overridden
@@ -566,7 +570,8 @@ Ext.madasQuoteRequestEditCmp =
             url:Ext.madasBaseUrl + 'quote/save',
             method:'POST',
             frame:true,
-            reader: Ext.madasJsonReader({successProperty:'success', root: 'data'}, 
+            deferredRender:false,
+            reader: new Ext.madasJsonReader({successProperty:'success', root: 'data'}, 
                                           [ {name: 'id', mapping: 'id'}, 
                                             {name: 'tonode', mapping: 'tonode'},
                                             {name: 'details', mapping: 'details'},
@@ -1022,7 +1027,7 @@ Ext.madasQuoteRequestEditCmp =
                 url:Ext.madasBaseUrl + 'quote/formalsave',
                 method:'POST',
                 fileUpload: true,
-                reader: Ext.madasJsonReader({successProperty:'success', root: 'data'}, 
+                reader: new Ext.madasJsonReader({successProperty:'success', root: 'data'}, 
                                               [ {name: 'id', mapping: 'id'}, 
                                                 {name: 'quoterequestid', mapping: 'quoterequestid'},
                                                 {name: 'details', mapping: 'details'},
@@ -1382,6 +1387,8 @@ Ext.madasViewFormalCmp = {
     autoScroll:true,
     layout:'column',
     bodyStyle:'padding:5px 5px 0px 0px',
+    deferredRender:false,
+    forceLayout:true,
     items:[
        {   xtype:'form', 
         labelWidth: 100, // label settings here cascade unless overridden
@@ -1391,7 +1398,7 @@ Ext.madasViewFormalCmp = {
         method:'POST',
         frame:true,
         width: 380,
-        reader: Ext.madasJsonReader({successProperty:'success', root: 'data'}, 
+        reader: new Ext.data.JsonReader({successProperty:'success', root: 'data'}, 
                                           [ {name: 'id', mapping: 'id'}, 
                                             {name: 'tonode', mapping: 'tonode'},
                                             {name: 'details', mapping: 'details'},
@@ -1839,7 +1846,7 @@ Ext.madasViewFormalCmp = {
         xtype:'form',
         labelWidth: 100, // label settings here cascade unless overridden
         id:'formalquoteview-panel',
-        reader: Ext.madasJsonReader({successProperty:'success', root: 'data'}, 
+        reader: new Ext.madasJsonReader({successProperty:'success', root: 'data'}, 
                                         [ {name: 'id', mapping: 'id'}, 
                                         {name: 'quoterequestid', mapping: 'quoterequestid'},
                                         {name: 'details', mapping: 'details'},

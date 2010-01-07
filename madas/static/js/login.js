@@ -216,6 +216,8 @@ Ext.madasLoginInit = function(paramArray) {
     
     Ext.madasPostLoginParamArray = paramArray;
     
+    console.log('ahem');
+    document.getElementById('loginDiv').style.display = 'block';
     Ext.getCmp('login-panel').getForm().reset();
     
 };
@@ -306,7 +308,11 @@ Ext.madasResetPasswordCmp = {id:'resetpassword-container-panel',
                     url:Ext.madasBaseUrl + 'login/processResetPassword',
                     method:'POST',
                     frame:true,
-                    reader: Ext.madasJsonReader,
+                    reader: new Ext.madasJsonReader({
+                                  root            : 'response.value.items',
+                                  versionProperty : 'response.value.version',
+                                  totalProperty   : 'response.value.total_count'
+                                  }, []),
                     title: 'Reset Password',
                     bodyStyle:'padding:5px 5px 0',
                     width: 380,
