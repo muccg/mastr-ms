@@ -133,7 +133,8 @@ Ext.madasTreatment = {
                             height:200,
                             border: true,
                             trackMouseOver: false,
-                            plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:true, listeners:{'afteredit':Ext.madasSaveTreatmentRow}})],
+                            plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':Ext.madasSaveTreatmentRow}})],
+                            sm: new Ext.grid.RowSelectionModel(),
                             store:treatmentStore,
                             viewConfig: {
                                 forceFit: true,
