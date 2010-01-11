@@ -392,6 +392,8 @@ Ext.madasAdminUserEditValidatePassword = function (textfield, event) {
 
 Ext.madasAdminUserEditCmp = {id:'adminuseredit-container-panel', 
 layout:'absolute', 
+deferredRender:false,
+forceLayout:true,
 items:[
        {  xtype:'form', 
        labelWidth: 100, // label settings here cascade unless overridden
@@ -399,7 +401,19 @@ items:[
        url:Ext.madasBaseUrl + 'admin/userSave',
        method:'POST',
        frame:true,
-       reader: new Ext.madasJsonReader(),
+       reader: new Ext.madasJsonReader({
+                                                 root            : 'data',
+                                                 versionProperty : 'response.value.version',
+                                                 totalProperty   : 'response.value.total_count'
+                                                 }, [
+                                                     { name: 'username', sortType : 'string' },
+                                                     { name: 'firstname', sortType : 'string' },
+                                                     { name: 'lastname', sortType : 'string' },
+                                                     { name: 'email', sortType : 'string' },
+                                                     { name: 'telephoneNumber', sortType : 'string' },
+                                                     { name: 'physicalDeliveryOfficeName', sortType : 'string' },
+                                                     { name: 'title', sortType : 'string' }
+                                                     ]),
        title: 'Edit User',
        bodyStyle:'padding:5px 5px 0',
        width: 380,

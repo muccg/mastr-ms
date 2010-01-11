@@ -262,7 +262,9 @@ Ext.madasBioSource = {
                                                    data : [['Microbial', 1],
                                                            ['Plant', 2],
                                                            ['Animal', 3],
-                                                           ['Human', 4]]
+                                                           ['Human', 4],
+                                                           ['Synthetic', 5],
+                                                           ['Other', 6]]
                                                    }),
                         listeners: {
                             'select': Ext.madasSourceTypeSelect

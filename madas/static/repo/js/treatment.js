@@ -18,6 +18,7 @@ Ext.madasSaveTimelineRow = function(roweditor, changes, rec, i) {
 };
 
 Ext.madasSaveTreatmentRow = function(roweditor, changes, rec, i) {
+console.log("save");
     var bundledData = {};
     
     bundledData.name = rec.data.name;
@@ -132,7 +133,7 @@ Ext.madasTreatment = {
                             height:200,
                             border: true,
                             trackMouseOver: false,
-                            plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':Ext.madasSaveTreatmentRow}})],
+                            plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:true, listeners:{'afteredit':Ext.madasSaveTreatmentRow}})],
                             store:treatmentStore,
                             viewConfig: {
                                 forceFit: true,
@@ -179,13 +180,33 @@ Ext.madasTreatment = {
                                 editable:true,
                                 forceSelection:false,
                                 displayField:'value',
-                                valueField:undefined,
                                 lazyRender:true,
+                                name:'bullshot',
                                 allowBlank:false,
                                 typeAhead:false,
-                                triggerAction:'all',
+                                triggerAction:'query',
                                 listWidth:230,
-                                store: treatmentComboStore
+                                store: treatmentComboStore,
+                                enableKeyEvents: true,
+                                scope: this,
+                                listeners: {
+                                    
+                                    expand: function(combo) {                                
+                                       // Since ExtJS combobox doesn't allow selection at -1  --> we pick -2 :)
+                                        this.select(-2, false);                    
+                                    },
+                                    
+                                    beforequery: function() {
+                                        this.collapse();                
+                                    },
+                                    
+                                    keydown: function(field, e) {                
+                                        if(e.getKey() == 9) {    // When pressing 'Tab'
+                                            this.collapse();    
+                                        }
+                                    }
+                                    
+                                } 
                             }), dataIndex:'name' }]
                       }
                     ]
