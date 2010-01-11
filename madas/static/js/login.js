@@ -216,7 +216,6 @@ Ext.madasLoginInit = function(paramArray) {
     
     Ext.madasPostLoginParamArray = paramArray;
     
-    console.log('ahem');
     document.getElementById('loginDiv').style.display = 'block';
     Ext.getCmp('login-panel').getForm().reset();
     

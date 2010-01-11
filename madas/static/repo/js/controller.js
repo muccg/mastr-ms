@@ -148,8 +148,8 @@ Ext.madasExperimentDetails = {
                 autoHeight:true,
                 items: [
                     { xtype:'textfield', fieldLabel:'experiment name', enableKeyEvents:true, id:'experimentName', allowBlank:false, listeners:{'keydown':function(t, e){ Ext.madasUpdateNav(); return true; }, 'keyup':function(t, e){ Ext.madasUpdateNav(); return true; }}},
-                    { xtype:'textarea', fieldLabel:'description', id:'experimentDescription', width:400 },
-                    { xtype:'textarea', fieldLabel:'comment', id:'experimentComment', width:400 },
+                    { xtype:'textarea', fieldLabel:'description', id:'experimentDescription', width:700, height:100 },
+                    { xtype:'textarea', fieldLabel:'comment', id:'experimentComment', width:700, height:100 },
                         new Ext.form.ComboBox({
                                               width:300,
                                               fieldLabel:'formal quote',
