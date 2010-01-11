@@ -211,7 +211,7 @@ Ext.ux.grid.RowEditor = Ext.extend(Ext.Panel, {
                 }
             }
         }
-        if(hasChange && this.fireEvent('validateedit', this, changes, r, this.rowIndex) !== false){
+        if(this.fireEvent('validateedit', this, changes, r, this.rowIndex) !== false){
             r.beginEdit();
             Ext.iterate(changes, function(name, value){
                 r.set(name, value);
