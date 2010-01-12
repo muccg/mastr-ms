@@ -57,6 +57,12 @@ Ext.madasUserEditValidatePassword = function (textfield, event) {
 
 Ext.madasUserEditCmp = {id:'useredit-container-panel', 
                 layout:'absolute', 
+                deferredRender:false,
+                forceLayout:true,
+                defaults: {
+                    deferredRender:false,
+                    forceLayout:true
+                },
                 items:[
                     {  xtype:'form', 
                     labelWidth: 100, // label settings here cascade unless overridden
@@ -64,7 +70,31 @@ Ext.madasUserEditCmp = {id:'useredit-container-panel',
                     url:Ext.madasBaseUrl + 'user/userSave',
                     method:'POST',
                     frame:true,
-                    reader: new Ext.madasJsonReader(),
+                    reader: new Ext.madasJsonReader({
+                                                              root            : 'data',
+                                                              versionProperty : 'response.value.version',
+                                                              totalProperty   : 'response.value.total_count',
+                                                              successProperty : 'success'
+                                                              }, [
+                                                                  { name: 'username', sortType : 'string' },
+                                                                  { name: 'firstname', sortType : 'string' },
+                                                                  { name: 'lastname', sortType : 'string' },
+                                                                  { name: 'email', sortType : 'string' },
+                                                                  { name: 'telephoneNumber', sortType : 'string' },
+                                                                  { name: 'physicalDeliveryOfficeName', sortType : 'string' },
+                                                                  { name: 'title', sortType : 'string' },
+                                                                  { name: 'homephone', sortType : 'string' },
+                                                                  { name: 'isAdmin', sortType : 'string' },
+                                                                  { name: 'isNodeRep', sortType : 'string' },
+                                                                  { name: 'node', sortType : 'string' },
+                                                                  { name: 'status', sortType : 'string' },
+                                                                  { name: 'dept', sortType : 'string' },
+                                                                  { name: 'institute', sortType : 'string' },
+                                                                  { name: 'address', sortType : 'string' },
+                                                                  { name: 'supervisor', sortType : 'string' },
+                                                                  { name: 'areaOfInterest', sortType : 'string' },
+                                                                  { name: 'country', sortType : 'string' }
+                                                                  ]),
                     title: 'Edit My Details',
                     bodyStyle:'padding:5px 5px 0',
                     width: 380,
