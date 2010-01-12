@@ -34,20 +34,17 @@ Ext.extend(Ext.madasJsonReader, Ext.data.JsonReader, {
      */   
 
     read : function(response){
-        console.log("a");
         var json = response.responseText;
         var o = eval("("+json+")");
         if(!o) {
             throw {message: "JsonReader.read: Json object not found"};
         }
-        console.log("b");
         if(o.metaData){
             delete this.ef;
             this.meta = o.metaData;
             this.recordType = Ext.data.Record.create(o.metaData.fields);
             this.onMetaChange(this.meta, this.recordType, o);
         }
-        console.log("c");
         return this.readRecords(o);
     },
 
@@ -65,7 +62,6 @@ Ext.extend(Ext.madasJsonReader, Ext.data.JsonReader, {
         //we pass on to the generic AJAX metadata processor to intercept 
         var aaPass = Ext.madasAjaxMetadataProcess(o);
         if (aaPass) {
-            console.log("d");
             //from here below is a copy-and-paste of the Ext standard code
         
             /**
@@ -117,7 +113,6 @@ Ext.extend(Ext.madasJsonReader, Ext.data.JsonReader, {
                 }
             }
             var records = [];
-            console.log("f "+c);
             if (!Ext.isDefined(c)) {
                 root = [root];
                 c = 1;
@@ -134,9 +129,7 @@ Ext.extend(Ext.madasJsonReader, Ext.data.JsonReader, {
                 var record = new Record(values, id);
                 record.json = n;
                 records[i] = record;
-                console.log("e");
             }
-            console.log(root);
             return {
                 success : success,
                 records : records,
