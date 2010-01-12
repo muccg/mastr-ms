@@ -18,7 +18,6 @@ Ext.madasSaveTimelineRow = function(roweditor, changes, rec, i) {
 };
 
 Ext.madasSaveTreatmentRow = function(roweditor, changes, rec, i) {
-console.log("save");
     var bundledData = {};
     
     bundledData.name = rec.data.name;
