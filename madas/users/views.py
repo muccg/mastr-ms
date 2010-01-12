@@ -59,6 +59,7 @@ def _userload(username):
     #    print '\t', key, ':', r[key]    
 
     d = _translate_ldap_to_madas(r) 
+    d = _stripArrays(d)
     d['originalEmail'] = d['email']
 
     #groups
@@ -97,7 +98,9 @@ def _userload(username):
     except Exception, e:
         print '\tEXCEPTION: get madas user group failed: ', str(e)
 
-    
+    d['status'] = d['status'][0]
+    if isinstance(d['groups'], list) and len(d['groups']) > 0:
+        d['groups'] = d['groups'][0]
 
     return d
     
@@ -117,12 +120,11 @@ def userload(request, *args):
     ### End Authorisation Check ###
     u = request.REQUEST.get('username', request.user.username)
 
-
-    d = _userload(u)
+    d = [_userload(u)]
 
     d = makeJsonFriendly(d)
 
-    setRequestVars(request, success=True, data=d, totalRows=len(d.keys()), authenticated=True, authorized=True)
+    setRequestVars(request, success=True, data=d, totalRows=1, authenticated=True, authorized=True)
     print '***userload : exit ***' 
     return jsonResponse(request, [])   
 
@@ -389,3 +391,10 @@ def getNodeMemberships(groups):
     i = [item for item in groups if not item in specialNodes]
     print '\tgetNodeMemberships returning ' , i
     return i
+
+
+def _stripArrays(d):
+    for key in d:
+        if isinstance(d[key], list):
+            d[key] = d[key][0]
+    return d
