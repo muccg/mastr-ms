@@ -77,7 +77,7 @@ Ext.madasMenuEnsure = function() {
 
 Ext.madasMenuShow = function() {
 
-    Ext.BLANK_IMAGE_URL = Ext.madasBaseUrl + 'static/repo/ext-3.1.0/resources/images/default/s.gif';
+    Ext.BLANK_IMAGE_URL = Ext.madasBaseUrl + 'static/ext-3.1.0/resources/images/default/s.gif';
 
     //disable certain menu items if the user is not an admin
     if (!Ext.madasIsAdmin) {
