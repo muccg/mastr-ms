@@ -77,7 +77,7 @@ items:[
                region:'east',
                split:true,
                width:200,
-               collapsible:true,
+//               collapsible:true,
                titleCollapse:false,
                
                items: [
@@ -124,7 +124,7 @@ items:[
                        
                    {
                        xtype:'form',
-                       height:60,
+                       height:120,
                        bodyStyle:'background:transparent;padding:4px;padding-top:15px;',
                        id:'pendingFileUpload',
                        fileUpload:true,
