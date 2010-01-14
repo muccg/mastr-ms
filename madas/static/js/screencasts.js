@@ -34,6 +34,8 @@ Ext.madasScreencastsCmp = {
     id:'screencasts-container-panel', 
     layout:'absolute', 
     style:'z-index:0',
+    deferredRender:false,
+    forceLayout:true,
     items: [
         { html:'<p id="screencast-placeholder">You must have flash installed to view this screencast</p>'
         }
