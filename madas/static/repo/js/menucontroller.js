@@ -21,10 +21,10 @@
  * acts as a shallow controller between string function names and initialization/display of pages
  * it should only be called directly when processing the return from an ajax request
  * any time you wish to change the display based on a user action you should call 
- * to Ext.madasAuthorize() instead, as that will check authorization first, which can prevent odd
+ * to MA.Authorize() instead, as that will check authorization first, which can prevent odd
  * situations where a page displays but the content fails
  */
-Ext.madasChangeMainContent = function(contentName, paramArray){
+MA.ChangeMainContent = function(contentName, paramArray){
     
     //Ext.get('center').dom.innerHTML = '';
     var showMenu = true;
@@ -39,7 +39,7 @@ Ext.madasChangeMainContent = function(contentName, paramArray){
             if (paramArray) {
                 resultContent = paramArray[0];
                 params = paramArray[1];
-                Ext.madasAuthorize(resultContent, params);
+                MA.Authorize(resultContent, params);
                 break;
             }
             //default
@@ -49,63 +49,63 @@ Ext.madasChangeMainContent = function(contentName, paramArray){
         case "login":
             showMenu = false;
             cancelBackTarget = false;
-            Ext.madasLoginInit(paramArray);
+            MA.LoginInit(paramArray);
             Ext.getCmp('center-panel').layout.setActiveItem('login-container-panel');
             break;
             
         case "login:forgotpassword":
             showMenu = false;
             cancelBackTarget = false;
-            Ext.madasForgotPasswordInit();
+            MA.ForgotPasswordInit();
             Ext.getCmp('center-panel').layout.setActiveItem('forgot-password-container-panel');
             break;
             
         case "login:resetpassword":
             showMenu = false;
             cancelBackTarget = false;
-            Ext.madasResetPasswordInit();
+            MA.ResetPasswordInit();
             Ext.getCmp('center-panel').layout.setActiveItem('resetpassword-container-panel');
             break;
             
         case "login:processLogout":
             cancelBackTarget = false;
-            Ext.madasLogoutInit();
+            MA.LogoutInit();
             break;
             
         case "admin:adminrequests":
-            Ext.madasAdminRequestsInit();
+            MA.AdminRequestsInit();
             Ext.getCmp('center-panel').layout.setActiveItem('adminrequests-panel');
             break;
             
         case "admin:usersearch":
-            Ext.madasUserSearchInit();
+            MA.UserSearchInit();
             Ext.getCmp('center-panel').layout.setActiveItem('usersearch-panel');
             break;
             
         case "admin:rejectedUsersearch":
-            Ext.madasRejectedUserSearchInit();
+            MA.RejectedUserSearchInit();
             Ext.getCmp('center-panel').layout.setActiveItem('rejectedusersearch-panel');
             break;
             
         case "admin:deletedUsersearch":
-            Ext.madasDeletedUserSearchInit();
+            MA.DeletedUserSearchInit();
             Ext.getCmp('center-panel').layout.setActiveItem('deletedusersearch-panel');
             break;
             
         case "admin:nodelist":
-            Ext.madasNodeManagementInit();
+            MA.NodeManagementInit();
             Ext.getCmp('center-panel').layout.setActiveItem('nodeManagementCmp');
             break;
             
         case "admin:useredit":
             cancelBackTarget = false;
-            Ext.madasAdminUserEditInit(paramArray);
+            MA.AdminUserEditInit(paramArray);
             Ext.getCmp('center-panel').layout.setActiveItem('adminuseredit-container-panel');
             break;
             
         case "user:myaccount":
             cancelBackTarget = false;
-            Ext.madasUserEditInit(paramArray);
+            MA.UserEditInit(paramArray);
             Ext.getCmp('center-panel').layout.setActiveItem('useredit-container-panel');
             break;
             
@@ -117,16 +117,16 @@ Ext.madasChangeMainContent = function(contentName, paramArray){
         case "message":
             cancelBackTarget = false;
             affectMenu = false;
-            Ext.madasMessage(paramArray);
+            MA.Message(paramArray);
             break;
             
         case 'experiment:my':
-            Ext.madasCurrentExpId = 0;
+            MA.CurrentExpId = 0;
             experimentListStore.reload();
             Ext.getCmp('center-panel').layout.setActiveItem('experiment-list');
             break;
         case 'experiment:new':
-            Ext.madasCurrentExpId = 0;
+            MA.CurrentExpId = 0;
             var namefield = Ext.getCmp('experimentName');
             var desc = Ext.getCmp('experimentDescription');
             var comment = Ext.getCmp('experimentComment');
@@ -155,22 +155,22 @@ Ext.madasChangeMainContent = function(contentName, paramArray){
     }
     
     //always affect menu if we are initing the app
-    if (contentName == Ext.madasInitFunction) {
+    if (contentName == MA.InitFunction) {
         affectMenu = true;
     }
     
     //    if (affectMenu) {
     //        if (showMenu) {
-    //            Ext.madasMenuShow();
+    //            MA.MenuShow();
     //        } else {
-    //            Ext.madasMenuHide();
+    //            MA.MenuHide();
     //        }
     //    }
     
-    Ext.madasMenuEnsure();
+    MA.MenuEnsure();
     
     if (cancelBackTarget) {
-        Ext.madasCancelBackTarget = contentName;
+        MA.CancelBackTarget = contentName;
     }
     
     //append the application path onto the URL as a means of making things bookmarkable
@@ -179,7 +179,7 @@ Ext.madasChangeMainContent = function(contentName, paramArray){
     
 };
 
-Ext.madasMessage = function(paramArray) {
+MA.Message = function(paramArray) {
     
     Ext.Msg.alert("", paramArray.message);
     

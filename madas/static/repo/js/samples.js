@@ -1,5 +1,5 @@
-Ext.madasExperimentSamplesInit = function() {
-    var expId = Ext.madasCurrentExperimentId();
+MA.ExperimentSamplesInit = function() {
+    var expId = MA.CurrentExperimentId();
     
     sampleClassStore.proxy.conn.url = wsBaseUrl + 'recreate_sample_classes/' + expId;
     sampleClassStore.load();
@@ -7,25 +7,25 @@ Ext.madasExperimentSamplesInit = function() {
     sampleStore.removeAll();
 };
 
-Ext.madasSaveSampleRow = function(roweditor, changes, rec, i) {
+MA.SaveSampleRow = function(roweditor, changes, rec, i) {
     var bundledData = {};
     
     bundledData.label = rec.data.label;
     bundledData.comment = rec.data.comment;
     bundledData.weight = rec.data.weight;
     
-    Ext.madasSaveRowLiterals('sample', roweditor, bundledData, rec, i, function() { var scId = Ext.madasCurrentSampleClassId(); sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/sample_class__id/' + scId; sampleStore.load();});
+    MA.SaveRowLiterals('sample', roweditor, bundledData, rec, i, function() { var scId = MA.CurrentSampleClassId(); sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/sample_class__id/' + scId; sampleStore.load();});
 };
 
-Ext.madasSaveSampleClassRow = function(roweditor, changes, rec, i) {
+MA.SaveSampleClassRow = function(roweditor, changes, rec, i) {
     var bundledData = {};
     
     bundledData.class_id = rec.data.class_id;
 
-    Ext.madasSaveRowLiterals('sampleclass', roweditor, bundledData, rec, i, Ext.madasExperimentSamplesInit);
+    MA.SaveRowLiterals('sampleclass', roweditor, bundledData, rec, i, MA.ExperimentSamplesInit);
 };
 
-Ext.madasExperimentSamples = {
+MA.ExperimentSamples = {
     baseCls: 'x-plain',
     border:'false',
     layout:'border',
@@ -48,13 +48,13 @@ Ext.madasExperimentSamples = {
                     border: false,
                     id:'sampleClasses',
                     trackMouseOver: false,
-                    plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':Ext.madasSaveSampleClassRow}})],
+                    plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':MA.SaveSampleClassRow}})],
                     sm: new Ext.grid.RowSelectionModel({
                                                        listeners:{'rowselect':function(sm, idx, rec) {
                                                        sampleStore.proxy.conn.url = wsBaseUrl + "records/sample/sample_class__id/" + rec.data.id;
                                                        sampleStore.load();
                                                        
-                                                       Ext.madasCurrentSampleClassIdValue = rec.data.id;
+                                                       MA.CurrentSampleClassIdValue = rec.data.id;
                                                        
                                                        var grid = Ext.getCmp("samples");
                                                        grid.enable();
@@ -68,7 +68,7 @@ Ext.madasExperimentSamples = {
                                                        grid.disable();
                                                        Ext.getCmp('addsamplebutton').disable();
                                                        Ext.getCmp('removesamplebutton').disable();
-                                                       Ext.madasCurrentSampleClassIdValue = undefined;
+                                                       MA.CurrentSampleClassIdValue = undefined;
                                                        }
                                                        }}                        }
                     }),
@@ -92,7 +92,7 @@ Ext.madasExperimentSamples = {
                            }
                            
                            for (var i = 0; i < delIds.length; i++) {
-                           Ext.madasCRUDSomething('sample_class_enable/'+delIds[i], {}, function() { var expId = Ext.madasCurrentExperimentId(); sampleClassStore.proxy.conn.url = wsBaseUrl + 'recreate_sample_classes/' + expId;
+                           MA.CRUDSomething('sample_class_enable/'+delIds[i], {}, function() { var expId = MA.CurrentExperimentId(); sampleClassStore.proxy.conn.url = wsBaseUrl + 'recreate_sample_classes/' + expId;
                                                   sampleClassStore.load(); });
                            }
                            
@@ -140,7 +140,7 @@ Ext.madasExperimentSamples = {
                    id:'addsamplebutton',
                 icon:'static/repo/images/add.gif',
                 handler : function(){
-                   Ext.madasCRUDSomething('create/sample/', {'sample_class_id':Ext.madasCurrentSampleClassId(), 'experiment_id':Ext.madasCurrentExperimentId()}, function() { var scId = Ext.madasCurrentSampleClassId(); sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/sample_class__id/' + scId;
+                   MA.CRUDSomething('create/sample/', {'sample_class_id':MA.CurrentSampleClassId(), 'experiment_id':MA.CurrentExperimentId()}, function() { var scId = MA.CurrentSampleClassId(); sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/sample_class__id/' + scId;
                                           sampleStore.load(); });
                    }
                 },
@@ -168,7 +168,7 @@ Ext.madasExperimentSamples = {
                    }
 
                    for (var i = 0; i < delIds.length; i++) {
-                   Ext.madasCRUDSomething('delete/sample/'+delIds[i], {}, function() { var scId = Ext.madasCurrentSampleClassId(); sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/sample_class__id/' + scId;
+                   MA.CRUDSomething('delete/sample/'+delIds[i], {}, function() { var scId = MA.CurrentSampleClassId(); sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/sample_class__id/' + scId;
                                           sampleStore.load(); });
                    }                        }
                 }
@@ -179,7 +179,7 @@ Ext.madasExperimentSamples = {
                     border: false,
                     id:'samples',
                     trackMouseOver: false,
-                    plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':Ext.madasSaveSampleRow}})],
+                    plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':MA.SaveSampleRow}})],
                     sm: new Ext.grid.RowSelectionModel(),
 //                    autoHeight:true,
                     viewConfig: {
@@ -199,8 +199,8 @@ Ext.madasExperimentSamples = {
     ]
 };
 
-Ext.madasExperimentSamplesOnlyInit = function() {
-    var expId = Ext.madasCurrentExperimentId();
+MA.ExperimentSamplesOnlyInit = function() {
+    var expId = MA.CurrentExperimentId();
     
     var classLoader = new Ajax.Request(wsBaseUrl + 'populate_select/sampleclass/id/class_id/experiment__id/'+escape(expId), 
                                      { 
@@ -224,7 +224,7 @@ Ext.madasExperimentSamplesOnlyInit = function() {
     sampleStore.load();
 };
 
-Ext.madasSaveSampleOnlyRow = function(roweditor, changes, rec, i) {
+MA.SaveSampleOnlyRow = function(roweditor, changes, rec, i) {
     var bundledData = {};
     
     bundledData.label = rec.data.label;
@@ -235,11 +235,11 @@ Ext.madasSaveSampleOnlyRow = function(roweditor, changes, rec, i) {
     bundledData.weight = rec.data.weight;
     bundledData.sample_class_id = rec.data.sample_class;
     
-    Ext.madasSaveRowLiterals('sample', roweditor, bundledData, rec, i, function() { var eId = Ext.madasCurrentExperimentId(); sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/experiment__id/' + eId;
+    MA.SaveRowLiterals('sample', roweditor, bundledData, rec, i, function() { var eId = MA.CurrentExperimentId(); sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/experiment__id/' + eId;
                              sampleStore.load();});
 };
 
-Ext.madasExperimentSamplesOnly = {
+MA.ExperimentSamplesOnly = {
     title: 'samples',
     region: 'center',
     cmargins: '0 0 0 0',
@@ -252,7 +252,7 @@ Ext.madasExperimentSamplesOnly = {
            id:'addsamplesbutton',
            icon:'static/repo/images/add.gif',
            handler : function(){
-           Ext.madasCRUDSomething('create/sample/', {'experiment_id':Ext.madasCurrentExperimentId()}, function() { var eId = Ext.madasCurrentExperimentId(); sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/experiment__id/' + eId;
+           MA.CRUDSomething('create/sample/', {'experiment_id':MA.CurrentExperimentId()}, function() { var eId = MA.CurrentExperimentId(); sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/experiment__id/' + eId;
                                   sampleStore.load(); });
            }
            },
@@ -279,7 +279,7 @@ Ext.madasExperimentSamplesOnly = {
            }
            
            for (var i = 0; i < delIds.length; i++) {
-           Ext.madasCRUDSomething('delete/sample/'+delIds[i], {}, function() { var eId = Ext.madasCurrentExperimentId(); sampleStore.proxy.conn.url = wsBaseUrl + 'recordsSamples/experiment__id/' + eId;
+           MA.CRUDSomething('delete/sample/'+delIds[i], {}, function() { var eId = MA.CurrentExperimentId(); sampleStore.proxy.conn.url = wsBaseUrl + 'recordsSamples/experiment__id/' + eId;
                                   sampleStore.load(); });
            }                        }
            }
@@ -290,7 +290,7 @@ Ext.madasExperimentSamplesOnly = {
             border: false,
             id:'samplesOnly',
             trackMouseOver: false,
-            plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':Ext.madasSaveSampleOnlyRow}})],
+            plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':MA.SaveSampleOnlyRow}})],
             sm: new Ext.grid.RowSelectionModel(),
             //                    autoHeight:true,
             viewConfig: {

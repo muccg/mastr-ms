@@ -1,5 +1,5 @@
-Ext.madasFilesInit = function() {
-    var expId = Ext.madasCurrentExperimentId();
+MA.FilesInit = function() {
+    var expId = MA.CurrentExperimentId();
 
     //reload trees
     Ext.getCmp('filesTree').getLoader().load(Ext.getCmp('filesTree').getRootNode());
@@ -7,7 +7,7 @@ Ext.madasFilesInit = function() {
     Ext.getCmp('pendingFilesTree').getLoader().load(Ext.getCmp('pendingFilesTree').getRootNode());
 };
 
-Ext.madasFiles = {
+MA.Files = {
 baseCls: 'x-plain',
 border:'false',
 layout:'fit',
@@ -51,7 +51,7 @@ items:[
                listeners:{
                     render: function() {
                         Ext.getCmp('filesTree').getLoader().on("beforeload", function(treeLoader, node) {
-                            treeLoader.baseParams.experiment = Ext.madasCurrentExperimentId();
+                            treeLoader.baseParams.experiment = MA.CurrentExperimentId();
                             }, this);
                         Ext.getCmp('filesTree').getRootNode().expand();
                     },
@@ -66,7 +66,7 @@ items:[
                                 headers: {
 //                                'my-header': 'foo'
                                 },
-                                     params: { file: de.dropNode.id, target: de.target.id, experiment_id: Ext.madasCurrentExperimentId() }
+                                     params: { file: de.dropNode.id, target: de.target.id, experiment_id: MA.CurrentExperimentId() }
                                 });
                }
                 }

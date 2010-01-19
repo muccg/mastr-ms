@@ -1,14 +1,14 @@
-Ext.madasTrackingSm = new Ext.grid.CheckboxSelectionModel({ width: 25 });
+MA.TrackingSm = new Ext.grid.CheckboxSelectionModel({ width: 25 });
 
-Ext.madasSampleLogSuccess = function() {
+MA.SampleLogSuccess = function() {
     //something
-    var expId = Ext.madasCurrentExperimentId();
+    var expId = MA.CurrentExperimentId();
     
     sampleStore.proxy.conn.url = wsBaseUrl + 'recordsSamples/experiment__id/' + expId;
     sampleStore.load();
 };
 
-Ext.madasSampleTracking = {
+MA.SampleTracking = {
     title: 'sample tracking',
     region: 'center',
     cmargins: '0 0 0 0',
@@ -38,7 +38,7 @@ Ext.madasSampleTracking = {
             height: 400,
             id:'sampleTracking',
             trackMouseOver: false,
-            sm: Ext.madasTrackingSm,
+            sm: MA.TrackingSm,
             viewConfig: {
             forceFit: true,
             autoFill:true
@@ -77,11 +77,11 @@ Ext.madasSampleTracking = {
                         listeners: {
                             'click': function(e) {
                                 //save changes to selected entries
-                                if (Ext.madasTrackingSm.getCount() > 0) {
+                                if (MA.TrackingSm.getCount() > 0) {
                                     var logType = Ext.getCmp('sampleLogType').getValue();
                                     var comment = Ext.getCmp('sampleLogComment').getValue();
                                     
-                                    var selections = Ext.madasTrackingSm.getSelections();
+                                    var selections = MA.TrackingSm.getSelections();
                                     
                                     if (!Ext.isArray(selections)) {
                                         selections = [selections];
@@ -97,7 +97,7 @@ Ext.madasSampleTracking = {
                                             { 
                                                 asynchronous:true, 
                                                 evalJSON:'force',
-                                                onSuccess:     Ext.madasSampleLogSuccess
+                                                onSuccess:     MA.SampleLogSuccess
                                             });
                                     }
                                 }
@@ -107,7 +107,7 @@ Ext.madasSampleTracking = {
                 ]
             },
             columns: [
-                      Ext.madasTrackingSm,
+                      MA.TrackingSm,
                       { header: "id", sortable:true, menuDisabled:true, dataIndex:'id' },
                       { header: "label", sortable:true, menuDisabled:true, dataIndex:'label' },
                       { header: "weight", sortable:true, menuDisabled:true, dataIndex:'weight' },

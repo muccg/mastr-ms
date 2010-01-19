@@ -1,6 +1,6 @@
-Ext.madasGrowthInit = function() {
-    var expId = Ext.madasCurrentExperimentId();
-    var orgType = Ext.madasCurrentOrganismType();
+MA.GrowthInit = function() {
+    var expId = MA.CurrentExperimentId();
+    var orgType = MA.CurrentOrganismType();
     
     if (orgType == 3) {
         animalOriginStore.proxy.conn.url = wsBaseUrl + 'records/origindetails/source__experiment__id/' + expId;
@@ -18,20 +18,20 @@ Ext.madasGrowthInit = function() {
     }
 }
 
-Ext.madasSaveAnimalOriginRow = function(roweditor, changes, rec, i) {
+MA.SaveAnimalOriginRow = function(roweditor, changes, rec, i) {
     var bundledData = {};
     
     bundledData['location_id'] = rec.data.location;
     bundledData['detailed_location'] = rec.data.detailed_location;
     bundledData['information'] = rec.data.information;
     
-    Ext.madasSaveRowLiterals('origindetails', roweditor, bundledData, rec, i, function() { var expId = Ext.madasCurrentExperimentId(); animalOriginStore.proxy.conn.url = wsBaseUrl + 'records/origindetails/source__experiment__id/' + expId; animalOriginStore.load();});
+    MA.SaveRowLiterals('origindetails', roweditor, bundledData, rec, i, function() { var expId = MA.CurrentExperimentId(); animalOriginStore.proxy.conn.url = wsBaseUrl + 'records/origindetails/source__experiment__id/' + expId; animalOriginStore.load();});
 };
 
-Ext.madasSaveGrowthConditionRow = function(roweditor, changes, rec, i) {
+MA.SaveGrowthConditionRow = function(roweditor, changes, rec, i) {
     var bundledData = {};
     
-    bundledData['source_id'] = Ext.madasCurrentBioSourceId();
+    bundledData['source_id'] = MA.CurrentBioSourceId();
     bundledData['greenhouse_id'] = rec.data.greenhouse;
     bundledData['detailed_location'] = rec.data.detailed_location;
     bundledData['light_source_id'] = rec.data.light_source;
@@ -46,10 +46,10 @@ Ext.madasSaveGrowthConditionRow = function(roweditor, changes, rec, i) {
     bundledData['light_fluence'] = rec.data.light_fluence;
     bundledData['lamp_details'] = rec.data.lamp_details;
     
-    Ext.madasSaveRowLiterals('growthcondition', roweditor, bundledData, rec, i, function() { var expId = Ext.madasCurrentExperimentId(); growthConditionStore.proxy.conn.url = wsBaseUrl + 'records/growthCondition/source__experiment__id/' + expId; growthConditionStore.load();});
+    MA.SaveRowLiterals('growthcondition', roweditor, bundledData, rec, i, function() { var expId = MA.CurrentExperimentId(); growthConditionStore.proxy.conn.url = wsBaseUrl + 'records/growthCondition/source__experiment__id/' + expId; growthConditionStore.load();});
 };
 
-Ext.madasGrowth = {
+MA.Growth = {
     baseCls: 'x-plain',
     border:false,
     frame:false,
@@ -74,7 +74,7 @@ Ext.madasGrowth = {
                     height:200,
                     border: true,
                     trackMouseOver: false,
-//                    plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':Ext.madasSaveAnimalOriginRow}})],
+//                    plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':MA.SaveAnimalOriginRow}})],
                     sm: new Ext.grid.RowSelectionModel(),
                     viewConfig: {
                         forceFit: true,
@@ -85,7 +85,7 @@ Ext.madasGrowth = {
                         cls: 'x-btn-text-icon',
                         icon:'static/repo/images/add.gif',
                         handler : function(){
-                            Ext.madasCRUDSomething('create/origindetails/', {'source_id':Ext.madasCurrentBioSourceId()}, function() { var expId = Ext.madasCurrentExperimentId(); animalOriginStore.proxy.conn.url = wsBaseUrl + 'records/origindetails/source__experiment__id/' + expId;
+                            MA.CRUDSomething('create/origindetails/', {'source_id':MA.CurrentBioSourceId()}, function() { var expId = MA.CurrentExperimentId(); animalOriginStore.proxy.conn.url = wsBaseUrl + 'records/origindetails/source__experiment__id/' + expId;
                                                   animalOriginStore.load(); });
                             }
                         },
@@ -111,7 +111,7 @@ Ext.madasGrowth = {
                            }
                            //console.log(delIds);
                            for (var i = 0; i < delIds.length; i++) {
-                           Ext.madasCRUDSomething('delete/origindetails/'+delIds[i], {}, function() { var expId = Ext.madasCurrentExperimentId(); animalOriginStore.proxy.conn.url = wsBaseUrl + 'records/origindetails/source__experiment__id/' + expId;
+                           MA.CRUDSomething('delete/origindetails/'+delIds[i], {}, function() { var expId = MA.CurrentExperimentId(); animalOriginStore.proxy.conn.url = wsBaseUrl + 'records/origindetails/source__experiment__id/' + expId;
                                                   animalOriginStore.load(); });
                            }                        }
                         }
@@ -129,7 +129,7 @@ Ext.madasGrowth = {
                     border: true,
                     height:200,
                     trackMouseOver: false,
-                    //plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':Ext.madasSaveGrowthConditionRow}})],
+                    //plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':MA.SaveGrowthConditionRow}})],
                     sm: new Ext.grid.RowSelectionModel(),
                     viewConfig: {
                     forceFit: true,
@@ -168,7 +168,7 @@ Ext.madasGrowth = {
                            var delCount = 0;
                            for (var i = 0; i < delIds.length; i++) {
                             if (Ext.isDefined(delIds[i]) && Ext.isNumber(delIds[i])) {
-                               Ext.madasCRUDSomething('delete/growthcondition/'+delIds[i], {}, function() { var expId = Ext.madasCurrentExperimentId(); growthConditionStore.proxy.conn.url = wsBaseUrl + 'records/growthcondition/source__experiment__id/' + expId;
+                               MA.CRUDSomething('delete/growthcondition/'+delIds[i], {}, function() { var expId = MA.CurrentExperimentId(); growthConditionStore.proxy.conn.url = wsBaseUrl + 'records/growthcondition/source__experiment__id/' + expId;
                                                       growthConditionStore.load(); });
                            delCount++;
                                 }

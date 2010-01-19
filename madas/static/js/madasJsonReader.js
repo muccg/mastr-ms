@@ -1,5 +1,5 @@
 /*
- * Ext.madasJsonReader
+ * MA.JsonReader
  * 
  * extending the JsonReader to pick up additional info such as authenticated, authorized, etc.
  *
@@ -20,12 +20,12 @@
  */
 
 
-Ext.madasJsonReader = function(meta, recordType){
-    Ext.madasJsonReader.superclass.constructor.call(this, meta, recordType);
+MA.JsonReader = function(meta, recordType){
+    MA.JsonReader.superclass.constructor.call(this, meta, recordType);
 };
 
 
-Ext.extend(Ext.madasJsonReader, Ext.data.JsonReader, {
+Ext.extend(MA.JsonReader, Ext.data.JsonReader, {
     
     /**
      * @cfg {String} versionProperty Name of the property from which to retrieve the 
@@ -60,7 +60,7 @@ Ext.extend(Ext.madasJsonReader, Ext.data.JsonReader, {
     {
         // o is the ajax response, already evald
         //we pass on to the generic AJAX metadata processor to intercept 
-        var aaPass = Ext.madasAjaxMetadataProcess(o);
+        var aaPass = MA.AjaxMetadataProcess(o);
         if (aaPass) {
             //from here below is a copy-and-paste of the Ext standard code
         

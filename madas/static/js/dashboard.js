@@ -15,4 +15,4 @@
  * along with Madas.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-Ext.madasDashboardCmp = { id: 'dashboard-panel', layout: 'fit', title: 'Dashboard', html: 'Welcome to Madas, please choose a menu item to begin' };
+MA.DashboardCmp = { id: 'dashboard-panel', layout: 'fit', title: 'Dashboard', html: 'Welcome to Madas, please choose a menu item to begin' };

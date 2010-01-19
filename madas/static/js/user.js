@@ -15,16 +15,16 @@
  * along with Madas.  If not, see <http://www.gnu.org/licenses/>.
  */
  
-Ext.madasUserEditInit = function () {
+MA.UserEditInit = function () {
 
     var userEditCmp = Ext.getCmp('useredit-panel');   
 
     //fetch user details
-    userEditCmp.load({url: Ext.madasBaseUrl + 'user/userload', waitMsg:'Loading'});
+    userEditCmp.load({url: MA.BaseUrl + 'user/userload', waitMsg:'Loading'});
     
     //attach validator that ext cannot deal with
-    Ext.getCmp("userEditPassword").on('blur', Ext.madasUserEditValidatePassword);
-    Ext.getCmp("userEditConfirmPassword").on('blur', Ext.madasUserEditValidatePassword);
+    Ext.getCmp("userEditPassword").on('blur', MA.UserEditValidatePassword);
+    Ext.getCmp("userEditConfirmPassword").on('blur', MA.UserEditValidatePassword);
     
     Ext.getCmp('userEditSubmit').enable();
     
@@ -36,7 +36,7 @@ Ext.madasUserEditInit = function () {
  * madasAdminUserEditValidatePassword
  * we need to implement a custom validator because Ext cannot validate an empty field that has to be the same as another field
  */
-Ext.madasUserEditValidatePassword = function (textfield, event) {
+MA.UserEditValidatePassword = function (textfield, event) {
     var passEl = Ext.getCmp('userEditPassword');
     var confirmEl = Ext.getCmp('userEditConfirmPassword');
     var submitEl = Ext.getCmp('userEditSubmit');
@@ -55,7 +55,7 @@ Ext.madasUserEditValidatePassword = function (textfield, event) {
     }
 };
 
-Ext.madasUserEditCmp = {id:'useredit-container-panel', 
+MA.UserEditCmp = {id:'useredit-container-panel', 
                 layout:'absolute', 
                 deferredRender:false,
                 forceLayout:true,
@@ -67,10 +67,10 @@ Ext.madasUserEditCmp = {id:'useredit-container-panel',
                     {  xtype:'form', 
                     labelWidth: 100, // label settings here cascade unless overridden
                     id:'useredit-panel',
-                    url:Ext.madasBaseUrl + 'user/userSave',
+                    url:MA.BaseUrl + 'user/userSave',
                     method:'POST',
                     frame:true,
-                    reader: new Ext.madasJsonReader({
+                    reader: new MA.JsonReader({
                                                               root            : 'data',
                                                               versionProperty : 'response.value.version',
                                                               totalProperty   : 'response.value.total_count',
@@ -136,7 +136,7 @@ Ext.madasUserEditCmp = {id:'useredit-container-panel',
                             id: 'userEditConfirmPassword',
                             xtype: 'textfield',
                             allowBlank:true,
-                            validator: Ext.madasUserEditValidatePassword
+                            validator: MA.UserEditValidatePassword
                         },{
                             fieldLabel: 'Office',
                             name: 'physicalDeliveryOfficeName',
@@ -475,7 +475,7 @@ Ext.madasUserEditCmp = {id:'useredit-container-panel',
                         text: 'Cancel',
                         handler: function(){
                             Ext.getCmp('useredit-panel').getForm().reset(); 
-                            Ext.madasAuthorize('dashboard');
+                            MA.Authorize('dashboard');
                             }
                         },{
                         text: 'Save',
@@ -492,7 +492,7 @@ Ext.madasUserEditCmp = {id:'useredit-container-panel',
                                             setTimeout("Ext.Msg.hide()", 5000);
                                             
                                             //load up the menu and next content area as declared in response
-                                            Ext.madasChangeMainContent(action.result.mainContentFunction);
+                                            MA.ChangeMainContent(action.result.mainContentFunction);
                                         } 
                                     },
                                     failure: function (form, action) {

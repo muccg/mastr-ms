@@ -1,5 +1,5 @@
-Ext.madasTreatmentInit = function() {
-    var expId = Ext.madasCurrentExperimentId();
+MA.TreatmentInit = function() {
+    var expId = MA.CurrentExperimentId();
     
     timelineStore.proxy.conn.url = wsBaseUrl + 'records/sampletimeline/experiment__id/' + expId;
     timelineStore.load();
@@ -8,26 +8,26 @@ Ext.madasTreatmentInit = function() {
     treatmentStore.load();
 };
 
-Ext.madasSaveTimelineRow = function(roweditor, changes, rec, i) {
+MA.SaveTimelineRow = function(roweditor, changes, rec, i) {
     var bundledData = {};
     
     bundledData.taken_on = Ext.util.Format.date(rec.data.taken_on, 'Y-m-d');
     bundledData.taken_at = rec.data.taken_at;
     
-    Ext.madasSaveRowLiterals('sampletimeline', roweditor, bundledData, rec, i, function() { var expId = Ext.madasCurrentExperimentId(); timelineStore.proxy.conn.url = wsBaseUrl + 'records/sampletimeline/experiment__id/' + expId; timelineStore.load();});
+    MA.SaveRowLiterals('sampletimeline', roweditor, bundledData, rec, i, function() { var expId = MA.CurrentExperimentId(); timelineStore.proxy.conn.url = wsBaseUrl + 'records/sampletimeline/experiment__id/' + expId; timelineStore.load();});
 };
 
-Ext.madasSaveTreatmentRow = function(roweditor, changes, rec, i) {
+MA.SaveTreatmentRow = function(roweditor, changes, rec, i) {
     var bundledData = {};
     
     bundledData.name = rec.data.name;
     bundledData.type_id = rec.data.type;
     bundledData.description = rec.data.description;
     
-    Ext.madasSaveRowLiterals('treatment', roweditor, bundledData, rec, i, function() { var expId = Ext.madasCurrentExperimentId(); treatmentStore.proxy.conn.url = wsBaseUrl + 'records/treatment/experiment__id/' + expId; treatmentStore.load();});
+    MA.SaveRowLiterals('treatment', roweditor, bundledData, rec, i, function() { var expId = MA.CurrentExperimentId(); treatmentStore.proxy.conn.url = wsBaseUrl + 'records/treatment/experiment__id/' + expId; treatmentStore.load();});
 };
 
-Ext.madasTreatment = {
+MA.Treatment = {
     baseCls: 'x-plain',
     border:false,
     frame:false,
@@ -56,7 +56,7 @@ Ext.madasTreatment = {
                             height:200,
                             border: true,
                             trackMouseOver: false,
-                            plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':Ext.madasSaveTimelineRow}})],
+                            plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':MA.SaveTimelineRow}})],
                             sm: new Ext.grid.RowSelectionModel(),
                             viewConfig: {
                                 forceFit: true,
@@ -67,7 +67,7 @@ Ext.madasTreatment = {
                                 cls: 'x-btn-text-icon',
                                 icon:'static/repo/images/add.gif',
                                 handler : function(){
-                                    Ext.madasCRUDSomething('create/sampletimeline/', {'experiment_id':Ext.madasCurrentExperimentId()}, function() { var expId = Ext.madasCurrentExperimentId(); timelineStore.proxy.conn.url = wsBaseUrl + 'records/sampletimeline/experiment__id/' + expId;
+                                    MA.CRUDSomething('create/sampletimeline/', {'experiment_id':MA.CurrentExperimentId()}, function() { var expId = MA.CurrentExperimentId(); timelineStore.proxy.conn.url = wsBaseUrl + 'records/sampletimeline/experiment__id/' + expId;
                                                           timelineStore.load(); });
                                     }
                                 },
@@ -93,7 +93,7 @@ Ext.madasTreatment = {
                                    }
                                    //console.log(delIds);
                                    for (var i = 0; i < delIds.length; i++) {
-                                   Ext.madasCRUDSomething('delete/sampletimeline/'+delIds[i], {}, function() { var expId = Ext.madasCurrentExperimentId(); timelineStore.proxy.conn.url = wsBaseUrl + 'records/sampletimeline/experiment__id/' + expId;
+                                   MA.CRUDSomething('delete/sampletimeline/'+delIds[i], {}, function() { var expId = MA.CurrentExperimentId(); timelineStore.proxy.conn.url = wsBaseUrl + 'records/sampletimeline/experiment__id/' + expId;
                                                           timelineStore.load(); });
                                    }                        }
                                    }
@@ -132,7 +132,7 @@ Ext.madasTreatment = {
                             height:200,
                             border: true,
                             trackMouseOver: false,
-                            plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':Ext.madasSaveTreatmentRow}})],
+                            plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':MA.SaveTreatmentRow}})],
                             sm: new Ext.grid.RowSelectionModel(),
                             store:treatmentStore,
                             viewConfig: {
@@ -144,7 +144,7 @@ Ext.madasTreatment = {
                                 cls: 'x-btn-text-icon',
                                 icon:'static/repo/images/add.gif',
                                 handler : function(){
-                                   Ext.madasCRUDSomething('create/treatment/', {'experiment_id':Ext.madasCurrentExperimentId()}, function() { var expId = Ext.madasCurrentExperimentId(); treatmentStore.proxy.conn.url = wsBaseUrl + 'records/treatment/experiment__id/' + expId;
+                                   MA.CRUDSomething('create/treatment/', {'experiment_id':MA.CurrentExperimentId()}, function() { var expId = MA.CurrentExperimentId(); treatmentStore.proxy.conn.url = wsBaseUrl + 'records/treatment/experiment__id/' + expId;
                                                           treatmentStore.load(); });
                                    }
                                 },
@@ -169,7 +169,7 @@ Ext.madasTreatment = {
                                    delIds.push(selections[index].data.id);
                                    }
                                    for (var i = 0; i < delIds.length; i++) {
-                                   Ext.madasCRUDSomething('delete/treatment/'+delIds[i], {}, function() { var expId = Ext.madasCurrentExperimentId(); treatmentStore.proxy.conn.url = wsBaseUrl + 'records/treatment/experiment__id/' + expId;
+                                   MA.CRUDSomething('delete/treatment/'+delIds[i], {}, function() { var expId = MA.CurrentExperimentId(); treatmentStore.proxy.conn.url = wsBaseUrl + 'records/treatment/experiment__id/' + expId;
                                                           treatmentStore.load(); });
                                    }
                                 }

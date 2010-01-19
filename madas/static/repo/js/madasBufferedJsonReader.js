@@ -51,7 +51,7 @@ Ext.extend(Ext.ux.data.MadasBufferedJsonReader, Ext.ux.data.BufferedJsonReader, 
         // o is the ajax response, already evald
         //we pass on to the generic AJAX metadata processor to intercept 
 
-        var aaPass = Ext.madasAjaxMetadataProcess(o);
+        var aaPass = MA.AjaxMetadataProcess(o);
         
         if (aaPass) {
             var s = this.meta;

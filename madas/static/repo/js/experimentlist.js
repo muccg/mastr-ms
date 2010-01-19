@@ -1,4 +1,4 @@
-Ext.madasExperimentListCmp = {
+MA.ExperimentListCmp = {
     title: 'experiments',
     region: 'center',
     cmargins: '0 0 0 0',
@@ -11,7 +11,7 @@ Ext.madasExperimentListCmp = {
         cls: 'x-btn-text-icon',
         icon:'static/repo/images/add.gif',
         handler : function(){
-                Ext.madasMenuHandler({'id':'experiment:new'});
+                MA.MenuHandler({'id':'experiment:new'});
             }
         },
         {
@@ -36,7 +36,7 @@ Ext.madasExperimentListCmp = {
            }
            //console.log(delIds);
            for (var i = 0; i < delIds.length; i++) {
-               Ext.madasCRUDSomething('delete/experiment/'+delIds[i], {}, function() { experimentListStore.load(); });
+               MA.CRUDSomething('delete/experiment/'+delIds[i], {}, function() { experimentListStore.load(); });
            }                        
            }
            
@@ -66,7 +66,7 @@ Ext.madasExperimentListCmp = {
                 'rowdblclick':function(el, ev) {
                     var sm = Ext.getCmp('experiments').getSelectionModel();
                     var rec = sm.getSelected();
-                    Ext.madasLoadExperiment(rec.data.id);
+                    MA.LoadExperiment(rec.data.id);
                 }
             }
         }
