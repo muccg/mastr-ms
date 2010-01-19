@@ -1,22 +1,22 @@
-Ext.madasAccessInit = function() {
-    var expId = Ext.madasCurrentExperimentId();
+MA.AccessInit = function() {
+    var expId = MA.CurrentExperimentId();
     
     userStore.proxy.conn.url = wsBaseUrl + 'records/userexperiment/experiment__id/' + expId;
     userStore.load();
 };
 
-Ext.madasSaveAccessRow = function(roweditor, changes, rec, i) {
+MA.SaveAccessRow = function(roweditor, changes, rec, i) {
     var bundledData = {};
     
-    bundledData.experiment_id = Ext.madasCurrentExperimentId();
+    bundledData.experiment_id = MA.CurrentExperimentId();
     bundledData.user_id = rec.data.user;
     bundledData.type_id = rec.data.type;
     bundledData.additional_info = rec.data.additional_info;
     
-    Ext.madasSaveRowLiterals('userexperiment', roweditor, bundledData, rec, i, function() { var expId = Ext.madasCurrentExperimentId(); userStore.proxy.conn.url = wsBaseUrl + 'records/userexperiment/experiment__id/' + expId; userStore.load();});
+    MA.SaveRowLiterals('userexperiment', roweditor, bundledData, rec, i, function() { var expId = MA.CurrentExperimentId(); userStore.proxy.conn.url = wsBaseUrl + 'records/userexperiment/experiment__id/' + expId; userStore.load();});
 };
 
-Ext.madasAccess = {
+MA.Access = {
     baseCls: 'x-plain',
     border:'false',
     layout:'border',
@@ -36,7 +36,7 @@ Ext.madasAccess = {
                     border: false,
                     id:'involvedUsersGrid',
                     trackMouseOver: false,
-                    plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':Ext.madasSaveAccessRow}})],
+                    plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':MA.SaveAccessRow}})],
                     sm: new Ext.grid.RowSelectionModel(),
                     tbar: [{
                         text: 'add user',
@@ -68,13 +68,13 @@ Ext.madasAccess = {
                            }
                            
                            //'unnecessary' reload to remove rows without id's
-                           var expId = Ext.madasCurrentExperimentId(); 
+                           var expId = MA.CurrentExperimentId(); 
                            userStore.proxy.conn.url = wsBaseUrl + 'records/userexperiment/experiment__id/' + expId;
                            userStore.load();
                            
                            for (var i = 0; i < delIds.length; i++) {
                            if (Ext.isDefined(delIds[i])) {
-                           Ext.madasCRUDSomething('delete/userexperiment/'+delIds[i], {}, function() { var expId = Ext.madasCurrentExperimentId(); userStore.proxy.conn.url = wsBaseUrl + 'records/userexperiment/experiment__id/' + expId;
+                           MA.CRUDSomething('delete/userexperiment/'+delIds[i], {}, function() { var expId = MA.CurrentExperimentId(); userStore.proxy.conn.url = wsBaseUrl + 'records/userexperiment/experiment__id/' + expId;
                                                   userStore.load(); });
                            }
                            }

@@ -1,4 +1,4 @@
-Ext.madasMenuRender = function(username) {
+MA.MenuRender = function(username) {
 
     var userText =  'User: '+username;
 
@@ -7,26 +7,26 @@ Ext.madasMenuRender = function(username) {
         {
             id: 'toolbara',
             items: [
-                { xtype: 'tbbutton', text:'Login', id:'login', handler: Ext.madasMenuHandler},
-                { xtype: 'tbbutton', text:'Dashboard', id:'dashboard', handler: Ext.madasMenuHandler},
+                { xtype: 'tbbutton', text:'Login', id:'login', handler: MA.MenuHandler},
+                { xtype: 'tbbutton', text:'Dashboard', id:'dashboard', handler: MA.MenuHandler},
                 { xtype: 'tbbutton', text:'Admin', id:'admin', menu:{
                     items: [
-                        {text:'Admin Requests', id:'admin:adminrequests', handler: Ext.madasMenuHandler},
-                        {text:'Active User Search', id:'admin:usersearch', handler: Ext.madasMenuHandler},
-                        {text:'Rejected User Search', id:'admin:rejectedUsersearch', handler: Ext.madasMenuHandler},
-                        {text:'Deleted User Search', id:'admin:deletedUsersearch', handler: Ext.madasMenuHandler},
+                        {text:'Admin Requests', id:'admin:adminrequests', handler: MA.MenuHandler},
+                        {text:'Active User Search', id:'admin:usersearch', handler: MA.MenuHandler},
+                        {text:'Rejected User Search', id:'admin:rejectedUsersearch', handler: MA.MenuHandler},
+                        {text:'Deleted User Search', id:'admin:deletedUsersearch', handler: MA.MenuHandler},
                         new Ext.menu.Separator(),
-                        {text:'Node Management', id:'admin:nodelist', handler: Ext.madasMenuHandler},
-                        {text:'Organisation Management', id:'admin:orglist', handler: Ext.madasMenuHandler}
+                        {text:'Node Management', id:'admin:nodelist', handler: MA.MenuHandler},
+                        {text:'Organisation Management', id:'admin:orglist', handler: MA.MenuHandler}
                     ]
                     }
                 },
                 { xtype: 'tbbutton', text:'Quotes', menu:{
                     items: [
-                        {text:'Make an Inquiry', id:'quote:request', handler: Ext.madasMenuHandler},
-                        {text:'View Quote Requests', id:'quote:list', handler: Ext.madasMenuHandler},
-                        {text:'My Formal Quotes', id:'quote:listFormal', handler: Ext.madasMenuHandler},
-                        {text:'Overview List', id:'quote:listAll', handler: Ext.madasMenuHandler}
+                        {text:'Make an Inquiry', id:'quote:request', handler: MA.MenuHandler},
+                        {text:'View Quote Requests', id:'quote:list', handler: MA.MenuHandler},
+                        {text:'My Formal Quotes', id:'quote:listFormal', handler: MA.MenuHandler},
+                        {text:'Overview List', id:'quote:listAll', handler: MA.MenuHandler}
                     ]
                     }
                 },
@@ -34,20 +34,20 @@ Ext.madasMenuRender = function(username) {
                     items: [
                             {text:'Screencasts', id:'help:screencasts', menu: {
                             items: [
-                                    {text:'Requesting a Quote', id:'help:screencasts-quoterequest', handler: Ext.madasMenuHandler}
+                                    {text:'Requesting a Quote', id:'help:screencasts-quoterequest', handler: MA.MenuHandler}
                                     ]
                             } 
                             },
                             {text:'Admin screencasts', id:'helpadmin:screencasts', menu: {
                             items: [
-                                    {text:'Accepting/rejecting users', id:'helpadmin:screencasts-authrequest', handler: Ext.madasMenuHandler},
-                                    {text:'Forwarding a Quote Request', id:'helpadmin:screencasts-forwardquoterequest', handler: Ext.madasMenuHandler},
-                                    {text:'Sending a Formal Quote', id:'helpadmin:screencasts-forwardformal', handler: Ext.madasMenuHandler},
-                                    {text:'Replacing a Formal Quote', id:'helpadmin:screencasts-replaceformal', handler: Ext.madasMenuHandler}
+                                    {text:'Accepting/rejecting users', id:'helpadmin:screencasts-authrequest', handler: MA.MenuHandler},
+                                    {text:'Forwarding a Quote Request', id:'helpadmin:screencasts-forwardquoterequest', handler: MA.MenuHandler},
+                                    {text:'Sending a Formal Quote', id:'helpadmin:screencasts-forwardformal', handler: MA.MenuHandler},
+                                    {text:'Replacing a Formal Quote', id:'helpadmin:screencasts-replaceformal', handler: MA.MenuHandler}
                                     ]
                             } 
                             },
-                            {text:'Contact Us', id:'help:contactus', handler: Ext.madasMenuHandler }
+                            {text:'Contact Us', id:'help:contactus', handler: MA.MenuHandler }
                             ]
                     }
                 },
@@ -55,8 +55,8 @@ Ext.madasMenuRender = function(username) {
                 { xtype: 'tbfill'},
                 { xtype: 'tbbutton', text:userText, id: 'userMenu', menu:{
                     items: [
-                        {text:'Logout', id:'login:processLogout', handler: Ext.madasLogoutHandler},
-                        {text:'My Account', id:'user:myaccount', handler: Ext.madasMenuHandler}
+                        {text:'Logout', id:'login:processLogout', handler: MA.LogoutHandler},
+                        {text:'My Account', id:'user:myaccount', handler: MA.MenuHandler}
                     ]
                     }
                 }
@@ -68,21 +68,21 @@ Ext.madasMenuRender = function(username) {
 
 }
 
-Ext.madasMenuEnsure = function() {
-    if (Ext.madasIsLoggedIn) 
-        Ext.madasMenuShow();
+MA.MenuEnsure = function() {
+    if (MA.IsLoggedIn) 
+        MA.MenuShow();
     else 
-        Ext.madasMenuHide();
+        MA.MenuHide();
 }
 
-Ext.madasMenuShow = function() {
+MA.MenuShow = function() {
 
-    Ext.BLANK_IMAGE_URL = Ext.madasBaseUrl + 'static/ext-3.1.0/resources/images/default/s.gif';
+    Ext.BLANK_IMAGE_URL = MA.BaseUrl + 'static/ext-3.1.0/resources/images/default/s.gif';
 
     //disable certain menu items if the user is not an admin
-    if (!Ext.madasIsAdmin) {
+    if (!MA.IsAdmin) {
         Ext.getCmp('admin:nodelist').disable();
-        if (!Ext.madasIsNodeRep) {
+        if (!MA.IsNodeRep) {
 	        Ext.get('admin').hide();
             Ext.getCmp('helpadmin:screencasts').disable();
         }
@@ -105,20 +105,20 @@ Ext.madasMenuShow = function() {
 
 }
 
-Ext.madasMenuHandler = function(item) {
+MA.MenuHandler = function(item) {
     //we authorize every access to check for session timeout and authorization to specific pages
     if (item.id.substr(0,4) == "help") {
-        Ext.madasChangeMainContent(item.id);
+        MA.ChangeMainContent(item.id);
     } else {
-        Ext.madasAuthorize(item.id);
+        MA.Authorize(item.id);
     }
 }
 
-Ext.madasLogoutHandler = function() {
+MA.LogoutHandler = function() {
     window.location = "login/processLogout";
 }
 
-Ext.madasMenuHide = function() {
+MA.MenuHide = function() {
 
     Ext.get('login').show();
     Ext.get('dashboard').hide();

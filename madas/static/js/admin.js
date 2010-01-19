@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Madas.  If not, see <http://www.gnu.org/licenses/>.
  */
-Ext.madasAdminRequestsInit = function(){
+MA.AdminRequestsInit = function(){
     
-	var dataurl = Ext.madasBaseUrl + "admin/adminrequests";
+	var dataurl = MA.BaseUrl + "admin/adminrequests";
     
-    var madasReader = new Ext.madasJsonReader({
+    var madasReader = new MA.JsonReader({
                                               root            : 'response.value.items',
                                               versionProperty : 'response.value.version',
                                               totalProperty   : 'response.value.total_count'
@@ -45,7 +45,7 @@ Ext.madasAdminRequestsInit = function(){
                                          });
     var editHandler = function(el, ev) {
         if (selectionModel.hasSelection()) {
-            Ext.madasAuthorize('admin:useredit', [selectionModel.getSelected().data['username']]);
+            MA.Authorize('admin:useredit', [selectionModel.getSelected().data['username']]);
         }
     };
     var topToolbar = new Ext.Toolbar({
@@ -92,11 +92,11 @@ Ext.madasAdminRequestsInit = function(){
     
 };
 
-Ext.madasUserSearchInit = function(){
+MA.UserSearchInit = function(){
     
-	var dataurl = Ext.madasBaseUrl + "admin/usersearch";
+	var dataurl = MA.BaseUrl + "admin/usersearch";
     
-    var madasReader = new Ext.madasJsonReader({
+    var madasReader = new MA.JsonReader({
                                               root            : 'response.value.items',
                                               versionProperty : 'response.value.version',
                                               totalProperty   : 'response.value.total_count'
@@ -141,7 +141,7 @@ Ext.madasUserSearchInit = function(){
                                              ]);
     var editHandler = function(el, ev) {
         if (selectionModel.hasSelection()) {
-            Ext.madasAuthorize('admin:useredit', [selectionModel.getSelected().data['username']]);
+            MA.Authorize('admin:useredit', [selectionModel.getSelected().data['username']]);
         }
     };
     var topToolbar = new Ext.Toolbar({
@@ -179,11 +179,11 @@ Ext.madasUserSearchInit = function(){
     
 };
 
-Ext.madasRejectedUserSearchInit = function(){
+MA.RejectedUserSearchInit = function(){
     
-	var dataurl = Ext.madasBaseUrl + "admin/rejectedUsersearch";
+	var dataurl = MA.BaseUrl + "admin/rejectedUsersearch";
     
-    var madasReader = new Ext.madasJsonReader({
+    var madasReader = new MA.JsonReader({
                                               root            : 'response.value.items',
                                               versionProperty : 'response.value.version',
                                               totalProperty   : 'response.value.total_count'
@@ -219,7 +219,7 @@ Ext.madasRejectedUserSearchInit = function(){
                                              ]);
     var editHandler = function(el, ev) {
         if (selectionModel.hasSelection()) {
-            Ext.madasAuthorize('admin:useredit', [selectionModel.getSelected().data['username']]);
+            MA.Authorize('admin:useredit', [selectionModel.getSelected().data['username']]);
         }
     };
     var topToolbar = new Ext.Toolbar({
@@ -257,11 +257,11 @@ Ext.madasRejectedUserSearchInit = function(){
     
 };
 
-Ext.madasDeletedUserSearchInit = function(){
+MA.DeletedUserSearchInit = function(){
     
-	var dataurl = Ext.madasBaseUrl + "admin/deletedUsersearch";
+	var dataurl = MA.BaseUrl + "admin/deletedUsersearch";
     
-    var madasReader = new Ext.madasJsonReader({
+    var madasReader = new MA.JsonReader({
                                               root            : 'response.value.items',
                                               versionProperty : 'response.value.version',
                                               totalProperty   : 'response.value.total_count'
@@ -297,7 +297,7 @@ Ext.madasDeletedUserSearchInit = function(){
                                              ]);
     var editHandler = function(el, ev) {
         if (selectionModel.hasSelection()) {
-            Ext.madasAuthorize('admin:useredit', [selectionModel.getSelected().data['username']]);
+            MA.Authorize('admin:useredit', [selectionModel.getSelected().data['username']]);
         }
     };
     var topToolbar = new Ext.Toolbar({
@@ -336,21 +336,21 @@ Ext.madasDeletedUserSearchInit = function(){
 };
 
 
-Ext.madasAdminUserEditInit = function (paramArray) {
+MA.AdminUserEditInit = function (paramArray) {
     var username = paramArray[0];
     var adminUserEditCmp = Ext.getCmp('adminuseredit-panel');   
     
     //fetch user details
-    adminUserEditCmp.load({url: Ext.madasBaseUrl + 'admin/userload', params: {'username': username}, waitMsg:'Loading'});
+    adminUserEditCmp.load({url: MA.BaseUrl + 'admin/userload', params: {'username': username}, waitMsg:'Loading'});
     
     //attach validator that ext cannot deal with
-    Ext.getCmp("adminUserEditPassword").on('blur', Ext.madasAdminUserEditValidatePassword);
-    Ext.getCmp("adminUserEditConfirmPassword").on('blur', Ext.madasAdminUserEditValidatePassword);
+    Ext.getCmp("adminUserEditPassword").on('blur', MA.AdminUserEditValidatePassword);
+    Ext.getCmp("adminUserEditConfirmPassword").on('blur', MA.AdminUserEditValidatePassword);
     
     Ext.getCmp('adminUserEditSubmit').enable();
     
     //if user is not an admin, disable certain UI components in the form
-    if (!Ext.madasIsAdmin) {
+    if (!MA.IsAdmin) {
         Ext.getCmp('adminUserEditIsAdmin').disable();
         Ext.getCmp('adminUserEditNode').disable();
     } else {
@@ -371,7 +371,7 @@ Ext.madasAdminUserEditInit = function (paramArray) {
  * madasAdminUserEditValidatePassword
  * we need to implement a custom validator because Ext cannot validate an empty field that has to be the same as another field
  */
-Ext.madasAdminUserEditValidatePassword = function (textfield, event) {
+MA.AdminUserEditValidatePassword = function (textfield, event) {
     var passEl = Ext.getCmp('adminUserEditPassword');
     var confirmEl = Ext.getCmp('adminUserEditConfirmPassword');
     var submitEl = Ext.getCmp('adminUserEditSubmit');
@@ -390,7 +390,7 @@ Ext.madasAdminUserEditValidatePassword = function (textfield, event) {
     };
 };
 
-Ext.madasAdminUserEditCmp = {id:'adminuseredit-container-panel', 
+MA.AdminUserEditCmp = {id:'adminuseredit-container-panel', 
 layout:'absolute', 
 deferredRender:false,
 forceLayout:true,
@@ -402,10 +402,10 @@ items:[
        {  xtype:'form', 
        labelWidth: 100, // label settings here cascade unless overridden
        id:'adminuseredit-panel',
-       url:Ext.madasBaseUrl + 'admin/userSave',
+       url:MA.BaseUrl + 'admin/userSave',
        method:'POST',
        frame:true,
-       reader: new Ext.madasJsonReader({
+       reader: new MA.JsonReader({
                                                  root            : 'data',
                                                  versionProperty : 'response.value.version',
                                                  totalProperty   : 'response.value.total_count',
@@ -471,7 +471,7 @@ items:[
                id: 'adminUserEditConfirmPassword',
                xtype: 'textfield',
                allowBlank: true,
-               validator: Ext.madasAdminUserEditValidatePassword
+               validator: MA.AdminUserEditValidatePassword
                },{
                fieldLabel: 'Office',
                name: 'physicalDeliveryOfficeName',
@@ -519,7 +519,7 @@ items:[
                                         listWidth:230,
                                         store: new Ext.data.JsonStore({
                                                                       storeId: 'adminUserEditNodeDS',
-                                                                      url: Ext.madasBaseUrl + 'admin/listGroups',
+                                                                      url: MA.BaseUrl + 'admin/listGroups',
                                                                       root: 'response.value.items',
                                                                       fields: ['name', 'submitValue']
                                                                       })
@@ -852,7 +852,7 @@ items:[
                  text: 'Cancel',
                  handler: function(){
                  Ext.getCmp('adminuseredit-panel').getForm().reset(); 
-                 Ext.madasAuthorize(Ext.madasCancelBackTarget)
+                 MA.Authorize(MA.CancelBackTarget)
                  }
                  },{
                  text: 'Save',
@@ -869,7 +869,7 @@ items:[
                                                                     setTimeout("Ext.Msg.hide()", 5000);
                                                                     
                                                                     //load up the menu and next content area as declared in response
-                                                                    Ext.madasChangeMainContent(action.result.mainContentFunction);
+                                                                    MA.ChangeMainContent(action.result.mainContentFunction);
                                                                     } 
                                                                     },
                                                                     failure: function (form, action) {
@@ -884,7 +884,7 @@ items:[
 };
 
 //handles selection and loading of node details
-Ext.madasNodeManagementSelectionManager = function(selModel) { 
+MA.NodeManagementSelectionManager = function(selModel) { 
     if (selModel.hasSelection()) { 
         Ext.getCmp('nodedetails-name').setValue(selModel.getSelected().data['name']);
         Ext.getCmp('nodedetails-originalName').setValue(selModel.getSelected().data['name']);
@@ -901,12 +901,12 @@ Ext.madasNodeManagementSelectionManager = function(selModel) {
 
 //clearing the form on a Cancel click
 //reuse the same functionality as if the user had just clicked on a new item in the grid
-Ext.madasNodeManagementClearForm = function() {
-    Ext.madasNodeManagementSelectionManager(Ext.getCmp('nodeListGrid').getSelectionModel());
+MA.NodeManagementClearForm = function() {
+    MA.NodeManagementSelectionManager(Ext.getCmp('nodeListGrid').getSelectionModel());
 };
 
 //handle the click on the 'add' tool button
-Ext.madasNodeManagementAddTool = function(event, toolEl, panel) {
+MA.NodeManagementAddTool = function(event, toolEl, panel) {
     Ext.getCmp('nodeListGrid').getSelectionModel().clearSelections();
     
     Ext.getCmp('nodedetails-name').setValue('New node');
@@ -916,7 +916,7 @@ Ext.madasNodeManagementAddTool = function(event, toolEl, panel) {
 };
 
 //handle the click on the 'delete' tool button
-Ext.madasNodeManagementDeleteTool = function(event, toolEl, panel) {
+MA.NodeManagementDeleteTool = function(event, toolEl, panel) {
     if (! Ext.getCmp('nodeListGrid').getSelectionModel().hasSelection()) {
         return false;
     }
@@ -932,7 +932,7 @@ Ext.madasNodeManagementDeleteTool = function(event, toolEl, panel) {
                     //execute the delete
                     //submit form   
                     var simple = new Ext.BasicForm('hiddenForm', {
-                                                   url:Ext.madasBaseUrl + 'admin/nodeDelete',
+                                                   url:MA.BaseUrl + 'admin/nodeDelete',
                                                    baseParams:{'name':nodename},
                                                    method:'POST'
                                                    });         
@@ -945,11 +945,11 @@ Ext.madasNodeManagementDeleteTool = function(event, toolEl, panel) {
                     setTimeout("Ext.Msg.hide()", 5000);
                     
                     //load up the menu and next content area as declared in response
-                    Ext.madasChangeMainContent(action.result.mainContentFunction);
+                    MA.ChangeMainContent(action.result.mainContentFunction);
                     },
                     failure: function (form, action) {
                     //load up the menu and next content area as declared in response
-                    Ext.madasChangeMainContent(action.result.mainContentFunction);
+                    MA.ChangeMainContent(action.result.mainContentFunction);
                     }
                     };
                     
@@ -970,25 +970,25 @@ Ext.madasNodeManagementDeleteTool = function(event, toolEl, panel) {
 };
 
 //initialize node management grid and the event handlers
-Ext.madasNodeManagementInit = function() {
+MA.NodeManagementInit = function() {
     Ext.getCmp('nodeListGrid').getStore().reload();
     
     //enable/disable the details panel when selection is changed (and load the details for the selected item)
-    Ext.getCmp('nodeListGrid').getSelectionModel().on('selectionchange', Ext.madasNodeManagementSelectionManager );
+    Ext.getCmp('nodeListGrid').getSelectionModel().on('selectionchange', MA.NodeManagementSelectionManager );
     
     //disable the node details panel by default
     Ext.getCmp('nodedetails-panel').disable();
 };
 
 //define the node details form
-Ext.madasNodeDetailsCmp = {
+MA.NodeDetailsCmp = {
 xtype:'form',
 labelWidth: 100, // label settings here cascade unless overridden
 id:'nodedetails-panel',
-url:Ext.madasBaseUrl + 'admin/nodesave',
+url:MA.BaseUrl + 'admin/nodesave',
 region: 'center',
 method:'POST',
-reader: new Ext.madasJsonReader(),
+reader: new MA.JsonReader(),
 bodyStyle: 'padding:10px;',
 title: 'Node Details',
 defaults: {width: 230},
@@ -1001,7 +1001,7 @@ items: [
         {   name: 'name', id: 'nodedetails-name', fieldLabel: 'Node Name', maskRe: /[^,=]/ }
         ],
 buttons: [
-          { text: 'Reset', handler: Ext.madasNodeManagementClearForm },
+          { text: 'Reset', handler: MA.NodeManagementClearForm },
           { text: 'Save', handler: function() { Ext.getCmp('nodedetails-panel').getForm().submit({   
                                                                                                  successProperty: 'success',
                                                                                                  success: function (form, action) {
@@ -1011,7 +1011,7 @@ buttons: [
                                                                                                  setTimeout("Ext.Msg.hide()", 5000);
                                                                                                  
                                                                                                  //load up the menu and next content area as declared in response
-                                                                                                 Ext.madasChangeMainContent(action.result.mainContentFunction);
+                                                                                                 MA.ChangeMainContent(action.result.mainContentFunction);
                                                                                                  }
                                                                                                  },
                                                                                                  failure: function (form, action) {
@@ -1023,7 +1023,7 @@ buttons: [
 };
 
 
-Ext.madasNodeManagementCmp = {
+MA.NodeManagementCmp = {
 id:'nodeManagementCmp',
 layout:'border',
 items: [
@@ -1036,11 +1036,11 @@ items: [
         split:true,
         xtype:'grid',
         tools: [
-                { id: 'plus', qtip: 'Add a new node', handler: Ext.madasNodeManagementAddTool },
-                { id: 'minus', qtip: 'Delete currently selected node', handler: Ext.madasNodeManagementDeleteTool }
+                { id: 'plus', qtip: 'Add a new node', handler: MA.NodeManagementAddTool },
+                { id: 'minus', qtip: 'Delete currently selected node', handler: MA.NodeManagementDeleteTool }
                 ],
         store: new Ext.data.JsonStore({
-                                      url: Ext.madasBaseUrl + 'admin/listGroups',
+                                      url: MA.BaseUrl + 'admin/listGroups',
                                       baseParams: { 'ignoreNone' : 'on' },
                                       root: 'response.value.items',
                                       fields: ['name', 'submitValue']
@@ -1062,14 +1062,14 @@ items: [
                                         ,width:150
                                         })]
         },
-        Ext.madasNodeDetailsCmp
+        MA.NodeDetailsCmp
         ]
 };
 
 //org management component ------------------------------------------------------------------------------------//
 
 //handles selection and loading of org details
-Ext.madasOrgManagementSelectionManager = function(selModel) { 
+MA.OrgManagementSelectionManager = function(selModel) { 
     if (selModel.hasSelection()) { 
         Ext.getCmp('orgdetails-name').setValue(selModel.getSelected().data['name']);
         Ext.getCmp('orgdetails-id').setValue(selModel.getSelected().data['id']);
@@ -1088,12 +1088,12 @@ Ext.madasOrgManagementSelectionManager = function(selModel) {
 
 //clearing the form on a Cancel click
 //reuse the same functionality as if the user had just clicked on a new item in the grid
-Ext.madasOrgManagementClearForm = function() {
-    Ext.madasOrgManagementSelectionManager(Ext.getCmp('orgListGrid').getSelectionModel());
+MA.OrgManagementClearForm = function() {
+    MA.OrgManagementSelectionManager(Ext.getCmp('orgListGrid').getSelectionModel());
 };
 
 //handle the click on the 'add' tool button
-Ext.madasOrgManagementAddTool = function(event, toolEl, panel) {
+MA.OrgManagementAddTool = function(event, toolEl, panel) {
     Ext.getCmp('orgListGrid').getSelectionModel().clearSelections();
     
     Ext.getCmp('orgdetails-name').setValue('New Organisation');
@@ -1104,7 +1104,7 @@ Ext.madasOrgManagementAddTool = function(event, toolEl, panel) {
 };
 
 //handle the click on the 'delete' tool button
-Ext.madasOrgManagementDeleteTool = function(event, toolEl, panel) {
+MA.OrgManagementDeleteTool = function(event, toolEl, panel) {
     if (! Ext.getCmp('orgListGrid').getSelectionModel().hasSelection()) {
         return false;
     }
@@ -1120,7 +1120,7 @@ Ext.madasOrgManagementDeleteTool = function(event, toolEl, panel) {
                     //execute the delete
                     //submit form   
                     var simple = new Ext.BasicForm('hiddenForm', {
-                                                   url:Ext.madasBaseUrl + 'admin/orgDelete',
+                                                   url:MA.BaseUrl + 'admin/orgDelete',
                                                    baseParams:{'id':orgid},
                                                    method:'POST'
                                                    });         
@@ -1134,11 +1134,11 @@ Ext.madasOrgManagementDeleteTool = function(event, toolEl, panel) {
                     setTimeout("Ext.Msg.hide()", 5000);
                     
                     //load up the menu and next content area as declared in response
-                    Ext.madasChangeMainContent(action.result.mainContentFunction);
+                    MA.ChangeMainContent(action.result.mainContentFunction);
                     },
                     failure: function (form, action) {
                     //load up the menu and next content area as declared in response
-                    Ext.madasChangeMainContent(action.result.mainContentFunction);
+                    MA.ChangeMainContent(action.result.mainContentFunction);
                     }
                     };
                     
@@ -1161,25 +1161,25 @@ Ext.madasOrgManagementDeleteTool = function(event, toolEl, panel) {
 
 
 //initialize org management grid and the event handlers
-Ext.madasOrgManagementInit = function() {
+MA.OrgManagementInit = function() {
     Ext.getCmp('orgListGrid').getStore().reload();
     
     //enable/disable the details panel when selection is changed (and load the details for the selected item)
-    Ext.getCmp('orgListGrid').getSelectionModel().on('selectionchange', Ext.madasOrgManagementSelectionManager );
+    Ext.getCmp('orgListGrid').getSelectionModel().on('selectionchange', MA.OrgManagementSelectionManager );
     
     //disable the node details panel by default
     Ext.getCmp('orgdetails-panel').disable();
 };
 
 //define the node details form
-Ext.madasOrgDetailsCmp = {
+MA.OrgDetailsCmp = {
 xtype:'form',
 labelWidth: 100, // label settings here cascade unless overridden
 id:'orgdetails-panel',
-url:Ext.madasBaseUrl + 'admin/orgsave',
+url:MA.BaseUrl + 'admin/orgsave',
 region: 'center',
 method:'POST',
-reader: new Ext.madasJsonReader(),
+reader: new MA.JsonReader(),
 bodyStyle: 'padding:10px;',
 title: 'Organisation Details',
 defaults: {width: 230},
@@ -1193,7 +1193,7 @@ items: [
         {   name: 'abn', id: 'orgdetails-abn', fieldLabel: 'ABN', maskRe: /[^,=]/ }
         ],
 buttons: [
-          { text: 'Reset', handler: Ext.madasOrgManagementClearForm },
+          { text: 'Reset', handler: MA.OrgManagementClearForm },
           { text: 'Save', handler: function() { Ext.getCmp('orgdetails-panel').getForm().submit({   
                                                                                                 successProperty: 'success',
                                                                                                 success: function (form, action) {
@@ -1204,7 +1204,7 @@ buttons: [
                                                                                                 setTimeout("Ext.Msg.hide()", 5000);
                                                                                                 
                                                                                                 //load up the menu and next content area as declared in response
-                                                                                                Ext.madasChangeMainContent(action.result.mainContentFunction);
+                                                                                                MA.ChangeMainContent(action.result.mainContentFunction);
                                                                                                 }
                                                                                                 },
                                                                                                 failure: function (form, action) {
@@ -1215,7 +1215,7 @@ buttons: [
           ]
 };
 
-Ext.madasOrgManagementCmp = {
+MA.OrgManagementCmp = {
 id:'orgManagementCmp',
 layout:'border',
 items: [
@@ -1228,11 +1228,11 @@ items: [
         split:true,
         xtype:'grid',
         tools: [
-                { id: 'plus', qtip: 'Add a new organisation', handler: Ext.madasOrgManagementAddTool },
-                { id: 'minus', qtip: 'Delete currently selected organisation', handler: Ext.madasOrgManagementDeleteTool }
+                { id: 'plus', qtip: 'Add a new organisation', handler: MA.OrgManagementAddTool },
+                { id: 'minus', qtip: 'Delete currently selected organisation', handler: MA.OrgManagementDeleteTool }
                 ],
         store: new Ext.data.JsonStore({
-                                      url: Ext.madasBaseUrl + 'admin/listOrganisations',
+                                      url: MA.BaseUrl + 'admin/listOrganisations',
                                       baseParams: { 'ignoreNone' : 'on' },
                                       root: 'response.value.items',
                                       fields: ['name', 'submitValue']
@@ -1254,6 +1254,6 @@ items: [
                                         ,width:150
                                         })]
         },
-        Ext.madasOrgDetailsCmp
+        MA.OrgDetailsCmp
         ]
 };

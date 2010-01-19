@@ -2,7 +2,7 @@
  * madasRegistrationValidatePassword
  * we need to implement a custom validator because Ext cannot validate an empty field that has to be the same as another field
  */
-Ext.madasRegistrationValidatePassword = function (textfield, event) {
+MA.RegistrationValidatePassword = function (textfield, event) {
     var passEl = Ext.getCmp('registrationPassword');
     var confirmEl = Ext.getCmp('registrationConfirmPassword');
     var submitEl = Ext.getCmp('registrationSubmit');
@@ -21,14 +21,14 @@ Ext.madasRegistrationValidatePassword = function (textfield, event) {
     }
 };
 
-Ext.madasRegistrationCmp = 
+MA.RegistrationCmp = 
 {   id:'registration-container-panel', 
 autoScroll:true,
 items:[
        {  xtype:'form', 
        labelWidth: 100, // label settings here cascade unless overridden
        id:'registration-panel',
-       url:Ext.madasBaseUrl + 'registration/submit',
+       url:MA.BaseUrl + 'registration/submit',
        method:'POST',
        frame:true,
        title: 'New Registration',
@@ -68,7 +68,7 @@ items:[
                id: 'registrationConfirmPassword',
                xtype: 'textfield',
                allowBlank:true,
-               validator: Ext.madasRegistrationValidatePassword
+               validator: MA.RegistrationValidatePassword
                },{
                fieldLabel: 'Office Phone (with area code)',
                name: 'telephoneNumber',
@@ -412,7 +412,7 @@ items:[
                                                                    Ext.Msg.alert("Registration request sent successfully", "We will contact you via email or phone as soon as possible. Thank you for your inquiry.");
                                                                    
                                                                    //load up the menu and next content area as declared in response
-                                                                   Ext.madasChangeMainContent(action.result.mainContentFunction);
+                                                                   MA.ChangeMainContent(action.result.mainContentFunction);
                                                                    } 
                                                                    },
                                                                    failure: function (form, action) {

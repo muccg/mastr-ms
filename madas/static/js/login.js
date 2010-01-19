@@ -15,7 +15,7 @@
  * along with Madas.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-Ext.madasLoginExecute = function(paramArray){
+MA.LoginExecute = function(paramArray){
                             Ext.getCmp('login-panel').getForm().submit(
                                 {   successProperty: 'success',        
                                     success: function (form, action) {
@@ -29,12 +29,12 @@ Ext.madasLoginExecute = function(paramArray){
                                             
                                             var resultContent = action.result.mainContentFunction;
                                             var params = action.result.params;
-                                            if (Ext.madasPostLoginParamArray) {
-                                                resultContent = Ext.madasPostLoginParamArray[0];
-                                                params = Ext.madasPostLoginParamArray[1];
+                                            if (MA.PostLoginParamArray) {
+                                                resultContent = MA.PostLoginParamArray[0];
+                                                params = MA.PostLoginParamArray[1];
                                             }
                                             
-                                            Ext.madasAuthorize(resultContent, params);
+                                            MA.Authorize(resultContent, params);
                                         } 
                                     },
                                     failure: function (form, action) {
@@ -44,14 +44,14 @@ Ext.madasLoginExecute = function(paramArray){
                                 });
                         };
                         
-Ext.madasForgotPasswordExecute = function(){
+MA.ForgotPasswordExecute = function(){
                             Ext.getCmp('forgot-password-panel').getForm().submit(
                                 {   successProperty: 'success',        
                                     success: function (form, action) {
                                         if (action.result.success === true) {
                                             form.reset(); 
                                             //load up the menu and next content area as declared in response
-                                            Ext.madasChangeMainContent(action.result.mainContentFunction, action.result.params);
+                                            MA.ChangeMainContent(action.result.mainContentFunction, action.result.params);
                                         } 
                                     },
                                     failure: function (form, action) {
@@ -61,12 +61,12 @@ Ext.madasForgotPasswordExecute = function(){
                                 });
                         };
 
-Ext.madasRequestQuoteButtonHandler = function() {
-    //Ext.madasAuthorize('quote:request');
-    Ext.madasChangeMainContent('quote:request');
+MA.RequestQuoteButtonHandler = function() {
+    //MA.Authorize('quote:request');
+    MA.ChangeMainContent('quote:request');
 };
 
-Ext.madasLoginCmp = {id:'login-container-panel', 
+MA.LoginCmp = {id:'login-container-panel', 
                 layout:'absolute', 
                 items:[
                        { xtype:'panel',
@@ -78,13 +78,13 @@ Ext.madasLoginCmp = {id:'login-container-panel',
                        y:10,
                        items: [{
                                xtype:'panel',
-                               html:'Welcome to the <a href="http://www.metabolomics.net.au/">Metabolomics Australia</a> User and Quote Management System. This site allows existing and prospective clients of Metabolomics Australia to obtain a quote for accessing the many services offered my Metabolomics Australia.                               <p> <br>                              To make an inquiry about any of the services offered by Metabolomics Australia, clients are encouraged to fill out an online inquiry form by clicking the "Make an Inquiry" button, below.                               <p> <br>                              Existing clients can login to the website using the form to the right, or if required request a new password by <a href="#" onclick="Ext.madasAuthorize(\'login:forgotpassword\')">clicking here</a>.<br><br>'
+                               html:'Welcome to the <a href="http://www.metabolomics.net.au/">Metabolomics Australia</a> User and Quote Management System. This site allows existing and prospective clients of Metabolomics Australia to obtain a quote for accessing the many services offered my Metabolomics Australia.                               <p> <br>                              To make an inquiry about any of the services offered by Metabolomics Australia, clients are encouraged to fill out an online inquiry form by clicking the "Make an Inquiry" button, below.                               <p> <br>                              Existing clients can login to the website using the form to the right, or if required request a new password by <a href="#" onclick="MA.Authorize(\'login:forgotpassword\')">clicking here</a>.<br><br>'
                                },
                                {
                                xtype:'button',
                                text:'Make an Inquiry',
                                style:'margin-left:200px;',
-                               handler:Ext.madasRequestQuoteButtonHandler
+                               handler:MA.RequestQuoteButtonHandler
                                }
                                ]
                        },
@@ -92,7 +92,7 @@ Ext.madasLoginCmp = {id:'login-container-panel',
                     {  xtype:'form', 
                     labelWidth: 75, // label settings here cascade unless overridden
                     id:'login-panel',
-                    url:Ext.madasBaseUrl + 'login/processLogin',
+                    url:MA.BaseUrl + 'login/processLogin',
                     method:'POST',
                     frame:true,
                     title: 'Login',
@@ -107,8 +107,8 @@ Ext.madasLoginCmp = {id:'login-container-panel',
                             xtype:'panel',
                             el:"loginDiv"
                         },
-                            {xtype:'panel', width: 350, style:'padding-top:4px;padding-left:80px;', html: '<a href="#" onclick="Ext.madasChangeMainContent(\'registration\')">Click here</a> to register for an account' },
-                        {xtype:'panel', width: 350, style:'padding-top:4px;padding-left:80px;', html: '<a href="#" onclick="Ext.madasAuthorize(\'login:forgotpassword\')">Forgot your password?</a>' }
+                            {xtype:'panel', width: 350, style:'padding-top:4px;padding-left:80px;', html: '<a href="#" onclick="MA.ChangeMainContent(\'registration\')">Click here</a> to register for an account' },
+                        {xtype:'panel', width: 350, style:'padding-top:4px;padding-left:80px;', html: '<a href="#" onclick="MA.Authorize(\'login:forgotpassword\')">Forgot your password?</a>' }
                     ]}
                     ]
                 };
@@ -116,13 +116,13 @@ Ext.madasLoginCmp = {id:'login-container-panel',
 /**
  * madasForgotPassword
  */
-Ext.madasForgotPasswordCmp = {id:'forgot-password-container-panel', 
+MA.ForgotPasswordCmp = {id:'forgot-password-container-panel', 
                 layout:'absolute', 
                 items:[
                     {  xtype:'form', 
                     labelWidth: 75, // label settings here cascade unless overridden
                     id:'forgot-password-panel',
-                    url:Ext.madasBaseUrl + 'login/processForgotPassword',
+                    url:MA.BaseUrl + 'login/processForgotPassword',
                     method:'POST',
                     frame:true,
                     title: 'Forgot Password',
@@ -144,26 +144,26 @@ Ext.madasForgotPasswordCmp = {id:'forgot-password-container-panel',
                         text: 'Cancel',
                         handler: function(){
                             Ext.getCmp('forgot-password-panel').getForm().reset(); 
-                            Ext.madasAuthorize('login');
+                            MA.Authorize('login');
                             }
                         },{
                         text: 'Submit',
-                        handler: Ext.madasForgotPasswordExecute
+                        handler: MA.ForgotPasswordExecute
                         }
                         ]}
                     ],
-                    keys: [{key: [10,13], fn: Ext.madasForgotPasswordExecute}]
+                    keys: [{key: [10,13], fn: MA.ForgotPasswordExecute}]
                 };
                 
-Ext.madasNotAuthorizedCmp = { id: 'notauthorized-panel', title: 'Not Authorized', html: 'You are not authorized to access this page' };
+MA.NotAuthorizedCmp = { id: 'notauthorized-panel', title: 'Not Authorized', html: 'You are not authorized to access this page' };
 
 /**
  * authorize
  * used to check if the user is still logged in, and if they can access the requested view
  */
-Ext.madasAuthorize = function(requestedView, params) {
+MA.Authorize = function(requestedView, params) {
     if (requestedView == 'notauthorized')
-        return Ext.madasChangeMainContent(requestedView, params);
+        return MA.ChangeMainContent(requestedView, params);
     
     //the module we need to auth against is the first part of the requestedView
     //ie admin/adminrequest
@@ -178,7 +178,7 @@ Ext.madasAuthorize = function(requestedView, params) {
 
     //submit form
     var simple = new Ext.BasicForm('hiddenForm', {
-        url:Ext.madasBaseUrl + module+'/authorize',
+        url:MA.BaseUrl + module+'/authorize',
         baseParams:{'subaction':action, 'params':Ext.util.JSON.encode(params)},
         method:'POST'
         });
@@ -189,22 +189,22 @@ Ext.madasAuthorize = function(requestedView, params) {
             //load up the menu and next content area as declared in response
             if (action.result.username) {
                 Ext.getCmp('userMenu').setText('User: '+action.result.username);
-                Ext.madasIsAdmin = action.result.isAdmin;
-                Ext.madasIsNodeRep = action.result.isNodeRep;
-                Ext.madasIsLoggedIn = true;
+                MA.IsAdmin = action.result.isAdmin;
+                MA.IsNodeRep = action.result.isNodeRep;
+                MA.IsLoggedIn = true;
             }
             if (! action.result.authenticated) {
-                Ext.madasIsAdmin = false;
-                Ext.madasIsNodeRep = false;
-                Ext.madasIsLoggedIn = false;
+                MA.IsAdmin = false;
+                MA.IsNodeRep = false;
+                MA.IsLoggedIn = false;
                 Ext.getCmp('userMenu').setText('User: none');
             }
-            Ext.madasChangeMainContent(action.result.mainContentFunction, action.result.params);
+            MA.ChangeMainContent(action.result.mainContentFunction, action.result.params);
         },
         failure: function (form, action) {
             //load up the menu and next content area as declared in response
             //alert(action.response.responseText);
-            Ext.madasChangeMainContent(action.result.mainContentFunction, action.result.params);
+            MA.ChangeMainContent(action.result.mainContentFunction, action.result.params);
         }
     };
 
@@ -212,25 +212,25 @@ Ext.madasAuthorize = function(requestedView, params) {
 };
 
 
-Ext.madasLoginInit = function(paramArray) {
+MA.LoginInit = function(paramArray) {
     
-    Ext.madasPostLoginParamArray = paramArray;
+    MA.PostLoginParamArray = paramArray;
     
     document.getElementById('loginDiv').style.display = 'block';
     Ext.getCmp('login-panel').getForm().reset();
     
 };
 
-Ext.madasForgotPasswordInit = function() {
+MA.ForgotPasswordInit = function() {
     
     Ext.getCmp('forgot-password-panel').getForm().reset();
     
 };
 
-Ext.madasLogoutInit = function(){
+MA.LogoutInit = function(){
 
     var simple = new Ext.BasicForm('hiddenForm', {
-        url:Ext.madasBaseUrl + 'login/processLogout',
+        url:MA.BaseUrl + 'login/processLogout',
         method:'POST'
         });
 
@@ -238,15 +238,15 @@ Ext.madasLogoutInit = function(){
         successProperty: 'success',        
         success: function (form, action) {
             if (action.result.success === true) { 
-                Ext.madasIsAdmin = false;
+                MA.IsAdmin = false;
                 Ext.getCmp('userMenu').setText('User: none');
-                Ext.madasIsLoggedIn = false;
+                MA.IsLoggedIn = false;
             
                 Ext.Msg.alert('Successfully logged out', '(this dialog will auto-close in 3 seconds)');
                 setTimeout('Ext.Msg.hide()', 3000);
             
                 //load up the menu and next content area as declared in response
-                Ext.madasChangeMainContent(action.result.mainContentFunction);
+                MA.ChangeMainContent(action.result.mainContentFunction);
             } 
         },
         failure: function (form, action) {
@@ -263,7 +263,7 @@ Ext.madasLogoutInit = function(){
  * madasResetPasswordValidatePassword
  * we need to implement a custom validator because Ext cannot validate an empty field that has to be the same as another field
  */
-Ext.madasResetPasswordValidatePassword = function (textfield, event) {
+MA.ResetPasswordValidatePassword = function (textfield, event) {
     var passEl = Ext.getCmp('resetPasswordPassword');
     var confirmEl = Ext.getCmp('resetPasswordConfirmPassword');
     var submitEl = Ext.getCmp('resetPasswordSubmit');
@@ -282,32 +282,32 @@ Ext.madasResetPasswordValidatePassword = function (textfield, event) {
     };
 };
 
-Ext.madasResetPasswordInit = function() {
+MA.ResetPasswordInit = function() {
 
     var resetPasswordCmp = Ext.getCmp('resetpassword-panel');   
 
     //fetch details for this request
-    resetPasswordCmp.load({url: Ext.madasBaseUrl + 'login/populateResetPasswordForm', waitMsg:'Loading'});
+    resetPasswordCmp.load({url: MA.BaseUrl + 'login/populateResetPasswordForm', waitMsg:'Loading'});
     
     //attach validator that ext cannot deal with
-    Ext.getCmp("resetPasswordPassword").on('blur', Ext.madasResetPasswordValidatePassword);
-    Ext.getCmp("resetPasswordConfirmPassword").on('blur', Ext.madasResetPasswordValidatePassword);
+    Ext.getCmp("resetPasswordPassword").on('blur', MA.ResetPasswordValidatePassword);
+    Ext.getCmp("resetPasswordConfirmPassword").on('blur', MA.ResetPasswordValidatePassword);
     
     Ext.getCmp('resetPasswordSubmit').disable();
 
     
 };
 
-Ext.madasResetPasswordCmp = {id:'resetpassword-container-panel', 
+MA.ResetPasswordCmp = {id:'resetpassword-container-panel', 
                 layout:'absolute', 
                 items:[
                     {  xtype:'form', 
                     labelWidth: 100, // label settings here cascade unless overridden
                     id:'resetpassword-panel',
-                    url:Ext.madasBaseUrl + 'login/processResetPassword',
+                    url:MA.BaseUrl + 'login/processResetPassword',
                     method:'POST',
                     frame:true,
-                    reader: new Ext.madasJsonReader({
+                    reader: new MA.JsonReader({
                                   root            : 'response.value.items',
                                   versionProperty : 'response.value.version',
                                   totalProperty   : 'response.value.total_count'
@@ -340,14 +340,14 @@ Ext.madasResetPasswordCmp = {id:'resetpassword-container-panel',
                             id: 'resetPasswordConfirmPassword',
                             xtype: 'textfield',
                             allowBlank:true,
-                            validator: Ext.madasResetPasswordValidatePassword
+                            validator: MA.ResetPasswordValidatePassword
                         }
                     ],
                     buttons: [{
                         text: 'Cancel',
                         handler: function(){
                             Ext.getCmp('resetpassword-panel').getForm().reset(); 
-                            Ext.madasAuthorize('login');
+                            MA.Authorize('login');
                             }
                         },{
                         text: 'Save',
@@ -364,7 +364,7 @@ Ext.madasResetPasswordCmp = {id:'resetpassword-container-panel',
                                             setTimeout("Ext.Msg.hide()", 5000);
                                             
                                             //load up the menu and next content area as declared in response
-                                            Ext.madasChangeMainContent(action.result.mainContentFunction);
+                                            MA.ChangeMainContent(action.result.mainContentFunction);
                                         } 
                                     },
                                     failure: function (form, action) {

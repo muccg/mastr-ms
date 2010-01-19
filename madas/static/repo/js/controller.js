@@ -1,19 +1,19 @@
-Ext.madasExperimentInit = function() {
-    Ext.madasLoadExperiment(Ext.madasCurrentExperimentId());
+MA.ExperimentInit = function() {
+    MA.LoadExperiment(MA.CurrentExperimentId());
 };
 
-Ext.madasBlur = function(invoker) {
+MA.Blur = function(invoker) {
     invoker.init();
     
     Ext.getCmp("expContent").getLayout().setActiveItem(invoker.index); 
     Ext.currentExperimentNavItem = invoker.index;
     
-    Ext.madasExperimentDeferredInvocation = {'init':Ext.madasNull, 'index':-1};
+    MA.ExperimentDeferredInvocation = {'init':MA.Null, 'index':-1};
 };
 
-Ext.madasNull = function() {};
+MA.Null = function() {};
 
-Ext.madasCRUDSomething = function(remainderURL, params, callbackfn) {
+MA.CRUDSomething = function(remainderURL, params, callbackfn) {
     var paramString = '?';
     
     for (var index in params) {
@@ -27,16 +27,16 @@ Ext.madasCRUDSomething = function(remainderURL, params, callbackfn) {
                                            method:'GET',
                                              url: wsBaseUrl + remainderURL + paramString,
                                              listeners: {
-                                                'load':Ext.madasDSLoaded,
+                                                'load':MA.DSLoaded,
                                                 'load':callbackfn,
-                                                'loadexception':Ext.madasDSLoadException}
+                                                'loadexception':MA.DSLoadException}
                                              }
                                              );
     crudStore.load();
 };
 
-Ext.madasExperimentBlur = function(invoker) {
-    var expId = Ext.madasCurrentExperimentId();
+MA.ExperimentBlur = function(invoker) {
+    var expId = MA.CurrentExperimentId();
     var expName = Ext.getCmp("experimentName").getValue();
     var expDescription = Ext.getCmp("experimentDescription").getValue();
     var expComment = Ext.getCmp("experimentComment").getValue();
@@ -49,7 +49,7 @@ Ext.madasExperimentBlur = function(invoker) {
         expJobNumber = '';
     }
     
-    Ext.madasExperimentDeferredInvocation = invoker;
+    MA.ExperimentDeferredInvocation = invoker;
 
     if (expId === 0) {
         
@@ -57,36 +57,36 @@ Ext.madasExperimentBlur = function(invoker) {
                                              { 
                                              asynchronous:true, 
                                              evalJSON:'force',
-                                     onSuccess:     Ext.madasExperimentBlurSuccess
+                                     onSuccess:     MA.ExperimentBlurSuccess
                                      });
     } else {
         var saver = new Ajax.Request(wsBaseUrl + 'update/experiment/'+expId+'/?title='+escape(expName)+'&description='+escape(expDescription)+'&comment='+escape(expComment)+'&status_id=2&formal_quote_id='+escape(expFQuoteId)+'&job_number='+escape(expJobNumber), 
                                      { 
                                      asynchronous:true, 
                                      evalJSON:'force',
-                                     onSuccess:     Ext.madasExperimentBlurSuccess
+                                     onSuccess:     MA.ExperimentBlurSuccess
                                      });
     }
 };
 
-Ext.madasExperimentBlurSuccess = function(response) {
+MA.ExperimentBlurSuccess = function(response) {
     if (Ext.isDefined(response)) {
-        Ext.madasCurrentExpId = response.responseJSON.rows[0].id;
+        MA.CurrentExpId = response.responseJSON.rows[0].id;
     }
     
-    var index = Ext.madasExperimentDeferredInvocation.index;
+    var index = MA.ExperimentDeferredInvocation.index;
 
     if (index >= 0) {
         Ext.getCmp("expContent").getLayout().setActiveItem(index); 
         Ext.currentExperimentNavItem = index;
     }
 
-    Ext.madasExperimentDeferredInvocation.init();
+    MA.ExperimentDeferredInvocation.init();
     
-    Ext.madasExperimentDeferredInvocation = {'index':-1, 'init':Ext.madasNull};
+    MA.ExperimentDeferredInvocation = {'index':-1, 'init':MA.Null};
 };
 
-Ext.madasExperimentShowFieldsets = function(organismType) {
+MA.ExperimentShowFieldsets = function(organismType) {
     Ext.getCmp('organismFieldset').hide();
     Ext.getCmp('plantFieldset').hide();
     Ext.getCmp('rankfield').hide();
@@ -119,14 +119,14 @@ Ext.madasExperimentShowFieldsets = function(organismType) {
     Ext.getCmp('speciesfield').enable();
 };
 
-Ext.madasLoadOrganismInfo = function(typeId, id) {
+MA.LoadOrganismInfo = function(typeId, id) {
     if (typeId == 2) {//plant
         plantStore.proxy.conn.url = wsBaseUrl + 'records/plant/id/' + id;
         plantStore.load();
     }
 };
 
-Ext.madasExperimentDetails = {
+MA.ExperimentDetails = {
     baseCls: 'x-plain',
     border:false,
     frame:false,
@@ -147,7 +147,7 @@ Ext.madasExperimentDetails = {
                 title:'experiment',
                 autoHeight:true,
                 items: [
-                    { xtype:'textfield', fieldLabel:'experiment name', enableKeyEvents:true, id:'experimentName', allowBlank:false, listeners:{'keydown':function(t, e){ Ext.madasUpdateNav(); return true; }, 'keyup':function(t, e){ Ext.madasUpdateNav(); return true; }}},
+                    { xtype:'textfield', fieldLabel:'experiment name', enableKeyEvents:true, id:'experimentName', allowBlank:false, listeners:{'keydown':function(t, e){ MA.UpdateNav(); return true; }, 'keyup':function(t, e){ MA.UpdateNav(); return true; }}},
                     { xtype:'textarea', fieldLabel:'description', id:'experimentDescription', width:700, height:100 },
                     { xtype:'textarea', fieldLabel:'comment', id:'experimentComment', width:700, height:100 },
                         new Ext.form.ComboBox({
@@ -177,7 +177,7 @@ Ext.madasExperimentDetails = {
 };
 
 
-Ext.madasExperimentCmp = { 
+MA.ExperimentCmp = { 
     id:'experimentTitle',
     title:'new experiment',
     layout:'border',
@@ -247,7 +247,7 @@ Ext.madasExperimentCmp = {
                             {
                                 storeId:"navDS",
                                 fields: ["nav", "init", "blur", "enabled"],
-                                data: [ ["experiment details", Ext.madasExperimentInit, Ext.madasExperimentBlur, true], ["source", Ext.madasBioSourceInit, Ext.madasBioSourceBlur, false], ["treatment",Ext.madasTreatmentInit, Ext.madasBlur,false], ["sample prep",Ext.madasSamplePrepInit, Ext.madasBlur,false], ["sample classes", Ext.madasExperimentSamplesInit, Ext.madasBlur, false], ["samples", Ext.madasExperimentSamplesOnlyInit, Ext.madasBlur, false], ["sample tracking", Ext.madasExperimentSamplesOnlyInit, Ext.madasBlur, false], ["files", Ext.madasFilesInit, Ext.madasBlur, false], ["access",Ext.madasAccessInit, Ext.madasBlur,false] ]
+                                data: [ ["experiment details", MA.ExperimentInit, MA.ExperimentBlur, true], ["source", MA.BioSourceInit, MA.BioSourceBlur, false], ["treatment",MA.TreatmentInit, MA.Blur,false], ["sample prep",MA.SamplePrepInit, MA.Blur,false], ["sample classes", MA.ExperimentSamplesInit, MA.Blur, false], ["samples", MA.ExperimentSamplesOnlyInit, MA.Blur, false], ["sample tracking", MA.ExperimentSamplesOnlyInit, MA.Blur, false], ["files", MA.FilesInit, MA.Blur, false], ["access",MA.AccessInit, MA.Blur,false] ]
                             }
                         ),
                         listeners:{"render":function(a){window.setTimeout("Ext.getCmp('expNav').getSelectionModel().selectFirstRow();", 500);}}
@@ -265,21 +265,21 @@ Ext.madasExperimentCmp = {
         activeItem:0,
         bodyStyle:'padding:0px;',
         items:[
-            Ext.madasExperimentDetails,
-            Ext.madasBioSource,
-            Ext.madasTreatment,
-            Ext.madasSamplePrep,
-            Ext.madasExperimentSamples,
-            Ext.madasExperimentSamplesOnly,
-            Ext.madasSampleTracking,
-            Ext.madasFiles,
-            Ext.madasAccess
+            MA.ExperimentDetails,
+            MA.BioSource,
+            MA.Treatment,
+            MA.SamplePrep,
+            MA.ExperimentSamples,
+            MA.ExperimentSamplesOnly,
+            MA.SampleTracking,
+            MA.Files,
+            MA.Access
         ]
     }]
 };
 
-Ext.madasLoadExperiment = function(expId) {
-    //if (expId == Ext.madasCurrentExpId) {
+MA.LoadExperiment = function(expId) {
+    //if (expId == MA.CurrentExpId) {
 //        return;
 //    }
     
@@ -352,17 +352,17 @@ Ext.madasLoadExperiment = function(expId) {
                                                  tjobNumber.setValue(rs[0].job_number);
                                              }
                                      
-                                             Ext.madasUpdateNav();
+                                             MA.UpdateNav();
 
                                          }
                                      }
                                      );
     
-    Ext.madasCurrentExpId = expId;
+    MA.CurrentExpId = expId;
     
-    Ext.madasMenuHandler({ id:'experiment:view' });
+    MA.MenuHandler({ id:'experiment:view' });
     
-    Ext.getCmp('expContent').getLayout().setActiveItem(0);
+    //Ext.getCmp('expContent').getLayout().setActiveItem(0);
 
     
 };
@@ -371,7 +371,7 @@ Ext.madasLoadExperiment = function(expId) {
  * madasInitApplication
  * initializes the main application interface and any required variables
  */
-Ext.madasInitApplication = function() {
+MA.InitApplication = function() {
     //various global settings for Ext
     Ext.BLANK_IMAGE_URL = 'static/ext-3.1.0/resources/images/default/s.gif';
     Ext.QuickTips.init();
@@ -380,14 +380,14 @@ Ext.madasInitApplication = function() {
     Ext.form.Field.prototype.msgTarget = 'side';
     
     var username = "";
-    Ext.madasMenuRender(username);
+    MA.MenuRender(username);
 
-    Ext.madasInitUI();
+    MA.InitUI();
     
-    Ext.madasAuthorize('experiment:my', []);
+    MA.Authorize('experiment:my', []);
 };
 
-Ext.madasInitUI = function() {
+MA.InitUI = function() {
    //the ViewPort defines the main layout for the entire Madas app
    //the center-panel component is the main area where content is switched in and out
    if (Ext.getCmp('viewport')) {
@@ -410,7 +410,7 @@ Ext.madasInitUI = function() {
                 id:'center-panel',
                 layout: 'card',
                 activeItem:2,
-                items: [Ext.madasExperimentCmp, Ext.madasExperimentListCmp, Ext.madasLoginCmp]
+                items: [MA.ExperimentCmp, MA.ExperimentListCmp, MA.LoginCmp]
             },
                new Ext.BoxComponent({
                                     region:'south',
@@ -422,7 +422,7 @@ Ext.madasInitUI = function() {
     
 };
 
-Ext.madasUpdateNav = function() {
+MA.UpdateNav = function() {
     var en = Ext.getCmp("experimentName");
     var ds = Ext.StoreMgr.get("navDS");
     var et = Ext.getCmp("experimentTitle");
@@ -432,7 +432,7 @@ Ext.madasUpdateNav = function() {
         ds.getAt(counter).set("enabled", (en.getValue() !== ''));
     }
     
-    if (Ext.madasCurrentExperimentId() == 0) {
+    if (MA.CurrentExperimentId() == 0) {
         et.setTitle('new experiment');
     } else {
         et.setTitle('experiment: '+en.getValue());

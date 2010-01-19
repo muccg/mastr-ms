@@ -15,8 +15,8 @@
  * along with Madas.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-Ext.madasScreencastsInit = function (vidFile) {
-    var s = new SWFObject(Ext.madasBaseUrl + "static/screencasts/flvplayer.swf","player","1280","740","7");
+MA.ScreencastsInit = function (vidFile) {
+    var s = new SWFObject(MA.BaseUrl + "static/screencasts/flvplayer.swf","player","1280","740","7");
 	s.addParam("allowfullscreen","true");
     s.addParam("wmode", "opaque");
 	s.addVariable("file",vidFile);
@@ -30,7 +30,7 @@ Ext.madasScreencastsInit = function (vidFile) {
     return;
 };
 
-Ext.madasScreencastsCmp = {
+MA.ScreencastsCmp = {
     id:'screencasts-container-panel', 
     layout:'absolute', 
     style:'z-index:0',

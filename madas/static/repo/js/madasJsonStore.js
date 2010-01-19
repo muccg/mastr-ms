@@ -1,9 +1,9 @@
-Ext.madasJsonStore = Ext.extend(Ext.data.Store, {
+MA.JsonStore = Ext.extend(Ext.data.Store, {
 
                                 constructor: function(config){
-                                Ext.madasJsonStore.superclass.constructor.call(this, Ext.apply(config, {
-                                                                                               reader: new Ext.madasJsonReader(config)
+                                MA.JsonStore.superclass.constructor.call(this, Ext.apply(config, {
+                                                                                               reader: new MA.JsonReader(config)
                                                                                                }));
                                 }
                                 });
-Ext.reg('madasjsonstore', Ext.madasJsonStore);
+Ext.reg('madasjsonstore', MA.JsonStore);

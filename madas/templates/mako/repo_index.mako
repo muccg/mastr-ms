@@ -18,6 +18,7 @@
 
 
     <script>
+    Ext.ns('MA');
     var baseUrl = '${ APP_SECURE_URL }';
     </script>
 
@@ -53,7 +54,7 @@ function callbacker(){
         return;
     }
     
-    Ext.madasInitApplication();
+    MA.InitApplication();
     //'${ APP_SECURE_URL }', '${ username }', '${ mainContentFunction }', '${ params }');
     document.getElementById("appLoad").style.display = "none";
     document.getElementById("hidePass").style.display = "block";
@@ -92,12 +93,12 @@ function callbacker(){
 
     <div id="south">(c) CCG 2008</div>
     <form id="hiddenForm"></form>
-    <ul id="experiment-nav" class="x-hidden" onclick="javascript:Ext.madasActions['expDetails'];">
+    <ul id="experiment-nav" class="x-hidden" onclick="javascript:MA.Actions['expDetails'];">
     	<li>
 			<img src="static/repo/images/s.gif" class="icon-show-active"/>
     		<a id="expDetails" href="#">experiment details</a>
     	</li>
-    	<li onclick="javascript:Ext.madasActions['expSamples'];">
+    	<li onclick="javascript:MA.Actions['expSamples'];">
 			<img src="static/repo/images/s.gif" class="icon-show-active"/>
     		<a id="expSamples" href="#">samples/classes</a>
     	</li>

@@ -1,11 +1,11 @@
-Ext.madasBioSourceInit = function() {
-    var expId = Ext.madasCurrentExperimentId();
+MA.BioSourceInit = function() {
+    var expId = MA.CurrentExperimentId();
     
     var loader = new Ajax.Request(wsBaseUrl + 'records/biologicalsource/experiment__id/'+expId, 
                                  { 
                                  asynchronous:true, 
                                  evalJSON:'force',
-                                 onSuccess:     Ext.madasBioLoadSuccess
+                                 onSuccess:     MA.BioLoadSuccess
                                  });
     
        
@@ -14,57 +14,57 @@ Ext.madasBioSourceInit = function() {
 
 };
 
-Ext.madasBioLoadSuccess = function(response) {
-    Ext.madasCurrentSingleSourceId = response.responseJSON.rows[0].id;
+MA.BioLoadSuccess = function(response) {
+    MA.CurrentSingleSourceId = response.responseJSON.rows[0].id;
     Ext.getCmp('sourceType').setValue( response.responseJSON.rows[0].type );
     Ext.getCmp('sourceInfo').setValue( response.responseJSON.rows[0].information );
     Ext.getCmp('sourceNCBI').setValue( response.responseJSON.rows[0].ncbi_id );
     
-    Ext.madasCurrentSourceType = response.responseJSON.rows[0].type;
+    MA.CurrentSourceType = response.responseJSON.rows[0].type;
     
     //load the source info
-    switch ( Ext.madasCurrentSourceType ) {
+    switch ( MA.CurrentSourceType ) {
         case 1:
-            var loader = new Ajax.Request(wsBaseUrl + 'records/microbialinfo/source__id/'+Ext.madasCurrentSingleSourceId, 
+            var loader = new Ajax.Request(wsBaseUrl + 'records/microbialinfo/source__id/'+MA.CurrentSingleSourceId, 
                                   { 
                                   asynchronous:true, 
                                   evalJSON:'force',
-                                  onSuccess:     Ext.madasSourceInfoLoadSuccess
+                                  onSuccess:     MA.SourceInfoLoadSuccess
                                   });
             break;
         case 2:
-            var loader = new Ajax.Request(wsBaseUrl + 'records/plantinfo/source__id/'+Ext.madasCurrentSingleSourceId, 
+            var loader = new Ajax.Request(wsBaseUrl + 'records/plantinfo/source__id/'+MA.CurrentSingleSourceId, 
                                           { 
                                           asynchronous:true, 
                                           evalJSON:'force',
-                                          onSuccess:     Ext.madasSourceInfoLoadSuccess
+                                          onSuccess:     MA.SourceInfoLoadSuccess
                                           });
             break;
         case 3:
-            var loader = new Ajax.Request(wsBaseUrl + 'records/animalinfo/source__id/'+Ext.madasCurrentSingleSourceId, 
+            var loader = new Ajax.Request(wsBaseUrl + 'records/animalinfo/source__id/'+MA.CurrentSingleSourceId, 
                                           { 
                                           asynchronous:true, 
                                           evalJSON:'force',
-                                          onSuccess:     Ext.madasSourceInfoLoadSuccess
+                                          onSuccess:     MA.SourceInfoLoadSuccess
                                           });
             break;
         case 4:
-            var loader = new Ajax.Request(wsBaseUrl + 'records/humaninfo/source__id/'+Ext.madasCurrentSingleSourceId, 
+            var loader = new Ajax.Request(wsBaseUrl + 'records/humaninfo/source__id/'+MA.CurrentSingleSourceId, 
                                           { 
                                           asynchronous:true, 
                                           evalJSON:'force',
-                                          onSuccess:     Ext.madasSourceInfoLoadSuccess
+                                          onSuccess:     MA.SourceInfoLoadSuccess
                                           });
             break;
         default:
             break;
     }
     
-    Ext.madasSourceTypeSelect();
+    MA.SourceTypeSelect();
 };
 
-Ext.madasSourceInfoLoadSuccess = function(response) {
-    switch ( Ext.madasCurrentSourceType ) {
+MA.SourceInfoLoadSuccess = function(response) {
+    switch ( MA.CurrentSourceType ) {
         case 1:
             //microbial
             Ext.getCmp('microbial_genus').setValue(response.responseJSON.rows[0].genus);
@@ -108,14 +108,14 @@ Ext.madasSourceInfoLoadSuccess = function(response) {
     }
 };
 
-Ext.madasBioSourceBlur = function(invoker) {
-    var expId = Ext.madasCurrentExperimentId();
+MA.BioSourceBlur = function(invoker) {
+    var expId = MA.CurrentExperimentId();
     
     if (expId == 0) {
-        Ext.madasExperimentDeferredInvocation = invoker;
-        Ext.madasBioSourceBlurSuccess();
+        MA.ExperimentDeferredInvocation = invoker;
+        MA.BioSourceBlurSuccess();
     } else {
-        Ext.madasExperimentDeferredInvocation = invoker;
+        MA.ExperimentDeferredInvocation = invoker;
         var extraParams = "";
         var sourceType, sourceInfo, sourceNCBI;
         
@@ -168,12 +168,12 @@ Ext.madasBioSourceBlur = function(invoker) {
                                  { 
                                  asynchronous:true, 
                                  evalJSON:'force',
-                                 onSuccess:     Ext.madasBioSourceBlurSuccess
+                                 onSuccess:     MA.BioSourceBlurSuccess
                                  });
     }
 };
 
-Ext.madasSourceTypeSelect = function() {
+MA.SourceTypeSelect = function() {
     //display the appropriate fieldset
     var src = Ext.getCmp('sourceType');
     
@@ -200,8 +200,8 @@ Ext.madasSourceTypeSelect = function() {
     }
 };
 
-Ext.madasBioSourceBlurSuccess = function() {
-    var index = Ext.madasExperimentDeferredInvocation.index;
+MA.BioSourceBlurSuccess = function() {
+    var index = MA.ExperimentDeferredInvocation.index;
 
     if (index >= 0) {
 
@@ -209,21 +209,21 @@ Ext.madasBioSourceBlurSuccess = function() {
         Ext.currentExperimentNavItem = index;
     }
 
-    Ext.madasExperimentDeferredInvocation.init();
+    MA.ExperimentDeferredInvocation.init();
     
-    Ext.madasExperimentDeferredInvocation = {'index':-1, 'init':Ext.madasNull};
+    MA.ExperimentDeferredInvocation = {'index':-1, 'init':MA.Null};
 };
 
-Ext.madasSaveOrganRow = function(roweditor, changes, rec, i) {
+MA.SaveOrganRow = function(roweditor, changes, rec, i) {
     var bundledData = {};
     
     bundledData.name = rec.data.name;
     bundledData.detail = rec.data.detail;
     
-    Ext.madasSaveRowLiterals('organ', roweditor, bundledData, rec, i, function() { var expId = Ext.madasCurrentExperimentId(); organStore.proxy.conn.url = wsBaseUrl + 'records/organ/experiment__id/' + expId; organStore.load();});
+    MA.SaveRowLiterals('organ', roweditor, bundledData, rec, i, function() { var expId = MA.CurrentExperimentId(); organStore.proxy.conn.url = wsBaseUrl + 'records/organ/experiment__id/' + expId; organStore.load();});
 };
 
-Ext.madasBioSource = {
+MA.BioSource = {
     baseCls: 'x-plain',
     border:false,
     frame:false,
@@ -267,7 +267,7 @@ Ext.madasBioSource = {
                                                            ['Other', 6]]
                                                    }),
                         listeners: {
-                            'select': Ext.madasSourceTypeSelect
+                            'select': MA.SourceTypeSelect
                         }
                     },
                     {
@@ -403,7 +403,7 @@ Ext.madasBioSource = {
                     border: true,
                     height:200,
                     trackMouseOver: false,
-                    plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':Ext.madasSaveOrganRow}})],
+                    plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':MA.SaveOrganRow}})],
                     sm: new Ext.grid.RowSelectionModel(),
                     viewConfig: {
                         forceFit: true,
@@ -414,7 +414,7 @@ Ext.madasBioSource = {
                         cls: 'x-btn-text-icon',
                         icon:'static/repo/images/add.gif',
                         handler : function() {
-                           Ext.madasCRUDSomething('create/organ/', {'experiment_id':Ext.madasCurrentExperimentId()}, function() { var expId = Ext.madasCurrentExperimentId(); organStore.proxy.conn.url = wsBaseUrl + 'records/organ/experiment__id/' + expId;
+                           MA.CRUDSomething('create/organ/', {'experiment_id':MA.CurrentExperimentId()}, function() { var expId = MA.CurrentExperimentId(); organStore.proxy.conn.url = wsBaseUrl + 'records/organ/experiment__id/' + expId;
                                                   organStore.load(); });
                         }
                         }, 
@@ -440,7 +440,7 @@ Ext.madasBioSource = {
                             }
 
                            for (var i = 0; i < delIds.length; i++) {
-                           Ext.madasCRUDSomething('delete/organ/'+delIds[i], {}, function() { var expId = Ext.madasCurrentExperimentId(); organStore.proxy.conn.url = wsBaseUrl + 'records/organ/experiment__id/' + expId;
+                           MA.CRUDSomething('delete/organ/'+delIds[i], {}, function() { var expId = MA.CurrentExperimentId(); organStore.proxy.conn.url = wsBaseUrl + 'records/organ/experiment__id/' + expId;
                                                   organStore.load(); });
                             }
                         }

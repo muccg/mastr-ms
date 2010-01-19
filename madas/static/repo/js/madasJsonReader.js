@@ -1,5 +1,5 @@
 /*
- * Ext.madasJsonReader
+ * MA.JsonReader
  * 
  * extending the JsonReader to pick up additional info such as authenticated, authorized, etc.
  *
@@ -24,7 +24,7 @@
  * look at the other headers in the header of an ajax request for a livegrid or other Object
  * assessing whether the user has timed-out or is not authorized to perform that action
  */
-Ext.madasAjaxMetadataProcess = function(ajaxData) {
+MA.AjaxMetadataProcess = function(ajaxData) {
     
     //look for specific sentinel values in the json
     //var authenticated = ajaxData.response.value.authenticated;
@@ -34,18 +34,18 @@ Ext.madasAjaxMetadataProcess = function(ajaxData) {
     
     if (authenticated != 1) {
         //trigger the login page
-        Ext.madasIsLoggedIn = false;
-        Ext.madasIsAdmin = false;
+        MA.IsLoggedIn = false;
+        MA.IsAdmin = false;
         Ext.getCmp('userMenu').setText('User: none');
         
-        Ext.madasChangeMainContent('login');
+        MA.ChangeMainContent('login');
         //return false to tell the JsonReader to abort
         return false;
     }
     
     if (authorized != 1) {
         //trigger a notauthorized page
-        Ext.madasChangeMainContent('notauthorized');
+        MA.ChangeMainContent('notauthorized');
         //return false to tell the JsonReader to abort
         return false;
     }
@@ -56,12 +56,12 @@ Ext.madasAjaxMetadataProcess = function(ajaxData) {
 
 
 
-Ext.madasJsonReader = function(meta, recordType){
-    Ext.madasJsonReader.superclass.constructor.call(this, meta, recordType);
+MA.JsonReader = function(meta, recordType){
+    MA.JsonReader.superclass.constructor.call(this, meta, recordType);
 };
 
 
-Ext.extend(Ext.madasJsonReader, Ext.data.JsonReader, {
+Ext.extend(MA.JsonReader, Ext.data.JsonReader, {
     
     /**
      * @cfg {String} versionProperty Name of the property from which to retrieve the 
@@ -96,7 +96,7 @@ Ext.extend(Ext.madasJsonReader, Ext.data.JsonReader, {
     {
         // o is the ajax response, already evald
         //we pass on to the generic AJAX metadata processor to intercept 
-        var aaPass = Ext.madasAjaxMetadataProcess(oc);
+        var aaPass = MA.AjaxMetadataProcess(oc);
         if (aaPass) {
             //from here below is a copy-and-paste of the Ext standard code
         

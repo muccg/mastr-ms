@@ -15,7 +15,7 @@
  * along with Madas.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-Ext.madasLoginCmp = {id:'login-container-panel', 
+MA.LoginCmp = {id:'login-container-panel', 
 layout:'absolute', 
 items:[
        {  xtype:'form', 
@@ -40,15 +40,15 @@ items:[
        ]
 };
 
-Ext.madasNotAuthorizedCmp = { id: 'notauthorized-panel', title: 'Not Authorized', html: 'You are not authorized to access this page' };
+MA.NotAuthorizedCmp = { id: 'notauthorized-panel', title: 'Not Authorized', html: 'You are not authorized to access this page' };
 
 /**
  * authorize
  * used to check if the user is still logged in, and if they can access the requested view
  */
-Ext.madasAuthorize = function(requestedView, params) {
+MA.Authorize = function(requestedView, params) {
     if (requestedView === 'notauthorized') {
-        return Ext.madasChangeMainContent(requestedView, params);
+        return MA.ChangeMainContent(requestedView, params);
     }
     
     //the module we need to auth against is the first part of the requestedView
@@ -75,17 +75,17 @@ Ext.madasAuthorize = function(requestedView, params) {
         //load up the menu and next content area as declared in response
         if (action.result.username) {
             Ext.getCmp('userMenu').setText('User: '+action.result.username);
-            Ext.madasIsAdmin = action.result.isAdmin;
-            Ext.madasIsNodeRep = action.result.isNodeRep;
-            Ext.madasIsLoggedIn = true;
+            MA.IsAdmin = action.result.isAdmin;
+            MA.IsNodeRep = action.result.isNodeRep;
+            MA.IsLoggedIn = true;
         }
         if (! action.result.authenticated) {
-            Ext.madasIsAdmin = false;
-            Ext.madasIsNodeRep = false;
-            Ext.madasIsLoggedIn = false;
+            MA.IsAdmin = false;
+            MA.IsNodeRep = false;
+            MA.IsLoggedIn = false;
             Ext.getCmp('userMenu').setText('User: none');
         }
-        Ext.madasChangeMainContent(action.result.mainContentFunction, action.result.params);
+        MA.ChangeMainContent(action.result.mainContentFunction, action.result.params);
     },
     failure: function (form, action) {
         switch (action.failureType) {
@@ -105,15 +105,15 @@ Ext.madasAuthorize = function(requestedView, params) {
 };
 
 
-Ext.madasLoginInit = function(paramArray) {
+MA.LoginInit = function(paramArray) {
     
-    Ext.madasPostLoginParamArray = paramArray;
+    MA.PostLoginParamArray = paramArray;
     
     Ext.getCmp('login-panel').getForm().reset();
     
 };
 
-Ext.madasLogoutInit = function(){
+MA.LogoutInit = function(){
     
     var simple = new Ext.BasicForm('hiddenForm', {
                                    url:'login/processLogout',
@@ -124,15 +124,15 @@ Ext.madasLogoutInit = function(){
     successProperty: 'success',        
     success: function (form, action) {
         if (action.result.success === true) { 
-            Ext.madasIsAdmin = false;
+            MA.IsAdmin = false;
             Ext.getCmp('userMenu').setText('User: none');
-            Ext.madasIsLoggedIn = false;
+            MA.IsLoggedIn = false;
             
             Ext.Msg.alert('Successfully logged out', '(this dialog will auto-close in 3 seconds)');
             setTimeout(Ext.Msg.hide, 3000);
             
             //load up the menu and next content area as declared in response
-            Ext.madasChangeMainContent(action.result.mainContentFunction);
+            MA.ChangeMainContent(action.result.mainContentFunction);
         } 
     },
     failure: function (form, action) {

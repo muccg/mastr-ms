@@ -15,18 +15,18 @@
  * along with Madas.  If not, see <http://www.gnu.org/licenses/>.
  */
  
-Ext.madasRequestQuoteInit = function () {
+MA.RequestQuoteInit = function () {
 	var reqQuoCmp = Ext.getCmp('requestquote-panel');   
 
     //fetch user details
-    reqQuoCmp.load({url: Ext.madasBaseUrl + 'user/userload', waitMsg:'Loading'});
+    reqQuoCmp.load({url: MA.BaseUrl + 'user/userload', waitMsg:'Loading'});
 
     reqQuoCmp.doLayout();
     
     return;
 };
 
-Ext.madasRequestQuoteCmp = 
+MA.RequestQuoteCmp = 
     {   id:'requestquote-container-panel', 
         autoScroll:true,
         deferredRender:false,
@@ -35,7 +35,7 @@ Ext.madasRequestQuoteCmp =
             {  xtype:'form', 
             labelWidth: 100, // label settings here cascade unless overridden
             id:'requestquote-panel',
-            url:Ext.madasBaseUrl + 'quote/sendRequest',
+            url:MA.BaseUrl + 'quote/sendRequest',
             method:'POST',
             frame:true,
             fileUpload: true,
@@ -371,7 +371,7 @@ Ext.madasRequestQuoteCmp =
                     listWidth:230,
                     store: new Ext.data.JsonStore({
                         storeId:'sendToStore',
-                        url: Ext.madasBaseUrl + 'quote/listGroups',
+                        url: MA.BaseUrl + 'quote/listGroups',
                         root: 'response.value.items',
                         fields: ['name', 'submitValue']
                     })
@@ -411,7 +411,7 @@ Ext.madasRequestQuoteCmp =
                                     Ext.Msg.alert("Request sent successfully", "We will contact you via email or phone as soon as possible. Thank you for your inquiry.");
                                     
                                     //load up the menu and next content area as declared in response
-                                    Ext.madasChangeMainContent(action.result.mainContentFunction);
+                                    MA.ChangeMainContent(action.result.mainContentFunction);
                                 } 
                             },
                             failure: function (form, action) {
@@ -426,11 +426,11 @@ Ext.madasRequestQuoteCmp =
             ]
     };
 
-Ext.madasQuoteRequestListInit = function(){
+MA.QuoteRequestListInit = function(){
         
-    var dataurl = Ext.madasBaseUrl + "quote/list";
+    var dataurl = MA.BaseUrl + "quote/list";
         
-    var madasReader = new Ext.madasJsonReader({
+    var madasReader = new MA.JsonReader({
         root            : 'response.value.items',
         versionProperty : 'response.value.version',
         totalProperty   : 'response.value.total_count'
@@ -461,7 +461,7 @@ Ext.madasQuoteRequestListInit = function(){
         });
     var editHandler = function(el, ev) {
         if (selectionModel.hasSelection()) {
-            Ext.madasAuthorize('quote:edit', [selectionModel.getSelected().data['id']]);
+            MA.Authorize('quote:edit', [selectionModel.getSelected().data['id']]);
         }
     };
     var topToolbar = new Ext.Toolbar({
@@ -516,7 +516,7 @@ Ext.madasQuoteRequestListInit = function(){
 
 };
 
-Ext.madasQuoteRequestEditInit = function (paramArray) {
+MA.QuoteRequestEditInit = function (paramArray) {
     var id = paramArray[0];
     var quoteRequestEditCmp = Ext.getCmp('quoterequestedit-panel');
     var formalQuoteCmp = Ext.getCmp('formalquoteedit-panel');
@@ -525,13 +525,13 @@ Ext.madasQuoteRequestEditInit = function (paramArray) {
     Ext.getCmp('formalquoteedit-panel').getForm().reset();
 
     //fetch user details
-    quoteRequestEditCmp.load({url: Ext.madasBaseUrl + 'quote/load', params: {'qid': id}, waitMsg:'Loading'});
-    formalQuoteCmp.load({url: Ext.madasBaseUrl + 'quote/formalload', params: {'qid': id}, waitMsg:'Loading'});
+    quoteRequestEditCmp.load({url: MA.BaseUrl + 'quote/load', params: {'qid': id}, waitMsg:'Loading'});
+    formalQuoteCmp.load({url: MA.BaseUrl + 'quote/formalload', params: {'qid': id}, waitMsg:'Loading'});
 
     var quoteHistoryCmp = Ext.getCmp('qre-history');
 
     //fetch history
-    quoteHistoryCmp.load({url:Ext.madasBaseUrl + 'quote/history', params:{'qid':id}, callback:Ext.madasRenderQuoteHistory, text:'Loading...'});
+    quoteHistoryCmp.load({url:MA.BaseUrl + 'quote/history', params:{'qid':id}, callback:MA.RenderQuoteHistory, text:'Loading...'});
 
     //reload the combobox   
     if (Ext.StoreMgr.containsKey('redirectQuoteNodeDS')) {
@@ -546,7 +546,7 @@ Ext.madasQuoteRequestEditInit = function (paramArray) {
 };
 
 
-Ext.madasQuoteRequestEditLoaded = function () {
+MA.QuoteRequestEditLoaded = function () {
 	if (Ext.getCmp('attachment').value == null || Ext.getCmp('attachment').value == '') {
 		Ext.getCmp('downloadattachbutton').setText('no attachments');
 		Ext.getCmp('downloadattachbutton').disable();
@@ -557,7 +557,7 @@ Ext.madasQuoteRequestEditLoaded = function () {
 }
 
 
-Ext.madasQuoteRequestEditCmp =
+MA.QuoteRequestEditCmp =
     {   id:'quoterequestedit-container-panel',
         autoScroll:true,
         layout:'column',
@@ -567,7 +567,7 @@ Ext.madasQuoteRequestEditCmp =
             {  xtype:'form',
             labelWidth: 100, // label settings here cascade unless overridden
             id:'quoterequestedit-panel',
-            url:Ext.madasBaseUrl + 'quote/save',
+            url:MA.BaseUrl + 'quote/save',
             method:'POST',
             frame:true,
             deferredRender:false,
@@ -908,7 +908,7 @@ Ext.madasQuoteRequestEditCmp =
                     disabled: true,
                     store: new Ext.data.JsonStore({
                         storeId: 'redirectQuoteNodeDS',
-                        url: Ext.madasBaseUrl + 'quote/listGroups',
+                        url: MA.BaseUrl + 'quote/listGroups',
                         root: 'response.value.items',
                         fields: ['name', 'submitValue']
                     })
@@ -949,7 +949,7 @@ Ext.madasQuoteRequestEditCmp =
 	            		id:'downloadattachbutton',
 	            		text:'Download Attachment',
 	            		handler: function() {
-	            				window.location = Ext.madasBaseUrl + 'quote/downloadAttachment?quoterequestid=' + Ext.getCmp('qre-id').value;
+	            				window.location = MA.BaseUrl + 'quote/downloadAttachment?quoterequestid=' + Ext.getCmp('qre-id').value;
 	            			}
 	            		}
 	            	]
@@ -960,8 +960,8 @@ Ext.madasQuoteRequestEditCmp =
                  text: 'Go Back',
                  handler: function(){
                         Ext.getCmp('quoterequestedit-panel').getForm().reset();
-                        Ext.madasQuoteEditVisualToggle(false);
-                        Ext.madasChangeMainContent('quote:list');
+                        MA.QuoteEditVisualToggle(false);
+                        MA.ChangeMainContent('quote:list');
                     }
                  },
                  {//this could be an Edit Details button, but functionality has been temporarily limited for practical purposes
@@ -984,7 +984,7 @@ Ext.madasQuoteRequestEditCmp =
                  hidden : true,
                  handler: function(){
                     Ext.getCmp('quoterequestedit-panel').getForm().reset();
-                    Ext.madasQuoteEditVisualToggle(false);
+                    MA.QuoteEditVisualToggle(false);
                     }
                  },
                  {
@@ -997,14 +997,14 @@ Ext.madasQuoteRequestEditCmp =
                                 if (action.result.success === true) {
                                     form.reset();
     
-                                    Ext.madasQuoteEditVisualToggle(false);
+                                    MA.QuoteEditVisualToggle(false);
 
                                     //display a success alert that auto-closes in 5 seconds
                                     Ext.Msg.alert("Quote Request Saved", "(this message will auto-close in 5 seconds)");
                                     setTimeout("Ext.Msg.hide()", 5000);
 
                                     //load up the menu and next content area as declared in response
-                                    Ext.madasChangeMainContent(action.result.mainContentFunction);
+                                    MA.ChangeMainContent(action.result.mainContentFunction);
                                 }
                             },
                             failure: function (form, action) {
@@ -1024,7 +1024,7 @@ Ext.madasQuoteRequestEditCmp =
                 xtype:'form',
                 labelWidth: 100, // label settings here cascade unless overridden
                 id:'formalquoteedit-panel',
-                url:Ext.madasBaseUrl + 'quote/formalsave',
+                url:MA.BaseUrl + 'quote/formalsave',
                 method:'POST',
                 fileUpload: true,
                 reader: new Ext.data.JsonReader({successProperty:'success', root: 'data'}, 
@@ -1083,7 +1083,7 @@ Ext.madasQuoteRequestEditCmp =
                                     setTimeout("Ext.Msg.hide()", 5000);
 
                                     //load up the menu and next content area as declared in response
-                                    Ext.madasChangeMainContent(action.result.mainContentFunction);
+                                    MA.ChangeMainContent(action.result.mainContentFunction);
                                 }
                             },
                             failure: function (form, action) {
@@ -1106,7 +1106,7 @@ Ext.madasQuoteRequestEditCmp =
             ]
     };
 
-Ext.madasQuoteEditVisualToggle = function(editMode) {
+MA.QuoteEditVisualToggle = function(editMode) {
     if (editMode === false) {
         Ext.getCmp('cancelEditQuoteRequestBtn').hide();
         Ext.getCmp('editQuoteRequestBtn').show();
@@ -1119,7 +1119,7 @@ Ext.madasQuoteEditVisualToggle = function(editMode) {
     }
 };
 
-Ext.madasRenderQuoteHistory = function(el, success, response, options) {
+MA.RenderQuoteHistory = function(el, success, response, options) {
      var t = new Ext.XTemplate(
         '<tpl for="data">',
         '<div>',
@@ -1141,14 +1141,14 @@ Ext.madasRenderQuoteHistory = function(el, success, response, options) {
     );
     t.overwrite(el, Ext.util.JSON.decode(response.responseText));   
     
-    window.setTimeout("Ext.madasQuoteRequestEditLoaded()", 1000);
+    window.setTimeout("MA.QuoteRequestEditLoaded()", 1000);
 };
 
-Ext.madasQuoteRequestListAllInit = function(){
+MA.QuoteRequestListAllInit = function(){
         
-    var dataurl = Ext.madasBaseUrl + "quote/listAll";
+    var dataurl = MA.BaseUrl + "quote/listAll";
         
-    var madasReader = new Ext.madasJsonReader({
+    var madasReader = new MA.JsonReader({
         root            : 'response.value.items',
         versionProperty : 'response.value.version',
         totalProperty   : 'response.value.total_count'
@@ -1181,7 +1181,7 @@ Ext.madasQuoteRequestListAllInit = function(){
         });
     /**var editHandler = function(el, ev) {
         if (selectionModel.hasSelection()) {
-            Ext.madasAuthorize('quote:edit', [selectionModel.getSelected().data['id']]);
+            MA.Authorize('quote:edit', [selectionModel.getSelected().data['id']]);
         }
     };*/
     var topToolbar = new Ext.Toolbar({
@@ -1240,11 +1240,11 @@ Ext.madasQuoteRequestListAllInit = function(){
 };
 
 
-Ext.madasFormalQuoteUserListInit = function(){
+MA.FormalQuoteUserListInit = function(){
         
-    var dataurl = Ext.madasBaseUrl + "quote/listFormal";
+    var dataurl = MA.BaseUrl + "quote/listFormal";
         
-    var madasReader = new Ext.madasJsonReader({
+    var madasReader = new MA.JsonReader({
         root            : 'response.value.items',
         versionProperty : 'response.value.version',
         totalProperty   : 'response.value.total_count'
@@ -1260,7 +1260,7 @@ Ext.madasFormalQuoteUserListInit = function(){
     
     var viewHandler = function(el, ev) {
         if (selectionModel.hasSelection()) {
-            Ext.madasAuthorize('quote:viewformal', {"qid" : selectionModel.getSelected().data['quoterequestid']});
+            MA.Authorize('quote:viewformal', {"qid" : selectionModel.getSelected().data['quoterequestid']});
         }
     };
     
@@ -1335,7 +1335,7 @@ Ext.madasFormalQuoteUserListInit = function(){
  * madasFquoValidatePassword
  * we need to implement a custom validator because Ext cannot validate an empty field that has to be the same as another field
  */
-Ext.madasFquoValidatePassword = function (textfield, event) {
+MA.FquoValidatePassword = function (textfield, event) {
     var passEl = Ext.getCmp('fquoUserEditPassword');
     var confirmEl = Ext.getCmp('fquoUserEditConfirmPassword');
     var submitEl = Ext.getCmp('fquoAcceptButton');
@@ -1354,14 +1354,14 @@ Ext.madasFquoValidatePassword = function (textfield, event) {
     };
 };
 
-Ext.madasViewFormalInit = function(paramArray){
+MA.ViewFormalInit = function(paramArray){
     var id = paramArray["qid"];
     var quoteRequestEditCmp = Ext.getCmp('fquouserdetails-panel');
     var formalQuoteCmp = Ext.getCmp('formalquoteview-panel');
 
     //if node rep or admin, disable the user edit fields
     for (var i = 0; i < quoteRequestEditCmp.items.length; i++) {
-        if (Ext.madasIsNodeRep || Ext.madasIsAdmin) {
+        if (MA.IsNodeRep || MA.IsAdmin) {
             if (quoteRequestEditCmp.items.get(i).getId() != 'quov-qid' &&
                 quoteRequestEditCmp.items.get(i).getId() != 'fquoadminmode') {
                 quoteRequestEditCmp.items.get(i).disable();
@@ -1371,18 +1371,18 @@ Ext.madasViewFormalInit = function(paramArray){
         }
     }
     
-    if (Ext.madasIsNodeRep || Ext.madasIsAdmin) {
+    if (MA.IsNodeRep || MA.IsAdmin) {
         Ext.getCmp('fquoadminmode').show();
     } else {
         Ext.getCmp('fquoadminmode').hide();
     }
     
     //fetch user details
-    quoteRequestEditCmp.load({url: Ext.madasBaseUrl + 'quote/load', params: {'qid': id}, waitMsg:'Loading'});
-    formalQuoteCmp.load({url: Ext.madasBaseUrl + 'quote/formalload', params: {'qid': id}, waitMsg:'Loading'});
+    quoteRequestEditCmp.load({url: MA.BaseUrl + 'quote/load', params: {'qid': id}, waitMsg:'Loading'});
+    formalQuoteCmp.load({url: MA.BaseUrl + 'quote/formalload', params: {'qid': id}, waitMsg:'Loading'});
 };
 
-Ext.madasViewFormalCmp = {   
+MA.ViewFormalCmp = {   
     id:'viewformalquote-container-panel',
     autoScroll:true,
     layout:'column',
@@ -1393,7 +1393,7 @@ Ext.madasViewFormalCmp = {
        {   xtype:'form', 
         labelWidth: 100, // label settings here cascade unless overridden
         id:'fquouserdetails-panel',
-        url:Ext.madasBaseUrl + 'quote/formalaccept',
+        url:MA.BaseUrl + 'quote/formalaccept',
         style:'margin-left:30px;margin-top:20px;',
         method:'POST',
         frame:true,
@@ -1457,7 +1457,7 @@ Ext.madasViewFormalCmp = {
                 id: 'fquoUserEditConfirmPassword',
                 xtype: 'textfield',
                 allowBlank: true,
-                validator: Ext.madasFquoValidatePassword
+                validator: MA.FquoValidatePassword
             },{
                 fieldLabel: 'Office',
                 name: 'office',
@@ -1790,7 +1790,7 @@ Ext.madasViewFormalCmp = {
                 handler: function(){
                     //use a different form to submit to avoid validation requirements
                     var simple = new Ext.BasicForm('hiddenForm', {
-                        url:Ext.madasBaseUrl + 'quote/formalreject',
+                        url:MA.BaseUrl + 'quote/formalreject',
                         baseParams:{'qid':Ext.getCmp('quov-qid').value},
                         method:'POST'
                         });
@@ -1803,7 +1803,7 @@ Ext.madasViewFormalCmp = {
                                 Ext.Msg.alert('Formal quote rejected', 'close this window when you are ready');
                                 
                                 //load up the menu and next content area as declared in response
-                                Ext.madasChangeMainContent(action.result.mainContentFunction);
+                                MA.ChangeMainContent(action.result.mainContentFunction);
                             } 
                         },
                         failure: function (form, action) {
@@ -1826,7 +1826,7 @@ Ext.madasViewFormalCmp = {
                                 Ext.Msg.alert("You have accepted this formal quote. Thank you.", "An email has been sent to the node representative. We will contact you as soon as possible.");
                                 
                                 //load up the menu and next content area as declared in response
-                                Ext.madasChangeMainContent(action.result.mainContentFunction);
+                                MA.ChangeMainContent(action.result.mainContentFunction);
                             } 
                         },
                         failure: function (form, action) {
@@ -1895,7 +1895,7 @@ Ext.madasViewFormalCmp = {
             		xtype:'button',
             		text:'Download Quote PDF',
             		handler: function() {
-            				window.location = Ext.madasBaseUrl + 'quote/downloadPDF?quoterequestid=' + Ext.getCmp('fquov-qid').value;
+            				window.location = MA.BaseUrl + 'quote/downloadPDF?quoterequestid=' + Ext.getCmp('fquov-qid').value;
             			}
             		}
             	]

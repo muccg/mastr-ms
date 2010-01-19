@@ -3,9 +3,9 @@
 var wsBaseUrl = baseUrl + "ws/";
 var storesNeededForRendering = [];
 
-Ext.madasDSLoaded = function(ds, recs, opts) {
+MA.DSLoaded = function(ds, recs, opts) {
     storesNeededForRendering[ds.storeId] = 'loaded';
-    ds.removeListener('load', Ext.madasDSLoaded);
+    ds.removeListener('load', MA.DSLoaded);
     
     var allLoaded = true;
     for (index in storesNeededForRendering) {
@@ -14,35 +14,35 @@ Ext.madasDSLoaded = function(ds, recs, opts) {
         }
     }
     
-    if (allLoaded && Ext.madasInitUI !== undefined) {
-        Ext.madasInitUI();
+    if (allLoaded && MA.InitUI !== undefined) {
+        MA.InitUI();
     }
 };
 
-Ext.madasDSLoadException = function() {
+MA.DSLoadException = function() {
     //console.log("load exception: "+this.storeId);
     
     storesNeededForRendering[this.storeId] = 'loaded';
-    Ext.madasDSLoaded(this, null, null);
+    MA.DSLoaded(this, null, null);
 };
 
-Ext.madasSaveRowLiterals = function(table, roweditor, changes, rec, i, callback) {
+MA.SaveRowLiterals = function(table, roweditor, changes, rec, i, callback) {
     if (rec.data.id === undefined || rec.data.id === "" || rec.data.id === 0) {
-        Ext.madasCRUDSomething('create/' + table + '/', changes, callback);
+        MA.CRUDSomething('create/' + table + '/', changes, callback);
     } else {
-        Ext.madasCRUDSomething('update/' + table + '/' + rec.data.id + '/', changes, callback);
+        MA.CRUDSomething('update/' + table + '/' + rec.data.id + '/', changes, callback);
     }
 };
 
-Ext.madasCurrentExperimentId = function() {
-    if (!Ext.madasCurrentExpId) {
+MA.CurrentExperimentId = function() {
+    if (!MA.CurrentExpId) {
         return 0;
     }
     
-    return Ext.madasCurrentExpId;
+    return MA.CurrentExpId;
 };
 
-Ext.madasCurrentBioSourceId = function() {
+MA.CurrentBioSourceId = function() {
     if (biologicalSourceStore.getTotalCount() < 1) {
         return 0;
     }
@@ -50,11 +50,11 @@ Ext.madasCurrentBioSourceId = function() {
     return biologicalSourceStore.getAt(0).get("id");
 };
 
-Ext.madasCurrentOrganismType = function() {
-    return Ext.madasCurrentOrganismTypeValue;
+MA.CurrentOrganismType = function() {
+    return MA.CurrentOrganismTypeValue;
 };
 
-Ext.madasCurrentAnimalId = function() {
+MA.CurrentAnimalId = function() {
     if (animalStore.getTotalCount() < 1) {
         return 0;
     }
@@ -62,17 +62,17 @@ Ext.madasCurrentAnimalId = function() {
     return animalStore.getAt(0).get("id");
 };
 
-Ext.madasCurrentTreatmentId = function() {
-    if (Ext.madasCurrentTreatmentIdValue !== undefined) {
-        return Ext.madasCurrentTreatmentIdValue;
+MA.CurrentTreatmentId = function() {
+    if (MA.CurrentTreatmentIdValue !== undefined) {
+        return MA.CurrentTreatmentIdValue;
     }
     
     return 0;
 };
 
-Ext.madasCurrentSampleClassId = function() {
-    if (Ext.madasCurrentSampleClassIdValue !== undefined) {
-        return Ext.madasCurrentSampleClassIdValue;
+MA.CurrentSampleClassId = function() {
+    if (MA.CurrentSampleClassIdValue !== undefined) {
+        return MA.CurrentSampleClassIdValue;
     }
     
     return 0;
@@ -84,8 +84,8 @@ var organStore = new Ext.data.JsonStore(
                             storeId: 'organism',
                             autoLoad: false,
                             url: wsBaseUrl + 'records/organ/experiment__id/0',
-                            listeners: {'load':Ext.madasDSLoaded,
-                                        'loadexception':Ext.madasDSLoadException}
+                            listeners: {'load':MA.DSLoaded,
+                                        'loadexception':MA.DSLoadException}
                             }
                     );
                     
@@ -94,8 +94,8 @@ var timelineStore = new Ext.data.JsonStore(
                             storeId: 'timeline',
                             autoLoad: false,
                             url: wsBaseUrl + 'records/sampletimeline/experiment__id/0',
-                            listeners: {'load':Ext.madasDSLoaded,
-                                        'loadexception':Ext.madasDSLoadException}
+                            listeners: {'load':MA.DSLoaded,
+                                        'loadexception':MA.DSLoadException}
                             }
                     );
                     
@@ -104,8 +104,8 @@ var treatmentStore = new Ext.data.JsonStore(
                             storeId: 'treatment',
                             autoLoad: false,
                             url: wsBaseUrl + 'records/treatment/experiment__id/0',
-                            listeners: {'load':Ext.madasDSLoaded,
-                                        'loadexception':Ext.madasDSLoadException}
+                            listeners: {'load':MA.DSLoaded,
+                                        'loadexception':MA.DSLoadException}
                             }
                     );
                     
@@ -114,8 +114,8 @@ var sopStore = new Ext.data.JsonStore(
                             storeId: 'sop',
                             autoLoad: false,
                             url: wsBaseUrl + 'records/standardoperationprocedure/experiments__id/0',
-                            listeners: {'load':Ext.madasDSLoaded,
-                                        'loadexception':Ext.madasDSLoadException}
+                            listeners: {'load':MA.DSLoaded,
+                                        'loadexception':MA.DSLoadException}
                             }
                     );
                     
@@ -124,8 +124,8 @@ var sopLookupStore = new Ext.data.JsonStore(
                             storeId: 'sopLookup',
                             autoLoad: false,
                             url: wsBaseUrl + 'records/standardoperationprocedure/id__gte/0',
-                            listeners: {'load':Ext.madasDSLoaded,
-                                        'loadexception':Ext.madasDSLoadException}
+                            listeners: {'load':MA.DSLoaded,
+                                        'loadexception':MA.DSLoadException}
                             }
                     );
 
@@ -134,8 +134,8 @@ var userStore = new Ext.data.JsonStore(
                             storeId: 'user',
                             autoLoad: false,
                             url: wsBaseUrl + 'records/userexperiment/experiment__id/0',
-                            listeners: {'load':Ext.madasDSLoaded,
-                                        'loadexception':Ext.madasDSLoadException}
+                            listeners: {'load':MA.DSLoaded,
+                                        'loadexception':MA.DSLoadException}
                             }
                     );
                     
@@ -144,8 +144,8 @@ var experimentListStore = new Ext.data.JsonStore(
                             storeId: 'experimentList',
                             autoLoad: false,
                             url: wsBaseUrl + 'recordsExperiments',
-                            listeners: {'load':Ext.madasDSLoaded,
-                                        'loadexception':Ext.madasDSLoadException}
+                            listeners: {'load':MA.DSLoaded,
+                                        'loadexception':MA.DSLoadException}
                             }
                     );
                     
@@ -159,8 +159,8 @@ var sampleClassStore = new Ext.data.JsonStore(
                                              storeId: 'sampleclass',
                                              autoLoad: false,
                                              url: wsBaseUrl + 'records/sampleclass/experiment__id/0',
-                                             listeners: {'load':Ext.madasDSLoaded,
-                                             'loadexception':Ext.madasDSLoadException}
+                                             listeners: {'load':MA.DSLoaded,
+                                             'loadexception':MA.DSLoadException}
                                              }
                                              );
 
@@ -169,8 +169,8 @@ var sampleStore = new Ext.data.JsonStore(
                                               storeId: 'samples',
                                               autoLoad: false,
                                               url: wsBaseUrl + 'records/sample/sample_class__id/0',
-                                              listeners: {'load':Ext.madasDSLoaded,
-                                              'loadexception':Ext.madasDSLoadException}
+                                              listeners: {'load':MA.DSLoaded,
+                                              'loadexception':MA.DSLoadException}
                                               }
                                               );
 
@@ -179,13 +179,13 @@ var plantStore = new Ext.data.JsonStore(
                                           storeId: 'plant',
                                           autoLoad: false,
                                           url: wsBaseUrl + 'records/plant/id/0',
-                                          listeners: {'load':Ext.madasDSLoaded,
+                                          listeners: {'load':MA.DSLoaded,
                                           'load':function(t, rs, o) {
                                               if (rs.length > 0) {
                                                   Ext.getCmp('development_stage').setValue(rs[0].data.development_stage);
                                               }
                                           },
-                                          'loadexception':Ext.madasDSLoadException}
+                                          'loadexception':MA.DSLoadException}
                                           }
                                           );
                     
@@ -194,7 +194,7 @@ var animalStore = new Ext.data.JsonStore(
                             storeId: 'animal',
                             autoLoad: false,
                             url: wsBaseUrl + 'records/animal/experiment__id/0',
-                            listeners: {'load':Ext.madasDSLoaded,
+                            listeners: {'load':MA.DSLoaded,
                                         'load':function(t, rs, o) {
                                             Ext.getCmp('animalGender').clearValue();
                                             Ext.getCmp('animalAge').setValue('');
@@ -207,7 +207,7 @@ var animalStore = new Ext.data.JsonStore(
                                             }
                                             
                                         },
-                                        'loadexception':Ext.madasDSLoadException}
+                                        'loadexception':MA.DSLoadException}
                             }
                     );
 
@@ -216,7 +216,7 @@ var humanStore = new Ext.data.JsonStore(
                                          storeId: 'human',
                                          autoLoad: false,
                                          url: wsBaseUrl + 'records/human/experiment__id/0',
-                                         listeners: {'load':Ext.madasDSLoaded,
+                                         listeners: {'load':MA.DSLoaded,
                                          'load':function(t, rs, o) {
                                          Ext.getCmp('humanGender').clearValue();
                                          Ext.getCmp('human_dob').setValue('');
@@ -231,7 +231,7 @@ var humanStore = new Ext.data.JsonStore(
                                          }
                                          
                                          },
-                                         'loadexception':Ext.madasDSLoadException}
+                                         'loadexception':MA.DSLoadException}
                                          }
                                          );
                                         
@@ -244,8 +244,8 @@ var organismTypeComboStore = new Ext.data.JsonStore(
                             url: wsBaseUrl + 'populate_select/organismtype/id/name/',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
-                            listeners: {'load':Ext.madasDSLoaded,
-                                        'loadexception':Ext.madasDSLoadException}
+                            listeners: {'load':MA.DSLoaded,
+                                        'loadexception':MA.DSLoadException}
                         }
                     );
 
@@ -256,8 +256,8 @@ var plantComboStore = new Ext.data.JsonStore(
                                                     url: wsBaseUrl + 'populate_select/plant/development_stage/',
                                                     root: 'response.value.items',
                                                     fields: ['value', 'key'],
-                                                    listeners: {'load':Ext.madasDSLoaded,
-                                                    'loadexception':Ext.madasDSLoadException}
+                                                    listeners: {'load':MA.DSLoaded,
+                                                    'loadexception':MA.DSLoadException}
                                                     }
                                                     );
 
@@ -268,8 +268,8 @@ var animalComboStore = new Ext.data.JsonStore(
                             url: wsBaseUrl + 'populate_select/animal/parental_line/',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
-                            listeners: {'load':Ext.madasDSLoaded,
-                                        'loadexception':Ext.madasDSLoadException}
+                            listeners: {'load':MA.DSLoaded,
+                                        'loadexception':MA.DSLoadException}
                         }
                     );
 
@@ -280,8 +280,8 @@ var organNameComboStore = new Ext.data.JsonStore(
                             url: wsBaseUrl + 'populate_select/organ/name',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
-                            listeners: {'load':Ext.madasDSLoaded,
-                                        'loadexception':Ext.madasDSLoadException}
+                            listeners: {'load':MA.DSLoaded,
+                                        'loadexception':MA.DSLoadException}
                         }
                     );
                     
@@ -292,8 +292,8 @@ var tissueComboStore = new Ext.data.JsonStore(
                             url: wsBaseUrl + 'populate_select/organ/tissue',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
-                            listeners: {'load':Ext.madasDSLoaded,
-                                        'loadexception':Ext.madasDSLoadException}
+                            listeners: {'load':MA.DSLoaded,
+                                        'loadexception':MA.DSLoadException}
                         }
                     );
                     
@@ -304,8 +304,8 @@ var cellTypeComboStore = new Ext.data.JsonStore(
                             url: wsBaseUrl + 'populate_select/organ/cell_type',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
-                            listeners: {'load':Ext.madasDSLoaded,
-                                        'loadexception':Ext.madasDSLoadException}
+                            listeners: {'load':MA.DSLoaded,
+                                        'loadexception':MA.DSLoadException}
                         }
                     );
                     
@@ -316,8 +316,8 @@ var subcellularCellTypeComboStore = new Ext.data.JsonStore(
                             url: wsBaseUrl + 'populate_select/organ/subcellular_cell_type',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
-                            listeners: {'load':Ext.madasDSLoaded,
-                                        'loadexception':Ext.madasDSLoadException}
+                            listeners: {'load':MA.DSLoaded,
+                                        'loadexception':MA.DSLoadException}
                         }
                     );
                     
@@ -329,8 +329,8 @@ var plantGrowingPlaceComboStore = new Ext.data.JsonStore(
                                                              url: wsBaseUrl + 'populate_select/plant/id/location',
                                                              root: 'response.value.items',
                                                              fields: ['value', 'key'],
-                                                             listeners: {'load':Ext.madasDSLoaded,
-                                                             'loadexception':Ext.madasDSLoadException}
+                                                             listeners: {'load':MA.DSLoaded,
+                                                             'loadexception':MA.DSLoadException}
                                                              }
                                                              );
                     
@@ -341,8 +341,8 @@ var treatmentComboStore = new Ext.data.JsonStore(
                             url: wsBaseUrl + 'populate_select/treatment/name',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
-                            listeners: {'load':Ext.madasDSLoaded,
-                                        'loadexception':Ext.madasDSLoadException}
+                            listeners: {'load':MA.DSLoaded,
+                                        'loadexception':MA.DSLoadException}
                         }
                     );
 
@@ -353,8 +353,8 @@ var sopComboStore = new Ext.data.JsonStore(
                             url: wsBaseUrl + 'populate_select/standardoperationprocedure/id/label',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
-                            listeners: {'load':Ext.madasDSLoaded,
-                                        'loadexception':Ext.madasDSLoadException}
+                            listeners: {'load':MA.DSLoaded,
+                                        'loadexception':MA.DSLoadException}
                         }
                     );
                     
@@ -365,8 +365,8 @@ var userComboStore = new Ext.data.JsonStore(
                             url: wsBaseUrl + 'populate_select/user/id/username',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
-                            listeners: {'load':Ext.madasDSLoaded,
-                                        'loadexception':Ext.madasDSLoadException}
+                            listeners: {'load':MA.DSLoaded,
+                                        'loadexception':MA.DSLoadException}
                         }
                     );
                     
@@ -377,7 +377,7 @@ var involvementComboStore = new Ext.data.JsonStore(
                             url: wsBaseUrl + 'populate_select/userinvolvementtype/id/name',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
-                            listeners: {'load':Ext.madasDSLoaded,
-                                        'loadexception':Ext.madasDSLoadException}
+                            listeners: {'load':MA.DSLoaded,
+                                        'loadexception':MA.DSLoadException}
                         }
                     );

@@ -1,4 +1,4 @@
-Ext.madasMenuRender = function(username) {
+MA.MenuRender = function(username) {
 
     var userText =  'User: '+username;
 
@@ -7,17 +7,17 @@ Ext.madasMenuRender = function(username) {
         {
             id: 'toolbarA',
             items: [
-                { xtype: 'tbbutton', text:'Login', id:'login', handler: Ext.madasMenuHandler},
+                { xtype: 'tbbutton', text:'Login', id:'login', handler: MA.MenuHandler},
                 { xtype: 'tbbutton', text:'Experiment', id:'experimentMenu', menu:{
                     items: [
-                        {text:'New Experiment', id:'experiment:new', handler: Ext.madasMenuHandler},
-                        {text:'My Experiments', id:'experiment:my', handler: Ext.madasMenuHandler}
+                        {text:'New Experiment', id:'experiment:new', handler: MA.MenuHandler},
+                        {text:'My Experiments', id:'experiment:my', handler: MA.MenuHandler}
                         ]
                     }
                 },
 //                { xtype: 'tbbutton', text:'Admin', id:'admin', menu:{
 //                    items: [
-//                        {text:'Admin Database', id:'admin:db', handler: Ext.madasMenuHandler}
+//                        {text:'Admin Database', id:'admin:db', handler: MA.MenuHandler}
 //                    ]
 //                    }
 //                },
@@ -25,16 +25,16 @@ Ext.madasMenuRender = function(username) {
 //                    items: [
 //                        {text:'Screencasts', id:'help:screencasts', menu: {
 //                            items: [
-//                                {text:'----------', id:'help:screencasts-quoterequest', handler: Ext.madasMenuHandler}
+//                                {text:'----------', id:'help:screencasts-quoterequest', handler: MA.MenuHandler}
 //                                ]
 //                            } 
 //                        },
 //                        {text:'Admin screencasts', id:'helpadmin:screencasts', menu: {
 //                            items: [
-//                                {text:'----------', id:'helpadmin:screencasts-authrequest', handler: Ext.madasMenuHandler},
-//                                {text:'----------', id:'helpadmin:screencasts-forwardquoterequest', handler: Ext.madasMenuHandler},
-//                                {text:'----------', id:'helpadmin:screencasts-forwardformal', handler: Ext.madasMenuHandler},
-//                                {text:'----------', id:'helpadmin:screencasts-replaceformal', handler: Ext.madasMenuHandler}
+//                                {text:'----------', id:'helpadmin:screencasts-authrequest', handler: MA.MenuHandler},
+//                                {text:'----------', id:'helpadmin:screencasts-forwardquoterequest', handler: MA.MenuHandler},
+//                                {text:'----------', id:'helpadmin:screencasts-forwardformal', handler: MA.MenuHandler},
+//                                {text:'----------', id:'helpadmin:screencasts-replaceformal', handler: MA.MenuHandler}
 //                                ]
 //                            } 
 //                        }
@@ -44,7 +44,7 @@ Ext.madasMenuRender = function(username) {
                 { xtype: 'tbfill'},
                 { xtype: 'tbbutton', text:userText, id: 'userMenu', menu:{
                     items: [
-                        {text:'Logout', id:'login:processLogout', handler: Ext.madasMenuHandler}
+                        {text:'Logout', id:'login:processLogout', handler: MA.MenuHandler}
                     ]
                     }
                 }
@@ -56,22 +56,22 @@ Ext.madasMenuRender = function(username) {
 
 };
 
-Ext.madasMenuEnsure = function() {
-    if (Ext.madasIsLoggedIn) {
-        Ext.madasMenuShow();
+MA.MenuEnsure = function() {
+    if (MA.IsLoggedIn) {
+        MA.MenuShow();
     } else {
-        Ext.madasMenuHide();
+        MA.MenuHide();
     }
 };
 
-Ext.madasMenuShow = function() {
+MA.MenuShow = function() {
 
     Ext.BLANK_IMAGE_URL = 'static/ext-3.1.0/resources/images/default/s.gif';
 
     //disable certain menu items if the user is not an admin
-    if (!Ext.madasIsAdmin) {
+    if (!MA.IsAdmin) {
         Ext.getCmp('admin:nodelist').disable();
-        if (!Ext.madasIsNodeRep) {
+        if (!MA.IsNodeRep) {
             //	        Ext.get('admin').hide();
 //            Ext.getCmp('helpadmin:screencasts').disable();
         } else {
@@ -94,14 +94,14 @@ Ext.madasMenuShow = function() {
 
 };
 
-Ext.madasMenuHandler = function(item) {
+MA.MenuHandler = function(item) {
     //we authorize every access to check for session timeout and authorization to specific pages
     
-    Ext.madasAuthorize(item.id);
+    MA.Authorize(item.id);
     
 };
 
-Ext.madasMenuHide = function() {
+MA.MenuHide = function() {
 
     Ext.get('login').show();
     //    Ext.get('admin').hide();

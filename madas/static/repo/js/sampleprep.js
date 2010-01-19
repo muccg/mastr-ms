@@ -1,27 +1,27 @@
-Ext.madasSamplePrepInit = function() {
-    var expId = Ext.madasCurrentExperimentId();
+MA.SamplePrepInit = function() {
+    var expId = MA.CurrentExperimentId();
     
     sopStore.proxy.conn.url = wsBaseUrl + 'records/standardoperationprocedure/experiments__id/' + expId;
     sopStore.load();
 };
 
-Ext.madasSaveSOPRow = function(changes) {
+MA.SaveSOPRow = function(changes) {
     
     if (changes.originalValue !== undefined && changes.originalValue !== "" && changes.originalValue !== null && changes.originalValue !== 0) {
-        Ext.madasCRUDSomething('dissociate/standardoperationprocedure/experiment/'+changes.value+'/'+Ext.madasCurrentExperimentId(), {}, Ext.madasNull);
+        MA.CRUDSomething('dissociate/standardoperationprocedure/experiment/'+changes.value+'/'+MA.CurrentExperimentId(), {}, MA.Null);
     }
-    Ext.madasCRUDSomething('associate/standardoperationprocedure/experiment/'+changes.value+'/'+Ext.madasCurrentExperimentId(), {}, Ext.madasSamplePrepInit);
+    MA.CRUDSomething('associate/standardoperationprocedure/experiment/'+changes.value+'/'+MA.CurrentExperimentId(), {}, MA.SamplePrepInit);
 };
 
-Ext.madasRemoveSOPRow = function(rec) {
+MA.RemoveSOPRow = function(rec) {
     if (rec !== undefined && rec.data !== undefined && rec.data.id !== undefined && rec.data.id !== '') {
-        Ext.madasCRUDSomething('dissociate/standardoperationprocedure/experiment/'+rec.data.id+'/'+Ext.madasCurrentExperimentId(), {}, Ext.madasSamplePrepInit);
+        MA.CRUDSomething('dissociate/standardoperationprocedure/experiment/'+rec.data.id+'/'+MA.CurrentExperimentId(), {}, MA.SamplePrepInit);
     } else {
         sopStore.remove(rec);
     }
 };
 
-Ext.madasSamplePrep = {
+MA.SamplePrep = {
     baseCls: 'x-plain',
     border:false,
     frame:false,
@@ -70,7 +70,7 @@ Ext.madasSamplePrep = {
                             var selections = grid.getSelectionModel().getSelections();
                             
                             for (var index in selections) {
-                                Ext.madasRemoveSOPRow(selections[index]);
+                                MA.RemoveSOPRow(selections[index]);
                             }
                         }
                         }
@@ -91,7 +91,7 @@ Ext.madasSamplePrep = {
                             }), dataIndex:'id', renderer: renderSOPLabel },
                         { header: "description", sortable:false, menuDisabled:true, dataIndex:'id', renderer: renderSOPDescription }
                     ],
-                    listeners: {'afteredit':function(e) { Ext.madasSaveSOPRow(e); }},
+                    listeners: {'afteredit':function(e) { MA.SaveSOPRow(e); }},
                     store: sopStore
                 }
 //                },

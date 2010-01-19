@@ -30,7 +30,8 @@
 
 <!-- setup variable -->
 <script>
-Ext.madasBaseUrl = '${ APP_SECURE_URL }';
+Ext.ns('MA');
+MA.baseUrl = '${ APP_SECURE_URL }';
 </script>
 
 <!-- Madas scripts -->
@@ -63,7 +64,7 @@ function callbacker(){
         return;
     }
     
-    Ext.madasInitApplication('${ APP_SECURE_URL }', '${ username }', '${ mainContentFunction }', "${ params }");
+    MA.InitApplication('${ APP_SECURE_URL }', '${ username }', '${ mainContentFunction }', "${ params }");
     document.getElementById("appLoad").style.display = "none";
     document.getElementById("hidePass").style.display = "block";
     document.getElementById("hideUser").style.display = "block";
