@@ -537,12 +537,12 @@ items:[
                                                                   triggerAction:'all',
                                                                   listWidth:230,
                                                                   store: new Ext.data.SimpleStore({
-                                                                                                  fields: ['submitValue', 'displayLabel'],
-                                                                                                  data : [['Pending','Pending'],
-                                                                                                          ['User', 'Active'],
-                                                                                                          ['Deleted','Deleted'],
-                                                                                                          ['Rejected','Rejected']]
-                                                                                                  })
+                                                          fields: ['submitValue', 'displayLabel'],
+                                                          data : [['Pending','Pending'],
+                                                                  ['User', 'Active'],
+                                                                  ['Deleted','Deleted'],
+                                                                  ['Rejected','Rejected']]
+                                                          })
                                                                   }),{
                fieldLabel: 'Department',
                name: 'dept',
@@ -1002,22 +1002,22 @@ items: [
         ],
 buttons: [
           { text: 'Reset', handler: MA.NodeManagementClearForm },
-          { text: 'Save', handler: function() { Ext.getCmp('nodedetails-panel').getForm().submit({   
-                                                                                                 successProperty: 'success',
-                                                                                                 success: function (form, action) {
-                                                                                                 if (action.result.success === true) {
-                                                                                                 //display a success alert that auto-closes in 5 seconds
-                                                                                                 Ext.Msg.alert("Node details saved successfully", "(this message will auto-close in 5 seconds)");
-                                                                                                 setTimeout("Ext.Msg.hide()", 5000);
-                                                                                                 
-                                                                                                 //load up the menu and next content area as declared in response
-                                                                                                 MA.ChangeMainContent(action.result.mainContentFunction);
-                                                                                                 }
-                                                                                                 },
-                                                                                                 failure: function (form, action) {
-                                                                                                 //do nothing special. this gets called on validation failures and server errors
-                                                                                                 }
-                                                                                                 });
+        { text: 'Save', handler: function() { Ext.getCmp('nodedetails-panel').getForm().submit({   
+                             successProperty: 'success',
+                             success: function (form, action) {
+                             if (action.result.success === true) {
+                             //display a success alert that auto-closes in 5 seconds
+                             Ext.Msg.alert("Node details saved successfully", "(this message will auto-close in 5 seconds)");
+                             setTimeout("Ext.Msg.hide()", 5000);
+                             
+                             //load up the menu and next content area as declared in response
+                             MA.ChangeMainContent(action.result.mainContentFunction);
+                             }
+                             },
+                             failure: function (form, action) {
+                             //do nothing special. this gets called on validation failures and server errors
+                             }
+                             });
           } }
           ]
 };
@@ -1173,52 +1173,54 @@ MA.OrgManagementInit = function() {
 
 //define the node details form
 MA.OrgDetailsCmp = {
-xtype:'form',
-labelWidth: 100, // label settings here cascade unless overridden
-id:'orgdetails-panel',
-url:MA.BaseUrl + 'admin/orgsave',
-region: 'center',
-method:'POST',
-reader: new MA.JsonReader(),
-bodyStyle: 'padding:10px;',
-title: 'Organisation Details',
-defaults: {width: 230},
-defaultType: 'textfield',
-trackResetOnLoad: true,
-waitMsgTarget: true,
-    
-items: [
-        {   name: 'id', id: 'orgdetails-id', xtype: 'hidden' },
-        {   name: 'name', id: 'orgdetails-name', fieldLabel: 'Organisation Name', maskRe: /[^,=]/ },
-        {   name: 'abn', id: 'orgdetails-abn', fieldLabel: 'ABN', maskRe: /[^,=]/ }
-        ],
-buttons: [
-          { text: 'Reset', handler: MA.OrgManagementClearForm },
-          { text: 'Save', handler: function() { Ext.getCmp('orgdetails-panel').getForm().submit({   
-                                                                                                successProperty: 'success',
-                                                                                                success: function (form, action) {
-                                                                                                if (action.result.success === true) {
-                                                                                                //display a success alert that auto-closes in 5 seconds
-                                                                                                Ext.getCmp('orgListGrid').getStore().reload();
-                                                                                                Ext.Msg.alert("Organisation details saved successfully", "(this message will auto-close in 5 seconds)");
-                                                                                                setTimeout("Ext.Msg.hide()", 5000);
-                                                                                                
-                                                                                                //load up the menu and next content area as declared in response
-                                                                                                MA.ChangeMainContent(action.result.mainContentFunction);
-                                                                                                }
-                                                                                                },
-                                                                                                failure: function (form, action) {
-                                                                                                //do nothing special. this gets called on validation failures and server errors
-                                                                                                }
-                                                                                                });
+    xtype:'form',
+    labelWidth: 100, // label settings here cascade unless overridden
+    id:'orgdetails-panel',
+    url:MA.BaseUrl + 'admin/orgsave',
+    region: 'center',
+    method:'POST',
+    reader: new MA.JsonReader(),
+    bodyStyle: 'padding:10px;',
+    title: 'Organisation Details',
+    defaults: {width: 230},
+    defaultType: 'textfield',
+    trackResetOnLoad: true,
+    waitMsgTarget: true,
+        
+    items: [
+            {   name: 'id', id: 'orgdetails-id', xtype: 'hidden' },
+            {   name: 'name', id: 'orgdetails-name', fieldLabel: 'Organisation Name', maskRe: /[^,=]/ },
+            {   name: 'abn', id: 'orgdetails-abn', fieldLabel: 'ABN', maskRe: /[^,=]/ }
+            ],
+    buttons: [
+              { text: 'Reset', handler: MA.OrgManagementClearForm },
+              { text: 'Save', 
+                  handler: function() { 
+                      Ext.getCmp('orgdetails-panel').getForm().submit({   
+                                        successProperty: 'success',
+                                        success: function (form, action) {
+                                        if (action.result.success === true) {
+                                        //display a success alert that auto-closes in 5 seconds
+                                        Ext.getCmp('orgListGrid').getStore().reload();
+                                        Ext.Msg.alert("Organisation details saved successfully", "(this message will auto-close in 5 seconds)");
+                                        setTimeout("Ext.Msg.hide()", 5000);
+                                        
+                                        //load up the menu and next content area as declared in response
+                                        MA.ChangeMainContent(action.result.mainContentFunction);
+                                        }
+                                        },
+                                        failure: function (form, action) {
+                                        //do nothing special. this gets called on validation failures and server errors
+                                        }
+                                        });
           } }
           ]
 };
 
 MA.OrgManagementCmp = {
-id:'orgManagementCmp',
-layout:'border',
-items: [
+    id:'orgManagementCmp',
+    layout:'border',
+    items: [
         {
         title:'Organisations List',
         id:'orgListGrid',
