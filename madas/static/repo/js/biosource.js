@@ -470,7 +470,7 @@ MA.BioSource = {
                                 allowBlank:true,
                                 typeAhead:false,
                                 triggerAction:'all',
-                                listWidth:230,
+                                listWidth:230
                             }), dataIndex:'detail'
                         }
                     ],
