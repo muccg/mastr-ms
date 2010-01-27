@@ -39,6 +39,14 @@ items:[
                    draggable: false,
                    id: 'experimentRoot'
                },
+               selModel: new Ext.tree.DefaultSelectionModel(
+                   { listeners:
+                       {
+                           selectionchange: function(sm, node) {
+                               window.location = wsBaseUrl + 'downloadFile?file=' + node.id + '&experiment_id=' + MA.CurrentExperimentId();
+                           }
+                       }
+                   }),
                //tbar: [{
 //                      text: 'add files',
 //                      cls: 'x-btn-text-icon',
@@ -55,20 +63,20 @@ items:[
                             }, this);
                         Ext.getCmp('filesTree').getRootNode().expand();
                     },
-               nodedrop: function(de) {
-                    Ext.Ajax.request({
-                                     method:'GET',
-                                url: wsBaseUrl + 'moveFile',
-                                     success: function() { Ext.getCmp('filesTree').getLoader().load(Ext.getCmp('filesTree').getRootNode());
-                                     Ext.getCmp('filesTree').getRootNode().expand(); },
-                                     failure: function() { Ext.getCmp('filesTree').getLoader().load(Ext.getCmp('filesTree').getRootNode());
-                                     Ext.getCmp('filesTree').getRootNode().expand(); },
-                                headers: {
-//                                'my-header': 'foo'
-                                },
-                                     params: { file: de.dropNode.id, target: de.target.id, experiment_id: MA.CurrentExperimentId() }
-                                });
-               }
+                   nodedrop: function(de) {
+                        Ext.Ajax.request({
+                                         method:'GET',
+                                    url: wsBaseUrl + 'moveFile',
+                                         success: function() { Ext.getCmp('filesTree').getLoader().load(Ext.getCmp('filesTree').getRootNode());
+                                         Ext.getCmp('filesTree').getRootNode().expand(); },
+                                         failure: function() { Ext.getCmp('filesTree').getLoader().load(Ext.getCmp('filesTree').getRootNode());
+                                         Ext.getCmp('filesTree').getRootNode().expand(); },
+                                    headers: {
+    //                                'my-header': 'foo'
+                                    },
+                                         params: { file: de.dropNode.id, target: de.target.id, experiment_id: MA.CurrentExperimentId() }
+                                    });
+                   }
                 }
                },
                
