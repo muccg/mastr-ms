@@ -18,5 +18,6 @@ urlpatterns = patterns('madas.repository.wsviews',
     (r'^pendingfiles[/]*$', 'pendingFilesList', {'SSL':True}),
     (r'^moveFile[/]*$', 'moveFile', {'SSL':True}),
     (r'^uploadFile[/]*$', 'uploadFile', {'SSL':True}),
+    (r'^downloadFile[/]*$', 'downloadFile', {'SSL':True}),
     (r'^updateSingleSource/(?P<exp_id>\w+)[/]*$', 'update_single_source', {'SSL':True}),
 )

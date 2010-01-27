@@ -840,6 +840,32 @@ def _fileList(request, basepath, path):
     return HttpResponse(json.dumps(output))
     
     
+def downloadFile(request, *args):
+    print 'downloadFile:', str('')
+    
+    args = request.REQUEST
+    
+    file = args['file']
+    
+    exp = Experiment.objects.get(id=args['experiment_id'])
+    exp.ensure_dir()
+    
+    import os, settings
+    filename = os.path.join(settings.REPO_FILES_ROOT, 'experiments', str(exp.created_on.year), str(exp.created_on.month), str(exp.id), file)
+    from django.core.servers.basehttp import FileWrapper
+    from django.http import HttpResponse
+
+    print ' well, you know, the file is ', filename
+
+    from django.core.files import File
+    wrapper = File(open(filename, "rb"))
+    content_disposition = 'attachment;  filename=\"%s\"' % (str(file))
+    response = HttpResponse(wrapper, content_type='application/download')
+    response['Content-Disposition'] = content_disposition
+    response['Content-Length'] = os.path.getsize(filename)
+    return response 
+
+    
 def uploadFile(request):
 
     if request.GET:
