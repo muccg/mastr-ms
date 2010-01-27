@@ -91,7 +91,7 @@ function callbacker(){
 
 <div id="centerDiv"></div>
 
-    <div id="south">(c) CCG 2008</div>
+    <div id="south">(c) CCG 2009</div>
     <form id="hiddenForm"></form>
     <ul id="experiment-nav" class="x-hidden" onclick="javascript:MA.Actions['expDetails'];">
     	<li>
