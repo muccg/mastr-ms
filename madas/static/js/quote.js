@@ -1072,7 +1072,10 @@ MA.QuoteRequestEditCmp =
                  text: 'Send Formal Quote',
                  id:'formalQuoteSubmit',
                  handler: function(){
-                    Ext.getCmp('formalquoteedit-panel').getForm().submit(
+                    if (Ext.getCmp('fquo-qid').getValue() === '') {
+                        alert("sorry, there was an error with the page. please reload and try again");
+                    } else {
+                        Ext.getCmp('formalquoteedit-panel').getForm().submit(
                         {   successProperty: 'success',
                             success: function (form, action) {
                                 if (action.result.success === true) {
@@ -1090,6 +1093,7 @@ MA.QuoteRequestEditCmp =
                                 //do nothing special. this gets called on validation failures and server errors
                             }
                         });
+                    }
                     }
                 }
                 ]
