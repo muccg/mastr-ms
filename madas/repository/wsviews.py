@@ -855,8 +855,6 @@ def downloadFile(request, *args):
     from django.core.servers.basehttp import FileWrapper
     from django.http import HttpResponse
 
-    print ' well, you know, the file is ', filename
-
     from django.core.files import File
     wrapper = File(open(filename, "rb"))
     content_disposition = 'attachment;  filename=\"%s\"' % (str(file))

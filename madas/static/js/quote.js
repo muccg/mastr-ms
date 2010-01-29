@@ -1262,8 +1262,10 @@ MA.FormalQuoteUserListInit = function(){
             { name: 'status', sortType: 'string' }
         ]);
     
-    var viewHandler = function(el, ev) {
-        if (selectionModel.hasSelection()) {
+    var viewHandler = function(grid, rowIndex, e) {
+        var selectionModel = grid.getSelectionModel();
+    
+        if (selectionModel.hasSelection() && selectionModel.getSelected().data['quoterequestid'] !== '') {
             MA.Authorize('quote:viewformal', {"qid" : selectionModel.getSelected().data['quoterequestid']});
         }
     };
