@@ -1858,7 +1858,10 @@ MA.ViewFormalCmp = {
                                         {name: 'details', mapping: 'details'},
                                         {name: 'created', mapping: 'created'},
                                         {name: 'fromemail', mapping: 'fromemail'},
-                                        {name: 'toemail', mapping: 'toemail'}
+                                        {name: 'toemail', mapping: 'toemail'},
+                                        {name: 'tonode', mapping: 'tonode'},
+                                        {name: 'fromname', mapping: 'fromname'},
+                                        {name: 'officePhone', mapping: 'officePhone'}
                                         ]),
         defaults: {width: 230},
         defaultType: 'textfield',
