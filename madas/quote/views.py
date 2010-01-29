@@ -344,7 +344,7 @@ def listFormal(request, *args):
 
 def _loadQuoteRequest(qid):
     print '\tload: qid was ', qid
-    if qid is not None:
+    if qid is not None and qid.isdigit() and qid is not '':
         qr = Quoterequest.objects.filter(id = qid).values('id', 'emailaddressid__emailaddress', 'tonode', 'details', 'requesttime', 'unread', 'completed', 'firstname', 'lastname', 'officephone', 'country', 'attachment')
         try:
             for ql in qr:
