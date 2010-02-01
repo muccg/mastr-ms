@@ -193,7 +193,7 @@ def populateResetPasswordForm(request, *args):
     data['validationKey'] = request.session['resetPasswordValidationKey']
     print '\tData: ', data
 
-    setRequestVars(request, success = True, data = data, authenticated = False, authorized = True, totalRows = len(data))
+    setRequestVars(request, success = True, items = [data], authenticated = False, authorized = True, totalRows = 1)
     print '***populateResetPasswordForm***: exit'
     return jsonResponse(request, args) 
 

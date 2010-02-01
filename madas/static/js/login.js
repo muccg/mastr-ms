@@ -299,7 +299,9 @@ MA.ResetPasswordInit = function() {
 };
 
 MA.ResetPasswordCmp = {id:'resetpassword-container-panel', 
-                layout:'absolute', 
+                layout:'absolute',
+                forceLayout:true,
+                deferredRender:false, 
                 items:[
                     {  xtype:'form', 
                     labelWidth: 100, // label settings here cascade unless overridden
@@ -307,11 +309,14 @@ MA.ResetPasswordCmp = {id:'resetpassword-container-panel',
                     url:MA.BaseUrl + 'login/processResetPassword',
                     method:'POST',
                     frame:true,
-                    reader: new MA.JsonReader({
+                    forceLayout:true,
+                    deferredRender:false, 
+                    reader: new Ext.data.JsonReader({
                                   root            : 'response.value.items',
                                   versionProperty : 'response.value.version',
                                   totalProperty   : 'response.value.total_count'
-                                  }, []),
+                                  }, [{ name: 'email', sortType:'string' },
+                                  {name: 'validationKey', sortType:'string'}]),
                     title: 'Reset Password',
                     bodyStyle:'padding:5px 5px 0',
                     width: 380,

@@ -21,7 +21,7 @@ MA.RequestQuoteInit = function () {
     //fetch user details
     reqQuoCmp.load({url: MA.BaseUrl + 'user/userload', waitMsg:'Loading'});
 
-    reqQuoCmp.doLayout();
+    //reqQuoCmp.doLayout();
     
     return;
 };
