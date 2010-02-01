@@ -31,7 +31,7 @@
 <!-- setup variable -->
 <script>
 Ext.ns('MA');
-MA.baseUrl = '${ APP_SECURE_URL }';
+MA.BaseUrl = '${ APP_SECURE_URL }';
 </script>
 
 <!-- Madas scripts -->
