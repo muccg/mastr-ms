@@ -43,7 +43,9 @@ items:[
                    { listeners:
                        {
                            selectionchange: function(sm, node) {
-                               window.location = wsBaseUrl + 'downloadFile?file=' + node.id + '&experiment_id=' + MA.CurrentExperimentId();
+                               if (node.isLeaf()) {
+                                   window.location = wsBaseUrl + 'downloadFile?file=' + node.id + '&experiment_id=' + MA.CurrentExperimentId();
+                               }
                            }
                        }
                    }),
