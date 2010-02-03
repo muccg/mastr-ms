@@ -10,6 +10,10 @@ MA.ExperimentSamplesInit = function() {
 MA.SaveSampleRow = function(roweditor, changes, rec, i) {
     var bundledData = {};
     
+    if (rec.data.weight == '') {
+        rec.data.weight = '0.00';
+    }
+    
     bundledData.label = rec.data.label;
     bundledData.comment = rec.data.comment;
     bundledData.weight = rec.data.weight;
