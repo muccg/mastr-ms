@@ -85,8 +85,13 @@ var organStore = new Ext.data.JsonStore(
                             autoLoad: false,
                             url: wsBaseUrl + 'records/organ/experiment__id/0',
                             listeners: {'load':MA.DSLoaded,
-                                        'loadexception':MA.DSLoadException}
+                                        'loadexception':MA.DSLoadException
+                            },
+                            sortInfo: {
+                                field: 'id',
+                                direction: 'DESC'
                             }
+                        }
                     );
                     
 var timelineStore = new Ext.data.JsonStore(
@@ -95,8 +100,13 @@ var timelineStore = new Ext.data.JsonStore(
                             autoLoad: false,
                             url: wsBaseUrl + 'records/sampletimeline/experiment__id/0',
                             listeners: {'load':MA.DSLoaded,
-                                        'loadexception':MA.DSLoadException}
+                                        'loadexception':MA.DSLoadException
+                            },
+                            sortInfo: {
+                                field: 'id',
+                                direction: 'DESC'
                             }
+                        }
                     );
                     
 var treatmentStore = new Ext.data.JsonStore(
@@ -105,8 +115,13 @@ var treatmentStore = new Ext.data.JsonStore(
                             autoLoad: false,
                             url: wsBaseUrl + 'records/treatment/experiment__id/0',
                             listeners: {'load':MA.DSLoaded,
-                                        'loadexception':MA.DSLoadException}
+                                        'loadexception':MA.DSLoadException
+                            },
+                            sortInfo: {
+                                field: 'id',
+                                direction: 'DESC'
                             }
+                        }
                     );
                     
 var sopStore = new Ext.data.JsonStore(
@@ -115,8 +130,13 @@ var sopStore = new Ext.data.JsonStore(
                             autoLoad: false,
                             url: wsBaseUrl + 'records/standardoperationprocedure/experiments__id/0',
                             listeners: {'load':MA.DSLoaded,
-                                        'loadexception':MA.DSLoadException}
+                                        'loadexception':MA.DSLoadException
+                            },
+                            sortInfo: {
+                                field: 'id',
+                                direction: 'DESC'
                             }
+                        }
                     );
                     
 var sopLookupStore = new Ext.data.JsonStore(
@@ -125,8 +145,9 @@ var sopLookupStore = new Ext.data.JsonStore(
                             autoLoad: false,
                             url: wsBaseUrl + 'records/standardoperationprocedure/id__gte/0',
                             listeners: {'load':MA.DSLoaded,
-                                        'loadexception':MA.DSLoadException}
+                                        'loadexception':MA.DSLoadException
                             }
+                        }
                     );
 
 var userStore = new Ext.data.JsonStore(
@@ -135,8 +156,9 @@ var userStore = new Ext.data.JsonStore(
                             autoLoad: false,
                             url: wsBaseUrl + 'records/userexperiment/experiment__id/0',
                             listeners: {'load':MA.DSLoaded,
-                                        'loadexception':MA.DSLoadException}
+                                        'loadexception':MA.DSLoadException
                             }
+                        }
                     );
                     
 var experimentListStore = new Ext.data.JsonStore(
@@ -145,8 +167,14 @@ var experimentListStore = new Ext.data.JsonStore(
                             autoLoad: false,
                             url: wsBaseUrl + 'recordsExperiments',
                             listeners: {'load':MA.DSLoaded,
-                                        'loadexception':MA.DSLoadException}
+                                        'loadexception':MA.DSLoadException
+                                        },
+                            sortInfo: {
+                                field: 'id',
+                                direction: 'DESC'
                             }
+                                    
+                        }
                     );
                     
 var experimentStore = new Ext.data.ArrayStore({
@@ -160,8 +188,13 @@ var sampleClassStore = new Ext.data.JsonStore(
                                              autoLoad: false,
                                              url: wsBaseUrl + 'records/sampleclass/experiment__id/0',
                                              listeners: {'load':MA.DSLoaded,
-                                             'loadexception':MA.DSLoadException}
+                                             'loadexception':MA.DSLoadException
+                                             },
+                                             sortInfo: {
+                                                 field: 'id',
+                                                 direction: 'DESC'
                                              }
+                                         }
                                              );
 
 var sampleStore = new Ext.data.JsonStore(
@@ -170,7 +203,11 @@ var sampleStore = new Ext.data.JsonStore(
                                               autoLoad: false,
                                               url: wsBaseUrl + 'records/sample/sample_class__id/0',
                                               listeners: {'load':MA.DSLoaded,
-                                              'loadexception':MA.DSLoadException}
+                                              'loadexception':MA.DSLoadException},
+                                              sortInfo: {
+                                                  field: 'id',
+                                                  direction: 'DESC'
+                                              }
                                               }
                                               );
 
