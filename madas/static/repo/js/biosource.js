@@ -414,7 +414,7 @@ MA.BioSource = {
                         cls: 'x-btn-text-icon',
                         icon:'static/repo/images/add.gif',
                         handler : function() {
-                           MA.CRUDSomething('create/organ/', {'experiment_id':MA.CurrentExperimentId()}, function() { var expId = MA.CurrentExperimentId(); organStore.proxy.conn.url = wsBaseUrl + 'records/organ/experiment__id/' + expId;
+                           MA.CRUDSomething('create/organ/', {'experiment_id':MA.CurrentExperimentId(), 'name':'Unknown'}, function() { var expId = MA.CurrentExperimentId(); organStore.proxy.conn.url = wsBaseUrl + 'records/organ/experiment__id/' + expId;
                                                   organStore.load(); });
                         }
                         }, 
