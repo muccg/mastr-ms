@@ -144,7 +144,7 @@ MA.Treatment = {
                                 cls: 'x-btn-text-icon',
                                 icon:'static/repo/images/add.gif',
                                 handler : function(){
-                                   MA.CRUDSomething('create/treatment/', {'experiment_id':MA.CurrentExperimentId()}, function() { var expId = MA.CurrentExperimentId(); treatmentStore.proxy.conn.url = wsBaseUrl + 'records/treatment/experiment__id/' + expId;
+                                   MA.CRUDSomething('create/treatment/', {'experiment_id':MA.CurrentExperimentId(), 'name':'Unknown'}, function() { var expId = MA.CurrentExperimentId(); treatmentStore.proxy.conn.url = wsBaseUrl + 'records/treatment/experiment__id/' + expId;
                                                           treatmentStore.load(); });
                                    }
                                 },
