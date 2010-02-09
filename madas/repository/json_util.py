@@ -22,7 +22,7 @@ def makeJsonFriendly(data):
           return str(data)
           
       elif isinstance(data, datetime.time):
-          return str(data.hour) + ':' + str(data.minute)
+          return str(data.hour) + ':' + str(data.minute).rjust(2,'0')
           
       elif isinstance(data, float):
           return str(data)
