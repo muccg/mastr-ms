@@ -14,6 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with Madas.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+MA.EmailDisplayField = Ext.extend(Ext.form.DisplayField,  {
+    setRawValue : function(v){
+        if(this.htmlEncode){
+            v = Ext.util.Format.htmlEncode(v);
+        }
+        return this.rendered ? (this.el.dom.innerHTML = (Ext.isEmpty(v) ? '' : '<a href="mailto:'+v+'">'+v+'</a>')) : (this.value = '<a href="mailto:'+v+'">'+v+'</a>');
+    },
+});
+
+Ext.reg('emaildisplayfield', MA.EmailDisplayField);
+
+
  
 MA.RequestQuoteInit = function () {
 	var reqQuoCmp = Ext.getCmp('requestquote-panel');   
@@ -376,7 +389,7 @@ MA.RequestQuoteCmp =
                         fields: ['name', 'submitValue']
                     })
                 }),{
-                    fieldLabel: 'Quote Request Details',
+                    fieldLabel: 'Information Request Details',
                     name: 'details',
                     xtype: 'textarea',
                     allowBlank:false,
@@ -600,9 +613,8 @@ MA.QuoteRequestEditCmp =
                 },{
                     fieldLabel: 'Email address',
                     name: 'email',
-                    vtype: 'email',
+                    xtype: 'emaildisplayfield',
                     allowBlank:false,
-                    disabled: true,
                     id: 'qre-email'
                 },{
                     fieldLabel: 'First name',
