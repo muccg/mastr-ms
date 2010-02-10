@@ -170,7 +170,7 @@ def sendRequest(request, *args):
         targetUsers = _findAdminOrNodeRepEmailTarget(groupname = toNode)
         from madas.mail_functions import sendQuoteRequestToAdminEmail
         for targetUser in targetUsers:
-            sendQuoteRequestToAdminEmail(request, qr.id, targetUser['uid'][0]) #toemail should be a string, but ldap returns are all lists
+            sendQuoteRequestToAdminEmail(request, qr.id, firstname, lastname, targetUser['uid'][0]) #toemail should be a string, but ldap returns are all lists
     except Exception, e:
         print 'Bad: ', str(e)
 
@@ -484,7 +484,7 @@ def save(request, *args):
             for targetuser in targetusers:
                 targetemail = targetuser['uid'][0]
                 from mail_functions import sendQuoteRequestToAdminEmail
-                sendQuoteRequestToAdminEmail(request, id, targetemail) 
+                sendQuoteRequestToAdminEmail(request, id, email, '', targetemail) 
     except Exception, e:
         print 'Exception emailing change to quote request: ', str(e) 
 

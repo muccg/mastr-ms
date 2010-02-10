@@ -64,7 +64,7 @@ def sendRegistrationToAdminEmail(request, toemail, fromemail=RETURN_EMAIL):
     except Exception, e:
         print 'Error sending mail to Node Reps/Admin: ', toemail , ':', str(e)
 
-def sendQuoteRequestToAdminEmail(request, qid, toemail, fromemail=RETURN_EMAIL):
+def sendQuoteRequestToAdminEmail(request, qid, firstname, lastname, toemail, fromemail=RETURN_EMAIL):
     #This email should always come from 'the system' - i.e. the RETURN_EMAIL
     #The request goes 'TO' an admin or node rep, which is passed in in 'toemail'.
     print '\tSending email'
@@ -73,6 +73,7 @@ def sendQuoteRequestToAdminEmail(request, qid, toemail, fromemail=RETURN_EMAIL):
         body = 'A new Madas Quote Request has been added to the system. Please follow the link below to read this request.\r\n\r\n'
         body += "Please click the following link to login to Madas.\r\n\r\n"
         body += "%s" % (siteurl(request))
+        body += "\r\n\r\nSender's name or email: %s %s" % (firstname, lastname)
        #TODO: Testing settings: toemail overridden. Remove this line to use the live data
         print 'Test email settings. Would have sent to ', toemail
         #toemail = 'bpower@ccg.murdoch.edu.au'
