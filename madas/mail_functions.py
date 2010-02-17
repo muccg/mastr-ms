@@ -1,9 +1,50 @@
 from django.core.mail import send_mail
 from madas.settings import RETURN_EMAIL
-from webhelpers import siteurl 
+from webhelpers import siteurl
+
+from django.core.mail import EmailMessage
+
+class FixedEmailMessage(EmailMessage):
+    def __init__(self, subject='', body='', from_email=None, to=None, cc=None,
+                 bcc=None, connection=None, attachments=None, headers=None):
+        """
+        Initialize a single email message (which can be sent to multiple
+        recipients).
+
+        All strings used to create the message can be Unicode strings (or UTF-8
+        bytestrings). The SafeMIMEText class will handle any necessary encoding
+        conversions.
+        """
+        to_cc_bcc_types = (type(None), list, tuple)
+        # test for typical error: people put strings in to, cc and bcc fields
+        # see documentation at http://www.djangoproject.com/documentation/email/
+        assert isinstance(to, to_cc_bcc_types)
+        assert isinstance(cc, to_cc_bcc_types)
+        assert isinstance(bcc, to_cc_bcc_types)
+        super(FixedEmailMessage, self).__init__(subject, body, from_email, to,
+                                           bcc, connection, attachments, headers)
+        if cc:
+            self.cc = list(cc)
+        else:
+            self.cc = []
+
+    def recipients(self):
+        """
+        Returns a list of all recipients of the email (includes direct
+        addressees as well as Bcc entries).
+        """
+        return self.to + self.cc + self.bcc
+
+    def message(self):
+        msg = super(FixedEmailMessage, self).message()
+        del msg['Bcc'] # if you still use old django versions
+        if self.cc:
+            msg['Cc'] = ', '.join(self.cc)
+        return msg
 
 
-def sendFormalQuoteEmail(request, qid, attachmentname, toemail, fromemail=RETURN_EMAIL):
+
+def sendFormalQuoteEmail(request, qid, attachmentname, toemail, cclist=None, fromemail=RETURN_EMAIL):
     #The email is sent TO whoever the quote was requested by,
     #and should come FROM the webuser who was logged in and clicked the 'send formal quote' button
     try:
@@ -12,7 +53,8 @@ def sendFormalQuoteEmail(request, qid, attachmentname, toemail, fromemail=RETURN
         body += "Please click the following link to view this formal quote on Madas.\r\n\r\n"
         body += "%s%s%s" % (siteurl(request),"quote/viewformal?quoterequestid=" , str(qid))
         print '\tSending email from: %s, to: %s' % (fromemail, toemail)
-        send_mail(subject, body, fromemail, [toemail], fail_silently = False)
+        e = FixedEmailMessage(subject=subject, body=body, from_email = fromemail, to = [toemail], cc=cclist)
+        e.send()
     except Exception, e:
         print 'Error sending formal quote mail to', toemail, ':', str(e)
 

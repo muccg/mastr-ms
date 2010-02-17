@@ -684,7 +684,15 @@ def formalSave(request, *args):
     toemail = qr['emailaddressid__emailaddress']
     fromemail = email
     from madas.mail_functions import sendFormalQuoteEmail
-    sendFormalQuoteEmail(request, qid, attachmentname, toemail, fromemail=fromemail)
+    #get the list of admins or nodereps which should be notified:
+    #note this is completely unsafe if the sequense above caused an exception retrieving the quote details.
+    tonode = qr['tonode']
+    cc = _findAdminOrNodeRepEmailTarget(groupname = tonode)
+    cc = [str(c['uid'][0]) for c in cc]
+    if toemail in cc:
+        cc.remove(toemail)
+    print 'cc list is: %s' % str(cc)
+    sendFormalQuoteEmail(request, qid, attachmentname, toemail, cclist = cc, fromemail=fromemail)
     #print '\tSetting request vars: '
     setRequestVars(request, data=None, totalRows=0, authenticated=True, authorized=True, success=True, mainContentFunction = 'quote:list') 
     #print '\tDone setting request vars'
