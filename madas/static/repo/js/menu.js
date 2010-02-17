@@ -71,22 +71,7 @@ MA.MenuShow = function() {
     //disable certain menu items if the user is not an admin
     if (!MA.IsAdmin) {
         Ext.getCmp('admin:nodelist').disable();
-        if (!MA.IsNodeRep) {
-            //	        Ext.get('admin').hide();
-//            Ext.getCmp('helpadmin:screencasts').disable();
-        } else {
-            //        	Ext.get('admin').show();
-//            Ext.getCmp('helpadmin:screencasts').enable();
-        }
-    } else {
-//        Ext.getCmp('admin:nodelist').enable();
-//        Ext.get('admin').show();
-//        Ext.getCmp('helpadmin:screencasts').enable();
     }
-
-    //TEMP hide admin menu from all users
-    //    Ext.get('admin').hide();
-
     
     Ext.get('login').hide();
     Ext.get('userMenu').show();
