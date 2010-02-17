@@ -8,11 +8,9 @@ def sendFormalQuoteEmail(request, qid, attachmentname, toemail, fromemail=RETURN
     #and should come FROM the webuser who was logged in and clicked the 'send formal quote' button
     try:
         subject = 'MA Formal Quote'
-        #print 'SUBJECT', subject
         body = 'Formal Quote details:\r\n\r\n%s\r\n\r\n' % (attachmentname)
         body += "Please click the following link to view this formal quote on Madas.\r\n\r\n"
         body += "%s%s%s" % (siteurl(request),"quote/viewformal?quoterequestid=" , str(qid))
-        #print 'BODY:', body
         print '\tSending email from: %s, to: %s' % (fromemail, toemail)
         send_mail(subject, body, fromemail, [toemail], fail_silently = False)
     except Exception, e:
@@ -28,7 +26,6 @@ def sendFormalStatusEmail(request, qid, status, toemail, fromemail=RETURN_EMAIL)
         body = '%s has changed the formal quote status to %s\r\n\r\n' % (fromemail, status) 
         body += "Please click the following link to view this formal quote on Madas.\r\n\r\n"
         body += "%s%s%s" % (siteurl(request),"quote/viewformal?quoterequestid=" , str(qid))
-        #print 'BODY:', body
         print '\tSending email from: %s, to: %s' % (fromemail, toemail)
         send_mail(subject, body, fromemail, [toemail], fail_silently = False)
     except Exception, e:
@@ -41,7 +38,6 @@ def sendQuoteRequestConfirmationEmail(request, qid, toemail, fromemail = RETURN_
     try:
         subject = 'Madas Quote Request Acknowledgement'
         body = 'Your Madas Quote Request has been added to the system. We will contact you as soon as possible.\r\n\r\n'
-        #TODO: get from email from settings
         print '\tSending email from: %s, to: %s' % (fromemail, toemail)
         send_mail(subject, body, fromemail, [toemail],fail_silently = False)
     except Exception, e:
@@ -56,9 +52,6 @@ def sendRegistrationToAdminEmail(request, toemail, fromemail=RETURN_EMAIL):
         body = 'A new user has registered for Madas. Please follow the link below to review this request.\r\n\r\n'
         body += "Please click the following link to login to Madas.\r\n\r\n"
         body += "%s" % (siteurl(request))
-       #TODO: Testing settings: toemail overridden. Remove this line to use the live data
-        print 'Test email settings. Would have sent to ', toemail
-        #toemail = 'bpower@ccg.murdoch.edu.au'
         print '\tSending email from: %s, to: %s' % (fromemail, toemail)
         send_mail(subject, body, fromemail, [toemail],fail_silently = False)
     except Exception, e:
@@ -74,9 +67,6 @@ def sendQuoteRequestToAdminEmail(request, qid, firstname, lastname, toemail, fro
         body += "Please click the following link to login to Madas.\r\n\r\n"
         body += "%s" % (siteurl(request))
         body += "\r\n\r\nSender's name or email: %s %s" % (firstname, lastname)
-       #TODO: Testing settings: toemail overridden. Remove this line to use the live data
-        print 'Test email settings. Would have sent to ', toemail
-        #toemail = 'bpower@ccg.murdoch.edu.au'
         print '\tSending email from: %s, to: %s' % (fromemail, toemail)
         send_mail(subject, body, fromemail, [toemail],fail_silently = False)
     except Exception, e:

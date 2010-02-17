@@ -167,12 +167,17 @@ def sendRequest(request, *args):
         sendQuoteRequestConfirmationEmail(request, qr.id, email) 
         
         #email the administrator(s) for the node 
-        targetUsers = _findAdminOrNodeRepEmailTarget(groupname = toNode)
+        print 'Argument to _findAdminOrNodeRepEmailTarget is: ', toNode
+        if toNode == '': #if the node was 'Dont Know'
+            searchgroups = 'Administrators'
+        else:
+            searchgroups = toNode
+        targetUsers = _findAdminOrNodeRepEmailTarget(groupname = searchgroups)
         from madas.mail_functions import sendQuoteRequestToAdminEmail
         for targetUser in targetUsers:
             sendQuoteRequestToAdminEmail(request, qr.id, firstname, lastname, targetUser['uid'][0]) #toemail should be a string, but ldap returns are all lists
     except Exception, e:
-        print 'Bad: ', str(e)
+        print 'Error sending mail in SendRequest: ', str(e)
 
     setRequestVars(request, success=True, authenticated=True, authorized=True, mainContentFunction='quote:request')
     print '*** quote:sendRequest: exit ***'
