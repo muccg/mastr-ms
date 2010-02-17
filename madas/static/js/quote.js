@@ -523,15 +523,17 @@ MA.QuoteRequestEditCmp =
                 url:MA.BaseUrl + 'quote/formalsave',
                 method:'POST',
                 fileUpload: true,
-                reader: new Ext.data.JsonReader({successProperty:'success', root: 'data'}, 
-                                              [ {name: 'id', mapping: 'id'}, 
-                                                {name: 'quoterequestid', mapping: 'quoterequestid'},
-                                                {name: 'details', mapping: 'details'},
-                                                {name: 'created', mapping: 'created'},
-                                                {name: 'fromemail', mapping: 'fromemail'},
-                                                {name: 'toemail', mapping: 'toemail'},
-                                                {name: 'pdf', mapping:'pdf'}
-                                              ]),
+                reader: new Ext.data.JsonReader({successProperty:'success', root: 'data', idProperty: 'quoterequestid'}, 
+                                [
+                                {name: 'quoterequestid', mapping: 'quoterequestid'},
+                                {name: 'details', mapping: 'details'},
+                                {name: 'fromemail', mapping: 'fromemail'},
+                                {name: 'toemail', mapping: 'toemail'},
+                                {name: 'tonode', mapping: 'tonode'},
+                                {name: 'pdf', mapping: 'pdf'},
+                                {name: 'fromname', mapping: 'fromname'},
+                                {name: 'officePhone', mapping: 'officePhone'}
+                                ]),
                 defaults: {width: 230},
                 defaultType: 'textfield',
 //                trackResetOnLoad: true,
@@ -1084,13 +1086,13 @@ MA.ViewFormalCmp = {
         labelWidth: 100, // label settings here cascade unless overridden
         id:'formalquoteview-panel',
         reader: new Ext.data.JsonReader({successProperty:'success', root: 'data'}, 
-                                        [ {name: 'id', mapping: 'id'}, 
+                                        [
                                         {name: 'quoterequestid', mapping: 'quoterequestid'},
                                         {name: 'details', mapping: 'details'},
-                                        {name: 'created', mapping: 'created'},
                                         {name: 'fromemail', mapping: 'fromemail'},
                                         {name: 'toemail', mapping: 'toemail'},
                                         {name: 'tonode', mapping: 'tonode'},
+                                        {name: 'pdf', mapping: 'pdf'},
                                         {name: 'fromname', mapping: 'fromname'},
                                         {name: 'officePhone', mapping: 'officePhone'}
                                         ]),
