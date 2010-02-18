@@ -78,7 +78,15 @@ body
 }
 
 .x-item-disabled {
-color:black;
-cursor:default;
-opacity:0.6;
+    color:black;
+    cursor:default;
+    opacity:0.6;
+}
+
+.x-form-display-field {
+    display: block;
+    padding: 3px 0px 0px 0px;
+    padding-left: 0px;
+    position: relative;
+    z-index: 2;
 }

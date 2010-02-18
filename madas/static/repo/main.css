@@ -86,3 +86,11 @@ body
 .x-row-gray td {
     color:#999;
 }
+
+.x-form-display-field, .ext-gecko .x-form-display-field, .ext-strict .ext-ie7 .x-form-display-field {
+    display: block;
+    padding: 3px 0px 0px 0px;
+    padding-left: 0px;
+    position: relative;
+    z-index: 2;
+}

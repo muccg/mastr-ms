@@ -23,11 +23,11 @@ MA.SampleTracking = {
             border:false,
             autoHeight:true,
             items: [
-                    { xtype:'textfield', fieldLabel:'experiment name', id:'trackingExperimentName', disabled:true},
-                    { xtype:'textarea', fieldLabel:'comment', id:'trackingExperimentComment', width:400, disabled:true },
-                    { xtype:'textfield', fieldLabel:'formal quote', id:'trackingFormalQuote', disabled:true },
+                    { xtype:'displayfield', fieldLabel:'experiment name', id:'trackingExperimentName'},
+                    { xtype:'displayfield', fieldLabel:'comment', id:'trackingExperimentComment', width:400, height:40 },
+                    { xtype:'displayfield', fieldLabel:'formal quote', id:'trackingFormalQuote' },
                     { xtype:'displayfield', fieldLabel:'organisation', id:'trackingOrg'},
-                    { xtype:'textfield', fieldLabel:'job number', id:'trackingJobNumber', disabled:true }
+                    { xtype:'displayfield', fieldLabel:'job number', id:'trackingJobNumber' }
                 ]
             },
             {
