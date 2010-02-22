@@ -37,6 +37,7 @@
     <script src="static/repo/js/sampleprep.js" type="text/javascript"></script>
     <script src="static/repo/js/access.js" type="text/javascript"></script>
     <script src="static/repo/js/experimentlist.js" type="text/javascript"></script>
+    <script src="static/repo/js/clients.js" type="text/javascript"></script>
     <script src="static/repo/js/files.js" type="text/javascript"></script>
     
     <script src="static/repo/js/controller.js" type="text/javascript"></script>

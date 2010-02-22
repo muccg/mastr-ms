@@ -667,6 +667,59 @@ def recordsExperiments(request):
     return HttpResponse(json.dumps(output))
     
     
+def recordsClients(request, *args):
+
+    if request.GET:
+        args = request.GET
+    else:
+        args = request.POST
+       
+
+    # basic json that we will fill in
+    output = {'metaData': { 'totalProperty': 'results',
+                            'successProperty': 'success',
+                            'root': 'rows',
+                            'id': 'id',
+                            'fields': [{'name':'id'}, {'name':'client'}]
+                            },
+              'results': 0,
+              'authenticated': True,
+              'authorized': True,
+              'success': True,
+              'rows': []
+              }
+
+    authenticated = request.user.is_authenticated()
+    authorized = True # need to change this
+    if not authenticated or not authorized:
+        return HttpResponse(json.dumps(output), status=401)
+
+
+    rows = Experiment.objects.all() 
+
+    # add row count
+    output['results'] = len(rows);
+
+    b = {}
+
+    # add rows
+    for row in rows:
+        d = {}
+        d['id'] = row.id
+        try:
+            d['client'] = UserExperiment.objects.filter(type__id=3, experiment__id=row.id)[0].user.username
+        except:
+            d['client'] = ''
+
+        if d['client'] not in b:
+            output['rows'].append(d)
+            b[d['client']] = 1
+
+    output = makeJsonFriendly(output)
+
+    return HttpResponse(json.dumps(output))
+    
+    
 def recordsSamples(request, experiment_id):
 
     if request.GET:
@@ -696,6 +749,61 @@ def recordsSamples(request, experiment_id):
 
 
     rows = Experiment.objects.get(id=experiment_id).sample_set.all()
+
+    # add row count
+    output['results'] = len(rows);
+
+    # add rows
+    for row in rows:
+        d = {}
+        d['id'] = row.id
+        d['label'] = row.label
+        d['weight'] = row.weight
+        d['comment'] = row.comment
+        d['sample_class'] = row.sample_class_id
+        try:
+            status = row.samplelog_set.all().order_by('-changetimestamp')[0]
+            d['last_status'] = str(status)
+        except:
+            d['last_status'] = ''
+
+        output['rows'].append(d)
+
+
+    output = makeJsonFriendly(output)
+
+    return HttpResponse(json.dumps(output))
+    
+    
+def recordsSamplesForClient(request, client):
+
+    if request.GET:
+        args = request.GET
+    else:
+        args = request.POST
+       
+
+    # basic json that we will fill in
+    output = {'metaData': { 'totalProperty': 'results',
+                            'successProperty': 'success',
+                            'root': 'rows',
+                            'id': 'id',
+                            'fields': [{'name':'id'}, {'name':'label'}, {'name':'weight'}, {'name':'comment'}, {'name':'sample_class'}, {'name':'last_status'}]
+                            },
+              'results': 0,
+              'authenticated': True,
+              'authorized': True,
+              'success': True,
+              'rows': []
+              }
+
+    authenticated = request.user.is_authenticated()
+    authorized = True # need to change this
+    if not authenticated or not authorized:
+        return HttpResponse(json.dumps(output), status=401)
+
+
+    rows = Experiment.objects.get(username=client).sample_set.all()
 
     # add row count
     output['results'] = len(rows);

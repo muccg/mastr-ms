@@ -104,7 +104,8 @@ MA.Treatment = {
                                                    allowBlank:false,
                                                    initDate: new Date(),
                                                    format:'Y/m/d'
-                                                   }), dataIndex:'taken_on' },
+                                                   }), dataIndex:'taken_on',
+                                                   renderer: Ext.util.Format.dateRenderer('Y/m/d') },
                                       { header: "time sample taken",  sortable:false, menuDisabled:true, editor:new Ext.form.TimeField({
                                                    editable:true,
                                                    allowBlank:false,
