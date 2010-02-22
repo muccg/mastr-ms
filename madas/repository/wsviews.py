@@ -1,7 +1,7 @@
 from django.http import HttpResponse, HttpResponseNotFound
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
-from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType
+from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType
 from madas.m.models import Organisation, Formalquote
 from django.utils import webhelpers
 from django.contrib.auth.models import User
@@ -803,7 +803,7 @@ def recordsSamplesForClient(request, client):
         return HttpResponse(json.dumps(output), status=401)
 
 
-    rows = Experiment.objects.get(username=client).sample_set.all()
+    rows = Sample.objects.filter(experiment__users__username=client)
 
     # add row count
     output['results'] = len(rows);
