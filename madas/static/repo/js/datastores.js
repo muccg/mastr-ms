@@ -177,6 +177,22 @@ var experimentListStore = new Ext.data.JsonStore(
                         }
                     );
                     
+var clientsListStore = new Ext.data.JsonStore(
+                        {
+                            storeId: 'clientsList',
+                            autoLoad: false,
+                            url: wsBaseUrl + 'recordsClients',
+                            listeners: {'load':MA.DSLoaded,
+                                        'loadexception':MA.DSLoadException
+                                        },
+                            sortInfo: {
+                                field: 'id',
+                                direction: 'DESC'
+                            }
+                                    
+                        }
+                    );
+                    
 var experimentStore = new Ext.data.ArrayStore({
                                              storeId:'experiment',
                                              fields: ['id', 'title', 'description', 'comment', 'status_id', 'created_on', 'client_id']

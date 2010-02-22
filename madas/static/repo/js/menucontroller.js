@@ -150,6 +150,11 @@ MA.ChangeMainContent = function(contentName, paramArray){
             window.location = "../repoadmin/";
             break;
             
+        case 'clients:list':
+            clientsListStore.reload();
+            Ext.getCmp('center-panel').layout.setActiveItem('clients-list');
+            break;
+            
         default:
             cancelBackTarget = false;
     }

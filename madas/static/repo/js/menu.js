@@ -15,32 +15,12 @@ MA.MenuRender = function(username) {
                         ]
                     }
                 },
-//                { xtype: 'tbbutton', text:'Admin', id:'admin', menu:{
-//                    items: [
-//                        {text:'Admin Database', id:'admin:db', handler: MA.MenuHandler}
-//                    ]
-//                    }
-//                },
-//                { xtype: 'tbbutton', text:'Help', menu:{
-//                    items: [
-//                        {text:'Screencasts', id:'help:screencasts', menu: {
-//                            items: [
-//                                {text:'----------', id:'help:screencasts-quoterequest', handler: MA.MenuHandler}
-//                                ]
-//                            } 
-//                        },
-//                        {text:'Admin screencasts', id:'helpadmin:screencasts', menu: {
-//                            items: [
-//                                {text:'----------', id:'helpadmin:screencasts-authrequest', handler: MA.MenuHandler},
-//                                {text:'----------', id:'helpadmin:screencasts-forwardquoterequest', handler: MA.MenuHandler},
-//                                {text:'----------', id:'helpadmin:screencasts-forwardformal', handler: MA.MenuHandler},
-//                                {text:'----------', id:'helpadmin:screencasts-replaceformal', handler: MA.MenuHandler}
-//                                ]
-//                            } 
-//                        }
-//                    ]
-//                    }
-//                },
+                { xtype: 'tbbutton', text:'Clients', id:'clientsMenu', menu:{
+                    items: [
+                        {text:'Clients List', id:'clients:list', handler: MA.MenuHandler}
+                        ]
+                    }
+                },
                 { xtype: 'tbfill'},
                 { xtype: 'tbbutton', text:userText, id: 'userMenu', menu:{
                     items: [
