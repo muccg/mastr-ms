@@ -232,8 +232,6 @@ var clientSampleStore = new Ext.data.GroupingStore(
                                               storeId: 'clientsamples',
                                               autoLoad: false,
                                               url: wsBaseUrl + 'recordsSamplesForClient/client/',
-                                              listeners: {'load':MA.DSLoaded,
-                                              'exception':function(proxy, type, action, options, response, arg){console.log('damnit:'+type+"\n"+response);}},
                                               root: 'rows',
                                               totalProperty: 'results',
                                               id: 'id',

@@ -21,7 +21,7 @@ MA.ClientsListCmp = {
             },
             columns: [
                       { header: "id", menuDisabled:true, dataIndex:'id', width:50 },
-                      { header: "Client", menuDisabled:true, dataIndex:'client' },
+                      { header: "Client", menuDisabled:true, dataIndex:'client' }
             ],
             store: clientsListStore,
             listeners: {
