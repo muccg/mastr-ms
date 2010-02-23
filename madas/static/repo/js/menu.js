@@ -56,6 +56,7 @@ MA.MenuShow = function() {
     Ext.get('login').hide();
     Ext.get('userMenu').show();
     Ext.get('experimentMenu').show();
+    Ext.get('clientsMenu').show();
 
 };
 
@@ -73,6 +74,7 @@ MA.MenuHide = function() {
     Ext.get('userMenu').hide();
     Ext.get('experimentMenu').hide();
 
+    Ext.get('clientsMenu').hide();
     //    Ext.getCmp('helpadmin:screencasts').disable();
 
 };

@@ -227,6 +227,26 @@ var sampleStore = new Ext.data.JsonStore(
                                               }
                                               );
 
+var clientSampleStore = new Ext.data.GroupingStore(
+                                              {
+                                              storeId: 'clientsamples',
+                                              autoLoad: false,
+                                              url: wsBaseUrl + 'recordsSamplesForClient/client/',
+                                              listeners: {'load':MA.DSLoaded,
+                                              'exception':function(proxy, type, action, options, response, arg){console.log('damnit:'+type+"\n"+response);}},
+                                              root: 'rows',
+                                              totalProperty: 'results',
+                                              id: 'id',
+                                              fields: ['id','experiment_id','experiment_title','label','weight','comment','sample_class','last_status'],
+                                              reader:new Ext.data.JsonReader({}),
+                                              sortInfo: {
+                                                  field: 'id',
+                                                  direction: 'DESC'
+                                              },
+                                              groupField:'experiment_id'
+                                              }
+                                              );
+
 var plantStore = new Ext.data.JsonStore(
                                           {
                                           storeId: 'plant',
