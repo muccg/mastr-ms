@@ -155,6 +155,10 @@ MA.ChangeMainContent = function(contentName, paramArray){
             Ext.getCmp('center-panel').layout.setActiveItem('clients-list');
             break;
             
+        case 'clients:samples':
+            Ext.getCmp('center-panel').layout.setActiveItem('client-samples-list');
+            break;
+            
         default:
             cancelBackTarget = false;
     }

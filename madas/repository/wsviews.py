@@ -788,7 +788,7 @@ def recordsSamplesForClient(request, client):
                             'successProperty': 'success',
                             'root': 'rows',
                             'id': 'id',
-                            'fields': [{'name':'id'}, {'name':'label'}, {'name':'weight'}, {'name':'comment'}, {'name':'sample_class'}, {'name':'last_status'}]
+                            'fields': [{'name':'id'}, {'name':'experiment_id'}, {'name':'experiment_title'}, {'name':'label'}, {'name':'weight'}, {'name':'comment'}, {'name':'sample_class'}, {'name':'last_status'}]
                             },
               'results': 0,
               'authenticated': True,
@@ -816,6 +816,8 @@ def recordsSamplesForClient(request, client):
         d['weight'] = row.weight
         d['comment'] = row.comment
         d['sample_class'] = row.sample_class_id
+        d['experiment_id'] = row.experiment_id
+        d['experiment_title'] = row.experiment.title
         try:
             status = row.samplelog_set.all().order_by('-changetimestamp')[0]
             d['last_status'] = str(status)

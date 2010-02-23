@@ -410,7 +410,7 @@ MA.InitUI = function() {
                 id:'center-panel',
                 layout: 'card',
                 activeItem:2,
-                items: [MA.ExperimentCmp, MA.ExperimentListCmp, MA.LoginCmp, MA.ClientsListCmp]
+                items: [MA.ExperimentCmp, MA.ExperimentListCmp, MA.LoginCmp, MA.ClientsListCmp, MA.ClientSamplesCmp]
             },
                new Ext.BoxComponent({
                                     region:'south',
