@@ -297,7 +297,13 @@ def populate_select(request, model=None, key=None, value=None, field=None, match
 
 def update_single_source(request, exp_id):
 
-    args = request.REQUEST
+    args = request.GET.copy()
+    
+    for key in args.keys():
+        if args[key] == '':
+            args[key] = None
+        if key == 'sex':
+            args[key] = u'U'
     
     output = {'metaData': { 'totalProperty': 'results',
                             'successProperty': 'success',
