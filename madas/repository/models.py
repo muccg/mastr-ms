@@ -57,6 +57,7 @@ class HumanInfo(models.Model):
     GENDER_CHOICES = (
         (u'M', u'Male'),
         (u'F', u'Female'),
+        (u'U', u'Unknown')
     )
     sex = models.CharField(null=True, max_length=2, choices=GENDER_CHOICES)
     date_of_birth = models.DateField(null=True, blank=True)
