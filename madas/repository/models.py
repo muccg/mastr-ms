@@ -98,6 +98,15 @@ class ExperimentStatus(models.Model):
     def __unicode__(self):
         return self.name
 
+class Project(models.Model):
+    title = models.CharField(max_length=255)
+    description = models.TextField(null=True)
+    created_on = models.DateField(null=False, default=date.today)
+    client = models.ForeignKey(User, null=True)    
+    
+    def __unicode__(self):
+        return self.title + ' (' + self.client.username + ')'
+
 class Experiment(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(null=True)
@@ -107,6 +116,7 @@ class Experiment(models.Model):
     created_on = models.DateField(null=False, default=date.today)
     formal_quote = models.ForeignKey(Formalquote, null=True)
     job_number = models.CharField(max_length=30)
+    project = models.ForeignKey(Project)
     # ? files
     
     def ensure_dir(self):
@@ -148,14 +158,12 @@ class Treatment(models.Model):
 
 class SampleTimeline(models.Model):
     experiment = models.ForeignKey('Experiment')
-    taken_at = models.TimeField(blank=True, null=True)
-    taken_on = models.DateField(default=date.today)
+    timeline = models.CharField(max_length=255, null=True, blank=True)
     
     def __unicode__(self):
-        if self.taken_at == None:
-            return str(self.taken_on)
-        else:
-            return str(self.taken_on) + ' ' + str(self.taken_at)
+        if self.timeline == None:
+            return ""
+        return self.timeline
 
 class SampleClass(models.Model):
     class_id = models.CharField(max_length=255)
