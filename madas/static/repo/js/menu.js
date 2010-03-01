@@ -8,6 +8,12 @@ MA.MenuRender = function(username) {
             id: 'toolbarA',
             items: [
                 { xtype: 'tbbutton', text:'Login', id:'login', handler: MA.MenuHandler},
+                { xtype: 'tbbutton', text:'Projects', id:'projectsMenu', menu:{
+                    items: [
+                        {text:'Projects List', id:'projects:list', handler: MA.MenuHandler}
+                        ]
+                    }
+                },
                 { xtype: 'tbbutton', text:'Experiment', id:'experimentMenu', menu:{
                     items: [
                         {text:'New Experiment', id:'experiment:new', handler: MA.MenuHandler},

@@ -147,7 +147,7 @@ MA.ExperimentDetails = {
                 title:'experiment',
                 autoHeight:true,
                 items: [
-                    { xtype:'textfield', fieldLabel:'experiment name', enableKeyEvents:true, id:'experimentName', allowBlank:false, listeners:{'keydown':function(t, e){ MA.UpdateNav(); return true; }, 'keyup':function(t, e){ MA.UpdateNav(); return true; }}},
+                    { xtype:'textfield', fieldLabel:'experiment name', width:700, enableKeyEvents:true, id:'experimentName', allowBlank:false, listeners:{'keydown':function(t, e){ MA.UpdateNav(); return true; }, 'keyup':function(t, e){ MA.UpdateNav(); return true; }}},
                     { xtype:'textarea', fieldLabel:'description', id:'experimentDescription', width:700, height:100 },
                     { xtype:'textarea', fieldLabel:'comment', id:'experimentComment', width:700, height:100 },
                         new Ext.form.ComboBox({
@@ -410,7 +410,7 @@ MA.InitUI = function() {
                 id:'center-panel',
                 layout: 'card',
                 activeItem:2,
-                items: [MA.ExperimentCmp, MA.ExperimentListCmp, MA.LoginCmp, MA.ClientsListCmp, MA.ClientSamplesCmp]
+                items: [MA.ExperimentCmp, MA.ExperimentListCmp, MA.LoginCmp, MA.ClientsListCmp, MA.ClientSamplesCmp, MA.ProjectListCmp]
             },
                new Ext.BoxComponent({
                                     region:'south',

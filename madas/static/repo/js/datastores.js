@@ -99,8 +99,11 @@ var timelineStore = new Ext.data.JsonStore(
                             storeId: 'timeline',
                             autoLoad: false,
                             url: wsBaseUrl + 'records/sampletimeline/experiment__id/0',
-                            listeners: {'load':MA.DSLoaded,
-                                        'loadexception':MA.DSLoadException
+                            listeners: {'load': function(store, records, options) {
+                                        },
+                                'exception': function(proxy, type, action, options, response, arg) {
+                                            console.log('exception');
+                                        }
                             },
                             sortInfo: {
                                 field: 'id',
@@ -166,6 +169,22 @@ var experimentListStore = new Ext.data.JsonStore(
                             storeId: 'experimentList',
                             autoLoad: false,
                             url: wsBaseUrl + 'recordsExperiments',
+                            listeners: {'load':MA.DSLoaded,
+                                        'loadexception':MA.DSLoadException
+                                        },
+                            sortInfo: {
+                                field: 'id',
+                                direction: 'DESC'
+                            }
+                                    
+                        }
+                    );
+
+var projectsListStore = new Ext.data.JsonStore(
+                        {
+                            storeId: 'projectList',
+                            autoLoad: false,
+                            url: wsBaseUrl + 'records/project',
                             listeners: {'load':MA.DSLoaded,
                                         'loadexception':MA.DSLoadException
                                         },

@@ -1,5 +1,13 @@
 [
     {
+        "pk": 1,
+        "model": "repository.project",
+        "fields": {
+            "title": "Test",
+            "client": 1
+        }
+    },
+    {
         "pk": 1, 
         "model": "repository.organismtype", 
         "fields": {
@@ -50,7 +58,8 @@
             "comment": "test", 
             "status": 1, 
             "description": "test", 
-            "title": "test"
+            "title": "test",
+            "project": 1
         }
     }, 
     {

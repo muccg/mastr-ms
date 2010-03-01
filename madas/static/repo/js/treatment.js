@@ -11,8 +11,7 @@ MA.TreatmentInit = function() {
 MA.SaveTimelineRow = function(roweditor, changes, rec, i) {
     var bundledData = {};
     
-    bundledData.taken_on = Ext.util.Format.date(rec.data.taken_on, 'Y-m-d');
-    bundledData.taken_at = rec.data.taken_at;
+    bundledData.timeline = rec.data.timeline;
     
     MA.SaveRowLiterals('sampletimeline', roweditor, bundledData, rec, i, function() { var expId = MA.CurrentExperimentId(); timelineStore.proxy.conn.url = wsBaseUrl + 'records/sampletimeline/experiment__id/' + expId; timelineStore.load();});
 };
@@ -51,7 +50,7 @@ MA.Treatment = {
                     { xtype:'editorgrid', 
                             id:'dates',
                             style:'margin-top:10px;margin-bottom:10px;',
-                            title:'dates',
+                            title:'timeline',
                             width:500,
                             height:200,
                             border: true,
@@ -63,7 +62,7 @@ MA.Treatment = {
                                 autoFill:true
                             },
                             tbar: [{
-                                text: 'add date',
+                                text: 'add time',
                                 cls: 'x-btn-text-icon',
                                 icon:'static/repo/images/add.gif',
                                 handler : function(){
@@ -72,7 +71,7 @@ MA.Treatment = {
                                     }
                                 },
                                 {
-                                text: 'remove date',
+                                text: 'remove time',
                                 cls: 'x-btn-text-icon',
                                 icon:'static/repo/images/no.gif',
                                 handler : function(){
@@ -99,22 +98,7 @@ MA.Treatment = {
                                    }
                             ],
                             columns: [
-                                      { header: "date sample taken",  sortable:false, menuDisabled:true, editor:new Ext.form.DateField({
-                                                   editable:true,
-                                                   allowBlank:false,
-                                                   initDate: new Date(),
-                                                   format:'Y/m/d'
-                                                   }), dataIndex:'taken_on',
-                                                   renderer: Ext.util.Format.dateRenderer('Y/m/d') },
-                                      { header: "time sample taken",  sortable:false, menuDisabled:true, editor:new Ext.form.TimeField({
-                                                   editable:true,
-                                                   allowBlank:false,
-                                                   initDate: new Date(),
-                                                   minValue: '0:00',
-                                                   maxValue: '23:59',
-                                                   increment: 1,
-                                                   format:'H:i'
-                                                   }), dataIndex:'taken_at' }
+                                      { header: "timeline",  sortable:false, menuDisabled:true, dataIndex:'timeline', editor: new Ext.form.TextField({allowBlank:false}) },
                             ],
                             store: timelineStore
                         }
@@ -128,7 +112,7 @@ MA.Treatment = {
                     { xtype:'editorgrid', 
                             id:'othertreat',
                             style:'margin-top:10px;margin-bottom:10px;',
-                            title:'other treatments',
+                            title:'treatments',
                             width:500,
                             height:200,
                             border: true,
