@@ -614,8 +614,11 @@ def recordsSampleClasses(request, experiment_id):
 
     return HttpResponse(json.dumps(output))
     
-    
+
 def recordsExperiments(request):
+   return recordsExperimentsForProject(request, None)
+    
+def recordsExperimentsForProject(request, project_id):
 
     if request.GET:
         args = request.GET
@@ -644,6 +647,9 @@ def recordsExperiments(request):
 
 
     rows = Experiment.objects.all() 
+    
+    if project_id is not None:
+        rows = rows.filter(project__id=project_id)
 
     # add row count
     output['results'] = len(rows);
