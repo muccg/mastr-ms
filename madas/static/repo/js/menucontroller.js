@@ -164,6 +164,19 @@ MA.ChangeMainContent = function(contentName, paramArray){
             Ext.getCmp('center-panel').layout.setActiveItem('projects-list');
             break;
             
+        case 'project:new':
+            MA.CurrentProjectId = 0;
+            var titlefield = Ext.getCmp('projectTitle');
+            var desc = Ext.getCmp('projectDescription');
+            
+            titlefield.setValue('');
+            desc.setValue('');
+            //fall through to force render of new experiment
+        case 'project:view':
+            Ext.getCmp('center-panel').layout.setActiveItem(6);
+            break;
+
+            
         default:
             cancelBackTarget = false;
     }
