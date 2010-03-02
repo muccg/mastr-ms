@@ -30,7 +30,7 @@ class SampleAdmin(admin.ModelAdmin):
     list_display = ('label','comment', 'sample_class')
 
 class SampleTimelineAdmin(admin.ModelAdmin):
-    list_display = ('timeline')
+    list_display = ('id', 'timeline')
 
 class StandardOperationProcedureAdmin(admin.ModelAdmin):
     list_display = ('responsible', 'label', 'area_where_valid', 'comment', 'organisation', 'version', 'defined_by', 'replaces_document', 'content', 'attached_pdf')

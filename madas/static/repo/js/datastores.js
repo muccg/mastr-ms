@@ -184,7 +184,7 @@ var projectsListStore = new Ext.data.JsonStore(
                         {
                             storeId: 'projectList',
                             autoLoad: false,
-                            url: wsBaseUrl + 'records/project',
+                            url: wsBaseUrl + 'records/project/id__gte/0',
                             listeners: {'load':MA.DSLoaded,
                                         'loadexception':MA.DSLoadException
                                         },
