@@ -165,12 +165,16 @@ MA.ChangeMainContent = function(contentName, paramArray){
             break;
             
         case 'project:new':
-            MA.CurrentProjectId = 0;
+            MA.currentProjectId = 0;
             var titlefield = Ext.getCmp('projectTitle');
             var desc = Ext.getCmp('projectDescription');
             
             titlefield.setValue('');
             desc.setValue('');
+            
+            experimentListStore.removeAll();
+            Ext.getCmp('project-experiment-list').disable();
+            
             //fall through to force render of new experiment
         case 'project:view':
             Ext.getCmp('center-panel').layout.setActiveItem(6);

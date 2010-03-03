@@ -53,14 +53,14 @@ MA.ExperimentBlur = function(invoker) {
 
     if (expId === 0) {
         
-        var saver = new Ajax.Request(wsBaseUrl + 'create/experiment/?title='+escape(expName)+'&description='+escape(expDescription)+'&comment='+escape(expComment)+'&status_id=2&formal_quote_id='+escape(expFQuoteId)+'&job_number='+escape(expJobNumber), 
+        var saver = new Ajax.Request(wsBaseUrl + 'create/experiment/?title='+escape(expName)+'&description='+escape(expDescription)+'&comment='+escape(expComment)+'&status_id=2&formal_quote_id='+escape(expFQuoteId)+'&job_number='+escape(expJobNumber)+'&project_id='+escape(MA.currentProjectId), 
                                              { 
                                              asynchronous:true, 
                                              evalJSON:'force',
                                      onSuccess:     MA.ExperimentBlurSuccess
                                      });
     } else {
-        var saver = new Ajax.Request(wsBaseUrl + 'update/experiment/'+expId+'/?title='+escape(expName)+'&description='+escape(expDescription)+'&comment='+escape(expComment)+'&status_id=2&formal_quote_id='+escape(expFQuoteId)+'&job_number='+escape(expJobNumber), 
+        var saver = new Ajax.Request(wsBaseUrl + 'update/experiment/'+expId+'/?title='+escape(expName)+'&description='+escape(expDescription)+'&comment='+escape(expComment)+'&status_id=2&formal_quote_id='+escape(expFQuoteId)+'&job_number='+escape(expJobNumber)+'&project_id='+escape(MA.currentProjectId), 
                                      { 
                                      asynchronous:true, 
                                      evalJSON:'force',
@@ -384,7 +384,7 @@ MA.InitApplication = function() {
 
     MA.InitUI();
     
-    MA.Authorize('experiment:my', []);
+    MA.Authorize('projects:list', []);
 };
 
 MA.InitUI = function() {
