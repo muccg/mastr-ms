@@ -63,6 +63,9 @@ def create_object(request, model):
 
 def update_object(request, model, id):
     
+    if id == '0':
+        return create_object(request, model)
+    
     if request.GET:
         args = request.GET
     else:
@@ -71,6 +74,7 @@ def update_object(request, model, id):
     #fetch the object and update all values
     model_obj = get_model('repository', model) # try to get app name dynamically at some point
     params = {'id':id}
+    
     rows = model_obj.objects.filter(**params)
     
     for row in rows:
