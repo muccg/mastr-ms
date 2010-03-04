@@ -98,7 +98,7 @@ MA.Treatment = {
                                    }
                             ],
                             columns: [
-                                      { header: "timeline",  sortable:false, menuDisabled:true, dataIndex:'timeline', editor: new Ext.form.TextField({allowBlank:false}) },
+                                      { header: "timeline",  sortable:false, menuDisabled:true, dataIndex:'timeline', editor: new Ext.form.TextField({allowBlank:false}) }
                             ],
                             store: timelineStore
                         }
