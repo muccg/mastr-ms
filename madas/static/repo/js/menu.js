@@ -14,13 +14,6 @@ MA.MenuRender = function(username) {
                         ]
                     }
                 },
-                { xtype: 'tbbutton', text:'Experiment', id:'experimentMenu', menu:{
-                    items: [
-                        {text:'New Experiment', id:'experiment:new', handler: MA.MenuHandler},
-                        {text:'My Experiments', id:'experiment:my', handler: MA.MenuHandler}
-                        ]
-                    }
-                },
                 { xtype: 'tbbutton', text:'Clients', id:'clientsMenu', menu:{
                     items: [
                         {text:'Clients List', id:'clients:list', handler: MA.MenuHandler}
