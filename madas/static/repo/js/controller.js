@@ -186,6 +186,14 @@ MA.ExperimentCmp = {
         split: true,
         bodyStyle: 'padding:15px'
     },
+    tools: [
+        {
+            id:'left',
+            handler: function() {
+                MA.LoadProject(MA.currentProjectId);
+            }
+        }
+    ],
     items: [{
         region:'west',
         margins: '5 0 0 0',
