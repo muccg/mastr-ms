@@ -35,7 +35,10 @@ def siteurl(request):
         u = d['META']['wsgi.url_scheme'] + '://' + d['META']['HTTP_X_FORWARDED_HOST'] + wsgibase() + '/'
     else:
         #Otherwise, its an internal request
-        u = d['META']['wsgi.url_scheme'] + '://' + d['META']['HTTP_HOST'] + wsgibase() + '/' 
+        host = d['META'].get('HTTP_HOST')
+        if not host:
+            host = d['META'].get('SERVER_NAME')
+        u = d['META']['wsgi.url_scheme'] + '://' + host + wsgibase() + '/' 
 
 
     '''
