@@ -226,6 +226,7 @@ MA.QuoteRequestListInit = function(){
         }
     }
     var colModel = new Ext.grid.ColumnModel([
+        {header: 'ID', align : 'left', sortable: true, dataIndex: 'id', width:25 },
         {header: 'Unread', align:'center', sortable: true, dataIndex: 'unread', renderer: checkBoxRenderer },
         {header: 'Completed', align:'center', sortable: true, dataIndex: 'completed', renderer: checkBoxRenderer },
         {header: 'Email', width:185, align : 'left', sortable: true, dataIndex: 'email' },
@@ -344,7 +345,8 @@ MA.QuoteRequestEditCmp =
                 {  
                     name: 'id',
                     id: 'qre-id',
-                    inputType: 'hidden'
+                    fieldLabel:'Request ID',
+                    xtype: 'displayfield'
                 },{
                     fieldLabel: 'Email address',
                     name: 'email',
