@@ -227,7 +227,7 @@ MA.QuoteRequestListInit = function(){
     }
     var colModel = new Ext.grid.ColumnModel([
         {header: 'ID', align : 'left', sortable: true, dataIndex: 'id', width:25 },
-        {header: 'Unread', align:'center', sortable: true, dataIndex: 'unread', renderer: checkBoxRenderer },
+        {header: 'Unread', align:'center', sortable: true, dataIndex: 'unread', renderer: checkBoxRenderer, width:35 },
         {header: 'Completed', align:'center', sortable: true, dataIndex: 'completed', renderer: checkBoxRenderer },
         {header: 'Email', width:185, align : 'left', sortable: true, dataIndex: 'email' },
         {header: 'First Name', align : 'left', sortable: true, dataIndex: 'firstname' },
@@ -702,7 +702,8 @@ MA.QuoteRequestListAllInit = function(){
         }
     }
     var colModel = new Ext.grid.ColumnModel([
-        {header: 'Unread', align:'center', sortable: true, dataIndex: 'unread', renderer: checkBoxRenderer },
+        {header: 'ID', align : 'left', sortable: true, dataIndex: 'id', width:25 },
+        {header: 'Unread', align:'center', sortable: true, dataIndex: 'unread', renderer: checkBoxRenderer, width:35 },
         {header: 'Completed', align:'center', sortable: true, dataIndex: 'completed', renderer: checkBoxRenderer },
         {header: 'Email', width:185, align : 'left', sortable: true, dataIndex: 'email' },
         {header: 'First Name', align : 'left', sortable: true, dataIndex: 'firstname' },
@@ -799,6 +800,8 @@ MA.FormalQuoteUserListInit = function(){
         }
     }
     var colModel = new Ext.grid.ColumnModel([
+        {header: 'ID', align : 'left', sortable: true, dataIndex: 'id', width:25 },
+        {header: 'QID', align : 'left', sortable: true, dataIndex: 'quoterequestid', width:25 },
         {header: 'From', align:'left', sortable: true, dataIndex: 'fromemail'},
          {header: 'To', align:'left', sortable: true, dataIndex: 'toemail'},
         {header: 'Details', align:'left', sortable: true, dataIndex: 'details'},
