@@ -934,7 +934,8 @@ MA.ViewFormalCmp = {
             {  
                 name: 'id',
                 id: 'quov-qid',
-                inputType: 'hidden'
+                xtype:'displayfield',
+                fieldLabel:'Request ID'
             },{
                 fieldLabel: 'Email address',
                 name: 'email',
