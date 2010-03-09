@@ -35,7 +35,7 @@ def makeJsonFriendly(data):
         elif isinstance(data, datetime.datetime):
             #print 'handling datetime'
             #print 'converting datetime: ', str(data)
-            return str(data)
+            return datetime.strftime(data, '%Y/%m/%d %H:%M')
         else:
             #print 'handling default case. Type was ', type(data)
             #print 'returning unmodified'
