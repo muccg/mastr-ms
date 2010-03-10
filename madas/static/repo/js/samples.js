@@ -101,6 +101,46 @@ MA.ExperimentSamples = {
                            }
                            
                         }
+                        },
+                        {
+                            text:' create ',
+                            handler: function() {
+                                var reps = Ext.getCmp('replicateField').getValue();
+                                
+                                var grid = Ext.getCmp('sampleClasses');
+                                var selIds = []; 
+                                
+                                var selections = grid.getSelectionModel().getSelections();
+                                if (!Ext.isArray(selections)) {
+                                    selections = [selections];
+                                }
+                                
+                                for (var index = 0; index < selections.length; index++) {
+                                    if (!Ext.isObject(selections[index])) {
+                                        continue;
+                                    }
+                                    
+                                    selIds.push(selections[index].data.id);
+                                }
+                                
+                                for (var i = 0; i < selIds.length; i++) {
+                                    for (var j = 0; j < reps; j++) {
+                                        MA.CRUDSomething('create/sample/', {'sample_class_id':selIds[i], 'experiment_id':MA.CurrentExperimentId()}, function() { });
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            xtype:'numberfield',
+                            id:'replicateField',
+                            value:'6',
+                            width:28
+                        },
+                        {
+                            xtype:'panel',
+                            html:' samples for selected classes ',
+                            border:false,
+                            bodyStyle:'background:transparent;padding:4px;'
                         }
                     ],
                     viewConfig: {
