@@ -327,6 +327,35 @@ MA.ExperimentSamplesOnly = {
                                   sampleStore.load(); });
            }                        }
            }
+//           },
+//           {
+//               text: 'view sample log',
+//               cls: 'x-btn-text-icon',
+//               id:'viewsamplelogbutton',
+//               icon:'static/repo/images/s.gif',
+//               handler : function(){
+//                   var grid = Ext.getCmp('samplesOnly');
+//                   var delIds = []; 
+//                   
+//                   var selections = grid.getSelectionModel().getSelections();
+//                   if (!Ext.isArray(selections)) {
+//                       selections = [selections];
+//                   }
+//                   
+//                   for (var index = 0; index < selections.length; index++) {
+//                       if (!Ext.isObject(selections[index])) {
+//                           continue;
+//                       }
+//                       
+//                       delIds.push(selections[index].data.id);
+//                   }
+//                   
+//                   for (var i = 0; i < delIds.length; i++) {
+        //           MA.CRUDSomething('delete/sample/'+delIds[i], {}, function() { var eId = MA.CurrentExperimentId(); sampleStore.proxy.conn.url = wsBaseUrl + 'recordsSamples/experiment__id/' + eId;
+        //                                  sampleStore.load(); });
+//                   }
+//               }
+//           }
            ],
     items: [
             {

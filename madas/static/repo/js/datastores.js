@@ -245,6 +245,20 @@ var sampleStore = new Ext.data.JsonStore(
                                               }
                                               }
                                               );
+                                              
+var sampleLogStore = new Ext.data.JsonStore(
+                                              {
+                                              storeId: 'samplelogs',
+                                              autoLoad: false,
+                                              url: wsBaseUrl + 'records/samplelog/id__gte/0',
+                                              listeners: {'load':MA.DSLoaded,
+                                              'loadexception':MA.DSLoadException},
+                                              sortInfo: {
+                                                  field: 'id',
+                                                  direction: 'DESC'
+                                              }
+                                              }
+                                              );
 
 var clientSampleStore = new Ext.data.GroupingStore(
                                               {

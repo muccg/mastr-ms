@@ -57,6 +57,11 @@ def create_object(request, model):
     if model == 'animal' or model == 'plant' or model == 'human':
         o = Organ(source=obj, name='Unknown')
         o.save()
+        
+    if model == 'samplelog':
+        user = User.objects.get(username=request.user.username)
+        obj.user = user
+        obj.save()
 
     return records(request, model, 'id', obj.id)
     
