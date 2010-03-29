@@ -1,11 +1,40 @@
 MA.TrackingSm = new Ext.grid.CheckboxSelectionModel({ width: 25 });
 
+MA.SampleTrackingInit = function() {
+    var expId = MA.CurrentExperimentId();
+    
+    var classLoader = new Ajax.Request(wsBaseUrl + 'populate_select/sampleclass/id/class_id/experiment__id/'+escape(expId), 
+                                     { 
+                                     asynchronous:false, 
+                                     evalJSON:'force',
+                                     onSuccess: function(response) {
+                                         var classComboStore = Ext.StoreMgr.get('classCombo');
+                                         var data = response.responseJSON.response.value.items;
+                                         var massagedData = [];
+
+                                         for (var idx in data) {
+                                             massagedData[idx] = [data[idx]['key'], data[idx]['value']];
+                                         }
+                                         
+                                         classComboStore.loadData(massagedData);
+                                         }
+                                     }
+                                     );
+    
+    sampleStore.proxy.conn.url = wsBaseUrl + 'recordsSamples/experiment__id/' + expId;
+    sampleStore.load();
+
+    sampleLogStore.load();
+};
+
 MA.SampleLogSuccess = function() {
     //something
     var expId = MA.CurrentExperimentId();
     
     sampleStore.proxy.conn.url = wsBaseUrl + 'recordsSamples/experiment__id/' + expId;
     sampleStore.load();
+    
+    sampleLogStore.load();
 };
 
 MA.SampleTracking = {
@@ -35,7 +64,7 @@ MA.SampleTracking = {
             border: true,
             title:'samples',
             style: 'padding-left:3%;padding-right:3%;',
-            height: 400,
+            height: 300,
             id:'sampleTracking',
             trackMouseOver: false,
             sm: MA.TrackingSm,
@@ -116,6 +145,28 @@ MA.SampleTracking = {
                       { header: "last status", sortable:true, menuDisabled:true, width:300, dataIndex:'last_status' }
                       ],
             store: sampleStore
+            },
+            {
+            xtype:'grid',
+            border: true,
+            title:'sample log',
+            style: 'padding-left:3%;padding-right:3%;',
+            height: 200,
+            id:'sampleTrackingLog',
+            trackMouseOver: false,
+            viewConfig: {
+            forceFit: true,
+            autoFill:true
+            },
+            columns: [
+                      { header: "id", sortable:true, menuDisabled:true, dataIndex:'id' },
+                      { header: "date", sortable:true, menuDisabled:true, dataIndex:'changetimestamp' },
+                      { header: "user", sortable:true, menuDisabled:true, width:300, dataIndex:'user', renderer:renderUser },
+                      { header: "sample", sortable:true, menuDisabled:true, width:300, dataIndex:'sample' },
+                      { header: "type", sortable:true, menuDisabled:true, dataIndex:'type', renderer:renderSampleLogType },
+                      { header: "description", sortable:true, menuDisabled:true, dataIndex:'description' }
+                      ],
+            store: sampleLogStore
             }
             ]
 };

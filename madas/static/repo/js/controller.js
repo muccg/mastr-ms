@@ -255,7 +255,7 @@ MA.ExperimentCmp = {
                             {
                                 storeId:"navDS",
                                 fields: ["nav", "init", "blur", "enabled"],
-                                data: [ ["experiment details", MA.ExperimentInit, MA.ExperimentBlur, true], ["source", MA.BioSourceInit, MA.BioSourceBlur, false], ["treatment",MA.TreatmentInit, MA.Blur,false], ["sample prep",MA.SamplePrepInit, MA.Blur,false], ["sample classes", MA.ExperimentSamplesInit, MA.Blur, false], ["samples", MA.ExperimentSamplesOnlyInit, MA.Blur, false], ["sample tracking", MA.ExperimentSamplesOnlyInit, MA.Blur, false], ["files", MA.FilesInit, MA.Blur, false], ["access",MA.AccessInit, MA.Blur,false] ]
+                                data: [ ["experiment details", MA.ExperimentInit, MA.ExperimentBlur, true], ["source", MA.BioSourceInit, MA.BioSourceBlur, false], ["treatment",MA.TreatmentInit, MA.Blur,false], ["sample prep",MA.SamplePrepInit, MA.Blur,false], ["sample classes", MA.ExperimentSamplesInit, MA.Blur, false], ["samples", MA.ExperimentSamplesOnlyInit, MA.Blur, false], ["sample tracking", MA.SampleTrackingInit, MA.Blur, false], ["files", MA.FilesInit, MA.Blur, false], ["access",MA.AccessInit, MA.Blur,false] ]
                             }
                         ),
                         listeners:{"render":function(a){window.setTimeout("Ext.getCmp('expNav').getSelectionModel().selectFirstRow();", 500);}}

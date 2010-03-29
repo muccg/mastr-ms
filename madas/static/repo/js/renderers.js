@@ -17,6 +17,22 @@ function renderStatus(v, p, record) {
 	return value;
 }
 
+function renderSampleLogType(val) {
+    switch (val) {
+        case 0:
+            return 'Comment';
+            break;
+        case 1:
+            return 'Relocation';
+            break;
+        case 2:
+            return 'Method';
+            break;
+    }
+    
+    return '';
+}
+
 function renderOrganism(val) {
     return renderValueOnly(organismComboStore, val);   
 }
