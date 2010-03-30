@@ -52,7 +52,7 @@ MA.SamplePrep = {
                         autoFill:true
                     },
                     tbar: [{
-                        text: 'add SOP',
+                        text: 'choose an SOP',
                         cls: 'x-btn-text-icon',
                         icon:'static/repo/images/add.gif',
                         handler : function(){
