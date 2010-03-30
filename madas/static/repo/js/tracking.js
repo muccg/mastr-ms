@@ -48,7 +48,7 @@ MA.SampleTracking = {
     items: [
             { 
             xtype:'fieldset', 
-            bodyStyle:'padding:15px;background:transparent;',
+            bodyStyle:'padding:15px;background:transparent;padding-bottom:0px;',
             border:false,
             autoHeight:true,
             items: [
@@ -63,7 +63,7 @@ MA.SampleTracking = {
             xtype:'grid',
             border: true,
             title:'samples',
-            style: 'padding-left:3%;padding-right:3%;',
+            style: 'padding-left:3%;padding-right:3%;padding-bottom:10px;',
             height: 300,
             id:'sampleTracking',
             trackMouseOver: false,
