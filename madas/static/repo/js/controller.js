@@ -299,10 +299,13 @@ MA.LoadExperiment = function(expId) {
                                          var fquoCombo = Ext.getCmp('formalQuote');
                                          var data = response.responseJSON.response.value.items;
                                          var massagedData = [];
-
+                                         
                                          for (var idx in data) {
                                             massagedData[idx] = [data[idx]['key'], '#'+data[idx]['key']+'  '+data[idx]['value']];
                                          }
+
+                                         //ensure that there is a blank entry
+                                         massagedData.unshift(['','  none  ']);
                                          
                                          fquoCombo.getStore().loadData(massagedData);
                                          

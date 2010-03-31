@@ -250,7 +250,7 @@ MA.LoadProject = function (projId) {
                                                  desc.setValue('');
     
                                                  var rs = response.responseJSON.rows;
-                                                 console.log(rs);
+
                                                  if (rs.length > 0) {
                                                      titleCmp.setTitle('Project: ' + rs[0].title);
                                                      titlefield.setValue(rs[0].title);

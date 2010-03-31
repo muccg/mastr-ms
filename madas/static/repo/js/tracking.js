@@ -24,6 +24,7 @@ MA.SampleTrackingInit = function() {
     sampleStore.proxy.conn.url = wsBaseUrl + 'recordsSamples/experiment__id/' + expId;
     sampleStore.load();
 
+    sampleLogStore.proxy.conn.url = wsBaseUrl + 'records/samplelog/sample__experiment__id/'+expId;
     sampleLogStore.load();
 };
 
