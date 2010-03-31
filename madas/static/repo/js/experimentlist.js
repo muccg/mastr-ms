@@ -18,26 +18,29 @@ MA.ExperimentListCmp = {
         text: 'remove experiment',
         cls: 'x-btn-text-icon',
         icon:'static/repo/images/no.gif',
-        handler : function(){
+        handler: function(){
+           console.log("pre a");
            var grid = Ext.getCmp('experiments');
            var delIds = []; 
-           
+           console.log("a");
            var selections = grid.getSelectionModel().getSelections();
            if (!Ext.isArray(selections)) {
-           selections = [selections];
+               selections = [selections];
            }
-           
+           console.log("b");           
            for (var index = 0; index < selections.length; index++) {
-           if (!Ext.isObject(selections[index])) {
-           continue;
+               if (!Ext.isObject(selections[index])) {
+                   continue;
+               }
+               
+               delIds.push(selections[index].data.id);
            }
-           
-           delIds.push(selections[index].data.id);
-           }
-           //console.log(delIds);
+           console.log("c");
+           console.log(delIds);
            for (var i = 0; i < delIds.length; i++) {
                MA.CRUDSomething('delete/experiment/'+delIds[i], {}, function() { experimentListStore.load(); });
-           }                        
+           }             
+           console.log("d");           
            }
            
         }
