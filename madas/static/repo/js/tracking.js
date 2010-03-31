@@ -43,8 +43,12 @@ MA.SampleTracking = {
     cmargins: '0 0 0 0',
     collapsible: false,
     bodyStyle: 'padding:0px;background:transparent;',
-    layout:'fit',
+    //layout:'fit',
     autoScroll:true,
+    viewConfig: {
+    forceFit: true,
+    autoFill:true
+    },
     items: [
             { 
             xtype:'fieldset', 
