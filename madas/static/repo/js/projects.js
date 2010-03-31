@@ -36,7 +36,7 @@ MA.ProjectListCmp = {
            }
            //console.log(delIds);
            for (var i = 0; i < delIds.length; i++) {
-               MA.CRUDSomething('delete/project/'+delIds[i], {}, function() { projectListStore.load(); });
+               MA.CRUDSomething('delete/project/'+delIds[i], {}, function() { projectsListStore.load(); });
            }                        
            }
            
@@ -174,7 +174,7 @@ MA.ProjectCmp = {
                 cls: 'x-btn-text-icon',
                 icon:'static/repo/images/no.gif',
                 handler : function(){
-                   var grid = Ext.getCmp('experiments');
+                   var grid = Ext.getCmp('project-experiments');
                    var delIds = []; 
                    
                    var selections = grid.getSelectionModel().getSelections();
