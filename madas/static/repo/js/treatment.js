@@ -66,7 +66,7 @@ MA.Treatment = {
                                 cls: 'x-btn-text-icon',
                                 icon:'static/repo/images/add.gif',
                                 handler : function(){
-                                    MA.CRUDSomething('create/sampletimeline/', {'experiment_id':MA.CurrentExperimentId()}, function() { var expId = MA.CurrentExperimentId(); timelineStore.proxy.conn.url = wsBaseUrl + 'records/sampletimeline/experiment__id/' + expId;
+                                    MA.CRUDSomething('create/sampletimeline/', {'experiment_id':MA.CurrentExperimentId(),'timeline':'00:00'}, function() { var expId = MA.CurrentExperimentId(); timelineStore.proxy.conn.url = wsBaseUrl + 'records/sampletimeline/experiment__id/' + expId;
                                                           timelineStore.load(); });
                                     }
                                 },
