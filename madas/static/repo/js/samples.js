@@ -125,7 +125,7 @@ MA.ExperimentSamples = {
                                 
                                 for (var i = 0; i < selIds.length; i++) {
                                     for (var j = 0; j < reps; j++) {
-                                        MA.CRUDSomething('create/sample/', {'sample_class_id':selIds[i], 'experiment_id':MA.CurrentExperimentId()}, function() { var sm = Ext.getCmp('sampleClasses').getSelectionModel(); var selected = sm.getSelected(); sm.clearSelections(); sm.selectRecords([selected]); });
+                                        MA.CRUDSomething('create/sample/', {'sample_class_id':selIds[i], 'experiment_id':MA.CurrentExperimentId()}, function() { var sm = Ext.getCmp('sampleClasses').getSelectionModel(); var selected = sm.getSelected(); sm.clearSelections(); sm.selectRecords([selected]);  MA.ExperimentSamplesInit(); });
                                     }
                                 }
                             }
@@ -161,6 +161,7 @@ MA.ExperimentSamples = {
                     columns: [
                         { header: "id", sortable:true, dataIndex:"id" },
                         { header: "Class", sortable:true, editor:new Ext.form.TextField(), dataIndex:"class_id" },
+                        { header: "Samples", sortable:true, dataIndex:"count" },
                               { header: "Treatment Variation", sortable:true, dataIndex:"treatment" },
                               { header: "Timeline", sortable:true, dataIndex:"timeline" },
                               { header: "Origin", sortable:true, dataIndex:"origin" },
@@ -185,7 +186,7 @@ MA.ExperimentSamples = {
                 icon:'static/repo/images/add.gif',
                 handler : function(){
                    MA.CRUDSomething('create/sample/', {'sample_class_id':MA.CurrentSampleClassId(), 'experiment_id':MA.CurrentExperimentId()}, function() { var scId = MA.CurrentSampleClassId(); sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/sample_class__id/' + scId;
-                                          sampleStore.load(); });
+                                          sampleStore.load(); MA.ExperimentSamplesInit(); });
                    }
                 },
                 {
@@ -213,7 +214,7 @@ MA.ExperimentSamples = {
 
                    for (var i = 0; i < delIds.length; i++) {
                    MA.CRUDSomething('delete/sample/'+delIds[i], {}, function() { var scId = MA.CurrentSampleClassId(); sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/sample_class__id/' + scId;
-                                          sampleStore.load(); });
+                                          sampleStore.load(); MA.ExperimentSamplesInit();  });
                    }                        }
                 }
             ],
