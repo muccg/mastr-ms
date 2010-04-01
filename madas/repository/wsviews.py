@@ -578,7 +578,7 @@ def recordsSampleClasses(request, experiment_id):
                             'successProperty': 'success',
                             'root': 'rows',
                             'id': 'id',
-                            'fields': [{'name':'id'}, {'name':'class_id'}, {'name':'treatment'}, {'name':'timeline'}, {'name':'organ'},  {'name':'enabled'}]
+                            'fields': [{'name':'id'}, {'name':'class_id'}, {'name':'treatment'}, {'name':'timeline'}, {'name':'organ'},  {'name':'enabled'}, {'name':'count'}]
                             },
               'results': 0,
               'authenticated': True,
@@ -615,6 +615,8 @@ def recordsSampleClasses(request, experiment_id):
             
         if row.organ:
             d['organ'] = row.organ.name
+        
+        d['count'] = row.sample_set.count()
 
         output['rows'].append(d)
 
