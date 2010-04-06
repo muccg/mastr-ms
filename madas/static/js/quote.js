@@ -303,6 +303,8 @@ MA.QuoteRequestEditLoaded = function () {
 		Ext.getCmp('downloadattachbutton').setText('Download '+Ext.getCmp('attachment').value);
 		Ext.getCmp('downloadattachbutton').enable();
 	}
+	
+	Ext.getCmp('qre-id').setValue(Ext.getCmp('qre-hidden-id').getValue());
 }
 
 
@@ -343,6 +345,10 @@ MA.QuoteRequestEditCmp =
 
             items: [
                 {  
+                    name: 'id',
+                    id: 'qre-hidden-id',
+                    xtype: 'hidden'
+                },{
                     name: 'id',
                     id: 'qre-id',
                     fieldLabel:'Request ID',
