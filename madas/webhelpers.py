@@ -30,6 +30,7 @@ def url( relpath ):
 
 def siteurl(request):
     d = request.__dict__
+    u = 'http://localhost'
     if d['META'].has_key('HTTP_X_FORWARDED_HOST'):
         #The request has come from outside, so respect X_FORWARDED_HOST
         u = d['META']['wsgi.url_scheme'] + '://' + d['META']['HTTP_X_FORWARDED_HOST'] + wsgibase() + '/'
@@ -38,7 +39,12 @@ def siteurl(request):
         host = d['META'].get('HTTP_HOST')
         if not host:
             host = d['META'].get('SERVER_NAME')
-        u = d['META']['wsgi.url_scheme'] + '://' + host + wsgibase() + '/' 
+        origin = d['META'].get('HTTP_ORIGIN')
+        if origin:
+            host = d['META']['HTTP_ORIGIN']
+             
+        u =  host + wsgibase() + '/' 
+
 
 
     '''
