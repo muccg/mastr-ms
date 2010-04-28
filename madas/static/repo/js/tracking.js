@@ -121,19 +121,22 @@ MA.SampleTracking = {
                                         selections = [selections];
                                     }
                                     
+                                    var ids = [];
                                     for (var idx in selections) {
                                         if (!Ext.isObject(selections[idx])) {
                                             continue;
                                         }
-                                    
-                                        var saver = new Ajax.Request(
-                                            wsBaseUrl + 'create/samplelog/?type='+escape(logType)+'&description='+escape(comment)+'&sample_id='+escape(selections[idx].data.id), 
-                                            { 
-                                                asynchronous:true, 
-                                                evalJSON:'force',
-                                                onSuccess:     MA.SampleLogSuccess
-                                            });
+                                        
+                                        ids.push(selections[idx].data.id);
                                     }
+                                    
+                                    var saver = new Ajax.Request(
+                                        wsBaseUrl + 'batchcreate/samplelog/?type='+escape(logType)+'&description='+escape(comment)+'&sample_ids='+escape(ids.join(",")), 
+                                        { 
+                                            asynchronous:true, 
+                                            evalJSON:'force',
+                                            onSuccess:     MA.SampleLogSuccess
+                                        });
                                 }
                             }
                         }
