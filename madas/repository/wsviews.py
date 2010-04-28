@@ -1,7 +1,7 @@
 from django.http import HttpResponse, HttpResponseNotFound
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
-from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project
+from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog
 from madas.m.models import Organisation, Formalquote
 from django.utils import webhelpers
 from django.contrib.auth.models import User
@@ -64,6 +64,27 @@ def create_object(request, model):
         obj.save()
 
     return records(request, model, 'id', obj.id)
+
+
+def batch_create_object(request):
+
+    #get args and remove the id from it if it exists
+    
+    if request.GET:
+        args = request.GET
+    else:
+        args = request.POST
+       
+    #todo stuff
+    type = args.get('type')
+    description = args.get('description')
+    sampleids = args.get('sample_ids').split(',')
+    
+    for sampleid in sampleids:
+        log = SampleLog(type=type,description=description,sample_id=sampleid)
+        log.save()
+
+    return records(request, 'samplelog', 'id', 0)
     
 
 def update_object(request, model, id):
