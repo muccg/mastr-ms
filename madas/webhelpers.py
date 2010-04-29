@@ -39,9 +39,6 @@ def siteurl(request):
         host = d['META'].get('HTTP_HOST')
         if not host:
             host = d['META'].get('SERVER_NAME')
-        origin = d['META'].get('HTTP_ORIGIN')
-        if origin:
-            host = d['META']['HTTP_ORIGIN']
              
         u = d['META']['wsgi.url_scheme'] + '://' + host + wsgibase() + '/' 
 
