@@ -21,7 +21,7 @@ MA.EmailDisplayField = Ext.extend(Ext.form.DisplayField,  {
             v = Ext.util.Format.htmlEncode(v);
         }
         return this.rendered ? (this.el.dom.innerHTML = (Ext.isEmpty(v) ? '' : '<a href="mailto:'+v+'">'+v+'</a>')) : (this.value = '<a href="mailto:'+v+'">'+v+'</a>');
-    },
+    }
 });
 
 Ext.reg('emaildisplayfield', MA.EmailDisplayField);
