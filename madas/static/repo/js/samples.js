@@ -360,7 +360,7 @@ MA.ExperimentSamplesOnly = {
            ],
     items: [
             {
-            xtype:'editorgrid',
+            xtype:'grid',
             border: false,
             id:'samplesOnly',
             trackMouseOver: false,
