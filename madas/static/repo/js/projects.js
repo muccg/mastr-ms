@@ -132,6 +132,8 @@ MA.ProjectCmp = {
                                         successProperty: 'success',
                                         success: function (form, action) {
                                             if (action.result.success === true) {
+                                                MA.currentProjectId = action.result.rows[0].id;
+                                            
                                                 //display a success alert that auto-closes in 5 seconds
                                                 Ext.Msg.alert("Project saved", "(this message will auto-close in 1 second)");
                                                 setTimeout("Ext.Msg.hide()", 1000);
