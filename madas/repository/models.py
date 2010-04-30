@@ -184,9 +184,11 @@ class Sample(models.Model):
     
 class SampleLog(models.Model):
     LOG_TYPES = (
-            (0, u'Comment'),
-            (1, u'Relocation'),
-            (2, u'Method')
+            (0, u'Received'),
+            (1, u'Stored'),
+            (2, u'Prepared'),
+            (3, u'Acquired'),
+            (4, u'Data Processed')
         )
     type = models.PositiveIntegerField(choices=LOG_TYPES, default=0)
     changetimestamp = models.DateTimeField(auto_now=True)
