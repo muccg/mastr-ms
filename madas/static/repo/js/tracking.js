@@ -98,9 +98,11 @@ MA.SampleTracking = {
                         listWidth:230,
                         store: new Ext.data.ArrayStore({
                                                    fields: ['value', 'key'],
-                                                   data : [['Comment', 0],
-                                                           ['Relocation', 1],
-                                                           ['Method', 2]]
+                                                   data : [['Received', 0],
+                                                           ['Stored', 1],
+                                                           ['Prepared', 2],
+                                                           ['Acquired', 3],
+                                                           ['Data Processed', 4]]
                                                    })
                         },
                     { xtype: 'tbspacer', width: 15 },
