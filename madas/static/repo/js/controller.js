@@ -148,7 +148,7 @@ MA.ExperimentDetails = {
                 autoHeight:true,
                 items: [
                     { xtype:'textfield', fieldLabel:'experiment name', width:700, enableKeyEvents:true, id:'experimentName', allowBlank:false, listeners:{'keydown':function(t, e){ MA.UpdateNav(); return true; }, 'keyup':function(t, e){ MA.UpdateNav(); return true; }}},
-                    { xtype:'textarea', fieldLabel:'description', id:'experimentDescription', width:700, height:100 },
+                    { xtype:'textarea', fieldLabel:'Experiment overview/aim', id:'experimentDescription', width:700, height:100 },
                     { xtype:'textarea', fieldLabel:'comment', id:'experimentComment', width:700, height:100 },
                         new Ext.form.ComboBox({
                                               width:300,

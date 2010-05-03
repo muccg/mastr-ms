@@ -220,7 +220,7 @@ MA.ExperimentSamples = {
             ],
             items: [
                 {
-                    xtype:'editorgrid',
+                    xtype:'grid',
                     border: false,
                     id:'samples',
                     trackMouseOver: false,
