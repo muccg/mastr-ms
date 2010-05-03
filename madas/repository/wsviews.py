@@ -739,7 +739,7 @@ def recordsClients(request, *args):
         return HttpResponse(json.dumps(output), status=401)
 
 
-    rows = Experiment.objects.all() 
+    rows = Project.objects.all() 
 
     # add row count
     output['results'] = len(rows);
@@ -749,15 +749,10 @@ def recordsClients(request, *args):
     # add rows
     for row in rows:
         d = {}
-        d['id'] = row.id
-        try:
-            d['client'] = UserExperiment.objects.filter(type__id=3, experiment__id=row.id)[0].user.username
-        except:
-            d['client'] = ''
-
-        if d['client'] not in b:
-            output['rows'].append(d)
-            b[d['client']] = 1
+        d['id'] = row.client.id
+        d['client'] = row.client.username
+        
+        output['rows'].append(d)        
 
     output = makeJsonFriendly(output)
 
