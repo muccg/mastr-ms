@@ -7,6 +7,30 @@ MA.ClientsListCmp = {
     bodyStyle: 'padding:0px;',
     layout:'fit',
     tbar: [
+        { text:'samples for selected client',
+          listeners: {
+              'click':function(el, ev) {
+                  var sm = Ext.getCmp('clients').getSelectionModel();
+                  var rec = sm.getSelected();
+                  MA.LoadClientSamples(rec.data.client);
+              }
+          }
+        },
+        { text:'projects for selected client',
+          listeners: {
+              'click':function(el, ev) {
+                  var sm = Ext.getCmp('clients').getSelectionModel();
+                  var rec = sm.getSelected();
+//                  MA.LoadClientSamples(rec.data.client);
+
+                  projectsListStore.proxy.conn.url = wsBaseUrl + 'records/project/client_id/' + rec.data.client;
+                  projectsListStore.load();
+
+                  Ext.getCmp('center-panel').layout.setActiveItem('projects-list');
+              }
+          }
+        }
+        
     ],
     items: [
         {
@@ -23,14 +47,7 @@ MA.ClientsListCmp = {
                       { header: "id", menuDisabled:true, dataIndex:'id', width:50 },
                       { header: "Client", menuDisabled:true, dataIndex:'client' }
             ],
-            store: clientsListStore,
-            listeners: {
-                'rowdblclick':function(el, ev) {
-                    var sm = Ext.getCmp('clients').getSelectionModel();
-                    var rec = sm.getSelected();
-                    MA.LoadClientSamples(rec.data.client);
-                }
-            }
+            store: clientsListStore
         }
     ]
 };
