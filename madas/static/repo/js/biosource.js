@@ -240,161 +240,182 @@ MA.BioSource = {
             autoScroll:true,
             minSize: 75,
             items: [
-                    { 
-                        xtype: 'combo', 
-                        fieldLabel:'source type',
-                        id:'sourceType',
-                        name:'typeText',
-                        editable:false,
-                        forceSelection:true,
-                        displayField:'value',
-                        valueField:'key',
-                        hiddenName:'sourceTypeValue',
-                        lazyRender:true,
-                        value:'1',
-                        mode:'local',
-                        allowBlank:false,
-                        typeAhead:false,
-                        triggerAction:'all',
-                        listWidth:230,
-                        store: new Ext.data.ArrayStore({
-                                                   fields: ['value', 'key'],
-                                                   data : [['Microbial', 1],
-                                                           ['Plant', 2],
-                                                           ['Animal', 3],
-                                                           ['Human', 4],
-                                                           ['Synthetic', 5],
-                                                           ['Other', 6]]
-                                                   }),
-                        listeners: {
-                            'select': MA.SourceTypeSelect
-                        }
-                    },
                     {
-                        fieldLabel:'information',
-                        id:'sourceInfo',
-                        xtype:'textfield'
-                    },
-                    {
-                        fieldLabel:'ncbi id',
-                        id:'sourceNCBI',
-                        xtype:'textfield'
-                    },
-                    { xtype:'fieldset', 
-                    title:'microbial info',
-                    id:'organismBioSourceMicrobialFieldset',
-                    autoHeight:true,
-                    labelWidth:150,
-                    items: [
-                            { xtype:'textfield', fieldLabel:'Genus', id:'microbial_genus' },
-                            { xtype:'textfield', fieldLabel:'Species', id:'microbial_species' },
-                            { xtype:'textfield', fieldLabel:'Culture collection ID', id:'microbial_culture' },
-                            { xtype:'textfield', fieldLabel:'Media', id:'microbial_media' },
-                            { xtype:'textfield', fieldLabel:'Fermentation vessel', id:'microbial_vessel' },
-                            { xtype:'textfield', fieldLabel:'Fermentation mode', id:'microbial_mode' },
-                            { xtype:'numberfield', fieldLabel:'Innoculation density', id:'microbial_density', maxValue:9999.99 },
-                            { xtype:'numberfield', fieldLabel:'Fermentation volume', id:'microbial_volume', maxValue:9999.99 },
-                            { xtype:'numberfield', fieldLabel:'Temperature', id:'microbial_temperature', maxValue:9999.99 },
-                            { xtype:'numberfield', fieldLabel:'Agitation', id:'microbial_agitation', maxValue:9999.99 },
-                            { xtype:'numberfield', fieldLabel:'pH', id:'microbial_ph', maxValue:9999.99 },
-                            { xtype:'textfield', fieldLabel:'Gas type', id:'microbial_gastype' },
-                            { xtype:'numberfield', fieldLabel:'Gas flow rate', id:'microbial_flowrate', maxValue:9999.99 },
-                            { xtype:'textfield', fieldLabel:'Gas delivery method', id:'microbial_delivery' }
-                            ]
-                    },
-                    { xtype:'fieldset', 
-                    title:'plant info',
-                    id:'organismBioSourcePlantFieldset',
-                    autoHeight:true,
-                    labelWidth:150,
-                    items: [
-                            { xtype:'textfield', fieldLabel:'Development stage', id:'plant_development_stage' }
-                            ]
-                    },
-                    { xtype:'fieldset', 
-                    title:'animal info',
-                    id:'organismBioSourceAnimalFieldset',
-                    autoHeight:true,
-                    //hidden:true,
-                    items: [
-                            
-                        { xtype:'combo', 
-                            fieldLabel:'gender',
-                            id:'animalGender',
-                            name:'genderText',
-                            editable:false,
-                            forceSelection:true,
-                            displayField:'value',
-                            valueField:'key',
-                            hiddenName:'gender',
-                            lazyRender:true,
-                            allowBlank:false,
-                            mode:'local',
-                            typeAhead:false,
-                            triggerAction:'all',
-                            listWidth:230,
-                            store: new Ext.data.ArrayStore({
-                                                            fields: ['value', 'key'],
-                                                            data : [['Male', 'M'],
-                                                                    ['Female', 'F'],
-                                                                    ['Unknown', 'U']]
-                                                            })
-                        }, 
-                        { xtype:'numberfield', fieldLabel:'age', id:'animalAge', maxValue:9999}, 
-                        { xtype:'combo', 
-                            fieldLabel:'parental line',
-                            editable:true,
-                            id:'animalParentalLine',
-                            displayField:'value',
-                            valueField:'key',
-                            forceSelection:false,
-                            hiddenName:'node',
-                            lazyRender:true,
-                            allowBlank:true,
-                            typeAhead:false,
-                            triggerAction:'all',
-                            listWidth:230,
-                            store: animalComboStore    
+                        xtype:'panel',
+                        layout:'column',
+                        border:false,
+                        bodyStyle:'padding:5px;background:transparent;',
+                    
+                        items:[
+                            { //column 1
+                                width:400,
+                                layout:'form',
+                                border:false,
+                                bodyStyle:'padding:5px;background:transparent;',
+                                items:[
+                                { 
+                                    xtype: 'combo', 
+                                    fieldLabel:'source type',
+                                    id:'sourceType',
+                                    name:'typeText',
+                                    editable:false,
+                                    forceSelection:true,
+                                    displayField:'value',
+                                    valueField:'key',
+                                    hiddenName:'sourceTypeValue',
+                                    lazyRender:true,
+                                    value:'1',
+                                    mode:'local',
+                                    allowBlank:false,
+                                    typeAhead:false,
+                                    triggerAction:'all',
+                                    listWidth:230,
+                                    store: new Ext.data.ArrayStore({
+                                                               fields: ['value', 'key'],
+                                                               data : [['Microbial', 1],
+                                                                       ['Plant', 2],
+                                                                       ['Animal', 3],
+                                                                       ['Human', 4],
+                                                                       ['Synthetic', 5],
+                                                                       ['Other', 6]]
+                                                               }),
+                                    listeners: {
+                                        'select': MA.SourceTypeSelect
+                                    }
+                                },
+                                {
+                                    fieldLabel:'ncbi id',
+                                    id:'sourceNCBI',
+                                    xtype:'textfield'
+                                },
+                                { xtype:'fieldset', 
+                                title:'microbial info',
+                                id:'organismBioSourceMicrobialFieldset',
+                                autoHeight:true,
+                                labelWidth:150,
+                                items: [
+                                        { xtype:'textfield', fieldLabel:'Genus', id:'microbial_genus' },
+                                        { xtype:'textfield', fieldLabel:'Species', id:'microbial_species' },
+                                        { xtype:'textfield', fieldLabel:'Culture collection ID', id:'microbial_culture' },
+                                        { xtype:'textfield', fieldLabel:'Media', id:'microbial_media' },
+                                        { xtype:'textfield', fieldLabel:'Fermentation vessel', id:'microbial_vessel' },
+                                        { xtype:'textfield', fieldLabel:'Fermentation mode', id:'microbial_mode' },
+                                        { xtype:'numberfield', fieldLabel:'Innoculation density', id:'microbial_density', maxValue:9999.99 },
+                                        { xtype:'numberfield', fieldLabel:'Fermentation volume', id:'microbial_volume', maxValue:9999.99 },
+                                        { xtype:'numberfield', fieldLabel:'Temperature', id:'microbial_temperature', maxValue:9999.99 },
+                                        { xtype:'numberfield', fieldLabel:'Agitation', id:'microbial_agitation', maxValue:9999.99 },
+                                        { xtype:'numberfield', fieldLabel:'pH', id:'microbial_ph', maxValue:9999.99 },
+                                        { xtype:'textfield', fieldLabel:'Gas type', id:'microbial_gastype' },
+                                        { xtype:'numberfield', fieldLabel:'Gas flow rate', id:'microbial_flowrate', maxValue:9999.99 },
+                                        { xtype:'textfield', fieldLabel:'Gas delivery method', id:'microbial_delivery' }
+                                        ]
+                                },
+                                { xtype:'fieldset', 
+                                title:'plant info',
+                                id:'organismBioSourcePlantFieldset',
+                                autoHeight:true,
+                                labelWidth:150,
+                                items: [
+                                        { xtype:'textfield', fieldLabel:'Development stage', id:'plant_development_stage' }
+                                        ]
+                                },
+                                { xtype:'fieldset', 
+                                title:'animal info',
+                                id:'organismBioSourceAnimalFieldset',
+                                autoHeight:true,
+                                //hidden:true,
+                                items: [
+                                        
+                                    { xtype:'combo', 
+                                        fieldLabel:'gender',
+                                        id:'animalGender',
+                                        name:'genderText',
+                                        editable:false,
+                                        forceSelection:true,
+                                        displayField:'value',
+                                        valueField:'key',
+                                        hiddenName:'gender',
+                                        lazyRender:true,
+                                        allowBlank:false,
+                                        mode:'local',
+                                        typeAhead:false,
+                                        triggerAction:'all',
+                                        listWidth:230,
+                                        store: new Ext.data.ArrayStore({
+                                                                        fields: ['value', 'key'],
+                                                                        data : [['Male', 'M'],
+                                                                                ['Female', 'F'],
+                                                                                ['Unknown', 'U']]
+                                                                        })
+                                    }, 
+                                    { xtype:'numberfield', fieldLabel:'age', id:'animalAge', maxValue:9999}, 
+                                    { xtype:'combo', 
+                                        fieldLabel:'parental line',
+                                        editable:true,
+                                        id:'animalParentalLine',
+                                        displayField:'value',
+                                        valueField:'key',
+                                        forceSelection:false,
+                                        hiddenName:'node',
+                                        lazyRender:true,
+                                        allowBlank:true,
+                                        typeAhead:false,
+                                        triggerAction:'all',
+                                        listWidth:230,
+                                        store: animalComboStore    
+                                        },
+                                        { xtype:'textfield', fieldLabel:'Location', id:'animal_location' },
+                                        { xtype:'textarea', fieldLabel:'Notes', id:'animal_notes', width:500 }
+                                ]
                             },
-                            { xtype:'textfield', fieldLabel:'Location', id:'animal_location' },
-                            { xtype:'textarea', fieldLabel:'Notes', id:'animal_notes', width:500 }
+                            { xtype:'fieldset', 
+                            title:'human info',
+                            id:'organismBioSourceHumanFieldset',
+                            autoHeight:true,
+                            //hidden:true,
+                            items: [
+                                    
+                                    { xtype:'combo', 
+                                    fieldLabel:'gender',
+                                    id:'humanGender',
+                                    editable:false,
+                                    forceSelection:true,
+                                    displayField:'value',
+                                    valueField:'key',
+                                    hiddenName:'node',
+                                    lazyRender:true,
+                                    allowBlank:false,
+                                    typeAhead:false,
+                                    mode:'local',
+                                    triggerAction:'all',
+                                    listWidth:230,
+                                    store: new Ext.data.ArrayStore({
+                                                                   fields: ['value', 'key'],
+                                                                   data : [['Male', 'M'],
+                                                                           ['Female', 'F'],
+                                                                           ['Unknown', 'U']]
+                                                                   })
+                                    
+                                    }, 
+                                    { xtype:'datefield', fieldLabel:'Date of birth', id:'human_dob', format:'d/m/Y'}, 
+                                    { xtype:'numberfield', fieldLabel:'BMI', id:'human_bmi', maxValue:9999.99 },
+                                    { xtype:'textfield', fieldLabel:'Diagnosis', id:'human_diagnosis' },
+                                    { xtype:'textfield', fieldLabel:'Location', id:'human_location' },
+                                    { xtype:'textarea', fieldLabel:'Notes', id:'human_notes', width:500 }
+                                    ]
+                            }
+                            ]
+                        },
+                        { //column 2
+                            width:400,
+                            layout:'form',
+                            border:false,
+                            bodyStyle:'padding:5px;background:transparent;',
+                            items: [
+                                {xtype:'textarea', fieldLabel:'Notes', id:'sourceInfo', width:240, height:300 }
+                            ]
+                        }
                     ]
-                },
-                { xtype:'fieldset', 
-                title:'human info',
-                id:'organismBioSourceHumanFieldset',
-                autoHeight:true,
-                //hidden:true,
-                items: [
-                        
-                        { xtype:'combo', 
-                        fieldLabel:'gender',
-                        id:'humanGender',
-                        editable:false,
-                        forceSelection:true,
-                        displayField:'value',
-                        valueField:'key',
-                        hiddenName:'node',
-                        lazyRender:true,
-                        allowBlank:false,
-                        typeAhead:false,
-                        mode:'local',
-                        triggerAction:'all',
-                        listWidth:230,
-                        store: new Ext.data.ArrayStore({
-                                                       fields: ['value', 'key'],
-                                                       data : [['Male', 'M'],
-                                                               ['Female', 'F'],
-                                                               ['Unknown', 'U']]
-                                                       })
-                        
-                        }, 
-                        { xtype:'datefield', fieldLabel:'Date of birth', id:'human_dob', format:'d/m/Y'}, 
-                        { xtype:'numberfield', fieldLabel:'BMI', id:'human_bmi', maxValue:9999.99 },
-                        { xtype:'textfield', fieldLabel:'Diagnosis', id:'human_diagnosis' },
-                        { xtype:'textfield', fieldLabel:'Location', id:'human_location' },
-                        { xtype:'textarea', fieldLabel:'Notes', id:'human_notes', width:500 }
-                        ]
                 },
                 { xtype:'grid', 
                     id:'organs',
