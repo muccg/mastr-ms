@@ -92,7 +92,7 @@ MA.SourceInfoLoadSuccess = function(response) {
             Ext.getCmp('animalAge').setValue(response.responseJSON.rows[0].age);
             Ext.getCmp('animalParentalLine').setValue(response.responseJSON.rows[0].parental_line);
             Ext.getCmp('animal_location').setValue(response.responseJSON.rows[0].location);
-            Ext.getCmp('animal_notes').setValue(response.responseJSON.rows[0].notes);
+//            Ext.getCmp('animal_notes').setValue(response.responseJSON.rows[0].notes);
             break;
         case 4:
             //human
@@ -101,7 +101,7 @@ MA.SourceInfoLoadSuccess = function(response) {
             Ext.getCmp('human_bmi').setValue(response.responseJSON.rows[0].bmi);
             Ext.getCmp('human_diagnosis').setValue(response.responseJSON.rows[0].diagnosis);
             Ext.getCmp('human_location').setValue(response.responseJSON.rows[0].location);
-            Ext.getCmp('human_notes').setValue(response.responseJSON.rows[0].notes);
+//            Ext.getCmp('human_notes').setValue(response.responseJSON.rows[0].notes);
             break;
         default:
             break;
@@ -149,7 +149,7 @@ MA.BioSourceBlur = function(invoker) {
                 extraParams += "&age=" + escape(Ext.getCmp('animalAge').getValue());
                 extraParams += "&parental_line=" + escape(Ext.getCmp('animalParentalLine').getValue());
                 extraParams += "&location=" + escape(Ext.getCmp('animal_location').getValue());
-                extraParams += "&notes=" + escape(Ext.getCmp('animal_notes').getValue());
+//                extraParams += "&notes=" + escape(Ext.getCmp('animal_notes').getValue());
                 break;
             case 4:
                 extraParams = "&sex=" + escape(Ext.getCmp('humanGender').getValue());
@@ -157,7 +157,7 @@ MA.BioSourceBlur = function(invoker) {
                 extraParams += "&bmi=" + escape(Ext.getCmp('human_bmi').getValue());
                 extraParams += "&diagnosis=" + escape(Ext.getCmp('human_diagnosis').getValue());
                 extraParams += "&location=" + escape(Ext.getCmp('human_location').getValue());
-                extraParams += "&notes=" + escape(Ext.getCmp('human_notes').getValue());
+//                extraParams += "&notes=" + escape(Ext.getCmp('human_notes').getValue());
                 break;
             default:
                 break;
@@ -364,8 +364,7 @@ MA.BioSource = {
                                         listWidth:230,
                                         store: animalComboStore    
                                         },
-                                        { xtype:'textfield', fieldLabel:'Location', id:'animal_location' },
-                                        { xtype:'hidden', fieldLabel:'Notes', id:'animal_notes', width:200 }
+                                        { xtype:'textfield', fieldLabel:'Location', id:'animal_location' }
                                 ]
                             },
                             { xtype:'fieldset', 
@@ -400,8 +399,7 @@ MA.BioSource = {
                                     { xtype:'datefield', fieldLabel:'Date of birth', id:'human_dob', format:'d/m/Y'}, 
                                     { xtype:'numberfield', fieldLabel:'BMI', id:'human_bmi', maxValue:9999.99 },
                                     { xtype:'textfield', fieldLabel:'Diagnosis', id:'human_diagnosis' },
-                                    { xtype:'textfield', fieldLabel:'Location', id:'human_location' },
-                                    { xtype:'hidden', fieldLabel:'Notes', id:'human_notes', width:200 }
+                                    { xtype:'textfield', fieldLabel:'Location', id:'human_location' }
                                     ]
                             }
                             ]
