@@ -20,13 +20,19 @@ function renderStatus(v, p, record) {
 function renderSampleLogType(val) {
     switch (val) {
         case 0:
-            return 'Comment';
+            return 'Received';
             break;
         case 1:
-            return 'Relocation';
+            return 'Stored';
             break;
         case 2:
-            return 'Method';
+            return 'Prepared';
+            break;
+        case 3:
+            return 'Acquired';
+            break;
+        case 4:
+            return 'Data Processed';
             break;
     }
     
