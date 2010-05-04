@@ -365,7 +365,7 @@ MA.BioSource = {
                                         store: animalComboStore    
                                         },
                                         { xtype:'textfield', fieldLabel:'Location', id:'animal_location' },
-                                        { xtype:'textarea', fieldLabel:'Notes', id:'animal_notes', width:200 }
+                                        { xtype:'hidden', fieldLabel:'Notes', id:'animal_notes', width:200 }
                                 ]
                             },
                             { xtype:'fieldset', 
@@ -401,7 +401,7 @@ MA.BioSource = {
                                     { xtype:'numberfield', fieldLabel:'BMI', id:'human_bmi', maxValue:9999.99 },
                                     { xtype:'textfield', fieldLabel:'Diagnosis', id:'human_diagnosis' },
                                     { xtype:'textfield', fieldLabel:'Location', id:'human_location' },
-                                    { xtype:'textarea', fieldLabel:'Notes', id:'human_notes', width:200 }
+                                    { xtype:'hidden', fieldLabel:'Notes', id:'human_notes', width:200 }
                                     ]
                             }
                             ]
