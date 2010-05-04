@@ -332,7 +332,7 @@ def update_single_source(request, exp_id):
     for key in args.keys():
         if args[key] == '':
             args[key] = None
-        if key == 'sex':
+        if key == 'sex' and args[key] == '':
             args[key] = u'U'
     
     output = {'metaData': { 'totalProperty': 'results',
@@ -462,7 +462,7 @@ def update_single_source(request, exp_id):
                     pass
                 ai.parental_line = args['parental_line']
                 ai.location = args['location']
-                ai.notes = args['notes']
+#                ai.notes = args['notes']
                 bs.animalinfo_set.add(ai)
             else:
                 ai = bs.animalinfo_set.all()[0]
@@ -473,7 +473,7 @@ def update_single_source(request, exp_id):
                     pass
                 ai.parental_line = args['parental_line']
                 ai.location = args['location']
-                ai.notes = args['notes']
+#                ai.notes = args['notes']
                 ai.save()
         elif int(args['type']) == 4:
             if bs.humaninfo_set.count() == 0:
@@ -483,7 +483,7 @@ def update_single_source(request, exp_id):
                 hi.bmi = args['bmi']
                 hi.diagnosis = args['diagnosis']
                 hi.location = args['location']
-                hi.notes = args['notes']
+#                hi.notes = args['notes']
                 bs.humaninfo_set.add(hi)
             else:
                 hi = bs.humaninfo_set.all()[0]
@@ -492,7 +492,7 @@ def update_single_source(request, exp_id):
                 hi.bmi = args['bmi']
                 hi.diagnosis = args['diagnosis']
                 hi.location = args['location']
-                hi.notes = args['notes']
+#                hi.notes = args['notes']
                 hi.save()
     
     return HttpResponse(json.dumps(output))
