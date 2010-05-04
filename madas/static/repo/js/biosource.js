@@ -248,7 +248,7 @@ MA.BioSource = {
                     
                         items:[
                             { //column 1
-                                width:400,
+                                width:350,
                                 layout:'form',
                                 border:false,
                                 bodyStyle:'padding:5px;background:transparent;',
