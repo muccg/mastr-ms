@@ -95,37 +95,7 @@ function callbacker(){
 
     <div id="south">(c) CCG 2009</div>
     <form id="hiddenForm"></form>
-    <ul id="experiment-nav" class="x-hidden" onclick="javascript:MA.Actions['expDetails'];">
-    	<li>
-			<img src="static/repo/images/s.gif" class="icon-show-active"/>
-    		<a id="expDetails" href="#">experiment details</a>
-    	</li>
-    	<li onclick="javascript:MA.Actions['expSamples'];">
-			<img src="static/repo/images/s.gif" class="icon-show-active"/>
-    		<a id="expSamples" href="#">samples/classes</a>
-    	</li>
-    	<li>
-			<img src="static/repo/images/s.gif" class="icon-show-active"/>
-    		<a id="expBioSource" href="#">biological source</a>
-    	</li>
-    	<li>
-			<img src="static/repo/images/s.gif" class="icon-show-active"/>
-    		<a id="expGrowth" href="#">growth</a>
-    	</li>
-    	<li>
-			<img src="static/repo/images/s.gif" class="icon-show-active"/>
-    		<a id="expTreat" href="#">treatment</a>
-    	</li>
-    	<li>
-			<img src="static/repo/images/s.gif" class="icon-show-active"/>
-    		<a id="expPrep" href="#">sample prep</a>
-    	</li>
-    	<li>
-			<img src="static/repo/images/s.gif" class="icon-show-active"/>
-    		<a id="expAccess" href="#">access</a>
-    	</li>
-
-    </ul>
-
-</body>
+    
+    
+    </body>
 </html>
