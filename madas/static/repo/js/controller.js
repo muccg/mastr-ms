@@ -272,6 +272,12 @@ MA.ExperimentCmp = {
         layout:'card',
         activeItem:0,
         bodyStyle:'padding:0px;',
+        forceLayout:true,
+        deferredRender:true,
+        defaults: {
+            forceLayout:true,
+            deferredRender:true
+        },
         items:[
             MA.ExperimentDetails,
             MA.BioSource,

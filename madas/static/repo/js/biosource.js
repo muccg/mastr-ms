@@ -254,7 +254,7 @@ MA.BioSource = {
                                 bodyStyle:'padding:5px;background:transparent;',
                                 items:[
                                 { 
-                                    xtype: 'combo', 
+                                    xtype: 'combo', width:230, 
                                     fieldLabel:'source type',
                                     id:'sourceType',
                                     name:'typeText',
@@ -326,7 +326,7 @@ MA.BioSource = {
                                 //hidden:true,
                                 items: [
                                         
-                                    { xtype:'combo', 
+                                    { xtype:'combo',  width:230,
                                         fieldLabel:'gender',
                                         id:'animalGender',
                                         name:'genderText',
@@ -349,7 +349,7 @@ MA.BioSource = {
                                                                         })
                                     }, 
                                     { xtype:'numberfield', fieldLabel:'age', id:'animalAge', maxValue:9999}, 
-                                    { xtype:'combo', 
+                                    { xtype:'combo',  width:230,
                                         fieldLabel:'parental line',
                                         editable:true,
                                         id:'animalParentalLine',
@@ -374,7 +374,7 @@ MA.BioSource = {
                             //hidden:true,
                             items: [
                                     
-                                    { xtype:'combo', 
+                                    { xtype:'combo',  width:230,
                                     fieldLabel:'gender',
                                     id:'humanGender',
                                     editable:false,
@@ -396,7 +396,7 @@ MA.BioSource = {
                                                                    })
                                     
                                     }, 
-                                    { xtype:'datefield', fieldLabel:'Date of birth', id:'human_dob', format:'d/m/Y'}, 
+                                    { xtype:'datefield', fieldLabel:'Date of birth', id:'human_dob', format:'d/m/Y', width:230}, 
                                     { xtype:'numberfield', fieldLabel:'BMI', id:'human_bmi', maxValue:9999.99 },
                                     { xtype:'textfield', fieldLabel:'Diagnosis', id:'human_diagnosis' },
                                     { xtype:'textfield', fieldLabel:'Location', id:'human_location' }

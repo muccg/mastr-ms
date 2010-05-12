@@ -73,6 +73,8 @@ MA.SampleTracking = {
             id:'sampleTracking',
             trackMouseOver: false,
             sm: MA.TrackingSm,
+            collapsible:true,
+            collapsed:true,
             viewConfig: {
             forceFit: true,
             autoFill:true
@@ -82,7 +84,7 @@ MA.SampleTracking = {
                     { xtype:'tbtext', text:'mark selected samples as ' },
                     { xtype: 'tbspacer', width: 15 },
                     { 
-                        xtype: 'combo', 
+                        xtype: 'combo', width:120,
                         id:'sampleLogType',
                         name:'sampleLogTypeText',
                         forceSelection:true,
@@ -105,7 +107,7 @@ MA.SampleTracking = {
                                                            ['Data Processed', 4]]
                                                    })
                         },
-                    { xtype: 'tbspacer', width: 15 },
+                    { xtype: 'tbspacer', width: 115 },
                     { xtype:'textfield', id:'sampleLogComment', width:200 },
                     { xtype: 'tbspacer', width: 15 },
                     { 
@@ -162,6 +164,8 @@ MA.SampleTracking = {
             title:'sample log',
             style: 'padding-left:3%;padding-right:3%;',
             height: 200,
+            collapsible:true,
+            collapsed:true,
             id:'sampleTrackingLog',
             trackMouseOver: false,
             viewConfig: {

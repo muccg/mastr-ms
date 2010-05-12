@@ -410,7 +410,7 @@ Object.extend(Function.prototype, (function() {
     }, timeout);
   }
 
-  function defer(0.1) {
+  function defer(amountIgnored) {
     var args = update([0.01], arguments);
     return this.delay.apply(this, args);
   }
