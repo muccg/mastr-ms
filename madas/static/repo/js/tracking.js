@@ -26,6 +26,9 @@ MA.SampleTrackingInit = function() {
 
     sampleLogStore.proxy.conn.url = wsBaseUrl + 'records/samplelog/sample__experiment__id/'+expId;
     sampleLogStore.load();
+    
+//    Ext.getCmp('sampleTracking').tbar.setWidth(800);
+//    Ext.getCmp('sampleTracking').topToolbar.setSize(800);
 };
 
 MA.SampleLogSuccess = function() {
@@ -44,12 +47,8 @@ MA.SampleTracking = {
     cmargins: '0 0 0 0',
     collapsible: false,
     bodyStyle: 'padding:0px;background:transparent;',
-    //layout:'fit',
+    layout:'anchor',
     autoScroll:true,
-    viewConfig: {
-    forceFit: true,
-    autoFill:true
-    },
     items: [
             { 
             xtype:'fieldset', 
@@ -73,8 +72,9 @@ MA.SampleTracking = {
             id:'sampleTracking',
             trackMouseOver: false,
             sm: MA.TrackingSm,
-            collapsible:true,
-            collapsed:true,
+            width:800,
+//            collapsible:true,
+//            collapsed:true,
             viewConfig: {
             forceFit: true,
             autoFill:true
@@ -164,8 +164,7 @@ MA.SampleTracking = {
             title:'sample log',
             style: 'padding-left:3%;padding-right:3%;',
             height: 200,
-            collapsible:true,
-            collapsed:true,
+            width:800,
             id:'sampleTrackingLog',
             trackMouseOver: false,
             viewConfig: {

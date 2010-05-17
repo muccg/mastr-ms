@@ -17647,11 +17647,15 @@ var myPanel = new Ext.Panel({
      * @return {Ext.BoxComponent} this
      */
     setSize : function(w, h){
-
         // support for standard size objects
         if(typeof w == 'object'){
+            console.log("boxcomponent setsize "+w.width+" "+w.height);
+
             h = w.height;
             w = w.width;
+            
+        } else {
+            console.log("boxcomponent setsize "+w+" "+h);
         }
         if (Ext.isDefined(w) && Ext.isDefined(this.boxMinWidth) && (w < this.boxMinWidth)) {
             w = this.boxMinWidth;
@@ -19764,6 +19768,8 @@ Ext.layout.FitLayout = Ext.extend(Ext.layout.ContainerLayout, {
 
     // private
     setItemSize : function(item, size){
+        console.log("set item size: "+this.id+" "+size.width);
+        console.log(item);
         if(item && size.height > 0){ // display none?
             item.setSize(size);
         }
@@ -24367,6 +24373,7 @@ new Ext.Panel({
         if(this.tbar){
             this.elements += ',tbar';
             this.topToolbar = this.createToolbar(this.tbar);
+            console.log(this.id+' has toolbars '+this.toolbars.length);
             this.tbar = null;
 
         }
@@ -24777,9 +24784,13 @@ new Ext.Panel({
     },
 
     onLayout : function(shallow, force){
+    console.log('panel onlayout');
         Ext.Panel.superclass.onLayout.apply(this, arguments);
+        console.log(this.id + '  check for layout '+this.hasLayout+' toolbars '+this.toolbars.length);
         if(this.hasLayout && this.toolbars.length > 0){
             Ext.each(this.toolbars, function(tb){
+                console.log('layout toolbar ');
+                console.log(tb);
                 tb.doLayout(undefined, force);
             });
             this.syncHeight();
@@ -25068,8 +25079,10 @@ new Ext.Panel({
                 }
 
                 if(this.tbar){
+                    console.log('setting tbar width '+w);
                     this.tbar.setWidth(w);
                     if(this.topToolbar){
+                        console.log('setting top tbar width '+w);
                         this.topToolbar.setSize(w);
                     }
                 }
@@ -25123,6 +25136,7 @@ new Ext.Panel({
 
     // private
     onBodyResize: function(w, h){
+        console.log("panel bodyresize");
         this.fireEvent('bodyresize', this, w, h);
     },
 
@@ -67513,6 +67527,7 @@ function(grid, rowIndex, columnIndex, e) {
     afterRender : function(){
         Ext.grid.GridPanel.superclass.afterRender.call(this);
         var v = this.view;
+        console.log('gridpanel afterrender');
         this.on('bodyresize', v.layout, v);
         v.layout();
         if(this.deferRowRender){
@@ -68669,6 +68684,8 @@ viewConfig: {
             this.applyEmptyText();
         }
         this.grid.fireEvent('viewready', this.grid);
+        
+        
     },
 
     /**
@@ -68789,6 +68806,7 @@ viewConfig: {
 
     // private
     layout : function() {
+        console.log("gridview layout");
         if(!this.mainBody){
             return; // not rendered
         }

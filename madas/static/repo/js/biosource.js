@@ -236,7 +236,7 @@ MA.BioSource = {
            title: 'source details',
             region: 'center',
             collapsible: false,
-            layout:'form',
+            layout:'anchor',
             autoScroll:true,
             minSize: 75,
             items: [
@@ -254,7 +254,7 @@ MA.BioSource = {
                                 bodyStyle:'padding:5px;background:transparent;',
                                 items:[
                                 { 
-                                    xtype: 'combo', width:230, 
+                                    xtype: 'combo', width:150, 
                                     fieldLabel:'source type',
                                     id:'sourceType',
                                     name:'typeText',
@@ -326,9 +326,10 @@ MA.BioSource = {
                                 //hidden:true,
                                 items: [
                                         
-                                    { xtype:'combo',  width:230,
+                                    { xtype:'combo', 
                                         fieldLabel:'gender',
                                         id:'animalGender',
+                                        width:150,
                                         name:'genderText',
                                         editable:false,
                                         forceSelection:true,
@@ -349,7 +350,7 @@ MA.BioSource = {
                                                                         })
                                     }, 
                                     { xtype:'numberfield', fieldLabel:'age', id:'animalAge', maxValue:9999}, 
-                                    { xtype:'combo',  width:230,
+                                    { xtype:'combo',  width:150,
                                         fieldLabel:'parental line',
                                         editable:true,
                                         id:'animalParentalLine',
@@ -374,10 +375,11 @@ MA.BioSource = {
                             //hidden:true,
                             items: [
                                     
-                                    { xtype:'combo',  width:230,
+                                    { xtype:'combo',
                                     fieldLabel:'gender',
                                     id:'humanGender',
                                     editable:false,
+                                    width:150,
                                     forceSelection:true,
                                     displayField:'value',
                                     valueField:'key',
@@ -396,7 +398,7 @@ MA.BioSource = {
                                                                    })
                                     
                                     }, 
-                                    { xtype:'datefield', fieldLabel:'Date of birth', id:'human_dob', format:'d/m/Y', width:230}, 
+                                    { xtype:'datefield', fieldLabel:'Date of birth', id:'human_dob', format:'d/m/Y', width:150}, 
                                     { xtype:'numberfield', fieldLabel:'BMI', id:'human_bmi', maxValue:9999.99 },
                                     { xtype:'textfield', fieldLabel:'Diagnosis', id:'human_diagnosis' },
                                     { xtype:'textfield', fieldLabel:'Location', id:'human_location' }
