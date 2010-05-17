@@ -102,7 +102,7 @@ var timelineStore = new Ext.data.JsonStore(
                             listeners: {'load': function(store, records, options) {
                                         },
                                 'exception': function(proxy, type, action, options, response, arg) {
-                                            console.log('exception');
+                                            //console.log('exception');
                                         }
                             },
                             sortInfo: {
