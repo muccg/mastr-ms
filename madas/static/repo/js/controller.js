@@ -426,6 +426,7 @@ MA.InitUI = function() {
                 region:'center',
                 id:'center-panel',
                 layout: 'card',
+                layoutOnCardChange:true,
                 activeItem:2,
                 items: [MA.ExperimentCmp, MA.ExperimentListCmp, MA.LoginCmp, MA.ClientsListCmp, MA.ClientSamplesCmp, MA.ProjectListCmp, MA.ProjectCmp]
             },
