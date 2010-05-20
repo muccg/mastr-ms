@@ -107,6 +107,18 @@ class Project(models.Model):
     def __unicode__(self):
         return self.title + ' (' + self.client.username + ')'
 
+class InstrumentMethod(models.Model):
+    title = models.CharField(max_length=255)
+    method_path = models.TextField()
+    method_name = models.CharField(max_length=255)
+    version = models.CharField(max_length=255)
+    created_on = models.DateField(null=False, default=date.today)
+    creator = models.ForeignKey(User)
+    template = models.TextField()
+    
+    def __unicode__(self):
+        return self.title + ' (' + self.version + ')' 
+
 class Experiment(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(null=True)
@@ -117,6 +129,7 @@ class Experiment(models.Model):
     formal_quote = models.ForeignKey(Formalquote, null=True)
     job_number = models.CharField(max_length=30)
     project = models.ForeignKey(Project)
+    instrument_method = models.ForeignKey(InstrumentMethod, null=True, blank=True)
     # ? files
     
     def ensure_dir(self):
