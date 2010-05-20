@@ -31,6 +31,9 @@ class SampleAdmin(admin.ModelAdmin):
 
 class SampleTimelineAdmin(admin.ModelAdmin):
     list_display = ('id', 'timeline')
+    
+class InstrumentMethodAdmin(admin.ModelAdmin):
+    list_display = ('id', 'title', 'version')
 
 class StandardOperationProcedureAdmin(admin.ModelAdmin):
     list_display = ('responsible', 'label', 'area_where_valid', 'comment', 'organisation', 'version', 'defined_by', 'replaces_document', 'content', 'attached_pdf')
@@ -57,6 +60,7 @@ admin.site.register(Organ, OrganAdmin)
 admin.site.register(BiologicalSource, BiologicalSourceAdmin)
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(Experiment, ExperimentAdmin)
+admin.site.register(InstrumentMethod, InstrumentMethodAdmin)
 admin.site.register(ExperimentStatus, ExperimentStatusAdmin)
 admin.site.register(AnimalInfo, AnimalInfoAdmin)
 admin.site.register(Treatment, TreatmentAdmin)
