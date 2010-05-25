@@ -204,14 +204,19 @@ MA.ExperimentCmp = {
         border: false,
         baseCls: 'x-plain',
         bodyStyle: 'padding:0px;padding-left:5px;',
+        layout:'anchor',
+        hideMode:'offsets',
         items: [
             {
                 title: 'navigation',
                 frame: true,
                 style:'background:white;',
+                layout:'anchor',
+                hideMode:'offsets',
                 items: [
                     {
                         id: 'expNav',
+                        hideMode:'offsets',
                     	baseCls:'x-plain',
                         xtype:'grid', 
                         border: false,
@@ -261,6 +266,18 @@ MA.ExperimentCmp = {
                         listeners:{"render":function(a){window.setTimeout("Ext.getCmp('expNav').getSelectionModel().selectFirstRow();", 500);}}
                       }
                 ]
+            },
+            {
+            title: 'run',
+            frame: true,
+            style:'background:white;margin-top:20px;',
+            items: [
+                {
+                    xtype:'panel',
+                    bodyStyle:'padding:4px;',
+                    id:'runPanel'
+                }
+            ]
             }
         ]
     },{

@@ -115,9 +115,18 @@ class InstrumentMethod(models.Model):
     created_on = models.DateField(null=False, default=date.today)
     creator = models.ForeignKey(User)
     template = models.TextField()
+    randomisation = models.BooleanField(default=False)
+    blank_at_start = models.BooleanField(default=False)
+    blank_at_end = models.BooleanField(default=False)
+    blank_position = models.CharField(max_length=255,null=True)
+    obsolete = models.BooleanField(default=False)
+    obsolescence_date = models.DateField(null=True,blank=True)
     
+    #future: quality control sample locations
+
     def __unicode__(self):
         return self.title + ' (' + self.version + ')' 
+        
 
 class Experiment(models.Model):
     title = models.CharField(max_length=255)
@@ -194,6 +203,16 @@ class Sample(models.Model):
     label = models.CharField(max_length=255)
     comment = models.TextField(null=True)
     weight = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    
+class Run(models.Model):
+    method = models.ForeignKey(InstrumentMethod)
+    created_on = models.DateField(null=False, default=date.today)
+    creator = models.ForeignKey(User)
+    title = models.CharField(max_length=255,null=True,blank=True)
+    samples = models.ManyToManyField(Sample)
+    
+    def __unicode__(self):
+        return self.title + ' (' + self.method.title + ' v.' + str(self.method.version) + ')' 
     
 class SampleLog(models.Model):
     LOG_TYPES = (
