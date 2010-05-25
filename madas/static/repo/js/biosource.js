@@ -23,6 +23,7 @@ MA.BioLoadSuccess = function(response) {
     MA.CurrentSourceType = response.responseJSON.rows[0].type;
     
     //load the source info
+    Ext.getCmp('sourceNCBI').enable();
     switch ( MA.CurrentSourceType ) {
         case 1:
             var loader = new Ajax.Request(wsBaseUrl + 'records/microbialinfo/source__id/'+MA.CurrentSingleSourceId, 
@@ -57,6 +58,7 @@ MA.BioLoadSuccess = function(response) {
                                           });
             break;
         default:
+            Ext.getCmp('sourceNCBI').disable();
             break;
     }
     
@@ -182,6 +184,7 @@ MA.SourceTypeSelect = function() {
     Ext.getCmp('organismBioSourceAnimalFieldset').hide();
     Ext.getCmp('organismBioSourceHumanFieldset').hide();
     
+    Ext.getCmp('sourceNCBI').enable();
     switch (src.getValue()) {
         case 1:
             Ext.getCmp('organismBioSourceMicrobialFieldset').show();
@@ -196,6 +199,7 @@ MA.SourceTypeSelect = function() {
             Ext.getCmp('organismBioSourceHumanFieldset').show();
             break;
         default:
+            Ext.getCmp('sourceNCBI').disable();
             break;
     }
 };
