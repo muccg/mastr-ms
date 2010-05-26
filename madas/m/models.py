@@ -38,6 +38,10 @@ class Formalquote(models.Model):
     class Meta:
         db_table = u'formalquote'
 
+    def __unicode__(self):
+        return str(self.details)
+
+
 
 class Quotehistory(models.Model):
     id = models.AutoField(primary_key=True) # This field type is a guess.
