@@ -18,8 +18,13 @@ class BiologicalSource(models.Model):
     ncbi_id = models.PositiveIntegerField(null=True)
     label = models.CharField(max_length=50, null=True, blank=True)
 
+    def __unicode__(self):
+        return str(self.label)
     
 class AnimalInfo(models.Model):
+    class Meta:
+        verbose_name_plural = "Animal information"
+
     source = models.ForeignKey(BiologicalSource)
     GENDER_CHOICES = (
         (u'M', u'Male'),
@@ -35,8 +40,10 @@ class AnimalInfo(models.Model):
     def __unicode__(self):
         return u"%s - %s - %s" % (self.sex, str(self.age), self.parental_line)
 
-
 class PlantInfo(models.Model):
+    class Meta:
+        verbose_name_plural = "Plant information"
+
     source = models.ForeignKey(BiologicalSource)
     development_stage = models.CharField(max_length=255, null=True, blank=True)
     location = models.CharField(max_length=255, null=True, blank=True)
@@ -52,6 +59,9 @@ class PlantInfo(models.Model):
     light_source = models.TextField(null=True, blank=True)
     lamp_details = models.TextField(null=True, blank=True)
 
+    def __unicode__(self):
+        return u"%s - %s" % (self.development_stage, self.growing_place)
+
 class HumanInfo(models.Model):
     source = models.ForeignKey(BiologicalSource)
     GENDER_CHOICES = (
@@ -65,6 +75,9 @@ class HumanInfo(models.Model):
     diagnosis = models.TextField(null=True, blank=True)
     location = models.CharField(max_length=255, null=True, blank=True)
     notes = models.TextField(null=True)
+
+    def __unicode__(self):
+        return u"%s - %s - %s" % (self.sex, self.date_of_birth, self.location)
 
 class MicrobialInfo(models.Model):
     source = models.ForeignKey(BiologicalSource)
@@ -83,6 +96,9 @@ class MicrobialInfo(models.Model):
     gas_flow_rate = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     gas_delivery_method = models.CharField(max_length=255, null=True, blank=True)
 
+    def __unicode__(self):
+        return u"%s - %s" % (self.genus, self.species)
+
 class Organ(models.Model):
     experiment = models.ForeignKey('Experiment')
     name = models.CharField(max_length=255, null=True, blank=True)
@@ -92,6 +108,9 @@ class Organ(models.Model):
         return self.name
 
 class ExperimentStatus(models.Model):
+    class Meta:
+        verbose_name_plural = "Experiment statuses"
+
     name = models.CharField(max_length=50)
     description = models.TextField(null=True)
 
@@ -125,9 +144,8 @@ class InstrumentMethod(models.Model):
     #future: quality control sample locations
 
     def __unicode__(self):
-        return self.title + ' (' + self.version + ')' 
+        return "%s (%s)" % (self.title, self.version) 
         
-
 class Experiment(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(null=True)
@@ -188,6 +206,9 @@ class SampleTimeline(models.Model):
         return self.timeline
 
 class SampleClass(models.Model):
+    class Meta:
+        verbose_name_plural = "Sample classes"
+
     class_id = models.CharField(max_length=255)
     experiment = models.ForeignKey(Experiment)
     biological_source = models.ForeignKey(BiologicalSource, null=True)
@@ -196,6 +217,9 @@ class SampleClass(models.Model):
     organ = models.ForeignKey(Organ, null=True, blank=True)
     enabled = models.BooleanField(default=True)
 
+    def __unicode__(self):
+        return str(self.organ)
+
 class Sample(models.Model):
     sample_id = models.CharField(max_length=255)
     sample_class = models.ForeignKey(SampleClass, null=True)
@@ -203,6 +227,9 @@ class Sample(models.Model):
     label = models.CharField(max_length=255)
     comment = models.TextField(null=True)
     weight = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+
+    def __unicode__(self):
+        return str(self.label)
     
 class Run(models.Model):
     method = models.ForeignKey(InstrumentMethod)
@@ -212,8 +239,8 @@ class Run(models.Model):
     samples = models.ManyToManyField(Sample)
     
     def __unicode__(self):
-        return self.title + ' (' + self.method.title + ' v.' + str(self.method.version) + ')' 
-    
+        return "%s (%s v.%s)" % (self.title, self.method.title, self.method.version)
+
 class SampleLog(models.Model):
     LOG_TYPES = (
             (0, u'Received'),
@@ -229,7 +256,7 @@ class SampleLog(models.Model):
     sample = models.ForeignKey(Sample)
     
     def __unicode__(self):
-        return str(self.LOG_TYPES[self.type][1]) + ': ' + str(self.description)
+        return "%s: %s" % (self.LOG_TYPES[self.type][1], self.description)
 
 class UserInvolvementType(models.Model):
     """Principal Investigator or Involved User"""
@@ -243,3 +270,6 @@ class UserExperiment(models.Model):
     experiment = models.ForeignKey(Experiment)
     type = models.ForeignKey(UserInvolvementType)
     additional_info = models.TextField(null=True, blank=True)
+
+    def __unicode__(self):
+        return "%s-%s" % (self.user, self.experiment)
