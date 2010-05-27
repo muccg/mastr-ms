@@ -258,7 +258,8 @@ SESSION_COOKIE_PATH = url('/')
 SESSION_SAVE_EVERY_REQUEST = True
 
 AUTHENTICATION_BACKENDS = (
- 'django.contrib.auth.backends.LDAPBackend',
+ 'madas.repository.backend.MadasBackend',
+ #'django.contrib.auth.backends.LDAPBackend',
  #'django.contrib.auth.backends.NoAuthModelBackend',
 )
 
