@@ -1,7 +1,8 @@
-from django.http import HttpResponse, HttpResponseNotFound
+from django.db import transaction
+from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
-from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog
+from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, NotAuthorizedError
 from madas.m.models import Organisation, Formalquote
 from django.utils import webhelpers
 from django.contrib.auth.models import User
@@ -11,7 +12,24 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import get_model
 from json_util import makeJsonFriendly
 from madas.utils import setRequestVars, jsonResponse
+from madas.repository.permissions import PermissionManager
 
+permissions = PermissionManager()
+
+
+# this should be a decorator, but it doesn't work with how the views are 
+# currently working.
+# left here for reference only. Example usage would be:
+#  @needs_permission('create')
+
+def needs_permission(permission):
+    def decorator(view):
+        def restricted_view(request, *args, **kwargs):
+            if not permissions.has_permission(request.user, permission):
+                return HttpResponseForbidden()
+            return view(request, *args, **kwargs)
+        return restricted_view
+    return decorator 
 
 def create_object(request, model):
 
@@ -20,7 +38,7 @@ def create_object(request, model):
     #in some cases, look up the value
     
     #get args and remove the id from it if it exists
-    
+
     if request.GET:
         args = request.GET
     else:
@@ -32,6 +50,9 @@ def create_object(request, model):
        
     for key in args.keys():
         obj.__setattr__(key, args[key])
+
+    if not permissions.has_permission(request.user, 'create', obj):
+        return HttpResponseForbidden()
 
     obj.save()
 
@@ -66,26 +87,31 @@ def create_object(request, model):
     return records(request, model, 'id', obj.id)
 
 
-def batch_create_object(request):
+def create_sample_log(user, sample_id, type, description):
+    log = SampleLog(type=type,description=description,sample_id=sample_id)
+    if not permissions.has_permission(user, 'create', log):
+        raise NotAuthorizedError()
+    log.save()
 
+@transaction.commit_on_success
+def batch_create_sample_logs(request):
     #get args and remove the id from it if it exists
-    
     if request.GET:
         args = request.GET
     else:
         args = request.POST
-       
+
     #todo stuff
     type = args.get('type')
     description = args.get('description')
     sampleids = args.get('sample_ids').split(',')
     
-    for sampleid in sampleids:
-        log = SampleLog(type=type,description=description,sample_id=sampleid)
-        log.save()
-
-    return records(request, 'samplelog', 'id', 0)
-    
+    try:
+        for sampleid in sampleids:
+            create_sample_log(request.user, sampleid, type, description)
+        return records(request, 'samplelog', 'id', 0)
+    except NotAuthorizedError:
+        return HttpResponseForbidden()
 
 def update_object(request, model, id):
     
@@ -106,6 +132,8 @@ def update_object(request, model, id):
     for row in rows:
         for key in args:
             row.__setattr__(key, args[key])
+        if not permissions.has_permission(request.user, 'update', row):
+            return HttpResponseForbidden()
         row.save()
 
     return records(request, model, 'id', id)
@@ -117,13 +145,15 @@ def delete_object(request, model, id):
         args = request.GET
     else:
         args = request.POST
-       
+
 
     #fetch the object and update all values
     model_obj = get_model('repository', model) # try to get app name dynamically at some point
     params = {'id':id}
     rows = model_obj.objects.filter(**params)
     
+    if rows and not permissions.has_permission(request.user, 'delete', rows[0]):
+        return HttpResponseForbidden()
     rows.delete()
 
     return records(request, model, 'id', id)
@@ -189,9 +219,8 @@ def records(request, model, field, value):
         args = request.GET
     else:
         args = request.POST
-       
 
-    ### Authorisation Check ###
+
     authenticated = request.user.is_authenticated()   
     if not authenticated == True:
         return jsonResponse(request, [])

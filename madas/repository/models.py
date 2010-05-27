@@ -3,6 +3,42 @@ from django.contrib.auth.models import User
 from datetime import datetime, date, time
 from m.models import Organisation, Formalquote
 
+class NotAuthorizedError(StandardError):
+    pass
+
+class MadasUser(User):
+    class Meta:
+        proxy = True
+
+    def __init__(self, *args, **kwargs):
+        User.__init__(self, *args, **kwargs)
+        self.ldap_groups = None
+
+    def set_ldap_groups(self, ldap_groups):
+        if ldap_groups is None: ldap_groups = tuple()
+        self.ldap_groups = ldap_groups
+        
+    @property
+    def is_admin(self):
+        assert self.ldap_groups is not None, "Ldap groups not set"
+        return ('Administrators' in self.ldap_groups)
+
+    @property
+    def is_noderep(self):
+        assert self.ldap_groups is not None, "Ldap groups not set"
+        return ('Node Reps' in self.ldap_groups)
+
+    @property
+    def is_client(self):
+        assert self.ldap_groups is not None, "Ldap groups not set"
+        return len(self.ldap_groups) == 0
+
+    def is_project_manager_of(self, project):
+        return self.pk in [m.pk for m in project.managers.all()]
+        
+    def is_client_of(self, project):
+        return (project.client and self.pk == project.client.pk)
+
 class OrganismType(models.Model):
     """Currently, Microorganism, Plant, Animal or Human"""
     name = models.CharField(max_length=50)
@@ -122,6 +158,7 @@ class Project(models.Model):
     description = models.TextField(null=True)
     created_on = models.DateField(null=False, default=date.today)
     client = models.ForeignKey(User, null=True)    
+    managers = models.ManyToManyField(User, related_name='managed_projects')
     
     def __unicode__(self):
         return self.title + ' (' + self.client.username + ')'
