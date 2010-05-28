@@ -53,15 +53,15 @@ class SampleAdmin(admin.ModelAdmin):
         selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
 
         im, created = InstrumentMethod.objects.get_or_create(title="Default Method", creator=request.user)
-        run = Run(method=im, creator=request.user, title="New Run")
-        run.save() # need id before we can add many-to-many
+        r = Run(method=im, creator=request.user, title="New Run")
+        r.save() # need id before we can add many-to-many
 
         for sample_id in selected:
             s = Sample.objects.get(id=sample_id)
-            run.samples.add(s)
-        run.save()
+            rs = RunSample(run=r, sample=s)
+            rs.save()
 
-        change_url = urlresolvers.reverse('admin:repository_run_change', args=(run.id,))
+        change_url = urlresolvers.reverse('admin:repository_run_change', args=(r.id,))
         return HttpResponseRedirect(change_url)
 
     create_run.short_description = "Create Run from samples."
