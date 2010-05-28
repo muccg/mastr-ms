@@ -6,6 +6,11 @@ class Emailmap(models.Model):
     emailaddress = models.CharField(max_length=100)
     class Meta:
         db_table = u'emailmap'
+        verbose_name = "email map"
+        verbose_name_plural = "email maps"
+
+    def __unicode__(self):
+        return self.emailaddress
 
 
 class Quoterequest(models.Model):
@@ -24,7 +29,11 @@ class Quoterequest(models.Model):
     
     class Meta:
         db_table = u'quoterequest'
+        verbose_name = "quote request"
+        verbose_name_plural = "quote requests"
 
+    def __unicode__(self):
+        return "%s (%s,%s)" % (self.tonode, self.lastname, self.firstname)
 
 class Formalquote(models.Model):
     id = models.AutoField(primary_key=True) # This field type is a guess.
@@ -37,7 +46,8 @@ class Formalquote(models.Model):
     downloaded = models.BooleanField()
     class Meta:
         db_table = u'formalquote'
-
+        verbose_name = "formal quote"
+        verbose_name_plural = "formal quotes"
     def __unicode__(self):
         return str(self.details)
 
@@ -55,6 +65,8 @@ class Quotehistory(models.Model):
     changetimestamp = models.DateTimeField(auto_now=True)
     class Meta:
         db_table = u'quotehistory'
+        verbose_name = "quote history"
+        verbose_name_plural = "quote histories"
 
 
 class Organisation(models.Model):
