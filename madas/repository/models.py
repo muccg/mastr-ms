@@ -49,6 +49,7 @@ class OrganismType(models.Model):
        
 class BiologicalSource(models.Model):
     experiment = models.ForeignKey('Experiment')
+    abbreviation = models.CharField(max_length=5)
     type = models.ForeignKey(OrganismType)
     information = models.TextField(null=True, blank=True)
     ncbi_id = models.PositiveIntegerField(null=True)
@@ -138,6 +139,7 @@ class MicrobialInfo(models.Model):
 class Organ(models.Model):
     experiment = models.ForeignKey('Experiment')
     name = models.CharField(max_length=255, null=True, blank=True)
+    abbreviation = models.CharField(max_length=5)
     detail = models.CharField(max_length=255, null=True, blank=True)
 
     def __unicode__(self):
@@ -227,6 +229,7 @@ class StandardOperationProcedure(models.Model):
 
 class Treatment(models.Model):
     experiment = models.ForeignKey('Experiment')
+    abbreviation = models.CharField(max_length=5)
     name = models.CharField(max_length=255)
     description = models.TextField(null=True)
 
@@ -235,6 +238,7 @@ class Treatment(models.Model):
 
 class SampleTimeline(models.Model):
     experiment = models.ForeignKey('Experiment')
+    abbreviation = models.CharField(max_length=5)
     timeline = models.CharField(max_length=255, null=True, blank=True)
     
     def __unicode__(self):
@@ -255,7 +259,16 @@ class SampleClass(models.Model):
     enabled = models.BooleanField(default=True)
 
     def __unicode__(self):
-        return str(self.organ)
+        val = ''
+        if self.biological_source is not None:
+            val = val + self.biological_source.abbreviation
+        if self.treatments is not None:
+            val = val + self.treatments.abbreviation
+        if self.timeline is not None:
+            val = val + self.timeline.abbreviation
+        if self.organ is not None:
+            val = val + self.organ.abbreviation
+        return val
 
 class Sample(models.Model):
     sample_id = models.CharField(max_length=255)
@@ -268,12 +281,21 @@ class Sample(models.Model):
     def __unicode__(self):
         return str(self.label)
     
+    def run_filename(self, run):
+        return self.sample_class + '-' + run.id + '-' + self.id + '.d'
+    
 class Run(models.Model):
     method = models.ForeignKey(InstrumentMethod)
     created_on = models.DateField(null=False, default=date.today)
     creator = models.ForeignKey(User)
     title = models.CharField(max_length=255,null=True,blank=True)
     samples = models.ManyToManyField(Sample)
+    from mdatasync_server.models import NodeClient
+    machine = models.ForeignKey(NodeClient)
+    
+    def sortedSamples(self):
+        #TODO if method indicates randomisation and blanks, now is when we would do it
+        return self.samples.all()
     
     def __unicode__(self):
         return "%s (%s v.%s)" % (self.title, self.method.title, self.method.version)

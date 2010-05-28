@@ -2,7 +2,7 @@ from django.db import transaction
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
-from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, NotAuthorizedError
+from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, InstrumentMethod
 from madas.m.models import Organisation, Formalquote
 from django.utils import webhelpers
 from django.contrib.auth.models import User
@@ -1108,6 +1108,27 @@ def sample_class_enable(request, id):
     sc.save()
         
     return recordsSampleClasses(request, sc.biological_source.experiment.id)
+
+
+def generate_worklist(request,run_id):
+    
+    from mako.template import Template
+    
+    #load the run info, including template
+    try:
+        run = Run.objects.get(id=run_id)
+    except Exception, e:
+        print 'failed to load run with run_id:' + run_id
+        return HttpResponse('failed to load run with run_id: ' + run_id)
+    
+    mytemplate = Template(run.method.template)
+    
+    #create the variables to insert
+    render_vars = {'username':request.user.username,'run':run}
+    
+    #render
+    # TODO set attribute on HttpResponse of content_type='application/download'
+    return HttpResponse(mytemplate.render(**render_vars), content_type="text/plain")
 
     
 def select_widget_json(authenticated=False, authorized=False, main_content_function=None, success=False, input=""):
