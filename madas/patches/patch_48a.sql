@@ -23,3 +23,15 @@ CREATE TABLE "repository_run_samples" (
 )
 ;
 COMMIT;
+
+BEGIN;
+
+ALTER TABLE "repository_biologicalsource" ADD COLUMN "abbreviation" varchar(5);
+ALTER TABLE "repository_treatment" ADD COLUMN "abbreviation" varchar(5);
+ALTER TABLE "repository_sampletimeline" ADD COLUMN "abbreviation" varchar(5);
+ALTER TABLE "repository_organ" ADD COLUMN "abbreviation" varchar(5);
+
+ALTER TABLE "mdatasync_server_nodeclient" ADD COLUMN "default_data_path" varchar(255);
+ALTER TABLE "repository_run" ADD COLUMN     "machine_id" integer REFERENCES "mdatasync_server_nodeclient" ("id") DEFERRABLE INITIALLY DEFERRED;
+
+COMMIT;
