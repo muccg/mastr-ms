@@ -261,13 +261,17 @@ class SampleClass(models.Model):
     def __unicode__(self):
         val = ''
         if self.biological_source is not None:
-            val = val + self.biological_source.abbreviation
+            if self.biological_source.abbreviation is not None:
+                val = val + self.biological_source.abbreviation
         if self.treatments is not None:
-            val = val + self.treatments.abbreviation
+            if self.treatments.abbreviation is not None:
+                val = val + self.treatments.abbreviation
         if self.timeline is not None:
-            val = val + self.timeline.abbreviation
+            if self.timeline.abbreviation is not None:
+                val = val + self.timeline.abbreviation
         if self.organ is not None:
-            val = val + self.organ.abbreviation
+            if self.organ.abbreviation is not None:
+                val = val + self.organ.abbreviation
         return val
 
 class Sample(models.Model):
@@ -282,7 +286,10 @@ class Sample(models.Model):
         return str(self.label)
     
     def run_filename(self, run):
-        return self.sample_class + '-' + run.id + '-' + self.id + '.d'
+        if self.sample_class is None:
+            return 'SAMPLE NOT IN A CLASS'
+        else:
+            return str(self.sample_class) + '-' + str(run.id) + '-' + str(self.id) + '.d'
     
 class Run(models.Model):
     method = models.ForeignKey(InstrumentMethod)
