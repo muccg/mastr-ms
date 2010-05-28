@@ -4,6 +4,11 @@ from django.http import HttpResponseRedirect
 from django.utils.webhelpers import url
 from django.core import urlresolvers
 
+class RunSampleInline(admin.TabularInline):
+    model = RunSample
+    extra = 3
+    raw_id_fields = ['sample', 'run']
+
 class OrganAdmin(admin.ModelAdmin):
     list_display = ('name', 'detail')
     search_fields = ['name']
@@ -47,7 +52,8 @@ class SampleAdmin(admin.ModelAdmin):
     list_display = ['label', 'experiment', 'comment', 'weight', 'sample_class', 'logs_link']
     search_fields = ['label', 'experiment__title', 'sample_class__organ__name']
     actions = ['create_run']
-
+    inlines = [RunSampleInline]
+    
     def create_run(self, request, queryset):
 
         selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
@@ -113,8 +119,8 @@ class SampleLogAdmin(admin.ModelAdmin):
 class RunAdmin(admin.ModelAdmin):
     list_display = ['title', 'method', 'creator', 'created_on']
     search_fields = ['title', 'method__title', 'creator__username', 'creator__first_name', 'creator__last_name']
-    raw_id_fields = ['samples']
-    
+    inlines = [RunSampleInline]
+
 
 admin.site.register(OrganismType, OrganismTypeAdmin)
 admin.site.register(UserInvolvementType, UserInvolvementTypeAdmin)
