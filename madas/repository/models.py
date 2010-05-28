@@ -347,5 +347,5 @@ class RunSample(models.Model):
     filename = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
-        db_table = u'run_samples'
+        db_table = u'repository_run_samples'
 
