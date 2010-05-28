@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime, date, time
 from m.models import Organisation, Formalquote
+from mdatasync_server.models import NodeClient
+
 
 class NotAuthorizedError(StandardError):
     pass
@@ -284,7 +286,7 @@ class Sample(models.Model):
 
     def __unicode__(self):
         return str(self.label)
-    
+
     def run_filename(self, run):
         if self.sample_class is None:
             return 'SAMPLE NOT IN A CLASS'
@@ -296,8 +298,7 @@ class Run(models.Model):
     created_on = models.DateField(null=False, default=date.today)
     creator = models.ForeignKey(User)
     title = models.CharField(max_length=255,null=True,blank=True)
-    samples = models.ManyToManyField(Sample)
-    from mdatasync_server.models import NodeClient
+    samples = models.ManyToManyField(Sample, through="RunSample")
     machine = models.ForeignKey(NodeClient)
     
     def sortedSamples(self):
@@ -339,3 +340,12 @@ class UserExperiment(models.Model):
 
     def __unicode__(self):
         return "%s-%s" % (self.user, self.experiment)
+
+class RunSample(models.Model):
+    run = models.ForeignKey(Run)
+    sample = models.ForeignKey(Sample)
+    filename = models.CharField(max_length=255, null=True, blank=True)
+
+    class Meta:
+        db_table = u'run_samples'
+

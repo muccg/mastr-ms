@@ -44,7 +44,7 @@ class TreatmentAdmin(admin.ModelAdmin):
     list_display = ('name','description')
 
 class SampleAdmin(admin.ModelAdmin):
-    list_display = ['label', 'experiment', 'comment', 'weight', 'sample_class']
+    list_display = ['label', 'experiment', 'comment', 'weight', 'sample_class', 'logs_link']
     search_fields = ['label', 'experiment__title', 'sample_class__organ__name']
     actions = ['create_run']
 
@@ -65,6 +65,12 @@ class SampleAdmin(admin.ModelAdmin):
         return HttpResponseRedirect(change_url)
 
     create_run.short_description = "Create Run from samples."
+
+    def logs_link(self, obj):
+        change_url = urlresolvers.reverse('admin:repository_samplelog_changelist')
+        return '<a href="%s?sample__id__exact=%s">Logs</a>' % (change_url, obj.id)
+    logs_link.short_description = 'Logs'
+    logs_link.allow_tags = True    
 
 
 class SampleTimelineAdmin(admin.ModelAdmin):
@@ -107,7 +113,7 @@ class SampleLogAdmin(admin.ModelAdmin):
 class RunAdmin(admin.ModelAdmin):
     list_display = ['title', 'method', 'creator', 'created_on']
     search_fields = ['title', 'method__title', 'creator__username', 'creator__first_name', 'creator__last_name']
-
+    raw_id_fields = ['samples']
     
 
 admin.site.register(OrganismType, OrganismTypeAdmin)
