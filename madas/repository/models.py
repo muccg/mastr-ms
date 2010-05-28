@@ -300,6 +300,7 @@ class Run(models.Model):
     title = models.CharField(max_length=255,null=True,blank=True)
     samples = models.ManyToManyField(Sample, through="RunSample")
     machine = models.ForeignKey(NodeClient)
+    generated_output = models.TextField(null=True, blank=True)
     
     def sortedSamples(self):
         #TODO if method indicates randomisation and blanks, now is when we would do it
