@@ -223,6 +223,7 @@ MA.SaveOrganRow = function(roweditor, changes, rec, i) {
     
     bundledData.name = rec.data.name;
     bundledData.detail = rec.data.detail;
+    bundledData.abbreviation = rec.data.abbreviation;
     
     MA.SaveRowLiterals('organ', roweditor, bundledData, rec, i, function() { var expId = MA.CurrentExperimentId(); organStore.proxy.conn.url = wsBaseUrl + 'records/organ/experiment__id/' + expId; organStore.load();});
 };
@@ -485,6 +486,19 @@ MA.BioSource = {
                                 listWidth:230,
                                 store: organNameComboStore
                             }), dataIndex:'name' },
+                        { header: "abbrev", sortable:false, menuDisabled:true, editor:new Ext.form.TextField({
+                                editable:true,
+                                forceSelection:false,
+                                displayField:'value',
+                                valueField:undefined,
+                                hiddenName:'abbrevValue',
+                                lazyRender:true,
+                                allowBlank:true,
+                                typeAhead:false,
+                                triggerAction:'all',
+                                listWidth:230
+                            }), dataIndex:'abbreviation'
+                        },
                         { header: "detail", sortable:false, menuDisabled:true, editor:new Ext.form.TextField({
                                 editable:true,
                                 forceSelection:false,

@@ -12,6 +12,7 @@ MA.SaveTimelineRow = function(roweditor, changes, rec, i) {
     var bundledData = {};
     
     bundledData.timeline = rec.data.timeline;
+    bundledData.abbreviation = rec.data.abbreviation;
     
     MA.SaveRowLiterals('sampletimeline', roweditor, bundledData, rec, i, function() { var expId = MA.CurrentExperimentId(); timelineStore.proxy.conn.url = wsBaseUrl + 'records/sampletimeline/experiment__id/' + expId; timelineStore.load();});
 };
@@ -22,6 +23,7 @@ MA.SaveTreatmentRow = function(roweditor, changes, rec, i) {
     bundledData.name = rec.data.name;
     bundledData.type_id = rec.data.type;
     bundledData.description = rec.data.description;
+    bundledData.abbreviation = rec.data.abbreviation;
     
     MA.SaveRowLiterals('treatment', roweditor, bundledData, rec, i, function() { var expId = MA.CurrentExperimentId(); treatmentStore.proxy.conn.url = wsBaseUrl + 'records/treatment/experiment__id/' + expId; treatmentStore.load();});
 };
@@ -98,7 +100,20 @@ MA.Treatment = {
                                    }
                             ],
                             columns: [
-                                      { header: "timeline",  sortable:false, menuDisabled:true, dataIndex:'timeline', editor: new Ext.form.TextField({allowBlank:false}) }
+                                      { header: "timeline",  sortable:false, menuDisabled:true, dataIndex:'timeline', editor: new Ext.form.TextField({allowBlank:false}) },
+                                      { header: "abbrev", sortable:false, menuDisabled:true, editor:new Ext.form.TextField({
+                                              editable:true,
+                                              forceSelection:false,
+                                              displayField:'value',
+                                              valueField:undefined,
+                                              hiddenName:'abbrevValue',
+                                              lazyRender:true,
+                                              allowBlank:true,
+                                              typeAhead:false,
+                                              triggerAction:'all',
+                                              listWidth:230
+                                          }), dataIndex:'abbreviation'
+                                      }
                             ],
                             store: timelineStore
                         }
@@ -192,7 +207,21 @@ MA.Treatment = {
                                     }
                                     
                                 } 
-                            }), dataIndex:'name' }]
+                            }), dataIndex:'name' },
+                            { header: "abbrev", sortable:false, menuDisabled:true, editor:new Ext.form.TextField({
+                                    editable:true,
+                                    forceSelection:false,
+                                    displayField:'value',
+                                    valueField:undefined,
+                                    hiddenName:'abbrevValue',
+                                    lazyRender:true,
+                                    allowBlank:true,
+                                    typeAhead:false,
+                                    triggerAction:'all',
+                                    listWidth:230
+                                }), dataIndex:'abbreviation'
+                            }
+                            ]
                       }
                     ]
                 }
