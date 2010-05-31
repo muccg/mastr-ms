@@ -63,13 +63,27 @@ class SampleAdmin(admin.ModelAdmin):
         r = Run(method=im, creator=request.user, title="New Run")
         r.save() # need id before we can add many-to-many
 
+
+        # check that each sample has a sample class
+        samples_valid = True
+        message = ''
         for sample_id in selected:
             s = Sample.objects.get(id=sample_id)
-            rs = RunSample(run=r, sample=s)
-            rs.save()
+            if not s.sample_class:
+                samples_valid = False
+                message = "Run NOT created as sample (%s, %s) does not have sample class." % (s.label, s.experiment)
+                break
 
-        change_url = urlresolvers.reverse('admin:repository_run_change', args=(r.id,))
-        return HttpResponseRedirect(change_url)
+        if not samples_valid:
+            self.message_user(request, message)
+        else:
+            for sample_id in selected:
+                s = Sample.objects.get(id=sample_id)
+                rs = RunSample(run=r, sample=s)
+                rs.save()
+
+            change_url = urlresolvers.reverse('admin:repository_run_change', args=(r.id,))
+            return HttpResponseRedirect(change_url)
 
     create_run.short_description = "Create Run from samples."
 

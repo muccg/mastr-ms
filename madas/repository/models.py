@@ -278,7 +278,7 @@ class SampleClass(models.Model):
 
 class Sample(models.Model):
     sample_id = models.CharField(max_length=255)
-    sample_class = models.ForeignKey(SampleClass, null=True)
+    sample_class = models.ForeignKey(SampleClass, null=True, blank=True)
     experiment = models.ForeignKey(Experiment)
     label = models.CharField(max_length=255)
     comment = models.TextField(null=True)
@@ -350,3 +350,5 @@ class RunSample(models.Model):
     class Meta:
         db_table = u'repository_run_samples'
 
+    def __unicode__(self):
+        return "Run: %s, Sample: %s, Filename: %s." % (self.run, self.sample, self.filename)
