@@ -425,6 +425,7 @@ items:[
                                                      { name: 'status', sortType : 'string' },
                                                      { name: 'dept', sortType : 'string' },
                                                      { name: 'institute', sortType : 'string' },
+                                                     { name: 'organisation', sortType : 'string' },
                                                      { name: 'address', sortType : 'string' },
                                                      { name: 'supervisor', sortType : 'string' },
                                                      { name: 'areaOfInterest', sortType : 'string' },
@@ -553,7 +554,28 @@ items:[
                name: 'institute',
                allowBlank:true,
                maskRe: /[^,=]/
-               },{
+               },
+               new Ext.form.ComboBox({
+                                        fieldLabel: 'Organisation',
+                                        id: 'adminUserEditOrganisation',
+                                        name: 'orgDisplay',
+                                        editable:false,
+                                        forceSelection:true,
+                                        displayField:'name',
+                                        valueField:'submitValue',
+                                        hiddenName:'organisation',
+                                        lazyRender:true,
+                                        typeAhead:false,
+                                        triggerAction:'all',
+                                        listWidth:230,
+                                        store: new Ext.data.JsonStore({
+                                                                      storeId: 'organisationDS',
+                                                                      url: MA.BaseUrl + 'admin/listOrganisations',
+                                                                      root: 'response.value.items',
+                                                                      fields: ['name', 'submitValue']
+                                                                      })
+                                        }),
+               {
                fieldLabel: 'Address',
                name: 'address',
                allowBlank:true,
