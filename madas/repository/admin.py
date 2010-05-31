@@ -118,13 +118,13 @@ class SampleLogAdmin(admin.ModelAdmin):
     search_fields = ['description']
 
 class RunAdmin(admin.ModelAdmin):
-    list_display = ['title', 'method', 'creator', 'created_on']
+    list_display = ['title', 'method', 'creator', 'created_on', 'output_link']
     search_fields = ['title', 'method__title', 'creator__username', 'creator__first_name', 'creator__last_name']
     inlines = [RunSampleInline]
 
     def output_link(self, obj):
         output_url = urlresolvers.reverse('generate_worklist', kwargs={'run_id': obj.id})
-        return '<a href="%s">Output</a>' % change_url
+        return '<a href="%s">Output</a>' % output_url
     output_link.short_description = 'Output'
     output_link.allow_tags = True    
 
