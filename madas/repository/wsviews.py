@@ -1109,26 +1109,18 @@ def sample_class_enable(request, id):
         
     return recordsSampleClasses(request, sc.biological_source.experiment.id)
 
-
+@login_required()
 def generate_worklist(request,run_id):
     
-    from mako.template import Template
+    run = Run.objects.get(id=run_id)
     
-    #load the run info, including template
-    try:
-        run = Run.objects.get(id=run_id)
-    except Exception, e:
-        print 'failed to load run with run_id:' + run_id
-        return HttpResponse('failed to load run with run_id: ' + run_id)
+    from runbuilder import RunBuilder
     
-    mytemplate = Template(run.method.template)
-    
-    #create the variables to insert
-    render_vars = {'username':request.user.username,'run':run}
+    rb = RunBuilder(run)
     
     #render
     # TODO set attribute on HttpResponse of content_type='application/download'
-    return HttpResponse(mytemplate.render(**render_vars), content_type="text/plain")
+    return HttpResponse(rb.generate(request), content_type="text/plain")
 
     
 def select_widget_json(authenticated=False, authorized=False, main_content_function=None, success=False, input=""):

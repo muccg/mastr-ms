@@ -4,6 +4,8 @@ from datetime import datetime, date, time
 from m.models import Organisation, Formalquote
 from mdatasync_server.models import NodeClient
 
+class SampleNotInClassException(Exception):
+    pass
 
 class NotAuthorizedError(StandardError):
     pass
@@ -274,6 +276,8 @@ class SampleClass(models.Model):
         if self.organ is not None:
             if self.organ.abbreviation is not None:
                 val = val + self.organ.abbreviation
+        if val == '':
+            val = 'class_' + str(self.id)
         return val
 
 class Sample(models.Model):
@@ -289,7 +293,8 @@ class Sample(models.Model):
 
     def run_filename(self, run):
         if self.sample_class is None:
-            return 'SAMPLE NOT IN A CLASS'
+            print 'sample not in class'
+            raise SampleNotInClassException
         else:
             return str(self.sample_class) + '-' + str(run.id) + '-' + str(self.id) + '.d'
     
