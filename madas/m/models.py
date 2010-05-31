@@ -72,6 +72,7 @@ class Quotehistory(models.Model):
 class Organisation(models.Model):
     name = models.CharField(max_length=100)
     abn = models.CharField(max_length=100)
+    user = models.ManyToManyField(User, through="UserOrganisation")
     
 class UserOrganisation(models.Model):
     user = models.ForeignKey(User)
