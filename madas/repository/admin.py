@@ -19,6 +19,7 @@ class BiologicalSourceAdmin(admin.ModelAdmin):
 class ProjectAdmin(admin.ModelAdmin):
     list_display = ('title', 'description', 'created_on', 'experiments_link')
     search_fields = ['title']
+    list_filter = ['client']
 
     def experiments_link(self, obj):
         change_url = urlresolvers.reverse('admin:repository_experiment_changelist')
@@ -120,6 +121,12 @@ class RunAdmin(admin.ModelAdmin):
     list_display = ['title', 'method', 'creator', 'created_on']
     search_fields = ['title', 'method__title', 'creator__username', 'creator__first_name', 'creator__last_name']
     inlines = [RunSampleInline]
+
+    def output_link(self, obj):
+        output_url = urlresolvers.reverse('generate_worklist', kwargs={'run_id': obj.id})
+        return '<a href="%s">Output</a>' % change_url
+    output_link.short_description = 'Output'
+    output_link.allow_tags = True    
 
 
 admin.site.register(OrganismType, OrganismTypeAdmin)
