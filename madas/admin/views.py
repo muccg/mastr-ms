@@ -2,9 +2,10 @@
 from django.db import models
 from django.http import HttpResponse, HttpResponseNotFound
 from django.contrib.auth.ldap_helper import LDAPHandler
+from django.contrib.auth.models import User
 
 from madas.utils import setRequestVars, jsonResponse, json_encode, translate_dict
-from madas.m.models import Quoterequest, Formalquote, Organisation
+from madas.m.models import Quoterequest, Formalquote, Organisation, UserOrganisation
 from django.db.models import Q
 from madas.repository.json_util import makeJsonFriendly
 from django.utils import simplejson as json
@@ -294,7 +295,17 @@ def user_save(request, *args):
         elif status == 'Deleted':
             nextview = 'admin:deletedUsersearch'
 
-
+    #apply organisational changes
+    targetUser = User.objects.get(username=request.REQUEST['email'])
+    try:
+        print 'organisation is ' + request.REQUEST['organisation']
+        org = Organisation.objects.get(id=request.REQUEST['organisation'])
+        if org:
+            UserOrganisation.objects.filter(user=targetUser).delete()
+            uo = UserOrganisation(user=targetUser, organisation=org)
+            uo.save()
+    except:
+        print 'FATAL error adding or removing user from organisation'
 
     setRequestVars(request, success=True, authenticated=True, authorized=True, mainContentFunction = nextview)
     print '***admin/user_save : exit ***' 
