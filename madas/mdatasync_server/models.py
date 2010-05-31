@@ -27,5 +27,9 @@ class NodeRules(models.Model):
     rule_category = models.IntegerField(choices = NODE_RULE_CHOICES)
     rule_text = models.TextField()
 
+    class Meta:
+        verbose_name = "Node rule"
+        verbose_name_plural = "Node rules"
+
     def __unicode__(self):
         return "%s%s" % (ActionType.CommandLookup[self.rule_category], self.rule_text)
