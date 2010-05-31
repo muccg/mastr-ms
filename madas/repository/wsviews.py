@@ -603,10 +603,15 @@ def recreate_sample_classes(request, experiment_id):
         if a:
             combo['id'] = a[0].id
             foundclasses.add(a[0].id)
+            sc = a[0]
         else:
             #if not found, add it on the spot
             sc.save()
             foundclasses.add(sc.id)
+        #now check if we can auto-assign a name based on abbreviations
+        if str(sc) != '' and sc.class_id == 'sample class':
+            sc.class_id = str(sc)
+            sc.save()
 
     #purge anything not in foundclasses
     purgeable = currentsamples.exclude(id__in=foundclasses)
