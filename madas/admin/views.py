@@ -247,6 +247,16 @@ def user_load(request, *args):
     import madas.users 
     from madas.users.views import _userload
     d = _userload(request.REQUEST['username'])
+    
+    #find user organisation
+    try:
+        u = User.objects.get(username=request.REQUEST['username'])
+        orgs = UserOrganisation.objects.filter(user=u)
+        d['organisation'] = orgs[0].organisation.id
+        print 'user in org ' + orgs[0].organisation.id
+    except Exception, e:
+        print str(e)
+        pass
 
     setRequestVars(request, success=True, data=d, totalRows=len(d.keys()), authenticated=True, authorized=True)
     print '***admin/user_load : exit ***' 
@@ -296,14 +306,21 @@ def user_save(request, *args):
             nextview = 'admin:deletedUsersearch'
 
     #apply organisational changes
-    targetUser = User.objects.get(username=request.REQUEST['email'])
     try:
-        print 'organisation is ' + request.REQUEST['organisation']
+        targetUser = User.objects.get(username=request.REQUEST['email'])
+    except:
+        targetUser = User.objects.create_user(request.REQUEST['email'], request.REQUEST['email'], '')
+        targetUser.save()
+        
+    try:
+        UserOrganisation.objects.filter(user=targetUser).delete()
+
         org = Organisation.objects.get(id=request.REQUEST['organisation'])
+    
         if org:
-            UserOrganisation.objects.filter(user=targetUser).delete()
             uo = UserOrganisation(user=targetUser, organisation=org)
             uo.save()
+            print 'added user to org'
     except:
         print 'FATAL error adding or removing user from organisation'
 
