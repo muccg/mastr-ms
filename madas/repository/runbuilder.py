@@ -1,3 +1,5 @@
+from madas.repository.models import RunSample
+
 class RunValidationException(Exception):
     pass
 
@@ -22,6 +24,11 @@ class RunBuilder(object):
             
             #create the variables to insert
             render_vars = {'username':request.user.username,'run':self.run}
+            
+            #write filenames into DB
+            for rs in RunSample.objects.filter(run=self.run):
+                rs.filename = rs.sample.run_filename(self.run)
+                rs.save()
             
             #render
             return mytemplate.render(**render_vars)
