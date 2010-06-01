@@ -562,7 +562,7 @@ items:[
                                         editable:false,
                                         forceSelection:true,
                                         displayField:'name',
-                                        valueField:'submitValue',
+                                        valueField:'id',
                                         hiddenName:'organisation',
                                         lazyRender:true,
                                         typeAhead:false,
@@ -572,7 +572,7 @@ items:[
                                                                       storeId: 'organisationDS',
                                                                       url: MA.BaseUrl + 'admin/listOrganisations',
                                                                       root: 'response.value.items',
-                                                                      fields: ['name', 'submitValue']
+                                                                      fields: ['name', 'id']
                                                                       })
                                         }),
                {
