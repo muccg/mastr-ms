@@ -2,6 +2,7 @@
 from django.http import HttpResponse
 from django.utils import simplejson
 from mdatasync_server.models import *
+from repository.models import *  
 from mdatasync_server.rules import *
 from django.conf import settings
 import os
@@ -35,7 +36,73 @@ def getNodeClients(request, *args):
 
         
     return jsonResponse(result)
-    
+
+def retrievePathsForFiles(request, *args):
+    status = 0 #no error
+    error = '' #no error
+    filesdict = {} 
+    rules = []
+    try:
+        pfiles = request.POST.get('files', {})
+        #pfiles is json for a list of filenames
+        pfiles = simplejson.loads(pfiles)
+        #pfiles is now our list of fnames.
+        porganisation = simplejson.loads(request.POST.get('organisation', ''))
+        psitename= simplejson.loads(request.POST.get('sitename', ''))
+        pstation = simplejson.loads(request.POST.get('stationname', ''))
+        print 'Post var files passed through was: ', pfiles
+        print 'Post var organisation passed through was: ', porganisation
+        print 'Post var station passed through was: ', pstation
+        print 'Post var sitename passed through was: ', psitename
+
+
+
+        #filter by client, node, whatever to 
+        #get a list of filenames in the repository run samples table
+        #to compare against.
+        #for each filename that matches, you use the experiment's ensurepath 
+        try:
+            nodeclient = NodeClient.objects.get(organisation_name = porganisation, site_name=psitename, station_name = pstation)
+            print 'Nodeclient found.'
+            try:
+                rulesset = NodeRules.objects.filter(parent_node = nodeclient)
+                rules = [x.__unicode__() for x in rulesset]
+            except Exception, e:
+                status = 1
+                error = '%s, %s' % (error, 'Unable to resolve ruleset: %s' % (str(e)))
+            #now get the runs for that nodeclient
+            runs = Run.objects.filter(machine = nodeclient) 
+            for run in runs:
+                runsamples = RunSample.objects.filter(run = run)
+                for rs in runsamples:
+                    fname = rs.filename;
+                    path = rs.sample.experiment.ensure_dir()
+                    print 'Filename: %s belongs in path %s' % ( fname, path )
+                    if filesdict.has_key(fname):
+                        print 'Duplicate path detected!!!'
+                        error = "%s, %s" % (error, "Duplicate filename detected for %s" % (fname))
+                        status = 2
+                    filesdict[fname] = path 
+
+        except Exception, e:
+            status = 1
+            error = "%s, %s" % (error, 'Unable to resolve end machine to stored NodeClient: %s' % str(e) )
+        
+
+    except Exception, e:
+        status = 1
+        error = str(e)
+
+    retval = {'status': status,
+             'error' : error,
+             'filesdict':filesdict,
+             'rules' : [] 
+             #'rules' : None 
+            }
+
+    print 'RETVAL is', retval
+    return jsonResponse(retval)
+
 def defaultpage(request, *args):
     try:
 

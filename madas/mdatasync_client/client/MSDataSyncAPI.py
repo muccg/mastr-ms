@@ -106,6 +106,12 @@ class MSDataSyncAPI(object):
         #print 'rsync returned: ', retval
         self.log('Default return callback:%s' % (str(args)), Debug=True)
 
+
+    def getFiles(self, dir):
+        import os
+        for root, dirs, files in os.walk(dir):
+            print files
+
     
     #------- WORKER CLASS-----------------------
     import threading
@@ -144,7 +150,6 @@ class MSDSImpl(object):
     
     def checkRsync(self, sourcedir, remoteuser, remotehost, remotedir, rules = []):
         self.log('checkRsync implementation entered!', Debug=True)
-        self.log('fsdsd') 
         
         from subprocess import Popen, PIPE, STDOUT
         logfile = 'rsync_log.txt'
@@ -167,12 +172,12 @@ class MSDSImpl(object):
 
         self.log('cmd is %s ' % str(cmd))
 
-        #p = Popen( cmd, stdout=PIPE, stderr=PIPE, stdin=PIPE)
-        #for line in p.stdout:
-        #    self.log(line)
+        p = Popen( cmd, stdout=PIPE, stderr=PIPE, stdin=PIPE)
+        for line in p.stdout:
+            self.log(line)
         
-        p = Popen( cmd,
-                   stdout=self.log, stderr=self.log, stdin=PIPE)
+        #p = Popen( cmd,
+        #           stdout=self.log, stderr=self.log, stdin=PIPE)
         
         #p = Popen( cmd,
         #           stdout=self.log, stderr=self.log, stdin=PIPE)
