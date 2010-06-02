@@ -69,9 +69,9 @@ class SampleAdmin(admin.ModelAdmin):
         message = ''
         for sample_id in selected:
             s = Sample.objects.get(id=sample_id)
-            if not s.sample_class:
+            if not s.sample_class or s.sample_class.enabled is False:
                 samples_valid = False
-                message = "Run NOT created as sample (%s, %s) does not have sample class." % (s.label, s.experiment)
+                message = "Run NOT created as sample (%s, %s) does not have sample class or its class is not enabled." % (s.label, s.experiment)
                 break
 
         if not samples_valid:
