@@ -1,7 +1,4 @@
-from madas.repository.models import RunSample
-
-class RunValidationException(Exception):
-    pass
+from madas.repository.models import RunSample, SampleNotInClassException
 
 class RunBuilder(object):
     def __init__(self, run):
@@ -9,15 +6,15 @@ class RunBuilder(object):
 
     def validate(self):
         for sample in self.run.samples.all():
-            try:
-                sample.run_filename(self.run)
-            except:
-                return False
+            sample.run_filename(self.run)
             
         return True
         
     def generate(self, request):
-        if self.validate():
+        try:
+            self.validate()
+            #if the validate fails we throw an exception
+            
             from mako.template import Template
             
             mytemplate = Template(self.run.method.template)
@@ -32,6 +29,8 @@ class RunBuilder(object):
             
             #render
             return mytemplate.render(**render_vars)
-        else:
-            raise RunValidationException
+        except SampleNotInClassException, e:
+            return 'Samples in the run need to be in sample classes before they can be used in a run'
+        except Exception, e:
+            return 'Run validation error ' + str(e)
         
