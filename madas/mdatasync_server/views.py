@@ -42,6 +42,9 @@ def retrievePathsForFiles(request, *args):
     error = '' #no error
     filesdict = {} 
     rules = []
+    import webhelpers
+    host = request.__dict__['META']['SERVER_NAME'] #might not be right name
+
     try:
         pfiles = request.POST.get('files', {})
         #pfiles is json for a list of filenames
@@ -54,8 +57,6 @@ def retrievePathsForFiles(request, *args):
         print 'Post var organisation passed through was: ', porganisation
         print 'Post var station passed through was: ', pstation
         print 'Post var sitename passed through was: ', psitename
-
-
 
         #filter by client, node, whatever to 
         #get a list of filenames in the repository run samples table
@@ -93,10 +94,22 @@ def retrievePathsForFiles(request, *args):
         status = 1
         error = str(e)
 
+    retfilesdict = {}
+
+    #so by this stage, we can go through and test each sent file against the filesdict.
+    for fname in pfiles:
+        fname = str(fname)
+        if fname in filesdict.keys(): #filesdict is keyed on filename
+            retfilesdict[fname] = filesdict[fname]
+            print 'Setting %s to %s' % (fname, retfilesdict[fname])
+        else:
+            print '%s not associated with a runsample. Ignored' % (fname)
+
     retval = {'status': status,
              'error' : error,
-             'filesdict':filesdict,
-             'rules' : [] 
+             'filesdict':retfilesdict,
+             'rules' : rules,
+             'host' : host,
              #'rules' : None 
             }
 

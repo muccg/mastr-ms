@@ -71,14 +71,20 @@ class MSDataSyncAPI(object):
 
         #get the local file list
         #TODO: Call this in the correct manner, using 'Tasks'
-        files = self.config.getValue('localdir')
         organisation = self.config.getValue('organisation')
         station = self.config.getValue('stationname')
         sitename = self.config.getValue('sitename')
 
         import urllib
         import simplejson
-        postvars = {'files' : simplejson.dumps(files), 'organisation' : simplejson.dumps(organisation), 'sitename' : simplejson.dumps(sitename), 'stationname': simplejson.dumps(station)}
+       
+        #grab all files in our local dir:
+
+        localdir = self.config.getValue('localdir')
+        filesdict = self.getFiles(localdir)
+        
+        
+        postvars = {'files' : simplejson.dumps(filesdict.keys()), 'organisation' : simplejson.dumps(organisation), 'sitename' : simplejson.dumps(sitename), 'stationname': simplejson.dumps(station)}
         try:
             f = urllib.urlopen(self.config.getValue('synchub'), urllib.urlencode(postvars))
             jsonret = f.read()
@@ -91,16 +97,20 @@ class MSDataSyncAPI(object):
         self.log('Synchub config loaded object is: %s' % j)
         d = simplejson.loads(jsonret)
         print 'Returned Json Obj: ', d
-        localdir = self.config.getValue('localdir')
+        
         user = self.config.getValue('user')
         #remotehost = self.config.getValue('remotehost')
         #remotedir = self.config.getValue('remotedir')
         remotehost = d['host']
-        remotedir = d['path']
+        remotefilesdict = d['filesdict']
 
         callingWindow.setState(statuschange)
-
-        self._appendTask(returnFn, self._impl.checkRsync, localdir, user, j['host'], j['path'], rules=[j['rules']])
+        import os.path
+        for filename in remotefilesdict.keys():
+            fulllocalpath = os.path.join(filesdict[filename], filename)
+            fullremotepath = os.path.join(remotefilesdict[filename], filename)
+            self.log( 'Creating a task to put %s at %s@%s' % (fulllocalpath, remotehost, fullremotepath) )
+            self._appendTask(returnFn, self._impl.checkRsync, fulllocalpath, user, j['host'], fullremotepath, rules=[j['rules']])
 
     def defaultReturn(self, *args, **kwargs):
         #print 'rsync returned: ', retval
@@ -109,9 +119,14 @@ class MSDataSyncAPI(object):
 
     def getFiles(self, dir):
         import os
+        retfiles = {}
         for root, dirs, files in os.walk(dir):
-            print files
-
+            #print files
+            for file in files:
+                if retfiles.has_key(file):
+                    print 'DUPLICATE FILE DETECTED!!: %s' % (file)
+                retfiles[file] = root
+        return retfiles
     
     #------- WORKER CLASS-----------------------
     import threading
@@ -149,7 +164,7 @@ class MSDSImpl(object):
        self.log = log #we expect 'log' to be a callable function. 
     
     def checkRsync(self, sourcedir, remoteuser, remotehost, remotedir, rules = []):
-        self.log('checkRsync implementation entered!', Debug=True)
+        #self.log('checkRsync implementation entered!', Debug=True)
         
         from subprocess import Popen, PIPE, STDOUT
         logfile = 'rsync_log.txt'
@@ -161,7 +176,7 @@ class MSDSImpl(object):
         cmd = []
         cmd.extend(cmdhead)
     
-        self.log('Rules is %s' %(str(rules)) )
+        #self.log('Rules is %s' %(str(rules)) )
         
         if rules is not None and len(rules) > 0:
             for r in rules:
@@ -173,18 +188,19 @@ class MSDSImpl(object):
         self.log('cmd is %s ' % str(cmd))
 
         p = Popen( cmd, stdout=PIPE, stderr=PIPE, stdin=PIPE)
-        for line in p.stdout:
-            self.log(line)
         
-        #p = Popen( cmd,
-        #           stdout=self.log, stderr=self.log, stdin=PIPE)
+        #for line in p.stdout:
+        #    self.log(line)
         
-        #p = Popen( cmd,
-        #           stdout=self.log, stderr=self.log, stdin=PIPE)
+        ##p = Popen( cmd,
+        ##           stdout=self.log, stderr=self.log, stdin=PIPE)
+        
+        ##p = Popen( cmd,
+        ##           stdout=self.log, stderr=self.log, stdin=PIPE)
 
 
         retcode = p.communicate()[0]
-        self.log('the retcode was: %s' % (str(retcode),), Debug=True)
+        #self.log('the retcode was: %s' % (str(retcode),), Debug=True)
         return retcode
 
     def getFileTree(self, dir):
