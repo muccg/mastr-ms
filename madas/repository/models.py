@@ -211,6 +211,8 @@ class Experiment(models.Model):
         
         if not os.path.exists(exppath):
             os.makedirs(exppath)
+            
+        return exppath
 
     def __unicode__(self):
         return self.title
