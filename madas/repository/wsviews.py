@@ -609,7 +609,7 @@ def recreate_sample_classes(request, experiment_id):
             sc.save()
             foundclasses.add(sc.id)
         #now check if we can auto-assign a name based on abbreviations
-        if str(sc) != '' and sc.class_id == 'sample class':
+        if str(sc) != '':
             sc.class_id = str(sc)
             sc.save()
 

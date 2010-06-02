@@ -299,7 +299,7 @@ class Sample(models.Model):
             print 'sample not in class'
             raise SampleNotInClassException
         else:
-            return str(self.sample_class) + '-' + str(run.id) + '-' + str(self.id) + '.d'
+            return self.sample_class.class_id + '-' + str(run.id) + '-' + str(self.id) + '.d'
     
 class Run(models.Model):
     method = models.ForeignKey(InstrumentMethod)
