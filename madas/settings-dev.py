@@ -78,6 +78,7 @@ else:
 
 REPO_FILES_ROOT = PERSISTENT_FILESTORE
 QUOTE_FILES_ROOT = os.path.join(PERSISTENT_FILESTORE, 'quotes')
+MADAS_SESSION_TIMEOUT = 1800 #30 minute session timeout 
 
 #Ensure the persistent storage dir exits. If it doesn't, exit noisily.
 assert os.path.exists(PERSISTENT_FILESTORE), "This application cannot start: It expects a writeable directory at %s to use as a persistent filestore" % (PERSISTENT_FILESTORE) 

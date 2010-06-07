@@ -56,7 +56,7 @@ def processLogin(request, *args):
                 #request.session.flush()
                 #set the session to expire after
                 from madas import settings
-                request.session.set_expiry(settings.SESSION_TIMEOUT)
+                request.session.set_expiry(settings.MADAS_SESSION_TIMEOUT)
                 request.session['loggedin'] = True
             else:
                 print '\tprocessLogin: inactive user'
