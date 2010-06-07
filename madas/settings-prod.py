@@ -9,9 +9,17 @@ from build.settings.ldap.prod import *
 
 ADMINS.append( ( 'Andrew Macgregor', 'andrew@ccg.murdoch.edu.au' ) )
 
-DATABASES['default']['NAME'] = 'dev_madas'
-DATABASES['default']['USER'] = 'madasapp'
-DATABASES['default']['PASSWORD'] = 'madasapp'
+
+## Reinstate multiple database config once mango 1.2 in place
+DATABASE_ENGINE = 'postgresql_psycopg2'           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'ado_mssql'.
+DATABASE_NAME = 'live_madas'             # Or path to database file if using sqlite3.
+DATABASE_USER = 'madasapp'             # Not used with sqlite3.
+DATABASE_PASSWORD = 'madasapp'         # Not used with sqlite3.
+DATABASE_HOST = 'iridium.localdomain'
+
+#DATABASES['default']['NAME'] = 'dev_madas'
+#DATABASES['default']['USER'] = 'madasapp'
+#DATABASES['default']['PASSWORD'] = 'madasapp'
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'qj#tl@9@7((%^)$i#iyw0gcfzf&#a*pobgb8yr#1%65+*6!@g$'
@@ -78,5 +86,8 @@ STATUS_CHECKS = [check_default]
 
 APPEND_SLASH = True
 SITE_NAME = 'madas'
-RETURN_EMAIL = 'bpower@ccg.murdoch.edu.au'
+RETURN_EMAIL = 'no-reply@ccg.murdoch.edu.au'
 
+# these are non-standard and override defaults
+MEDIA_ROOT = os.path.join(PROJECT_DIRECTORY,"static")
+MEDIA_URL = '/static/'
