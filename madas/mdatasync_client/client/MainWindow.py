@@ -17,6 +17,7 @@ class Log(wx.PyLog):
         self.DebugOn = boolvalue
 
     def DoLogString(self, message, timeStamp=0, Debug = False):
+        return
         #print message, timeStamp
         #if self.logTime:
         #    message = time.strftime("%X", time.localtime(timeStamp)) + \

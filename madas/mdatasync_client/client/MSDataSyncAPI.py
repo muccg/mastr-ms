@@ -92,9 +92,9 @@ class MSDataSyncAPI(object):
             returnFn(retcode = False, retstring = "Could not connect %s" % (str(e)) )
             return
 
-        self.log('Synchub config: %s' % jsonret)
+        #self.log('Synchub config: %s' % jsonret)
         j = simplejson.loads(jsonret)
-        self.log('Synchub config loaded object is: %s' % j)
+        #self.log('Synchub config loaded object is: %s' % j)
         d = simplejson.loads(jsonret)
         print 'Returned Json Obj: ', d
         
@@ -109,7 +109,7 @@ class MSDataSyncAPI(object):
         for filename in remotefilesdict.keys():
             fulllocalpath = os.path.join(filesdict[filename], filename)
             fullremotepath = os.path.join(remotefilesdict[filename], filename)
-            self.log( 'Creating a task to put %s at %s@%s' % (fulllocalpath, remotehost, fullremotepath) )
+            #self.log( 'Creating a task to put %s at %s@%s' % (fulllocalpath, remotehost, fullremotepath) )
             self._appendTask(returnFn, self._impl.checkRsync, fulllocalpath, user, j['host'], fullremotepath, rules=[j['rules']])
 
     def defaultReturn(self, *args, **kwargs):
