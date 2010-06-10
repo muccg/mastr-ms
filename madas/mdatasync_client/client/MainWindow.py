@@ -17,7 +17,6 @@ class Log(wx.PyLog):
         self.DebugOn = boolvalue
 
     def DoLogString(self, message, timeStamp=0, Debug = False):
-        return
         #print message, timeStamp
         #if self.logTime:
         #    message = time.strftime("%X", time.localtime(timeStamp)) + \
@@ -35,6 +34,18 @@ class Log(wx.PyLog):
     #other methods that may be being called.
     write = DoLogString
     WriteText = DoLogString
+
+    def __call__(self, *args, **kwargs):
+        #print '__call__ with args:%s and kwargs:%s' % (str(*args), str(**kwargs))
+        thread = kwargs.get('thread', False)
+
+        if (thread):
+            wx.CallAfter(self.DoLogString, *args, **kwargs) 
+        else:
+            #print 'Calling DoLogString with:'
+            #print 'args: ', str(*args)
+            #print 'kwargs', str(**kwargs)
+            self.DoLogString(*args, **kwargs)
 
 
 class APPSTATE:  
@@ -60,7 +71,7 @@ class MainWindow(wx.Frame):
         if wx.Platform == "__WXMAC__":
             self.logTextCtrl.MacCheckSpelling(False)
         self.log = Log(self.logTextCtrl)
-        wx.Log_SetActiveTarget(Log(self.log)) 
+        wx.Log_SetActiveTarget(self.log) 
 
         #self.ListCtrlPanel = ListCtrlPanel(self, self.log)
 
