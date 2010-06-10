@@ -12,7 +12,7 @@ class MDataSyncApp(wx.PySimpleApp):
         #wx.Log_SetActiveTarget( wx.LogGui() )
         win = MainWindow(None)
         self.win = win
-        self.msds = MSDataSyncAPI( win.getLog() ) 
+        self.msds = MSDataSyncAPI( win.getLog() )#, False ) #false is no threading  
         
         #let the jobs execute in threads
         #disable this for debugging

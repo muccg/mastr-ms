@@ -1,6 +1,6 @@
 SAVEFILE_NAME = 'settings.cfg'
 import sys, os, string, time, cPickle
-
+import os.path
 class MSDSConfig(object):
     def __init__(self):
         self.store = {}
@@ -19,6 +19,7 @@ class MSDSConfig(object):
                    'synchub'  : ['http://127.0.0.1:8001/sync/', 'SyncHub Address', 'The web address of the synchub server'],
                    'logfile'  : ['rsync_log.txt', 'Local Log File', 'Sync operations are logged to this file'],
                    'syncfreq' : [1, 'Sync Frequency (Mins)', 'How often the application should push updates to the server'],
+                   'localindexdir' : ['.local_index', 'Local Index Directory', 'Temporary storage area for data transfer'],
             }
         self.load()
 
@@ -43,19 +44,20 @@ class MSDSConfig(object):
         except IOError:
             print 'No saved config existed: %s' % (SAVEFILE_NAME)
         try:
-            store = cPickle.load(fo)
+            savedstore = cPickle.load(fo)
             retval = True
         except Exception, e:
             print 'Exception reading saved configuration: %s' % (str(e))
         
         if retval:
-            self.store = store
+            self.store.update(savedstore) 
 
         if fo is not None:
             fo.close()
         return retval
             
-        
+    def getLocalIndexPath(self):
+        return os.path.join(self.getValue('localdir'), self.getValue('localindexdir'))
 
     def getValue(self, key):
         try:

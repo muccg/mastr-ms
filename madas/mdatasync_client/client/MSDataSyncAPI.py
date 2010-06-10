@@ -25,9 +25,11 @@ class MSDataSyncAPI(object):
         if log is None:
             self.log = self.defaultLogSink
         else:
-            self.log = log.WriteText
-        self._impl = MSDSImpl(self.log) 
+            self.log = log
+        
+        self._impl = MSDSImpl(self.log, self) 
         self.config = MSDSConfig()
+        self.useThreading = False
 
     def defaultLogSink(self, *args, **kwargs):
         pass
@@ -37,6 +39,7 @@ class MSDataSyncAPI(object):
             return
         self._thread = self.Worker( self._tasks )
         self._thread.start()
+        self.useThreading = True
 
     def stopThread( self ):
         if not hasattr( self, "_thread" ) or self._thread == None:
@@ -46,6 +49,7 @@ class MSDataSyncAPI(object):
         self._appendTask( None, None )  # dummy task to force thread to run
         self._thread.join()             # wait until thread is done
         self._thread = None
+        self.useThreading = False
 
     def _appendTask( self, callback, command, *args, **kwargs ):
         '''Either uses a thread (if available) or not.
@@ -58,7 +62,8 @@ class MSDataSyncAPI(object):
             result = None
             try:
                 result = command( *args, **kwargs )
-            except:
+            except Exception, e:
+                print 'Error running command: ', e
                 result = None
             if callback != None:
                 callback( result )
@@ -82,7 +87,7 @@ class MSDataSyncAPI(object):
 
         localdir = self.config.getValue('localdir')
         filesdict = self.getFiles(localdir)
-        
+        localindexdir = self.config.getLocalIndexPath() 
         
         postvars = {'files' : simplejson.dumps(filesdict.keys()), 'organisation' : simplejson.dumps(organisation), 'sitename' : simplejson.dumps(sitename), 'stationname': simplejson.dumps(station)}
         try:
@@ -94,7 +99,7 @@ class MSDataSyncAPI(object):
 
         #self.log('Synchub config: %s' % jsonret)
         j = simplejson.loads(jsonret)
-        #self.log('Synchub config loaded object is: %s' % j)
+        self.log('Synchub config loaded object is: %s' % j)
         d = simplejson.loads(jsonret)
         print 'Returned Json Obj: ', d
         
@@ -109,8 +114,11 @@ class MSDataSyncAPI(object):
         for filename in remotefilesdict.keys():
             fulllocalpath = os.path.join(filesdict[filename], filename)
             fullremotepath = os.path.join(remotefilesdict[filename], filename)
-            #self.log( 'Creating a task to put %s at %s@%s' % (fulllocalpath, remotehost, fullremotepath) )
-            self._appendTask(returnFn, self._impl.checkRsync, fulllocalpath, user, j['host'], fullremotepath, rules=[j['rules']])
+            self.log( 'Copying %s to %s' % (fulllocalpath, "%s%s" %(localindexdir, fullremotepath) ) )
+            self._appendTask(returnFn, self._impl.copyfile, fulllocalpath, "%s%s" % (localindexdir, fullremotepath)) #this could potentially result in not the right path
+            
+        #now rsync the whole thing over
+        self._appendTask(returnFn, self._impl.checkRsync, "%s/" % (localindexdir) , user, j['host'], '/', rules=[j['rules']])
 
     def defaultReturn(self, *args, **kwargs):
         #print 'rsync returned: ', retval
@@ -146,8 +154,10 @@ class MSDataSyncAPI(object):
                 ( callback, command, args, kwargs ) = self._tasks.get()
                 result = None
                 try:
+                    print 'worker thread executing %s with args %s' % (str(command), str(args))
                     result = command( *args )
-                except:
+                except Exception, e:
+                    print 'Error running command: ', e
                     result = None
                 if callback != None:
                     callback( result )
@@ -160,9 +170,9 @@ class MSDataSyncAPI(object):
 
 class MSDSImpl(object):
     '''the implementation of the MSDataSyncAPI'''
-    def __init__(self, log):
+    def __init__(self, log, controller):
        self.log = log #we expect 'log' to be a callable function. 
-    
+       self.controller = controller
     def checkRsync(self, sourcedir, remoteuser, remotehost, remotedir, rules = []):
         #self.log('checkRsync implementation entered!', Debug=True)
         
@@ -185,12 +195,13 @@ class MSDSImpl(object):
             
         cmd.extend(cmdtail)
 
-        self.log('cmd is %s ' % str(cmd))
+        print 'cmd is %s ' % str(cmd)
+        #self.log('cmd is %s ' % str(cmd), thread=self.controller.useThreading)
 
-        p = Popen( cmd, stdout=PIPE, stderr=PIPE, stdin=PIPE)
+        p = Popen( cmd, shell=False, stdout=PIPE, stderr=PIPE)
         
         #for line in p.stdout:
-        #    self.log(line)
+        #    self.log(line, thread=self.controller.useThreading)
         
         ##p = Popen( cmd,
         ##           stdout=self.log, stderr=self.log, stdin=PIPE)
@@ -202,6 +213,23 @@ class MSDSImpl(object):
         retcode = p.communicate()[0]
         #self.log('the retcode was: %s' % (str(retcode),), Debug=True)
         return retcode
+
+    def copyfile(self, src, dst):
+        from shutil import copy2
+        import os.path
+        print src
+        print dst
+        
+        thepath = os.path.dirname(dst)
+        print 'copyfile: %s to %s, path is %s' % (src, dst, thepath)
+        try:
+            if not os.path.exists(thepath):
+                print 'path %s did not exist - creating' % (thepath,)
+                os.makedirs(thepath)
+
+            copy2(src, dst)
+        except Exception, e:
+            print 'Error copying %s to %s : %s' % (src, dst, e)
 
     def getFileTree(self, dir):
         print 'Entered getFileTree: checking %s' % dir
@@ -215,7 +243,7 @@ class MSDSImpl(object):
                 #self.log('dirs: %s' % (str(dirs)) )
                 #self.log('files: %s' % (str(files)) )
             for f in allfiles:
-                self.log('File: %s' % (f) )
+                self.log('File: %s' % (f), thread = self.controller.useThreading )
         except Exception, e:
             print 'Exception: %s' % (str(e))
         print 'Done with getFileTree'
