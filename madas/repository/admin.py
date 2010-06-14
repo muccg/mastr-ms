@@ -32,6 +32,12 @@ class ExperimentAdmin(admin.ModelAdmin):
     list_display = ['title', 'description', 'comment', 'status', 'created_on', 'formal_quote', 'job_number', 'project', 'instrument_method', 'samples_link']
     search_fields = ['title', 'job_number']
 
+    def queryset(self, request):
+        qs = super(ExperimentAdmin, self).queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(users__id=request.user.id)
+
     def samples_link(self, obj):
         change_url = urlresolvers.reverse('admin:repository_sample_changelist')
         return '<a href="%s?experiment__id__exact=%s">Samples</a>' % (change_url, obj.id)
