@@ -58,7 +58,7 @@ class SystrayIcon(wx.TaskBarIcon):
         if not self.parentApp.IsShown():
             self.parentApp.Show(True)
         self.parentApp.Raise()
-        self.log.WriteText('Raising App', Debug=True)
+        self.log('Raising App', type=self.log.LOG_DEBUG)
 
 
     def OnTaskBarQuit(self, evt):
@@ -73,13 +73,13 @@ class SystrayIcon(wx.TaskBarIcon):
 
 
     def OnTaskBarCheckNow(self, evt):
-        self.log.WriteText('CheckNow chosen', Debug=True)
+        self.log('CheckNow chosen', type=self.log.LOG_DEBUG)
         #from MSDataSyncAPI import MSDSCheckFn
         self.parentApp.MSDSCheckFn('somedir', 'somehost', 'someremotedir')
 
 
     def OnTaskBarTestConnection(self, evt):
-        self.log.WriteText('TestConnection chosen', Debug=True)
+        self.log('TestConnection chosen', type=self.log.LOG_DEBUG)
 
     def SetIconTimer(self):
         '''fires a timer which calls BlinkIcon'''

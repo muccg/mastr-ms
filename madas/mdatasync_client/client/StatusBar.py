@@ -7,7 +7,7 @@ class StatusBar(wx.StatusBar):
         #Make the SB with 3 feilds
         self.SetFieldsCount(3)
         #Set the relative Widths
-        self.SetStatusWidths( [-2,-1,-2] )
+        self.SetStatusWidths( [-1,-3,-1] )
         self.log = log
         self.sizeChanged = False
         self.Bind(wx.EVT_SIZE, self.OnSize)

@@ -86,8 +86,8 @@ class MSDataSyncAPI(object):
         #grab all files in our local dir:
 
         localdir = self.config.getValue('localdir')
-        filesdict = self.getFiles(localdir)
         localindexdir = self.config.getLocalIndexPath() 
+        filesdict = self.getFiles(localdir, ignoredirs=[localindexdir])
         
         postvars = {'files' : simplejson.dumps(filesdict.keys()), 'organisation' : simplejson.dumps(organisation), 'sitename' : simplejson.dumps(sitename), 'stationname': simplejson.dumps(station)}
         try:
@@ -108,28 +108,39 @@ class MSDataSyncAPI(object):
         #remotedir = self.config.getValue('remotedir')
         remotehost = d['host']
         remotefilesdict = d['filesdict']
+        remotefilesrootdir = d['rootdir']
 
         callingWindow.setState(statuschange)
         import os.path
         for filename in remotefilesdict.keys():
             fulllocalpath = os.path.join(filesdict[filename], filename)
             fullremotepath = os.path.join(remotefilesdict[filename], filename)
-            self.log( 'Copying %s to %s' % (fulllocalpath, "%s%s" %(localindexdir, fullremotepath) ) )
-            self._appendTask(returnFn, self._impl.copyfile, fulllocalpath, "%s%s" % (localindexdir, fullremotepath)) #this could potentially result in not the right path
+            self.log( 'Copying %s to %s' % (fulllocalpath, "%s" %(os.path.join(localindexdir, fullremotepath) ) ) )
+            self._appendTask(returnFn, self._impl.copyfile, fulllocalpath, "%s" % os.path.join(localindexdir, fullremotepath))
             
         #now rsync the whole thing over
-        self._appendTask(returnFn, self._impl.checkRsync, "%s/" % (localindexdir) , user, j['host'], '/', rules=[j['rules']])
+        self._appendTask(returnFn, self._impl.checkRsync, "%s/" % (localindexdir) , user, j['host'], remotefilesrootdir, rules=[j['rules']])
 
     def defaultReturn(self, *args, **kwargs):
         #print 'rsync returned: ', retval
         self.log('Default return callback:%s' % (str(args)), Debug=True)
 
 
-    def getFiles(self, dir):
+    def getFiles(self, dir, ignoredirs = []):
         import os
         retfiles = {}
         for root, dirs, files in os.walk(dir):
             #print files
+            shouldignore = False
+            for ignoredir in ignoredirs:
+                if root.startswith(ignoredir):
+                    print 'ignoring ', root
+                    shouldignore = True
+                    break
+
+            if shouldignore:
+                continue #go to the next iteration of the loop 
+
             for file in files:
                 if retfiles.has_key(file):
                     print 'DUPLICATE FILE DETECTED!!: %s' % (file)
@@ -180,7 +191,8 @@ class MSDSImpl(object):
         logfile = 'rsync_log.txt'
         #Popen('rsync -t %s %s:%s' % (sourcedir, remotehost, remotedir) )
         
-        cmdhead = ['rsync', '-tavz'] #t, i=itemize-changes,a=archive,v=verbose,z=zip
+        #cmdhead = ['rsync', '-tavz'] #t, i=itemize-changes,a=archive,v=verbose,z=zip
+        cmdhead = ['rsync', '-avz'] #v=verbose,z=zip
         cmdtail = ['--log-file=%s' % (logfile), sourcedir, '%s@%s:%s' % (remoteuser, remotehost, remotedir)]
 
         cmd = []
