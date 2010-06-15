@@ -53,7 +53,7 @@ MADAS_ADMIN_GROUPS = ['Administrators', 'Node Reps']
 AUTHENTICATION_BACKENDS = [
  'madas.repository.backend.MadasBackend',
  #'django.contrib.auth.backends.LDAPBackend',
- #'django.contrib.auth.backends.NoAuthModelBackend',
+ 'django.contrib.auth.backends.NoAuthModelBackend',
 ]
 
 SESSION_COOKIE_PATH = url('/')
