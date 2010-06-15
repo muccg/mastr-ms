@@ -91,7 +91,7 @@ class MainWindow(wx.Frame):
         logAreaPane.SetSizer(logAreaSizer)
         #sizer.Fit(self)
 
-        progress = wx.Gauge(parent = _cp, range=1000, size=(400, 20))
+        progress = wx.Gauge(parent = _cp, range=100, size=(400, 20))
         self.progress = progress
         
 
@@ -216,16 +216,24 @@ class MainWindow(wx.Frame):
 
     def OnCheckNow(self, evt):
         #MSDSCheckFn is defined by the main app - MDataSyncApp. It just sets the method in a hacky way :(
+        self.SetProgress(0) #set progress to 0 
         self.setState(APPSTATE.CHECKING_SYNCHUB)
         self.MSDSCheckFn(self, APPSTATE.UPLOADING_DATA, 'notused', self.CheckReturnFn)
 
+    def SetProgress(self, prognum, add=False):
+        if (add):
+            prognum += self.progress.GetValue()
+
+        self.progress.SetValue(prognum)
+
     def CheckReturnFn(self, retcode = True, retstring = "", *args):
         self.setState(APPSTATE.IDLE)
+        self.SetProgress(100)
         if retcode:
             self.log('Check function returned', type=self.log.LOG_DEBUG)
         else:
             self.log(retstring)
-
+        
 
     def __testMenuFunction(self, event):
         self.log('Menu event! %s' % str(event), type = self.log.LOG_DEBUG)
