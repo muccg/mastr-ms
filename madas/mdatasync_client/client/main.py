@@ -16,7 +16,7 @@ class MDataSyncApp(wx.PySimpleApp):
         
         #let the jobs execute in threads
         #disable this for debugging
-        #self.msds.startThread() 
+        self.msds.startThread() 
         
         win.MSDSCheckFn = self.msds.checkRsync
         win.config = self.msds.config #TODO make this weakref
