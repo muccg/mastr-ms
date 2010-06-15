@@ -13,8 +13,22 @@ class OrganAdmin(admin.ModelAdmin):
     list_display = ('name', 'detail')
     search_fields = ['name']
 
+    def queryset(self, request):
+        qs = super(OrganAdmin, self).queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(experiment__users__id=request.user.id)
+
+
 class BiologicalSourceAdmin(admin.ModelAdmin):
     list_display = ('type',)
+
+    def queryset(self, request):
+        qs = super(BiologicalSourceAdmin, self).queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(experiment__users__id=request.user.id)
+
 
 class ProjectAdmin(admin.ModelAdmin):
     list_display = ('title', 'description', 'created_on', 'experiments_link')
@@ -58,14 +72,34 @@ class ExperimentStatusAdmin(admin.ModelAdmin):
 class AnimalInfoAdmin(admin.ModelAdmin):
     list_display = ('sex', 'age', 'parental_line')
 
+    def queryset(self, request):
+        qs = super(AnimalInfoAdmin, self).queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(source__experiment__users__id=request.user.id)
+
+
 class TreatmentAdmin(admin.ModelAdmin):
     list_display = ('name','description')
+
+    def queryset(self, request):
+        qs = super(TreatmentAdmin, self).queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(experiment__users__id=request.user.id)
+
 
 class SampleAdmin(admin.ModelAdmin):
     list_display = ['label', 'experiment', 'comment', 'weight', 'sample_class', 'logs_link']
     search_fields = ['label', 'experiment__title', 'sample_class__organ__name']
     actions = ['create_run']
     inlines = [RunSampleInline]
+
+    def queryset(self, request):
+        qs = super(SampleAdmin, self).queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(experiment__users__id=request.user.id)
     
     def create_run(self, request, queryset):
 
@@ -108,6 +142,13 @@ class SampleAdmin(admin.ModelAdmin):
 
 class SampleTimelineAdmin(admin.ModelAdmin):
     list_display = ('id', 'timeline')
+
+    def queryset(self, request):
+        qs = super(SampleTimelineAdmin, self).queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(experiment__users__id=request.user.id)
+
     
 class InstrumentMethodAdmin(admin.ModelAdmin):
     list_display = ['title', 'method_path', 'method_name', 'version', 'creator', 'created_on', 'randomisation', 'blank_at_start',
@@ -134,19 +175,43 @@ class UserInvolvementTypeAdmin(admin.ModelAdmin):
 
 class PlantInfoAdmin(admin.ModelAdmin):
     list_display = ('id', 'development_stage')
+
+    def queryset(self, request):
+        qs = super(PlantInfoAdmin, self).queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(source__experiment__users__id=request.user.id)
     
 class SampleClassAdmin(admin.ModelAdmin):
     list_display = ['id', 'experiment', 'biological_source', 'treatments', 'timeline', 'organ', 'enabled']
     search_fields = ['experiment__title']
 
+    def queryset(self, request):
+        qs = super(SampleClassAdmin, self).queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(experiment__users__id=request.user.id)
+
 class SampleLogAdmin(admin.ModelAdmin):
     list_display = ['type', 'description', 'user', 'sample']
     search_fields = ['description']
+
+    def queryset(self, request):
+        qs = super(SampleLogAdmin, self).queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(sample__experiment__users__id=request.user.id)
 
 class RunAdmin(admin.ModelAdmin):
     list_display = ['title', 'method', 'creator', 'created_on', 'output_link']
     search_fields = ['title', 'method__title', 'creator__username', 'creator__first_name', 'creator__last_name']
     inlines = [RunSampleInline]
+
+    def queryset(self, request):
+        qs = super(RunAdmin, self).queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(samples__experiment__users__id=request.user.id).distinct()
 
     def output_link(self, obj):
         output_url = urlresolvers.reverse('generate_worklist', kwargs={'run_id': obj.id})
