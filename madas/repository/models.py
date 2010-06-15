@@ -201,18 +201,26 @@ class Experiment(models.Model):
     project = models.ForeignKey(Project)
     instrument_method = models.ForeignKey(InstrumentMethod, null=True, blank=True)
     # ? files
-    
+  
     def ensure_dir(self):
+        ''' This function calculates where the storage area should be for the experiment data.
+            It create the directory if it does not exist.
+            It returns a tuple in form (abspath, relpath) where 
+                abspath is the absolute path
+                relpath is the path, relative to the settings.REPO_FILES_ROOT
+        '''
         import settings, os
         
-        yearpath = settings.REPO_FILES_ROOT + os.sep + 'experiments/' + str(self.created_on.year)
-        monthpath = yearpath + '/' + str(self.created_on.month)
-        exppath = monthpath + '/' + str(self.id)
-        
-        if not os.path.exists(exppath):
-            os.makedirs(exppath)
+        yearpath = os.path.join('experiments', str(self.created_on.year) )
+        monthpath = os.path.join(yearpath, str(self.created_on.month) )
+        exppath = os.path.join(monthpath, str(self.id) )
+       
+        abspath = os.path.join(settings.REPO_FILES_ROOT, exppath)
+
+        if not os.path.exists(abspath):
+            os.makedirs(abspath)
             
-        return exppath
+        return (abspath, exppath)
 
 
     def __unicode__(self):

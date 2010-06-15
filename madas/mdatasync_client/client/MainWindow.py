@@ -11,29 +11,33 @@ class Log(wx.PyLog):
         wx.PyLog.__init__(self)
         self.tc = textCtrl
         self.logTime = logTime
-        self.DebugOn = True
 
-    def setDebug(boolvalue):
-        self.DebugOn = boolvalue
+        #type constants
+        self.LOG_NORMAL = 0
+        self.LOG_DEBUG = 1
+        self.LOG_WARNING = 2
+        self.LOG_ERROR = 3
 
-    def DoLogString(self, message, timeStamp=0, Debug = False):
-        #print message, timeStamp
-        #if self.logTime:
-        #    message = time.strftime("%X", time.localtime(timeStamp)) + \
-        #              ": " + message
-        if Debug:
+    def DoLogString(self, message, timeStamp=0, type = 0): #small type hardcoding sin here
+        textstyle = wx.TextAttr()
+        
+        if type == self.LOG_DEBUG:
             message = 'DEBUG: ' + message
-
+            textstyle.SetTextColour(wx.Colour(0,0,255) ) #blue
+        elif type == self.LOG_WARNING:
+            message = 'WARNING: ' + message
+            textstyle.SetTextColour(wx.Colour(255,128,64) ) #orange
+        elif type == self.LOG_ERROR:
+            message = 'ERROR: ' + message
+            textstyle.SetTextColour(wx.Colour(255,0,0) ) #red
+        else: #type == normal
+            textstyle.SetTextColour(wx.Colour(0,0,0) ) #black
         #add in the time:
         message = '[%s] %s' % (time.strftime("%X", time.localtime() ), message) 
 
-
-        if self.tc and (not Debug or (Debug and self.DebugOn)):
+        if self.tc: # and (not Debug or (Debug and self.DebugOn)):
+            self.tc.SetDefaultStyle(textstyle)
             self.tc.AppendText(message + '\n')
-
-    #other methods that may be being called.
-    write = DoLogString
-    WriteText = DoLogString
 
     def __call__(self, *args, **kwargs):
         #print '__call__ with args:%s and kwargs:%s' % (str(*args), str(**kwargs))
@@ -42,9 +46,6 @@ class Log(wx.PyLog):
         if (thread):
             wx.CallAfter(self.DoLogString, *args, **kwargs) 
         else:
-            #print 'Calling DoLogString with:'
-            #print 'args: ', str(*args)
-            #print 'kwargs', str(**kwargs)
             self.DoLogString(*args, **kwargs)
 
 
@@ -64,10 +65,37 @@ class MainWindow(wx.Frame):
     def __init__(self, parent):
 
         wx.Frame.__init__(self, parent, -1, 'MS Datasync Application')
+       
+
+
+        self.contentPanel = wx.Panel(self, -1)
+        _cp = self.contentPanel
+
         
+        logLabel = wx.StaticText(parent = _cp)
+        logLabel.SetLabel(label="Log")
+
+        progressLabel = wx.StaticText(parent = _cp)
+        progressLabel.SetLabel(label="Progress")
+
         #First thing, set up the log.
-        self.logTextCtrl = wx.TextCtrl(self, -1, 
+        self.logArea = wx.CollapsiblePane(_cp, -1, name='LogArea')
+        logAreaPane = self.logArea.GetPane() 
+        logAreaSizer = wx.BoxSizer(wx.VERTICAL) 
+        self.logTextCtrl = wx.TextCtrl(logAreaPane, -1, 
                                     style = wx.TE_MULTILINE|wx.TE_READONLY|wx.HSCROLL)
+        
+        
+
+        logAreaSizer.Add(self.logTextCtrl, 1, flag=wx.ALL|wx.EXPAND, border=2)
+        logAreaPane.SetSizer(logAreaSizer)
+        #sizer.Fit(self)
+
+        progress = wx.Gauge(parent = _cp, range=1000, size=(400, 20))
+        self.progress = progress
+        
+
+        #modify the log
         if wx.Platform == "__WXMAC__":
             self.logTextCtrl.MacCheckSpelling(False)
         self.log = Log(self.logTextCtrl)
@@ -122,11 +150,25 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnMenuPreferences, id=ID_PREFERENCES )
         self.Bind(wx.EVT_MENU, self.pycrust, id=ID_PYCRUST )
         
+       
+
+        #now lay everything out.
+        contentpanelsizer = wx.BoxSizer(wx.VERTICAL)
+        contentpanelsizer.Add(progressLabel, 0, flag=wx.ALL, border=2)
+        contentpanelsizer.Add(progress, 0, wx.ALL | wx.EXPAND | wx.FIXED_MINSIZE, border=2)
+        contentpanelsizer.Add(logLabel, 0, wx.ALL, border=2)
+        contentpanelsizer.Add(self.logArea, 1, flag=wx.ALL | wx.EXPAND, border=2)
+        #mainpanelsizer.Add(self.StatusBar, 0, flag=wx.ALL, border=2)
+
+        self.contentPanel.SetSizerAndFit(contentpanelsizer)
+        #self.SetAutoLayout(True)
+        #self.Layout() 
+        #self.SetSize((640,480))
+
 
         
-        self.SetSize((640,480))
         self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
-        self.log.WriteText('Finished loading application')
+        self.log('Finished loading application')
 
     def resetTimeTillNextSync(self, forceReset = False):
         f = int(self.config.getValue('syncfreq'))
@@ -155,11 +197,11 @@ class MainWindow(wx.Frame):
         if self.IsShown():
             self.Show(False)
         self.Lower()
-        self.log.WriteText('Minimising App', Debug=True)
+        self.log('Minimising App', type=self.log.LOG_DEBUG)
 
     def OnMenuQuit(self, evt):
         '''Close (quit) the parent app.'''
-        self.log.WriteText('Quitting...')
+        self.log('Quitting...', type=self.log.LOG_DEBUG)
         #wx.CallAfter(self.Close())
         self.Close()
 
@@ -180,13 +222,13 @@ class MainWindow(wx.Frame):
     def CheckReturnFn(self, retcode = True, retstring = "", *args):
         self.setState(APPSTATE.IDLE)
         if retcode:
-            self.log.WriteText('Check function returned')
+            self.log('Check function returned', type=self.log.LOG_DEBUG)
         else:
-            self.log.WriteText(retstring)
+            self.log(retstring)
 
 
     def __testMenuFunction(self, event):
-        self.log.WriteText('Menu event! %s' % str(event))
+        self.log('Menu event! %s' % str(event), type = self.log.LOG_DEBUG)
 
     def getLog(self):
         #return weakref.ref(self.log) 
@@ -196,7 +238,7 @@ class MainWindow(wx.Frame):
         self.StatusBar.Destroy()
         self.SystrayIcon.Destroy()
         #self.MenuBar.Destroy() #this causes a seg fault!
-        self.log.WriteText('Called Exit. Cleaning up...')
+        self.log('Called Exit. Cleaning up...', type=self.log.LOG_DEBUG)
         self.Destroy()
 
     def OnTimerTick(self, event):

@@ -77,13 +77,14 @@ def retrievePathsForFiles(request, *args):
                 runsamples = RunSample.objects.filter(run = run)
                 for rs in runsamples:
                     fname = rs.filename;
-                    path = rs.sample.experiment.ensure_dir()
-                    print 'Filename: %s belongs in path %s' % ( fname, path )
+                    abspath, relpath = rs.sample.experiment.ensure_dir()
+                    print 'Filename: %s belongs in path %s' % ( fname, abspath )
                     if filesdict.has_key(fname):
                         print 'Duplicate path detected!!!'
                         error = "%s, %s" % (error, "Duplicate filename detected for %s" % (fname))
                         status = 2
-                    filesdict[fname] = path 
+                    #we use the relative path    
+                    filesdict[fname] = relpath 
 
         except Exception, e:
             status = 1
@@ -108,6 +109,7 @@ def retrievePathsForFiles(request, *args):
     retval = {'status': status,
              'error' : error,
              'filesdict':retfilesdict,
+             'rootdir' : settings.REPO_FILES_ROOT,
              'rules' : rules,
              'host' : host,
              #'rules' : None 
