@@ -100,6 +100,15 @@ class SampleAdmin(admin.ModelAdmin):
         if request.user.is_superuser:
             return qs
         return qs.filter(experiment__users__id=request.user.id)
+
+    # customise the sample class drop down
+    def get_form(self, request, obj=None):
+        form = super(SampleAdmin, self).get_form(request, obj)
+        if request.user.is_superuser:
+            return form
+        form.base_fields['sample_class'].queryset = SampleClass.objects.filter(experiment__users__id=request.user.id)
+        return form
+
     
     def create_run(self, request, queryset):
 
@@ -191,6 +200,7 @@ class SampleClassAdmin(admin.ModelAdmin):
         if request.user.is_superuser:
             return qs
         return qs.filter(experiment__users__id=request.user.id)
+
 
 class SampleLogAdmin(admin.ModelAdmin):
     list_display = ['type', 'description', 'user', 'sample']
