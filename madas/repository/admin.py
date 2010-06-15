@@ -21,6 +21,12 @@ class ProjectAdmin(admin.ModelAdmin):
     search_fields = ['title']
     list_filter = ['client']
 
+    def queryset(self, request):
+        qs = super(ProjectAdmin, self).queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(experiment__users__id=request.user.id)
+
     def experiments_link(self, obj):
         change_url = urlresolvers.reverse('admin:repository_experiment_changelist')
         return '<a href="%s?project__id__exact=%s">Experiments</a>' % (change_url, obj.id)
