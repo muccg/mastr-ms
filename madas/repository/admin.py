@@ -217,11 +217,11 @@ class RunAdmin(admin.ModelAdmin):
     search_fields = ['title', 'method__title', 'creator__username', 'creator__first_name', 'creator__last_name']
     inlines = [RunSampleInline]
 
-    def queryset(self, request):
-        qs = super(RunAdmin, self).queryset(request)
-        if request.user.is_superuser:
-            return qs
-        return qs.filter(samples__experiment__users__id=request.user.id).distinct()
+##    def queryset(self, request):
+##        qs = super(RunAdmin, self).queryset(request)
+##        if request.user.is_superuser:
+##            return qs
+##        return qs.filter(samples__experiment__users__id=request.user.id).distinct()
 
     def output_link(self, obj):
         output_url = urlresolvers.reverse('generate_worklist', kwargs={'run_id': obj.id})
@@ -247,4 +247,4 @@ admin.site.register(UserExperiment,UserExperimentAdmin)
 admin.site.register(PlantInfo, PlantInfoAdmin)
 admin.site.register(SampleClass, SampleClassAdmin)
 admin.site.register(SampleLog, SampleLogAdmin)
-admin.site.register(Run, RunAdmin)
+admin.site.register(Run)
