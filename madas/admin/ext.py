@@ -6,20 +6,55 @@ from json import dumps, loads
 
 class ExtJsonInterface(object):
     def serialise(self, records):
+        def field_to_ext_type(field):
+            internal_type = field.get_internal_type()
+
+            # Obviously this isn't terribly comprehensive: string types can go
+            # through as "auto", and field types beyond the standard set in
+            # Django 1.1 aren't going to be handled gracefully. Still, it's a
+            # start.
+            MAPPING = {
+                "AutoField": "int",
+                "BooleanField": "boolean",
+                "DateField": "date",
+                "DateTimeField": "date",
+                "FloatField": "float",
+                "IntegerField": "int",
+                "NullBooleanField": "boolean",
+                "PositiveIntegerField": "int",
+                "PositiveSmallIntegerField": "int",
+                "SmallIntegerField": "int",
+            }
+
+            if internal_type in MAPPING:
+                return MAPPING[internal_type]
+
+            return "auto"
+
         def serialise_record(record):
             d = {}
+
             for field in record._meta.fields:
                 d[field.name] = unicode(getattr(record, field.name))
+
             return d
+
+        serialiser = serialise_record
+        try:
+            if callable(self.model.serialise):
+                serialiser = lambda record: record.serialise()
+        except AttributeError:
+            pass
 
         rows = []
         for record in records:
-            rows.append(serialise_record(record))
+            rows.append(serialiser(record))
 
         fields = []
         for field in self.model._meta.fields:
             fields.append({
                 "name": field.name,
+                "type": field_to_ext_type(field),
             })
 
         metadata = {
