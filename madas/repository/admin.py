@@ -1,3 +1,4 @@
+from madas.admin.ext import ExtJsonInterface
 from madas.repository.models import *
 from django.contrib import admin
 from django.http import HttpResponseRedirect
@@ -30,7 +31,7 @@ class BiologicalSourceAdmin(admin.ModelAdmin):
         return qs.filter(experiment__users__id=request.user.id)
 
 
-class ProjectAdmin(admin.ModelAdmin):
+class ProjectAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ('title', 'description', 'created_on', 'experiments_link')
     search_fields = ['title']
     list_filter = ['client']
