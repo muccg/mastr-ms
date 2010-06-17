@@ -60,7 +60,7 @@ class BiologicalSource(models.Model):
     label = models.CharField(max_length=50, null=True, blank=True)
 
     def __unicode__(self):
-        return str(self.label)
+        return ("%s %s %s %s" % (self.abbreviation, self.type, self.ncbi_id, self.label)).replace('None', '--')
     
 class AnimalInfo(models.Model):
     class Meta:
@@ -300,7 +300,7 @@ class Sample(models.Model):
     weight = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
 
     def __unicode__(self):
-        return str(self.label)
+        return ("%s %s" % (self.sample_class, self.label)).replace('None', '--')
 
     def run_filename(self, run):
         if self.sample_class is None:
