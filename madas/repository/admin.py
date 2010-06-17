@@ -16,7 +16,7 @@ class RunSampleInline(admin.TabularInline):
     extra = 3
     raw_id_fields = ['sample', 'run']
 
-class OrganAdmin(admin.ModelAdmin):
+class OrganAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ('name', 'detail')
     search_fields = ['name']
 
@@ -33,7 +33,7 @@ class OrganAdmin(admin.ModelAdmin):
         form.base_fields['experiment'].queryset = Experiment.objects.filter(users=request.user)
         return form
 
-class BiologicalSourceAdmin(admin.ModelAdmin):
+class BiologicalSourceAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ('type',)
 
     def queryset(self, request):
@@ -68,7 +68,7 @@ class ProjectAdmin(ExtJsonInterface, admin.ModelAdmin):
     experiments_link.allow_tags = True
 
 
-class ExperimentAdmin(admin.ModelAdmin):
+class ExperimentAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ['title', 'description', 'comment', 'status', 'created_on', 'formal_quote', 'job_number', 'project', 'instrument_method', 'samples_link']
     search_fields = ['title', 'job_number']
 
@@ -92,11 +92,11 @@ class ExperimentAdmin(admin.ModelAdmin):
     samples_link.allow_tags = True
 
 
-class ExperimentStatusAdmin(admin.ModelAdmin):
+class ExperimentStatusAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ('name', 'description')
     search_fields = ['name']
 
-class AnimalInfoAdmin(admin.ModelAdmin):
+class AnimalInfoAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ('sex', 'age', 'parental_line')
 
     def queryset(self, request):
@@ -112,7 +112,7 @@ class AnimalInfoAdmin(admin.ModelAdmin):
         form.base_fields['source'].queryset = BiologicalSource.objects.filter(experiment__users=request.user)
         return form
 
-class TreatmentAdmin(admin.ModelAdmin):
+class TreatmentAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ('name','description')
 
     def queryset(self, request):
@@ -128,7 +128,7 @@ class TreatmentAdmin(admin.ModelAdmin):
         form.base_fields['experiment'].queryset = Experiment.objects.filter(users=request.user)
         return form
 
-class SampleAdmin(admin.ModelAdmin):
+class SampleAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ['label', 'experiment', 'comment', 'weight', 'sample_class', 'logs_link']
     search_fields = ['label', 'experiment__title', 'sample_class__organ__name']
     actions = ['create_run']
@@ -188,7 +188,7 @@ class SampleAdmin(admin.ModelAdmin):
     logs_link.allow_tags = True    
 
 
-class SampleTimelineAdmin(admin.ModelAdmin):
+class SampleTimelineAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ('id', 'timeline')
 
     def queryset(self, request):
@@ -205,7 +205,7 @@ class SampleTimelineAdmin(admin.ModelAdmin):
         return form
 
     
-class InstrumentMethodAdmin(admin.ModelAdmin):
+class InstrumentMethodAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ['title', 'method_path', 'method_name', 'version', 'creator', 'created_on', 'randomisation', 'blank_at_start',
                     'blank_at_end', 'blank_position', 'obsolete', 'obsolescence_date', 'run_link']
 
@@ -216,7 +216,7 @@ class InstrumentMethodAdmin(admin.ModelAdmin):
     run_link.allow_tags = True
 
 
-class StandardOperationProcedureAdmin(admin.ModelAdmin):
+class StandardOperationProcedureAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ('responsible', 'label', 'area_where_valid', 'comment', 'organisation', 'version', 'defined_by', 'replaces_document', 'content', 'attached_pdf')
 
     def get_form(self, request, obj=None):
@@ -227,16 +227,16 @@ class StandardOperationProcedureAdmin(admin.ModelAdmin):
         return form
 
 
-class OrganismTypeAdmin(admin.ModelAdmin):
+class OrganismTypeAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ('id', 'name')
     
-class UserExperimentAdmin(admin.ModelAdmin):
+class UserExperimentAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ('user', 'experiment', 'type')   
 
-class UserInvolvementTypeAdmin(admin.ModelAdmin):
+class UserInvolvementTypeAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ('id', 'name')   
 
-class PlantInfoAdmin(admin.ModelAdmin):
+class PlantInfoAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ('id', 'development_stage')
 
     def queryset(self, request):
@@ -253,7 +253,7 @@ class PlantInfoAdmin(admin.ModelAdmin):
         return form
     
 
-class SampleClassAdmin(admin.ModelAdmin):
+class SampleClassAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ['id', 'experiment', 'biological_source', 'treatments', 'timeline', 'organ', 'enabled']
     search_fields = ['experiment__title']
 
@@ -275,7 +275,7 @@ class SampleClassAdmin(admin.ModelAdmin):
         return form
 
 
-class SampleLogAdmin(admin.ModelAdmin):
+class SampleLogAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ['type', 'description', 'user', 'sample']
     search_fields = ['description']
 
@@ -292,7 +292,7 @@ class SampleLogAdmin(admin.ModelAdmin):
         form.base_fields['sample'].queryset = Sample.objects.filter(experiment__users=request.user)
         return form
 
-class RunAdmin(admin.ModelAdmin):
+class RunAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ['title', 'method', 'creator', 'created_on', 'output_link']
     search_fields = ['title', 'method__title', 'creator__username', 'creator__first_name', 'creator__last_name']
     inlines = [RunSampleInline]
