@@ -295,8 +295,8 @@ class SampleLogAdmin(ExtJsonInterface, admin.ModelAdmin):
         return form
 
 class RunAdmin(ExtJsonInterface, admin.ModelAdmin):
-    list_display = ['title', 'method', 'creator', 'created_on', 'output_link']
-##    list_display = ['title', 'created_on', 'output_link']
+##    list_display = ['title', 'method', 'creator', 'created_on', 'output_link']
+    list_display = ['title', 'created_on', 'output_link']
     search_fields = ['title', 'method__title', 'creator__username', 'creator__first_name', 'creator__last_name']
     inlines = [RunSampleInline]
 
