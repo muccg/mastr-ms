@@ -53,7 +53,7 @@ class BiologicalSourceAdmin(ExtJsonInterface, admin.ModelAdmin):
 
 
 class ProjectAdmin(ExtJsonInterface, admin.ModelAdmin):
-    list_display = ('title', 'description', 'created_on', 'experiments_link')
+    list_display = ('title', 'description', 'created_on', 'client', 'experiments_link')
     search_fields = ['title']
     list_filter = ['client']
 
