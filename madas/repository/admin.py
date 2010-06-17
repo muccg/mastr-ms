@@ -4,6 +4,12 @@ from django.contrib import admin
 from django.http import HttpResponseRedirect
 from django.utils.webhelpers import url
 from django.core import urlresolvers
+from django.db.models import Q
+
+##
+## Most of the Admin classes here override queryset to restrict access, ie row level permissions.
+## They also override get_form where necessary to restrict select widgets based on permissions.
+##
 
 class RunSampleInline(admin.TabularInline):
     model = RunSample
@@ -18,8 +24,14 @@ class OrganAdmin(admin.ModelAdmin):
         qs = super(OrganAdmin, self).queryset(request)
         if request.user.is_superuser:
             return qs
-        return qs.filter(experiment__users__id=request.user.id)
+        return qs.filter(experiment__users=request.user)
 
+    def get_form(self, request, obj=None):
+        form = super(OrganAdmin, self).get_form(request, obj)
+        if request.user.is_superuser:
+            return form
+        form.base_fields['experiment'].queryset = Experiment.objects.filter(users=request.user)
+        return form
 
 class BiologicalSourceAdmin(admin.ModelAdmin):
     list_display = ('type',)
@@ -28,7 +40,14 @@ class BiologicalSourceAdmin(admin.ModelAdmin):
         qs = super(BiologicalSourceAdmin, self).queryset(request)
         if request.user.is_superuser:
             return qs
-        return qs.filter(experiment__users__id=request.user.id)
+        return qs.filter(experiment__users=request.user)
+
+    def get_form(self, request, obj=None):
+        form = super(BiologicalSourceAdmin, self).get_form(request, obj)
+        if request.user.is_superuser:
+            return form
+        form.base_fields['experiment'].queryset = Experiment.objects.filter(users=request.user)
+        return form
 
 
 class ProjectAdmin(ExtJsonInterface, admin.ModelAdmin):
@@ -40,7 +59,7 @@ class ProjectAdmin(ExtJsonInterface, admin.ModelAdmin):
         qs = super(ProjectAdmin, self).queryset(request)
         if request.user.is_superuser:
             return qs
-        return qs.filter(experiment__users__id=request.user.id)
+        return qs.filter(Q(experiment__users=request.user)|Q(client=request.user)).distinct()
 
     def experiments_link(self, obj):
         change_url = urlresolvers.reverse('admin:repository_experiment_changelist')
@@ -58,6 +77,13 @@ class ExperimentAdmin(admin.ModelAdmin):
         if request.user.is_superuser:
             return qs
         return qs.filter(users__id=request.user.id)
+
+    def get_form(self, request, obj=None):
+        form = super(ExperimentAdmin, self).get_form(request, obj)
+        if request.user.is_superuser:
+            return form
+        form.base_fields['project'].queryset = Project.objects.filter(managers=request.user)
+        return form
 
     def samples_link(self, obj):
         change_url = urlresolvers.reverse('admin:repository_sample_changelist')
@@ -77,8 +103,14 @@ class AnimalInfoAdmin(admin.ModelAdmin):
         qs = super(AnimalInfoAdmin, self).queryset(request)
         if request.user.is_superuser:
             return qs
-        return qs.filter(source__experiment__users__id=request.user.id)
+        return qs.filter(source__experiment__users=request.user)
 
+    def get_form(self, request, obj=None):
+        form = super(AnimalInfoAdmin, self).get_form(request, obj)
+        if request.user.is_superuser:
+            return form
+        form.base_fields['source'].queryset = BiologicalSource.objects.filter(experiment__users=request.user)
+        return form
 
 class TreatmentAdmin(admin.ModelAdmin):
     list_display = ('name','description')
@@ -87,8 +119,14 @@ class TreatmentAdmin(admin.ModelAdmin):
         qs = super(TreatmentAdmin, self).queryset(request)
         if request.user.is_superuser:
             return qs
-        return qs.filter(experiment__users__id=request.user.id)
+        return qs.filter(experiment__users=request.user)
 
+    def get_form(self, request, obj=None):
+        form = super(TreatmentAdmin, self).get_form(request, obj)
+        if request.user.is_superuser:
+            return form
+        form.base_fields['experiment'].queryset = Experiment.objects.filter(users=request.user)
+        return form
 
 class SampleAdmin(admin.ModelAdmin):
     list_display = ['label', 'experiment', 'comment', 'weight', 'sample_class', 'logs_link']
@@ -100,14 +138,14 @@ class SampleAdmin(admin.ModelAdmin):
         qs = super(SampleAdmin, self).queryset(request)
         if request.user.is_superuser:
             return qs
-        return qs.filter(experiment__users__id=request.user.id)
+        return qs.filter(experiment__users=request.user)
 
-    # customise the sample class drop down
     def get_form(self, request, obj=None):
         form = super(SampleAdmin, self).get_form(request, obj)
         if request.user.is_superuser:
             return form
-        form.base_fields['sample_class'].queryset = SampleClass.objects.filter(experiment__users__id=request.user.id)
+        form.base_fields['sample_class'].queryset = SampleClass.objects.filter(experiment__users=request.user)
+        form.base_fields['experiment'].queryset = Experiment.objects.filter(users=request.user)        
         return form
 
     
@@ -157,7 +195,14 @@ class SampleTimelineAdmin(admin.ModelAdmin):
         qs = super(SampleTimelineAdmin, self).queryset(request)
         if request.user.is_superuser:
             return qs
-        return qs.filter(experiment__users__id=request.user.id)
+        return qs.filter(experiment__users=request.user)
+
+    def get_form(self, request, obj=None):
+        form = super(SampleTimelineAdmin, self).get_form(request, obj)
+        if request.user.is_superuser:
+            return form
+        form.base_fields['experiment'].queryset = Experiment.objects.filter(users=request.user)
+        return form
 
     
 class InstrumentMethodAdmin(admin.ModelAdmin):
@@ -173,6 +218,14 @@ class InstrumentMethodAdmin(admin.ModelAdmin):
 
 class StandardOperationProcedureAdmin(admin.ModelAdmin):
     list_display = ('responsible', 'label', 'area_where_valid', 'comment', 'organisation', 'version', 'defined_by', 'replaces_document', 'content', 'attached_pdf')
+
+    def get_form(self, request, obj=None):
+        form = super(StandardOperationProcedureAdmin, self).get_form(request, obj)
+        if request.user.is_superuser:
+            return form
+        form.base_fields['experiments'].queryset = Experiment.objects.filter(users=request.user)
+        return form
+
 
 class OrganismTypeAdmin(admin.ModelAdmin):
     list_display = ('id', 'name')
@@ -190,8 +243,16 @@ class PlantInfoAdmin(admin.ModelAdmin):
         qs = super(PlantInfoAdmin, self).queryset(request)
         if request.user.is_superuser:
             return qs
-        return qs.filter(source__experiment__users__id=request.user.id)
+        return qs.filter(source__experiment__users=request.user)
+
+    def get_form(self, request, obj=None):
+        form = super(PlantInfoAdmin, self).get_form(request, obj)
+        if request.user.is_superuser:
+            return form
+        form.base_fields['source'].queryset = BiologicalSource.objects.filter(experiment__users=request.user)
+        return form
     
+
 class SampleClassAdmin(admin.ModelAdmin):
     list_display = ['id', 'experiment', 'biological_source', 'treatments', 'timeline', 'organ', 'enabled']
     search_fields = ['experiment__title']
@@ -200,7 +261,18 @@ class SampleClassAdmin(admin.ModelAdmin):
         qs = super(SampleClassAdmin, self).queryset(request)
         if request.user.is_superuser:
             return qs
-        return qs.filter(experiment__users__id=request.user.id)
+        return qs.filter(experiment__users=request.user)
+
+    def get_form(self, request, obj=None):
+        form = super(SampleClassAdmin, self).get_form(request, obj)
+        if request.user.is_superuser:
+            return form
+        form.base_fields['experiment'].queryset = Experiment.objects.filter(users=request.user)
+        form.base_fields['biological_source'].queryset = BiologicalSource.objects.filter(experiment__users=request.user)
+        form.base_fields['treatments'].queryset = Treatment.objects.filter(experiment__users=request.user)
+        form.base_fields['timeline'].queryset = SampleTimeline.objects.filter(experiment__users=request.user)
+        form.base_fields['organ'].queryset = Organ.objects.filter(experiment__users=request.user)        
+        return form
 
 
 class SampleLogAdmin(admin.ModelAdmin):
@@ -211,7 +283,14 @@ class SampleLogAdmin(admin.ModelAdmin):
         qs = super(SampleLogAdmin, self).queryset(request)
         if request.user.is_superuser:
             return qs
-        return qs.filter(sample__experiment__users__id=request.user.id)
+        return qs.filter(sample__experiment__users=request.user)
+
+    def get_form(self, request, obj=None):
+        form = super(SampleLogAdmin, self).get_form(request, obj)
+        if request.user.is_superuser:
+            return form
+        form.base_fields['sample'].queryset = Sample.objects.filter(experiment__users=request.user)
+        return form
 
 class RunAdmin(admin.ModelAdmin):
     list_display = ['title', 'method', 'creator', 'created_on', 'output_link']
@@ -222,7 +301,7 @@ class RunAdmin(admin.ModelAdmin):
 ##        qs = super(RunAdmin, self).queryset(request)
 ##        if request.user.is_superuser:
 ##            return qs
-##        return qs.filter(samples__experiment__users__id=request.user.id).distinct()
+##        return qs.filter(samples__experiment__users=request.user).distinct()
 
     def output_link(self, obj):
         output_url = urlresolvers.reverse('generate_worklist', kwargs={'run_id': obj.id})
