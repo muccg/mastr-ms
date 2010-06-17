@@ -11,15 +11,15 @@ ADMINS.append( ( 'Andrew Macgregor', 'andrew@ccg.murdoch.edu.au' ) )
 
 
 ## Reinstate multiple database config once mango 1.2 in place
-DATABASE_ENGINE = 'postgresql_psycopg2'           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'ado_mssql'.
-DATABASE_NAME = 'dev_madas'            # Or path to database file if using sqlite3.
-DATABASE_USER = 'madasapp'             # Not used with sqlite3.
-DATABASE_PASSWORD = 'madasapp'         # Not used with sqlite3.
-DATABASE_HOST = 'eowyn.localdomain'    # Set to empty string for localhost. Not used with sqlite3.
+##DATABASE_ENGINE = 'postgresql_psycopg2'           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'ado_mssql'.
+##DATABASE_NAME = 'dev_madas'            # Or path to database file if using sqlite3.
+##DATABASE_USER = 'madasapp'             # Not used with sqlite3.
+##DATABASE_PASSWORD = 'madasapp'         # Not used with sqlite3.
+##DATABASE_HOST = 'eowyn.localdomain'    # Set to empty string for localhost. Not used with sqlite3.
 
-#DATABASES['default']['NAME'] = 'dev_madas'
-#DATABASES['default']['USER'] = 'madasapp'
-#DATABASES['default']['PASSWORD'] = 'madasapp'
+DATABASES['default']['NAME'] = 'dev_madas'
+DATABASES['default']['USER'] = 'madasapp'
+DATABASES['default']['PASSWORD'] = 'madasapp'
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'qj#tl@9@7((%^)$i#iyw0gcfzf&#a*pobgb8yr#1%65+*6!@g$'

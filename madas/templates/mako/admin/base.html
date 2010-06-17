@@ -6,8 +6,7 @@ dir="rtl"
 >
 <%namespace name="admin" module="django.contrib.admin.templatetags.adminmedia" />
 <%!
-from django.utils import webhelpers
-SITE_URL = webhelpers.url('/')
+import django.core.urlresolvers as resolvers
 %>
 <head>
 <%def name="block_title()">Undefined</%def>
@@ -16,14 +15,16 @@ SITE_URL = webhelpers.url('/')
 <%def name="block_stylesheet_rtl()">${admin.admin_media_prefix()}css/rtl.css</%def>
 <link rel="stylesheet" type="text/css" href="${self.block_stylesheet()}" />
 <link rel="stylesheet" type="text/css" href="${next.block_stylesheet()}" />
-
+  
+<!--[if lte IE 7]><link rel="stylesheet" type="text/css" href="{% block stylesheet_ie %}{% load adminmedia %}{% admin_media_prefix %}css/ie.css{% endblock %}" /><![endif]--> 
 % if LANGUAGE_BIDI:
 <link rel="stylesheet" type="text/css" href="${self.block_stylesheet_rtl()}<%def name="block_stylesheet_rtl()">${admin.admin_media_prefix()}css/rtl.css</%def>" />
 % endif
-
+<script type="text/javascript">window.__admin_media_prefix__ = "${ escapejs( admin.admin_media_prefix() ) }";</script>
+<!-- STYLES -->
 ${self.block_extrastyle()}<%def name="block_extrastyle()"></%def>
 ${self.block_extrahead()}<%def name="block_extrahead()"></%def>
-${self.block_blockbots()}<%def name="block_blockbots()"><meta name="robots" content="NONE,NOARCHIVE" /></%def>
+${self.block_blockbots()}<%def name="block_blockbots()"><meta name="bang" content="pop"/><meta name="robots" content="NONE,NOARCHIVE" /></%def>
 </head>
 
 
@@ -45,20 +46,16 @@ ${self.block_bodyclass()}<%def name="block_bodyclass()"></%def>">
         ${self.block_branding()}<%def name="block_branding()"></%def>
         </div>
         
-% if user.is_authenticated and user.is_staff:
+% if user.is_active and user.is_staff:
 
         <div id="user-tools">${ trans('Welcome,') } <strong>
 % if user.first_name:
-${user.first_name}
+${ force_escape(user.first_name)}
 % else:
-${user.username}
+${ force_escape(user.username)}
 % endif
-</strong>. ${self.block_userlinks()}<%def name="block_userlinks()"><% docsroot = url(django_admindocs_docroot) %>
-% if docsroot:
-<a href="${docsroot}">${trans('Documentation')}</a> / 
-% endif
-<a href="${SITE_URL}logout/">${trans('Log out')}</a></%def></div>
-        
+&nbsp;&nbsp;</strong> ${self.block_userlinks()}<%def name="block_userlinks()"><% docsroot = url(django_admindocs_docroot) %>
+ <a href="${ (root_path+'logout/') if not resolvers.reverse('admin:logout') else resolvers.reverse('admin:logout') }">${trans('Log out')}</a></%def></div>
 % endif
 
         ${self.block_nav_global()}<%def name="block_nav_global()"></%def>
