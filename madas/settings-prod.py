@@ -9,7 +9,7 @@ from build.settings.ldap.prod import *
 
 ADMINS.append( ( 'Andrew Macgregor', 'andrew@ccg.murdoch.edu.au' ) )
 
-DATABASES['default']['NAME'] = 'dev_madas'
+DATABASES['default']['NAME'] = 'live_madas'
 DATABASES['default']['USER'] = 'madasapp'
 DATABASES['default']['PASSWORD'] = 'madasapp'
 
