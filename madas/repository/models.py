@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime, date, time
@@ -315,7 +316,7 @@ class Run(models.Model):
     creator = models.ForeignKey(User)
     title = models.CharField(max_length=255,null=True,blank=True)
     samples = models.ManyToManyField(Sample, through="RunSample")
-    machine = models.ForeignKey(NodeClient)
+    machine = models.ForeignKey(NodeClient, null=True)
     generated_output = models.TextField(null=True, blank=True)
     
     def sortedSamples(self):
