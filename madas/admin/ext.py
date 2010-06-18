@@ -140,7 +140,7 @@ class ExtJsonInterface(object):
             field = request.GET["sort"]
             if request.GET["dir"].lower() == "desc":
                 field = "-" + field
-            qs.order_by(field)
+            qs = qs.order_by(field)
 
         return HttpResponse(content_type="text/plain; charset=UTF-8", content=self.serialise(qs))
 
