@@ -120,6 +120,13 @@ class ExtJsonInterface(object):
 
     def handle_read(self, request):
         qs = self.queryset(request)
+
+        if "sort" in request.GET and "dir" in request.GET:
+            field = request.GET["sort"]
+            if request.GET["dir"].lower() == "desc":
+                field = "-" + field
+            qs.order_by(field)
+
         return HttpResponse(content_type="text/plain; charset=UTF-8", content=self.serialise(qs))
 
     @transaction.commit_manually
