@@ -9,17 +9,9 @@ from build.settings.ldap.prod import *
 
 ADMINS.append( ( 'Andrew Macgregor', 'andrew@ccg.murdoch.edu.au' ) )
 
-
-## Reinstate multiple database config once mango 1.2 in place
-DATABASE_ENGINE = 'postgresql_psycopg2'           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'ado_mssql'.
-DATABASE_NAME = 'live_madas'             # Or path to database file if using sqlite3.
-DATABASE_USER = 'madasapp'             # Not used with sqlite3.
-DATABASE_PASSWORD = 'madasapp'         # Not used with sqlite3.
-DATABASE_HOST = 'iridium.localdomain'
-
-#DATABASES['default']['NAME'] = 'dev_madas'
-#DATABASES['default']['USER'] = 'madasapp'
-#DATABASES['default']['PASSWORD'] = 'madasapp'
+DATABASES['default']['NAME'] = 'dev_madas'
+DATABASES['default']['USER'] = 'madasapp'
+DATABASES['default']['PASSWORD'] = 'madasapp'
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'qj#tl@9@7((%^)$i#iyw0gcfzf&#a*pobgb8yr#1%65+*6!@g$'
@@ -58,6 +50,7 @@ AUTHENTICATION_BACKENDS = [
 
 SESSION_COOKIE_PATH = url('/')
 SESSION_SAVE_EVERY_REQUEST = True
+CSRF_COOKIE_NAME = "csrftoken_madas_repoadmin"
 
 # a directory for persistent storage on the filesystem for this app. 
 # it is 'DECLARED' here for readability, set below based on whether 
@@ -69,14 +62,13 @@ PERSISTENT_FILESTORE = None
 PERSISTENT_FILESTORE = os.path.normpath(os.path.join(PROJECT_DIRECTORY, '..', '..', 'files') )
 REPO_FILES_ROOT = PERSISTENT_FILESTORE
 QUOTE_FILES_ROOT = os.path.join(PERSISTENT_FILESTORE, 'quotes')
+MADAS_SESSION_TIMEOUT = 1800 #30 minute session timeout
 
 #Ensure the persistent storage dir exits. If it doesn't, exit noisily.
 assert os.path.exists(PERSISTENT_FILESTORE), "This application cannot start: It expects a writeable directory at %s to use as a persistent filestore" % (PERSISTENT_FILESTORE) 
 
 # email server
-EMAIL_HOST = 'ccg.murdoch.edu.au'
 EMAIL_APP_NAME = "Madas (Mango)"
-SERVER_EMAIL = "apache@ccg.murdoch.edu.au"
 EMAIL_SUBJECT_PREFIX = "Madas (Mango) PROD_SERVER"
 
 

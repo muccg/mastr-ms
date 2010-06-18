@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Django settings for nutrition project.
+# Django settings for project.
 import os
 from django.utils.webhelpers import url
 
@@ -8,14 +8,6 @@ from build.settings.db.dev import *
 from build.settings.ldap.dev import *
 
 ADMINS.append( ( 'Andrew Macgregor', 'andrew@ccg.murdoch.edu.au' ) )
-
-
-## Reinstate multiple database config once mango 1.2 in place
-##DATABASE_ENGINE = 'postgresql_psycopg2'           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'ado_mssql'.
-##DATABASE_NAME = 'dev_madas'            # Or path to database file if using sqlite3.
-##DATABASE_USER = 'madasapp'             # Not used with sqlite3.
-##DATABASE_PASSWORD = 'madasapp'         # Not used with sqlite3.
-##DATABASE_HOST = 'eowyn.localdomain'    # Set to empty string for localhost. Not used with sqlite3.
 
 DATABASES['default']['NAME'] = 'dev_madas'
 DATABASES['default']['USER'] = 'madasapp'
@@ -59,6 +51,7 @@ AUTHENTICATION_BACKENDS = [
 
 SESSION_COOKIE_PATH = url('/')
 SESSION_SAVE_EVERY_REQUEST = True
+CSRF_COOKIE_NAME = "csrftoken_madas_repoadmin"
 
 # a directory for persistent storage on the filesystem for this app. 
 # it is 'DECLARED' here for readability, set below based on whether 
