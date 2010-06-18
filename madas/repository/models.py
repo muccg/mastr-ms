@@ -57,7 +57,7 @@ class BiologicalSource(models.Model):
     abbreviation = models.CharField(max_length=5)
     type = models.ForeignKey(OrganismType)
     information = models.TextField(null=True, blank=True)
-    ncbi_id = models.PositiveIntegerField(null=True)
+    ncbi_id = models.PositiveIntegerField(null=True, blank=True)
     label = models.CharField(max_length=50, null=True, blank=True)
 
     def __unicode__(self):
@@ -75,7 +75,7 @@ class AnimalInfo(models.Model):
     )
     sex = models.CharField(max_length=2, choices=GENDER_CHOICES, default=u'U')
     age = models.PositiveIntegerField(null=True, blank=True)
-    parental_line = models.CharField(max_length=255, blank=True)
+    parental_line = models.CharField(max_length=255)
     location = models.CharField(max_length=255, null=True, blank=True)
     notes = models.TextField(null=True)
 
@@ -116,7 +116,7 @@ class HumanInfo(models.Model):
     bmi = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     diagnosis = models.TextField(null=True, blank=True)
     location = models.CharField(max_length=255, null=True, blank=True)
-    notes = models.TextField(null=True)
+    notes = models.TextField(null=True, blank=True)
 
     def __unicode__(self):
         return u"%s - %s - %s" % (self.sex, self.date_of_birth, self.location)
@@ -155,20 +155,23 @@ class ExperimentStatus(models.Model):
         verbose_name_plural = "Experiment statuses"
 
     name = models.CharField(max_length=50)
-    description = models.TextField(null=True)
+    description = models.TextField(null=True, blank=True)
 
     def __unicode__(self):
         return self.name
 
 class Project(models.Model):
     title = models.CharField(max_length=255)
-    description = models.TextField(null=True)
+    description = models.TextField(null=True, blank=True)
     created_on = models.DateField(null=False, default=date.today)
-    client = models.ForeignKey(User, null=True)    
+    client = models.ForeignKey(User, null=True, blank=True)    
     managers = models.ManyToManyField(User, related_name='managed_projects')
     
     def __unicode__(self):
-        return self.title + ' (' + self.client.username + ')'
+        client_username = 'No client'
+        if self.client:
+            client_username = self.client.username
+        return "%s (%s)" % (self.title, client_username)
 
 class InstrumentMethod(models.Model):
     title = models.CharField(max_length=255)
@@ -181,7 +184,7 @@ class InstrumentMethod(models.Model):
     randomisation = models.BooleanField(default=False)
     blank_at_start = models.BooleanField(default=False)
     blank_at_end = models.BooleanField(default=False)
-    blank_position = models.CharField(max_length=255,null=True)
+    blank_position = models.CharField(max_length=255,null=True,blank=True)
     obsolete = models.BooleanField(default=False)
     obsolescence_date = models.DateField(null=True,blank=True)
     
@@ -192,12 +195,12 @@ class InstrumentMethod(models.Model):
         
 class Experiment(models.Model):
     title = models.CharField(max_length=255)
-    description = models.TextField(null=True)
-    comment = models.TextField(null=True)
-    users = models.ManyToManyField(User, through='UserExperiment', null=True)
-    status = models.ForeignKey(ExperimentStatus, null=True)
+    description = models.TextField(null=True, blank=True)
+    comment = models.TextField(null=True, blank=True)
+    users = models.ManyToManyField(User, through='UserExperiment', null=True, blank=True)
+    status = models.ForeignKey(ExperimentStatus, null=True, blank=True)
     created_on = models.DateField(null=False, default=date.today)
-    formal_quote = models.ForeignKey(Formalquote, null=True)
+    formal_quote = models.ForeignKey(Formalquote, null=True, blank=True)
     job_number = models.CharField(max_length=30)
     project = models.ForeignKey(Project)
     instrument_method = models.ForeignKey(InstrumentMethod, null=True, blank=True)
@@ -247,7 +250,7 @@ class Treatment(models.Model):
     experiment = models.ForeignKey('Experiment')
     abbreviation = models.CharField(max_length=5)
     name = models.CharField(max_length=255)
-    description = models.TextField(null=True)
+    description = models.TextField(null=True, blank=True)
 
     def __unicode__(self):
         return self.name
@@ -268,9 +271,9 @@ class SampleClass(models.Model):
 
     class_id = models.CharField(max_length=255)
     experiment = models.ForeignKey(Experiment)
-    biological_source = models.ForeignKey(BiologicalSource, null=True)
-    treatments = models.ForeignKey(Treatment, null=True)
-    timeline = models.ForeignKey(SampleTimeline,null=True)
+    biological_source = models.ForeignKey(BiologicalSource, null=True, blank=True)
+    treatments = models.ForeignKey(Treatment, null=True, blank=True)
+    timeline = models.ForeignKey(SampleTimeline,null=True, blank=True)
     organ = models.ForeignKey(Organ, null=True, blank=True)
     enabled = models.BooleanField(default=True)
 
@@ -297,7 +300,7 @@ class Sample(models.Model):
     sample_class = models.ForeignKey(SampleClass, null=True, blank=True)
     experiment = models.ForeignKey(Experiment)
     label = models.CharField(max_length=255)
-    comment = models.TextField(null=True)
+    comment = models.TextField(null=True, blank=True)
     weight = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
 
     def __unicode__(self):
@@ -316,7 +319,7 @@ class Run(models.Model):
     creator = models.ForeignKey(User)
     title = models.CharField(max_length=255,null=True,blank=True)
     samples = models.ManyToManyField(Sample, through="RunSample")
-    machine = models.ForeignKey(NodeClient, null=True)
+    machine = models.ForeignKey(NodeClient, null=True, blank=True)
     generated_output = models.TextField(null=True, blank=True)
     
     def sortedSamples(self):
@@ -337,7 +340,7 @@ class SampleLog(models.Model):
     type = models.PositiveIntegerField(choices=LOG_TYPES, default=0)
     changetimestamp = models.DateTimeField(auto_now=True)
     description = models.CharField(max_length=255)
-    user = models.ForeignKey(User, null=True)
+    user = models.ForeignKey(User, null=True, blank=True)
     sample = models.ForeignKey(Sample)
     
     def __unicode__(self):
