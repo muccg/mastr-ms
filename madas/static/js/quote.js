@@ -453,7 +453,7 @@ MA.QuoteRequestEditCmp =
 	            		id:'downloadattachbutton',
 	            		text:'Download Attachment',
 	            		handler: function() {
-	            				window.location = MA.BaseUrl + 'quote/downloadAttachment?quoterequestid=' + Ext.getCmp('qre-id').value;
+	            				window.location = MA.BaseUrl + 'quote/downloadAttachment?quoterequestid=' + Ext.getCmp('qre-hidden-id').value;
 	            			}
 	            		}
 	            	]
