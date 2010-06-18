@@ -131,7 +131,7 @@ class TreatmentAdmin(ExtJsonInterface, admin.ModelAdmin):
         return form
 
 class SampleAdmin(ExtJsonInterface, admin.ModelAdmin):
-    list_display = ['label', 'experiment', 'comment', 'weight', 'sample_class', 'logs_link']
+    list_display = ['label', 'comment', 'weight', 'sample_class', 'experiments_link', 'runs_link', 'logs_link']
     search_fields = ['label', 'experiment__title', 'sample_class__organ__name']
     actions = ['create_run']
     inlines = [RunSampleInline]
@@ -182,6 +182,19 @@ class SampleAdmin(ExtJsonInterface, admin.ModelAdmin):
             return HttpResponseRedirect(change_url)
 
     create_run.short_description = "Create Run from samples."
+
+    def experiments_link(self, obj):
+        change_url = urlresolvers.reverse('admin:repository_experiment_changelist')
+        return '<a href="%s?id__exact=%s">%s</a>' % (change_url, obj.experiment.id, obj.experiment.title)
+    experiments_link.short_description = 'Experiment'
+    experiments_link.allow_tags = True
+
+    def runs_link(self, obj):
+        change_url = urlresolvers.reverse('admin:repository_run_changelist')
+        run_ids = ','.join([str(x.id) for x in obj.run_set.all()])
+        return '<a href="%s?id__in=%s">Runs</a>' % (change_url, run_ids)
+    runs_link.short_description = 'Runs'
+    runs_link.allow_tags = True
 
     def logs_link(self, obj):
         change_url = urlresolvers.reverse('admin:repository_samplelog_changelist')
@@ -296,7 +309,7 @@ class SampleLogAdmin(ExtJsonInterface, admin.ModelAdmin):
 
 class RunAdmin(ExtJsonInterface, admin.ModelAdmin):
 ##    list_display = ['title', 'method', 'creator', 'created_on', 'output_link']
-    list_display = ['title', 'created_on', 'output_link']
+    list_display = ['title', 'created_on', 'output_link', 'experiments_link', 'samples_link']
     search_fields = ['title', 'method__title', 'creator__username', 'creator__first_name', 'creator__last_name']
     inlines = [RunSampleInline]
 
@@ -309,12 +322,25 @@ class RunAdmin(ExtJsonInterface, admin.ModelAdmin):
 ##        return qs.filter(samples__experiment__users=request.user).distinct()
 
 
-
     def output_link(self, obj):
         output_url = urlresolvers.reverse('generate_worklist', kwargs={'run_id': obj.id})
         return '<a href="%s">Output</a>' % output_url
     output_link.short_description = 'Output'
     output_link.allow_tags = True    
+
+    def experiments_link(self, obj):
+        change_url = urlresolvers.reverse('admin:repository_experiment_changelist')
+        exp_ids = ','.join([str(x.experiment.id) for x in obj.samples.all()])
+        return '<a href="%s?id__in=%s">Experiments</a>' % (change_url, exp_ids)
+    experiments_link.short_description = 'Experiments'
+    experiments_link.allow_tags = True
+
+    def samples_link(self, obj):
+        change_url = urlresolvers.reverse('admin:repository_sample_changelist')
+        sample_ids = ','.join([str(x.id) for x in obj.samples.all()])
+        return '<a href="%s?id__in=%s">Samples</a>' % (change_url, sample_ids)
+    samples_link.short_description = 'Samples'
+    samples_link.allow_tags = True
 
 
 admin.site.register(OrganismType, OrganismTypeAdmin)
