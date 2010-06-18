@@ -1,6 +1,7 @@
 from django.conf.urls.defaults import patterns, url
+from django.core.exceptions import FieldError
 from django.db import transaction
-from django.http import HttpResponse, HttpResponseNotAllowed, HttpResponseNotFound, HttpResponseServerError
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed, HttpResponseNotFound, HttpResponseServerError
 from json import dumps, loads
 
 
@@ -121,6 +122,20 @@ class ExtJsonInterface(object):
     def handle_read(self, request):
         qs = self.queryset(request)
 
+        # Add filters.
+        filters = {}
+        for field, term in request.GET.iteritems():
+            if field not in ("sort", "dir"):
+                filters[field] = term
+
+        if len(filters) > 0:
+            try:
+                qs = qs.filter(**filters)
+            except FieldError:
+                # Bad parameter to QuerySet.filter.
+                return HttpResponseBadRequest(content_type="text/plain; charset=UTF-8", content=dumps("Bad search term"))
+
+        # Apply sorting parameters, if given.
         if "sort" in request.GET and "dir" in request.GET:
             field = request.GET["sort"]
             if request.GET["dir"].lower() == "desc":
