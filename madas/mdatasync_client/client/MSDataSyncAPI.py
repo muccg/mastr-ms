@@ -11,6 +11,9 @@
 #
 #This makes use of the rsync script by Vivian De Smedt, relased under the BSD license.
 
+try: import json as simplejson
+except ImportError: import simplejson
+
 def nullFn(*args, **kwargs):
     print 'null fn'
     pass
@@ -46,6 +49,7 @@ class MSDataSyncAPI(object):
             return
         self._tasks.join()              # block until task queue is empty
         self._thread.die()              # tell the thread to die
+        print 'Flushing with None task'
         self._appendTask( None, None )  # dummy task to force thread to run
         self._thread.join()             # wait until thread is done
         self._thread = None
@@ -56,14 +60,14 @@ class MSDataSyncAPI(object):
            Obviously one doesn't block, and one does.
            Either way, the callback is called once done.'''
         if hasattr( self, "_thread" ) and self._thread != None:
-            print 'Using thread'
             self._tasks.put_nowait( ( callback, command, args, kwargs ) )
         else:
             result = None
             try:
                 result = command( *args, **kwargs )
             except Exception, e:
-                print 'Error running command: ', e
+                print 'Error running command (nonthreaded): %s' % (str(e))
+                #print 'command(args, kwargs) was: %s(%s,%s)' % (str(command), str(args), str(kwargs))
                 result = None
             if callback != None:
                 callback( result )
@@ -75,13 +79,11 @@ class MSDataSyncAPI(object):
         c = self.config.getConfig()
 
         #get the local file list
-        #TODO: Call this in the correct manner, using 'Tasks'
         organisation = self.config.getValue('organisation')
         station = self.config.getValue('stationname')
         sitename = self.config.getValue('sitename')
 
         import urllib
-        import simplejson
        
         #grab all files in our local dir:
 
@@ -101,7 +103,7 @@ class MSDataSyncAPI(object):
         j = simplejson.loads(jsonret)
         self.log('Synchub config loaded object is: %s' % j)
         d = simplejson.loads(jsonret)
-        print 'Returned Json Obj: ', d
+        #print 'Returned Json Obj: ', d
         
         user = self.config.getValue('user')
         #remotehost = self.config.getValue('remotehost')
@@ -111,20 +113,32 @@ class MSDataSyncAPI(object):
         remotefilesrootdir = d['rootdir']
 
         callingWindow.setState(statuschange)
+        self.callingWindow = callingWindow
+        
+        copydict = {}
+        import os.path
         import os.path
         for filename in remotefilesdict.keys():
             fulllocalpath = os.path.join(filesdict[filename], filename)
             fullremotepath = os.path.join(remotefilesdict[filename], filename)
-            self.log( 'Copying %s to %s' % (fulllocalpath, "%s" %(os.path.join(localindexdir, fullremotepath) ) ) )
-            self._appendTask(returnFn, self._impl.copyfile, fulllocalpath, "%s" % os.path.join(localindexdir, fullremotepath))
+            #self.log( 'Copying %s to %s' % (fulllocalpath, "%s" %(os.path.join(localindexdir, fullremotepath) ) ) )
+            copydict[fulllocalpath] =  "%s" %(os.path.join(localindexdir, fullremotepath) )
+
+        callingWindow.SetProgress(20)
+        self.log("Initiating file copy to local index (%d files)" % (len(copydict.keys())) )
+        #copy all the files
+        self._appendTask(self.copyFilesReturn, self._impl.copyfiles, copydict)
             
         #now rsync the whole thing over
-        self._appendTask(returnFn, self._impl.checkRsync, "%s/" % (localindexdir) , user, j['host'], remotefilesrootdir, rules=[j['rules']])
+        self._appendTask(returnFn, self._impl.perform_rsync, "%s" % (localindexdir) , user, j['host'], remotefilesrootdir, rules=[j['rules']])
 
     def defaultReturn(self, *args, **kwargs):
         #print 'rsync returned: ', retval
-        self.log('Default return callback:%s' % (str(args)), Debug=True)
+        self.log('Default return callback:%s' % (str(args)), Debug=True, thread = self.useThreading)
 
+    def copyFilesReturn(self, *args, **kwargs):
+        self.log('Local file copy stage complete', thread = self.useThreading)
+        self.callingWindow.SetProgress(50)
 
     def getFiles(self, dir, ignoredirs = []):
         import os
@@ -143,7 +157,7 @@ class MSDataSyncAPI(object):
 
             for file in files:
                 if retfiles.has_key(file):
-                    print 'DUPLICATE FILE DETECTED!!: %s' % (file)
+                    self.log('Duplicate file detected: %s' % (file), thread=False, type=self.log.LOG_WARNING)
                 retfiles[file] = root
         return retfiles
     
@@ -165,10 +179,12 @@ class MSDataSyncAPI(object):
                 ( callback, command, args, kwargs ) = self._tasks.get()
                 result = None
                 try:
-                    print 'worker thread executing %s with args %s' % (str(command), str(args))
-                    result = command( *args )
+                    #print 'worker thread executing %s with args %s' % (str(command), str(args))
+                    result = command( *args, **kwargs )
                 except Exception, e:
-                    print 'Error running command: ', e
+                    print 'Error running command (threaded): ', e
+                    #print 'command(args, kwargs) was: %s(%s,%s)' % (str(command), str(args), str(kwargs))
+
                     result = None
                 if callback != None:
                     callback( result )
@@ -184,16 +200,47 @@ class MSDSImpl(object):
     def __init__(self, log, controller):
        self.log = log #we expect 'log' to be a callable function. 
        self.controller = controller
-    def checkRsync(self, sourcedir, remoteuser, remotehost, remotedir, rules = []):
+    def perform_rsync(self, sourcedir, remoteuser, remotehost, remotedir, rules = []):
         #self.log('checkRsync implementation entered!', Debug=True)
+       
         
+        #fix the sourcedir.
+        #On windows, the driveletter and colon make rsync think 
+        #that it is a host:path pair. So on windows, we need to fix that.
+        #What we do is find the drive letter, get rid of the colon, and then prefix
+        #the sourcedir name with /cygdrive
+        #we also make sure the path is 'normalised', so that they look like posix paths,
+        #since both mac, linux, and cygwin all use it.
+        if self.controller.isMSWINDOWS:
+            import os
+            import os.path
+            #print 'WINDOWS SOURCE DIR HACK IN PROGRESS'
+            #os.path.normpath makes sure slashes are native - on windows this is an escaped backslash \\
+            #os.sep gives you the dir sepator for this platform (windows = \\)
+            #os.path.splitdrive splits the path into drive,path : ('c:', '\something\\somethingelse')
+            drive,winpath = os.path.splitdrive(os.path.normpath(sourcedir))
+            drive = str(drive)
+            print 'drive is ', drive
+            print 'winpath is ', winpath
+            #so for the winpath, we replace all \\ and then \ with /
+            winpath=winpath.replace(os.sep, '/')
+            winpath=winpath.replace('\\', '/')
+            #then we take the drive letter (drive[0]) and put it after /cygdrive
+            cygpath = "/%s/%s%s/" % ('cygdrive', drive[0], winpath)
+            print 'cygpath is: ', cygpath
+            sourcedir = cygpath
+
+        else:
+            #print 'NO NEED FOR WINDOWS SOURCE DIR HACK'
+            sourcedir += '/' #make sure it ends in a slash
+
         from subprocess import Popen, PIPE, STDOUT
         logfile = 'rsync_log.txt'
         #Popen('rsync -t %s %s:%s' % (sourcedir, remotehost, remotedir) )
         
         #cmdhead = ['rsync', '-tavz'] #t, i=itemize-changes,a=archive,v=verbose,z=zip
         cmdhead = ['rsync', '-avz'] #v=verbose,z=zip
-        cmdtail = ['--log-file=%s' % (logfile), sourcedir, '%s@%s:%s' % (remoteuser, remotehost, remotedir)]
+        cmdtail = ['--log-file=%s' % (logfile), str(sourcedir), '%s@%s:%s' % (str(remoteuser), str(remotehost), str(remotedir) )]
 
         cmd = []
         cmd.extend(cmdhead)
@@ -207,41 +254,44 @@ class MSDSImpl(object):
             
         cmd.extend(cmdtail)
 
-        print 'cmd is %s ' % str(cmd)
+        self.log('Rsync command is: %s ' % str(cmd), thread=self.controller.useThreading, type=self.log.LOG_DEBUG)
         #self.log('cmd is %s ' % str(cmd), thread=self.controller.useThreading)
 
         p = Popen( cmd, shell=False, stdout=PIPE, stderr=PIPE)
         
         #for line in p.stdout:
-        #    self.log(line, thread=self.controller.useThreading)
+        #    self.log("RSYNC %s: " % (line,), thread=self.controller.useThreading)
         
-        ##p = Popen( cmd,
-        ##           stdout=self.log, stderr=self.log, stdin=PIPE)
-        
-        ##p = Popen( cmd,
-        ##           stdout=self.log, stderr=self.log, stdin=PIPE)
-
-
         retcode = p.communicate()[0]
         #self.log('the retcode was: %s' % (str(retcode),), Debug=True)
         return retcode
 
+    def copyfiles(self, copydict):
+        import os.path
+        print 'Copyfiles dict: ', copydict
+        try:
+            for filename in copydict.keys():
+                self.log( '\tCopying %s to %s' % (str(os.path.normpath(filename)), str(os.path.normpath(copydict[filename]) ) ), thread=self.controller.useThreading  )
+                print 'doing copyfile'
+                self.copyfile( str(os.path.normpath(filename)), str(os.path.normpath(copydict[filename])))
+        except Exception, e:
+            self.log('Problem copying: %s' % (str(e)), type=self.log.LOG_ERROR,  thread = self.controller.useThreading )
+
     def copyfile(self, src, dst):
         from shutil import copy2
         import os.path
-        print src
-        print dst
-        
-        thepath = os.path.dirname(dst)
-        print 'copyfile: %s to %s, path is %s' % (src, dst, thepath)
+        print 'getting path'
+        thepath = str(os.path.dirname(dst))
+        print 'finished getting path'
+        #print 'copyfile: %s to %s, path is %s' % (src, dst, thepath)
         try:
             if not os.path.exists(thepath):
-                print 'path %s did not exist - creating' % (thepath,)
+                self.log('Path %s did not exist - creating' % (thepath,) , thread = self.controller.useThreading )
                 os.makedirs(thepath)
 
             copy2(src, dst)
         except Exception, e:
-            print 'Error copying %s to %s : %s' % (src, dst, e)
+            self.log('Error copying %s to %s : %s' % (src, dst, e), type = self.log.LOG_ERROR,  thread = self.controller.useThreading )
 
     def getFileTree(self, dir):
         print 'Entered getFileTree: checking %s' % dir
@@ -255,8 +305,8 @@ class MSDSImpl(object):
                 #self.log('dirs: %s' % (str(dirs)) )
                 #self.log('files: %s' % (str(files)) )
             for f in allfiles:
-                self.log('File: %s' % (f), thread = self.controller.useThreading )
+                self.log('File: %s' % (str(f)), thread = self.controller.useThreading )
         except Exception, e:
-            print 'Exception: %s' % (str(e))
+            self.log('getFileTree: Exception: %s' % (str(e)), self.log.LOG_ERROR, thread = self.controller.useThreading)
         print 'Done with getFileTree'
         return allfiles

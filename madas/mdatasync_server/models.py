@@ -8,9 +8,12 @@ class NodeClient(models.Model):
     organisation_name = models.CharField(max_length=50)
     site_name = models.CharField(max_length=50)
     station_name = models.CharField(max_length=50)
+    default_data_path = models.CharField(max_length=255)
+    #username = models.CharField(max_length=255)
+    #hostname = models.CharField(max_length=255)
+    #flags = models.CharField(max_length=255)
     date_created = models.DateTimeField(auto_now_add=True) #generate 'now' on INSERT
     last_modified = models.DateTimeField(auto_now = True) #generate 'now' on UPDATE
-    default_data_path = models.CharField(max_length=255)
 
     def __unicode__(self):
         return "[%s]-[%s]-[%s]" % (self.organisation_name, self.site_name, self.station_name)
