@@ -312,6 +312,13 @@ class Sample(models.Model):
             raise SampleNotInClassException
         else:
             return self.sample_class.class_id + '-' + str(run.id) + '-' + str(self.id) + '.d'
+
+    def is_valid_for_run(self):
+        '''Test to determine whether this sample can be used in a run'''
+        if not self.sample_class or not self.sample_class.enabled:
+            return False
+        return True
+
     
 class Run(models.Model):
     method = models.ForeignKey(InstrumentMethod)
@@ -328,6 +335,15 @@ class Run(models.Model):
     
     def __unicode__(self):
         return "%s (%s v.%s)" % (self.title, self.method.title, self.method.version)
+
+    def add_samples(self, queryset):
+        '''Takes a queryset of samples'''
+        assert self.id, 'Run must have an id before samples can be added'
+        for s in queryset:
+            if s.is_valid_for_run():
+                rs = RunSample(run=self, sample=s)
+                rs.save()
+
 
 class SampleLog(models.Model):
     LOG_TYPES = (
