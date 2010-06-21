@@ -1,9 +1,16 @@
 import wx
+import urllib2
+from poster.encode import multipart_encode
+from poster import streaminghttp
+import simplejson
 
 import NodeConfigSelector
 
 from identifiers import *
 import  wx.lib.filebrowsebutton as filebrowse
+
+#register the streamind http and https handlers with urllib2
+streaminghttp.register_openers()
 
 class AutoPreferences(wx.Dialog):
     def __init__(self, parent, ID, config, log):
@@ -42,13 +49,28 @@ class AutoPreferences(wx.Dialog):
         box = wx.BoxSizer(wx.HORIZONTAL)
         self.nodeconfiglabel = wx.StaticText(self, -1, "" ) 
         self.setNodeConfigLabel()
-        box.Add(label, 0, wx.ALIGN_LEFT|wx.ALL, 5)
+        box.Add(label, 1, wx.ALIGN_LEFT|wx.ALL, 2)
         btn = wx.Button(self, ID_CHOOSENODE_BUTTON)
         btn.SetLabel("Choose")
         btn.Bind(wx.EVT_BUTTON, self.openNodeChooser)
-        box.Add(btn, 0,  wx.ALIGN_RIGHT|wx.ALL, 5)
+        box.Add(btn, 1,  wx.ALIGN_RIGHT|wx.ALL, 2)
 
-        sizer.Add(box, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 2)
+        sizer.Add(box, 1, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 2)
+
+        #also add a button to upload logs to the webserver
+        buttonsbox = wx.BoxSizer(wx.HORIZONTAL)
+        logbutton = wx.Button(self, ID_SENDLOGS_BUTTON)
+        logbutton.SetLabel("Send Log")
+        logbutton.Bind(wx.EVT_BUTTON, self.OnSendLog)
+        buttonsbox.Add(logbutton, 1, wx.ALIGN_RIGHT | wx.ALL, 2)
+        #and a button to upload keys 
+        keybutton = wx.Button(self, ID_SENDKEY_BUTTON)
+        keybutton.SetLabel("Send Key")
+        keybutton.Bind(wx.EVT_BUTTON, self.OnSendKey)
+        buttonsbox.Add(keybutton, 1, wx.ALIGN_LEFT | wx.ALL, 2)
+
+        
+        sizer.Add(buttonsbox, 1, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 2)
 
         self.fields = {}
         for key in self.preference_keys:
@@ -60,12 +82,12 @@ class AutoPreferences(wx.Dialog):
                 else: 
                     label = wx.StaticText(self, -1, self.config.getFormalName(key))
                     label.SetHelpText(self.config.getHelpText(key))
-                    box.Add(label, 0, wx.ALIGN_LEFT|wx.ALL, 2)
+                    box.Add(label, 0, wx.ALIGN_LEFT| wx.ALIGN_CENTER_VERTICAL|wx.ALL, 2)
                     #the text entry field
                     ctrl = wx.TextCtrl(self, -1, str(self.config.getValue(key)), size=(80,-1))
                     ctrl.SetHelpText(self.config.getHelpText(key))
                 box.Add(ctrl, 1, wx.ALIGN_CENTRE|wx.ALL, 2)
-                sizer.Add(box, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 2)
+                sizer.Add(box, 1, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 2)
                 
                 #store the field so we can serialise it later
                 self.fields[key] = ctrl
@@ -87,7 +109,7 @@ class AutoPreferences(wx.Dialog):
         btnsizer.AddButton(btn)
         btnsizer.Realize()
         
-        sizer.Add(btnsizer, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 2)
+        sizer.Add(btnsizer, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 2)
 
         self.SetSizer(sizer)
         sizer.Fit(self)
@@ -96,6 +118,27 @@ class AutoPreferences(wx.Dialog):
     def OKPressed(self, *args):
         self.save(args)
         self.EndModal(0)
+
+    def OnSendLog(self, evt):
+        print 'send logs!'
+        try:
+            #Start the multipart encoded post of whatever file our log is saved to:
+            posturl = self.config.getValue('synchub') + 'logupload/'
+
+            rsync_logfile = open(self.config.getValue('logfile'))
+            datagen, headers = multipart_encode( {'uploaded' : rsync_logfile, 'nodename' : self.config.getNodeName()} )
+            request = urllib2.Request(posturl, datagen, headers)
+            print 'sending log %s to %s' % (rsync_logfile, posturl)
+            jsonret = urllib2.urlopen(request).read()
+            retval = simplejson.loads(jsonret)
+            print 'OnSendLog: retval is %s' % (retval)
+        except Exception, e:
+            print 'OnSendLog: Exception occured: %s' % (str(e))
+
+
+    def OnSendKey(self, evt):
+        print 'send keys!'
+
 
     def save(self, *args):
         #k = self.config.getConfig().keys()
@@ -110,8 +153,7 @@ class AutoPreferences(wx.Dialog):
 
 
     def setNodeConfigLabel(self):
-        configname = "%s.%s.%s" % (self.config.getValue('organisation'), self.config.getValue('sitename'), self.config.getValue('stationname') )
-        self.nodeconfiglabel.SetLabel("Current Node: %s" % (configname) ) 
+        self.nodeconfiglabel.SetLabel("Current Node: %s" % (self.config.getNodeName()) ) 
 
     #this function gets called by the node chooser dialog,
     #and uses the data it passes to put values into the config, which arent 
@@ -121,11 +163,20 @@ class AutoPreferences(wx.Dialog):
             self.config.setValue(k, datadict[k])
         self.setNodeConfigLabel()
         
-
-       
     def openNodeChooser(self, *args):
         self.nodeconfigselector = NodeConfigSelector.NodeConfigSelector(self, ID_NODESELECTOR_DIALOG, self.log, None)
 
         self.nodeconfigselector.createTree()
         self.nodeconfigselector.ShowModal()
         self.nodeconfigselector.Destroy()
+
+    def postRsyncLog(self, *args):
+        import MultipartPostHandler, urllib2, sys
+        opener = urllib2.build_opener(MultipartPostHandler.MultipartPostHandler)
+        params = {'uploaded' : open("rsync.log")}
+        a = opener.open(self.config.getValue('synchub') + 'logupload/')
+        resp = a.read()
+        print resp
+
+    def postRSAKey(self, *args):
+        pass

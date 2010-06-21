@@ -1,6 +1,7 @@
 import wx
-import urllib
-import simplejson
+import urllib2
+try: import json as simplejson
+except ImportError: import simplejson
 
 class NodeConfigSelector(wx.Dialog):
 
@@ -100,7 +101,8 @@ class NodeConfigSelector(wx.Dialog):
         #get the data
         retval = None
         try:
-            f = urllib.urlopen(self.parentApp.config.getValue('synchub') + 'nodes/')
+            req = urllib2.Request(self.parentApp.config.getValue('synchub') + 'nodes/')
+            f = urllib2.urlopen(req)
             jsonret = f.read()
             print 'node config: %s' % jsonret 
             retval = simplejson.loads(jsonret)
@@ -199,8 +201,9 @@ class NodeConfigSelector(wx.Dialog):
                 if type(item) == str:
                     self.tree.AppendItem(parentItem, item)
                 else:
-                    newItem = self.tree.AppendItem(parentItem, item[0])
-                    self.AddTreeNodes(newItem, item[0])
+                    print 'item wasnt a string.: %s' % str(item)
+                    newItem = self.tree.AppendItem(parentItem, str(item))
+                    #self.AddTreeNodes(newItem, str(item[0]))
             
 
 

@@ -22,9 +22,11 @@ def configureNode(request, *args):
     return jsonResponse(nodeconfig.toDict())
 
 def getNodeClients(request, *args):
+    print 'trying getNodeClients'
     ncs = NodeClient.objects.all()
     result = {}
     for n in ncs:
+        print 'checking a node'
         if not result.has_key(n.organisation_name):
             result[n.organisation_name] = {}
         o = result[n.organisation_name]
@@ -33,8 +35,6 @@ def getNodeClients(request, *args):
 
         o[n.site_name].append(n.station_name)
 
-
-        
     return jsonResponse(result)
 
 def retrievePathsForFiles(request, *args):
@@ -164,6 +164,44 @@ def defaultpage(request, *args):
         return jsonResponse(d)
     except Exception, e:
         return jsonResponse(str(e))
+
+
+def logUpload(request, *args):
+    fname_prefix = 'UNKNOWN_'
+    if request.POST.has_key('nodename'):
+        fname_prefix = request.POST['nodename'] + '_'
+    
+    if request.FILES.has_key('uploaded'):
+        f = request.FILES['uploaded']
+        print 'Uploaded file name:', f._get_name()
+        _handle_uploaded_file(f, str(os.path.join('synclogs', "%s%s" % (fname_prefix,'rsync.log')) ) )#dont allow them to replace arbitrary files
+    else:
+        print 'No file in the post'
+
+    return jsonResponse('ok')
+
+def _handle_uploaded_file(f, name):
+    '''Handles a file upload to the projects REPO_FILES_ROOT
+       Expects a django InMemoryUpload object, and a filename'''
+    print '*** _handle_uploaded_file: enter ***'
+    retval = False
+    try:
+        import os
+        dest_fname = str(os.path.join(settings.REPO_FILES_ROOT, name))
+        if not os.path.exists(os.path.dirname(dest_fname)):
+            print 'creating directory: ', os.path.dirname(dest_fname)
+            os.makedirs(os.path.dirname(dest_fname))
+
+        destination = open(dest_fname, 'wb+')
+        for chunk in f.chunks():
+            destination.write(chunk)
+        destination.close()
+        retval = True
+    except Exception, e:
+        retval = False
+        print '\tException in file upload: ', str(e)
+    print '*** _handle_uploaded_file: exit ***'
+    return retval
 
 
 '''

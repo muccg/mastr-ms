@@ -36,7 +36,7 @@ class SystrayIcon(wx.TaskBarIcon):
 
 
     def CreatePopupMenu(self):
-        ''' create a popup menu to display when the icon is right clicked
+        ''' create a popup menu to display when the icon is right clicked (every time)
             Called by the base class. So we just define it, the base class takes
             care of the rest'''
         menu = wx.Menu()
@@ -46,6 +46,10 @@ class SystrayIcon(wx.TaskBarIcon):
         menu.Append(self.TBMENU_HIDE, "Hide main window")
         menu.Append(self.TBMENU_RESTORE, "Open main window")
         menu.Append(self.TBMENU_QUIT,   "Quit")
+        #grey out the 'check now' item if we are already uploading data
+        from MainWindow import APPSTATE
+        if self.parentApp.state == APPSTATE.UPLOADING_DATA:
+            menu.Enable(self.TBMENU_CHECKNOW, False)
         return menu
 
 
@@ -64,7 +68,7 @@ class SystrayIcon(wx.TaskBarIcon):
     def OnTaskBarQuit(self, evt):
         '''Close (quit) the parent app.'''
         #self.log.WriteText('Quiting...')
-        self.parentApp.Close()
+        self.parentApp.OnMenuQuit(evt)
 
     def OnTaskBarHide(self, evt):
         '''minimise/hide the main window'''
@@ -75,7 +79,7 @@ class SystrayIcon(wx.TaskBarIcon):
     def OnTaskBarCheckNow(self, evt):
         self.log('CheckNow chosen', type=self.log.LOG_DEBUG)
         #from MSDataSyncAPI import MSDSCheckFn
-        self.parentApp.MSDSCheckFn('somedir', 'somehost', 'someremotedir')
+        self.parentApp.OnCheckNow(evt)
 
 
     def OnTaskBarTestConnection(self, evt):
@@ -101,4 +105,6 @@ class SystrayIcon(wx.TaskBarIcon):
         '''sets the icon in the systray to whatever is in the iconbar at coordinates l/r'''
         icon = self.IconBar.Get(l, r)
         #self.SetIcon(icon, "L:%d,R:%d"%(l,r) )
-        self.SetIcon(icon, "any status text you like" )
+        #Set the icon, and the mouseover text to be the apps statusbar's 0th field
+        #print  str(self.parentApp.StatusBar.GetStatusText())
+        self.SetIcon(icon, str(self.parentApp.StatusBar.GetStatusText()) )  

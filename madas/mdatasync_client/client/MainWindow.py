@@ -18,7 +18,7 @@ class Log(wx.PyLog):
         self.LOG_WARNING = 2
         self.LOG_ERROR = 3
 
-    def DoLogString(self, message, timeStamp=0, type = 0): #small type hardcoding sin here
+    def DoLogString(self, message, timeStamp=0, type = 0, **kwargs): #small type hardcoding sin here
         textstyle = wx.TextAttr()
         
         if type == self.LOG_DEBUG:
@@ -40,14 +40,17 @@ class Log(wx.PyLog):
             self.tc.AppendText(message + '\n')
 
     def __call__(self, *args, **kwargs):
+        print 'startlog',
         #print '__call__ with args:%s and kwargs:%s' % (str(*args), str(**kwargs))
         thread = kwargs.get('thread', False)
 
         if (thread):
+            #print 'LOG: callafter:', args
             wx.CallAfter(self.DoLogString, *args, **kwargs) 
         else:
+            #print 'LOG: notcallafter:', args
             self.DoLogString(*args, **kwargs)
-
+        print 'endlog'
 
 class APPSTATE:  
 
@@ -80,28 +83,47 @@ class MainWindow(wx.Frame):
 
         #First thing, set up the log.
         self.logArea = wx.CollapsiblePane(_cp, -1, name='LogArea')
-        logAreaPane = self.logArea.GetPane() 
-        logAreaSizer = wx.BoxSizer(wx.VERTICAL) 
-        self.logTextCtrl = wx.TextCtrl(logAreaPane, -1, 
+        self.logAreaPane = self.logArea.GetPane() 
+        self.logAreaSizer = wx.BoxSizer(wx.VERTICAL) 
+        self.logTextCtrl = wx.TextCtrl(self.logAreaPane, -1, 
                                     style = wx.TE_MULTILINE|wx.TE_READONLY|wx.HSCROLL)
         
         
 
-        logAreaSizer.Add(self.logTextCtrl, 1, flag=wx.ALL|wx.EXPAND, border=2)
-        logAreaPane.SetSizer(logAreaSizer)
-        #sizer.Fit(self)
 
-        progress = wx.Gauge(parent = _cp, range=100, size=(400, 20))
+        progress = wx.Gauge(parent = _cp, range=100, size=(500, 20))
         self.progress = progress
         
 
         #modify the log
         if wx.Platform == "__WXMAC__":
             self.logTextCtrl.MacCheckSpelling(False)
+        
         self.log = Log(self.logTextCtrl)
         wx.Log_SetActiveTarget(self.log) 
 
         #self.ListCtrlPanel = ListCtrlPanel(self, self.log)
+
+        #menu bar
+        #We set this up fairly early on in the piece so that the things below
+        #status bars and timers etc, can enable/disable items in it.
+        self.menuBar = wx.MenuBar()
+        fileMenu = wx.Menu()
+        fileMenu.Append(ID_TEST_CONNECTION, "&Test Connection", "Test your connection to the server")
+        fileMenu.Append(ID_CHECK_NOW, "&Check Now", "Check for required uploads now")
+        fileMenu.AppendSeparator()
+        fileMenu.Append(ID_MINIMISE, "&Minimize", "Minimize the app to the system tray")
+        fileMenu.Append(ID_QUIT, "&Quit", "Quits the application completely")
+
+        editMenu = wx.Menu()
+        editMenu.Append(ID_PREFERENCES, "&Preferences", "Application Preferences")
+        editMenu.Append(ID_PYCRUST, "&Pycrust", "Pycrust")
+
+        self.menuBar.Append(fileMenu, "&File")
+        self.menuBar.Append(editMenu, "&Edit")
+
+
+
 
         #status bar
         self.StatusBar = StatusBar(self, self.log)
@@ -123,23 +145,7 @@ class MainWindow(wx.Frame):
         self.syncFreq = 0 #local cache of syncfreq
         
 
-        #menu bar
-        self.menuBar = wx.MenuBar()
-        fileMenu = wx.Menu()
-        fileMenu.Append(ID_TEST_CONNECTION, "&Test Connection", "Test your connection to the server")
-        fileMenu.Append(ID_CHECK_NOW, "&Check Now", "Check for required uploads now")
-        fileMenu.AppendSeparator()
-        fileMenu.Append(ID_MINIMISE, "&Minimize", "Minimize the app to the system tray")
-        fileMenu.Append(ID_QUIT, "&Quit", "Quits the application completely")
-
-        editMenu = wx.Menu()
-        editMenu.Append(ID_PREFERENCES, "&Preferences", "Application Preferences")
-        editMenu.Append(ID_PYCRUST, "&Pycrust", "Pycrust")
-
-        self.menuBar.Append(fileMenu, "&File")
-        self.menuBar.Append(editMenu, "&Edit")
-
-
+        
         #Menu Events
         self.SetMenuBar(self.menuBar)
         self.Bind(wx.EVT_MENU_HIGHLIGHT_ALL, self.OnMenuHighlight)
@@ -151,24 +157,44 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.pycrust, id=ID_PYCRUST )
         
        
+        #Collapsible pane event (the logArea):
+        self.Bind(wx.EVT_COLLAPSIBLEPANE_CHANGED, self.OnPaneChanged, self.logArea)
 
         #now lay everything out.
+        
+        self.logAreaSizer.Add(self.logTextCtrl, 1, flag=wx.ALL|wx.GROW|wx.EXPAND, border=2)
+        self.logAreaPane.SetSizerAndFit(self.logAreaSizer)
+        #sizer.Fit(self)
+        
         contentpanelsizer = wx.BoxSizer(wx.VERTICAL)
         contentpanelsizer.Add(progressLabel, 0, flag=wx.ALL, border=2)
-        contentpanelsizer.Add(progress, 0, wx.ALL | wx.EXPAND | wx.FIXED_MINSIZE, border=2)
+        contentpanelsizer.Add(progress, 0, wx.ALL | wx.GROW|wx.EXPAND | wx.FIXED_MINSIZE, border=2)
         contentpanelsizer.Add(logLabel, 0, wx.ALL, border=2)
-        contentpanelsizer.Add(self.logArea, 1, flag=wx.ALL | wx.EXPAND, border=2)
+        contentpanelsizer.Add(self.logArea, 1, flag=wx.ALL | wx.GROW | wx.EXPAND | wx.FIXED_MINSIZE, border=2)
         #mainpanelsizer.Add(self.StatusBar, 0, flag=wx.ALL, border=2)
 
-        self.contentPanel.SetSizerAndFit(contentpanelsizer)
         #self.SetAutoLayout(True)
-        #self.Layout() 
-        #self.SetSize((640,480))
-
+        self.contentPanel.SetSizerAndFit(contentpanelsizer)
+        self.contentpanelsizer = contentpanelsizer
+        #self.contentpanelsizer.SetSizeHints(self)
+        
+        
+        #self.SetSizer(contentpanelsizer)
+        
+        self.OnPaneChanged() #force a layout fit
 
         
         self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
         self.log('Finished loading application')
+
+    def OnPaneChanged(self, event=None):
+        if event:
+            print 'wx.EVT_COLLAPSIBLEPANE_CHANGED: %s' % event.Collapsed
+
+        # redo the layout
+        self.logAreaSizer.Fit(self)#.contentPanel)
+        self.contentpanelsizer.Fit(self)
+
 
     def resetTimeTillNextSync(self, forceReset = False):
         f = int(self.config.getValue('syncfreq'))
@@ -177,8 +203,15 @@ class MainWindow(wx.Frame):
             self.secondsUntilNextSync = 60 * f
 
     def setState(self, state):
+        '''setState needs to set the statusbar text, and enable/disable the menu item for 'check now' '''
+        #The menu on the system tray icon is created every time it is clicked:
+        #We don't need to do anything here, as long as the state is set.
         self.state = state
         self.StatusBar.SetStatusText(state)
+        if state == APPSTATE.UPLOADING_DATA:
+            self.menuBar.Enable(ID_CHECK_NOW, False)
+        else:
+            self.menuBar.Enable(ID_CHECK_NOW, True)
 
     def OnMenuHighlight(self, event):
         # Show how to get menu item info from this event handler
@@ -201,9 +234,16 @@ class MainWindow(wx.Frame):
 
     def OnMenuQuit(self, evt):
         '''Close (quit) the parent app.'''
+        #This is the only way to quit the app.
         self.log('Quitting...', type=self.log.LOG_DEBUG)
-        #wx.CallAfter(self.Close())
-        self.Close()
+        self.Bind(wx.EVT_TIMER, None)
+        self.timer.Stop()
+        self.StatusBar.Destroy()
+        self.SystrayIcon.Destroy()
+        #self.MenuBar.Destroy() #this causes a seg fault!
+        self.log('Called Exit. Cleaning up...', type=self.log.LOG_DEBUG)
+        self.Destroy()
+
 
     def OnMenuPreferences(self, evt):
         '''open the prefs dialog which BLOCKS'''
@@ -221,18 +261,36 @@ class MainWindow(wx.Frame):
         self.MSDSCheckFn(self, APPSTATE.UPLOADING_DATA, 'notused', self.CheckReturnFn)
 
     def SetProgress(self, prognum, add=False):
+        #may be being called from a thread
+        thread = self.msds.useThreading #see main.py for how msds got set
+        if (thread):
+            wx.CallAfter(self._SetProgress, prognum, add=add)
+        else:
+            self._SetProgress(prognum, add=add)
+
+    def _SetProgress(self, prognum, add = False):
         if (add):
             prognum += self.progress.GetValue()
 
         self.progress.SetValue(prognum)
 
+
     def CheckReturnFn(self, retcode = True, retstring = "", *args):
-        self.setState(APPSTATE.IDLE)
-        self.SetProgress(100)
-        if retcode:
-            self.log('Check function returned', type=self.log.LOG_DEBUG)
+        #we may have come back from a thread here.
+        thread = self.msds.useThreading #see main.py for how msds got set
+        if thread:
+            wx.CallAfter(self.setState, APPSTATE.IDLE)
+            wx.CallAfter(self.SetProgress, 100)
         else:
-            self.log(retstring)
+
+            self.setState(APPSTATE.IDLE)
+            self.SetProgress(100)
+        
+        print 'return function called'
+        if retcode:
+            self.log('Check function returned', type=self.log.LOG_DEBUG, thread = thread)
+        #else:
+        #    self.log(retstring, type=self.log.LOG_DEBUG)
         
 
     def __testMenuFunction(self, event):
@@ -243,11 +301,7 @@ class MainWindow(wx.Frame):
         return self.log
 
     def OnCloseWindow(self, event):
-        self.StatusBar.Destroy()
-        self.SystrayIcon.Destroy()
-        #self.MenuBar.Destroy() #this causes a seg fault!
-        self.log('Called Exit. Cleaning up...', type=self.log.LOG_DEBUG)
-        self.Destroy()
+        self.OnMenuMinimise(event) #closing minimises
 
     def OnTimerTick(self, event):
         if self.secondsUntilNextSync > 0:

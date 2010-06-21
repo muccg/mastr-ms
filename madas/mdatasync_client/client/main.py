@@ -4,6 +4,7 @@ from MSDataSyncAPI import MSDataSyncAPI #, MSDSCheckFn
 import sys
 
 
+
 class MDataSyncApp(wx.PySimpleApp):
     def OnInit(self):
         global MSDSCheckFn
@@ -14,11 +15,24 @@ class MDataSyncApp(wx.PySimpleApp):
         self.win = win
         self.msds = MSDataSyncAPI( win.getLog() )#, False ) #false is no threading  
         
+        self.msds.isMSWINDOWS = False
+        if wx.Platform == "__WXMSW__":
+            sys.stderr = open("errorlogfile.txt","w")  #log to file
+            sys.stdout = open("outlogfile.txt","w")  #log to file
+            win.getLog()("Running on Windows")
+            self.msds.isMSWINDOWS = True
+        elif wx.Platform == "__WXMAC__":
+            win.getLog()("Running on Macintosh")
+        elif wx.Platform == "__WXGTK__":
+            win.getLog()("Running on Linux (GTK)") 
+        
+
         #let the jobs execute in threads
         #disable this for debugging
         self.msds.startThread() 
         
         win.MSDSCheckFn = self.msds.checkRsync
+        win.msds = self.msds
         win.config = self.msds.config #TODO make this weakref
         win.resetTimeTillNextSync()
         #wx.Log_SetActiveTarget( wx.LogWindow(None, 'loggin...') )
