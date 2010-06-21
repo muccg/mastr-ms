@@ -158,19 +158,14 @@ class SampleAdmin(ExtJsonInterface, admin.ModelAdmin):
 
     
     def create_run(self, request, queryset):
-
-        selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
-
         im, created = InstrumentMethod.objects.get_or_create(title="Default Method", creator=request.user)
         r = Run(method=im, creator=request.user, title="New Run")
         r.save() # need id before we can add many-to-many
 
-
         # check that each sample has a sample class
         samples_valid = True
         message = ''
-        for sample_id in selected:
-            s = Sample.objects.get(id=sample_id)
+        for s in queryset:
             if not s.sample_class or s.sample_class.enabled is False:
                 samples_valid = False
                 message = "Run NOT created as sample (%s, %s) does not have sample class or its class is not enabled." % (s.label, s.experiment)
@@ -179,8 +174,7 @@ class SampleAdmin(ExtJsonInterface, admin.ModelAdmin):
         if not samples_valid:
             self.message_user(request, message)
         else:
-            for sample_id in selected:
-                s = Sample.objects.get(id=sample_id)
+            for s in queryset:
                 rs = RunSample(run=r, sample=s)
                 rs.save()
 
