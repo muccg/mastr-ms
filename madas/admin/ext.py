@@ -2,6 +2,7 @@ from django.conf.urls.defaults import patterns, url
 from django.core.exceptions import FieldError
 from django.db import transaction
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed, HttpResponseNotFound, HttpResponseServerError
+from django.utils.encoding import smart_str
 from json import dumps, loads
 
 
@@ -126,7 +127,7 @@ class ExtJsonInterface(object):
         filters = {}
         for field, term in request.GET.iteritems():
             if field not in ("sort", "dir"):
-                filters[field] = term
+                filters[smart_str(field)] = term
 
         if len(filters) > 0:
             try:
