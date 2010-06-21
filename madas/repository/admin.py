@@ -79,10 +79,6 @@ class ExperimentAdmin(ExtJsonInterface, admin.ModelAdmin):
         involvement = UserInvolvementType.objects.get(name="Principal Investigator")
         user_exp, created = UserExperiment.objects.get_or_create(user=request.user, experiment=obj, type=involvement)        
         user_exp.save()
-        if created:
-            print "CREATED userexperiment id: %s" % user_exp.id
-        print "SAVED experiment id: %s" % obj.id
-
 
     def queryset(self, request):
         qs = super(ExperimentAdmin, self).queryset(request)
