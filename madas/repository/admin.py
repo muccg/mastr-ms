@@ -74,6 +74,16 @@ class ExperimentAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ['title', 'description', 'comment', 'status', 'created_on', 'formal_quote', 'job_number', 'project', 'instrument_method', 'samples_link']
     search_fields = ['title', 'job_number']
 
+    def save_model(self, request, obj, form, change):
+        obj.save()
+        involvement = UserInvolvementType.objects.get(name="Principal Investigator")
+        user_exp, created = UserExperiment.objects.get_or_create(user=request.user, experiment=obj, type=involvement)        
+        user_exp.save()
+        if created:
+            print "CREATED userexperiment id: %s" % user_exp.id
+        print "SAVED experiment id: %s" % obj.id
+
+
     def queryset(self, request):
         qs = super(ExperimentAdmin, self).queryset(request)
         if request.user.is_superuser:
