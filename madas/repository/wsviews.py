@@ -1142,25 +1142,6 @@ def select_widget_json(authenticated=False, authorized=False, main_content_funct
     output["success"] = success
     return json.dumps(output)
 
-
-
-
-
-####
-## Views that access the admin to do the work
-####
-##def create_run(request):
-##    if request.method == 'GET':
-##        return HttpResponseNotAllowed(['POST'])
-##    sample_ids = [int(X) for X in request.POST.get('sample_ids', '').split(',')]
-##    qs = Sample.objects.filter(id__in=sample_ids)
-
-##    from madas.repository.admin import SampleAdmin
-##    from django.contrib import admin
-##    sa = SampleAdmin(Sample, admin.site)
-##    return sa.create_run(request,qs)
-
-
 @staff_member_required
 def create_run(request):
 
