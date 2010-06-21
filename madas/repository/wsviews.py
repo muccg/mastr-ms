@@ -1,5 +1,5 @@
 from django.db import transaction
-from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden
+from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden, HttpResponseNotAllowed, HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, InstrumentMethod
@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from django.utils import simplejson as json
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
+from django.core import urlresolvers
 from django.db.models import get_model
 from json_util import makeJsonFriendly
 from madas.utils import setRequestVars, jsonResponse
@@ -1140,3 +1141,49 @@ def select_widget_json(authenticated=False, authorized=False, main_content_funct
                                     }}
     output["success"] = success
     return json.dumps(output)
+
+
+
+
+
+####
+## Views that access the admin to do the work
+####
+##def create_run(request):
+##    if request.method == 'GET':
+##        return HttpResponseNotAllowed(['POST'])
+##    sample_ids = [int(X) for X in request.POST.get('sample_ids', '').split(',')]
+##    qs = Sample.objects.filter(id__in=sample_ids)
+
+##    from madas.repository.admin import SampleAdmin
+##    from django.contrib import admin
+##    sa = SampleAdmin(Sample, admin.site)
+##    return sa.create_run(request,qs)
+
+
+@staff_member_required
+def create_run(request):
+
+    if request.method == 'GET':
+        return HttpResponseNotAllowed(['POST'])
+
+    sample_id_str = request.POST.get('sample_ids', '')
+    if not sample_id_str:
+        return HttpResponseBadRequest("Could not find sample_ids.\n")
+
+
+    sample_ids = [int(X) for X in sample_id_str.split(',')]
+    queryset = Sample.objects.filter(id__in=sample_ids)
+
+    # check that each sample is valid
+    for s in queryset:
+        if not s.is_valid_for_run():
+            return HttpResponseNotFound("Run NOT created as sample (%s, %s) does not have sample class or its class is not enabled.\n" % (s.label, s.experiment))
+
+    im, created = InstrumentMethod.objects.get_or_create(title="Default Method", creator=request.user)
+    r = Run(method=im, creator=request.user, title="New Run")
+    r.save() # need id before we can add many-to-many
+    r.add_samples(queryset)
+    
+    change_url = "%sext/json?id__exact=%s" % (urlresolvers.reverse('admin:repository_run_changelist'), r.id)
+    return HttpResponseRedirect(change_url)

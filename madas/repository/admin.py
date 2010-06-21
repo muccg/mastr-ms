@@ -158,15 +158,12 @@ class SampleAdmin(ExtJsonInterface, admin.ModelAdmin):
 
     
     def create_run(self, request, queryset):
-        im, created = InstrumentMethod.objects.get_or_create(title="Default Method", creator=request.user)
-        r = Run(method=im, creator=request.user, title="New Run")
-        r.save() # need id before we can add many-to-many
 
-        # check that each sample has a sample class
+        # check that each sample is valid
         samples_valid = True
         message = ''
         for s in queryset:
-            if not s.sample_class or s.sample_class.enabled is False:
+            if not s.is_valid_for_run():
                 samples_valid = False
                 message = "Run NOT created as sample (%s, %s) does not have sample class or its class is not enabled." % (s.label, s.experiment)
                 break
@@ -174,10 +171,10 @@ class SampleAdmin(ExtJsonInterface, admin.ModelAdmin):
         if not samples_valid:
             self.message_user(request, message)
         else:
-            for s in queryset:
-                rs = RunSample(run=r, sample=s)
-                rs.save()
-
+            im, created = InstrumentMethod.objects.get_or_create(title="Default Method", creator=request.user)
+            r = Run(method=im, creator=request.user, title="New Run")
+            r.save() # need id before we can add many-to-many
+            r.add_samples(queryset)
             change_url = urlresolvers.reverse('admin:repository_run_change', args=(r.id,))
             return HttpResponseRedirect(change_url)
 
