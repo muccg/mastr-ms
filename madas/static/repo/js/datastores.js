@@ -84,7 +84,9 @@ var organStore = new Ext.data.JsonStore(
                         {
                             storeId: 'organism',
                             autoLoad: false,
-                            url: wsBaseUrl + 'records/organ/experiment__id/0',
+                            url: adminBaseUrl + "repository/organ/ext/json",
+                            remoteSort: true,
+                            restful: true,
                             listeners: {'load':MA.DSLoaded,
                                         'loadexception':MA.DSLoadException
                             },
