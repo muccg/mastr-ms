@@ -42,7 +42,7 @@ MA.ProjectListCmp = {
             columns: [
                 { header: "id", sortable:false, menuDisabled:true, dataIndex:'id', width:50 },
                 { header: "title", sortable:false, menuDisabled:true, dataIndex:'title' },
-                { header: "Client", sortable:false, menuDisabled:true, dataIndex:'client' },
+                { header: "Client", sortable:false, menuDisabled:true, dataIndex:'client__unicode' },
                 { header: "description", sortable:false, menuDisabled:true, width:300, dataIndex:'description' }
             ],
             store: projectsListStore,
