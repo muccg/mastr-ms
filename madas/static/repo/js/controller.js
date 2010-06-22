@@ -24,7 +24,7 @@ MA.CRUDSomething = function(remainderURL, params, callbackfn) {
     var crudStore = new Ext.data.JsonStore( 
                                              {
                                              autoLoad: false,
-                                           method:'GET',
+                                             method:'GET',
                                              url: wsBaseUrl + remainderURL + paramString,
                                              listeners: {
                                                 'load':MA.DSLoaded,
