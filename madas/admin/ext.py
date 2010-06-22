@@ -73,6 +73,23 @@ class ExtJsonInterface(object):
 
         return dumps(obj, indent=4, ensure_ascii=False)
 
+    def set_field(self, instance, field, value):
+        """Set a field on an instance of the ModelAdmin's model while
+        respecting foreign keys. Surely there's an easier way to do this in
+        Django, but I'll be damned if I can figure out how."""
+
+        # Check if it's a foreign key: if so, we have to
+        # instantiate the right object first.
+        model_field = self.model._meta.get_field_by_name(field)[0]
+
+        try:
+            foreign_class = model_field.rel.to
+            actual = foreign_class.objects.get(pk=value)
+        except AttributeError:
+            actual = value
+
+        setattr(instance, field, actual)
+
     def get_urls(self):
         urls = super(ExtJsonInterface, self).get_urls()
         local_urls = patterns("",
@@ -90,17 +107,7 @@ class ExtJsonInterface(object):
 
             try:
                 for field in row:
-                    # Check if it's a foreign key: if so, we have to
-                    # instantiate the right object first.
-                    model_field = self.model._meta.get_field_by_name(field)[0]
-
-                    try:
-                        foreign_class = model_field.rel.to
-                        value = foreign_class.objects.get(pk=row[field])
-                    except AttributeError:
-                        value = row[field]
-
-                    setattr(o, field, value)
+                    self.set_field(o, field, row[field])
             except Exception, e:
                 print e
 
@@ -112,7 +119,7 @@ class ExtJsonInterface(object):
                 return HttpResponseBadRequest(content_type="text/plain; charset=UTF-8", content=dumps(response))
         except ValueError:
             for field in request.POST:
-                setattr(o, field, request.POST[field])
+                self.set_field(o, field, request.POST[field])
         except KeyError:
             response = {
                 "success": False,
@@ -192,7 +199,7 @@ class ExtJsonInterface(object):
             o = qs.get(pk=row[pk])
             for name, value in row.iteritems():
                 if name != pk:
-                    setattr(o, name, value)
+                    self.set_field(o, name, value)
             o.save()
 
             # If we've gotten here, all is well.
