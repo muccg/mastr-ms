@@ -1,5 +1,6 @@
 //var wsBaseUrl = "http://boromir5.localdomain/madasrepo/ntakayama/ws/";
 //var baseUrl = "/madas/ntakayama/repo/";
+var adminBaseUrl = baseUrl + "repoadmin/";
 var wsBaseUrl = baseUrl + "ws/";
 var storesNeededForRendering = [];
 
@@ -184,7 +185,10 @@ var projectsListStore = new Ext.data.JsonStore(
                         {
                             storeId: 'projectList',
                             autoLoad: false,
-                            url: baseUrl + 'repoadmin/repository/project/ext/json/',
+                            url: baseUrl + 'repoadmin/repository/project/ext/json',
+                            remoteSort: true,
+                            restful: true,
+                            writer: new Ext.data.JsonWriter({ encode: false }),
                             listeners: {'load':MA.DSLoaded,
                                         'loadexception':MA.DSLoadException
                                         },
@@ -192,7 +196,6 @@ var projectsListStore = new Ext.data.JsonStore(
                                 field: 'id',
                                 direction: 'DESC'
                             }
-                                    
                         }
                     );
                     
