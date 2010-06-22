@@ -82,12 +82,46 @@ class ExtJsonInterface(object):
         return local_urls + urls
 
     def handle_create(self, request):
-        o = self.queryset(request).create()
+        o = self.model()
         
-        for field in request.POST:
-            setattr(o, field, request.POST[field])
+        # Pull in the JSON data that's been sent, if it is in fact JSON.
+        try:
+            row = loads(request.raw_post_data)["rows"]
 
-        o.save()
+            try:
+                for field in row:
+                    # Check if it's a foreign key: if so, we have to
+                    # instantiate the right object first.
+                    model_field = self.model._meta.get_field_by_name(field)[0]
+
+                    try:
+                        foreign_class = model_field.rel.to
+                        value = foreign_class.objects.get(pk=row[field])
+                    except AttributeError:
+                        value = row[field]
+
+                    setattr(o, field, value)
+            except Exception, e:
+                print e
+
+                response = {
+                    "success": False,
+                    "message": "Unable to parse incoming record.",
+                }
+
+                return HttpResponseBadRequest(content_type="text/plain; charset=UTF-8", content=dumps(response))
+        except ValueError:
+            for field in request.POST:
+                setattr(o, field, request.POST[field])
+        except KeyError:
+            response = {
+                "success": False,
+                "message": "Unable to parse incoming record.",
+            }
+
+            return HttpResponseBadRequest(content_type="text/plain; charset=UTF-8", content=dumps(response))
+
+        o.save(force_insert=True)
 
         response = {
             "success": True,
