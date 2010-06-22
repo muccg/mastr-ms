@@ -15,6 +15,7 @@ urlpatterns = patterns('',
     (r'^nodes', 'madas.mdatasync_server.views.getNodeClients'),
     (r'^syncadmin/(.*)', admin.site.root),
     (r'^logupload/', 'madas.mdatasync_server.views.logUpload'),
+    (r'^keyupload/', 'madas.mdatasync_server.views.keyUpload'),
     (r'^(.*)', 'madas.mdatasync_server.views.retrievePathsForFiles'),
     #(r'^(.*)', 'madas.mdatasync_server.views.defaultpage'),
     # madas
