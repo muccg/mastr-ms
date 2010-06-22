@@ -106,7 +106,6 @@ class ExtJsonInterface(object):
             response = {
                 "success": True,
                 "message": "Record deleted.",
-                "data": [],
             }
 
             return HttpResponse(content_type="text/plain; charset=UTF-8", content=dumps(response))
