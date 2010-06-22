@@ -185,7 +185,7 @@ var projectsListStore = new Ext.data.JsonStore(
                         {
                             storeId: 'projectList',
                             autoLoad: false,
-                            url: adminBaseUrl + 'repoadmin/repository/project/ext/json',
+                            url: adminBaseUrl + 'repository/project/ext/json',
                             remoteSort: true,
                             restful: true,
                             writer: new Ext.data.JsonWriter({ encode: false }),
