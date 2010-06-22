@@ -101,7 +101,9 @@ var timelineStore = new Ext.data.JsonStore(
                         {
                             storeId: 'timeline',
                             autoLoad: false,
-                            url: wsBaseUrl + 'records/sampletimeline/experiment__id/0',
+                            url: adminBaseUrl + "repository/sampletimeline/ext/json",
+                            remoteSort: true,
+                            restful: true,
                             listeners: {'load': function(store, records, options) {
                                         },
                                 'exception': function(proxy, type, action, options, response, arg) {
@@ -119,7 +121,9 @@ var treatmentStore = new Ext.data.JsonStore(
                         {
                             storeId: 'treatment',
                             autoLoad: false,
-                            url: wsBaseUrl + 'records/treatment/experiment__id/0',
+                            url: adminBaseUrl + "repository/treatment/ext/json",
+                            remoteSort: true,
+                            restful: true,
                             listeners: {'load':MA.DSLoaded,
                                         'loadexception':MA.DSLoadException
                             },
@@ -134,7 +138,9 @@ var sopStore = new Ext.data.JsonStore(
                         {
                             storeId: 'sop',
                             autoLoad: false,
-                            url: wsBaseUrl + 'records/standardoperationprocedure/experiments__id/0',
+                            url: adminBaseUrl + "repository/standardoperationprocedure/ext/json",
+                            remoteSort: true,
+                            restful: true,
                             listeners: {'load':MA.DSLoaded,
                                         'loadexception':MA.DSLoadException
                             },
@@ -148,8 +154,10 @@ var sopStore = new Ext.data.JsonStore(
 var sopLookupStore = new Ext.data.JsonStore(
                         {
                             storeId: 'sopLookup',
-                            autoLoad: false,
-                            url: wsBaseUrl + 'records/standardoperationprocedure/id__gte/0',
+                            autoLoad: true,
+                            url: adminBaseUrl + "repository/standardoperationprocedure/ext/json",
+                            remoteSort: true,
+                            restful: true,
                             listeners: {'load':MA.DSLoaded,
                                         'loadexception':MA.DSLoadException
                             }
@@ -160,13 +168,19 @@ var userStore = new Ext.data.JsonStore(
                         {
                             storeId: 'user',
                             autoLoad: false,
-                            url: wsBaseUrl + 'records/userexperiment/experiment__id/0',
+                            url: adminBaseUrl + "repository/userexperiment/ext/json",
+                            remoteSort: true,
+                            restful: true,
                             listeners: {'load':MA.DSLoaded,
                                         'loadexception':MA.DSLoadException
                             }
                         }
                     );
                     
+/* By rights, this should use the ExtJsonInterface, but because
+ * recordsExperiments does some magic to fill in the principal, for now I'm
+ * just going to hack the appropriate row filtering into repository.wsviews and
+ * come back to this at a later stage. */
 var experimentListStore = new Ext.data.JsonStore(
                         {
                             storeId: 'experimentList',

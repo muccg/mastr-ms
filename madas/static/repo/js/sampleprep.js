@@ -1,8 +1,5 @@
 MA.SamplePrepInit = function() {
-    var expId = MA.CurrentExperimentId();
-    
-    sopStore.proxy.conn.url = wsBaseUrl + 'records/standardoperationprocedure/experiments__id/' + expId;
-    sopStore.load();
+    sopStore.load({ params: { experiments__id: MA.CurrentExperimentId() } });
 };
 
 MA.SaveSOPRow = function(changes) {

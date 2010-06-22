@@ -1,11 +1,14 @@
 MA.TreatmentInit = function() {
-    var expId = MA.CurrentExperimentId();
-    
-    timelineStore.proxy.conn.url = wsBaseUrl + 'records/sampletimeline/experiment__id/' + expId;
-    timelineStore.load();
+    MA.TimelineLoad();
+    MA.TreatmentLoad();
+};
 
-    treatmentStore.proxy.conn.url = wsBaseUrl + 'records/treatment/experiment__id/' + expId;
-    treatmentStore.load();
+MA.TimelineLoad = function () {
+    timelineStore.load({ params: { experiment__id__exact: MA.CurrentExperimentId() } });
+};
+
+MA.TreatmentLoad = function () {
+    treatmentStore.load({ params: { experiment__id__exact: MA.CurrentExperimentId() } });
 };
 
 MA.SaveTimelineRow = function(roweditor, changes, rec, i) {
@@ -14,7 +17,7 @@ MA.SaveTimelineRow = function(roweditor, changes, rec, i) {
     bundledData.timeline = rec.data.timeline;
     bundledData.abbreviation = rec.data.abbreviation;
     
-    MA.SaveRowLiterals('sampletimeline', roweditor, bundledData, rec, i, function() { var expId = MA.CurrentExperimentId(); timelineStore.proxy.conn.url = wsBaseUrl + 'records/sampletimeline/experiment__id/' + expId; timelineStore.load();});
+    MA.SaveRowLiterals('sampletimeline', roweditor, bundledData, rec, i, MA.TimelineLoad);
 };
 
 MA.SaveTreatmentRow = function(roweditor, changes, rec, i) {
@@ -25,7 +28,7 @@ MA.SaveTreatmentRow = function(roweditor, changes, rec, i) {
     bundledData.description = rec.data.description;
     bundledData.abbreviation = rec.data.abbreviation;
     
-    MA.SaveRowLiterals('treatment', roweditor, bundledData, rec, i, function() { var expId = MA.CurrentExperimentId(); treatmentStore.proxy.conn.url = wsBaseUrl + 'records/treatment/experiment__id/' + expId; treatmentStore.load();});
+    MA.SaveRowLiterals('treatment', roweditor, bundledData, rec, i, MA.TreatmentLoad);
 };
 
 MA.Treatment = {
@@ -63,41 +66,44 @@ MA.Treatment = {
                                 forceFit: true,
                                 autoFill:true
                             },
-                            tbar: [{
-                                text: 'add time',
-                                cls: 'x-btn-text-icon',
-                                icon:'static/repo/images/add.gif',
-                                handler : function(){
-                                    MA.CRUDSomething('create/sampletimeline/', {'experiment_id':MA.CurrentExperimentId(),'timeline':'00:00'}, function() { var expId = MA.CurrentExperimentId(); timelineStore.proxy.conn.url = wsBaseUrl + 'records/sampletimeline/experiment__id/' + expId;
-                                                          timelineStore.load(); });
+                            tbar: [
+                                {
+                                    text: 'add time',
+                                    cls: 'x-btn-text-icon',
+                                    icon:'static/repo/images/add.gif',
+                                    handler : function(){
+                                        MA.CRUDSomething('create/sampletimeline/', {
+                                            'experiment_id': MA.CurrentExperimentId(),
+                                            'timeline': '00:00'
+                                        }, MA.TimelineLoad);
                                     }
                                 },
                                 {
-                                text: 'remove time',
-                                cls: 'x-btn-text-icon',
-                                icon:'static/repo/images/no.gif',
-                                handler : function(){
-                                   var grid = Ext.getCmp('dates');
-                                   var delIds = []; 
-                                   
-                                   var selections = grid.getSelectionModel().getSelections();
-                                   if (!Ext.isArray(selections)) {
-                                   selections = [selections];
-                                   }
-                                   
-                                   for (var index = 0; index < selections.length; index++) {
-                                   if (!Ext.isObject(selections[index])) {
-                                   continue;
-                                   }
-                                   
-                                   delIds.push(selections[index].data.id);
-                                   }
-                                   //console.log(delIds);
-                                   for (var i = 0; i < delIds.length; i++) {
-                                   MA.CRUDSomething('delete/sampletimeline/'+delIds[i], {}, function() { var expId = MA.CurrentExperimentId(); timelineStore.proxy.conn.url = wsBaseUrl + 'records/sampletimeline/experiment__id/' + expId;
-                                                          timelineStore.load(); });
-                                   }                        }
-                                   }
+                                    text: 'remove time',
+                                    cls: 'x-btn-text-icon',
+                                    icon:'static/repo/images/no.gif',
+                                    handler : function(){
+                                        var grid = Ext.getCmp('dates');
+                                        var delIds = []; 
+                                        
+                                        var selections = grid.getSelectionModel().getSelections();
+                                        if (!Ext.isArray(selections)) {
+                                            selections = [selections];
+                                        }
+                                        
+                                        for (var index = 0; index < selections.length; index++) {
+                                            if (!Ext.isObject(selections[index])) {
+                                                continue;
+                                            }
+                                        
+                                            delIds.push(selections[index].data.id);
+                                        }
+ 
+                                        for (var i = 0; i < delIds.length; i++) {
+                                            MA.CRUDSomething('delete/sampletimeline/'+delIds[i], {}, MA.TimelineLoad);
+                                        }
+                                    }
+                                }
                             ],
                             columns: [
                                       { header: "timeline",  sortable:false, menuDisabled:true, dataIndex:'timeline', editor: new Ext.form.TextField({allowBlank:false}) },
@@ -139,40 +145,43 @@ MA.Treatment = {
                                 forceFit: true,
                                 autoFill:true
                             },
-                            tbar: [{
-                                text: 'add treatment',
-                                cls: 'x-btn-text-icon',
-                                icon:'static/repo/images/add.gif',
-                                handler : function(){
-                                   MA.CRUDSomething('create/treatment/', {'experiment_id':MA.CurrentExperimentId(), 'name':'Unknown'}, function() { var expId = MA.CurrentExperimentId(); treatmentStore.proxy.conn.url = wsBaseUrl + 'records/treatment/experiment__id/' + expId;
-                                                          treatmentStore.load(); });
-                                   }
+                            tbar: [
+                                {
+                                    text: 'add treatment',
+                                    cls: 'x-btn-text-icon',
+                                    icon:'static/repo/images/add.gif',
+                                    handler : function(){
+                                        MA.CRUDSomething('create/treatment/', {
+                                            'experiment_id': MA.CurrentExperimentId(),
+                                            'name': 'Unknown'
+                                        }, MA.TreatmentLoad);
+                                    }
                                 },
                                 {
-                                text: 'remove treatment',
-                                cls: 'x-btn-text-icon',
-                                icon:'static/repo/images/no.gif',
-                                handler : function(){
-                                   var grid = Ext.getCmp('othertreat');
-                                   var delIds = []; 
-                                   
-                                   var selections = grid.getSelectionModel().getSelections();
-                                   if (!Ext.isArray(selections)) {
-                                   selections = [selections];
-                                   }
-                                   
-                                   for (var index = 0; index < selections.length; index++) {
-                                   if (!Ext.isObject(selections[index])) {
-                                   continue;
-                                   }
-                                   
-                                   delIds.push(selections[index].data.id);
-                                   }
-                                   for (var i = 0; i < delIds.length; i++) {
-                                   MA.CRUDSomething('delete/treatment/'+delIds[i], {}, function() { var expId = MA.CurrentExperimentId(); treatmentStore.proxy.conn.url = wsBaseUrl + 'records/treatment/experiment__id/' + expId;
-                                                          treatmentStore.load(); });
-                                   }
-                                }
+                                    text: 'remove treatment',
+                                    cls: 'x-btn-text-icon',
+                                    icon:'static/repo/images/no.gif',
+                                    handler : function(){
+                                        var grid = Ext.getCmp('othertreat');
+                                        var delIds = []; 
+                                       
+                                        var selections = grid.getSelectionModel().getSelections();
+                                        if (!Ext.isArray(selections)) {
+                                            selections = [selections];
+                                        }
+                                       
+                                        for (var index = 0; index < selections.length; index++) {
+                                            if (!Ext.isObject(selections[index])) {
+                                                continue;
+                                            }
+                                       
+                                            delIds.push(selections[index].data.id);
+                                        }
+
+                                        for (var i = 0; i < delIds.length; i++) {
+                                            MA.CRUDSomething('delete/treatment/'+delIds[i], {}, MA.TreatmentLoad);
+                                        }
+                                    }
                                 }
                             ],
                             columns: [
