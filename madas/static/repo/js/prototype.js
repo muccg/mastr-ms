@@ -1488,11 +1488,6 @@ Ajax.Request = Class.create(Ajax.Base, {
     this.method = this.options.method;
     var params = Object.clone(this.options.parameters);
 
-    if (!['get', 'post'].include(this.method)) {
-      params['_method'] = this.method;
-      this.method = 'post';
-    }
-
     this.parameters = params;
 
     if (params = Object.toQueryString(params)) {
@@ -1541,7 +1536,7 @@ Ajax.Request = Class.create(Ajax.Base, {
       'Accept': 'text/javascript, text/html, application/xml, text/xml, */*'
     };
 
-    if (this.method == 'post') {
+    if (this.method == 'post' || this.method == 'put') {
       headers['Content-type'] = this.options.contentType +
         (this.options.encoding ? '; charset=' + this.options.encoding : '');
 
