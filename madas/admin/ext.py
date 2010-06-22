@@ -126,7 +126,7 @@ class ExtJsonInterface(object):
         # Add filters.
         filters = {}
         for field, term in request.GET.iteritems():
-            if field not in ("sort", "dir"):
+            if field not in ("sort", "dir", "_dc"):
                 filters[smart_str(field)] = term
 
         if len(filters) > 0:
