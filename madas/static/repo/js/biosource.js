@@ -8,10 +8,12 @@ MA.BioSourceInit = function() {
                                  onSuccess:     MA.BioLoadSuccess
                                  });
     
-       
-    organStore.proxy.conn.url = wsBaseUrl + 'records/organ/experiment__id/' + expId;
-    organStore.load();
+    MA.BioSourceLoad();
+};
 
+MA.BioSourceLoad = function () {
+    var expId = MA.CurrentExperimentId();
+    organStore.load({ params: { experiment__id__exact: expId } });
 };
 
 MA.BioLoadSuccess = function(response) {
@@ -225,7 +227,7 @@ MA.SaveOrganRow = function(roweditor, changes, rec, i) {
     bundledData.detail = rec.data.detail;
     bundledData.abbreviation = rec.data.abbreviation;
     
-    MA.SaveRowLiterals('organ', roweditor, bundledData, rec, i, function() { var expId = MA.CurrentExperimentId(); organStore.proxy.conn.url = wsBaseUrl + 'records/organ/experiment__id/' + expId; organStore.load();});
+    MA.SaveRowLiterals('organ', roweditor, bundledData, rec, i, MA.BioSourceLoad);
 };
 
 MA.BioSource = {
@@ -440,8 +442,7 @@ MA.BioSource = {
                         cls: 'x-btn-text-icon',
                         icon:'static/repo/images/add.gif',
                         handler : function() {
-                           MA.CRUDSomething('create/organ/', {'experiment_id':MA.CurrentExperimentId(), 'name':'Unknown'}, function() { var expId = MA.CurrentExperimentId(); organStore.proxy.conn.url = wsBaseUrl + 'records/organ/experiment__id/' + expId;
-                                                  organStore.load(); });
+                           MA.CRUDSomething('create/organ/', {'experiment_id':MA.CurrentExperimentId(), 'name':'Unknown'}, MA.BioSourceLoad);
                         }
                         }, 
                         {
@@ -466,8 +467,7 @@ MA.BioSource = {
                             }
 
                            for (var i = 0; i < delIds.length; i++) {
-                           MA.CRUDSomething('delete/organ/'+delIds[i], {}, function() { var expId = MA.CurrentExperimentId(); organStore.proxy.conn.url = wsBaseUrl + 'records/organ/experiment__id/' + expId;
-                                                  organStore.load(); });
+                           MA.CRUDSomething('delete/organ/'+delIds[i], {}, MA.BioSourceLoad);
                             }
                         }
                         }
