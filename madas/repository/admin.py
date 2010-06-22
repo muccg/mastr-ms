@@ -305,18 +305,15 @@ class SampleLogAdmin(ExtJsonInterface, admin.ModelAdmin):
         return form
 
 class RunAdmin(ExtJsonInterface, admin.ModelAdmin):
-##    list_display = ['title', 'method', 'creator', 'created_on', 'output_link']
-    list_display = ['title', 'created_on', 'output_link', 'experiments_link', 'samples_link']
+    list_display = ['title', 'method', 'creator', 'created_on', 'output_link', 'experiments_link', 'samples_link']
     search_fields = ['title', 'method__title', 'creator__username', 'creator__first_name', 'creator__last_name']
     inlines = [RunSampleInline]
 
     def queryset(self, request):
         qs = super(RunAdmin, self).queryset(request)
-        print qs
-        return qs
-##        if request.user.is_superuser:
-##            return qs
-##        return qs.filter(samples__experiment__users=request.user).distinct()
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(samples__experiment__users=request.user).distinct()
 
 
     def output_link(self, obj):
