@@ -14,7 +14,7 @@ from django.db.models import get_model
 from json_util import makeJsonFriendly
 from madas.utils import setRequestVars, jsonResponse
 from madas.repository.permissions import PermissionManager
-
+from madas.repository.permissions import user_passes_test
 permissions = PermissionManager()
 
 
@@ -31,6 +31,7 @@ def needs_permission(permission):
             return view(request, *args, **kwargs)
         return restricted_view
     return decorator 
+
 
 def create_object(request, model):
 
@@ -1144,6 +1145,7 @@ def select_widget_json(authenticated=False, authorized=False, main_content_funct
 
 
 @staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='ma_staff')) or False)
 def add_samples_to_run(request):
     '''Takes a run_id and a list of sample_ids and adds samples to the run after checking permissions etc.'''
 
