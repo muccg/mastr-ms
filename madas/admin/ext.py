@@ -33,24 +33,9 @@ class ExtJsonInterface(object):
 
             return "auto"
 
-        def serialise_record(record):
-            d = {}
-
-            for field in record._meta.fields:
-                d[field.name] = unicode(getattr(record, field.name))
-
-            return d
-
-        serialiser = serialise_record
-        try:
-            if callable(self.model.serialise):
-                serialiser = lambda record: record.serialise()
-        except AttributeError:
-            pass
-
         rows = []
         for record in records:
-            rows.append(serialiser(record))
+            rows.append(self.serialise_record(record))
 
         fields = []
         for field in self.model._meta.fields:
@@ -72,6 +57,24 @@ class ExtJsonInterface(object):
         }
 
         return dumps(obj, indent=4, ensure_ascii=False)
+
+    def serialise_record(self, record):
+        def serialise_record(record):
+            d = {}
+
+            for field in record._meta.fields:
+                d[field.name] = unicode(getattr(record, field.name))
+
+            return d
+
+        serialiser = serialise_record
+        try:
+            if callable(self.model.serialise):
+                serialiser = lambda record: record.serialise()
+        except AttributeError:
+            pass
+
+        return serialiser(record)
 
     def set_field(self, instance, field, value):
         """Set a field on an instance of the ModelAdmin's model while
@@ -132,6 +135,8 @@ class ExtJsonInterface(object):
 
         response = {
             "success": True,
+            "message": "Created new record.",
+            "data": self.serialise_record(o),
         }
 
         return HttpResponse(content_type="text/plain; charset=UTF-8", content=dumps(response))
