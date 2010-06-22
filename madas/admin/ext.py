@@ -44,6 +44,15 @@ class ExtJsonInterface(object):
                 "type": field_to_ext_type(field),
             })
 
+            try:
+                field.rel.to
+                fields.append({
+                    "name": field.name + "__unicode",
+                    "type": "string",
+                })
+            except AttributeError:
+                pass
+
         metadata = {
             "root": "rows",
             "idProperty": self.model._meta.pk.name,
@@ -63,7 +72,14 @@ class ExtJsonInterface(object):
             d = {}
 
             for field in record._meta.fields:
-                d[field.name] = unicode(getattr(record, field.name))
+                # It's helpful to return both the primary key and string
+                # representation of foreign keys.
+                value = getattr(record, field.name)
+                try:
+                    d[field.name] = value.pk
+                    d[field.name + "__unicode"] = unicode(value)
+                except AttributeError:
+                    d[field.name] = unicode(value)
 
             return d
 
