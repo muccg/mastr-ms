@@ -9,9 +9,9 @@ class NodeClient(models.Model):
     site_name = models.CharField(max_length=50)
     station_name = models.CharField(max_length=50)
     default_data_path = models.CharField(max_length=255)
-    #username = models.CharField(max_length=255)
-    #hostname = models.CharField(max_length=255)
-    #flags = models.CharField(max_length=255)
+    username = models.CharField(max_length=255, default="")
+    hostname = models.CharField(max_length=255, default="")
+    flags = models.CharField(max_length=255, default="")
     date_created = models.DateTimeField(auto_now_add=True) #generate 'now' on INSERT
     last_modified = models.DateTimeField(auto_now = True) #generate 'now' on UPDATE
 

@@ -69,7 +69,8 @@ class AutoPreferences(wx.Dialog):
         keybutton.Bind(wx.EVT_BUTTON, self.OnSendKey)
         buttonsbox.Add(keybutton, 1, wx.ALIGN_LEFT | wx.ALL, 2)
 
-        
+        self.logbutton = logbutton
+        self.keybutton = keybutton
         sizer.Add(buttonsbox, 1, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 2)
 
         self.fields = {}
@@ -121,6 +122,9 @@ class AutoPreferences(wx.Dialog):
 
     def OnSendLog(self, evt):
         print 'send logs!'
+        self.logbutton.Disable()
+        origlabel = self.logbutton.GetLabel()
+        self.logbutton.SetLabel('Sending')
         try:
             #Start the multipart encoded post of whatever file our log is saved to:
             posturl = self.config.getValue('synchub') + 'logupload/'
@@ -132,13 +136,39 @@ class AutoPreferences(wx.Dialog):
             jsonret = urllib2.urlopen(request).read()
             retval = simplejson.loads(jsonret)
             print 'OnSendLog: retval is %s' % (retval)
+            self.log('Log send response: %s' % (str(retval)) )
         except Exception, e:
             print 'OnSendLog: Exception occured: %s' % (str(e))
+            self.log('Exception occured sending log: %s' % (str(e)), type=log.LOG_ERROR)
 
+        self.logbutton.Enable()
+        self.logbutton.SetLabel(origlabel)
 
     def OnSendKey(self, evt):
         print 'send keys!'
+        self.keybutton.Disable()
+        origlabel = self.keybutton.GetLabel()
+        self.keybutton.SetLabel('Sending')
 
+        try:
+            #Start the multipart encoded post of whatever file our log is saved to:
+            posturl = self.config.getValue('synchub') + 'keyupload/'
+
+            keyfile = open('id_rsa.pub')
+            datagen, headers = multipart_encode( {'uploaded' : keyfile, 'nodename' : self.config.getNodeName()} )
+            request = urllib2.Request(posturl, datagen, headers)
+            print 'sending log %s to %s' % (keyfile, posturl)
+            jsonret = urllib2.urlopen(request).read()
+            retval = simplejson.loads(jsonret)
+            print 'OnSendKey: retval is %s' % (retval)
+            self.log('Key send response: %s' % (str(retval)) )
+        except Exception, e:
+            print 'OnSendKey: Exception occured: %s' % (str(e))
+            self.log('Exception occured sending key: %s' % (str(e)), type=log.LOG_ERROR)
+
+
+        self.keybutton.Enable()
+        self.keybutton.SetLabel(origlabel)
 
     def save(self, *args):
         #k = self.config.getConfig().keys()

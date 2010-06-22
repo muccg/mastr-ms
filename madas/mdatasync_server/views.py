@@ -180,6 +180,22 @@ def logUpload(request, *args):
 
     return jsonResponse('ok')
 
+def keyUpload(request, *args):
+    fname_prefix = 'UNKNOWN_'
+    if request.POST.has_key('nodename'):
+        fname_prefix = request.POST['nodename'] + '_'
+    
+    if request.FILES.has_key('uploaded'):
+        f = request.FILES['uploaded']
+        print 'Uploaded file name:', f._get_name()
+        _handle_uploaded_file(f, str(os.path.join('publickeys', "%s%s" % (fname_prefix,'id_rsa.pub')) ) )#dont allow them to replace arbitrary files
+    else:
+        print 'No file in the post'
+
+    return jsonResponse('ok')
+
+
+
 def _handle_uploaded_file(f, name):
     '''Handles a file upload to the projects REPO_FILES_ROOT
        Expects a django InMemoryUpload object, and a filename'''
