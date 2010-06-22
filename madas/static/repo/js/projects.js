@@ -20,7 +20,6 @@ MA.ProjectListCmp = {
         icon:'static/repo/images/no.gif',
         handler : function(){
            var grid = Ext.getCmp('projects');
-           var delIds = []; 
            
            var selections = grid.getSelectionModel().getSelections();
 
