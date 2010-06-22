@@ -32,15 +32,15 @@ def needs_permission(permission):
         return restricted_view
     return decorator 
 
-
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
 def create_object(request, model):
+    '''
+    Allow arbitrary insertion of any data object but requiring certain defaults
+    to be defined, particularly for object references in some cases, look up the value
+    '''
 
-    #allow arbitrary insertion of any data object
-    #but requiring certain defaults to defined, particularly for object references
-    #in some cases, look up the value
-    
-    #get args and remove the id from it if it exists
-
+    # get args and remove the id from it if it exists
     if request.GET:
         args = request.GET
     else:
@@ -52,9 +52,6 @@ def create_object(request, model):
        
     for key in args.keys():
         obj.__setattr__(key, args[key])
-
-    if not permissions.has_permission(request.user, 'create', obj):
-        return HttpResponseForbidden()
 
     obj.save()
 
@@ -89,12 +86,15 @@ def create_object(request, model):
     return records(request, model, 'id', obj.id)
 
 
-def create_sample_log(user, sample_id, type, description):
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
+def create_sample_log(request, sample_id, type, description):
     log = SampleLog(type=type,description=description,sample_id=sample_id)
-    if not permissions.has_permission(user, 'create', log):
-        raise NotAuthorizedError()
     log.save()
 
+
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
 @transaction.commit_on_success
 def batch_create_sample_logs(request):
     #get args and remove the id from it if it exists
@@ -108,13 +108,13 @@ def batch_create_sample_logs(request):
     description = args.get('description')
     sampleids = args.get('sample_ids').split(',')
     
-    try:
-        for sampleid in sampleids:
-            create_sample_log(request.user, sampleid, type, description)
-        return records(request, 'samplelog', 'id', 0)
-    except NotAuthorizedError:
-        return HttpResponseForbidden()
+    for sampleid in sampleids:
+        create_sample_log(request, sampleid, type, description)
+    return records(request, 'samplelog', 'id', 0)
 
+
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
 def update_object(request, model, id):
     
     if id == '0':
@@ -134,13 +134,12 @@ def update_object(request, model, id):
     for row in rows:
         for key in args:
             row.__setattr__(key, args[key])
-        if not permissions.has_permission(request.user, 'update', row):
-            return HttpResponseForbidden()
         row.save()
-
     return records(request, model, 'id', id)
     
     
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
 def delete_object(request, model, id):
 
     if request.GET:
@@ -153,14 +152,12 @@ def delete_object(request, model, id):
     model_obj = get_model('repository', model) # try to get app name dynamically at some point
     params = {'id':id}
     rows = model_obj.objects.filter(**params)
-    
-    if rows and not permissions.has_permission(request.user, 'delete', rows[0]):
-        return HttpResponseForbidden()
     rows.delete()
-
     return records(request, model, 'id', id)
     
     
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
 def associate_object(request, model, association, parent_id, id):
 
     if request.GET:
@@ -190,6 +187,8 @@ def associate_object(request, model, association, parent_id, id):
     return records(request, model, 'id', parent_id)
 
 
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
 def dissociate_object(request, model, association, parent_id, id):
 
     if request.GET:
@@ -215,6 +214,8 @@ def dissociate_object(request, model, association, parent_id, id):
     return records(request, model, 'id', parent_id)
     
 
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
 def records(request, model, field, value):
 
     if request.GET:
@@ -222,8 +223,8 @@ def records(request, model, field, value):
     else:
         args = request.POST
 
-
-    authenticated = request.user.is_authenticated()   
+    ### TODO why do we need this, we'll get a 403 from decorator now if not logged in and not in group - ABM
+    authenticated = request.user.is_authenticated()
     if not authenticated == True:
         return jsonResponse(request, [])
     ### End Authorisation Check ###
@@ -242,6 +243,7 @@ def records(request, model, field, value):
               'rows': []
               }
 
+    # TODO as above - do we need this now - ABM
     authenticated = request.user.is_authenticated()
     authorized = True # need to change this
     if not authenticated or not authorized:
@@ -266,12 +268,12 @@ def records(request, model, field, value):
             d[f.name] = f.value_from_object(row)
         output['rows'].append(d)
 
-
     output = makeJsonFriendly(output)
-
     return HttpResponse(json.dumps(output))
 
 
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
 def populate_select(request, model=None, key=None, value=None, field=None, match=None):
 
     if request.GET:
@@ -302,6 +304,7 @@ def populate_select(request, model=None, key=None, value=None, field=None, match
                        }
 
 
+    # TODO do we need this with the decorators in place? ABM
     authenticated = request.user.is_authenticated()
     authorized = True # need to change this
     main_content_function = "" # may need to change this
@@ -356,6 +359,8 @@ def populate_select(request, model=None, key=None, value=None, field=None, match
         return HttpResponseNotFound(output)
 
 
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
 def update_single_source(request, exp_id):
 
     args = request.GET.copy()
@@ -529,6 +534,8 @@ def update_single_source(request, exp_id):
     return HttpResponse(json.dumps(output))
     
 
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
 def recreate_sample_classes(request, experiment_id):
 
     if request.GET:
@@ -622,6 +629,8 @@ def recreate_sample_classes(request, experiment_id):
     return recordsSampleClasses(request, experiment_id)
 
 
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
 def recordsSampleClasses(request, experiment_id):
 
     if request.GET:
@@ -644,6 +653,7 @@ def recordsSampleClasses(request, experiment_id):
               'rows': []
               }
 
+    # TODO do we need this with decorator in place ABM
     authenticated = request.user.is_authenticated()
     authorized = True # need to change this
     if not authenticated or not authorized:
@@ -679,13 +689,17 @@ def recordsSampleClasses(request, experiment_id):
 
 
     output = makeJsonFriendly(output)
-
     return HttpResponse(json.dumps(output))
     
 
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
 def recordsExperiments(request):
    return recordsExperimentsForProject(request, None)
-    
+
+
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
 def recordsExperimentsForProject(request, project_id):
 
     if request.GET:
@@ -693,7 +707,6 @@ def recordsExperimentsForProject(request, project_id):
     else:
         args = request.POST
        
-
     # basic json that we will fill in
     output = {'metaData': { 'totalProperty': 'results',
                             'successProperty': 'success',
@@ -743,10 +756,11 @@ def recordsExperimentsForProject(request, project_id):
 
 
     output = makeJsonFriendly(output)
-
     return HttpResponse(json.dumps(output))
     
-    
+
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
 def recordsClients(request, *args):
 
     if request.GET:
@@ -769,6 +783,7 @@ def recordsClients(request, *args):
               'rows': []
               }
 
+    # TODO do we need this with decorator? ABM
     authenticated = request.user.is_authenticated()
     authorized = True # need to change this
     if not authenticated or not authorized:
@@ -793,8 +808,10 @@ def recordsClients(request, *args):
     output = makeJsonFriendly(output)
 
     return HttpResponse(json.dumps(output))
-    
-    
+
+
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)    
 def recordsSamples(request, experiment_id):
 
     if request.GET:
@@ -816,7 +833,7 @@ def recordsSamples(request, experiment_id):
               'success': True,
               'rows': []
               }
-
+    # TODO do we need this ABM
     authenticated = request.user.is_authenticated()
     authorized = True # need to change this
     if not authenticated or not authorized:
@@ -846,10 +863,11 @@ def recordsSamples(request, experiment_id):
 
 
     output = makeJsonFriendly(output)
-
     return HttpResponse(json.dumps(output))
     
     
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
 def recordsSamplesForClient(request, client):
 
     if request.GET:
@@ -872,6 +890,7 @@ def recordsSamplesForClient(request, client):
               'rows': []
               }
 
+    # TODO do we need this? ABM
     authenticated = request.user.is_authenticated()
     authorized = True # need to change this
     if not authenticated or not authorized:
@@ -907,6 +926,8 @@ def recordsSamplesForClient(request, client):
     return HttpResponse(json.dumps(output))
         
 
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
 def moveFile(request):
     
     output = {'success':'', 'newlocation':''}
@@ -944,6 +965,8 @@ def moveFile(request):
     return HttpResponse(json.dumps(output))
 
     
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
 def experimentFilesList(request):
     
     if request.GET:
@@ -968,7 +991,9 @@ def experimentFilesList(request):
     
     return _fileList(request, exppath, path)
     
-    
+
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
 def pendingFilesList(request):
     
     if request.GET:
@@ -988,6 +1013,8 @@ def pendingFilesList(request):
     return _fileList(request, basepath, path)
     
     
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
 def _fileList(request, basepath, path):
 
     import os
@@ -1025,6 +1052,8 @@ def _fileList(request, basepath, path):
     return HttpResponse(json.dumps(output))
     
     
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
 def downloadFile(request, *args):
     print 'downloadFile:', str('')
     
@@ -1049,6 +1078,8 @@ def downloadFile(request, *args):
     return response 
 
     
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
 def uploadFile(request):
 
     if request.GET:
@@ -1097,7 +1128,9 @@ def _handle_uploaded_file(f, name):
     print '*** _handle_uploaded_file: exit ***'
     return retval
     
-    
+
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
 def sample_class_enable(request, id):
     
     if request.GET:
@@ -1116,7 +1149,9 @@ def sample_class_enable(request, id):
         
     return recordsSampleClasses(request, sc.biological_source.experiment.id)
 
-@login_required()
+
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
 def generate_worklist(request,run_id):
     
     run = Run.objects.get(id=run_id)
@@ -1145,7 +1180,7 @@ def select_widget_json(authenticated=False, authorized=False, main_content_funct
 
 
 @staff_member_required
-@user_passes_test(lambda u: (u and u.groups.filter(name='ma_staff')) or False)
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
 def add_samples_to_run(request):
     '''Takes a run_id and a list of sample_ids and adds samples to the run after checking permissions etc.'''
 
