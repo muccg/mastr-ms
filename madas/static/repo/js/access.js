@@ -1,8 +1,5 @@
 MA.AccessInit = function() {
-    var expId = MA.CurrentExperimentId();
-    
-    userStore.proxy.conn.url = wsBaseUrl + 'records/userexperiment/experiment__id/' + expId;
-    userStore.load();
+    userStore.load({ params: { experiment__id__exact: MA.CurrentExperimentId() } });
 };
 
 MA.SaveAccessRow = function(roweditor, changes, rec, i) {
@@ -13,7 +10,7 @@ MA.SaveAccessRow = function(roweditor, changes, rec, i) {
     bundledData.type_id = rec.data.type;
     bundledData.additional_info = rec.data.additional_info;
     
-    MA.SaveRowLiterals('userexperiment', roweditor, bundledData, rec, i, function() { var expId = MA.CurrentExperimentId(); userStore.proxy.conn.url = wsBaseUrl + 'records/userexperiment/experiment__id/' + expId; userStore.load();});
+    MA.SaveRowLiterals('userexperiment', roweditor, bundledData, rec, i, MA.AccessInit);
 };
 
 MA.Access = {
@@ -38,46 +35,44 @@ MA.Access = {
                     trackMouseOver: false,
                     plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':MA.SaveAccessRow}})],
                     sm: new Ext.grid.RowSelectionModel(),
-                    tbar: [{
-                        text: 'add user',
-                        cls: 'x-btn-text-icon',
-                        icon:'static/repo/images/add.gif',
-                        handler : function(){
-                                userStore.add(new Ext.data.Record({'user':'', 'type':'1', 'additional_info':''}));
+                    tbar: [
+                        {
+                            text: 'add user',
+                            cls: 'x-btn-text-icon',
+                            icon: 'static/repo/images/add.gif',
+                            handler: function(){
+                                    userStore.add(new Ext.data.Record({'user':'', 'type':'1', 'additional_info':''}));
                             }
                         },
                         {
-                        text: 'remove user',
-                        cls: 'x-btn-text-icon',
-                        icon:'static/repo/images/no.gif',
-                        handler : function(){
-                           var grid = Ext.getCmp('involvedUsersGrid');
-                           var delIds = []; 
-                           
-                           var selections = grid.getSelectionModel().getSelections();
-                           if (!Ext.isArray(selections)) {
-                           selections = [selections];
-                           }
-                           
-                           for (var index = 0; index < selections.length; index++) {
-                           if (!Ext.isObject(selections[index])) {
-                           continue;
-                           }
-                           
-                           delIds.push(selections[index].data.id);
-                           }
-                           
-                           //'unnecessary' reload to remove rows without id's
-                           var expId = MA.CurrentExperimentId(); 
-                           userStore.proxy.conn.url = wsBaseUrl + 'records/userexperiment/experiment__id/' + expId;
-                           userStore.load();
-                           
-                           for (var i = 0; i < delIds.length; i++) {
-                           if (Ext.isDefined(delIds[i])) {
-                           MA.CRUDSomething('delete/userexperiment/'+delIds[i], {}, function() { var expId = MA.CurrentExperimentId(); userStore.proxy.conn.url = wsBaseUrl + 'records/userexperiment/experiment__id/' + expId;
-                                                  userStore.load(); });
-                           }
-                           }
+                            text: 'remove user',
+                            cls: 'x-btn-text-icon',
+                            icon: 'static/repo/images/no.gif',
+                            handler: function(){
+                                var grid = Ext.getCmp('involvedUsersGrid');
+                                var delIds = []; 
+                               
+                                var selections = grid.getSelectionModel().getSelections();
+                                if (!Ext.isArray(selections)) {
+                                    selections = [selections];
+                                }
+                               
+                                for (var index = 0; index < selections.length; index++) {
+                                    if (!Ext.isObject(selections[index])) {
+                                        continue;
+                                    }
+                                   
+                                    delIds.push(selections[index].data.id);
+                                }
+                               
+                                //'unnecessary' reload to remove rows without id's
+                                MA.AccessInit();
+                               
+                                for (var i = 0; i < delIds.length; i++) {
+                                    if (Ext.isDefined(delIds[i])) {
+                                        MA.CRUDSomething('delete/userexperiment/'+delIds[i], {}, MA.AccessInit);
+                                    }
+                                }
                             }
                         }
                     ],

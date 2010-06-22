@@ -711,7 +711,13 @@ def recordsExperimentsForProject(request, project_id):
         return HttpResponse(json.dumps(output), status=401)
 
 
-    rows = Experiment.objects.all() 
+    # Recreate the queryset filtering ExperimentAdmin does, since it's easier
+    # than writing a custom serialiser for the Experiment model to fill in the
+    # principal and client.
+    if request.user.is_superuser:
+        rows = Experiment.objects.all()
+    else:
+        rows = Experiment.objects.filter(users__id=request.user.id)
     
     if project_id is not None:
         rows = rows.filter(project__id=project_id)
@@ -746,13 +752,6 @@ def recordsExperimentsForProject(request, project_id):
 @staff_member_required
 @user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
 def recordsClients(request, *args):
-
-    if request.GET:
-        args = request.GET
-    else:
-        args = request.POST
-       
-
     # basic json that we will fill in
     output = {'metaData': { 'totalProperty': 'results',
                             'successProperty': 'success',
@@ -773,21 +772,17 @@ def recordsClients(request, *args):
     if not authenticated or not authorized:
         return HttpResponse(json.dumps(output), status=401)
 
-
-    rows = Project.objects.all() 
+    rows = User.objects.extra(where=["id IN (SELECT DISTINCT client_id FROM repository_project ORDER BY client_id)"])
 
     # add row count
     output['results'] = len(rows);
 
-    b = {}
-
     # add rows
     for row in rows:
-        d = {}
-        d['id'] = row.client.id
-        d['client'] = row.client.username
-        
-        output['rows'].append(d)        
+        output["rows"].append({
+            "id": row.id,
+            "client": row.username,
+        })
 
     output = makeJsonFriendly(output)
 
