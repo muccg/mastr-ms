@@ -160,7 +160,7 @@ MA.ChangeMainContent = function(contentName, paramArray){
             break;
             
         case 'projects:list':
-            projectsListStore.reload();
+            projectsListStore.load();
             Ext.getCmp('center-panel').layout.setActiveItem('projects-list');
             break;
             

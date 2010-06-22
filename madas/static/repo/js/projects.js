@@ -23,21 +23,8 @@ MA.ProjectListCmp = {
            var delIds = []; 
            
            var selections = grid.getSelectionModel().getSelections();
-           if (!Ext.isArray(selections)) {
-           selections = [selections];
-           }
-           
-           for (var index = 0; index < selections.length; index++) {
-           if (!Ext.isObject(selections[index])) {
-           continue;
-           }
-           
-           delIds.push(selections[index].data.id);
-           }
-           //console.log(delIds);
-           for (var i = 0; i < delIds.length; i++) {
-               MA.CRUDSomething('delete/project/'+delIds[i], {}, function() { projectsListStore.load(); });
-           }                        
+
+           projectsListStore.remove(selections);
            }
            
         }

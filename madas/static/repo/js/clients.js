@@ -23,8 +23,7 @@ MA.ClientsListCmp = {
                   var rec = sm.getSelected();
 //                  MA.LoadClientSamples(rec.data.client);
 
-                  projectsListStore.proxy.conn.url = wsBaseUrl + 'records/project/client/' + rec.data.id;
-                  projectsListStore.load();
+                  projectsListStore.load({ params: { client__id__exact: rec.data.id } });
 
                   Ext.getCmp('center-panel').layout.setActiveItem('projects-list');
               }
