@@ -242,11 +242,27 @@ class StandardOperationProcedureAdmin(ExtJsonInterface, admin.ModelAdmin):
 class OrganismTypeAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ('id', 'name')
     
+
 class UserExperimentAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ('user', 'experiment', 'type')   
 
+    def queryset(self, request):
+        qs = super(UserExperimentAdmin, self).queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(experiment__users=request.user)
+
+    def get_form(self, request, obj=None):
+        form = super(UserExperimentAdmin, self).get_form(request, obj)
+        if request.user.is_superuser:
+            return form
+        form.base_fields['experiment'].queryset = Experiment.objects.filter(users=request.user)
+        return form
+    
+
 class UserInvolvementTypeAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ('id', 'name')   
+
 
 class PlantInfoAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ('id', 'development_stage')
@@ -314,7 +330,6 @@ class RunAdmin(ExtJsonInterface, admin.ModelAdmin):
         if request.user.is_superuser:
             return qs
         return qs.filter(samples__experiment__users=request.user).distinct()
-
 
     def output_link(self, obj):
         output_url = urlresolvers.reverse('generate_worklist', kwargs={'run_id': obj.id})
