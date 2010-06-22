@@ -25,5 +25,5 @@ urlpatterns = patterns('madas.repository.wsviews',
     (r'^downloadFile[/]*$', 'downloadFile', {'SSL':True}),
     (r'^updateSingleSource/(?P<exp_id>\w+)[/]*$', 'update_single_source', {'SSL':True}),
     url(r'^generate_worklist/(?P<run_id>\w+)[/]*$', 'generate_worklist', {'SSL':True}, name='generate_worklist'),
-    url(r'^create_run[/]*$', 'create_run', {'SSL':True}, name='create_run')
+    url(r'^add_samples_to_run[/]*$', 'add_samples_to_run', {'SSL':True}, name='add_samples_to_run')
 )

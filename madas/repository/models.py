@@ -341,9 +341,7 @@ class Run(models.Model):
         assert self.id, 'Run must have an id before samples can be added'
         for s in queryset:
             if s.is_valid_for_run():
-                rs = RunSample(run=self, sample=s)
-                rs.save()
-
+                rs, created = RunSample.objects.get_or_create(run=self, sample=s)
 
 class SampleLog(models.Model):
     LOG_TYPES = (
