@@ -13,24 +13,8 @@ from django.core import urlresolvers
 from django.db.models import get_model
 from json_util import makeJsonFriendly
 from madas.utils import setRequestVars, jsonResponse
-from madas.repository.permissions import PermissionManager
 from madas.repository.permissions import user_passes_test
-permissions = PermissionManager()
 
-
-# this should be a decorator, but it doesn't work with how the views are 
-# currently working.
-# left here for reference only. Example usage would be:
-#  @needs_permission('create')
-
-def needs_permission(permission):
-    def decorator(view):
-        def restricted_view(request, *args, **kwargs):
-            if not permissions.has_permission(request.user, permission):
-                return HttpResponseForbidden()
-            return view(request, *args, **kwargs)
-        return restricted_view
-    return decorator 
 
 @staff_member_required
 @user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
