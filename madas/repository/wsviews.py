@@ -1142,29 +1142,46 @@ def select_widget_json(authenticated=False, authorized=False, main_content_funct
     output["success"] = success
     return json.dumps(output)
 
+
 @staff_member_required
-def create_run(request):
+def add_samples_to_run(request):
+    '''Takes a run_id and a list of sample_ids and adds samples to the run after checking permissions etc.'''
 
     if request.method == 'GET':
         return HttpResponseNotAllowed(['POST'])
 
-    sample_id_str = request.POST.get('sample_ids', '')
-    if not sample_id_str:
-        return HttpResponseBadRequest("Could not find sample_ids.\n")
+    run_id = request.POST.get('run_id', None)
+    if not run_id:
+        return HttpResponseBadRequest("No run_id provided.\n")
 
+    try:
+        run = Run.objects.get(id=run_id)
+    except ObjectDoesNotExist:
+        return HttpResponseNotFound("Run with id %s not found.\n" % run_id)
+
+    sample_id_str = request.POST.get('sample_ids', None)
+    if not sample_id_str:
+        return HttpResponseBadRequest("No sample_ids provided.\n")
 
     sample_ids = [int(X) for X in sample_id_str.split(',')]
     queryset = Sample.objects.filter(id__in=sample_ids)
+
+    if len(queryset) != len(sample_ids):
+        return HttpResponseNotFound("At least one of the samples can not be found.\n")
+
+    # check that each sample is permitted
+    samples = Sample.objects.filter(experiment__users=request.user)
+    allowed_set = set(list(samples))
+    qs_set = set(list(queryset))
+    if not qs_set.issubset(allowed_set):
+        return HttpResponseForbidden('Some samples do not belong to this user.\n')
 
     # check that each sample is valid
     for s in queryset:
         if not s.is_valid_for_run():
             return HttpResponseNotFound("Run NOT created as sample (%s, %s) does not have sample class or its class is not enabled.\n" % (s.label, s.experiment))
 
-    im, created = InstrumentMethod.objects.get_or_create(title="Default Method", creator=request.user)
-    r = Run(method=im, creator=request.user, title="New Run")
-    r.save() # need id before we can add many-to-many
-    r.add_samples(queryset)
-    
-    change_url = "%sext/json?id__exact=%s" % (urlresolvers.reverse('admin:repository_run_changelist'), r.id)
-    return HttpResponseRedirect(change_url)
+    # by the time you we get here we should have a valid run and valid samples
+    run.add_samples(queryset)
+
+    return HttpResponse()
