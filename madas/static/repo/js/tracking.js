@@ -21,24 +21,20 @@ MA.SampleTrackingInit = function() {
                                      }
                                      );
     
-    sampleStore.proxy.conn.url = wsBaseUrl + 'recordsSamples/experiment__id/' + expId;
-    sampleStore.load();
-
-    sampleLogStore.proxy.conn.url = wsBaseUrl + 'records/samplelog/sample__experiment__id/'+expId;
-    sampleLogStore.load();
+    MA.SampleLoadByExperiment();
+    MA.SampleLogLoad();
     
 //    Ext.getCmp('sampleTracking').tbar.setWidth(800);
 //    Ext.getCmp('sampleTracking').topToolbar.setSize(800);
 };
 
+MA.SampleLogLoad = function () {
+    sampleLogStore.load({ params: { sample__experiment__id__exact: MA.CurrentExperimentId() } });
+};
+
 MA.SampleLogSuccess = function() {
-    //something
-    var expId = MA.CurrentExperimentId();
-    
-    sampleStore.proxy.conn.url = wsBaseUrl + 'recordsSamples/experiment__id/' + expId;
-    sampleStore.load();
-    
-    sampleLogStore.load();
+    MA.SampleLoadByExperiment();
+    MA.SampleLogLoad();
 };
 
 MA.SampleTracking = {
