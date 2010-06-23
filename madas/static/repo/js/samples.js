@@ -7,6 +7,14 @@ MA.ExperimentSamplesInit = function() {
     sampleStore.removeAll();
 };
 
+MA.SampleLoadByExperiment = function () {
+    sampleStore.load({ params: { experiment__id__exact: MA.CurrentExperimentId() } });
+};
+
+MA.SampleLoadBySampleClass = function () {
+    sampleStore.load({ params: { sample_class__id__exact: MA.CurrentSampleClassId() } });
+};
+
 MA.SaveSampleRow = function(roweditor, changes, rec, i) {
     var bundledData = {};
     
@@ -18,7 +26,7 @@ MA.SaveSampleRow = function(roweditor, changes, rec, i) {
     bundledData.comment = rec.data.comment;
     bundledData.weight = rec.data.weight;
     
-    MA.SaveRowLiterals('sample', roweditor, bundledData, rec, i, function() { var scId = MA.CurrentSampleClassId(); sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/sample_class__id/' + scId; sampleStore.load();});
+    MA.SaveRowLiterals('sample', roweditor, bundledData, rec, i, MA.SampleLoadBySampleClass);
 };
 
 MA.SaveSampleClassRow = function(roweditor, changes, rec, i) {
@@ -55,8 +63,7 @@ MA.ExperimentSamples = {
                     plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':MA.SaveSampleClassRow}})],
                     sm: new Ext.grid.RowSelectionModel({
                                                        listeners:{'rowselect':function(sm, idx, rec) {
-                                                       sampleStore.proxy.conn.url = wsBaseUrl + "records/sample/sample_class__id/" + rec.data.id;
-                                                       sampleStore.load();
+                                                       MA.SampleLoadBySampleClass();
                                                        
                                                        MA.CurrentSampleClassIdValue = rec.data.id;
                                                        
@@ -177,44 +184,53 @@ MA.ExperimentSamples = {
             collapsible: false,
             bodyStyle: 'padding:0px;',
             layout:'fit',
-            tbar: [{
-                text: 'add sample',
-                cls: 'x-btn-text-icon',
-                   disabled:true,
-                   id:'addsamplebutton',
-                icon:'static/repo/images/add.gif',
-                handler : function(){
-                   MA.CRUDSomething('create/sample/', {'sample_class_id':MA.CurrentSampleClassId(), 'experiment_id':MA.CurrentExperimentId()}, function() { var scId = MA.CurrentSampleClassId(); sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/sample_class__id/' + scId;
-                                          sampleStore.load(); MA.ExperimentSamplesInit(); });
-                   }
+            tbar: [
+                {
+                    text: 'add sample',
+                    cls: 'x-btn-text-icon',
+                    disabled: true,
+                    id: 'addsamplebutton',
+                    icon: 'static/repo/images/add.gif',
+                    handler: function () {
+                        MA.CRUDSomething('create/sample/', {
+                            'sample_class_id': MA.CurrentSampleClassId(),
+                            'experiment_id': MA.CurrentExperimentId()
+                        }, function () {
+                            MA.SampleLoadBySampleClass();
+                            MA.ExperimentSamplesInit();
+                        });
+                    }
                 },
                 {
-                text: 'remove sample',
-                cls: 'x-btn-text-icon',
-                   disabled:true,
-                   id:'removesamplebutton',
-                icon:'static/repo/images/no.gif',
-                handler : function(){
-                   var grid = Ext.getCmp('samples');
-                   var delIds = []; 
-                   
-                   var selections = grid.getSelectionModel().getSelections();
-                   if (!Ext.isArray(selections)) {
-                   selections = [selections];
-                   }
-                   
-                   for (var index = 0; index < selections.length; index++) {
-                   if (!Ext.isObject(selections[index])) {
-                   continue;
-                   }
-                   
-                   delIds.push(selections[index].data.id);
-                   }
+                    text: 'remove sample',
+                    cls: 'x-btn-text-icon',
+                    disabled: true,
+                    id: 'removesamplebutton',
+                    icon: 'static/repo/images/no.gif',
+                    handler: function () {
+                        var grid = Ext.getCmp('samples');
+                        var delIds = []; 
+                       
+                        var selections = grid.getSelectionModel().getSelections();
+                        if (!Ext.isArray(selections)) {
+                            selections = [selections];
+                        }
+                       
+                        for (var index = 0; index < selections.length; index++) {
+                            if (!Ext.isObject(selections[index])) {
+                                continue;
+                            }
+                       
+                            delIds.push(selections[index].data.id);
+                        }
 
-                   for (var i = 0; i < delIds.length; i++) {
-                   MA.CRUDSomething('delete/sample/'+delIds[i], {}, function() { var scId = MA.CurrentSampleClassId(); sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/sample_class__id/' + scId;
-                                          sampleStore.load(); MA.ExperimentSamplesInit();  });
-                   }                        }
+                        for (var i = 0; i < delIds.length; i++) {
+                            MA.CRUDSomething("delete/sample/" + delIds[i], {}, function () {
+                                MA.SampleLoadBySampleClass();
+                                MA.ExperimentSamplesInit();
+                            });
+                        }
+                    }
                 }
             ],
             items: [
@@ -264,8 +280,7 @@ MA.ExperimentSamplesOnlyInit = function() {
                                      }
                                      );
     
-    sampleStore.proxy.conn.url = wsBaseUrl + 'recordsSamples/experiment__id/' + expId;
-    sampleStore.load();
+    MA.SampleLoadByExperiment();
 };
 
 MA.SaveSampleOnlyRow = function(roweditor, changes, rec, i) {
@@ -279,8 +294,7 @@ MA.SaveSampleOnlyRow = function(roweditor, changes, rec, i) {
     bundledData.weight = rec.data.weight;
     bundledData.sample_class_id = rec.data.sample_class;
     
-    MA.SaveRowLiterals('sample', roweditor, bundledData, rec, i, function() { var eId = MA.CurrentExperimentId(); sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/experiment__id/' + eId;
-                             sampleStore.load();});
+    MA.SaveRowLiterals('sample', roweditor, bundledData, rec, i, MA.SampleLoadByExperiment);
 };
 
 MA.ExperimentSamplesOnly = {
@@ -290,43 +304,43 @@ MA.ExperimentSamplesOnly = {
     collapsible: false,
     bodyStyle: 'padding:0px;',
     layout:'fit',
-    tbar: [{
-           text: 'add sample',
-           cls: 'x-btn-text-icon',
-           id:'addsamplesbutton',
-           icon:'static/repo/images/add.gif',
-           handler : function(){
-           MA.CRUDSomething('create/sample/', {'experiment_id':MA.CurrentExperimentId()}, function() { var eId = MA.CurrentExperimentId(); sampleStore.proxy.conn.url = wsBaseUrl + 'records/sample/experiment__id/' + eId;
-                                  sampleStore.load(); });
-           }
-           },
-           {
-           text: 'remove sample',
-           cls: 'x-btn-text-icon',
-           id:'removesamplesbutton',
-           icon:'static/repo/images/no.gif',
-           handler : function(){
-           var grid = Ext.getCmp('samplesOnly');
-           var delIds = []; 
-           
-           var selections = grid.getSelectionModel().getSelections();
-           if (!Ext.isArray(selections)) {
-           selections = [selections];
-           }
-           
-           for (var index = 0; index < selections.length; index++) {
-           if (!Ext.isObject(selections[index])) {
-           continue;
-           }
-           
-           delIds.push(selections[index].data.id);
-           }
-           
-           for (var i = 0; i < delIds.length; i++) {
-           MA.CRUDSomething('delete/sample/'+delIds[i], {}, function() { var eId = MA.CurrentExperimentId(); sampleStore.proxy.conn.url = wsBaseUrl + 'recordsSamples/experiment__id/' + eId;
-                                  sampleStore.load(); });
-           }                        }
-           }
+    tbar: [
+        {
+            text: 'add sample',
+            cls: 'x-btn-text-icon',
+            id: 'addsamplesbutton',
+            icon: 'static/repo/images/add.gif',
+            handler: function () {
+                MA.CRUDSomething('create/sample/', {'experiment_id':MA.CurrentExperimentId()}, MA.SampleLoadByExperiment);
+            }
+        },
+        {
+            text: 'remove sample',
+            cls: 'x-btn-text-icon',
+            id: 'removesamplesbutton',
+            icon: 'static/repo/images/no.gif',
+            handler: function () {
+                var grid = Ext.getCmp('samplesOnly');
+                var delIds = []; 
+
+                var selections = grid.getSelectionModel().getSelections();
+                if (!Ext.isArray(selections)) {
+                    selections = [selections];
+                }
+
+                for (var index = 0; index < selections.length; index++) {
+                    if (!Ext.isObject(selections[index])) {
+                        continue;
+                    }
+
+                    delIds.push(selections[index].data.id);
+                }
+
+                for (var i = 0; i < delIds.length; i++) {
+                    MA.CRUDSomething("delete/sample/" + delIds[i], {}, MA.SampleLoadByExperiment);
+                }
+            }
+        }
 //           },
 //           {
 //               text: 'view sample log',

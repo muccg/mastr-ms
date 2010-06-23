@@ -255,7 +255,9 @@ var sampleStore = new Ext.data.JsonStore(
                                               {
                                               storeId: 'samples',
                                               autoLoad: false,
-                                              url: wsBaseUrl + 'records/sample/sample_class__id/0',
+                                              url: adminBaseUrl + 'repository/sample/ext/json',
+                                              remoteSort: true,
+                                              restful: true,
                                               listeners: {'load':MA.DSLoaded,
                                               'loadexception':MA.DSLoadException},
                                               sortInfo: {
@@ -269,7 +271,9 @@ var sampleLogStore = new Ext.data.JsonStore(
                                               {
                                               storeId: 'samplelogs',
                                               autoLoad: false,
-                                              url: wsBaseUrl + 'records/samplelog/id__gte/0',
+                                              url: adminBaseUrl + 'repository/samplelog/ext/json',
+                                              remoteSort: true,
+                                              restful: true,
                                               listeners: {'load':MA.DSLoaded,
                                               'loadexception':MA.DSLoadException},
                                               sortInfo: {
