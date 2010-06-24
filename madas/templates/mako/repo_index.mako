@@ -39,6 +39,7 @@
     <script src="static/repo/js/projects.js" type="text/javascript"></script>
     <script src="static/repo/js/clients.js" type="text/javascript"></script>
     <script src="static/repo/js/files.js" type="text/javascript"></script>
+    <script src="static/repo/js/runs.js" type="text/javascript"></script>
     
     <script src="static/repo/js/controller.js" type="text/javascript"></script>
     <script src="static/repo/js/menu.js" type="text/javascript"></script>
