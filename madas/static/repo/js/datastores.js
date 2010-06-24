@@ -21,7 +21,7 @@ MA.DSLoaded = function(ds, recs, opts) {
 };
 
 MA.DSLoadException = function() {
-    //console.log("load exception: "+this.storeId);
+    console.log("load exception: "+this.storeId);
     
     storesNeededForRendering[this.storeId] = 'loaded';
     MA.DSLoaded(this, null, null);
@@ -361,6 +361,22 @@ var humanStore = new Ext.data.JsonStore(
                                          'loadexception':MA.DSLoadException}
                                          }
                                          );
+                                         
+var runStore = new Ext.data.JsonStore(
+                        {
+                            storeId: 'run',
+                            autoLoad: true,
+                            url: adminBaseUrl + "repository/run/ext/json",
+                            restful: true,
+                            listeners: {'load':MA.DSLoaded,
+                                        'loadexception':MA.DSLoadException
+                            },
+                            sortInfo: {
+                                field: 'id',
+                                direction: 'DESC'
+                            }
+                        }
+                    );
                                         
 // ---------- COMBO STORES ---------- (used for comboboxes)
 var organismTypeComboStore = new Ext.data.JsonStore(

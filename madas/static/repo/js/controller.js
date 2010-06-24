@@ -275,7 +275,14 @@ MA.ExperimentCmp = {
                 {
                     xtype:'panel',
                     bodyStyle:'padding:4px;',
-                    id:'runPanel'
+                    id:'runPanel',
+                    items:[
+                        { 
+                            xtype:'button',
+                            text:'view',
+                            handler:function(){MA.RunCmp.show();}
+                        }
+                    ]
                 }
             ]
             }
