@@ -57,12 +57,12 @@ def authorize(request, module='/', perms = [], internal = False):
         if not request.user.is_anonymous():
             #if request.user:
             #    request.user.logout() #session gets flushed here
-            request.session.flush()
+            request.session.delete()
         else:
             #print request.session.__dict__
             if redirectMainContentFunction is not None and\
                redirectMainContentFunction != 'login:resetpassword':
-                request.session.flush()
+                request.session.delete()
 
     request.session['params'] = cachedparams
     request.session['redirectMainContentFunction'] = redirectMainContentFunction
