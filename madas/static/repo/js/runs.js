@@ -4,50 +4,100 @@
 //the current samples in the run being manipulated
 
 MA.CurrentRun = {
-    
+    id: 0,
+    addSamples: function(ids) {
+        if (this.id == 0) {
+            if (this.pendingIDs == null ||
+                this.pendingIDs == undefined) {
+                this.pendingIDs = ids;
+            } else {
+                this.pendingIDs.concat(ids);
+            }
+            
+            MA.RunCmp.show();
+            Ext.Msg.alert('Adding Samples to a Fresh Run', 'As this Run is completely new, it needs to have a Title, Method and Machine assigned before Samples can be properly added to it. Your selection will be remembered until you choose apropriate options and press Save.<p>Selecting another Run or pressing Create New will discard the samples you have just chosen.');
+            
+        } else {
+            this.addSamplesCommit(ids);
+        }
+    },
+    addSamplesCommit: function(ids) {
+        var saver = new Ajax.Request(
+            wsBaseUrl + 'add_samples_to_run/', 
+            { 
+                parameters:{
+                    run_id:MA.CurrentRun.id,
+                    sample_ids:ids.join(",")
+                },
+                asynchronous:true, 
+                evalJSON:'force',
+                onSuccess:     MA.RunSampleAddSuccess
+            });
+    },
+    clear: function() {
+        this.id = 0;
+        this.pendingIDs = undefined;
+    }
 };
 
 MA.RunSampleCheckboxSM = new Ext.grid.CheckboxSelectionModel({ width: 25 });
 
 MA.CreateNewRun = function() {
+    Ext.getCmp('runlistview').clearSelections();
+
 	var detailPanel = Ext.getCmp('runDetails');
 
-    detailPanel.getComponent('id').setValue(0);
+    MA.CurrentRun.clear();
+    
     detailPanel.getComponent('title').setValue('New Untitled Run');
     detailPanel.getComponent('method').clearValue();
     detailPanel.getComponent('machine').clearValue();
+    
+    runSampleStore.proxy.conn.url = adminBaseUrl + "repository/sample/ext/json?run__id__exact=" + MA.CurrentRun.id;
+    runSampleStore.load();
+    
+    Ext.getCmp('currentRunTitle').update("New Untitled Run");
 };
 
 MA.RunCmpRowSelect = function(view, nodes) {
 	var detailPanel = Ext.getCmp('runDetails');
-    	
+    
+    MA.CurrentRun.clear();
+    
     if (nodes.length == 0) {
         MA.ClearCurrentRun;
     } else {
         var r = view.getSelectedRecords()[0];
         
-        detailPanel.getComponent('id').setValue(r.data.id);
         detailPanel.getComponent('title').setValue(r.data.title);
         detailPanel.getComponent('method').setValue(r.data.method);
         detailPanel.getComponent('machine').setValue(r.data.machine);
         
-        MA.CurrentRun.id = r.data.id;
-        MA.CurrentRun.title = r.data.title;
-        MA.CurrentRun.machine = r.data.machine;
-        MA.CurrentRun.method = r.data.method;
+        Ext.getCmp('currentRunTitle').update(r.data.title);
         
+        MA.CurrentRun.id = r.data.id;
     }
     
     runSampleStore.proxy.conn.url = adminBaseUrl + "repository/sample/ext/json?run__id__exact=" + MA.CurrentRun.id;
     runSampleStore.load();
 };
 
-MA.RunSaveCallback = function() {
-    //note: do not use close() because, unlike the close button, it actually kills the window
-    MA.RunCmp.hide();
-
-    //here is where I would call
-    runStore.reload();
+MA.RunSaveCallback = function(store, records, options) {
+    if (records.length > 0) {
+        MA.CurrentRun.id = records[0].data.id;
+    
+        //note: do not use close() because, unlike the close button, it actually kills the window
+        //MA.RunCmp.hide();
+        
+        MA.CurrentRun.addSamplesCommit(MA.CurrentRun.pendingIDs);
+        
+        Ext.getCmp('currentRunTitle').update(r.data.title);
+    
+        //here is where I would call
+        runStore.reload();
+    } else {
+        Ext.Msg.alert('Error', 'An unknown error occurred while saving the Run');
+    }
 };
 
 MA.RunDeleteCallback = function() {
@@ -60,26 +110,37 @@ MA.RunDeleteCallback = function() {
 };
 
 MA.RunSampleRemoveSuccess = function() {
+    runSampleStore.proxy.conn.url = adminBaseUrl + "repository/sample/ext/json?run__id__exact=" + MA.CurrentRun.id;
     runSampleStore.load();
 };
 
 MA.ClearCurrentRun = function() {
 	var detailPanel = Ext.getCmp('runDetails');
 
-    detailPanel.getComponent('id').setValue(0);
     detailPanel.getComponent('title').setValue("New Untitled Run");
     detailPanel.getComponent('method').clearValue();
     detailPanel.getComponent('machine').clearValue();
     
     MA.CurrentRun.id = 0;
-    MA.CurrentRun.title = 'New Untitled Run';
+    
+    Ext.getCmp('currentRunTitle').update("New Untitled Run");
 }
+
+MA.RunSampleAddSuccess = function() {
+    MA.CurrentRun.pendingIDs = undefined;
+
+    runSampleStore.proxy.conn.url = adminBaseUrl + "repository/sample/ext/json?run__id__exact=" + MA.CurrentRun.id;
+    runSampleStore.load();
+    
+    MA.RunCmp.show();
+};
 
 MA.RunCmp = new Ext.Window({
     id:'runCmp',
     title:'Current Run',
     width:680,
-    height:600,
+    height:500,
+    minHeight:500,
     x:170,
     y:50,
     closeAction:'hide',
@@ -103,7 +164,7 @@ MA.RunCmp = new Ext.Window({
             store:runStore,
             loadingText:'Loading...',
             columns: [
-	            {header: "or select existing", dataIndex: 'title', sortable: true}
+	            {header: "or select existing", dataIndex: 'title', sortable: false}
             ],
             listeners:{
                 'selectionchange':MA.RunCmpRowSelect
@@ -171,7 +232,7 @@ MA.RunCmp = new Ext.Window({
                     fieldLabel:'Samples',
                     xtype:'grid',
                     width:310,
-                    height:200,
+                    height:300,
                     store:runSampleStore,
                     loadingText:'Loading...',
                     columns: [
@@ -187,41 +248,47 @@ MA.RunCmp = new Ext.Window({
                     style:'background:white;',
                     autoScroll:true,
                     reserveScrollOffset:true,
-                    tbar: {
-                        { 
-                            text:'remove',
-                            cls: 'x-btn-text-icon',
-                            icon:'static/repo/images/no.gif',
-                            listeners: {
-                                'click': function(e) {
-                                    //save changes to selected entries
-                                    if (MA.RunSampleCheckboxSM.getCount() > 0) {
-                                        var selections = MA.RunSampleCheckboxSM.getSelections();
-                                        
-                                        if (!Ext.isArray(selections)) {
-                                            selections = [selections];
-                                        }
-                                        
-                                        var ids = [];
-                                        for (var idx in selections) {
-                                            if (!Ext.isObject(selections[idx])) {
-                                                continue;
+                    bbar: {
+                        items: [
+                            { 
+                                text:'remove',
+                                cls: 'x-btn-text-icon',
+                                icon:'static/repo/images/no.gif',
+                                listeners: {
+                                    'click': function(e) {
+                                        //save changes to selected entries
+                                        if (MA.RunSampleCheckboxSM.getCount() > 0) {
+                                            var selections = MA.RunSampleCheckboxSM.getSelections();
+                                            
+                                            if (!Ext.isArray(selections)) {
+                                                selections = [selections];
                                             }
                                             
-                                            ids.push(selections[idx].data.id);
+                                            var ids = [];
+                                            for (var idx in selections) {
+                                                if (!Ext.isObject(selections[idx])) {
+                                                    continue;
+                                                }
+                                                
+                                                ids.push(selections[idx].data.id);
+                                            }
+                                            
+                                            var saver = new Ajax.Request(
+                                                wsBaseUrl + 'remove_samples_from_run/', 
+                                                { 
+                                                    parameters:{
+                                                        run_id:MA.CurrentRun.id,
+                                                        sample_ids:ids.join(",")
+                                                    },
+                                                    asynchronous:true, 
+                                                    evalJSON:'force',
+                                                    onSuccess:     MA.RunSampleRemoveSuccess
+                                                });
                                         }
-                                        
-                                        var saver = new Ajax.Request(
-                                            wsBaseUrl + 'remove_samples_from_run/?run_id='+escape(MA.CurrentRun.id)+'&sample_ids='+escape(ids.join(",")), 
-                                            { 
-                                                asynchronous:true, 
-                                                evalJSON:'force',
-                                                onSuccess:     MA.RunSampleRemoveSuccess
-                                            });
                                     }
                                 }
                             }
-                        }
+                        ]
                     }
                 }
             ],
@@ -229,19 +296,21 @@ MA.RunCmp = new Ext.Window({
                 {
                     text:'Delete',
                     handler:function() {
-                        var detailPanel = Ext.getCmp('runDetails');
-                        if (detailPanel.getComponent('id').getValue() == 0) {
+                        if (MA.CurrentRun.id == 0) {
                             MA.RunDeleteCallback();
                         } else {
                             var agreed = window.confirm("Are you sure you wish to delete this Run?");
                             if (agreed) {
-                                MA.CRUDSomething('delete/run/'+detailPanel.getComponent('id').getValue()+'/', null, MA.RunDeleteCallback);
+                                MA.CRUDSomething('delete/run/'+MA.CurrentRun.id+'/', null, MA.RunDeleteCallback);
                             }
                         }
                     }
                 },
                 {
-                    text:'Generate Worklist'
+                    text:'Generate Worklist',
+                    handler:function() {
+                        window.open(wsBaseUrl + 'generate_worklist/' + MA.CurrentRun.id, 'worklist');
+                    }
                 },
                 { 
                     text:'Save',
@@ -249,7 +318,7 @@ MA.RunCmp = new Ext.Window({
                     	var detailPanel = Ext.getCmp('runDetails');
 
                         if (detailPanel.isValid()) {
-                            if (detailPanel.getComponent('id').getValue() == 0) {
+                            if (MA.CurrentRun.id == 0) {
                                 //create new
                                 values = {};
                                 values.title = detailPanel.getComponent('title').getValue();
@@ -260,7 +329,7 @@ MA.RunCmp = new Ext.Window({
                             } else {
                                 //update
                                 values = {};
-                                values.id = detailPanel.getComponent('id').getValue();
+                                values.id = MA.CurrentRun.id;
                                 values.title = detailPanel.getComponent('title').getValue();
                                 values.method_id = detailPanel.getComponent('method').getValue();
                                 values.machine_id = detailPanel.getComponent('machine').getValue();

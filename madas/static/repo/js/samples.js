@@ -63,9 +63,9 @@ MA.ExperimentSamples = {
                     plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':MA.SaveSampleClassRow}})],
                     sm: new Ext.grid.RowSelectionModel({
                                                        listeners:{'rowselect':function(sm, idx, rec) {
-                                                       MA.SampleLoadBySampleClass();
-                                                       
                                                        MA.CurrentSampleClassIdValue = rec.data.id;
+                                                       
+                                                      MA.SampleLoadBySampleClass();
                                                        
                                                        var grid = Ext.getCmp("samples");
                                                        grid.enable();
@@ -231,6 +231,34 @@ MA.ExperimentSamples = {
                             });
                         }
                     }
+                },
+                {
+                    text: 'add selected samples to run',
+                    cls: 'x-btn-text-icon',
+                    icon: 'static/repo/images/add.gif',
+                    handler: function() {
+                        //save changes to selected entries
+                        var grid = Ext.getCmp('samples');
+                        var selections = grid.getSelectionModel().getSelections();
+        
+                        if (!Ext.isArray(selections)) {
+                            selections = [selections];
+                        }
+        
+                        if (selections.length > 0) {
+                            
+                            var ids = [];
+                            for (var idx in selections) {
+                                if (!Ext.isObject(selections[idx])) {
+                                    continue;
+                                }
+                                
+                                ids.push(selections[idx].data.id);
+                            }
+                            
+                            MA.CurrentRun.addSamples(ids);
+                        }
+                    }
                 }
             ],
             items: [
@@ -238,6 +266,7 @@ MA.ExperimentSamples = {
                     xtype:'grid',
                     border: false,
                     id:'samples',
+                    loadingText:'Loading...',
                     trackMouseOver: false,
                     plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':MA.SaveSampleRow}})],
                     sm: new Ext.grid.RowSelectionModel(),

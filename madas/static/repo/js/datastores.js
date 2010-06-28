@@ -21,7 +21,7 @@ MA.DSLoaded = function(ds, recs, opts) {
 };
 
 MA.DSLoadException = function() {
-    console.log("load exception: "+this.storeId);
+    Ext.Msg.Alert('Network Error', "An error occurred making a network request. Please try again");
     
     storesNeededForRendering[this.storeId] = 'loaded';
     MA.DSLoaded(this, null, null);
