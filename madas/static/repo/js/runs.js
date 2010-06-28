@@ -234,7 +234,7 @@ MA.RunCmp = new Ext.Window({
                     width:310,
                     height:300,
                     store:runSampleStore,
-                    loadingText:'Loading...',
+                    loadMask:true,
                     columns: [
                         MA.RunSampleCheckboxSM,
                         {header: "id", dataIndex: 'id', sortable: true},
