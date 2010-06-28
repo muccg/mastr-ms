@@ -377,6 +377,22 @@ var runStore = new Ext.data.JsonStore(
                             }
                         }
                     );
+                    
+var runSampleStore = new Ext.data.JsonStore(
+                        {
+                            storeId: 'runsamples',
+                            autoLoad: true,
+                            url: adminBaseUrl + "repository/sample/ext/json?run__id__exact=0",
+                            restful: true,
+                            listeners: {'load':MA.DSLoaded,
+                                        'loadexception':MA.DSLoadException
+                            },
+                            sortInfo: {
+                                field: 'id',
+                                direction: 'DESC'
+                            }
+                        }
+                    );
                                         
 // ---------- COMBO STORES ---------- (used for comboboxes)
 var organismTypeComboStore = new Ext.data.JsonStore(
@@ -524,3 +540,19 @@ var involvementComboStore = new Ext.data.JsonStore(
                                         'loadexception':MA.DSLoadException}
                         }
                     );
+
+var machineStore = new Ext.data.JsonStore({
+    autoLoad:true,
+    storeId:'machineStore',
+    url: wsBaseUrl + 'populate_select/machine/id/station_name/',
+    root: 'response.value.items',
+    fields: ['key', 'value']
+});
+
+var methodStore = new Ext.data.JsonStore({
+    autoLoad:true,
+    storeId:'methodStore',
+    url: wsBaseUrl + 'populate_select/instrumentmethod/id/title/',
+    root: 'response.value.items',
+    fields: ['key', 'value']
+});

@@ -37,6 +37,9 @@ def create_object(request, model):
     for key in args.keys():
         obj.__setattr__(key, args[key])
 
+    if model == 'run':
+        obj.creator = User.objects.get(username=request.user.username)
+
     obj.save()
 
     if model == 'experiment':
@@ -284,7 +287,9 @@ def populate_select(request, model=None, key=None, value=None, field=None, match
                        'growthcondition' : ['id', 'greenhouse_id', 'greenhouse__name', 'detailed_location', 'lamp_details'],
                        'organisation': ['id', 'name'],
                        'sampleclass': ['id', 'class_id', 'experiment__id'],
-                       'formalquote': ['id', 'toemail']
+                       'formalquote': ['id', 'toemail'],
+                       'instrumentmethod': ['id','title'],
+                       'machine': ['id','station_name']
                        }
 
 
@@ -309,6 +314,8 @@ def populate_select(request, model=None, key=None, value=None, field=None, match
             model_obj = get_model('auth', 'user')
         elif model == 'formalquote':
             model_obj = get_model('m', 'formalquote')
+        elif model == 'machine':
+            model_obj = get_model('mdatasync_server', 'nodeclient')
         else:
             model_obj = get_model('repository', model)
         
