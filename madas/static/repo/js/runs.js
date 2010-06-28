@@ -7,6 +7,8 @@ MA.CurrentRun = {
     
 };
 
+MA.RunSampleCheckboxSM = new Ext.grid.CheckboxSelectionModel({ width: 25 });
+
 MA.CreateNewRun = function() {
 	var detailPanel = Ext.getCmp('runDetails');
 
@@ -20,13 +22,7 @@ MA.RunCmpRowSelect = function(view, nodes) {
 	var detailPanel = Ext.getCmp('runDetails');
     	
     if (nodes.length == 0) {
-        detailPanel.getComponent('id').setValue(0);
-        detailPanel.getComponent('title').clearValue();
-        detailPanel.getComponent('method').clearValue();
-        detailPanel.getComponent('machine').clearValue();
-        
-        MA.CurrentRun.id = 0;
-        MA.CurrentRun.title = 'New Untitled Run';
+        MA.ClearCurrentRun;
     } else {
         var r = view.getSelectedRecords()[0];
         
@@ -47,12 +43,37 @@ MA.RunCmpRowSelect = function(view, nodes) {
 };
 
 MA.RunSaveCallback = function() {
-    //here is where I would call
-    //Ext.getCmp('runlistview').refresh();
-    //except that it doesn't work and the error is swallowed in the framework
     //note: do not use close() because, unlike the close button, it actually kills the window
     MA.RunCmp.hide();
+
+    //here is where I would call
+    runStore.reload();
 };
+
+MA.RunDeleteCallback = function() {
+    MA.ClearCurrentRun();
+
+//    Ext.getCmp('runlistview').clearSelections();
+    
+    runStore.reload();
+    
+};
+
+MA.RunSampleRemoveSuccess = function() {
+    runSampleStore.load();
+};
+
+MA.ClearCurrentRun = function() {
+	var detailPanel = Ext.getCmp('runDetails');
+
+    detailPanel.getComponent('id').setValue(0);
+    detailPanel.getComponent('title').setValue("New Untitled Run");
+    detailPanel.getComponent('method').clearValue();
+    detailPanel.getComponent('machine').clearValue();
+    
+    MA.CurrentRun.id = 0;
+    MA.CurrentRun.title = 'New Untitled Run';
+}
 
 MA.RunCmp = new Ext.Window({
     id:'runCmp',
@@ -99,7 +120,7 @@ MA.RunCmp = new Ext.Window({
         {
             id:'runDetails',
             region:'center',
-            layout:'form',
+            xtype:'form',
             labelWidth:160,
             bodyStyle:'padding:20px;background:transparent;border-top:none;border-bottom:none;border-right:none;',
             items:[
@@ -148,12 +169,13 @@ MA.RunCmp = new Ext.Window({
                 }),
                 {
                     fieldLabel:'Samples',
-                    xtype:'listview',
-                    width:200,
+                    xtype:'grid',
+                    width:310,
                     height:200,
                     store:runSampleStore,
                     loadingText:'Loading...',
                     columns: [
+                        MA.RunSampleCheckboxSM,
                         {header: "id", dataIndex: 'id', sortable: true},
                         {header: "label", dataIndex: 'label', sortable: true},
                         {header: "class", dataIndex: 'sample_class__unicode', sortable: true}
@@ -161,14 +183,63 @@ MA.RunCmp = new Ext.Window({
                     viewConfig:{
                         forceFit:true
                     },
-                    singleSelect:true,
-                    multiSelect:true,
+                    sm: MA.RunSampleCheckboxSM,
                     style:'background:white;',
                     autoScroll:true,
-                    reserveScrollOffset:true
+                    reserveScrollOffset:true,
+                    tbar: {
+                        { 
+                            text:'remove',
+                            cls: 'x-btn-text-icon',
+                            icon:'static/repo/images/no.gif',
+                            listeners: {
+                                'click': function(e) {
+                                    //save changes to selected entries
+                                    if (MA.RunSampleCheckboxSM.getCount() > 0) {
+                                        var selections = MA.RunSampleCheckboxSM.getSelections();
+                                        
+                                        if (!Ext.isArray(selections)) {
+                                            selections = [selections];
+                                        }
+                                        
+                                        var ids = [];
+                                        for (var idx in selections) {
+                                            if (!Ext.isObject(selections[idx])) {
+                                                continue;
+                                            }
+                                            
+                                            ids.push(selections[idx].data.id);
+                                        }
+                                        
+                                        var saver = new Ajax.Request(
+                                            wsBaseUrl + 'remove_samples_from_run/?run_id='+escape(MA.CurrentRun.id)+'&sample_ids='+escape(ids.join(",")), 
+                                            { 
+                                                asynchronous:true, 
+                                                evalJSON:'force',
+                                                onSuccess:     MA.RunSampleRemoveSuccess
+                                            });
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             ],
             buttons:[
+                {
+                    text:'Delete',
+                    handler:function() {
+                        var detailPanel = Ext.getCmp('runDetails');
+                        if (detailPanel.getComponent('id').getValue() == 0) {
+                            MA.RunDeleteCallback();
+                        } else {
+                            var agreed = window.confirm("Are you sure you wish to delete this Run?");
+                            if (agreed) {
+                                MA.CRUDSomething('delete/run/'+detailPanel.getComponent('id').getValue()+'/', null, MA.RunDeleteCallback);
+                            }
+                        }
+                    }
+                },
                 {
                     text:'Generate Worklist'
                 },
@@ -177,27 +248,44 @@ MA.RunCmp = new Ext.Window({
                     handler:function() {
                     	var detailPanel = Ext.getCmp('runDetails');
 
-                        if (detailPanel.getComponent('id').getValue() == 0) {
-                            //create new
-                            values = {};
-                            values.title = detailPanel.getComponent('title').getValue();
-                            values.method_id = detailPanel.getComponent('method').getValue();
-                            values.machine_id = detailPanel.getComponent('machine').getValue();
-                            
-                            MA.CRUDSomething('create/run/', values, MA.RunSaveCallback);
-                        } else {
-                            //update
-                            values = {};
-                            values.id = detailPanel.getComponent('id').getValue();
-                            values.title = detailPanel.getComponent('title').getValue();
-                            values.method_id = detailPanel.getComponent('method').getValue();
-                            values.machine_id = detailPanel.getComponent('machine').getValue();
-                            
-                            MA.CRUDSomething('update/run/'+values.id+'/', values, MA.RunSaveCallback);
+                        if (detailPanel.isValid()) {
+                            if (detailPanel.getComponent('id').getValue() == 0) {
+                                //create new
+                                values = {};
+                                values.title = detailPanel.getComponent('title').getValue();
+                                values.method_id = detailPanel.getComponent('method').getValue();
+                                values.machine_id = detailPanel.getComponent('machine').getValue();
+                                
+                                MA.CRUDSomething('create/run/', values, MA.RunSaveCallback);
+                            } else {
+                                //update
+                                values = {};
+                                values.id = detailPanel.getComponent('id').getValue();
+                                values.title = detailPanel.getComponent('title').getValue();
+                                values.method_id = detailPanel.getComponent('method').getValue();
+                                values.machine_id = detailPanel.getComponent('machine').getValue();
+                                
+                                MA.CRUDSomething('update/run/'+values.id+'/', values, MA.RunSaveCallback);
+                            }
                         }
                     }
                 }
-            ]
+            ],
+            isValid: function() {
+                var valid = true;
+                if (this.getComponent("machine").getValue() == "None" ||
+                    this.getComponent("machine").getValue() == "") {
+                    valid = false;
+                    this.getComponent("machine").markInvalid("Required");
+                }
+                if (this.getComponent("method").getValue() == "None" ||
+                    this.getComponent("method").getValue() == "") {
+                    valid = false;
+                    this.getComponent("method").markInvalid("Required");
+                }
+                
+                return valid;
+            }
         }
     
     ]
