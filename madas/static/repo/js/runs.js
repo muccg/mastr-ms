@@ -15,7 +15,7 @@ MA.CurrentRun = {
             }
             
             MA.RunCmp.show();
-            Ext.Msg.alert('Adding Samples to a Fresh Run', 'As this Run is completely new, it needs to have a Title, Method and Machine assigned before Samples can be properly added to it. Your selection will be remembered until you choose apropriate options and press Save.<p>Selecting another Run or pressing Create New will discard the samples you have just chosen.');
+            Ext.Msg.alert('Adding Samples to a Fresh Run', 'As this Run is completely new, it needs to have a Title, Method and Machine assigned, and Saved. Then your selected samples will be automatically added.');
             
         } else {
             this.addSamplesCommit(ids);
