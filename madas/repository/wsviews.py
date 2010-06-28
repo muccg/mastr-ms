@@ -1208,3 +1208,32 @@ def add_samples_to_run(request):
     run.add_samples(queryset)
 
     return HttpResponse()
+
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
+def remove_samples_from_run(request):
+    '''Takes a run_id and a list of sample_ids and remove samples from the run after checking permissions etc.'''
+
+    if request.method == 'GET':
+        return HttpResponseNotAllowed(['POST'])
+
+    run_id = request.POST.get('run_id', None)
+    if not run_id:
+        return HttpResponseBadRequest("No run_id provided.\n")
+
+    try:
+        run = Run.objects.get(id=run_id)
+    except ObjectDoesNotExist:
+        return HttpResponseNotFound("Run with id %s not found.\n" % run_id)
+
+    sample_id_str = request.POST.get('sample_ids', None)
+    if not sample_id_str:
+        return HttpResponseBadRequest("No sample_ids provided.\n")
+
+    sample_ids = [int(X) for X in sample_id_str.split(',')]
+    queryset = Sample.objects.filter(id__in=sample_ids)
+
+    # do it
+    run.remove_samples(queryset)
+
+    return HttpResponse()

@@ -268,7 +268,7 @@ MA.ExperimentCmp = {
                 ]
             },
             {
-            title: 'run',
+            title: 'current run',
             frame: true,
             style:'background:white;margin-top:20px;',
             items: [
@@ -277,10 +277,21 @@ MA.ExperimentCmp = {
                     bodyStyle:'padding:4px;',
                     id:'runPanel',
                     items:[
+                        {
+                            xtype:'panel',
+                            html:'Selected samples will be added to:'
+                        },
+                        {
+                            xtype:'panel',
+                            html:'New Untitled Run',
+                            id:'currentRunTitle',
+                            style:'font-weight:bold;padding:6px;'
+                        },
                         { 
                             xtype:'button',
                             text:'view',
-                            handler:function(){MA.RunCmp.show();}
+                            handler:function(){MA.RunCmp.show();},
+                            style:'padding-left:40px'
                         }
                     ]
                 }

@@ -342,6 +342,11 @@ class Run(models.Model):
         for s in queryset:
             if s.is_valid_for_run():
                 rs, created = RunSample.objects.get_or_create(run=self, sample=s)
+                
+    def remove_samples(self, queryset):
+        assert self.id, 'Run must have an id before samples can be added'
+        for s in queryset:
+            RunSample.objects.filter(run=self, sample=s).delete()
 
 class SampleLog(models.Model):
     LOG_TYPES = (
