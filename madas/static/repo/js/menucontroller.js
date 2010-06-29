@@ -180,6 +180,10 @@ MA.ChangeMainContent = function(contentName, paramArray){
             Ext.getCmp('center-panel').layout.setActiveItem(6);
             break;
 
+        case "runs:list":
+            runListStore.load();
+            Ext.getCmp("center-panel").layout.setActiveItem("runs-list");
+            break;
             
         default:
             cancelBackTarget = false;
