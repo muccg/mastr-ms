@@ -20,8 +20,17 @@ MA.DSLoaded = function(ds, recs, opts) {
     }
 };
 
-MA.DSLoadException = function() {
-    Ext.Msg.Alert('Network Error', "An error occurred making a network request. Please try again");
+MA.DSLoadException = function(status, text) {
+    var title = "Network Error";
+    if (status !== undefined) {
+        title = "Error";
+    }
+    
+    if (text === undefined) {
+        text = "An unidentified error occurred, please try again. (Code: "+status+")";
+    }
+
+    Ext.Msg.alert(title, text);
     
     storesNeededForRendering[this.storeId] = 'loaded';
     MA.DSLoaded(this, null, null);

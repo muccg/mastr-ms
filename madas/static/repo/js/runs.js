@@ -31,7 +31,8 @@ MA.CurrentRun = {
                 },
                 asynchronous:true, 
                 evalJSON:'force',
-                onSuccess:     MA.RunSampleAddSuccess
+                onSuccess:     MA.RunSampleAddSuccess,
+                onFailure:    function(transport) { MA.DSLoadException(transport.status, transport.responseText); }
             });
     },
     clear: function() {
@@ -90,11 +91,12 @@ MA.RunSaveCallback = function(store, records, options) {
         //MA.RunCmp.hide();
         
         MA.CurrentRun.addSamplesCommit(MA.CurrentRun.pendingIDs);
-        
-        Ext.getCmp('currentRunTitle').update(r.data.title);
-    
+
         //here is where I would call
         runStore.reload();
+            
+        Ext.getCmp('currentRunTitle').update(records[0].data.title);
+
     } else {
         Ext.Msg.alert('Error', 'An unknown error occurred while saving the Run');
     }
