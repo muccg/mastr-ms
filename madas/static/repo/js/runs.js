@@ -65,8 +65,10 @@ MA.RunCmpRowSelect = function(view, nodes) {
     MA.CurrentRun.clear();
     
     if (nodes.length == 0) {
-        MA.ClearCurrentRun;
+        console.log("selnone");
+        MA.ClearCurrentRun();
     } else {
+        console.log("sel");
         var r = view.getSelectedRecords()[0];
         
         detailPanel.getComponent('title').setValue(r.data.title);
@@ -116,15 +118,13 @@ MA.RunSampleRemoveSuccess = function() {
 
 MA.ClearCurrentRun = function() {
 	var detailPanel = Ext.getCmp('runDetails');
-
     detailPanel.getComponent('title').setValue("New Untitled Run");
     detailPanel.getComponent('method').clearValue();
     detailPanel.getComponent('machine').clearValue();
     
     MA.CurrentRun.id = 0;
-    
     Ext.getCmp('currentRunTitle').update("New Untitled Run");
-}
+};
 
 MA.RunSampleAddSuccess = function() {
     MA.CurrentRun.pendingIDs = undefined;
@@ -163,8 +163,10 @@ MA.RunCmp = new Ext.Window({
             width:150,
             store:runStore,
             loadingText:'Loading...',
+            columnSort:false,
             columns: [
-	            {header: "or select existing", dataIndex: 'title', sortable: false}
+	            {header: "or select existing", dataIndex: 'title', 
+	                tpl: '<div style="padding:4px"><b>{title}</b><br><div style="color:#666"><i>{method__unicode}<br>{creator__unicode}</i></div></div>'}
             ],
             listeners:{
                 'selectionchange':MA.RunCmpRowSelect
@@ -251,7 +253,7 @@ MA.RunCmp = new Ext.Window({
                     bbar: {
                         items: [
                             { 
-                                text:'remove',
+                                text:'remove samples',
                                 cls: 'x-btn-text-icon',
                                 icon:'static/repo/images/no.gif',
                                 listeners: {
@@ -294,7 +296,7 @@ MA.RunCmp = new Ext.Window({
             ],
             buttons:[
                 {
-                    text:'Delete',
+                    text:'Delete Run',
                     handler:function() {
                         if (MA.CurrentRun.id == 0) {
                             MA.RunDeleteCallback();
@@ -308,12 +310,17 @@ MA.RunCmp = new Ext.Window({
                 },
                 {
                     text:'Generate Worklist',
+                    id:'generateWorklistButton',
                     handler:function() {
-                        window.open(wsBaseUrl + 'generate_worklist/' + MA.CurrentRun.id, 'worklist');
+                        if (MA.CurrentRun.id == 0) {
+                            Ext.Msg.alert('Save Required', 'Before you can generate a worklist, this Run must be Saved');
+                        } else {
+                            window.open(wsBaseUrl + 'generate_worklist/' + MA.CurrentRun.id, 'worklist');
+                        }
                     }
                 },
                 { 
-                    text:'Save',
+                    text:'Save Run',
                     handler:function() {
                     	var detailPanel = Ext.getCmp('runDetails');
 
