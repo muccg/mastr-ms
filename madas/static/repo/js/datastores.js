@@ -22,19 +22,16 @@ MA.DSLoaded = function(ds, recs, opts) {
 
 MA.DSLoadIgnoreException = function() {};
 
-MA.DSLoadException = function(status, text) {
+MA.DSLoadException = function(status, text, c, d, e) {
     var title = "Network Error";
     if (status !== undefined) {
         title = "Error";
     }
     
-    if (text === undefined || Ext.isObject(text)) {
+    if (text === undefined) {
         text = "An unidentified error occurred, please try again. (Code: "+status+")";
-    }
-    
-    if (Ext.isObject(status)) {
-        console.log(status);
-        console.log(text);
+    } else if (Ext.isObject(text)) {
+        text = "An error occurred, code: "+c.status+" message: "+c.statusText;
     }
     
     Ext.Msg.alert(title, text);
@@ -428,7 +425,7 @@ var plantComboStore = new Ext.data.JsonStore(
                                                     {
                                                     storeId: 'plantCombo',
                                                     autoLoad: false,
-                                                    url: wsBaseUrl + 'populate_select/plant/development_stage/',
+                                                    url: wsBaseUrl + 'populate_select/plantinfo/development_stage/',
                                                     root: 'response.value.items',
                                                     fields: ['value', 'key'],
                                                     listeners: {'load':MA.DSLoaded,
@@ -440,7 +437,7 @@ var animalComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'animalCombo',
                             autoLoad: false,
-                            url: wsBaseUrl + 'populate_select/animal/parental_line/',
+                            url: wsBaseUrl + 'populate_select/animalinfo/parental_line/',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
                             listeners: {'load':MA.DSLoaded,
