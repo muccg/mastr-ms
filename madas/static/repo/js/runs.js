@@ -65,10 +65,8 @@ MA.RunCmpRowSelect = function(view, nodes) {
     MA.CurrentRun.clear();
     
     if (nodes.length == 0) {
-        console.log("selnone");
         MA.ClearCurrentRun();
     } else {
-        console.log("sel");
         var r = view.getSelectedRecords()[0];
         
         detailPanel.getComponent('title').setValue(r.data.title);
