@@ -20,16 +20,23 @@ MA.DSLoaded = function(ds, recs, opts) {
     }
 };
 
+MA.DSLoadIgnoreException = function() {};
+
 MA.DSLoadException = function(status, text) {
     var title = "Network Error";
     if (status !== undefined) {
         title = "Error";
     }
     
-    if (text === undefined) {
+    if (text === undefined || Ext.isObject(text)) {
         text = "An unidentified error occurred, please try again. (Code: "+status+")";
     }
-
+    
+    if (Ext.isObject(status)) {
+        console.log(status);
+        console.log(text);
+    }
+    
     Ext.Msg.alert(title, text);
     
     storesNeededForRendering[this.storeId] = 'loaded';
@@ -168,7 +175,7 @@ var sopLookupStore = new Ext.data.JsonStore(
                             remoteSort: true,
                             restful: true,
                             listeners: {'load':MA.DSLoaded,
-                                        'loadexception':MA.DSLoadException
+                                        'loadexception':MA.DSLoadIgnoreException
                             }
                         }
                     );
@@ -378,7 +385,7 @@ var runStore = new Ext.data.JsonStore(
                             url: adminBaseUrl + "repository/run/ext/json",
                             restful: true,
                             listeners: {'load':MA.DSLoaded,
-                                        'loadexception':MA.DSLoadException
+                                        'loadexception':MA.DSLoadIgnoreException
                             },
                             sortInfo: {
                                 field: 'id',
@@ -394,7 +401,7 @@ var runSampleStore = new Ext.data.JsonStore(
                             url: adminBaseUrl + "repository/sample/ext/json?run__id__exact=0",
                             restful: true,
                             listeners: {'load':MA.DSLoaded,
-                                        'loadexception':MA.DSLoadException
+                                        'loadexception':MA.DSLoadIgnoreException
                             },
                             sortInfo: {
                                 field: 'id',
@@ -413,7 +420,7 @@ var organismTypeComboStore = new Ext.data.JsonStore(
                             root: 'response.value.items',
                             fields: ['value', 'key'],
                             listeners: {'load':MA.DSLoaded,
-                                        'loadexception':MA.DSLoadException}
+                                        'loadexception':MA.DSLoadIgnoreException}
                         }
                     );
 
@@ -534,7 +541,7 @@ var userComboStore = new Ext.data.JsonStore(
                             root: 'response.value.items',
                             fields: ['value', 'key'],
                             listeners: {'load':MA.DSLoaded,
-                                        'loadexception':MA.DSLoadException}
+                                        'loadexception':MA.DSLoadIgnoreException}
                         }
                     );
                     
@@ -546,7 +553,7 @@ var involvementComboStore = new Ext.data.JsonStore(
                             root: 'response.value.items',
                             fields: ['value', 'key'],
                             listeners: {'load':MA.DSLoaded,
-                                        'loadexception':MA.DSLoadException}
+                                        'loadexception':MA.DSLoadIgnoreException}
                         }
                     );
 
