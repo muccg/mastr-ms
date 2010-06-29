@@ -348,6 +348,23 @@ class Run(models.Model):
         for s in queryset:
             RunSample.objects.filter(run=self, sample=s).delete()
 
+    @staticmethod
+    def serialised_fields():
+        return [
+            { "name": "id", "type": "int" },
+            { "name": "pk", "type": "int" },
+            { "name": "method", "type": "string" },
+            { "name": "created_on", "type": "date" },
+            { "name": "creator", "type": "int" },
+            { "name": "creator__unicode", "type": "string" },
+            { "name": "title", "type": "string" },
+            { "name": "machine", "type": "int" },
+            { "name": "machine__unicode", "type": "string" },
+            { "name": "generated_output", "type": "auto" },
+            { "name": "state", "type": "string" },
+            { "name": "progress", "type": "float" },
+        ]
+
 class SampleLog(models.Model):
     LOG_TYPES = (
             (0, u'Received'),
