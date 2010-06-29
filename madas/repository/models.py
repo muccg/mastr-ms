@@ -385,6 +385,7 @@ class RunSample(models.Model):
     run = models.ForeignKey(Run)
     sample = models.ForeignKey(Sample)
     filename = models.CharField(max_length=255, null=True, blank=True)
+    complete = models.BooleanField(default=False)
 
     class Meta:
         db_table = u'repository_run_samples'
