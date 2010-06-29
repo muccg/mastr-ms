@@ -37,21 +37,33 @@ class ExtJsonInterface(object):
         for record in records:
             rows.append(self.serialise_record(record))
 
-        fields = []
-        for field in self.model._meta.fields:
-            fields.append({
-                "name": field.name,
-                "type": field_to_ext_type(field),
-            })
+        def serialise_fields(model):
+            fields = []
 
-            try:
-                field.rel.to
+            for field in model._meta.fields:
                 fields.append({
-                    "name": field.name + "__unicode",
-                    "type": "string",
+                    "name": field.name,
+                    "type": field_to_ext_type(field),
                 })
-            except AttributeError:
-                pass
+
+                try:
+                    field.rel.to
+                    fields.append({
+                        "name": field.name + "__unicode",
+                        "type": "string",
+                    })
+                except AttributeError:
+                    pass
+
+            return fields
+
+        try:
+            if callable(self.model.serialised_fields):
+                fields = self.model.serialised_fields()
+            else:
+                fields = serialise_fields(self.model)
+        except AttributeError:
+            fields = serialise_fields(self.model)
 
         metadata = {
             "root": "rows",
