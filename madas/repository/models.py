@@ -348,6 +348,52 @@ class Run(models.Model):
         for s in queryset:
             RunSample.objects.filter(run=self, sample=s).delete()
 
+    def progress(self):
+        # See how many samples have been completed.
+        samples = RunSample.objects.filter(run=self)
+        total = samples.count()
+        complete = samples.filter(complete=True).count()
+
+        if total == 0:
+            # Is a run with no samples a run? </philosoraptor>
+            # For now, we'll return 0, which indicates incompleteness.
+            return 0
+        elif total == complete:
+            # Return int 1 -- it shouldn't really matter, since 1.0 can be
+            # represented exactly in a double, but let's be on the safe side.
+            # Plus, we save a division (although we do a comparison, so that's
+            # about as much of a win as discovering a way to optimally sort
+            # coins to save a millisecond while buying a large flat white).
+            return 1
+
+        return complete / float(total)
+
+    def state(self):
+        progress = self.progress()
+
+        if progress == 1:
+            return "Complete"
+        elif progress == 0:
+            return "New"
+
+        return "Started"
+
+    def serialise(self):
+        return {
+            "id": self.id,
+            "pk": self.pk,
+            "method": unicode(self.method),
+            "created_on": unicode(self.created_on),
+            "creator": self.creator.pk,
+            "creator__unicode": unicode(self.creator),
+            "title": unicode(self.title),
+            "machine": self.machine.pk if self.machine is not None else None,
+            "machine__unicode": unicode(self.machine),
+            "generated_output": unicode(self.generated_output),
+            "state": unicode(self.state()),
+            "progress": self.progress(),
+        }
+
     @staticmethod
     def serialised_fields():
         return [
