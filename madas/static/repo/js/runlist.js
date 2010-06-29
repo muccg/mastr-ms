@@ -39,7 +39,31 @@ MA.RunListCmp = {
                 { header: "progress", sortable: false, menuDisabled: true, groupable: true, dataIndex: "progress" },
                 { header: "state", sortable: false, menuDisabled: true, groupable: true, dataIndex: "state" }
             ],
-            store: runListStore
+            store: runListStore,
+            listeners: {
+                "rowdblclick": function () {
+                    var detail = new MA.RunDetail({
+                        bodyStyle:'padding:20px;background:transparent;border-top:none;border-bottom:none;border-right:none;'
+                    });
+
+                    detail.selectRun(Ext.getCmp("runs").getSelectionModel().getSelected());
+
+                    var win = new Ext.Window({
+                        title: "Run",
+                        width: 680,
+                        height: 500,
+                        minHeight: 500,
+                        items: [detail],
+                    });
+
+                    detail.addListener("delete", function () {
+                        runListStore.reload();
+                        win.close();
+                    });
+
+                    win.show();
+                }
+            }
         })
-    ]
+    ],
 };
