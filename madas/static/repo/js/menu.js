@@ -20,6 +20,12 @@ MA.MenuRender = function(username) {
                         ]
                     }
                 },
+                { xtype: 'tbbutton', text:'Runs', id:'runsMenu', menu:{
+                    items: [
+                        {text:'Runs List', id:'runs:list', handler: MA.MenuHandler}
+                        ]
+                    }
+                },
                 { xtype: 'tbfill'},
                 { xtype: 'tbbutton', text:userText, id: 'userMenu', menu:{
                     items: [
@@ -56,6 +62,7 @@ MA.MenuShow = function() {
     Ext.get('userMenu').show();
     Ext.get('clientsMenu').show();
     Ext.get('projectsMenu').show();
+    Ext.get('runsMenu').show();
 
 };
 
@@ -75,6 +82,7 @@ MA.MenuHide = function() {
     Ext.get('clientsMenu').hide();
     //    Ext.getCmp('helpadmin:screencasts').disable();
     Ext.get('projectsMenu').hide();
+    Ext.get("runsMenu").hide();
 
 };
 
