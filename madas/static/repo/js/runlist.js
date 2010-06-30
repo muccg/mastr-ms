@@ -14,11 +14,14 @@ MA.RunListCmp = {
     collapsible: false,
     id: "runs-list",
     bodyStyle: "padding: 0",
-    layout: "fit",
-    tbar: [],
+    layout: "border",
+    defaults: {
+        split: true
+    },
     items: [
         new Ext.grid.GridPanel({
             border: false,
+            region: "center",
             id: "runs",
             selModel: new Ext.grid.RowSelectionModel({ singleSelect: true }),
             view: new Ext.grid.GroupingView({
@@ -38,28 +41,21 @@ MA.RunListCmp = {
             ],
             store: runListStore,
             listeners: {
-                "rowdblclick": function () {
-                    var detail = new MA.RunDetail({
-                        bodyStyle:'padding:20px;background:transparent;border-top:none;border-bottom:none;border-right:none;'
-                    });
+                "rowclick": function () {
+                    var detail = Ext.getCmp("run-list-detail");
 
                     detail.selectRun(Ext.getCmp("runs").getSelectionModel().getSelected());
-
-                    var win = new Ext.Window({
-                        title: "Run",
-                        width: 680,
-                        height: 500,
-                        minHeight: 500,
-                        items: [detail],
-                    });
-
-                    detail.addListener("delete", function () {
-                        runListStore.reload();
-                        win.close();
-                    });
-
-                    win.show();
                 }
+            }
+        }),
+        new MA.RunDetail({
+            bodyStyle:'padding:10px;background:transparent;border-top:none;border-bottom:none;border-right:none;',
+            border: false,
+            region: "east",
+            id: "run-list-detail",
+            listeners: {
+                "delete": function () { runListStore.reload(); },
+                "save": function () { runListStore.reload(); }
             }
         })
     ],
