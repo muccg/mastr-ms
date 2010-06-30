@@ -40,13 +40,24 @@ function renderSampleLogType(val) {
 }
 
 function renderRunProgress(val, meta, record) {
-    var progress = 100.0 * record.get("complete_sample_count") / record.get("sample_count");
+    var progress = record.get("complete_sample_count") / record.get("sample_count");
 
     if (isNaN(progress)) {
         progress = 0.0;
     }
 
-    return Math.round(progress).toString() + "%";
+    var id = Ext.id();
+
+    var progress = new Ext.ProgressBar({
+        text: Math.floor(progress * 100.0).toString() + "%",
+        value: progress
+    });
+
+    (function () {
+        progress.applyToMarkup(id);
+    }).defer(50);
+
+    return "<div id='" + id + "'></div>";
 }
 
 function renderRunState(val) {
