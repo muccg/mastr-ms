@@ -88,9 +88,18 @@ class ExtJsonInterface(object):
                 # representation of foreign keys.
                 value = getattr(record, field.name)
                 try:
-                    d[field.name] = value.pk
-                    d[field.name + "__unicode"] = unicode(value)
+                    # Test to see if we have a foreign key relationship.
+                    field.rel.to
+
+                    # The value might actually be None if it's nullable.
+                    try:
+                        d[field.name] = value.pk
+                        d[field.name + "__unicode"] = unicode(value)
+                    except AttributeError:
+                        d[field.name] = None
+                        d[field.name + "__unicode"] = u""
                 except AttributeError:
+                    # No foreign key relationship.
                     d[field.name] = unicode(value)
 
             return d
