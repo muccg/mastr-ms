@@ -321,6 +321,12 @@ class Sample(models.Model):
 
     
 class Run(models.Model):
+    RUN_STATES = (
+        (0, u"New"),
+        (1, u"In Progress"),
+        (2, u"Complete"),
+    )
+
     method = models.ForeignKey(InstrumentMethod)
     created_on = models.DateField(null=False, default=date.today)
     creator = models.ForeignKey(User)
@@ -328,6 +334,10 @@ class Run(models.Model):
     samples = models.ManyToManyField(Sample, through="RunSample")
     machine = models.ForeignKey(NodeClient, null=True, blank=True)
     generated_output = models.TextField(null=True, blank=True)
+    state = models.SmallIntegerField(choices=RUN_STATES, default=0, db_index=True)
+    sample_count = models.IntegerField(default=0)
+    incomplete_sample_count = models.IntegerField(default=0)
+    complete_sample_count = models.IntegerField(default=0)
     
     def sortedSamples(self):
         #TODO if method indicates randomisation and blanks, now is when we would do it
@@ -347,6 +357,22 @@ class Run(models.Model):
         assert self.id, 'Run must have an id before samples can be added'
         for s in queryset:
             RunSample.objects.filter(run=self, sample=s).delete()
+
+    def update_sample_counts(self):
+        qs = RunSample.objects.filter(run=self)
+
+        self.sample_count = qs.count()
+        self.incomplete_sample_count = qs.filter(complete=False).count()
+        self.complete_sample_count = self.sample_count - self.incomplete_sample_count
+
+        if self.complete_sample_count == self.sample_count:
+            self.state = 2
+        elif self.incomplete_sample_count == self.sample_count:
+            self.state = 0
+        else:
+            self.state = 1
+
+        self.save()
 
 class SampleLog(models.Model):
     LOG_TYPES = (
@@ -392,3 +418,12 @@ class RunSample(models.Model):
 
     def __unicode__(self):
         return "Run: %s, Sample: %s, Filename: %s." % (self.run, self.sample, self.filename)
+
+    def delete(self, *args, **kwargs):
+        run = self.run
+        super(RunSample, self).delete(*args, **kwargs)
+        run.update_sample_counts()
+
+    def save(self, *args, **kwargs):
+        super(RunSample, self).save(*args, **kwargs)
+        self.run.update_sample_counts()
