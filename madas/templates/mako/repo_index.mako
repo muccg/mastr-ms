@@ -10,8 +10,8 @@
 
     <script src="static/repo/js/prototype.js" type="text/javascript"></script>
     <script src="static/repo/js/scriptaculous/scriptaculous.js" type="text/javascript"></script>
-    <script src="static/ext-3.2.1/adapter/prototype/ext-prototype-adapter-debug.js" type="text/javascript"></script>
-    <script src="static/ext-3.2.1/ext-all-debug.js"></script>
+    <script src="static/ext-3.2.1/adapter/prototype/ext-prototype-adapter.js" type="text/javascript"></script>
+    <script src="static/ext-3.2.1/ext-all.js"></script>
     <script src="static/ext-3.2.1/examples/ux/RowEditor.js"></script>
     <script type="text/javascript" src="static/js/FileUploadField.js"></script>
 
