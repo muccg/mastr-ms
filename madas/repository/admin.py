@@ -351,56 +351,6 @@ class RunAdmin(ExtJsonInterface, admin.ModelAdmin):
     samples_link.short_description = 'Samples'
     samples_link.allow_tags = True
 
-    def handle_read(self, request):
-        # Handle an additional state filter. This isn't an ideal
-        # implementation: ExtJsonInterface should probably have the queryset
-        # loading and filtering separated out from the serialisation logic to
-        # avoid the code duplication below, or better yet, the Run model should
-        # probably be extended to include a computed field that can be queried
-        # properly, but since Django doesn't support that natively, we'll do
-        # this for now and clean it up later.
-
-        qs = self.queryset(request)
-
-        # Add filters.
-        filters = {}
-        for field, term in request.GET.iteritems():
-            if field not in ("sort", "dir", "_dc", "state"):
-                filters[smart_str(field)] = term
-
-        if len(filters) > 0:
-            try:
-                qs = qs.filter(**filters)
-            except FieldError:
-                # Bad parameter to QuerySet.filter.
-                return HttpResponseBadRequest(content_type="text/plain; charset=UTF-8", content=dumps("Bad search term"))
-
-        # Apply sorting parameters, if given.
-        if "sort" in request.GET and "dir" in request.GET:
-            field = request.GET["sort"]
-            if request.GET["dir"].lower() == "desc":
-                field = "-" + field
-            qs = qs.order_by(field)
-
-        # Apply state filter, if given.
-        state = request.GET.get("state")
-        if state:
-            state = state.lower()
-            if state == "new":
-                qs = qs.extra(where=["repository_run.id NOT IN (SELECT DISTINCT run_id FROM repository_run_samples WHERE complete = 'T')"])
-            elif state == "complete":
-                qs = qs.extra(where=["repository_run.id NOT IN (SELECT DISTINCT run_id FROM repository_run_samples WHERE complete = 'F')"])
-            else:
-                # Oh man, this one's horrible, since we need the run ID both in
-                # the set of complete and incomplete samples.
-                qs = qs.extra(where=[
-                    "repository_run.id IN (SELECT DISTINCT run_id FROM repository_run_samples WHERE complete = 'T')",
-                    "repository_run.id IN (SELECT DISTINCT run_id FROM repository_run_samples WHERE complete = 'F')",
-                ])
-
-        from django.http import HttpResponse
-        return HttpResponse(content_type="text/plain; charset=UTF-8", content=self.serialise(qs))
-
 
 admin.site.register(OrganismType, OrganismTypeAdmin)
 admin.site.register(UserInvolvementType, UserInvolvementTypeAdmin)
