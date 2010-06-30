@@ -48,30 +48,30 @@
 <script>
 var callbackCount = 0;
 function callbacker(){
-    var username = document.getElementById('username').value;
+//    var username = document.getElementById('username').value;
     
-    if (username == "" && callbackCount < 10) {
-        //console.log("waiting...");
-        callbackCount += 1;
-        window.setTimeout("callbacker();", 100);
-        return;
-    }
+//    if (username == "" && callbackCount < 10) {
+//        //console.log("waiting...");
+//        callbackCount += 1;
+//        window.setTimeout("callbacker();", 100);
+//        return;
+//    }
     
-    MA.InitApplication();
-    //'${ APP_SECURE_URL }', '${ username }', '${ mainContentFunction }', '${ params }');
-    document.getElementById("appLoad").style.display = "none";
-    document.getElementById("hidePass").style.display = "block";
-    document.getElementById("hideUser").style.display = "block";
+//    document.getElementById('appLoad').style.display = "none";
+    MA.InitApplication('${ APP_SECURE_URL }', '${ username }', '${ mainContentFunction }', '${ params }');
+//    document.getElementById("appLoad").style.display = "none";
+//    document.getElementById("hidePass").style.display = "block";
+//    document.getElementById("hideUser").style.display = "block";
 }
 </script>
 
 </head>
-<body onLoad="callbacker();">
+<body onload="callbacker();">
+<div id="appLoad" style="display:none;z-index:1;position:absolute;left:0px;top:0px;width:100%;height:100%;background:white;padding:40%;"><img src="static/ext-3.2.1/resources/images/default/shared/large-loading.gif" width="32" height="32"> Loading...</div>
 
     <div id="north"><div id="appTitle">MASTR MS</div><div id="toolbar"></div></div>
 
 <div style="position:relative;">
-<div id="appLoad" style="display:none;z-index:1;position:absolute;left:0px;top:0px;width:400px;height:200px;background:white;padding:200px;"><img src="static/ext-3.2.1/resources/images/default/shared/large-loading.gif"> Loading...</div>
 <div id="loginDiv">
 <form id="loginForm" action="login/processLogin" method="POST">
 <div class="x-form-item" id="hideUser"><label class="x-form-item-label">Email address:</label>
