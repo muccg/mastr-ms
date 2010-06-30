@@ -382,7 +382,8 @@ class Run(models.Model):
         return {
             "id": self.id,
             "pk": self.pk,
-            "method": unicode(self.method),
+            "method":self.method.pk if self.method is not None else None,
+            "method__unicode": unicode(self.method),
             "created_on": unicode(self.created_on),
             "creator": self.creator.pk,
             "creator__unicode": unicode(self.creator),
@@ -399,7 +400,8 @@ class Run(models.Model):
         return [
             { "name": "id", "type": "int" },
             { "name": "pk", "type": "int" },
-            { "name": "method", "type": "string" },
+            { "name": "method", "type": "int" },
+            { "name": "method__unicode", "type": "string" },
             { "name": "created_on", "type": "date" },
             { "name": "creator", "type": "int" },
             { "name": "creator__unicode", "type": "string" },
