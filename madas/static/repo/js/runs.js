@@ -65,23 +65,18 @@ MA.RunCmpRowSelect = function(view, nodes) {
     }
 };
 
-MA.RunSaveCallback = function(store, records, options) {
-    if (records.length > 0) {
-        MA.CurrentRun.id = records[0].data.id;
+MA.RunSaveCallback = function(id) {
+    MA.CurrentRun.id = id;
+
+    //note: do not use close() because, unlike the close button, it actually kills the window
+    //MA.RunCmp.hide();
     
-        //note: do not use close() because, unlike the close button, it actually kills the window
-        //MA.RunCmp.hide();
+    MA.CurrentRun.addSamplesCommit(MA.CurrentRun.pendingIDs);
+
+    //here is where I would call
+    runStore.reload();
         
-        MA.CurrentRun.addSamplesCommit(MA.CurrentRun.pendingIDs);
-
-        //here is where I would call
-        runStore.reload();
-            
-        Ext.getCmp('currentRunTitle').update(records[0].data.title);
-
-    } else {
-        Ext.Msg.alert('Error', 'An unknown error occurred while saving the Run');
-    }
+    Ext.getCmp('currentRunTitle').update(runStore.getById(id).data.title);
 };
 
 MA.RunDeleteCallback = function() {
@@ -160,6 +155,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     typeAhead:false,
                     triggerAction:'all',
                     listWidth:230,
+                    width: 200,
                     store: methodStore
                 }),
                 new Ext.form.ComboBox({
@@ -176,6 +172,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     typeAhead:false,
                     triggerAction:'all',
                     listWidth:230,
+                    width: 200,
                     store: machineStore
                 }),
                 {
@@ -267,6 +264,10 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     text:'Save Run',
                     handler:function() {
                         if (self.isValid()) {
+                            var runSaveCallback = function (store, records, options) {
+                                self.fireEvent("save", records[0].data.id);
+                            };
+
                             if (self.runId == 0) {
                                 //create new
                                 values = {};
@@ -274,7 +275,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                                 values.method_id = self.getComponent('method').getValue();
                                 values.machine_id = self.getComponent('machine').getValue();
                                 
-                                MA.CRUDSomething('create/run/', values, MA.RunSaveCallback);
+                                MA.CRUDSomething('create/run/', values, runSaveCallback);
                             } else {
                                 //update
                                 values = {};
@@ -283,7 +284,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                                 values.method_id = self.getComponent('method').getValue();
                                 values.machine_id = self.getComponent('machine').getValue();
                                 
-                                MA.CRUDSomething('update/run/'+values.id+'/', values, MA.RunSaveCallback);
+                                MA.CRUDSomething('update/run/'+values.id+'/', values, runSaveCallback);
                             }
                         }
                     }
@@ -310,7 +311,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
 
         MA.RunDetail.superclass.constructor.call(this, config);
 
-        this.addEvents("delete");
+        this.addEvents("delete", "save");
 
         this.runId = 0;
     },
@@ -403,7 +404,8 @@ MA.RunCmp = new Ext.Window({
             region:'center',
             bodyStyle:'padding:20px;background:transparent;border-top:none;border-bottom:none;border-right:none;',
             listeners: {
-                "delete": { fn: MA.RunDeleteCallback }
+                "delete": MA.RunDeleteCallback,
+                "save": MA.RunSaveCallback
             }
         })
     ]
