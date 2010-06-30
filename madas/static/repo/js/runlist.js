@@ -3,11 +3,7 @@ runListStore = new Ext.data.GroupingStore({
     proxy: runStore.proxy,
     reader: runStore.reader,
     restful: true,
-    remoteSort: true,
-    sortInfo: {
-        field: "id",
-        direction: "DESC"
-    }
+    remoteSort: false
 });
 
 
@@ -27,7 +23,8 @@ MA.RunListCmp = {
             selModel: new Ext.grid.RowSelectionModel({ singleSelect: true }),
             view: new Ext.grid.GroupingView({
                 forceFit: true,
-                autoFill: true
+                autoFill: true,
+                hideGroupedColumn: true
             }),
             columns: [
                 { header: "id", sortable: false, menuDisabled: true, dataIndex: "id" },
@@ -35,9 +32,9 @@ MA.RunListCmp = {
                 { header: "method", sortable: false, menuDisabled: true, dataIndex: "method__unicode" },
                 { header: "machine", sortable: false, menuDisabled: true, dataIndex: "machine__unicode" },
                 { header: "creator", sortable: false, menuDisabled: true, dataIndex: "creator__unicode" },
-                { header: "created_on", sortable: false, menuDisabled: true, dataIndex: "created_on" },
-                { header: "progress", sortable: false, menuDisabled: true, groupable: true, dataIndex: "progress" },
-                { header: "state", sortable: false, menuDisabled: true, groupable: true, dataIndex: "state" }
+                { header: "created_on", sortable: false, menuDisabled: true, dataIndex: "created_on", renderer: renderDateTime },
+                { header: "progress", sortable: false, menuDisabled: true, groupable: false, renderer: renderRunProgress },
+                { header: "state", sortable: false, menuDisabled: true, groupable: true, dataIndex: "state", renderer: renderRunState }
             ],
             store: runListStore,
             listeners: {
