@@ -94,7 +94,7 @@ function callbacker(){
 
 <div id="centerDiv"></div>
 
-    <div id="south">(c) CCG 2009 $REV$</div>
+    <div id="south">(c) CCG 2009 $Rev$</div>
     <form id="hiddenForm"></form>
     
     
