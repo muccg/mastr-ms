@@ -134,6 +134,12 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     xtype:'hidden',
                     itemId:'id'
                 },
+                new Ext.form.Label({
+                    fieldLabel: "State",
+                    itemId: "state",
+                    style: "position: relative; top: 3px;",
+                    text: renderRunState(0)
+                }),
                 {
                     fieldLabel:'Title',
                     xtype:'textfield',
@@ -179,7 +185,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     fieldLabel:'Samples',
                     xtype:'grid',
                     width:310,
-                    height:300,
+                    height:250,
                     store:this.sampleStore,
                     loadMask:true,
                     columns: [
@@ -260,6 +266,18 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                         }
                     }
                 },
+                {
+                    text: "Mark Complete",
+                    handler: function () {
+                        Ext.Ajax.request({
+                            url: wsBaseUrl + "mark_run_complete/" + self.runId,
+                            success: function () {
+                                self.getComponent("state").setText(renderRunState(2));
+                                self.fireEvent("save", self.runId);
+                            }
+                        });
+                    }
+                },
                 { 
                     text:'Save Run',
                     handler:function() {
@@ -321,6 +339,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
     createRun: function () {
         this.runId = 0;
 
+        this.getComponent("state").setText(renderRunState(0));
         this.getComponent("title").setValue("New Untitled Run");
         this.getComponent("method").clearValue();
         this.getComponent("machine").clearValue();
@@ -346,6 +365,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
     selectRun: function (record) {
         this.runId = record.data.id;
 
+        this.getComponent("state").setText(renderRunState(record.data.state));
         this.getComponent("title").setValue(record.data.title);
         this.getComponent("method").setValue(record.data.method);
         this.getComponent("machine").setValue(record.data.machine);
