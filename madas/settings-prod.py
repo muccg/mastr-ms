@@ -7,8 +7,6 @@ from build.settings.defaults.prod import *
 from build.settings.db.prod import *
 from build.settings.ldap.prod import *
 
-ADMINS.append( ( 'Andrew Macgregor', 'andrew@ccg.murdoch.edu.au' ) )
-
 DATABASES['default']['NAME'] = 'live_madas'
 DATABASES['default']['USER'] = 'madasapp'
 DATABASES['default']['PASSWORD'] = 'madasapp'
