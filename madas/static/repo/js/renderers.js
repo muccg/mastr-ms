@@ -39,6 +39,26 @@ function renderSampleLogType(val) {
     return '';
 }
 
+function renderRunProgress(val, meta, record) {
+    var progress = 100.0 * record.get("complete_sample_count") / record.get("sample_count");
+
+    if (isNaN(progress)) {
+        progress = 0.0;
+    }
+
+    return Math.round(progress).toString() + "%";
+}
+
+function renderRunState(val) {
+    var states = [
+        "New",
+        "In Progress",
+        "Complete"
+    ];
+
+    return states[val];
+}
+
 function renderOrganism(val) {
     return renderValueOnly(organismComboStore, val);   
 }
