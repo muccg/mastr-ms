@@ -391,21 +391,22 @@ MA.AdminUserEditValidatePassword = function (textfield, event) {
 };
 
 MA.AdminUserEditCmp = {id:'adminuseredit-container-panel', 
-layout:'absolute', 
-deferredRender:false,
-forceLayout:true,
-defaults:{
+    layout:'absolute', 
+    autoScroll:true,
     deferredRender:false,
-    forceLayout:true
-},
-items:[
-       {  xtype:'form', 
-       labelWidth: 100, // label settings here cascade unless overridden
-       id:'adminuseredit-panel',
-       url:MA.BaseUrl + 'admin/userSave',
-       method:'POST',
-       frame:true,
-       reader: new MA.JsonReader({
+    forceLayout:true,
+    defaults:{
+        deferredRender:false,
+        forceLayout:true
+    },
+    items:[
+           {  xtype:'form', 
+           labelWidth: 100, // label settings here cascade unless overridden
+           id:'adminuseredit-panel',
+           url:MA.BaseUrl + 'admin/userSave',
+           method:'POST',
+           frame:true,
+           reader: new MA.JsonReader({
                                                  root            : 'data',
                                                  versionProperty : 'response.value.version',
                                                  totalProperty   : 'response.value.total_count',
