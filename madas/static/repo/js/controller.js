@@ -216,45 +216,40 @@ MA.ExperimentCmp = {
                 items: [
                     {
                         id: 'expNav',
+                        baseCls: 'x-plain',
                         hideMode:'offsets',
-                    	baseCls:'x-plain',
-                        xtype:'grid', 
-                        border: false,
-                        trackMouseOver: false,
+                    	style:'background:white;',
+                    	selectedClass:'ma-list-selected',
+                        xtype:'listview', 
+//                        border: false,
+//                        trackMouseOver: false,
                         hideHeaders:true,
-                        syncFocus: false,
+//                        syncFocus: false,
                         width:270,
-                        autoHeight:true,
-                        sm: new Ext.grid.RowSelectionModel(
-                            {
-                                singleSelect:true,
-                                listeners:{
-                                    "rowselect":function(sm, index, r) { 
-                                        if (Ext.currentExperimentNavItem == index) {
-                                           return;
-                                        }
-                                        
-                                        var currItem = Ext.StoreMgr.get("navDS").getAt(Ext.currentExperimentNavItem);
-                                        var blurFn = currItem.get("blur");
-                                        if (blurFn !== null) {
-                                            blurFn({'init':r.get("init"), 'index':index});
-                                        }
-                                    },
-                                    "beforerowselect":function(sm, ri, ke, r) {
-                                        if (!r.data.enabled) {
-                                            return false;
-                                        }
-                                    }
+//                        autoHeight:true,
+                        singleSelect:true,
+                        multiSelect:false,
+                        listeners:{
+                            "selectionchange":function(list, nodes) { 
+                                var index = list.getSelectedIndexes()[0];
+                                var r = list.getSelectedRecords()[0];
+                            
+                                if (Ext.currentExperimentNavItem == index) {
+                                   return;
                                 }
-                            } 
-                        ),
-                        viewConfig: {
-                            forceFit: true,
-                            autoFill:true,
-                            scrollOffset:0
+                                
+                                var currItem = Ext.StoreMgr.get("navDS").getAt(Ext.currentExperimentNavItem);
+                                var blurFn = currItem.get("blur");
+                                if (blurFn !== null) {
+                                    blurFn({'init':r.get("init"), 'index':index});
+                                }
+                            },
+                            "beforeselect":function(list, nodes, sel) {
+                                return !list.disabled;
+                            }
                         },
                         columns: [
-                            { header: "nav",  sortable:false, menuDisabled:true, renderer: renderNavItem }
+                            { header: "nav",  dataIndex:'nav', sortable:false, menuDisabled:true }
                         ],
                         store: new Ext.data.SimpleStore(
                             {
@@ -262,8 +257,7 @@ MA.ExperimentCmp = {
                                 fields: ["nav", "init", "blur", "enabled"],
                                 data: [ ["experiment details", MA.ExperimentInit, MA.ExperimentBlur, true], ["source", MA.BioSourceInit, MA.BioSourceBlur, false], ["treatment",MA.TreatmentInit, MA.Blur,false], ["sample prep",MA.SamplePrepInit, MA.Blur,false], ["sample classes", MA.ExperimentSamplesInit, MA.Blur, false], ["samples", MA.ExperimentSamplesOnlyInit, MA.Blur, false], ["sample tracking", MA.SampleTrackingInit, MA.Blur, false], ["files", MA.FilesInit, MA.Blur, false], ["access",MA.AccessInit, MA.Blur,false] ]
                             }
-                        ),
-                        listeners:{"render":function(a){window.setTimeout("Ext.getCmp('expNav').getSelectionModel().selectFirstRow();", 500);}}
+                          )  
                       }
                 ]
             },
@@ -479,17 +473,26 @@ MA.UpdateNav = function() {
     var en = Ext.getCmp("experimentName");
     var ds = Ext.StoreMgr.get("navDS");
     var et = Ext.getCmp("experimentTitle");
+    var na = Ext.getCmp("expNav");
+    
     var counter = 1;
         
-    for (counter = 1; counter <= 8; counter++) {
-        ds.getAt(counter).set("enabled", (en.getValue() !== ''));
+    if (en.getValue() === '') {
+        na.disable();
+    } else {
+        na.enable();
     }
+    
+    if (na.getSelectionCount() == 0) {
+        na.select(0,false,false);
+    }
+//    for (counter = 1; counter <= 8; counter++) {
+//        ds.getAt(counter).set("enabled", (en.getValue() !== ''));
+//    }
     
     if (MA.CurrentExperimentId() == 0) {
         et.setTitle('new experiment');
     } else {
         et.setTitle('experiment: '+en.getValue());
     }
-    
-    Ext.getCmp("expNav").getView().refresh();
 };

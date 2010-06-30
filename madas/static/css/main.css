@@ -92,3 +92,8 @@ body
     position: relative;
     z-index: 2;
 }
+
+.ma-list-selected {
+    background-color: blue; 
+    color:white;
+}

@@ -94,3 +94,12 @@ body
     position: relative;
     z-index: 2;
 }
+
+.x-list-body {
+    background-color: white;
+}
+
+.ma-list-selected {
+    background-color: #003862; 
+    color:white;
+}
