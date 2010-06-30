@@ -78,7 +78,7 @@ function callbacker(){
 
 <div id="north"><div id="appTitle">Metabolomics Australia User and Quote Management System</div><div id="toolbar"></div></div>
 
-<div id="south">(c) CCG 2009</div>
+<div id="south">(c) CCG 2009 $REV$</div>
 
 
 <div style="position:relative;">
