@@ -2,7 +2,7 @@ from django.db import transaction
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden, HttpResponseNotAllowed, HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
-from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, InstrumentMethod
+from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RunSample, InstrumentMethod
 from madas.m.models import Organisation, Formalquote
 from django.utils import webhelpers
 from django.contrib.auth.models import User
@@ -1150,6 +1150,19 @@ def generate_worklist(request,run_id):
     # TODO set attribute on HttpResponse of content_type='application/download'
     return HttpResponse(rb.generate(request), content_type="text/plain")
 
+
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name="mastaff")) or False)
+@transaction.commit_on_success
+def mark_run_complete(request, run_id):
+    samples = RunSample.objects.filter(run__id=run_id)
+    
+    for sample in samples:
+        sample.complete = True
+        sample.save()
+
+    return HttpResponse(json.dumps({ "success": True }), content_type="text/plain")
+    
     
 def select_widget_json(authenticated=False, authorized=False, main_content_function=None, success=False, input=""):
 
