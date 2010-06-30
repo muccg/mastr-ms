@@ -569,6 +569,7 @@ items:[
                                         triggerAction:'all',
                                         listWidth:230,
                                         store: new Ext.data.JsonStore({
+                                                                      autoLoad:true,
                                                                       storeId: 'organisationDS',
                                                                       url: MA.BaseUrl + 'admin/listOrganisations',
                                                                       root: 'response.value.items',
