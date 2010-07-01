@@ -84,7 +84,7 @@ def retrievePathsForFiles(request, *args):
                         error = "%s, %s" % (error, "Duplicate filename detected for %s" % (fname))
                         status = 2
                     #we use the relative path    
-                    filesdict[fname] = relpath 
+                    filesdict[fname] = [run.id, rs.id, relpath]
 
         except Exception, e:
             status = 1
@@ -96,12 +96,18 @@ def retrievePathsForFiles(request, *args):
         error = str(e)
 
     retfilesdict = {}
+    runsamplesdict = {}
 
     #so by this stage, we can go through and test each sent file against the filesdict.
     for fname in pfiles:
         fname = str(fname)
         if fname in filesdict.keys(): #filesdict is keyed on filename
-            retfilesdict[fname] = filesdict[fname]
+            retfilesdict[fname] = filesdict[fname][2] #relative path is third item in the list
+            runid = filesdict[fname][0]
+            runsampleid = filesdict[fname][1]
+            if runid not in runsamplesdict.keys():
+                runsamplesdict[runid] = []
+            runsamplesdict[runid].append(runsampleid) 
             print 'Setting %s to %s' % (fname, retfilesdict[fname])
         else:
             print '%s not associated with a runsample. Ignored' % (fname)
@@ -109,6 +115,7 @@ def retrievePathsForFiles(request, *args):
     retval = {'status': status,
              'error' : error,
              'filesdict':retfilesdict,
+             'runsamplesdict' : runsamplesdict,
              'rootdir' : settings.REPO_FILES_ROOT,
              'rules' : rules,
              'host' : host,
@@ -117,6 +124,43 @@ def retrievePathsForFiles(request, *args):
 
     print 'RETVAL is', retval
     return jsonResponse(retval)
+
+def checkRunSampleFiles(request):
+    ret = {}
+    ret['success'] = False;
+    ret['description'] = "No Error"
+    runsamplefilesjson = request.POST.get('runsamplefiles', None)
+    if runsamplefilesjson is not None:
+        runsamplefilesdict = simplejson.loads(runsamplefilesjson)
+        #so now we have a dict keyed on run, of sample id's whose file should have been received.
+        print 'Checking run samples against:', runsamplefilesdict
+        #We iterate through each run, get the samples referred to, and ensure their file exists on disk.
+        ret['description'] = ""
+        for runid in runsamplefilesdict.keys():
+            print 'Checking files from run %s', str(runid)
+            runsamples = runsamplefilesdict[runid]
+            for runsample in runsamples:
+                runsample = int(runsample)
+                try:
+                    rs = RunSample.objects.get(id = runsample)
+                    abssamplepath, relsamplepath = rs.sample.experiment.ensure_dir()
+                    complete_filename = os.path.join(abssamplepath, rs.filename)
+                    fileexists = os.path.exists(complete_filename)
+                    print 'Checking file %s:%s' % (complete_filename, str(fileexists))
+                    
+                    #now change the value in the DB
+                    rs.complete = fileexists
+                    rs.save()
+                    ret['success'] = True 
+                    ret['description'] = 'Success'
+                except Exception, e:
+                    ret['success'] = False
+                    ret['description'] = "%s, %s" % (ret['description'], str(e)) 
+                
+    else:
+        ret['description'] = "No files given"
+
+    return jsonResponse(ret)
 
 def defaultpage(request, *args):
     try:

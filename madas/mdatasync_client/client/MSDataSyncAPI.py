@@ -13,6 +13,7 @@
 
 try: import json as simplejson
 except ImportError: import simplejson
+import urllib
 
 def nullFn(*args, **kwargs):
     print 'null fn'
@@ -83,7 +84,6 @@ class MSDataSyncAPI(object):
         station = self.config.getValue('stationname')
         sitename = self.config.getValue('sitename')
 
-        import urllib
        
         #grab all files in our local dir:
 
@@ -110,7 +110,12 @@ class MSDataSyncAPI(object):
         #remotedir = self.config.getValue('remotedir')
         remotehost = d['host']
         remotefilesdict = d['filesdict']
+        remoterunsamplesdict = d['runsamplesdict']
         remotefilesrootdir = d['rootdir']
+
+        print "remote files dicrt" , remotefilesdict
+        print "remote runsamples dict", remoterunsamplesdict
+
 
         callingWindow.setState(statuschange)
         self.callingWindow = callingWindow
@@ -130,7 +135,12 @@ class MSDataSyncAPI(object):
         self._appendTask(self.copyFilesReturn, self._impl.copyfiles, copydict)
             
         #now rsync the whole thing over
-        self._appendTask(returnFn, self._impl.perform_rsync, "%s" % (localindexdir) , user, j['host'], remotefilesrootdir, rules=[j['rules']])
+        self._appendTask(self.rsyncReturn, self._impl.perform_rsync, "%s" % (localindexdir) , user, j['host'], remotefilesrootdir, rules=[j['rules']])
+
+        #now tell the server to check the files off
+        baseurl =  self.config.getValue('synchub')
+        self._appendTask(returnFn, self._impl.serverCheckRunSampleFiles, remoterunsamplesdict, baseurl)
+        
 
     def defaultReturn(self, *args, **kwargs):
         #print 'rsync returned: ', retval
@@ -139,6 +149,11 @@ class MSDataSyncAPI(object):
     def copyFilesReturn(self, *args, **kwargs):
         self.log('Local file copy stage complete', thread = self.useThreading)
         self.callingWindow.SetProgress(50)
+
+    def rsyncReturn(self, *args, **kwargs):
+        self.log('Remote transfer stage complete', thread = self.useThreading)
+        self.callingWindow.SetProgress(90) 
+
 
     def getFiles(self, dir, ignoredirs = []):
         import os
@@ -265,6 +280,20 @@ class MSDSImpl(object):
         retcode = p.communicate()[0]
         #self.log('the retcode was: %s' % (str(retcode),), Debug=True)
         return retcode
+
+    
+    def serverCheckRunSampleFiles(self, runsampledict, baseurl):
+        self.log('Informing the server of transfer', thread = self.controller.useThreading)
+        postvars = {'runsamplefiles' : simplejson.dumps(runsampledict) }
+        url = "%s%s/" % (baseurl, "checksamplefiles")
+        try:
+            f = urllib.urlopen(url, urllib.urlencode(postvars))
+            jsonret = f.read()
+            self.log('Server returned %s' % (str(jsonret)), thread = self.controller.useThreading)
+            self.log('Finished informing the server of transfer', thread = self.controller.useThreading)
+        except Exception, e:
+            self.log('Could not connect to %s: %s' % (url, str(e)), type=self.log.LOG_ERROR, thread = self.controller.useThreading)
+        
 
     def copyfiles(self, copydict):
         import os.path
