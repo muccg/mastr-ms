@@ -257,6 +257,8 @@ MA.ExperimentSamples = {
                             }
                             
                             Ext.getCmp("runDetails").addSample(ids);
+
+                            MA.RunCmp.show();
                         }
                     }
                 }
