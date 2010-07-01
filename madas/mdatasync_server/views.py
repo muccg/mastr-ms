@@ -43,7 +43,11 @@ def retrievePathsForFiles(request, *args):
     filesdict = {} 
     rules = []
     import webhelpers
-    host = request.__dict__['META']['SERVER_NAME'] #might not be right name
+    #default host is this host.
+    host = None 
+    defaultHost = request.__dict__['META']['SERVER_NAME'] 
+    flags = None
+    username = None
 
     try:
         pfiles = request.POST.get('files', {})
@@ -65,6 +69,16 @@ def retrievePathsForFiles(request, *args):
         try:
             nodeclient = NodeClient.objects.get(organisation_name = porganisation, site_name=psitename, station_name = pstation)
             print 'Nodeclient found.'
+            nchost = nodeclient.hostname
+            if nchost is not None and len(nchost) > 0:
+                host = str(nchost)
+            ncflags = nodeclient.flags
+            if ncflags is not None and len(ncflags) > 0:
+                flags = str(ncflags)
+            ncuname = nodeclient.username
+            if ncuname is not None and len(ncuname) > 0:
+                username = str(ncuname)
+
             try:
                 rulesset = NodeRules.objects.filter(parent_node = nodeclient)
                 rules = [x.__unicode__() for x in rulesset]
@@ -112,6 +126,10 @@ def retrievePathsForFiles(request, *args):
         else:
             print '%s not associated with a runsample. Ignored' % (fname)
 
+    #set the default host
+    if host is None or len(host) == 0:
+        host = defaultHost 
+
     retval = {'status': status,
              'error' : error,
              'filesdict':retfilesdict,
@@ -119,6 +137,8 @@ def retrievePathsForFiles(request, *args):
              'rootdir' : settings.REPO_FILES_ROOT,
              'rules' : rules,
              'host' : host,
+             'username': username,
+             'flags': flags,
              #'rules' : None 
             }
 
@@ -164,7 +184,6 @@ def checkRunSampleFiles(request):
 
 def defaultpage(request, *args):
     try:
-
         pfiles = request.POST.get('files', None)
         porganisation = simplejson.loads(request.POST.get('organisation', ''))
         psitename= simplejson.loads(request.POST.get('sitename', ''))
