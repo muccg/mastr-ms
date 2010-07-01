@@ -48,15 +48,23 @@ MA.RunListCmp = {
                 }
             }
         }),
-        new MA.RunDetail({
-            bodyStyle:'padding:10px;background:transparent;border-top:none;border-bottom:none;border-right:none;',
-            border: false,
+        new Ext.Panel({
             region: "east",
-            id: "run-list-detail",
-            listeners: {
-                "delete": function () { runListStore.reload(); },
-                "save": function () { runListStore.reload(); }
-            }
+            width: 520,
+            border: false,
+            bodyStyle: "background: #d0def0;",
+            items: [
+                new MA.RunDetail({
+                    bodyStyle:'padding:10px;background:transparent;border-top:none;border-bottom:none;border-right:none;',
+                    border: false,
+                    flex: 0,
+                    id: "run-list-detail",
+                    listeners: {
+                        "delete": function () { runListStore.reload(); },
+                        "save": function () { runListStore.reload(); }
+                    }
+                })
+            ]
         })
     ]
 };
