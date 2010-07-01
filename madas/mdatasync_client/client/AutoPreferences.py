@@ -2,7 +2,8 @@ import wx
 import urllib2
 from poster.encode import multipart_encode
 from poster import streaminghttp
-import simplejson
+try: import json as simplejson
+except ImportError: import simplejson
 
 import NodeConfigSelector
 
@@ -139,7 +140,7 @@ class AutoPreferences(wx.Dialog):
             self.log('Log send response: %s' % (str(retval)) )
         except Exception, e:
             print 'OnSendLog: Exception occured: %s' % (str(e))
-            self.log('Exception occured sending log: %s' % (str(e)), type=log.LOG_ERROR)
+            self.log('Exception occured sending log: %s' % (str(e)), type=self.log.LOG_ERROR)
 
         self.logbutton.Enable()
         self.logbutton.SetLabel(origlabel)
@@ -164,7 +165,7 @@ class AutoPreferences(wx.Dialog):
             self.log('Key send response: %s' % (str(retval)) )
         except Exception, e:
             print 'OnSendKey: Exception occured: %s' % (str(e))
-            self.log('Exception occured sending key: %s' % (str(e)), type=log.LOG_ERROR)
+            self.log('Exception occured sending key: %s' % (str(e)), type=self.log.LOG_ERROR)
 
 
         self.keybutton.Enable()

@@ -7,7 +7,7 @@ py2exe_options = dict(
                       'pyreadline', 'difflib', 'doctest',
                       'optparse', 'pickle', 'calendar'],  # Exclude standard library
             dll_excludes=['msvcr71.dll', 'MSVCP90.dll'],  # Exclude msvcr71
-            includes=['encodings','encodings.ascii'],
+            includes=['encodings','encodings.*'],
             compressed=True,  # Compress library.zip
                     )
 
