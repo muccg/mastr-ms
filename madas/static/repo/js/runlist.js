@@ -58,5 +58,5 @@ MA.RunListCmp = {
                 "save": function () { runListStore.reload(); }
             }
         })
-    ],
+    ]
 };
