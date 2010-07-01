@@ -256,7 +256,7 @@ MA.ExperimentSamples = {
                                 ids.push(selections[idx].data.id);
                             }
                             
-                            MA.CurrentRun.addSamples(ids);
+                            Ext.getCmp("runDetails").addSample(ids);
                         }
                     }
                 }

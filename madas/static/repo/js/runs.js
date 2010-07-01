@@ -3,110 +3,36 @@
 //the current run being manipulated
 //the current samples in the run being manipulated
 
-MA.CurrentRun = {
-    id: 0,
-    addSamples: function(ids) {
-        if (this.id == 0) {
-            if (this.pendingIDs == null ||
-                this.pendingIDs == undefined) {
-                this.pendingIDs = ids;
-            } else {
-                this.pendingIDs.concat(ids);
-            }
-            
-            MA.RunCmp.show();
-            Ext.Msg.alert('Adding Samples to a Fresh Run', 'As this Run is completely new, it needs to have a Title, Method and Machine assigned, and Saved. Then your selected samples will be automatically added.');
-            
-        } else {
-            this.addSamplesCommit(ids);
-        }
-    },
-    addSamplesCommit: function(ids) {
-        var saver = new Ajax.Request(
-            wsBaseUrl + 'add_samples_to_run/', 
-            { 
-                parameters:{
-                    run_id:MA.CurrentRun.id,
-                    sample_ids:ids.join(",")
-                },
-                asynchronous:true, 
-                evalJSON:'force',
-                onSuccess:     MA.RunSampleAddSuccess,
-                onFailure:    function(transport) { MA.DSLoadException(transport.status, transport.responseText); }
-            });
-    },
-    clear: function() {
-        this.id = 0;
-        this.pendingIDs = undefined;
-    }
-};
-
 MA.CreateNewRun = function() {
     Ext.getCmp('runlistview').clearSelections();
 
-    MA.CurrentRun.clear();
     Ext.getCmp("runDetails").createRun();
     
     Ext.getCmp('currentRunTitle').update("New Untitled Run");
 };
 
 MA.RunCmpRowSelect = function(view, nodes) {
-    MA.CurrentRun.clear();
-    
     if (nodes.length == 0) {
-        MA.ClearCurrentRun();
+        Ext.getCmp("runDetails").createRun();
     } else {
         var r = view.getSelectedRecords()[0];
 
         Ext.getCmp("runDetails").selectRun(r);
         Ext.getCmp('currentRunTitle').update(r.data.title);
-        
-        MA.CurrentRun.id = r.data.id;
     }
 };
 
 MA.RunSaveCallback = function(id) {
-    MA.CurrentRun.id = id;
-
-    //note: do not use close() because, unlike the close button, it actually kills the window
-    //MA.RunCmp.hide();
-    
-    MA.CurrentRun.addSamplesCommit(MA.CurrentRun.pendingIDs);
-
-    //here is where I would call
-    runStore.reload();
-        
     Ext.getCmp('currentRunTitle').update(runStore.getById(id).data.title);
 };
 
 MA.RunDeleteCallback = function() {
     MA.ClearCurrentRun();
-
-//    Ext.getCmp('runlistview').clearSelections();
-    
-    runStore.reload();
-    
-};
-
-MA.RunSampleRemoveSuccess = function() {
-    runSampleStore.proxy.conn.url = adminBaseUrl + "repository/sample/ext/json?run__id__exact=" + MA.CurrentRun.id;
-    runSampleStore.load();
 };
 
 MA.ClearCurrentRun = function() {
     Ext.getCmp("runDetails").clearRun();
-    
-    MA.CurrentRun.id = 0;
     Ext.getCmp('currentRunTitle').update("New Untitled Run");
-};
-
-MA.RunSampleAddSuccess = function() {
-    MA.CurrentRun.pendingIDs = undefined;
-
-    runSampleStore.proxy.conn.url = adminBaseUrl + "repository/sample/ext/json?run__id__exact=" + MA.CurrentRun.id;
-    runSampleStore.load();
-    
-    MA.RunCmp.show();
 };
 
 // Create a component we can use both here and from the run list.
@@ -114,7 +40,23 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
     constructor: function (config) {
         var self = this;
 
+        this.pendingSampleSelModel = new Ext.grid.CheckboxSelectionModel({ width: 25 });
         this.sampleSelModel = new Ext.grid.CheckboxSelectionModel({ width: 25 });
+
+        this.pendingSampleFields = [
+            { name: "id", type: "int" }
+        ];
+
+        this.pendingSampleStore = new Ext.data.ArrayStore({
+            fields: this.pendingSampleFields,
+            idIndex: 0,
+            sortInfo: {
+                field: "id",
+                direction: "DESC"
+            }
+        });
+
+        this.PendingSampleRecord = Ext.data.Record.create(this.pendingSampleFields);
 
         this.sampleStore = new Ext.data.JsonStore({
             autoLoad: false,
@@ -182,10 +124,59 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     store: machineStore
                 }),
                 {
+                    fieldLabel:'Samples to Add',
+                    xtype:'grid',
+                    width:310,
+                    height:120,
+                    store:this.pendingSampleStore,
+                    loadMask:true,
+                    columns: [
+                        self.pendingSampleSelModel,
+                        {header: "id", dataIndex: 'id', sortable: true}
+                    ],
+                    viewConfig:{
+                        forceFit:true
+                    },
+                    sm: self.pendingSampleSelModel,
+                    style:'background:white;',
+                    autoScroll:true,
+                    reserveScrollOffset:true,
+                    bbar: {
+                        items: [
+                            { 
+                                text:'remove samples',
+                                cls: 'x-btn-text-icon',
+                                icon:'static/repo/images/no.gif',
+                                listeners: {
+                                    'click': function(e) {
+                                        //save changes to selected entries
+                                        if (self.pendingSampleSelModel.getCount() > 0) {
+                                            var selections = self.pendingSampleSelModel.getSelections();
+                                            
+                                            if (!Ext.isArray(selections)) {
+                                                selections = [selections];
+                                            }
+                                            
+                                            var ids = [];
+                                            for (var idx in selections) {
+                                                if (!Ext.isObject(selections[idx])) {
+                                                    continue;
+                                                }
+
+                                                self.pendingSampleStore.remove(selections[idx]);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
                     fieldLabel:'Samples',
                     xtype:'grid',
                     width:310,
-                    height:250,
+                    height:120,
                     store:this.sampleStore,
                     loadMask:true,
                     columns: [
@@ -283,11 +274,19 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     handler:function() {
                         if (self.isValid()) {
                             var runSaveCallback = function (store, records, options) {
+                                self.runId = records[0].data.id;
+                                self.savePendingSamples();
+
                                 self.fireEvent("save", records[0].data.id);
                             };
 
                             if (self.runId == 0) {
                                 //create new
+                                if (self.pendingSampleStore.getCount() == 0) {
+                                    Ext.Msg.alert("Warning", "You cannot create a run without samples. Please select some samples and try again.");
+                                    return;
+                                }
+
                                 values = {};
                                 values.title = self.getComponent('title').getValue();
                                 values.method_id = self.getComponent('method').getValue();
@@ -329,15 +328,27 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
 
         MA.RunDetail.superclass.constructor.call(this, config);
 
-        this.addEvents("delete", "save");
+        this.addEvents("delete", "save", "save-samples");
 
+        this.pendingSampleStore.removeAll();
         this.runId = 0;
+    },
+    addSample: function (id) {
+        if (Ext.isArray(id)) {
+            for (var i = 0; i < id.length; i++) {
+                this.addSample(id[i]);
+            }
+            return;
+        }
+
+        this.pendingSampleStore.add(new this.PendingSampleRecord({ id: id }, id));
     },
     clearRun: function () {
         this.createRun();
     },
     createRun: function () {
         this.runId = 0;
+        this.pendingSampleStore.removeAll();
 
         this.getComponent("state").setText(renderRunState(0));
         this.getComponent("title").setValue("New Untitled Run");
@@ -362,8 +373,41 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
             }
         }
     },
+    savePendingSamples: function () {
+        if (this.pendingSampleStore.getCount() > 0) {
+            if (this.runId) {
+                var self = this;
+
+                var ids = [];
+                this.pendingSampleStore.each(function (record) {
+                    ids.push(record.data.id);
+                });
+
+                Ext.Ajax.request({
+                    url: wsBaseUrl + "add_samples_to_run/",
+                    method: "POST",
+                    params: {
+                        run_id: this.runId,
+                        sample_ids: ids.join(",")
+                    },
+                    success: function () {
+                        self.pendingSampleStore.removeAll();
+                        self.sampleStore.load({ params: { run__id__exact: self.runId } });
+                        self.fireEvent("save-samples");
+                    },
+                    failure: function (response, options) {
+                        Ext.Msg.alert("Error", "An error occurred while saving the sample list for this run.");
+                    }
+                });
+            }
+            else {
+                throw new Error("Pending samples can only be saved if a run has already been created.");
+            }
+        }
+    },
     selectRun: function (record) {
         this.runId = record.data.id;
+        this.pendingSampleStore.removeAll();
 
         this.getComponent("state").setText(renderRunState(record.data.state));
         this.getComponent("title").setValue(record.data.title);
@@ -371,7 +415,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         this.getComponent("machine").setValue(record.data.machine);
 
         this.sampleStore.load({ params: { run__id__exact: this.runId } });
-    },
+    }
 });
 
 MA.RunCmp = new Ext.Window({
@@ -425,7 +469,10 @@ MA.RunCmp = new Ext.Window({
             bodyStyle:'padding:20px;background:transparent;border-top:none;border-bottom:none;border-right:none;',
             listeners: {
                 "delete": MA.RunDeleteCallback,
-                "save": MA.RunSaveCallback
+                "save": function (id) {
+                    runStore.load();
+                    MA.RunSaveCallback(id);
+                }
             }
         })
     ]
