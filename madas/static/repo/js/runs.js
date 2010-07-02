@@ -27,6 +27,7 @@ MA.RunSaveCallback = function(id) {
 };
 
 MA.RunDeleteCallback = function() {
+    runStore.load();
     MA.ClearCurrentRun();
 };
 
