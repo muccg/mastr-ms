@@ -430,7 +430,7 @@ MA.InitApplication = function() {
 
     MA.InitUI();
     
-    MA.Authorize('dashboard:list', []);
+    MA.Authorize('dashboard:list', [], function () { Ext.get("loginOverlay").remove(); });
 };
 
 MA.InitUI = function() {
@@ -466,7 +466,7 @@ MA.InitUI = function() {
                                     })
             ]
     });
-    
+
 };
 
 MA.UpdateNav = function() {
