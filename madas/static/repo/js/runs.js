@@ -397,7 +397,13 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                         self.fireEvent("save-samples");
                     },
                     failure: function (response, options) {
-                        Ext.Msg.alert("Error", "An error occurred while saving the sample list for this run.");
+                        var message = "An error occurred while saving the "
+                            + "sample list for this run. More detail may be "
+                            + "available below:"
+                            + "<br /><br />"
+                            + response.responseText;
+
+                        Ext.Msg.alert("Error", message);
                     }
                 });
             }
