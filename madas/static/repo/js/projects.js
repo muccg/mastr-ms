@@ -10,7 +10,7 @@ MA.ProjectList = Ext.extend(Ext.Panel, {
                     cls: "x-btn-text-icon",
                     icon: "static/repo/images/add.gif",
                     handler: function () {
-                        MA.MenuHandler({ "id": "project-new" });
+                        MA.MenuHandler({ "id": "project:new" });
                     }
                 },
                 {
