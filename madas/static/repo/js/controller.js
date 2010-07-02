@@ -430,7 +430,7 @@ MA.InitApplication = function() {
 
     MA.InitUI();
     
-    MA.Authorize('projects:list', []);
+    MA.Authorize('dashboard:list', []);
 };
 
 MA.InitUI = function() {
@@ -457,7 +457,7 @@ MA.InitUI = function() {
                 layout: 'card',
                 layoutOnCardChange:true,
                 activeItem:2,
-                items: [MA.ExperimentCmp, MA.ExperimentListCmp, MA.LoginCmp, MA.ClientsListCmp, MA.ClientSamplesCmp, MA.ProjectListCmp, MA.ProjectCmp, MA.RunListCmp]
+                items: [MA.ExperimentCmp, MA.ExperimentListCmp, MA.LoginCmp, MA.ClientsListCmp, MA.ClientSamplesCmp, MA.ProjectListCmp, MA.ProjectCmp, MA.RunListCmp, MA.DashboardCmp]
             },
                new Ext.BoxComponent({
                                     region:'south',

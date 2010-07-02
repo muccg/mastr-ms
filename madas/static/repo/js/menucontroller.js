@@ -149,6 +149,11 @@ MA.ChangeMainContent = function(contentName, paramArray){
         case 'admin:db':
             window.location = "../repoadmin/";
             break;
+
+        case "dashboard:list":
+            MA.Dashboard.prepare();
+            Ext.getCmp("center-panel").layout.setActiveItem("dashboard");
+            break;
             
         case 'clients:list':
             clientsListStore.reload();

@@ -8,6 +8,7 @@ MA.MenuRender = function(username) {
             id: 'toolbarA',
             items: [
                 { xtype: 'tbbutton', text:'Login', id:'login', handler: MA.MenuHandler},
+                { xtype: 'tbbutton', text:'Dashboard', id:'dashboard:list', handler: MA.MenuHandler},
                 { xtype: 'tbbutton', text:'Projects', id:'projectsMenu', menu:{
                     items: [
                         {text:'Projects List', id:'projects:list', handler: MA.MenuHandler}
@@ -59,6 +60,7 @@ MA.MenuShow = function() {
     }
     
     Ext.get('login').hide();
+    Ext.get('dashboard:list').show();
     Ext.get('userMenu').show();
     Ext.get('clientsMenu').show();
     Ext.get('projectsMenu').show();
@@ -77,6 +79,7 @@ MA.MenuHide = function() {
 
     Ext.get('login').show();
     //    Ext.get('admin').hide();
+    Ext.get('dashboard:list').hide();
     Ext.get('userMenu').hide();
 
     Ext.get('clientsMenu').hide();
