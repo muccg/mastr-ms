@@ -1,61 +1,88 @@
-MA.ProjectListCmp = {
+MA.ProjectList = Ext.extend(Ext.Panel, {
+    constructor: function (config) {
+        var self = this;
+
+        var defaultConfig = {
+            layout: "fit",
+            tbar: [
+                {
+                    text: "new project",
+                    cls: "x-btn-text-icon",
+                    icon: "static/repo/images/add.gif",
+                    handler: function () {
+                        MA.MenuHandler({ "id": "project-new" });
+                    }
+                },
+                {
+                    text: "remove project",
+                    cls: "x-btn-text-icon",
+                    icon: "static/repo/images/no.gif",
+                    handler: function () {
+                        var grid = self.getComponent("grid");
+                        var selections = grid.getSelectionModel().getSelections();
+
+                        grid.getStore().remove(selections);
+                        self.fireEvent("delete", selections);
+                    }
+                }
+            ],
+            items: [
+                new Ext.grid.GridPanel({
+                    itemId: "grid",
+                    border: false,
+                    trackMouseOver: false,
+                    selModel: new Ext.grid.RowSelectionModel({ singleSelect: true }),
+                    viewConfig: {
+                        forceFit: true,
+                        autoFill: true
+                    },
+                    columns: [
+                        { header: "id", sortable: false, menuDisabled: true, dataIndex: "id", width: 50 },
+                        { header: "title", sortable: false, menuDisabled: true, dataIndex: "title" },
+                        { header: "client", sortable: false, menuDisabled: true, dataIndex: "client__unicode" },
+                        { header: "description", sortable: false, menuDisabled: true, dataIndex: "description", width: 300 }
+                    ],
+                    store: projectsListStore,
+                    listeners: {
+                        "rowclick": function () {
+                            self.fireEvent("click", this.getSelectionModel().getSelected().data.id);
+                        },
+                        "rowdblclick": function () {
+                            self.fireEvent("dblclick", this.getSelectionModel().getSelected().data.id);
+                        }
+                    }
+                })
+            ]
+        };
+
+        config = Ext.apply(defaultConfig, config);
+
+        MA.ProjectList.superclass.constructor.call(this, config);
+        this.addEvents("click", "dblclick", "delete");
+    },
+    getStore: function () {
+        return this.getComponent("grid").getStore();
+    },
+    select: function (id) {
+        var record = this.getStore().getById(id);
+        this.getComponent("grid").getSelectionModel().selectRecords([record], false);
+    }
+});
+
+
+MA.ProjectListCmp = new MA.ProjectList({
     title: 'projects',
     region: 'center',
     cmargins: '0 0 0 0',
     collapsible: false,
     id:'projects-list',
     bodyStyle: 'padding:0px;',
-    layout:'fit',
-    tbar: [{
-        text: 'new project',
-        cls: 'x-btn-text-icon',
-        icon:'static/repo/images/add.gif',
-        handler : function(){
-                MA.MenuHandler({'id':'project:new'});
-            }
-        },
-        {
-        text: 'remove project',
-        cls: 'x-btn-text-icon',
-        icon:'static/repo/images/no.gif',
-        handler : function(){
-           var grid = Ext.getCmp('projects');
-           
-           var selections = grid.getSelectionModel().getSelections();
-
-           projectsListStore.remove(selections);
-           }
-           
+    listeners: {
+        dblclick: function (id) {
+            MA.LoadProject(id);
         }
-    ],
-    items: [
-        {
-            xtype:'grid',
-            border: false,
-            id:'projects',
-            trackMouseOver: false,
-            sm: new Ext.grid.RowSelectionModel( {singleSelect:true}),
-            viewConfig: {
-                forceFit: true,
-                autoFill:true
-            },
-            columns: [
-                { header: "id", sortable:false, menuDisabled:true, dataIndex:'id', width:50 },
-                { header: "title", sortable:false, menuDisabled:true, dataIndex:'title' },
-                { header: "Client", sortable:false, menuDisabled:true, dataIndex:'client__unicode' },
-                { header: "description", sortable:false, menuDisabled:true, width:300, dataIndex:'description' }
-            ],
-            store: projectsListStore,
-            listeners: {
-                'rowdblclick':function(el, ev) {
-                    var sm = Ext.getCmp('projects').getSelectionModel();
-                    var rec = sm.getSelected();
-                    MA.LoadProject(rec.data.id);
-                }
-            }
-        }
-    ]
-};
+    }
+});
 
 MA.ProjectCmp = { 
     id:'projectCmpTitle',
