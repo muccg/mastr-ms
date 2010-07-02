@@ -69,11 +69,6 @@
         </script>
     </head>
     <body onload="callbacker();">
-        <div id="appLoad" style="display:none;z-index:1;position:absolute;left:0px;top:0px;width:100%;height:100%;background:white;padding:40%;">
-            <img src="static/ext-3.2.1/resources/images/default/shared/large-loading.gif" width="32" height="32" />
-            Loading...
-        </div>
-
         <div id="north">
             <div id="appTitle">MASTR MS</div>
             <div id="toolbar"></div>
@@ -110,5 +105,34 @@
         <div id="south">&copy; CCG 2010 $Rev$</div>
 
         <form id="hiddenForm"></form>
+
+        <div id="loginOverlay">
+            <div id="appLoad" class="x-panel">
+                <div class="x-panel-tl">
+                    <div class="x-panel-tr">
+                        <div class="x-panel-tc">
+                            <div class="x-panel-header x-unselectable">
+                                MASTR MS
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="x-panel-bwrap">
+                    <div class="x-panel-ml">
+                        <div class="x-panel-mr">
+                            <div class="x-panel-mc">
+                                <img src="static/ext-3.2.1/resources/images/default/shared/large-loading.gif" width="32" height="32" />
+                                Loading...
+                            </div>
+                        </div>
+                    </div>
+                    <div class="x-panel-bl x-panel-nofooter">
+                        <div class="x-panel-br">
+                            <div class="x-panel-bc"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </body>
 </html>

@@ -46,7 +46,7 @@ MA.NotAuthorizedCmp = { id: 'notauthorized-panel', title: 'Not Authorized', html
  * authorize
  * used to check if the user is still logged in, and if they can access the requested view
  */
-MA.Authorize = function(requestedView, params) {
+MA.Authorize = function(requestedView, params, callback) {
     if (requestedView === 'notauthorized') {
         return MA.ChangeMainContent(requestedView, params);
     }
@@ -86,6 +86,10 @@ MA.Authorize = function(requestedView, params) {
             Ext.getCmp('userMenu').setText('User: none');
         }
         MA.ChangeMainContent(action.result.mainContentFunction, action.result.params);
+
+        if (callback) {
+            callback();
+        }
     },
     failure: function (form, action) {
         switch (action.failureType) {
