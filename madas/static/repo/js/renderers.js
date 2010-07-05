@@ -48,13 +48,13 @@ function renderRunProgress(val, meta, record) {
 
     var id = Ext.id();
 
-    var progress = new Ext.ProgressBar({
+    var progressBar = new Ext.ProgressBar({
         text: Math.floor(progress * 100.0).toString() + "%",
         value: progress
     });
 
     (function () {
-        progress.applyToMarkup(id);
+        progressBar.applyToMarkup(id);
     }).defer(50);
 
     return "<div id='" + id + "'></div>";
