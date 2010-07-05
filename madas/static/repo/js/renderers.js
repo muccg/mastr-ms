@@ -46,20 +46,19 @@ function renderRunProgress(val, meta, record) {
         progress = 0.0;
     }
 
-    var progressBar = new Ext.ProgressBar({
-        text: Math.floor(progress * 100.0).toString() + "%",
-        value: progress
-    });
+    var text = Math.floor(progress * 100.0).toString() + "%";
 
-    var id = Ext.id();
-    
-    (function () {
-        if (Ext.get(id) != null) {
-            progressBar.applyToMarkup(id);
-        }
-    }).defer(50);
-
-    return "<div id='" + id + "'></div>";
+    return "<div class='x-progress-wrap'>"
+        + "<div class='x-progress-inner'>"
+        + "<div style='position: relative; height: 16px; width: " + text + "' class='x-progress-bar'>"
+        + "</div>"
+        + "<div style='width: 100%; padding: 1px 0' class='x-progress-text'>"
+        + "<div class='x-renderer-progress-text'>" + text + "</div>"
+        + "</div>"
+        + "</div>"
+        + "</div>"
+        + "</div>"
+        + "</div>";
 }
 
 function renderRunState(val) {

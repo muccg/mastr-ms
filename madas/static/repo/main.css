@@ -135,3 +135,11 @@ body
 #loginOverlay #appLoad .x-panel-mc img {
     vertical-align: middle;
 }
+
+.x-renderer-progress-text {
+    width: 100%;
+    height: 18px;
+    text-shadow: -1px 0 rgb(57, 96, 149), 0 1px rgb(57, 96, 149), 1px 0 rgb(57, 96, 149), 0 -1px rgb(57, 96, 149);
+    text-shadow: -1px 0 rgba(57, 96, 149, 0.5), 0 1px rgba(57, 96, 149, 0.5), 1px 0 rgba(57, 96, 149, 0.5), 0 -1px rgba(57, 96, 149, 0.5);
+    filter: progid:DXImageTransform.Microsoft.DropShadow(offX=1, offY=0, color=#80396095) progid:DXImageTransform.Microsoft.DropShadow(offX=-1, offY=0, color=#80396095) progid:DXImageTransform.Microsoft.DropShadow(offX=0, offY=1, color=#80396095) progid:DXImageTransform.Microsoft.DropShadow(offX=0, offY=-1, color=#80396095);
+}
