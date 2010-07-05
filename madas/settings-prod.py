@@ -3,10 +3,6 @@
 import os
 from django.utils.webhelpers import url
 
-# PROJECT_DIRECTORY isnt set when not under wsgi
-if not os.environ.has_key('PROJECT_DIRECTORY'):
-    os.environ['PROJECT_DIRECTORY']=os.path.dirname(__file__).split("/appsettings/")[0]
-
 from appsettings.default_prod import *
 from appsettings.mastrms.prod import *
 
