@@ -366,7 +366,7 @@ MA.BioSource = {
                                         forceSelection:false,
                                         hiddenName:'node',
                                         lazyRender:true,
-                                        allowBlank:true,
+                                        allowBlank:false,
                                         typeAhead:false,
                                         triggerAction:'all',
                                         listWidth:230,
