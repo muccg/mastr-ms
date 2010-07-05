@@ -3,18 +3,17 @@
 import os
 from django.utils.webhelpers import url
 
-from build.settings.defaults.dev import *
-from build.settings.db.dev import *
-from build.settings.ldap.dev import *
+# PROJECT_DIRECTORY isnt set when not under wsgi
+if not os.environ.has_key('PROJECT_DIRECTORY'):
+    os.environ['PROJECT_DIRECTORY']=os.path.dirname(__file__).split("/appsettings/")[0]
 
-ADMINS.append( ( 'Andrew Macgregor', 'andrew@ccg.murdoch.edu.au' ) )
+from appsettings.default_dev import *
+from appsettings.mastrms.dev import *
 
-DATABASES['default']['NAME'] = 'dev_madas'
-DATABASES['default']['USER'] = 'madasapp'
-DATABASES['default']['PASSWORD'] = 'madasapp'
-
-# Make this unique, and don't share it with anybody.
-SECRET_KEY = 'qj#tl@9@7((%^)$i#iyw0gcfzf&#a*pobgb8yr#1%65+*6!@g$'
+# Defaults
+#LOGIN_URL
+#LOGIN_REDIRECT_URL
+#LOGOUT_URL
 
 ROOT_URLCONF = 'madas.urls'
 
@@ -31,17 +30,8 @@ INSTALLED_APPS.extend( [
 
 MEMCACHE_KEYSPACE = "dev-madas-"
 
-# override the LDAP group
-DEFAULT_GROUP = 'madas'  #this needs to exist in the database.
-AUTH_LDAP_BASE = 'ou=People,dc=ccg,dc=murdoch,dc=edu,dc=au'
-AUTH_LDAP_GROUP_BASE = 'ou=NEMA,ou=Web Groups,dc=ccg,dc=murdoch,dc=edu,dc=au'
-AUTH_LDAP_ADMIN_BASE = 'dc=ccg,dc=murdoch,dc=edu,dc=au'
-AUTH_LDAP_USER_BASE = 'ou=NEMA,ou=People,' + AUTH_LDAP_ADMIN_BASE
-LDAPADMINUSERNAME = 'uid=nemaapp,ou=Application Accounts'
-LDAPADMINPASSWORD = 'nr2WovGfkWR'
 MADAS_STATUS_GROUPS = ['User', 'Pending', 'Deleted', 'Rejected']
 MADAS_ADMIN_GROUPS = ['Administrators', 'Node Reps']
-DEV_SERVER = True # used by ldap helper
 
 AUTHENTICATION_BACKENDS = [
  'madas.repository.backend.MadasBackend',
@@ -53,21 +43,11 @@ SESSION_COOKIE_PATH = url('/')
 SESSION_SAVE_EVERY_REQUEST = True
 CSRF_COOKIE_NAME = "csrftoken_madas_repoadmin"
 
-# a directory for persistent storage on the filesystem for this app. 
-# it is 'DECLARED' here for readability, set below based on whether 
-# the site is being run locally, on a dev server, or on a production server,
-# and then asserted towards the end of this file. 
-# It should be created outside of PROJECT_DIR, and the application should fail 
-# on startup if it does not exist (hence the assert)
-PERSISTENT_FILESTORE = None
+PERSISTENT_FILESTORE = os.path.normpath(os.path.join(PROJECT_DIRECTORY, '..', '..', 'files'))
 
 if "LOCALDEV" in os.environ:
     SSL_ENABLED = False
-    #localdev persistent filestore is at /tmp/SCRIPT_NAME/filestore
     PERSISTENT_FILESTORE = os.path.normpath('/tmp/madas/filedata')
-else:
-    #Dev Server persistent filestore is at appdir/../../filestore
-    PERSISTENT_FILESTORE = os.path.normpath(os.path.join(PROJECT_DIRECTORY, '..', '..', 'files') )
 
 REPO_FILES_ROOT = PERSISTENT_FILESTORE
 QUOTE_FILES_ROOT = os.path.join(PERSISTENT_FILESTORE, 'quotes')
@@ -76,19 +56,12 @@ MADAS_SESSION_TIMEOUT = 1800 #30 minute session timeout
 #Ensure the persistent storage dir exits. If it doesn't, exit noisily.
 assert os.path.exists(PERSISTENT_FILESTORE), "This application cannot start: It expects a writeable directory at %s to use as a persistent filestore" % (PERSISTENT_FILESTORE) 
 
-
-# email server
-EMAIL_APP_NAME = "Madas (Mango)"
-EMAIL_SUBJECT_PREFIX = "Madas (Mango) DEV_SERVER"
-
-
 #functions to evaluate for status checking
 from status_checks import *
 STATUS_CHECKS = [check_default]
 
 APPEND_SLASH = True
 SITE_NAME = 'madas'
-RETURN_EMAIL = 'bpower@ccg.murdoch.edu.au'
 
 # these are non-standard and override defaults
 MEDIA_ROOT = os.path.join(PROJECT_DIRECTORY,"static")
