@@ -477,7 +477,8 @@ MA.RunCmp = new Ext.Window({
             listeners: {
                 "delete": MA.RunDeleteCallback,
                 "save": function (id) {
-                    runStore.load();
+                    //disabling the runstore reload because it loses the selection which causes issues
+                    //runStore.load();
                     MA.RunSaveCallback(id);
                 }
             }
