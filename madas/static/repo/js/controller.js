@@ -230,7 +230,11 @@ MA.ExperimentCmp = {
                         singleSelect:true,
                         multiSelect:false,
                         listeners:{
-                            "selectionchange":function(list, nodes) { 
+                            "selectionchange":function(list, nodes) {
+                                if (list.getSelectionCount() == 0) {
+                                    return;
+                                }
+                             
                                 var index = list.getSelectedIndexes()[0];
                                 var r = list.getSelectedRecords()[0];
                             
@@ -407,10 +411,9 @@ MA.LoadExperiment = function(expId) {
     MA.CurrentExpId = expId;
     
     MA.MenuHandler({ id:'experiment:view' });
-    
-    //Ext.getCmp('expContent').getLayout().setActiveItem(0);
 
-    
+    //Ext.getCmp('expContent').getLayout().setActiveItem(0);
+    Ext.getCmp('expNav').clearSelections();
 };
 
 /**
@@ -484,7 +487,7 @@ MA.UpdateNav = function() {
     }
     
     if (na.getSelectionCount() == 0) {
-        na.select(0,false,false);
+        na.select(0,0,false);
     }
 //    for (counter = 1; counter <= 8; counter++) {
 //        ds.getAt(counter).set("enabled", (en.getValue() !== ''));
