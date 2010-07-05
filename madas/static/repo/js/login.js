@@ -78,11 +78,13 @@ MA.Authorize = function(requestedView, params, callback) {
             MA.IsAdmin = action.result.isAdmin;
             MA.IsNodeRep = action.result.isNodeRep;
             MA.IsLoggedIn = true;
+            MA.CurrentUserId = action.result.user_id;
         }
         if (! action.result.authenticated) {
             MA.IsAdmin = false;
             MA.IsNodeRep = false;
             MA.IsLoggedIn = false;
+            MA.CurrentUserId = 0;
             Ext.getCmp('userMenu').setText('User: none');
         }
         MA.ChangeMainContent(action.result.mainContentFunction, action.result.params);

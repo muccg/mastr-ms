@@ -241,6 +241,7 @@ def jsonResponse(request, *args):
     a['totalRows'] =        get_var(s, 'totalRows', 0)
     a['authenticated'] =    get_var(s, 'authenticated', 0)
     a['authorized'] =       get_var(s, 'authorized', 0)
+    a['user_id'] =          request.user.id
     a['username'] =         request.user.username
     #TODO: This isnt quite right. admin != node rep, node rep != admin
 
