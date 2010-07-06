@@ -284,26 +284,17 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                                 self.fireEvent("save", records[0].data.id);
                             };
 
+                            var values = {};
+                            values.title = self.getComponent('title').getValue();
+                            values.method_id = self.getComponent('method').getValue();
+                            values.machine_id = self.getComponent('machine').getValue();
+
                             if (self.runId == 0) {
                                 //create new
-                                if (self.pendingSampleStore.getCount() == 0) {
-                                    Ext.Msg.alert("Warning", "You cannot create a run without samples. Please select some samples and try again.");
-                                    return;
-                                }
-
-                                values = {};
-                                values.title = self.getComponent('title').getValue();
-                                values.method_id = self.getComponent('method').getValue();
-                                values.machine_id = self.getComponent('machine').getValue();
-                                
                                 MA.CRUDSomething('create/run/', values, runSaveCallback);
                             } else {
                                 //update
-                                values = {};
                                 values.id = self.runId;
-                                values.title = self.getComponent('title').getValue();
-                                values.method_id = self.getComponent('method').getValue();
-                                values.machine_id = self.getComponent('machine').getValue();
                                 
                                 MA.CRUDSomething('update/run/'+values.id+'/', values, runSaveCallback);
                             }
