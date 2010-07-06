@@ -136,14 +136,18 @@ MA.ChangeMainContent = function(contentName, paramArray){
             et.setTitle('new experiment');
             
             namefield.setValue('');
+
+            MA.UpdateNav();       
+
             desc.setValue('');
             comment.setValue('');
-            formalQuote.setValue('');
+            formalQuote.clearValue();
             jobNumber.setValue('');
             //fall through to force render of new experiment
         case 'experiment:view':
             Ext.getCmp('center-panel').layout.setActiveItem(0);
-            Ext.getCmp('expNav').getSelectionModel().selectFirstRow();            
+            Ext.getCmp('expNav').getSelectionModel().selectFirstRow();     
+            
             break;
             
         case 'admin:db':
