@@ -352,6 +352,15 @@ class RunAdmin(ExtJsonInterface, admin.ModelAdmin):
     samples_link.allow_tags = True
 
 
+class ClientFileAdmin(ExtJsonInterface, admin.ModelAdmin):
+    list_display = ['experiment', 'filepath', 'sharetimestamp', 'sharedby', 'downloaded']
+
+    def queryset(self, request):
+        qs = super(ClientFileAdmin, self).queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(experiment__users=request.user).distinct()
+
 admin.site.register(OrganismType, OrganismTypeAdmin)
 admin.site.register(UserInvolvementType, UserInvolvementTypeAdmin)
 admin.site.register(Organ, OrganAdmin)
@@ -370,3 +379,4 @@ admin.site.register(PlantInfo, PlantInfoAdmin)
 admin.site.register(SampleClass, SampleClassAdmin)
 admin.site.register(SampleLog, SampleLogAdmin)
 admin.site.register(Run, RunAdmin)
+admin.site.register(ClientFile, ClientFileAdmin)
