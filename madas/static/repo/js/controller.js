@@ -49,6 +49,13 @@ MA.ExperimentBlur = function(invoker) {
         expJobNumber = '';
     }
     
+    if (!Ext.isDefined(expName) ||
+        expName === "") {
+        //seriously, this should never happen
+        MA.ExperimentBlurSuccess();
+        return;
+    }
+    
     MA.ExperimentDeferredInvocation = invoker;
 
     if (expId === 0) {
@@ -364,7 +371,7 @@ MA.LoadExperiment = function(expId) {
                                              var formalQuote = Ext.getCmp('formalQuote');
                                              var jobNumber = Ext.getCmp('jobNumber');
 
-                                             //update the fields on the ssample tracking page
+                                             //update the fields on the sample tracking page
                                              var tnamefield = Ext.getCmp('trackingExperimentName');
                                              var tcomment = Ext.getCmp('trackingExperimentComment');
                                              var tformalQuote = Ext.getCmp('trackingFormalQuote');
@@ -377,7 +384,7 @@ MA.LoadExperiment = function(expId) {
                                              namefield.setValue('');
                                              desc.setValue('');
                                              comment.setValue('');
-                                             formalQuote.setValue('');
+                                             formalQuote.clearValue();
                                              jobNumber.setValue('');
                                                 
                                              //tracking fields
@@ -479,7 +486,6 @@ MA.UpdateNav = function() {
     var na = Ext.getCmp("expNav");
     
     var counter = 1;
-        
     if (en.getValue() === '') {
         na.disable();
     } else {
