@@ -477,8 +477,18 @@ MA.RunCmp = new Ext.Window({
             listeners: {
                 "delete": MA.RunDeleteCallback,
                 "save": function (id) {
-                    //disabling the runstore reload because it loses the selection which causes issues
-                    //runStore.load();
+                    runStore.addListener("load", function () {
+                        /* Need to reload the record from the store for list
+                         * manipulation methods to work. No, I don't understand
+                         * why either. */
+                        var record = runStore.getById(id);
+                        var list = Ext.getCmp("runlistview");
+
+                        list.select(record);
+                        list.getNode(record).scrollIntoView(list.innerBody.dom.parentNode);
+                    }, runStore, { single: true });
+
+                    runStore.load();
                     MA.RunSaveCallback(id);
                 }
             }
