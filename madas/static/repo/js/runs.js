@@ -261,13 +261,16 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                 {
                     text: "Mark Complete",
                     handler: function () {
-                        Ext.Ajax.request({
-                            url: wsBaseUrl + "mark_run_complete/" + self.runId,
-                            success: function () {
-                                self.getComponent("state").setText(renderRunState(2));
-                                self.fireEvent("save", self.runId);
-                            }
-                        });
+                        var agreed = window.confirm("Are you sure you wish to mark this run as having been fully completed?");
+                        if (agreed) {
+                            Ext.Ajax.request({
+                                url: wsBaseUrl + "mark_run_complete/" + self.runId,
+                                success: function () {
+                                    self.getComponent("state").setText(renderRunState(2));
+                                    self.fireEvent("save", self.runId);
+                                }
+                            });
+                        }
                     }
                 },
                 { 
