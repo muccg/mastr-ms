@@ -20,6 +20,11 @@ items:[
        //       bodyStyle:'padding:0px;background:transparent;',
        collapsible: false,
        layout:'border',
+       tbar: {
+           items: [
+               { xtype:'tbtext', text:'checkmarks indicate files that are visible to clients' }
+           ]
+       },
        items: [
                {
                xtype:'treepanel',
