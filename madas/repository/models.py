@@ -427,3 +427,10 @@ class RunSample(models.Model):
     def save(self, *args, **kwargs):
         super(RunSample, self).save(*args, **kwargs)
         self.run.update_sample_counts()
+        
+class ClientFile(models.Model):
+    experiment = models.ForeignKey(Experiment)
+    filepath = models.TextField()
+    downloaded = models.BooleanField(default=False, db_index=True)
+    sharetimestamp = models.DateTimeField(auto_now=True)
+    sharedby = models.ForeignKey(User)

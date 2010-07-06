@@ -2,7 +2,7 @@ from django.db import transaction
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden, HttpResponseNotAllowed, HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
-from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RunSample, InstrumentMethod
+from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RunSample, InstrumentMethod, ClientFile
 from madas.m.models import Organisation, Formalquote
 from django.utils import webhelpers
 from django.contrib.auth.models import User
@@ -253,6 +253,73 @@ def records(request, model, field, value):
         d = {}
         for f in model_obj._meta.fields:
             d[f.name] = f.value_from_object(row)
+        output['rows'].append(d)
+
+    output = makeJsonFriendly(output)
+    return HttpResponse(json.dumps(output))
+
+
+def recordsClientFiles(request):
+
+    if request.GET:
+        args = request.GET
+    else:
+        args = request.POST
+
+    ### TODO why do we need this, we'll get a 403 from decorator now if not logged in and not in group - ABM
+    authenticated = request.user.is_authenticated()
+    if not authenticated == True:
+        return jsonResponse(request, [])
+    ### End Authorisation Check ###
+
+    # basic json that we will fill in
+    output = {'metaData': { 'totalProperty': 'results',
+                            'root': 'rows',
+                            'id': 'id',
+                            'successProperty': 'success',
+                            'fields': []
+                            },
+              'results': 0,
+              'authenticated': True,
+              'authorized': True,
+              'success': True,
+              'rows': []
+              }
+
+    # TODO as above - do we need this now - ABM
+    authenticated = request.user.is_authenticated()
+    authorized = True # need to change this
+    if not authenticated or not authorized:
+        return HttpResponse(json.dumps(output), status=401)
+
+
+    rows = ClientFile.objects.filter(experiment__users=request.user) 
+
+    # add fields to meta data
+    for f in ClientFile._meta.fields:
+        output['metaData']['fields'].append({'name':f.name})
+        try:
+            f.rel.to
+            output['metaData']['fields'].append({
+                "name": f.name + "__unicode",
+                "type": "string",
+            })
+        except AttributeError:
+            pass
+
+    # add row count
+    output['results'] = len(rows);
+
+    # add rows
+    for row in rows:
+        d = {}
+        for f in ClientFile._meta.fields:
+            d[f.name] = f.value_from_object(row)
+            try:
+                d[f.name + "__unicode"] = unicode(getattr(row, f.name))
+            except:
+                pass
+            
         output['rows'].append(d)
 
     output = makeJsonFriendly(output)
@@ -966,6 +1033,7 @@ def experimentFilesList(request):
         path = ''
     
     if not 'experiment' in args or args['experiment'] == '0':
+        print 'invalid experiment'
         return HttpResponse('[]')
         
     exp = Experiment.objects.get(id=args['experiment'])
@@ -975,7 +1043,9 @@ def experimentFilesList(request):
     
     exppath = settings.REPO_FILES_ROOT + os.sep + 'experiments' + os.sep + str(exp.created_on.year) + os.sep + str(exp.created_on.month) + os.sep + str(exp.id) + os.sep
     
-    return _fileList(request, exppath, path)
+    sharedList = ClientFile.objects.filter(experiment=exp)
+    print sharedList
+    return _fileList(request, exppath, path, True, sharedList)
     
 
 @staff_member_required
@@ -996,12 +1066,12 @@ def pendingFilesList(request):
     
     basepath = settings.REPO_FILES_ROOT + os.sep + 'pending' + os.sep
     
-    return _fileList(request, basepath, path)
+    return _fileList(request, basepath, path, False, [])
     
     
 @staff_member_required
 @user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
-def _fileList(request, basepath, path):
+def _fileList(request, basepath, path, withChecks, sharedList):
 
     import os
 
@@ -1009,6 +1079,7 @@ def _fileList(request, basepath, path):
 
     #verify that there is no up-pathing hack happening
     if len(os.path.abspath(basepath)) > len(os.path.commonprefix((basepath, os.path.abspath(basepath + path)))):
+        print 'uppath problem for '+os.path.commonprefix((basepath, os.path.abspath(basepath + path)))
         return HttpResponse(json.dumps(output))
 
     if not os.path.exists(basepath + path):
@@ -1017,6 +1088,8 @@ def _fileList(request, basepath, path):
 
     files = os.listdir(basepath + path)
     files.sort()
+    
+    print str(len(files)) + ' files in ' + basepath + path
     
     for filename in files:
         filepath = basepath + filename
@@ -1033,10 +1106,45 @@ def _fileList(request, basepath, path):
             file['id'] = filename
             if not path == '':
                 file['id'] = path + os.sep + filename
+            if withChecks:
+                print 'checking'
+                file['checked'] = False
+                
+                for cf in sharedList:
+                    if file['id'] == cf.filepath:
+                        file['checked'] = True
             output.append(file)
         
     return HttpResponse(json.dumps(output))
+
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
+def shareFile(request, *args):
+    print 'shareFile:', str('')
     
+    args = request.POST
+    
+    file = args['file']
+    checked = args['checked']
+    
+    exp = Experiment.objects.get(id=args['experiment_id'])
+    exp.ensure_dir()
+
+    if checked == 'true':    
+        try:
+            client_file = ClientFile.objects.get(filepath=file, experiment=exp)
+        except:
+            client_file = ClientFile.objects.create(filepath=file, experiment=exp, sharedby=request.user)
+        client_file.sharedby=request.user
+        client_file.save()
+    else:
+        try:
+            client_file = ClientFile.objects.get(filepath=file, experiment=exp)
+            client_file.delete()
+        except:
+            pass
+    
+    return HttpResponse(json.dumps({'success':True}))
     
 @staff_member_required
 @user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
@@ -1063,6 +1171,29 @@ def downloadFile(request, *args):
     response['Content-Length'] = os.path.getsize(filename)
     return response 
 
+def downloadClientFile(request, file_id):
+    print 'downloadClientFile:', str('')
+
+    try:
+        cf = ClientFile.objects.get(id=file_id, experiment__users=request.user)
+    except:
+        return HttpResponseNotFound("You do not have permission to a file with that ID ("+file_id+")")
+    
+    exp = cf.experiment
+    exp.ensure_dir()
+    
+    import os, settings
+    filename = os.path.join(settings.REPO_FILES_ROOT, 'experiments', str(exp.created_on.year), str(exp.created_on.month), str(exp.id), cf.filepath)
+    from django.core.servers.basehttp import FileWrapper
+    from django.http import HttpResponse
+
+    from django.core.files import File
+    wrapper = File(open(filename, "rb"))
+    content_disposition = 'attachment;  filename=\"%s\"' % (str(cf.filepath))
+    response = HttpResponse(wrapper, content_type='application/download')
+    response['Content-Disposition'] = content_disposition
+    response['Content-Length'] = os.path.getsize(filename)
+    return response 
     
 @staff_member_required
 @user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)

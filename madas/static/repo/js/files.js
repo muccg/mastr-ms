@@ -78,7 +78,16 @@ items:[
                                     },
                                          params: { file: de.dropNode.id, target: de.target.id, experiment_id: MA.CurrentExperimentId() }
                                     });
-                   }
+                   },
+                   checkchange: function(node, checked){
+                                   Ext.Ajax.request({
+                                       method:'POST',
+                                       url: wsBaseUrl + 'shareFile',
+                                       success: function() {  },
+                                       failure: function() {  },
+                                       params: { file: node.id, checked: checked, experiment_id: MA.CurrentExperimentId() }
+                                                                   });
+                               }
                 }
                },
                
