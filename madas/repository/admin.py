@@ -329,7 +329,7 @@ class RunAdmin(ExtJsonInterface, admin.ModelAdmin):
         qs = super(RunAdmin, self).queryset(request)
         if request.user.is_superuser:
             return qs
-        return qs.filter(samples__experiment__users=request.user).distinct()
+        return qs.filter(Q(samples__experiment__users=request.user) | Q(creator=request.user)).distinct()
 
     def output_link(self, obj):
         output_url = urlresolvers.reverse('generate_worklist', kwargs={'run_id': obj.id})
