@@ -9,24 +9,12 @@ MA.MenuRender = function(username) {
             items: [
                 { xtype: 'tbbutton', text:'Login', id:'login', handler: MA.MenuHandler},
                 { xtype: 'tbbutton', text:'Dashboard', id:'dashboard:list', handler: MA.MenuHandler},
-                { xtype: 'tbbutton', text:'Projects', id:'projectsMenu', menu:{
-                    items: [
-                        {text:'Projects List', id:'projects:list', handler: MA.MenuHandler}
-                        ]
-                    }
-                },
-                { xtype: 'tbbutton', text:'Clients', id:'clientsMenu', menu:{
-                    items: [
-                        {text:'Clients List', id:'clients:list', handler: MA.MenuHandler}
-                        ]
-                    }
-                },
-                { xtype: 'tbbutton', text:'Runs', id:'runsMenu', menu:{
-                    items: [
-                        {text:'Runs List', id:'runs:list', handler: MA.MenuHandler}
-                        ]
-                    }
-                },
+                { xtype: 'tbspacer', width: 5 },
+                { xtype: 'tbbutton', text:'Projects', id:'projects:list', handler: MA.MenuHandler},
+                { xtype: 'tbspacer', width: 5 },
+                { xtype: 'tbbutton', text:'Clients', id:'clients:list', handler: MA.MenuHandler},
+                { xtype: 'tbspacer', width: 5 },
+                { xtype: 'tbbutton', text:'Runs', id:'runs:list', handler: MA.MenuHandler},
                 { xtype: 'tbfill'},
                 { xtype: 'tbbutton', text:userText, id: 'userMenu', menu:{
                     items: [
@@ -62,9 +50,9 @@ MA.MenuShow = function() {
     Ext.get('login').hide();
     Ext.get('dashboard:list').show();
     Ext.get('userMenu').show();
-    Ext.get('clientsMenu').show();
-    Ext.get('projectsMenu').show();
-    Ext.get('runsMenu').show();
+    Ext.get('clients:list').show();
+    Ext.get('projects:list').show();
+    Ext.get('runs:list').show();
 
 };
 
@@ -82,10 +70,10 @@ MA.MenuHide = function() {
     Ext.get('dashboard:list').hide();
     Ext.get('userMenu').hide();
 
-    Ext.get('clientsMenu').hide();
+    Ext.get('clients:list').hide();
     //    Ext.getCmp('helpadmin:screencasts').disable();
-    Ext.get('projectsMenu').hide();
-    Ext.get("runsMenu").hide();
+    Ext.get('projects:list').hide();
+    Ext.get("runs:list").hide();
 
 };
 
