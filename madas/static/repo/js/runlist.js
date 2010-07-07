@@ -53,7 +53,23 @@ MA.RunList = Ext.extend(Ext.Panel, {
                                     }
                                 }
                             }
-                        }
+                        },
+                        { xtype: "tbfill" },
+                        new MA.InlineSearch({
+                            width: 120,
+                            listeners: {
+                                clear: function () {
+                                    self.getStore().clearFilter();
+                                },
+                                search: function (term) {
+                                    term = term.toLowerCase();
+
+                                    self.getStore().filterBy(function (record, id) {
+                                        return (record.data.title.toLowerCase().indexOf(term) != -1);
+                                    });
+                                }
+                            }
+                        })
                     ],
                     listeners: {
                         "rowclick": function () {
