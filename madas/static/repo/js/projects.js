@@ -2,6 +2,11 @@ MA.ProjectList = Ext.extend(Ext.Panel, {
     constructor: function (config) {
         var self = this;
 
+        var store = projectsListStore;
+        if (config.store) {
+            store = config.store;
+        }
+
         var defaultConfig = {
             layout: "fit",
             tbar: [
@@ -27,19 +32,12 @@ MA.ProjectList = Ext.extend(Ext.Panel, {
                 },
                 { xtype: "tbfill" },
                 new MA.InlineSearch({
-                    width: 120,
-                    listeners: {
-                        clear: function () {
-                            self.getComponent("grid").getStore().clearFilter();
-                        },
-                        search: function (term) {
-                            term = term.toLowerCase();
-
-                            self.getComponent("grid").getStore().filterBy(function (record, id) {
-                                return (record.data.title.toLowerCase().indexOf(term) != -1);
-                            });
-                        }
-                    }
+                    filterFunction: function (record, term) {
+                        var term = term.toLowerCase();
+                        return (record.data.title.toLowerCase().indexOf(term) != -1);
+                    },
+                    store: store,
+                    width: 120
                 })
             ],
             items: [
@@ -58,7 +56,7 @@ MA.ProjectList = Ext.extend(Ext.Panel, {
                         { header: "Client", sortable: false, menuDisabled: true, dataIndex: "client__unicode" },
                         { header: "Description", sortable: false, menuDisabled: true, dataIndex: "description", width: 300 }
                     ],
-                    store: projectsListStore,
+                    store: store,
                     listeners: {
                         "rowclick": function () {
                             self.fireEvent("click", this.getSelectionModel().getSelected().data.id);
@@ -75,7 +73,7 @@ MA.ProjectList = Ext.extend(Ext.Panel, {
 
         /* Items that can be provided in the config that should apply to the
          * grid. */
-        var keys = ["loadMask", "store"];
+        var keys = ["loadMask"];
         for (var i = 0; i < keys.length; i++) {
             var key = keys[i];
             if (config[key]) {

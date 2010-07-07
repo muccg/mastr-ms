@@ -30,19 +30,12 @@ MA.ClientsListCmp = {
             tbar: [
                 { xtype: "tbfill" },
                 new MA.InlineSearch({
-                    width: 120,
-                    listeners: {
-                        clear: function () {
-                            Ext.getCmp("clients").getStore().clearFilter();
-                        },
-                        search: function (term) {
-                            term = term.toLowerCase();
-
-                            Ext.getCmp("clients").getStore().filterBy(function (record, id) {
-                                return (record.data.client.toLowerCase().indexOf(term) != -1);
-                            });
-                        }
-                    }
+                    filterFunction: function (record, term) {
+                        term = term.toLowerCase();
+                        return (record.data.client.toLowerCase().indexOf(term) != -1);
+                    },
+                    store: clientsListStore,
+                    width: 120
                 })
             ],
             listeners: {
