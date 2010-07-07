@@ -30,12 +30,12 @@ MA.ProjectList = Ext.extend(Ext.Panel, {
                     width: 120,
                     listeners: {
                         clear: function () {
-                            projectsListStore.clearFilter();
+                            self.getComponent("grid").getStore().clearFilter();
                         },
                         search: function (term) {
                             term = term.toLowerCase();
 
-                            projectsListStore.filterBy(function (record, id) {
+                            self.getComponent("grid").getStore().filterBy(function (record, id) {
                                 return (record.data.title.toLowerCase().indexOf(term) != -1);
                             });
                         }
@@ -72,6 +72,16 @@ MA.ProjectList = Ext.extend(Ext.Panel, {
         };
 
         config = Ext.apply(defaultConfig, config);
+
+        /* Items that can be provided in the config that should apply to the
+         * grid. */
+        var keys = ["loadMask", "store"];
+        for (var i = 0; i < keys.length; i++) {
+            var key = keys[i];
+            if (config[key]) {
+                config.items[0][key] = config[key];
+            }
+        }
 
         MA.ProjectList.superclass.constructor.call(this, config);
         this.addEvents("click", "dblclick", "delete");
