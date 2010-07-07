@@ -341,7 +341,7 @@ MA.ExperimentSamplesOnly = {
     layout:'fit',
     tbar: [
         {
-            text: 'Add sample',
+            text: 'Add Sample',
             cls: 'x-btn-text-icon',
             id: 'addsamplesbutton',
             icon: 'static/repo/images/add.png',
@@ -350,7 +350,7 @@ MA.ExperimentSamplesOnly = {
             }
         },
         {
-            text: 'Remove sample',
+            text: 'Remove Sample',
             cls: 'x-btn-text-icon',
             id: 'removesamplesbutton',
             icon: 'static/repo/images/delete.png',
