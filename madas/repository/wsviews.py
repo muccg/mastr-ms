@@ -75,6 +75,29 @@ def create_object(request, model):
 
 @staff_member_required
 @user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
+def create_samples(request):
+    # get args and remove the id from it if it exists
+    if request.GET:
+        args = request.GET
+    else:
+        args = request.POST
+       
+    #create model object
+    model_obj = get_model('repository', 'sample')
+    
+    for i in range(0, int(args['replicates'])):
+        obj = model_obj()
+           
+        for key in args.keys():
+            obj.__setattr__(key, args[key])
+    
+        obj.save()
+
+    return records(request, 'sample', 'id', obj.id)
+    
+
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
 def create_sample_log(request, sample_id, type, description):
     log = SampleLog(type=type,description=description,sample_id=sample_id)
     log.save()

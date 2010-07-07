@@ -133,9 +133,7 @@ MA.ExperimentSamples = {
                                 }
                                 
                                 for (var i = 0; i < selIds.length; i++) {
-                                    for (var j = 0; j < reps; j++) {
-                                        MA.CRUDSomething('create/sample/', {'sample_class_id':selIds[i], 'experiment_id':MA.CurrentExperimentId()}, function() { var sm = Ext.getCmp('sampleClasses').getSelectionModel(); var selected = sm.getSelected(); sm.clearSelections(); sm.selectRecords([selected]);  MA.ExperimentSamplesInit(); });
-                                    }
+                                    MA.CRUDSomething('createSamples/', {'sample_class_id':selIds[i], 'experiment_id':MA.CurrentExperimentId(), 'replicates':reps}, function() { var sm = Ext.getCmp('sampleClasses').getSelectionModel(); var selected = sm.getSelected(); sm.clearSelections(); sm.selectRecords([selected]);  MA.ExperimentSamplesInit(); });
                                 }
                             }
                         },
