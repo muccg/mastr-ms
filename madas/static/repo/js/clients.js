@@ -76,7 +76,7 @@ MA.LoadClientSamples = function(id) {
     
     MA.MenuHandler({ id:'clients:samples' });
     
-    Ext.getCmp('client-samples-list').setTitle('samples by client: '+id);
+    Ext.getCmp('client-samples-list').setTitle('Samples by Client: '+id);
 };
 
 MA.ClientSamplesCmp = {

@@ -106,7 +106,7 @@ MA.ExperimentShowFieldsets = function(organismType) {
     
     if (organismType > 4) {  //4 here refers to food & beverage, or synthetic compound. everything else is an organism
         Ext.getCmp('rankfield').hide();
-        Ext.getCmp('organismFieldset').setTitle('subtype');
+        Ext.getCmp('organismFieldset').setTitle('Subtype');
         Ext.getCmp('upperrankfield').setVisible(false);
         Ext.getCmp('ncbifield').setVisible(false);
     } else {
@@ -521,8 +521,8 @@ MA.UpdateNav = function() {
 //    }
     
     if (MA.CurrentExperimentId() == 0) {
-        et.setTitle('new experiment');
+        et.setTitle('New Experiment');
     } else {
-        et.setTitle('experiment: '+en.getValue());
+        et.setTitle('Experiment: '+en.getValue());
     }
 };
