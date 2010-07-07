@@ -28,16 +28,6 @@ MA.ClientsListCmp = {
             ],
             store: clientsListStore,
             tbar: [
-                {
-                    text:'Samples for Selected Client',
-                    listeners: {
-                        'click':function(el, ev) {
-                            var sm = Ext.getCmp('clients').getSelectionModel();
-                            var rec = sm.getSelected();
-                            MA.LoadClientSamples(rec.data.client);
-                        }
-                    }
-                },
                 { xtype: "tbfill" },
                 new MA.InlineSearch({
                     width: 120,
@@ -61,89 +51,92 @@ MA.ClientsListCmp = {
                     var store = Ext.getCmp("client-project-list").getStore();
 
                     if (selModel.hasSelection()) {
-                        store.addListener("load", function () {
-                            store.clearFilter();
-                        }, store, { single: true });
+                        var record = selModel.getSelected();
+                        var clearFilter = function () {
+                            this.clearFilter();
+                        };
 
-                        store.load({ params: { client__id__exact: selModel.getSelected().data.id } });
+                        clientSampleStore.addListener("load", clearFilter, clientSampleStore, { single: true });
+                        store.addListener("load", clearFilter, store, { single: true });
+
+                        clientSampleStore.proxy.conn.url = wsBaseUrl + "recordsSamplesForClient/client/" + record.data.client;
+                        clientSampleStore.load();
+
+                        store.load({ params: { client__id__exact: record.data.id } });
                     }
                     else {
-                        store.filterBy(function () { return false; });
+                        var rejectAll = function () {
+                            return false;
+                        };
+
+                        clientSampleStore.filterBy(rejectAll);
+                        store.filterBy(rejectAll);
                     }
                 }
             }
         },
-        new MA.ProjectList({
-            id: "client-project-list",
+        {
+            xtype: "panel",
             region: "east",
             width: "50%",
-            border: true,
-            title: "Client Projects",
-            loadMask: true,
-            store: new Ext.data.JsonStore({
-                autoLoad: false,
-                url: projectsListStore.url,
-                remoteSort: true,
-                restful: true,
-                writer: new Ext.data.JsonWriter({ encode: false }),
-                sortInfo: {
-                    field: 'id',
-                    direction: 'DESC'
-                }
-            })
-        })
-    ]
-};
-
-MA.LoadClientSamples = function(id) {
-    var scmp = clientSampleStore;
-    
-    scmp.proxy.conn.url = wsBaseUrl + 'recordsSamplesForClient/client/' + id;
-    scmp.load();
-    
-    MA.MenuHandler({ id:'clients:samples' });
-    
-    Ext.getCmp('client-samples-list').setTitle('Samples by Client: '+id);
-};
-
-MA.ClientSamplesCmp = {
-    title: 'Samples by Client',
-    region: 'center',
-    cmargins: '0 0 0 0',
-    collapsible: false,
-    id:'client-samples-list',
-    bodyStyle: 'padding:0px;',
-    layout:'fit',
-    tbar: [
-    ],
-    items: [
-        {
-            xtype:'grid',
             border: false,
-            id:'clients-samples',
-            trackMouseOver: false,
-            sm: new Ext.grid.RowSelectionModel( {singleSelect:true} ),
-            viewConfig: {
-                forceFit: true,
-                autoFill:true
+            layout: "border",
+            defaults: {
+                split: true
             },
-            view: new Ext.grid.GroupingView({
-                loadMask : { msg : 'Please wait...' },
-                forceFit: true,
-                groupTextTpl: '{[ values.rs[0].data["experiment_title"] ]} &nbsp;&nbsp;({[values.rs.length]} samples)',
-                hideGroupedColumn: true
+            items: [
+                new MA.ProjectList({
+                    id: "client-project-list",
+                    border: true,
+                    region: "north",
+                    height: 200,
+                    title: "Client Projects",
+                    loadMask: true,
+                    store: new Ext.data.JsonStore({
+                        autoLoad: false,
+                        url: projectsListStore.url,
+                        remoteSort: true,
+                        restful: true,
+                        writer: new Ext.data.JsonWriter({ encode: false }),
+                        sortInfo: {
+                            field: 'id',
+                            direction: 'DESC'
+                        }
+                    })
                 }),
-            columns: [
-                      { header: "ID", sortable:true, dataIndex:'id' },
-                      { header: "Label", sortable:true, dataIndex:'label' },
-                      { header: "Weight", sortable:true, dataIndex:'weight' },
-                      { header: "Comment", sortable:false, sortable:true, width:300, dataIndex:'comment' },
-                      { header: "Last Status", sortable:true, width:300, dataIndex:'last_status' },
-                      { header: "Experiment ID", dataIndex:'experiment_id' },
-                      { header: "Experiment Title", dataIndex:'experiment_title'},
-                      { header: "Sample Class", dataIndex:'sample_class' }
-            ],
-            store: clientSampleStore
+                {
+                    border: true,
+                    title: "Client Samples",
+                    xtype:'grid',
+                    border: true,
+                    region: "center",
+                    id:'clients-samples',
+                    trackMouseOver: false,
+                    loadMask : true,
+                    sm: new Ext.grid.RowSelectionModel( {singleSelect:true} ),
+                    viewConfig: {
+                        forceFit: true,
+                        autoFill:true
+                    },
+                    view: new Ext.grid.GroupingView({
+                        loadMask : true,
+                        forceFit: true,
+                        groupTextTpl: '{[ values.rs[0].data["experiment_title"] ]} &nbsp;&nbsp;({[values.rs.length]} samples)',
+                        hideGroupedColumn: true
+                        }),
+                    columns: [
+                              { header: "ID", sortable:true, dataIndex:'id' },
+                              { header: "Label", sortable:true, dataIndex:'label' },
+                              { header: "Weight", sortable:true, dataIndex:'weight' },
+                              { header: "Comment", sortable:false, sortable:true, width:300, dataIndex:'comment' },
+                              { header: "Last Status", sortable:true, width:300, dataIndex:'last_status' },
+                              { header: "Experiment ID", dataIndex:'experiment_id' },
+                              { header: "Experiment Title", dataIndex:'experiment_title'},
+                              { header: "Sample Class", dataIndex:'sample_class' }
+                    ],
+                    store: clientSampleStore
+                }
+            ]
         }
     ]
 };

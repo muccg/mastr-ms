@@ -145,7 +145,7 @@ MA.ChangeMainContent = function(contentName, paramArray){
             jobNumber.setValue('');
             //fall through to force render of new experiment
         case 'experiment:view':
-            Ext.getCmp('center-panel').layout.setActiveItem(0);
+            Ext.getCmp('center-panel').layout.setActiveItem('experimentTitle');
             Ext.getCmp('expNav').getSelectionModel().selectFirstRow();     
             
             break;
@@ -162,10 +162,6 @@ MA.ChangeMainContent = function(contentName, paramArray){
         case 'clients:list':
             clientsListStore.reload();
             Ext.getCmp('center-panel').layout.setActiveItem('clients-list');
-            break;
-            
-        case 'clients:samples':
-            Ext.getCmp('center-panel').layout.setActiveItem('client-samples-list');
             break;
             
         case 'projects:list':
@@ -186,7 +182,7 @@ MA.ChangeMainContent = function(contentName, paramArray){
             
             //fall through to force render of new experiment
         case 'project:view':
-            Ext.getCmp('center-panel').layout.setActiveItem(6);
+            Ext.getCmp('center-panel').layout.setActiveItem('projectCmpTitle');
             break;
 
         case "runs:list":
