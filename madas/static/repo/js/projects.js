@@ -24,7 +24,23 @@ MA.ProjectList = Ext.extend(Ext.Panel, {
                         grid.getStore().remove(selections);
                         self.fireEvent("delete", selections);
                     }
-                }
+                },
+                { xtype: "tbfill" },
+                new MA.InlineSearch({
+                    width: 120,
+                    listeners: {
+                        clear: function () {
+                            projectsListStore.clearFilter();
+                        },
+                        search: function (term) {
+                            term = term.toLowerCase();
+
+                            projectsListStore.filterBy(function (record, id) {
+                                return (record.data.title.toLowerCase().indexOf(term) != -1);
+                            });
+                        }
+                    }
+                })
             ],
             items: [
                 new Ext.grid.GridPanel({
