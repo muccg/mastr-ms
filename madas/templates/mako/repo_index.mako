@@ -105,8 +105,8 @@
         <div id="centerDiv"></div>
 
         <div id="south">
-            <a id="copyright" href="#">Copyright information</a>
             <span id="revision">$Rev$</span>
+            <a id="copyright" href="#">Copyright information</a>
         </div>
 
         <div id="copyright-information" class="x-hidden">
