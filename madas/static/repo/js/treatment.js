@@ -106,8 +106,8 @@ MA.Treatment = {
                                 }
                             ],
                             columns: [
-                                      { header: "timeline",  sortable:false, menuDisabled:true, dataIndex:'timeline', editor: new Ext.form.TextField({allowBlank:false}) },
-                                      { header: "abbrev", sortable:false, menuDisabled:true, editor:new Ext.form.TextField({
+                                      { header: "Timeline",  sortable:false, menuDisabled:true, dataIndex:'timeline', editor: new Ext.form.TextField({allowBlank:false}) },
+                                      { header: "Abbrev", sortable:false, menuDisabled:true, editor:new Ext.form.TextField({
                                               editable:true,
                                               forceSelection:false,
                                               displayField:'value',
@@ -185,7 +185,7 @@ MA.Treatment = {
                                 }
                             ],
                             columns: [
-                                { header: "name",  sortable:false, menuDisabled:true, editor:new Ext.form.ComboBox({
+                                { header: "Name",  sortable:false, menuDisabled:true, editor:new Ext.form.ComboBox({
                                 editable:true,
                                 forceSelection:false,
                                 displayField:'value',
@@ -217,7 +217,7 @@ MA.Treatment = {
                                     
                                 } 
                             }), dataIndex:'name' },
-                            { header: "abbrev", sortable:false, menuDisabled:true, editor:new Ext.form.TextField({
+                            { header: "Abbrev", sortable:false, menuDisabled:true, editor:new Ext.form.TextField({
                                     editable:true,
                                     forceSelection:false,
                                     displayField:'value',

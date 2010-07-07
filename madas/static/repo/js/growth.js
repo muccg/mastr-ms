@@ -181,7 +181,7 @@ MA.Growth = {
                            }
                            ],
                     columns: [
-                              { header: "greenhouse",  sortable:false, menuDisabled:true, editor:new Ext.form.ComboBox({
+                              { header: "Greenhouse",  sortable:false, menuDisabled:true, editor:new Ext.form.ComboBox({
                                                                                                                  editable:false,
                                                                                                                  forceSelection:true,
                                                                                                                  displayField:'value',
@@ -194,7 +194,7 @@ MA.Growth = {
                                                                                                                  listWidth:230,
                                                                                                                  store: locationComboStore
                                                                                                                        }), dataIndex:'greenhouse', renderer:renderLocation },
-                              { header: "detailed location", sortable:false, menuDisabled:true, editor:new Ext.form.ComboBox({
+                              { header: "Detailed Location", sortable:false, menuDisabled:true, editor:new Ext.form.ComboBox({
                                                                                                                   editable:true,
                                                                                                                   forceSelection:false,
                                                                                                                   displayField:'value',
@@ -208,7 +208,7 @@ MA.Growth = {
                                                                                                                   store: plantDetailedLocationComboStore
                                                                                                                   }), dataIndex:'detailed_location'
                               },
-                              { header: "growing place/media", sortable:false, menuDisabled:true, editor:new Ext.form.ComboBox({
+                              { header: "Growing Place/Media", sortable:false, menuDisabled:true, editor:new Ext.form.ComboBox({
                                                                                                                              editable:true,
                                                                                                                              forceSelection:false,
                                                                                                                              displayField:'value',
@@ -222,38 +222,38 @@ MA.Growth = {
                                                                                                                              store: plantGrowingPlaceComboStore
                                                                                                                              }), dataIndex:'growing_place'
                               },
-                              { header: "seeding date", sortable:false, menuDisabled:true, editor:new Ext.form.DateField({
+                              { header: "Seeding Date", sortable:false, menuDisabled:true, editor:new Ext.form.DateField({
                                                                                                                                editable:true,
                                                                                                                                allowBlank:false,
                                                                                                                          format:'Y/m/d'
                                                                                                                         }), dataIndex:'seeded_on'
                               },
-                              { header: "transplant date", sortable:false, menuDisabled:true, editor:new Ext.form.DateField({
+                              { header: "Transplant Date", sortable:false, menuDisabled:true, editor:new Ext.form.DateField({
                                                                                                                             editable:true,
                                                                                                                             allowBlank:false ,
                                                                                                                             format:'Y/m/d'                                                                                                                              }), dataIndex:'transplated_on'
                               },
-                              { header: "harvest date", sortable:false, menuDisabled:true, editor:new Ext.form.DateField({
+                              { header: "Harvest Date", sortable:false, menuDisabled:true, editor:new Ext.form.DateField({
                                                                                                                          editable:true,
                                                                                                                          allowBlank:false  ,
                                                                                                                          format:'Y/m/d'                                                                                                                             }), dataIndex:'harvested_on'
                               },
-                              { header: "harvest time", sortable:false, menuDisabled:true, editor:new Ext.form.TimeField({
+                              { header: "Harvest Time", sortable:false, menuDisabled:true, editor:new Ext.form.TimeField({
                                                                                                                          editable:true,
                                                                                                                          allowBlank:false  ,
                                                                                                                          format:'H:i'                                                                                                                             }), dataIndex:'harvested_at'
                               },
-                              { header: "night temp C", sortable:false, menuDisabled:true, editor:new Ext.form.NumberField({editable:true}), dataIndex:'night_temp_cels'
+                              { header: "Night Temp &deg;C", sortable:false, menuDisabled:true, editor:new Ext.form.NumberField({editable:true}), dataIndex:'night_temp_cels'
                               },
-                              { header: "day temp C", sortable:false, menuDisabled:true, editor:new Ext.form.NumberField({editable:true}), dataIndex:'day_temp_cels'
-                              },
-                              
-                              { header: "hrs of light/day", sortable:false, menuDisabled:true, editor:new Ext.form.NumberField({editable:true}), dataIndex:'light_hrs_per_day'
+                              { header: "Day Temp &deg;C", sortable:false, menuDisabled:true, editor:new Ext.form.NumberField({editable:true}), dataIndex:'day_temp_cels'
                               },
                               
-                              { header: "light fluence", sortable:false, menuDisabled:true, editor:new Ext.form.NumberField({editable:true}), dataIndex:'light_fluence'
+                              { header: "Hrs of Light/Day", sortable:false, menuDisabled:true, editor:new Ext.form.NumberField({editable:true}), dataIndex:'light_hrs_per_day'
                               },
-                              { header: "light source", sortable:false, menuDisabled:true, editor:new Ext.form.ComboBox({
+                              
+                              { header: "Light Fluence", sortable:false, menuDisabled:true, editor:new Ext.form.NumberField({editable:true}), dataIndex:'light_fluence'
+                              },
+                              { header: "Light Source", sortable:false, menuDisabled:true, editor:new Ext.form.ComboBox({
                                                                                                                              editable:false,
                                                                                                                              forceSelection:true,
                                                                                                                              displayField:'value',
@@ -267,7 +267,7 @@ MA.Growth = {
                                                                                                                              store: lightSourceComboStore
                                                                                                                         }), dataIndex:'light_source', renderer:renderLightSource
                               },
-                              { header: "lamp details", sortable:false, menuDisabled:true, editor:new Ext.form.ComboBox({
+                              { header: "Lamp Details", sortable:false, menuDisabled:true, editor:new Ext.form.ComboBox({
                                                                                                                         editable:true,
                                                                                                                         forceSelection:false,
                                                                                                                         displayField:'value',

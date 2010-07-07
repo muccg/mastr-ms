@@ -86,7 +86,7 @@ MA.SamplePrep = {
                                 store: sopComboStore,
                                 listeners:{'selectionchange':function() { }}
                             }), dataIndex:'id', renderer: renderSOPLabel },
-                        { header: "description", sortable:false, menuDisabled:true, dataIndex:'id', renderer: renderSOPDescription }
+                        { header: "Description", sortable:false, menuDisabled:true, dataIndex:'id', renderer: renderSOPDescription }
                     ],
                     listeners: {'afteredit':function(e) { MA.SaveSOPRow(e); }},
                     store: sopStore

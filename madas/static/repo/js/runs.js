@@ -133,7 +133,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     loadMask:true,
                     columns: [
                         self.pendingSampleSelModel,
-                        {header: "id", dataIndex: 'id', sortable: true}
+                        {header: "ID", dataIndex: 'id', sortable: true}
                     ],
                     viewConfig:{
                         forceFit:true
@@ -182,9 +182,9 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     loadMask:true,
                     columns: [
                         self.sampleSelModel,
-                        {header: "id", dataIndex: 'id', sortable: true},
-                        {header: "label", dataIndex: 'label', sortable: true},
-                        {header: "class", dataIndex: 'sample_class__unicode', sortable: true}
+                        {header: "ID", dataIndex: 'id', sortable: true},
+                        {header: "Label", dataIndex: 'label', sortable: true},
+                        {header: "Class", dataIndex: 'sample_class__unicode', sortable: true}
                     ],
                     viewConfig:{
                         forceFit:true
@@ -449,7 +449,7 @@ MA.RunCmp = new Ext.Window({
             loadingText:'Loading...',
             columnSort:false,
             columns: [
-	            {header: "or select existing", dataIndex: 'title', 
+	            {header: "Or select existing", dataIndex: 'title', 
 	                tpl: '<div style="padding:4px"><b>{title}</b><br><div style="color:#666"><i>{method__unicode}<br>{creator__unicode}</i></div></div>'}
             ],
             listeners:{

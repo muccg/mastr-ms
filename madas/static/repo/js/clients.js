@@ -60,7 +60,7 @@ MA.ClientsListCmp = {
                 autoFill:true
             },
             columns: [
-                      { header: "id", menuDisabled:true, dataIndex:'id', width:50 },
+                      { header: "ID", menuDisabled:true, dataIndex:'id', width:50 },
                       { header: "Client", menuDisabled:true, dataIndex:'client' }
             ],
             store: clientsListStore
@@ -107,14 +107,14 @@ MA.ClientSamplesCmp = {
                 hideGroupedColumn: true
                 }),
             columns: [
-                      { header: "id", sortable:true, dataIndex:'id' },
-                      { header: "label", sortable:true, dataIndex:'label' },
-                      { header: "weight", sortable:true, dataIndex:'weight' },
-                      { header: "comment", sortable:false, sortable:true, width:300, dataIndex:'comment' },
-                      { header: "last status", sortable:true, width:300, dataIndex:'last_status' },
-                      { header: "experiment_id", dataIndex:'experiment_id' },
-                      { header: "experiment_title", dataIndex:'experiment_title'},
-                      { header: "sample class", dataIndex:'sample_class' }
+                      { header: "ID", sortable:true, dataIndex:'id' },
+                      { header: "Label", sortable:true, dataIndex:'label' },
+                      { header: "Weight", sortable:true, dataIndex:'weight' },
+                      { header: "Comment", sortable:false, sortable:true, width:300, dataIndex:'comment' },
+                      { header: "Last Status", sortable:true, width:300, dataIndex:'last_status' },
+                      { header: "Experiment ID", dataIndex:'experiment_id' },
+                      { header: "Experiment Title", dataIndex:'experiment_title'},
+                      { header: "Sample Class", dataIndex:'sample_class' }
             ],
             store: clientSampleStore
         }
