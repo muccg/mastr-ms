@@ -8,7 +8,7 @@ MA.ProjectList = Ext.extend(Ext.Panel, {
                 {
                     text: "new project",
                     cls: "x-btn-text-icon",
-                    icon: "static/repo/images/add.gif",
+                    icon: "static/repo/images/add.png",
                     handler: function () {
                         MA.MenuHandler({ "id": "project:new" });
                     }
@@ -16,7 +16,7 @@ MA.ProjectList = Ext.extend(Ext.Panel, {
                 {
                     text: "remove project",
                     cls: "x-btn-text-icon",
-                    icon: "static/repo/images/no.gif",
+                    icon: "static/repo/images/delete.png",
                     handler: function () {
                         var grid = self.getComponent("grid");
                         var selections = grid.getSelectionModel().getSelections();
@@ -195,7 +195,7 @@ MA.ProjectCmp = {
             tbar: [{
                 text: 'new experiment',
                 cls: 'x-btn-text-icon',
-                icon:'static/repo/images/add.gif',
+                icon:'static/repo/images/add.png',
                 handler : function(){
                         MA.MenuHandler({'id':'experiment:new'});
                     }
@@ -203,7 +203,7 @@ MA.ProjectCmp = {
                 {
                 text: 'remove experiment',
                 cls: 'x-btn-text-icon',
-                icon:'static/repo/images/no.gif',
+                icon:'static/repo/images/delete.png',
                 handler : function(){
                    var grid = Ext.getCmp('project-experiments');
                    var delIds = []; 

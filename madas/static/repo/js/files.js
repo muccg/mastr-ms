@@ -57,7 +57,7 @@ items:[
                //tbar: [{
 //                      text: 'add files',
 //                      cls: 'x-btn-text-icon',
-//                      icon:'static/repo/images/add.gif',
+//                      icon:'static/repo/images/add.png',
 //                      handler : function(){
 ////                      userStore.add(new Ext.data.Record({'user':'', 'type':'1', 'additional_info':''}));
 //                      }

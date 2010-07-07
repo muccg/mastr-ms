@@ -9,7 +9,7 @@ MA.ExperimentListCmp = {
     tbar: [{
         text: 'new experiment',
         cls: 'x-btn-text-icon',
-        icon:'static/repo/images/add.gif',
+        icon:'static/repo/images/add.png',
         handler : function(){
                 MA.MenuHandler({'id':'experiment:new'});
             }
@@ -17,7 +17,7 @@ MA.ExperimentListCmp = {
         {
         text: 'remove experiment',
         cls: 'x-btn-text-icon',
-        icon:'static/repo/images/no.gif',
+        icon:'static/repo/images/delete.png',
         handler: function(){
            var grid = Ext.getCmp('experiments');
            var delIds = []; 
