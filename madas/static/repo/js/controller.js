@@ -429,7 +429,7 @@ MA.LoadExperiment = function(expId) {
  */
 MA.InitApplication = function() {
     //various global settings for Ext
-    Ext.BLANK_IMAGE_URL = 'static/ext-3.1.0/resources/images/default/s.gif';
+    Ext.BLANK_IMAGE_URL = 'static/ext-3.2.1/resources/images/default/s.gif';
     Ext.QuickTips.init();
     
     // turn on validation errors beside the field globally
