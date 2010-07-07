@@ -79,7 +79,9 @@ MA.DashboardCmp = {
         loadMask : { msg : 'Please wait...' },
         forceFit: true,
         groupTextTpl: ' {text}',
-        hideGroupedColumn: true
+        hideGroupedColumn: true,
+        emptyText:'No files available for download',
+        deferEmptyText:false
         }),
     sm: new Ext.grid.RowSelectionModel({ singleSelect: true }),
     columns: [
