@@ -39,7 +39,7 @@ MA.Access = {
                         {
                             text: 'add user',
                             cls: 'x-btn-text-icon',
-                            icon: 'static/repo/images/add.gif',
+                            icon: 'static/repo/images/add.png',
                             handler: function(){
                                     userStore.add(new Ext.data.Record({'user':'', 'type':'1', 'additional_info':''}));
                             }
@@ -47,7 +47,7 @@ MA.Access = {
                         {
                             text: 'remove user',
                             cls: 'x-btn-text-icon',
-                            icon: 'static/repo/images/no.gif',
+                            icon: 'static/repo/images/delete.png',
                             handler: function(){
                                 var grid = Ext.getCmp('involvedUsersGrid');
                                 var delIds = []; 

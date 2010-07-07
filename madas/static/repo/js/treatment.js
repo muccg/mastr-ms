@@ -70,7 +70,7 @@ MA.Treatment = {
                                 {
                                     text: 'add time',
                                     cls: 'x-btn-text-icon',
-                                    icon:'static/repo/images/add.gif',
+                                    icon:'static/repo/images/add.png',
                                     handler : function(){
                                         MA.CRUDSomething('create/sampletimeline/', {
                                             'experiment_id': MA.CurrentExperimentId(),
@@ -81,7 +81,7 @@ MA.Treatment = {
                                 {
                                     text: 'remove time',
                                     cls: 'x-btn-text-icon',
-                                    icon:'static/repo/images/no.gif',
+                                    icon:'static/repo/images/delete.png',
                                     handler : function(){
                                         var grid = Ext.getCmp('dates');
                                         var delIds = []; 
@@ -149,7 +149,7 @@ MA.Treatment = {
                                 {
                                     text: 'add treatment',
                                     cls: 'x-btn-text-icon',
-                                    icon:'static/repo/images/add.gif',
+                                    icon:'static/repo/images/add.png',
                                     handler : function(){
                                         MA.CRUDSomething('create/treatment/', {
                                             'experiment_id': MA.CurrentExperimentId(),
@@ -160,7 +160,7 @@ MA.Treatment = {
                                 {
                                     text: 'remove treatment',
                                     cls: 'x-btn-text-icon',
-                                    icon:'static/repo/images/no.gif',
+                                    icon:'static/repo/images/delete.png',
                                     handler : function(){
                                         var grid = Ext.getCmp('othertreat');
                                         var delIds = []; 

@@ -83,7 +83,7 @@ MA.Growth = {
                     tbar: [{
                         text: 'add origin',
                         cls: 'x-btn-text-icon',
-                        icon:'static/repo/images/add.gif',
+                        icon:'static/repo/images/add.png',
                         handler : function(){
                             MA.CRUDSomething('create/origindetails/', {'source_id':MA.CurrentBioSourceId()}, function() { var expId = MA.CurrentExperimentId(); animalOriginStore.proxy.conn.url = wsBaseUrl + 'records/origindetails/source__experiment__id/' + expId;
                                                   animalOriginStore.load(); });
@@ -92,7 +92,7 @@ MA.Growth = {
                         {
                         text: 'remove origin',
                         cls: 'x-btn-text-icon',
-                        icon:'static/repo/images/no.gif',
+                        icon:'static/repo/images/delete.png',
                         handler : function(){
                            var grid = Ext.getCmp('animalOrigins');
                            var delIds = []; 
@@ -138,7 +138,7 @@ MA.Growth = {
                     tbar: [{
                            text: 'add growth condition',
                            cls: 'x-btn-text-icon',
-                           icon:'static/repo/images/add.gif',
+                           icon:'static/repo/images/add.png',
                            handler : function() {
                            growthConditionStore.add(new Ext.data.Record({'id':'', 'name':'', 'detailed_location':''}));
                             }
@@ -146,7 +146,7 @@ MA.Growth = {
                            {
                            text: 'remove growth condition',
                            cls: 'x-btn-text-icon',
-                           icon:'static/repo/images/no.gif',
+                           icon:'static/repo/images/delete.png',
                            handler : function(){
                            var grid = Ext.getCmp('growthConditions');
                            var delIds = []; 

@@ -190,7 +190,7 @@ MA.ExperimentSamples = {
                     cls: 'x-btn-text-icon',
                     disabled: true,
                     id: 'addsamplebutton',
-                    icon: 'static/repo/images/add.gif',
+                    icon: 'static/repo/images/add.png',
                     handler: function () {
                         MA.CRUDSomething('create/sample/', {
                             'sample_class_id': MA.CurrentSampleClassId(),
@@ -206,7 +206,7 @@ MA.ExperimentSamples = {
                     cls: 'x-btn-text-icon',
                     disabled: true,
                     id: 'removesamplebutton',
-                    icon: 'static/repo/images/no.gif',
+                    icon: 'static/repo/images/delete.png',
                     handler: function () {
                         var grid = Ext.getCmp('samples');
                         var delIds = []; 
@@ -235,7 +235,7 @@ MA.ExperimentSamples = {
                 {
                     text: 'add selected samples to run',
                     cls: 'x-btn-text-icon',
-                    icon: 'static/repo/images/add.gif',
+                    icon: 'static/repo/images/add.png',
                     handler: function() {
                         //save changes to selected entries
                         var grid = Ext.getCmp('samples');
@@ -340,7 +340,7 @@ MA.ExperimentSamplesOnly = {
             text: 'add sample',
             cls: 'x-btn-text-icon',
             id: 'addsamplesbutton',
-            icon: 'static/repo/images/add.gif',
+            icon: 'static/repo/images/add.png',
             handler: function () {
                 MA.CRUDSomething('create/sample/', {'experiment_id':MA.CurrentExperimentId()}, MA.SampleLoadByExperiment);
             }
@@ -349,7 +349,7 @@ MA.ExperimentSamplesOnly = {
             text: 'remove sample',
             cls: 'x-btn-text-icon',
             id: 'removesamplesbutton',
-            icon: 'static/repo/images/no.gif',
+            icon: 'static/repo/images/delete.png',
             handler: function () {
                 var grid = Ext.getCmp('samplesOnly');
                 var delIds = []; 
