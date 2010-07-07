@@ -56,19 +56,12 @@ MA.RunList = Ext.extend(Ext.Panel, {
                         },
                         { xtype: "tbfill" },
                         new MA.InlineSearch({
-                            width: 120,
-                            listeners: {
-                                clear: function () {
-                                    self.getStore().clearFilter();
-                                },
-                                search: function (term) {
-                                    term = term.toLowerCase();
-
-                                    self.getStore().filterBy(function (record, id) {
-                                        return (record.data.title.toLowerCase().indexOf(term) != -1);
-                                    });
-                                }
-                            }
+                            filterFunction: function (record, term) {
+                                var term = term.toLowerCase();
+                                return (record.data.title.toLowerCase().indexOf(term) != -1);
+                            },
+                            store: runListStore,
+                            width: 120
                         })
                     ],
                     listeners: {
