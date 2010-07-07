@@ -46,7 +46,7 @@ MA.ExperimentSamples = {
     },
     items:[
         {
-            title: 'sample classes',
+            title: 'Sample Classes',
             region: 'north',
             bodyStyle:'padding:0px;background:transparent;',
             collapsible: false,
@@ -84,7 +84,7 @@ MA.ExperimentSamples = {
                                                        }}                        }
                     }),
                     tbar: [{
-                        text: 'enable/disable sample class',
+                        text: 'Enable/Disable Sample Class',
                         handler : function(){
                            var grid = Ext.getCmp('sampleClasses');
                            var delIds = []; 
@@ -110,7 +110,7 @@ MA.ExperimentSamples = {
                         }
                         },
                         {
-                            text:' create ',
+                            text:'Create',
                             handler: function() {
                                 var reps = Ext.getCmp('replicateField').getValue();
                                 
@@ -178,7 +178,7 @@ MA.ExperimentSamples = {
             ]
         },
         {
-            title: 'samples',
+            title: 'Samples',
             region: 'center',
             cmargins: '0 0 0 0',
             collapsible: false,
@@ -186,7 +186,7 @@ MA.ExperimentSamples = {
             layout:'fit',
             tbar: [
                 {
-                    text: 'add sample',
+                    text: 'Add Sample',
                     cls: 'x-btn-text-icon',
                     disabled: true,
                     id: 'addsamplebutton',
@@ -202,7 +202,7 @@ MA.ExperimentSamples = {
                     }
                 },
                 {
-                    text: 'remove sample',
+                    text: 'Remove Sample',
                     cls: 'x-btn-text-icon',
                     disabled: true,
                     id: 'removesamplebutton',
@@ -233,7 +233,7 @@ MA.ExperimentSamples = {
                     }
                 },
                 {
-                    text: 'add selected samples to run',
+                    text: 'Add Selected Samples to Run',
                     cls: 'x-btn-text-icon',
                     icon: 'static/repo/images/add.png',
                     handler: function() {
@@ -329,7 +329,7 @@ MA.SaveSampleOnlyRow = function(roweditor, changes, rec, i) {
 };
 
 MA.ExperimentSamplesOnly = {
-    title: 'samples',
+    title: 'Samples',
     region: 'center',
     cmargins: '0 0 0 0',
     collapsible: false,
@@ -337,7 +337,7 @@ MA.ExperimentSamplesOnly = {
     layout:'fit',
     tbar: [
         {
-            text: 'add sample',
+            text: 'Add sample',
             cls: 'x-btn-text-icon',
             id: 'addsamplesbutton',
             icon: 'static/repo/images/add.png',
@@ -346,7 +346,7 @@ MA.ExperimentSamplesOnly = {
             }
         },
         {
-            text: 'remove sample',
+            text: 'Remove sample',
             cls: 'x-btn-text-icon',
             id: 'removesamplesbutton',
             icon: 'static/repo/images/delete.png',
@@ -374,7 +374,7 @@ MA.ExperimentSamplesOnly = {
         }
 //           },
 //           {
-//               text: 'view sample log',
+//               text: 'View Sample Log',
 //               cls: 'x-btn-text-icon',
 //               id:'viewsamplelogbutton',
 //               icon:'static/repo/images/s.gif',

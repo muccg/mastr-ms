@@ -1,5 +1,5 @@
 MA.ClientsListCmp = {
-    title: 'clients',
+    title: 'Clients',
     region: 'center',
     cmargins: '0 0 0 0',
     collapsible: false,
@@ -8,7 +8,7 @@ MA.ClientsListCmp = {
     layout:'fit',
     tbar: [
         {
-            text:'samples for selected client',
+            text:'Samples for Selected Client',
             listeners: {
                 'click':function(el, ev) {
                     var sm = Ext.getCmp('clients').getSelectionModel();
@@ -18,7 +18,7 @@ MA.ClientsListCmp = {
             }
         },
         {
-            text:'projects for selected client',
+            text:'Projects for Selected Client',
             listeners: {
                 'click':function(el, ev) {
                     var sm = Ext.getCmp('clients').getSelectionModel();
@@ -80,7 +80,7 @@ MA.LoadClientSamples = function(id) {
 };
 
 MA.ClientSamplesCmp = {
-    title: 'samples by client',
+    title: 'Samples by Client',
     region: 'center',
     cmargins: '0 0 0 0',
     collapsible: false,

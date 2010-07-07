@@ -38,7 +38,7 @@ MA.SampleLogSuccess = function() {
 };
 
 MA.SampleTracking = {
-    title: 'sample tracking',
+    title: 'Sample Tracking',
     region: 'center',
     cmargins: '0 0 0 0',
     collapsible: false,
@@ -52,17 +52,17 @@ MA.SampleTracking = {
             border:false,
             autoHeight:true,
             items: [
-                    { xtype:'displayfield', fieldLabel:'experiment name', id:'trackingExperimentName'},
-                    { xtype:'displayfield', fieldLabel:'comment', id:'trackingExperimentComment', width:400, height:40 },
-                    { xtype:'displayfield', fieldLabel:'formal quote', id:'trackingFormalQuote' },
-                    { xtype:'displayfield', fieldLabel:'organisation', id:'trackingOrg'},
-                    { xtype:'displayfield', fieldLabel:'job number', id:'trackingJobNumber' }
+                    { xtype:'displayfield', fieldLabel:'Experiment name', id:'trackingExperimentName'},
+                    { xtype:'displayfield', fieldLabel:'Comment', id:'trackingExperimentComment', width:400, height:40 },
+                    { xtype:'displayfield', fieldLabel:'Formal quote', id:'trackingFormalQuote' },
+                    { xtype:'displayfield', fieldLabel:'Organisation', id:'trackingOrg'},
+                    { xtype:'displayfield', fieldLabel:'Job number', id:'trackingJobNumber' }
                 ]
             },
             {
             xtype:'grid',
             border: true,
-            title:'samples',
+            title:'Samples',
             style: 'padding-left:3%;padding-right:3%;padding-bottom:10px;',
             height: 300,
             id:'sampleTracking',
@@ -77,7 +77,7 @@ MA.SampleTracking = {
             },
             tbar: {
                 items: [
-                    { xtype:'tbtext', text:'mark selected samples as ' },
+                    { xtype:'tbtext', text:'Mark Selected Samples as ' },
                     { xtype: 'tbspacer', width: 15 },
                     { 
                         xtype: 'combo', width:120,
@@ -107,7 +107,7 @@ MA.SampleTracking = {
                     { xtype:'textfield', id:'sampleLogComment', width:200 },
                     { xtype: 'tbspacer', width: 15 },
                     { 
-                        text:'save',
+                        text:'Save',
                         listeners: {
                             'click': function(e) {
                                 //save changes to selected entries
@@ -157,7 +157,7 @@ MA.SampleTracking = {
             {
             xtype:'grid',
             border: true,
-            title:'sample log',
+            title:'Sample Log',
             style: 'padding-left:3%;padding-right:3%;',
             height: 200,
             width:800,

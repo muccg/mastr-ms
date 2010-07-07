@@ -36,7 +36,7 @@ MA.RunList = Ext.extend(Ext.Panel, {
                     store: runListStore,
                     tbar: [
                         {
-                            text: "remove run",
+                            text: "Remove Run",
                             cls: "x-btn-text-icon",
                             icon: "static/repo/images/delete.png",
                             handler: function () {
@@ -100,7 +100,7 @@ MA.RunList = Ext.extend(Ext.Panel, {
 
 
 MA.RunListCmp = {
-    title: "runs",
+    title: "Runs",
     region: "center",
     cmargins: "0 0 0 0",
     collapsible: false,

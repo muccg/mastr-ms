@@ -1,5 +1,5 @@
 MA.ExperimentListCmp = {
-    title: 'experiments',
+    title: 'Experiments',
     region: 'center',
     cmargins: '0 0 0 0',
     collapsible: false,
@@ -7,7 +7,7 @@ MA.ExperimentListCmp = {
     bodyStyle: 'padding:0px;',
     layout:'fit',
     tbar: [{
-        text: 'new experiment',
+        text: 'New Experiment',
         cls: 'x-btn-text-icon',
         icon:'static/repo/images/add.png',
         handler : function(){
@@ -15,7 +15,7 @@ MA.ExperimentListCmp = {
             }
         },
         {
-        text: 'remove experiment',
+        text: 'Remove Experiment',
         cls: 'x-btn-text-icon',
         icon:'static/repo/images/delete.png',
         handler: function(){

@@ -16,13 +16,13 @@ defaults: {
 },
 items:[
        {
-       title: 'files',
+       title: 'Files',
        //       bodyStyle:'padding:0px;background:transparent;',
        collapsible: false,
        layout:'border',
        tbar: {
            items: [
-               { xtype:'tbtext', text:'checkmarks indicate files that are visible to clients' }
+               { xtype:'tbtext', text:'Checkmarks indicate files that are visible to clients' }
            ]
        },
        items: [
@@ -40,7 +40,7 @@ items:[
                requestMethod:'GET',
                root: {
                    nodeType: 'async',
-                   text: 'experiment',
+                   text: 'Experiment',
                    draggable: false,
                    id: 'experimentRoot'
                },
@@ -55,7 +55,7 @@ items:[
                        }
                    }),
                //tbar: [{
-//                      text: 'add files',
+//                      text: 'Add Files',
 //                      cls: 'x-btn-text-icon',
 //                      icon:'static/repo/images/add.png',
 //                      handler : function(){
@@ -113,10 +113,10 @@ items:[
                    id:'pendingFilesTree',
                    enableDrag: true,
                    region:'center',
-                   title:'pending files',
+                   title:'Pending Files',
                    
                        tbar: [{
-                             text: 'refresh',
+                             text: 'Refresh',
                              handler : function(){
                                   //reload the pending files tree
                                   Ext.getCmp('pendingFilesTree').getLoader().load(Ext.getCmp('pendingFilesTree').getRootNode());
@@ -132,7 +132,7 @@ items:[
                    requestMethod:'GET',
                    root: {
                    nodeType: 'async',
-                   text: 'pending files',
+                   text: 'Pending Files',
                    draggable: false,
                    id: 'pendingRoot'
                    },
@@ -154,7 +154,7 @@ items:[
                        fileUpload:true,
                        region:'south',
                        method:'POST',
-                       title:'upload',
+                       title:'Upload',
                        url:wsBaseUrl + 'uploadFile',
                        items: [
                                {
@@ -162,7 +162,7 @@ items:[
                                xtype: 'fileuploadfield',
                                id: 'quo-attach',
                                emptyText: '',
-                               fieldLabel: 'file',
+                               fieldLabel: 'File',
                                name: 'attachfile'
                                }
                            ],
