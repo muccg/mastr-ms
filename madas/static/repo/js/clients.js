@@ -7,29 +7,46 @@ MA.ClientsListCmp = {
     bodyStyle: 'padding:0px;',
     layout:'fit',
     tbar: [
-        { text:'samples for selected client',
-          listeners: {
-              'click':function(el, ev) {
-                  var sm = Ext.getCmp('clients').getSelectionModel();
-                  var rec = sm.getSelected();
-                  MA.LoadClientSamples(rec.data.client);
-              }
-          }
+        {
+            text:'samples for selected client',
+            listeners: {
+                'click':function(el, ev) {
+                    var sm = Ext.getCmp('clients').getSelectionModel();
+                    var rec = sm.getSelected();
+                    MA.LoadClientSamples(rec.data.client);
+                }
+            }
         },
-        { text:'projects for selected client',
-          listeners: {
-              'click':function(el, ev) {
-                  var sm = Ext.getCmp('clients').getSelectionModel();
-                  var rec = sm.getSelected();
-//                  MA.LoadClientSamples(rec.data.client);
+        {
+            text:'projects for selected client',
+            listeners: {
+                'click':function(el, ev) {
+                    var sm = Ext.getCmp('clients').getSelectionModel();
+                    var rec = sm.getSelected();
+                    //MA.LoadClientSamples(rec.data.client);
 
-                  projectsListStore.load({ params: { client__id__exact: rec.data.id } });
+                    projectsListStore.load({ params: { client__id__exact: rec.data.id } });
 
-                  Ext.getCmp('center-panel').layout.setActiveItem('projects-list');
-              }
-          }
-        }
-        
+                    Ext.getCmp('center-panel').layout.setActiveItem('projects-list');
+                }
+            }
+        },
+        { xtype: "tbfill" },
+        new MA.InlineSearch({
+            width: 120,
+            listeners: {
+                clear: function () {
+                    Ext.getCmp("clients").getStore().clearFilter();
+                },
+                search: function (term) {
+                    term = term.toLowerCase();
+
+                    Ext.getCmp("clients").getStore().filterBy(function (record, id) {
+                        return (record.data.client.toLowerCase().indexOf(term) != -1);
+                    });
+                }
+            }
+        })
     ],
     items: [
         {
