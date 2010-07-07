@@ -6,7 +6,7 @@ MA.ProjectList = Ext.extend(Ext.Panel, {
             layout: "fit",
             tbar: [
                 {
-                    text: "new project",
+                    text: "New Project",
                     cls: "x-btn-text-icon",
                     icon: "static/repo/images/add.png",
                     handler: function () {
@@ -14,7 +14,7 @@ MA.ProjectList = Ext.extend(Ext.Panel, {
                     }
                 },
                 {
-                    text: "remove project",
+                    text: "Remove Project",
                     cls: "x-btn-text-icon",
                     icon: "static/repo/images/delete.png",
                     handler: function () {
@@ -87,7 +87,7 @@ MA.ProjectList = Ext.extend(Ext.Panel, {
 
 
 MA.ProjectListCmp = new MA.ProjectList({
-    title: 'projects',
+    title: 'Projects',
     region: 'center',
     cmargins: '0 0 0 0',
     collapsible: false,
@@ -102,7 +102,7 @@ MA.ProjectListCmp = new MA.ProjectList({
 
 MA.ProjectCmp = { 
     id:'projectCmpTitle',
-    title:'new project',
+    title:'New Project',
     layout:'border',
     forceLayout:true,
     deferredRender:false,
@@ -124,14 +124,14 @@ MA.ProjectCmp = {
                     width:850,
                     items: [ 
                         { xtype:'fieldset', 
-                        title:'project details',
+                        title:'Project Details',
                         bodyStyle: 'background-color:transparent',
                         autoHeight:true,
                         items: [
-                            { xtype:'textfield', fieldLabel:'project title', width:700, id:'projectTitle', name:'title', allowBlank:false},
-                            { xtype:'textarea', fieldLabel:'description', id:'projectDescription', width:700, height:100, name:'description' },
+                            { xtype:'textfield', fieldLabel:'Project title', width:700, id:'projectTitle', name:'title', allowBlank:false},
+                            { xtype:'textarea', fieldLabel:'Description', id:'projectDescription', width:700, height:100, name:'description' },
                             new Ext.form.ComboBox({
-                                    fieldLabel:'client',
+                                    fieldLabel:'Client',
                                     id:'projectClientCombo',
                                     name:'client',
                                     width:700,
@@ -184,7 +184,7 @@ MA.ProjectCmp = {
             ]
         },
         {
-            title: 'experiments',
+            title: 'Experiments',
             region: 'center',
             cmargins: '0 0 0 0',
             collapsible: false,
@@ -193,7 +193,7 @@ MA.ProjectCmp = {
             layout:'fit',
 //            disabled:true,
             tbar: [{
-                text: 'new experiment',
+                text: 'New Experiment',
                 cls: 'x-btn-text-icon',
                 icon:'static/repo/images/add.png',
                 handler : function(){
@@ -201,7 +201,7 @@ MA.ProjectCmp = {
                     }
                 },
                 {
-                text: 'remove experiment',
+                text: 'Remove Experiment',
                 cls: 'x-btn-text-icon',
                 icon:'static/repo/images/delete.png',
                 handler : function(){

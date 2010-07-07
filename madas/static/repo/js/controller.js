@@ -143,7 +143,7 @@ MA.ExperimentDetails = {
     },
     items:[
         {
-            title: 'experiment details',
+            title: 'Experiment Details',
             region: 'center',
             collapsible: false,
             autoScroll:true,
@@ -151,15 +151,15 @@ MA.ExperimentDetails = {
             minSize: 75,
             items: [ 
                 { xtype:'fieldset', 
-                title:'experiment',
+                title:'Experiment',
                 autoHeight:true,
                 items: [
-                    { xtype:'textfield', fieldLabel:'experiment name', width:700, enableKeyEvents:true, id:'experimentName', allowBlank:false, listeners:{'keydown':function(t, e){ MA.UpdateNav(); return true; }, 'keyup':function(t, e){ MA.UpdateNav(); return true; }}},
+                    { xtype:'textfield', fieldLabel:'Experiment name', width:700, enableKeyEvents:true, id:'experimentName', allowBlank:false, listeners:{'keydown':function(t, e){ MA.UpdateNav(); return true; }, 'keyup':function(t, e){ MA.UpdateNav(); return true; }}},
                     { xtype:'textarea', fieldLabel:'Experiment overview/aim', id:'experimentDescription', width:700, height:100 },
-                    { xtype:'textarea', fieldLabel:'comment', id:'experimentComment', width:700, height:100 },
+                    { xtype:'textarea', fieldLabel:'Comment', id:'experimentComment', width:700, height:100 },
                         new Ext.form.ComboBox({
                                               width:300,
-                                              fieldLabel:'formal quote',
+                                              fieldLabel:'Formal quote',
                                               id:'formalQuote', 
                                               editable:false,
                                               forceSelection:true,
@@ -174,8 +174,8 @@ MA.ExperimentDetails = {
                                               mode:'local',
                                               store: new Ext.data.ArrayStore({fields: ['key', 'value']})
                                               }),
-                        { xtype:'displayfield', fieldLabel:'organisation', id:'expOrg', disabled:true},
-                        { xtype:'textfield', fieldLabel:'job number', id:'jobNumber' }
+                        { xtype:'displayfield', fieldLabel:'Organisation', id:'expOrg', disabled:true},
+                        { xtype:'textfield', fieldLabel:'Job number', id:'jobNumber' }
                     ]
                 }
             ]
@@ -186,7 +186,7 @@ MA.ExperimentDetails = {
 
 MA.ExperimentCmp = { 
     id:'experimentTitle',
-    title:'new experiment',
+    title:'New Experiment',
     layout:'border',
     defaults: {
         collapsible: false,
@@ -215,7 +215,7 @@ MA.ExperimentCmp = {
         hideMode:'offsets',
         items: [
             {
-                title: 'navigation',
+                title: 'Navigation',
                 frame: true,
                 style:'background:white;',
                 layout:'anchor',
@@ -273,7 +273,7 @@ MA.ExperimentCmp = {
                 ]
             },
             {
-            title: 'current run',
+            title: 'Current Run',
             frame: true,
             style:'background:white;margin-top:20px;',
             items: [
@@ -294,7 +294,7 @@ MA.ExperimentCmp = {
                         },
                         { 
                             xtype:'button',
-                            text:'view',
+                            text:'View',
                             handler:function(){MA.RunCmp.show();},
                             style:'padding-left:40px'
                         }

@@ -240,7 +240,7 @@ MA.BioSource = {
     },
     items:[
         {
-           title: 'source details',
+            title: 'Source Details',
             region: 'center',
             collapsible: false,
             layout:'anchor',
@@ -262,7 +262,7 @@ MA.BioSource = {
                                 items:[
                                 { 
                                     xtype: 'combo', width:150, 
-                                    fieldLabel:'source type',
+                                    fieldLabel:'Source type',
                                     id:'sourceType',
                                     name:'typeText',
                                     editable:false,
@@ -291,12 +291,12 @@ MA.BioSource = {
                                     }
                                 },
                                 {
-                                    fieldLabel:'ncbi id',
+                                    fieldLabel:'NCBI ID',
                                     id:'sourceNCBI',
                                     xtype:'textfield'
                                 },
                                 { xtype:'fieldset', 
-                                title:'microbial info',
+                                title:'Microbial Information',
                                 id:'organismBioSourceMicrobialFieldset',
                                 autoHeight:true,
                                 labelWidth:150,
@@ -318,7 +318,7 @@ MA.BioSource = {
                                         ]
                                 },
                                 { xtype:'fieldset', 
-                                title:'plant info',
+                                title:'Plant Information',
                                 id:'organismBioSourcePlantFieldset',
                                 autoHeight:true,
                                 labelWidth:150,
@@ -327,14 +327,14 @@ MA.BioSource = {
                                         ]
                                 },
                                 { xtype:'fieldset', 
-                                title:'animal info',
+                                title:'Animal Information',
                                 id:'organismBioSourceAnimalFieldset',
                                 autoHeight:true,
                                 //hidden:true,
                                 items: [
                                         
                                     { xtype:'combo', 
-                                        fieldLabel:'gender',
+                                        fieldLabel:'Gender',
                                         id:'animalGender',
                                         width:150,
                                         name:'genderText',
@@ -356,9 +356,9 @@ MA.BioSource = {
                                                                                 ['Unknown', 'U']]
                                                                         })
                                     }, 
-                                    { xtype:'numberfield', fieldLabel:'age', id:'animalAge', maxValue:9999}, 
+                                    { xtype:'numberfield', fieldLabel:'Age', id:'animalAge', maxValue:9999}, 
                                     { xtype:'combo',  width:150,
-                                        fieldLabel:'parental line',
+                                        fieldLabel:'Parental line',
                                         editable:true,
                                         id:'animalParentalLine',
                                         displayField:'value',
@@ -376,14 +376,14 @@ MA.BioSource = {
                                 ]
                             },
                             { xtype:'fieldset', 
-                            title:'human info',
+                            title:'Human Information',
                             id:'organismBioSourceHumanFieldset',
                             autoHeight:true,
                             //hidden:true,
                             items: [
                                     
                                     { xtype:'combo',
-                                    fieldLabel:'gender',
+                                    fieldLabel:'Gender',
                                     id:'humanGender',
                                     editable:false,
                                     width:150,
@@ -427,7 +427,7 @@ MA.BioSource = {
                 { xtype:'grid', 
                     id:'organs',
                     style:'margin-top:10px;margin-bottom:10px;',
-                    title:'organs/parts',
+                    title:'Organs/Parts',
                     border: true,
                     height:200,
                     trackMouseOver: false,
@@ -438,7 +438,7 @@ MA.BioSource = {
                         autoFill:true
                     },
                     tbar: [{
-                        text: 'add organ/part',
+                        text: 'Add Organ/Part',
                         cls: 'x-btn-text-icon',
                         icon:'static/repo/images/add.png',
                         handler : function() {
@@ -446,7 +446,7 @@ MA.BioSource = {
                         }
                         }, 
                         {
-                        text: 'remove organ/part',
+                        text: 'Remove Organ/Part',
                         cls: 'x-btn-text-icon',
                         icon:'static/repo/images/delete.png',
                         handler : function(){

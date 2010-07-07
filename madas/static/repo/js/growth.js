@@ -59,7 +59,7 @@ MA.Growth = {
     },
     items:[
         {
-            title: 'growth',
+            title: 'Growth',
             region: 'center',
             collapsible: false,
             autoScroll:true,
@@ -69,7 +69,7 @@ MA.Growth = {
                 { xtype:'editorgrid', 
                     id:'animalOrigins',
                     style:'margin-top:10px;margin-bottom:10px;',
-                    title:'animal origin',
+                    title:'Animal Origin',
                     width:500,
                     height:200,
                     border: true,
@@ -81,7 +81,7 @@ MA.Growth = {
                         autoFill:true
                     },
                     tbar: [{
-                        text: 'add origin',
+                        text: 'Add Origin',
                         cls: 'x-btn-text-icon',
                         icon:'static/repo/images/add.png',
                         handler : function(){
@@ -90,7 +90,7 @@ MA.Growth = {
                             }
                         },
                         {
-                        text: 'remove origin',
+                        text: 'Remove Origin',
                         cls: 'x-btn-text-icon',
                         icon:'static/repo/images/delete.png',
                         handler : function(){
@@ -125,7 +125,7 @@ MA.Growth = {
                     xtype:'editorgrid', 
                     id:'growthConditions',
                     style:'margin-top:10px;margin-bottom:10px;',
-                    title:'plant growth conditions',
+                    title:'Plant Growth Conditions',
                     border: true,
                     height:200,
                     trackMouseOver: false,
@@ -136,7 +136,7 @@ MA.Growth = {
                     autoFill:true
                     },
                     tbar: [{
-                           text: 'add growth condition',
+                           text: 'Add Growth Condition',
                            cls: 'x-btn-text-icon',
                            icon:'static/repo/images/add.png',
                            handler : function() {
@@ -144,7 +144,7 @@ MA.Growth = {
                             }
                            }, 
                            {
-                           text: 'remove growth condition',
+                           text: 'Remove Growth Condition',
                            cls: 'x-btn-text-icon',
                            icon:'static/repo/images/delete.png',
                            handler : function(){

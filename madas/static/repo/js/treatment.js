@@ -41,7 +41,7 @@ MA.Treatment = {
     },
     items:[
         {
-            title: 'treatment',
+            title: 'Treatment',
             region: 'center',
             collapsible: false,
             layout:'form',
@@ -49,13 +49,13 @@ MA.Treatment = {
             minSize: 75,
             items: [ 
                 { xtype:'fieldset', 
-                title:'timeline',
+                title:'Timeline',
                 autoHeight:true,
                 items: [
                     { xtype:'editorgrid', 
                             id:'dates',
                             style:'margin-top:10px;margin-bottom:10px;',
-                            title:'timeline',
+                            title:'Timeline',
                             width:500,
                             height:200,
                             border: true,
@@ -68,7 +68,7 @@ MA.Treatment = {
                             },
                             tbar: [
                                 {
-                                    text: 'add time',
+                                    text: 'Add Time',
                                     cls: 'x-btn-text-icon',
                                     icon:'static/repo/images/add.png',
                                     handler : function(){
@@ -79,7 +79,7 @@ MA.Treatment = {
                                     }
                                 },
                                 {
-                                    text: 'remove time',
+                                    text: 'Remove Time',
                                     cls: 'x-btn-text-icon',
                                     icon:'static/repo/images/delete.png',
                                     handler : function(){
@@ -126,14 +126,14 @@ MA.Treatment = {
                     ]
                 },
                 { xtype:'fieldset', 
-                title:'treatments',
+                title:'Treatments',
                 autoHeight:true,
 
                 items: [
                     { xtype:'editorgrid', 
                             id:'othertreat',
                             style:'margin-top:10px;margin-bottom:10px;',
-                            title:'treatments',
+                            title:'Treatments',
                             width:500,
                             height:200,
                             border: true,
@@ -147,7 +147,7 @@ MA.Treatment = {
                             },
                             tbar: [
                                 {
-                                    text: 'add treatment',
+                                    text: 'Add Treatment',
                                     cls: 'x-btn-text-icon',
                                     icon:'static/repo/images/add.png',
                                     handler : function(){
@@ -158,7 +158,7 @@ MA.Treatment = {
                                     }
                                 },
                                 {
-                                    text: 'remove treatment',
+                                    text: 'Remove Treatment',
                                     cls: 'x-btn-text-icon',
                                     icon:'static/repo/images/delete.png',
                                     handler : function(){

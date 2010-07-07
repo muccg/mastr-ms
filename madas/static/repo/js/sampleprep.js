@@ -28,7 +28,7 @@ MA.SamplePrep = {
     },
     items:[
         {
-            title: 'sample preparation',
+            title: 'Sample Preparation',
             region: 'center',
             collapsible: false,
             autoScroll:true,
@@ -38,7 +38,7 @@ MA.SamplePrep = {
                 { xtype:'editorgrid', 
                     id:'standop',
                     style:'margin-top:10px;margin-bottom:10px;',
-                    title:'standard operating procedures used',
+                    title:'Standard Operating Procedures Used',
                     width:500,
                     height:200,
                     border: true,
@@ -49,7 +49,7 @@ MA.SamplePrep = {
                         autoFill:true
                     },
                     tbar: [{
-                        text: 'choose an SOP',
+                        text: 'Choose a SOP',
                         cls: 'x-btn-text-icon',
                         icon:'static/repo/images/add.png',
                         handler : function(){
@@ -57,7 +57,7 @@ MA.SamplePrep = {
                             }
                         },
                         {
-                        text: 'remove SOP',
+                        text: 'Remove SOP',
                         cls: 'x-btn-text-icon',
                         icon:'static/repo/images/delete.png',
                         handler : function(){
@@ -92,8 +92,8 @@ MA.SamplePrep = {
                     store: sopStore
                 }
 //                },
-//                { xtype: 'textfield', fieldLabel: 'weight' },
-//                { xtype: 'checkbox', fieldLabel: 'dry weight?' }
+//                { xtype: 'textfield', fieldLabel: 'Weight' },
+//                { xtype: 'checkbox', fieldLabel: 'Dry weight?' }
             ]
         }
     ]

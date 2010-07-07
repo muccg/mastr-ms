@@ -22,7 +22,7 @@ MA.Access = {
     },
     items:[
         {
-            title: 'involved users',
+            title: 'Involved Users',
             region: 'center',
             bodyStyle:'padding:0px;background:transparent;',
             collapsible: false,
@@ -37,7 +37,7 @@ MA.Access = {
                     sm: new Ext.grid.RowSelectionModel(),
                     tbar: [
                         {
-                            text: 'add user',
+                            text: 'Add User',
                             cls: 'x-btn-text-icon',
                             icon: 'static/repo/images/add.png',
                             handler: function(){
@@ -45,7 +45,7 @@ MA.Access = {
                             }
                         },
                         {
-                            text: 'remove user',
+                            text: 'Remove User',
                             cls: 'x-btn-text-icon',
                             icon: 'static/repo/images/delete.png',
                             handler: function(){
