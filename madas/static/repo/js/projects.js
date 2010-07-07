@@ -171,9 +171,11 @@ MA.ProjectCmp = {
                                             if (action.result.success === true) {
                                                 MA.currentProjectId = action.result.rows[0].id;
                                             
-                                                //display a success alert that auto-closes in 5 seconds
+                                                //display a success alert that auto-closes in 1 second
                                                 Ext.Msg.alert("Project saved", "(this message will auto-close in 1 second)");
-                                                setTimeout("Ext.Msg.hide()", 1000);
+                                                window.setTimeout(function () {
+                                                    Ext.Msg.hide();
+                                                }, 1000);
             
                                                 Ext.getCmp('project-experiment-list').enable();
             
