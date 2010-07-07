@@ -261,6 +261,8 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                 },
                 {
                     text: "Mark Complete",
+                    itemId:'markCompleteButton',
+                    disabled:true,
                     handler: function () {
                         var agreed = window.confirm("Are you sure you wish to mark this run as having been fully completed?");
                         if (agreed) {
@@ -283,6 +285,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                                 self.savePendingSamples();
 
                                 self.getFooterToolbar().getComponent("generateWorklistButton").enable();
+                                this.getFooterToolbar().getComponent("markCompleteButton").enable();
 
                                 self.fireEvent("save", records[0].data.id);
                             };
@@ -354,6 +357,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         this.getComponent("machine").clearValue();
 
         this.getFooterToolbar().getComponent("generateWorklistButton").disable();
+        this.getFooterToolbar().getComponent("markCompleteButton").disable();
 
         this.sampleStore.load({ params: { run__id__exact: this.runId } });
     },
@@ -421,7 +425,8 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         this.getComponent("machine").setValue(record.data.machine);
 
         this.getFooterToolbar().getComponent("generateWorklistButton").enable();
-
+        this.getFooterToolbar().getComponent("markCompleteButton").enable();
+        
         this.sampleStore.load({ params: { run__id__exact: this.runId } });
     }
 });
