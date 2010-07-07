@@ -196,6 +196,7 @@ MA.ExperimentCmp = {
     tools: [
         {
             id:'left',
+            qtip: "Back to the project",
             handler: function() {
                 MA.LoadProject(MA.currentProjectId);
             }
