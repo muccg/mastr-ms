@@ -249,6 +249,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                 },
                 {
                     text:'Generate Worklist',
+                    disabled: true,
                     itemId:'generateWorklistButton',
                     handler:function() {
                         if (self.runId == 0) {
@@ -280,6 +281,8 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                             var runSaveCallback = function (store, records, options) {
                                 self.runId = records[0].data.id;
                                 self.savePendingSamples();
+
+                                self.getFooterToolbar().getComponent("generateWorklistButton").enable();
 
                                 self.fireEvent("save", records[0].data.id);
                             };
@@ -350,6 +353,8 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         this.getComponent("method").clearValue();
         this.getComponent("machine").clearValue();
 
+        this.getFooterToolbar().getComponent("generateWorklistButton").disable();
+
         this.sampleStore.load({ params: { run__id__exact: this.runId } });
     },
     deleteRun: function () {
@@ -414,6 +419,8 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         this.getComponent("title").setValue(record.data.title);
         this.getComponent("method").setValue(record.data.method);
         this.getComponent("machine").setValue(record.data.machine);
+
+        this.getFooterToolbar().getComponent("generateWorklistButton").enable();
 
         this.sampleStore.load({ params: { run__id__exact: this.runId } });
     }
