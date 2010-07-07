@@ -139,8 +139,8 @@
                     <div class="x-panel-ml">
                         <div class="x-panel-mr">
                             <div class="x-panel-mc">
-                                <img src="static/ext-3.2.1/resources/images/default/shared/large-loading.gif" width="32" height="32" />
-                                Loading...
+                                Loading...<br/>
+                                <img src="static/ext-3.2.1/resources/images/default/shared/loading-balls.gif" width="41" height="9" />
                             </div>
                         </div>
                     </div>
