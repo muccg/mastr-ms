@@ -1,5 +1,5 @@
 from django.core.mail import send_mail
-from madas.settings import RETURN_EMAIL
+from appsetttings.mastrms.prod import RETURN_EMAIL
 from webhelpers import siteurl
 
 from django.core.mail import EmailMessage
