@@ -133,7 +133,7 @@ MA.ChangeMainContent = function(contentName, paramArray){
             var formalQuote = Ext.getCmp('formalQuote');
             var jobNumber = Ext.getCmp('jobNumber');
             var et = Ext.getCmp("experimentTitle");
-            et.setTitle('new experiment');
+            et.setTitle('New Experiment');
             
             namefield.setValue('');
 
