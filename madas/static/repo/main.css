@@ -42,6 +42,17 @@ body
 	background-color: #004375;
 }
 
+#copyright {
+    color: white;
+    padding-right: 1em;
+}
+
+#revision {
+    display: block;
+    padding-right: 20px;
+    float: right;
+}
+
 #center
 {
 	padding-left: 20px;

@@ -477,6 +477,17 @@ MA.InitUI = function() {
             ]
     });
 
+    Ext.get("copyright").addListener("click", function () {
+        Ext.Msg.show({
+            title: "Copyright Information",
+            msg: document.getElementById("copyright-information").innerHTML,
+            icon: Ext.Msg.INFO,
+            buttons: Ext.Msg.OK,
+            minWidth: 400
+        });
+
+        return false;
+    });
 };
 
 MA.UpdateNav = function() {
