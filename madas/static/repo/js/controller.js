@@ -271,7 +271,7 @@ MA.ExperimentCmp = {
                                     [ "Experiment Details", MA.ExperimentInit, MA.ExperimentBlur, true ],
                                     [ "Source", MA.BioSourceInit, MA.BioSourceBlur, false ],
                                     [ "Treatment", MA.TreatmentInit, MA.Blur, false ],
-                                    [ "Sample Prep", MA.SamplePrepInit, MA.Blur, false ],
+                                    [ "Sample Preparation", MA.SamplePrepInit, MA.Blur, false ],
                                     [ "Sample Classes", MA.ExperimentSamplesInit, MA.Blur, false ],
                                     [ "Samples", MA.ExperimentSamplesOnlyInit, MA.Blur, false ],
                                     [ "Sample Tracking", MA.SampleTrackingInit, MA.Blur, false ],
