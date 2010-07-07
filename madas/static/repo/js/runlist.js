@@ -24,7 +24,7 @@ MA.RunList = Ext.extend(Ext.Panel, {
                         hideGroupedColumn: true
                     }),
                     columns: [
-                        { header: "ID", sortable: false, menuDisabled: true, dataIndex: "id" },
+                        { header: "ID", sortable: false, menuDisabled: true, dataIndex: "id", width: 50 },
                         { header: "Title", sortable: false, menuDisabled: true, dataIndex: "title" },
                         { header: "Method", sortable: false, menuDisabled: true, dataIndex: "method__unicode" },
                         { header: "Machine", sortable: false, menuDisabled: true, dataIndex: "machine__unicode" },
