@@ -34,6 +34,27 @@ MA.RunList = Ext.extend(Ext.Panel, {
                         { header: "state", sortable: false, menuDisabled: true, groupable: true, dataIndex: "state", renderer: renderRunState }
                     ],
                     store: runListStore,
+                    tbar: [
+                        {
+                            text: "remove run",
+                            cls: "x-btn-text-icon",
+                            icon: "static/repo/images/add.gif",
+                            handler: function () {
+                                var selModel = self.getComponent("grid").getSelectionModel();
+
+                                if (selModel.hasSelection()) {
+                                    var agreed = window.confirm("Are you sure you want to remove the selected run?");
+                                    if (agreed) {
+                                        var id = selModel.getSelected().data.id;
+                                        MA.CRUDSomething("delete/run/"+id+"/", null, function () {
+                                            self.getStore().reload();
+                                            self.fireEvent("delete", id);
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    ],
                     listeners: {
                         "rowclick": function () {
                             self.fireEvent("click", this.getSelectionModel().getSelected().data.id);
@@ -50,7 +71,7 @@ MA.RunList = Ext.extend(Ext.Panel, {
 
         MA.RunList.superclass.constructor.call(this, config);
 
-        this.addEvents("click", "dblclick");
+        this.addEvents("click", "dblclick", "delete");
     },
     getStore: function () {
         return this.getComponent("grid").getStore();
@@ -82,6 +103,12 @@ MA.RunListCmp = {
                 click: function (id) {
                     var detail = Ext.getCmp("run-list-detail");
                     detail.selectRun(runListStore.getById(id));
+                },
+                "delete": function (id) {
+                    var detail = Ext.getCmp("run-list-detail");
+                    if (detail.runId == id) {
+                        detail.clearRun();
+                    }
                 }
             }
         }),
