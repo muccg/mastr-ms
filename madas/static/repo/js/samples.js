@@ -166,7 +166,7 @@ MA.ExperimentSamples = {
                         }
                     },
                     columns: [
-                        { header: "id", sortable:true, dataIndex:"id" },
+                        { header: "ID", sortable:true, dataIndex:"id" },
                         { header: "Class", sortable:true, editor:new Ext.form.TextField(), dataIndex:"class_id" },
                         { header: "Samples", sortable:true, dataIndex:"count" },
                               { header: "Treatment Variation", sortable:true, dataIndex:"treatment" },
@@ -278,10 +278,10 @@ MA.ExperimentSamples = {
                         autoFill:true
                     },
                     columns: [
-                        { header: "id", sortable:true, dataIndex:'id' },
-                        { header: "label", sortable:true, editor:new Ext.form.TextField(), dataIndex:'label' },
-                          { header: "weight", sortable:true, editor:new Ext.form.NumberField({editable:true, maxValue:9999.99}), dataIndex:'weight' },
-                        { header: "comment", sortable:false, sortable:true, width:300, editor:new Ext.form.TextField(), dataIndex:'comment' }
+                        { header: "ID", sortable:true, dataIndex:'id' },
+                        { header: "Label", sortable:true, editor:new Ext.form.TextField(), dataIndex:'label' },
+                          { header: "Weight", sortable:true, editor:new Ext.form.NumberField({editable:true, maxValue:9999.99}), dataIndex:'weight' },
+                        { header: "Comment", sortable:false, sortable:true, width:300, editor:new Ext.form.TextField(), dataIndex:'comment' }
                     ],
                     store: sampleStore
                 }
@@ -417,11 +417,11 @@ MA.ExperimentSamplesOnly = {
             autoFill:true
             },
             columns: [
-                      { header: "id", sortable:true, dataIndex:'id' },
-                      { header: "label", sortable:true, editor:new Ext.form.TextField(), dataIndex:'label' },
-                      { header: "weight", sortable:true, editor:new Ext.form.NumberField({editable:true, maxValue:9999.99}), dataIndex:'weight' },
-                      { header: "comment", sortable:false, sortable:true, width:300, editor:new Ext.form.TextField(), dataIndex:'comment' },
-                      { header: "class", sortable:true, dataIndex:'sample_class', editor:new Ext.form.ComboBox({
+                      { header: "ID", sortable:true, dataIndex:'id' },
+                      { header: "Label", sortable:true, editor:new Ext.form.TextField(), dataIndex:'label' },
+                      { header: "Weight", sortable:true, editor:new Ext.form.NumberField({editable:true, maxValue:9999.99}), dataIndex:'weight' },
+                      { header: "Comment", sortable:false, sortable:true, width:300, editor:new Ext.form.TextField(), dataIndex:'comment' },
+                      { header: "Class", sortable:true, dataIndex:'sample_class', editor:new Ext.form.ComboBox({
                                editable:true,
                                forceSelection:false,
                                displayField:'value',
@@ -434,7 +434,7 @@ MA.ExperimentSamplesOnly = {
                                mode:'local',
                                store: new Ext.data.ArrayStore({storeId:'classCombo', fields: ['key', 'value']})                               }),
                       renderer:renderClass },
-                      { header: "last status", sortable:true, width:300, dataIndex:'last_status' }
+                      { header: "Last Status", sortable:true, width:300, dataIndex:'last_status' }
                       ],
             store: sampleStore
             }

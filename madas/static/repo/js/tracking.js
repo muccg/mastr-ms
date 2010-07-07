@@ -145,12 +145,12 @@ MA.SampleTracking = {
             },
             columns: [
                       MA.TrackingSm,
-                      { header: "id", sortable:true, menuDisabled:true, dataIndex:'id' },
-                      { header: "label", sortable:true, menuDisabled:true, dataIndex:'label' },
-                      { header: "weight", sortable:true, menuDisabled:true, dataIndex:'weight' },
-                      { header: "comment", sortable:true, menuDisabled:true, width:300, dataIndex:'comment' },
-                      { header: "class", sortable:true, menuDisabled:true, dataIndex:'sample_class', renderer:renderClass },
-                      { header: "last status", sortable:true, menuDisabled:true, width:300, dataIndex:'last_status' }
+                      { header: "ID", sortable:true, menuDisabled:true, dataIndex:'id' },
+                      { header: "Label", sortable:true, menuDisabled:true, dataIndex:'label' },
+                      { header: "Weight", sortable:true, menuDisabled:true, dataIndex:'weight' },
+                      { header: "Comment", sortable:true, menuDisabled:true, width:300, dataIndex:'comment' },
+                      { header: "Class", sortable:true, menuDisabled:true, dataIndex:'sample_class', renderer:renderClass },
+                      { header: "Last Status", sortable:true, menuDisabled:true, width:300, dataIndex:'last_status' }
                       ],
             store: sampleStore
             },
@@ -168,12 +168,12 @@ MA.SampleTracking = {
             autoFill:true
             },
             columns: [
-                      { header: "id", sortable:true, menuDisabled:true, dataIndex:'id' },
-                      { header: "date", sortable:true, menuDisabled:true, dataIndex:'changetimestamp' },
-                      { header: "user", sortable:true, menuDisabled:true, width:300, dataIndex:'user', renderer:renderUser },
-                      { header: "sample", sortable:true, menuDisabled:true, width:300, dataIndex:'sample' },
-                      { header: "type", sortable:true, menuDisabled:true, dataIndex:'type', renderer:renderSampleLogType },
-                      { header: "description", sortable:true, menuDisabled:true, dataIndex:'description' }
+                      { header: "ID", sortable:true, menuDisabled:true, dataIndex:'id' },
+                      { header: "Date", sortable:true, menuDisabled:true, dataIndex:'changetimestamp' },
+                      { header: "User", sortable:true, menuDisabled:true, width:300, dataIndex:'user', renderer:renderUser },
+                      { header: "Sample", sortable:true, menuDisabled:true, width:300, dataIndex:'sample' },
+                      { header: "Type", sortable:true, menuDisabled:true, dataIndex:'type', renderer:renderSampleLogType },
+                      { header: "Description", sortable:true, menuDisabled:true, dataIndex:'description' }
                       ],
             store: sampleLogStore
             }

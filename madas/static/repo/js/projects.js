@@ -53,10 +53,10 @@ MA.ProjectList = Ext.extend(Ext.Panel, {
                         autoFill: true
                     },
                     columns: [
-                        { header: "id", sortable: false, menuDisabled: true, dataIndex: "id", width: 50 },
-                        { header: "title", sortable: false, menuDisabled: true, dataIndex: "title" },
-                        { header: "client", sortable: false, menuDisabled: true, dataIndex: "client__unicode" },
-                        { header: "description", sortable: false, menuDisabled: true, dataIndex: "description", width: 300 }
+                        { header: "ID", sortable: false, menuDisabled: true, dataIndex: "id", width: 50 },
+                        { header: "Title", sortable: false, menuDisabled: true, dataIndex: "title" },
+                        { header: "Client", sortable: false, menuDisabled: true, dataIndex: "client__unicode" },
+                        { header: "Description", sortable: false, menuDisabled: true, dataIndex: "description", width: 300 }
                     ],
                     store: projectsListStore,
                     listeners: {
@@ -240,12 +240,12 @@ MA.ProjectCmp = {
                         autoFill:true
                     },
                     columns: [
-                        { header: "id", sortable:false, menuDisabled:true, dataIndex:'id', width:50 },
-                        { header: "title", sortable:false, menuDisabled:true, dataIndex:'title' },
+                        { header: "ID", sortable:false, menuDisabled:true, dataIndex:'id', width:50 },
+                        { header: "Title", sortable:false, menuDisabled:true, dataIndex:'title' },
                         { header: "Principal", sortable:false, menuDisabled:true, dataIndex:'principal' },
                         { header: "Client", sortable:false, menuDisabled:true, dataIndex:'client' },
-                        { header: "description", sortable:false, menuDisabled:true, width:300, dataIndex:'description' },
-                        { header: "status", sortable:false, menuDisabled:true, renderer:renderStatus, dataIndex:'status' }
+                        { header: "Description", sortable:false, menuDisabled:true, width:300, dataIndex:'description' },
+                        { header: "Status", sortable:false, menuDisabled:true, renderer:renderStatus, dataIndex:'status' }
                     ],
                     store: experimentListStore,
                     listeners: {

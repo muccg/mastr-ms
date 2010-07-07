@@ -80,7 +80,7 @@ MA.Access = {
                         forceFit: true
                     },
                     columns: [
-                        { header: "name", sortable:false, menuDisabled:true, editor:new Ext.form.ComboBox({
+                        { header: "Name", sortable:false, menuDisabled:true, editor:new Ext.form.ComboBox({
                                 editable:false,
                                 forceSelection:true,
                                 displayField:'value',
@@ -92,7 +92,7 @@ MA.Access = {
                                 listWidth:230,
                                 store: userComboStore
                             }), dataIndex: 'user', renderer:renderUser },
-                        { header: "involvement", sortable:false, menuDisabled:true, editor:new Ext.form.ComboBox(
+                        { header: "Involvement", sortable:false, menuDisabled:true, editor:new Ext.form.ComboBox(
                             {
                                 editable:false,
                                 allowBlank:false,
@@ -106,7 +106,7 @@ MA.Access = {
                             ),
                             dataIndex:'type', renderer:renderInvolvement
                         },
-                        { header: "additional info", sortable:false, menuDisabled:true, editor:new Ext.form.TextField(), dataIndex:'additional_info' }
+                        { header: "Additional Info", sortable:false, menuDisabled:true, editor:new Ext.form.TextField(), dataIndex:'additional_info' }
                     ],
                     store: userStore
                 }

@@ -24,14 +24,14 @@ MA.RunList = Ext.extend(Ext.Panel, {
                         hideGroupedColumn: true
                     }),
                     columns: [
-                        { header: "id", sortable: false, menuDisabled: true, dataIndex: "id" },
-                        { header: "title", sortable: false, menuDisabled: true, dataIndex: "title" },
-                        { header: "method", sortable: false, menuDisabled: true, dataIndex: "method__unicode" },
-                        { header: "machine", sortable: false, menuDisabled: true, dataIndex: "machine__unicode" },
-                        { header: "creator", sortable: false, menuDisabled: true, dataIndex: "creator__unicode" },
-                        { header: "created_on", sortable: false, menuDisabled: true, dataIndex: "created_on", renderer: renderDateTime },
-                        { header: "progress", sortable: false, menuDisabled: true, groupable: false, renderer: renderRunProgress },
-                        { header: "state", sortable: false, menuDisabled: true, groupable: true, dataIndex: "state", renderer: renderRunState }
+                        { header: "ID", sortable: false, menuDisabled: true, dataIndex: "id" },
+                        { header: "Title", sortable: false, menuDisabled: true, dataIndex: "title" },
+                        { header: "Method", sortable: false, menuDisabled: true, dataIndex: "method__unicode" },
+                        { header: "Machine", sortable: false, menuDisabled: true, dataIndex: "machine__unicode" },
+                        { header: "Creator", sortable: false, menuDisabled: true, dataIndex: "creator__unicode" },
+                        { header: "Created On", sortable: false, menuDisabled: true, dataIndex: "created_on", renderer: renderDateTime },
+                        { header: "Progress", sortable: false, menuDisabled: true, groupable: false, renderer: renderRunProgress },
+                        { header: "State", sortable: false, menuDisabled: true, groupable: true, dataIndex: "state", renderer: renderRunState }
                     ],
                     store: runListStore,
                     tbar: [

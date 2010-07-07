@@ -473,7 +473,7 @@ MA.BioSource = {
                         }
                     ],
                     columns: [
-                        { header: "name",  sortable:false, menuDisabled:true, editor:new Ext.form.ComboBox({
+                        { header: "Name",  sortable:false, menuDisabled:true, editor:new Ext.form.ComboBox({
                                 editable:true,
                                 forceSelection:false,
                                 displayField:'value',
@@ -486,7 +486,7 @@ MA.BioSource = {
                                 listWidth:230,
                                 store: organNameComboStore
                             }), dataIndex:'name' },
-                        { header: "abbrev", sortable:false, menuDisabled:true, editor:new Ext.form.TextField({
+                        { header: "Abbrev", sortable:false, menuDisabled:true, editor:new Ext.form.TextField({
                                 editable:true,
                                 forceSelection:false,
                                 displayField:'value',
@@ -499,7 +499,7 @@ MA.BioSource = {
                                 listWidth:230
                             }), dataIndex:'abbreviation'
                         },
-                        { header: "detail", sortable:false, menuDisabled:true, editor:new Ext.form.TextField({
+                        { header: "Detail", sortable:false, menuDisabled:true, editor:new Ext.form.TextField({
                                 editable:true,
                                 forceSelection:false,
                                 displayField:'value',

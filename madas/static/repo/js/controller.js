@@ -260,13 +260,23 @@ MA.ExperimentCmp = {
                             }
                         },
                         columns: [
-                            { header: "nav",  dataIndex:'nav', sortable:false, menuDisabled:true }
+                            { header: "Nav",  dataIndex:'nav', sortable:false, menuDisabled:true }
                         ],
                         store: new Ext.data.SimpleStore(
                             {
                                 storeId:"navDS",
                                 fields: ["nav", "init", "blur", "enabled"],
-                                data: [ ["experiment details", MA.ExperimentInit, MA.ExperimentBlur, true], ["source", MA.BioSourceInit, MA.BioSourceBlur, false], ["treatment",MA.TreatmentInit, MA.Blur,false], ["sample prep",MA.SamplePrepInit, MA.Blur,false], ["sample classes", MA.ExperimentSamplesInit, MA.Blur, false], ["samples", MA.ExperimentSamplesOnlyInit, MA.Blur, false], ["sample tracking", MA.SampleTrackingInit, MA.Blur, false], ["files", MA.FilesInit, MA.Blur, false], ["access",MA.AccessInit, MA.Blur,false] ]
+                                data: [ 
+                                    [ "Experiment Details", MA.ExperimentInit, MA.ExperimentBlur, true ],
+                                    [ "Source", MA.BioSourceInit, MA.BioSourceBlur, false ],
+                                    [ "Treatment", MA.TreatmentInit, MA.Blur, false ],
+                                    [ "Sample Prep", MA.SamplePrepInit, MA.Blur, false ],
+                                    [ "Sample Classes", MA.ExperimentSamplesInit, MA.Blur, false ],
+                                    [ "Samples", MA.ExperimentSamplesOnlyInit, MA.Blur, false ],
+                                    [ "Sample Tracking", MA.SampleTrackingInit, MA.Blur, false ],
+                                    [ "Files", MA.FilesInit, MA.Blur, false ],
+                                    [ "Access", MA.AccessInit, MA.Blur, false ]
+                                ]
                             }
                           )  
                       }
