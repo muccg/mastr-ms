@@ -249,7 +249,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                 },
                 {
                     text:'Generate Worklist',
-                    id:'generateWorklistButton',
+                    itemId:'generateWorklistButton',
                     handler:function() {
                         if (self.runId == 0) {
                             Ext.Msg.alert('Save Required', 'Before you can generate a worklist, this Run must be Saved');
