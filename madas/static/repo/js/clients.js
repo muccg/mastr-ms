@@ -5,54 +5,17 @@ MA.ClientsListCmp = {
     collapsible: false,
     id:'clients-list',
     bodyStyle: 'padding:0px;',
-    layout:'fit',
-    tbar: [
-        {
-            text:'Samples for Selected Client',
-            listeners: {
-                'click':function(el, ev) {
-                    var sm = Ext.getCmp('clients').getSelectionModel();
-                    var rec = sm.getSelected();
-                    MA.LoadClientSamples(rec.data.client);
-                }
-            }
-        },
-        {
-            text:'Projects for Selected Client',
-            listeners: {
-                'click':function(el, ev) {
-                    var sm = Ext.getCmp('clients').getSelectionModel();
-                    var rec = sm.getSelected();
-                    //MA.LoadClientSamples(rec.data.client);
-
-                    projectsListStore.load({ params: { client__id__exact: rec.data.id } });
-
-                    Ext.getCmp('center-panel').layout.setActiveItem('projects-list');
-                }
-            }
-        },
-        { xtype: "tbfill" },
-        new MA.InlineSearch({
-            width: 120,
-            listeners: {
-                clear: function () {
-                    Ext.getCmp("clients").getStore().clearFilter();
-                },
-                search: function (term) {
-                    term = term.toLowerCase();
-
-                    Ext.getCmp("clients").getStore().filterBy(function (record, id) {
-                        return (record.data.client.toLowerCase().indexOf(term) != -1);
-                    });
-                }
-            }
-        })
-    ],
+    layout:'border',
+    defaults: {
+        split: true
+    },
     items: [
         {
             xtype:'grid',
-            border: false,
+            border: true,
             id:'clients',
+            region: 'center',
+            width: '50%',
 //            trackMouseOver: false,
             sm: new Ext.grid.RowSelectionModel( {singleSelect:true} ),
             viewConfig: {
@@ -63,8 +26,72 @@ MA.ClientsListCmp = {
                       { header: "ID", menuDisabled:true, dataIndex:'id', width:50 },
                       { header: "Client", menuDisabled:true, dataIndex:'client' }
             ],
-            store: clientsListStore
-        }
+            store: clientsListStore,
+            tbar: [
+                {
+                    text:'Samples for Selected Client',
+                    listeners: {
+                        'click':function(el, ev) {
+                            var sm = Ext.getCmp('clients').getSelectionModel();
+                            var rec = sm.getSelected();
+                            MA.LoadClientSamples(rec.data.client);
+                        }
+                    }
+                },
+                { xtype: "tbfill" },
+                new MA.InlineSearch({
+                    width: 120,
+                    listeners: {
+                        clear: function () {
+                            Ext.getCmp("clients").getStore().clearFilter();
+                        },
+                        search: function (term) {
+                            term = term.toLowerCase();
+
+                            Ext.getCmp("clients").getStore().filterBy(function (record, id) {
+                                return (record.data.client.toLowerCase().indexOf(term) != -1);
+                            });
+                        }
+                    }
+                })
+            ],
+            listeners: {
+                rowclick: function () {
+                    var selModel = this.getSelectionModel();
+                    var store = Ext.getCmp("client-project-list").getStore();
+
+                    if (selModel.hasSelection()) {
+                        store.addListener("load", function () {
+                            store.clearFilter();
+                        }, store, { single: true });
+
+                        store.load({ params: { client__id__exact: selModel.getSelected().data.id } });
+                    }
+                    else {
+                        store.filterBy(function () { return false; });
+                    }
+                }
+            }
+        },
+        new MA.ProjectList({
+            id: "client-project-list",
+            region: "east",
+            width: "50%",
+            border: true,
+            title: "Client Projects",
+            loadMask: true,
+            store: new Ext.data.JsonStore({
+                autoLoad: false,
+                url: projectsListStore.url,
+                remoteSort: true,
+                restful: true,
+                writer: new Ext.data.JsonWriter({ encode: false }),
+                sortInfo: {
+                    field: 'id',
+                    direction: 'DESC'
+                }
+            })
+        })
     ]
 };
 
