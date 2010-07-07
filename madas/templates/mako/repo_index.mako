@@ -104,7 +104,23 @@
 
         <div id="centerDiv"></div>
 
-        <div id="south">&copy; CCG 2010 $Rev$</div>
+        <div id="south">
+            <a id="copyright" href="#">Copyright information</a>
+            <span id="revision">$Rev$</span>
+        </div>
+
+        <div id="copyright-information" class="x-hidden">
+            <p style="padding-bottom: 1em">
+                MASTR MS is &copy; 2010
+                <a href="http://ccg.murdoch.edu.au/" target="_new">Centre for Comparative Genomics</a>.
+            </p>
+
+            <p>
+                Some icons are licensed from the
+                <a href="http://everaldo.com/crystal/" target="_new">Crystal Project</a>
+                under the Lesser Generic Public License.
+            </p>
+        </div>
 
         <form id="hiddenForm"></form>
 
