@@ -135,7 +135,9 @@ MA.LogoutInit = function(){
             MA.IsLoggedIn = false;
             
             Ext.Msg.alert('Successfully logged out', '(this dialog will auto-close in 3 seconds)');
-            setTimeout(Ext.Msg.hide, 3000);
+            window.setTimeout(function () {
+                Ext.Msg.hide();
+            }, 3000);
             
             //load up the menu and next content area as declared in response
             MA.ChangeMainContent(action.result.mainContentFunction);
@@ -143,7 +145,9 @@ MA.LogoutInit = function(){
     },
     failure: function (form, action) {
         Ext.Msg.alert('Logout failure', '(this dialog will auto-close in 3 seconds)');
-        setTimeout(Ext.Msg.hide, 3000);
+        window.setTimeout(function () {
+            Ext.Msg.hide();
+        }, 3000);
     }
     };
     
