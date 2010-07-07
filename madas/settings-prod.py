@@ -39,9 +39,6 @@ CSRF_COOKIE_NAME = "csrftoken_madas_repoadmin"
 
 PERSISTENT_FILESTORE = os.path.normpath(os.path.join(PROJECT_DIRECTORY, '..', '..', 'files'))
 
-if not os.path.exists(os.path.join(PERSISTENT_FILESTORE,OUTPUT_SUBPATH)):
-    os.mkdir(os.path.join(PERSISTENT_FILESTORE,OUTPUT_SUBPATH))
-
 REPO_FILES_ROOT = PERSISTENT_FILESTORE
 QUOTE_FILES_ROOT = os.path.join(PERSISTENT_FILESTORE, 'quotes')
 MADAS_SESSION_TIMEOUT = 1800 #30 minute session timeout 
