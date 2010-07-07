@@ -109,8 +109,11 @@ MA.ExperimentSamples = {
                            
                         }
                         },
+                        { xtype: "tbseparator" },
                         {
                             text:'Create',
+                            cls: 'x-btn-text-icon',
+                            icon: 'static/repo/images/create-samples.png',
                             handler: function() {
                                 var reps = Ext.getCmp('replicateField').getValue();
                                 
@@ -145,9 +148,9 @@ MA.ExperimentSamples = {
                         },
                         {
                             xtype:'panel',
-                            html:' samples for selected classes ',
+                            html:' Samples for Selected Classes',
                             border:false,
-                            bodyStyle:'background:transparent;padding:4px;'
+                            bodyStyle:'background:transparent;padding:4px; color: #333'
                         }
                     ],
                     viewConfig: {
@@ -232,10 +235,11 @@ MA.ExperimentSamples = {
                         }
                     }
                 },
+                { xtype: "tbseparator" },
                 {
                     text: 'Add Selected Samples to Run',
                     cls: 'x-btn-text-icon',
-                    icon: 'static/repo/images/add.png',
+                    icon: 'static/repo/images/add-to-run.png',
                     handler: function() {
                         //save changes to selected entries
                         var grid = Ext.getCmp('samples');
