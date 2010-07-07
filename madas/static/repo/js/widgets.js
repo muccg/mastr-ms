@@ -19,6 +19,7 @@ MA.InlineSearch = Ext.extend(Ext.Panel, {
                     itemId: "clear-inline-search",
                     flex: 0,
                     icon: "static/repo/images/clear.png",
+                    tooltip: "Clear search",
                     handler: function () {
                         self.getComponent("inline-search").setValue("");
                         self.update();
