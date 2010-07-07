@@ -117,6 +117,8 @@ items:[
                    
                        tbar: [{
                              text: 'Refresh',
+                             cls: 'x-btn-text-icon',
+                             icon: 'static/repo/images/refresh.png',
                              handler : function(){
                                   //reload the pending files tree
                                   Ext.getCmp('pendingFilesTree').getLoader().load(Ext.getCmp('pendingFilesTree').getRootNode());
