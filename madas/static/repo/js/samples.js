@@ -60,7 +60,6 @@ MA.ExperimentSamples = {
                     border: false,
                     id:'sampleClasses',
                     trackMouseOver: false,
-                    plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':MA.SaveSampleClassRow}})],
                     sm: new Ext.grid.RowSelectionModel({
                                                        listeners:{'rowselect':function(sm, idx, rec) {
                                                        MA.CurrentSampleClassIdValue = rec.data.id;
