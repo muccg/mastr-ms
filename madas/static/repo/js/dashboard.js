@@ -15,6 +15,7 @@ MA.Dashboard.Component = Ext.extend(Ext.Panel, {
                 new MA.ProjectList({
                     title: "Projects",
                     region: "center",
+                    width: "50%",
                     listeners: {
                         "dblclick": MA.LoadProject
                     }
@@ -22,6 +23,7 @@ MA.Dashboard.Component = Ext.extend(Ext.Panel, {
                 new MA.RunList({
                     title: "Runs",
                     region: "east",
+                    width: "50%",
                     listeners: {
                         "dblclick": MA.LoadRun
                     }
