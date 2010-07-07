@@ -303,11 +303,11 @@ MA.ExperimentCmp = {
                             id:'currentRunTitle',
                             style:'font-weight:bold;padding:6px;'
                         },
-                        { 
+                        {
                             xtype:'button',
                             text:'View',
                             handler:function(){MA.RunCmp.show();},
-                            style:'padding-left:40px'
+                            style: "margin-left: auto; margin-right: auto"
                         }
                     ]
                 }
