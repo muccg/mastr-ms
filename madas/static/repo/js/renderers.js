@@ -46,6 +46,10 @@ function renderRunProgress(val, meta, record) {
         progress = 0.0;
     }
 
+    if (record.get("state") == 2) {
+        progress = 1.0;
+    }
+
     var text = Math.floor(progress * 100.0).toString() + "%";
 
     return "<div class='x-progress-wrap'>"

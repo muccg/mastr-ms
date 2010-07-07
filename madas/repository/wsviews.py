@@ -1314,6 +1314,10 @@ def mark_run_complete(request, run_id):
     for sample in samples:
         sample.complete = True
         sample.save()
+        
+    run = Run.objects.get(id=run_id)
+    run.state = 2
+    run.save()
 
     return HttpResponse(json.dumps({ "success": True }), content_type="text/plain")
     
