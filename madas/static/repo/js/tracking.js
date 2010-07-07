@@ -108,6 +108,8 @@ MA.SampleTracking = {
                     { xtype: 'tbspacer', width: 15 },
                     { 
                         text:'Save',
+                        cls: 'x-btn-text-icon',
+                        icon: 'static/repo/images/save.png',
                         listeners: {
                             'click': function(e) {
                                 //save changes to selected entries
