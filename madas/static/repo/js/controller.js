@@ -357,7 +357,7 @@ MA.LoadExperiment = function(expId) {
                                          var data = response.responseJSON.response.value.items;
                                          var massagedData = [];
                                          
-                                         for (var idx in data) {
+                                         for (var idx = 0; idx < data.length; idx++) {
                                             massagedData[idx] = [data[idx]['key'], '#'+data[idx]['key']+'  '+data[idx]['value']];
                                          }
 
