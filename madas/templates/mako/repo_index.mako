@@ -31,7 +31,6 @@
         <script src="static/repo/js/datastores.js" type="text/javascript"></script>
 
         <script src="static/repo/js/renderers.js" type="text/javascript"></script>
-        <script src="static/repo/js/widgets.js" type="text/javascript"></script>
         <script src="static/repo/js/GridSearch.js" type="text/javascript"></script>
 
         <script src="static/repo/js/samples.js" type="text/javascript"></script>
