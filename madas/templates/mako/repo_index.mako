@@ -51,22 +51,8 @@
         <script src="static/repo/js/menu.js" type="text/javascript"></script>
 
         <script type="text/javascript">
-            var callbackCount = 0;
             function callbacker(){
-            //    var username = document.getElementById('username').value;
-                
-            //    if (username == "" && callbackCount < 10) {
-            //        //console.log("waiting...");
-            //        callbackCount += 1;
-            //        window.setTimeout("callbacker();", 100);
-            //        return;
-            //    }
-                
-            //    document.getElementById('appLoad').style.display = "none";
                 MA.InitApplication('${ APP_SECURE_URL }', '${ username }', '${ mainContentFunction }', '${ params }');
-            //    document.getElementById("appLoad").style.display = "none";
-            //    document.getElementById("hidePass").style.display = "block";
-            //    document.getElementById("hideUser").style.display = "block";
             }
         </script>
     </head>

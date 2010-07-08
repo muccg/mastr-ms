@@ -285,7 +285,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                                 self.savePendingSamples();
 
                                 self.getFooterToolbar().getComponent("generateWorklistButton").enable();
-                                this.getFooterToolbar().getComponent("markCompleteButton").enable();
+                                self.getFooterToolbar().getComponent("markCompleteButton").enable();
 
                                 self.fireEvent("save", records[0].data.id);
                             };
