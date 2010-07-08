@@ -23,6 +23,14 @@ MA.RunList = Ext.extend(Ext.Panel, {
                         autoFill: true,
                         hideGroupedColumn: true
                     }),
+                    plugins:[new Ext.ux.grid.Search({
+                         mode:'local'
+                        ,iconCls:false
+                        ,dateFormat:'m/d/Y'
+                        ,minLength:0
+                        ,width:150
+                        ,position:'top'
+                    })],
                     columns: [
                         { header: "ID", sortable: false, menuDisabled: true, dataIndex: "id", width: 50 },
                         { header: "Title", sortable: false, menuDisabled: true, dataIndex: "title" },
@@ -53,16 +61,7 @@ MA.RunList = Ext.extend(Ext.Panel, {
                                     }
                                 }
                             }
-                        },
-                        { xtype: "tbfill" },
-                        new MA.InlineSearch({
-                            filterFunction: function (record, term) {
-                                var term = term.toLowerCase();
-                                return (record.data.title.toLowerCase().indexOf(term) != -1);
-                            },
-                            store: runListStore,
-                            width: 120
-                        })
+                        }
                     ],
                     listeners: {
                         "rowclick": function () {

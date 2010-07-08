@@ -26,17 +26,16 @@ MA.ClientsListCmp = {
                       { header: "ID", menuDisabled:true, dataIndex:'id', width:50 },
                       { header: "Client", menuDisabled:true, dataIndex:'client' }
             ],
+            plugins:[new Ext.ux.grid.Search({
+                 mode:'local'
+                ,iconCls:false
+                ,dateFormat:'m/d/Y'
+                ,minLength:0
+                ,width:150
+                ,position:'top'
+            })],
             store: clientsListStore,
             tbar: [
-                { xtype: "tbfill" },
-                new MA.InlineSearch({
-                    filterFunction: function (record, term) {
-                        term = term.toLowerCase();
-                        return (record.data.client.toLowerCase().indexOf(term) != -1);
-                    },
-                    store: clientsListStore,
-                    width: 120
-                })
             ],
             listeners: {
                 rowclick: function () {
@@ -95,7 +94,12 @@ MA.ClientsListCmp = {
                             field: 'id',
                             direction: 'DESC'
                         }
-                    })
+                    }),
+                    listeners: {
+                        dblclick: function (id) {
+                            MA.LoadProject(id);
+                        }
+                    }
                 }),
                 {
                     border: true,

@@ -9,42 +9,41 @@ MA.ProjectList = Ext.extend(Ext.Panel, {
 
         var defaultConfig = {
             layout: "fit",
-            tbar: [
-                {
-                    text: "New Project",
-                    cls: "x-btn-text-icon",
-                    icon: "static/repo/images/add.png",
-                    handler: function () {
-                        MA.MenuHandler({ "id": "project:new" });
-                    }
-                },
-                {
-                    text: "Remove Project",
-                    cls: "x-btn-text-icon",
-                    icon: "static/repo/images/delete.png",
-                    handler: function () {
-                        var grid = self.getComponent("grid");
-                        var selections = grid.getSelectionModel().getSelections();
-
-                        grid.getStore().remove(selections);
-                        self.fireEvent("delete", selections);
-                    }
-                },
-                { xtype: "tbfill" },
-                new MA.InlineSearch({
-                    filterFunction: function (record, term) {
-                        var term = term.toLowerCase();
-                        return (record.data.title.toLowerCase().indexOf(term) != -1);
-                    },
-                    store: store,
-                    width: 120
-                })
-            ],
             items: [
                 new Ext.grid.GridPanel({
                     itemId: "grid",
                     border: false,
+                    tbar: [
+                                    {
+                                        text: "New Project",
+                                        cls: "x-btn-text-icon",
+                                        icon: "static/repo/images/add.png",
+                                        handler: function () {
+                                            MA.MenuHandler({ "id": "project:new" });
+                                        }
+                                    },
+                                    {
+                                        text: "Remove Project",
+                                        cls: "x-btn-text-icon",
+                                        icon: "static/repo/images/delete.png",
+                                        handler: function () {
+                                            var grid = self.getComponent("grid");
+                                            var selections = grid.getSelectionModel().getSelections();
+                    
+                                            grid.getStore().remove(selections);
+                                            self.fireEvent("delete", selections);
+                                        }
+                                    }
+                                ],
                     trackMouseOver: false,
+                    plugins:[new Ext.ux.grid.Search({
+                         mode:'local'
+                        ,iconCls:false
+                        ,dateFormat:'m/d/Y'
+                        ,minLength:0
+                        ,width:150
+                        ,position:'top'
+                    })],
                     selModel: new Ext.grid.RowSelectionModel({ singleSelect: true }),
                     viewConfig: {
                         forceFit: true,
