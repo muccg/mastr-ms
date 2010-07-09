@@ -428,13 +428,32 @@ MA.LoadExperiment = function(expId) {
                                          }
                                      }
                                      );
-    
+
+    var changingExperiment = (MA.CurrentExpId != expId);
     MA.CurrentExpId = expId;
     
     MA.MenuHandler({ id:'experiment:view' });
 
-    //Ext.getCmp('expContent').getLayout().setActiveItem(0);
-    (function(){Ext.getCmp('expNav').select(0);}).defer(500);
+    // Eh, we'll check for IE 6 as well just in case.
+    if ((Ext.isIE6 || Ext.isIE7) && changingExperiment) {
+        /* This works around an apparent DOM manipulation timing bug in IE 7
+         * where the multitude of calls required to deselect a pane in the
+         * navigation and select the experiment details pane manages to confuse
+         * it, as ExtJS will continue to make calls to manipulate elements that
+         * are hidden, and things break. */
+        var mask = new Ext.LoadMask("center-panel", {
+            removeMask: true
+        });
+        mask.show();
+
+        (function () {
+            Ext.getCmp('expNav').select(0);
+            mask.hide();
+        }).defer(500);
+    }
+    else {
+        Ext.getCmp('expContent').getLayout().setActiveItem(0);
+    }
 };
 
 /**
