@@ -3,8 +3,11 @@ MA.ExperimentInit = function() {
 };
 
 MA.Blur = function(invoker) {
-    invoker.init();
-    
+    if (invoker.index === -1) {
+        Ext.getCmp("expContent").getLayout().setActiveItem(0);
+    }
+
+    invoker.init.call();
     Ext.getCmp("expContent").getLayout().setActiveItem(invoker.index); 
     Ext.currentExperimentNavItem = invoker.index;
     
@@ -431,7 +434,7 @@ MA.LoadExperiment = function(expId) {
     MA.MenuHandler({ id:'experiment:view' });
 
     //Ext.getCmp('expContent').getLayout().setActiveItem(0);
-    Ext.getCmp('expNav').clearSelections();
+    (function(){Ext.getCmp('expNav').select(0);}).defer(500);
 };
 
 /**

@@ -8,7 +8,6 @@
         <link rel="stylesheet" href="static/ext-3.2.1/examples/ux/css/RowEditor.css"/>
         <link rel="stylesheet" type="text/css" href="static/css/file-upload.css"/>
 
-        <!-- <script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script> -->
 
         <script src="static/repo/js/prototype.js" type="text/javascript"></script>
         <script src="static/repo/js/scriptaculous/scriptaculous.js" type="text/javascript"></script>
