@@ -13,7 +13,7 @@ MA.CreateNewRun = function() {
 
 MA.RunCmpRowSelect = function(view, nodes) {
     if (nodes.length == 0) {
-        Ext.getCmp("runDetails").createRun();
+//        Ext.getCmp("runDetails").createRun();
     } else {
         var r = view.getSelectedRecords()[0];
 
@@ -465,7 +465,23 @@ MA.RunCmp = new Ext.Window({
 	                tpl: '<div style="padding:4px"><b>{title}</b><br><div style="color:#666"><i>{method__unicode}<br>{creator__unicode}</i></div></div>'}
             ],
             listeners:{
-                'selectionchange':MA.RunCmpRowSelect
+                'selectionchange':MA.RunCmpRowSelect,
+                'render': function() {
+                    //register to be notified when the runstore loads so that we can update current sel
+                    
+                    runStore.addListener("load", function() {
+                        var record = runStore.getById(Ext.getCmp('runDetails').runId);
+                        if (record != null) {
+                            var list = Ext.getCmp("runlistview");
+                            list.refresh();
+    
+                            list.select(record);
+                            list.getNode(record).scrollIntoView(list.innerBody.dom.parentNode);
+                        } else {
+                            MA.CreateNewRun();
+                        }
+                    });
+                }
             },
             viewConfig:{
                 forceFit:true
@@ -483,16 +499,16 @@ MA.RunCmp = new Ext.Window({
             listeners: {
                 "delete": MA.RunDeleteCallback,
                 "save": function (id) {
-                    runStore.addListener("load", function () {
-                        /* Need to reload the record from the store for list
-                         * manipulation methods to work. No, I don't understand
-                         * why either. */
-                        var record = runStore.getById(id);
-                        var list = Ext.getCmp("runlistview");
-
-                        list.select(record);
-                        list.getNode(record).scrollIntoView(list.innerBody.dom.parentNode);
-                    }, runStore, { single: true });
+//                    runStore.addListener("load", function () {
+//                        /* Need to reload the record from the store for list
+//                         * manipulation methods to work. No, I don't understand
+//                         * why either. */
+//                        var record = runStore.getById(id);
+//                        var list = Ext.getCmp("runlistview");
+//
+//                        list.select(record);
+//                        list.getNode(record).scrollIntoView(list.innerBody.dom.parentNode);
+//                    }, runStore, { single: true });
 
                     runStore.load();
                     MA.RunSaveCallback(id);

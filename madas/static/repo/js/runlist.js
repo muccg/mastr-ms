@@ -57,6 +57,8 @@ MA.RunList = Ext.extend(Ext.Panel, {
                                         MA.CRUDSomething("delete/run/"+id+"/", null, function () {
                                             self.getStore().reload();
                                             self.fireEvent("delete", id);
+                                            
+                                            runStore.reload();
                                         });
                                     }
                                 }
@@ -132,8 +134,8 @@ MA.RunListCmp = {
                     flex: 0,
                     id: "run-list-detail",
                     listeners: {
-                        "delete": function () { runListStore.reload(); },
-                        "save": function () { runListStore.reload(); }
+                        "delete": function () { runListStore.reload(); runStore.reload(); },
+                        "save": function () { runListStore.reload(); runStore.reload(); }
                     }
                 })
             ]
