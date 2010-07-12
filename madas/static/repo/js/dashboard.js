@@ -6,7 +6,8 @@ MA.Dashboard.Component = Ext.extend(Ext.Panel, {
         var defaultConfig = {
             defaults: {
                 margins: "5px",
-                split: true
+                split: true,
+                border: false
             },
             layout: {
                 type: "border"
@@ -41,8 +42,7 @@ MA.Dashboard.Component = Ext.extend(Ext.Panel, {
 
 
 MA.DashboardCmp = new MA.Dashboard.Component({
-    id: "dashboard",
-    title: "Dashboard"
+    id: "dashboard"
 });
 
 
