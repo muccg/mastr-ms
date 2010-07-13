@@ -206,7 +206,14 @@ MA.SourceTypeSelect = function() {
     }
 };
 
-MA.BioSourceBlurSuccess = function() {
+MA.BioSourceBlurSuccess = function(response) {
+    if (Ext.isDefined(response)) {
+        if (!Ext.isDefined(response.responseJSON)) {
+            Ext.Msg.alert('Error', 'An unexpected error has occurred. Your session may have timed out. Please reload your browser window.');
+            return;
+        }
+    }
+
     var index = MA.ExperimentDeferredInvocation.index;
 
     if (index >= 0) {
