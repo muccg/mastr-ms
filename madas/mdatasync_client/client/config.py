@@ -9,14 +9,14 @@ class MSDSConfig(object):
         #key: [value, formalKeyName, helpText]
         #e.g.:
         #'user' : ['jsmith', 'Username', 'The username with which to logon to the remote server']
-        self.store = { 'user' : ['bpower', 'Username', 'The username with which to logon to the remote server.'],
+        self.store = { 'user' : ['default_user', 'Username', 'The username with which to logon to the remote server.'],
                  #'remotehost' : ['127.0.0.1', 'Remote Host', 'The address of the remote rsync machine.'],
                  # 'remotedir' : ['syncdir_dest', 'Dest Dir'],
                   'sitename'  : ['defaultsite', 'Site Name', 'A name to identify this installation, e.g. Lab #1.', False],
                   'stationname'  : ['defaultstation', 'Stationname', 'A name to identify this installation, e.g. Lab #1.', False],
               'organisation'  : ['defaultorg',  'Organisation', 'Identifies which organisation your site belongs to. It is important that this is correct.', False],
                    'localdir' : ['syncdir','Data root directory', 'The local root directory for the data.'],
-                   'synchub'  : ['https://faramir.localdomain/madas/ntakayama/sync/', 'SyncHub Address', 'The web address of the synchub server'],
+                   'synchub'  : ['https://ccg.murdoch.edu.au/madas/sync/', 'SyncHub Address', 'The web address of the synchub server'],
                    'logfile'  : ['rsync_log.txt', 'Local Log File', 'Sync operations are logged to this file'],
                    'syncfreq' : [30, 'Sync Frequency (Mins)', 'How often the application should push updates to the server'],
                    'localindexdir' : ['.local_index', 'Local Index Directory', 'Temporary storage area for data transfer'],

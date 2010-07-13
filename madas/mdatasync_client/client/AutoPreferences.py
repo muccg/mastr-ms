@@ -54,7 +54,7 @@ class AutoPreferences(wx.Dialog):
         btn = wx.Button(self, ID_CHOOSENODE_BUTTON)
         btn.SetLabel("Choose")
         btn.Bind(wx.EVT_BUTTON, self.openNodeChooser)
-        box.Add(btn, 1,  wx.ALIGN_RIGHT|wx.ALL, 2)
+        box.Add(btn, 1, wx.ALIGN_RIGHT|wx.ALL, 2)
 
         sizer.Add(box, 1, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 2)
 
