@@ -30,9 +30,8 @@ MA.CRUDSomething = function(remainderURL, params, callbackfn) {
                                              method:'GET',
                                              url: wsBaseUrl + remainderURL + paramString,
                                              listeners: {
-                                                'load':MA.DSLoaded,
                                                 'load':callbackfn,
-                                                'loadexception':MA.DSLoadException}
+                                                'exception':MA.DSLoadException}
                                              }
                                              );
     crudStore.load();
@@ -67,20 +66,27 @@ MA.ExperimentBlur = function(invoker) {
                                              { 
                                              asynchronous:true, 
                                              evalJSON:'force',
-                                     onSuccess:     MA.ExperimentBlurSuccess
+                                     onSuccess:     MA.ExperimentBlurSuccess,
+                                     onFailure:    MA.DSLoadException
                                      });
     } else {
         var saver = new Ajax.Request(wsBaseUrl + 'update/experiment/'+expId+'/?title='+escape(expName)+'&description='+escape(expDescription)+'&comment='+escape(expComment)+'&status_id=2&formal_quote_id='+escape(expFQuoteId)+'&job_number='+escape(expJobNumber)+'&project_id='+escape(MA.currentProjectId), 
                                      { 
                                      asynchronous:true, 
                                      evalJSON:'force',
-                                     onSuccess:     MA.ExperimentBlurSuccess
+                                     onSuccess:     MA.ExperimentBlurSuccess,
+                                      onFailure:    MA.DSLoadException
                                      });
     }
 };
 
 MA.ExperimentBlurSuccess = function(response) {
     if (Ext.isDefined(response)) {
+        if (!Ext.isDefined(response.responseJSON)) {
+            Ext.Msg.alert('Error', 'An unexpected error has occurred. Your session may have timed out. Please reload your browser window.');
+            return;
+        }
+        
         MA.CurrentExpId = response.responseJSON.rows[0].id;
     }
     
