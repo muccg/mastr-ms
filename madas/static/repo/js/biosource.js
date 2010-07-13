@@ -431,7 +431,7 @@ MA.BioSource = {
                     border: true,
                     height:200,
                     trackMouseOver: false,
-                    plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':MA.SaveOrganRow}})],
+                    plugins: [new Ext.ux.grid.MARowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':MA.SaveOrganRow}})],
                     sm: new Ext.grid.RowSelectionModel(),
                     viewConfig: {
                         forceFit: true,

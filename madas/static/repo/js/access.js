@@ -33,7 +33,7 @@ MA.Access = {
                     border: false,
                     id:'involvedUsersGrid',
                     trackMouseOver: false,
-                    plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':MA.SaveAccessRow}})],
+                    plugins: [new Ext.ux.grid.MARowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':MA.SaveAccessRow}})],
                     sm: new Ext.grid.RowSelectionModel(),
                     tbar: [
                         {

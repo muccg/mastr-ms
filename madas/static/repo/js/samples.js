@@ -271,7 +271,7 @@ MA.ExperimentSamples = {
                     id:'samples',
                     loadMask:true,
                     trackMouseOver: false,
-                    plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':MA.SaveSampleRow}})],
+                    plugins: [new Ext.ux.grid.MARowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':MA.SaveSampleRow}})],
                     sm: new Ext.grid.RowSelectionModel(),
 //                    autoHeight:true,
                     viewConfig: {
@@ -410,7 +410,7 @@ MA.ExperimentSamplesOnly = {
             id:'samplesOnly',
             trackMouseOver: false,
             loadMask:true,
-            plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':MA.SaveSampleOnlyRow}})],
+            plugins: [new Ext.ux.grid.MARowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':MA.SaveSampleOnlyRow}})],
             sm: new Ext.grid.RowSelectionModel(),
             //                    autoHeight:true,
             viewConfig: {
