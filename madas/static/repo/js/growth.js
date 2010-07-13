@@ -74,7 +74,7 @@ MA.Growth = {
                     height:200,
                     border: true,
                     trackMouseOver: false,
-//                    plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':MA.SaveAnimalOriginRow}})],
+//                    plugins: [new Ext.ux.grid.MARowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':MA.SaveAnimalOriginRow}})],
                     sm: new Ext.grid.RowSelectionModel(),
                     viewConfig: {
                         forceFit: true,
@@ -129,7 +129,7 @@ MA.Growth = {
                     border: true,
                     height:200,
                     trackMouseOver: false,
-                    //plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':MA.SaveGrowthConditionRow}})],
+                    //plugins: [new Ext.ux.grid.MARowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':MA.SaveGrowthConditionRow}})],
                     sm: new Ext.grid.RowSelectionModel(),
                     viewConfig: {
                     forceFit: true,

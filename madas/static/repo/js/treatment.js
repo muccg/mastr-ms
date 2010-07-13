@@ -12,6 +12,7 @@ MA.TreatmentLoad = function () {
 };
 
 MA.SaveTimelineRow = function(roweditor, changes, rec, i) {
+console.log("save timeline row");
     var bundledData = {};
     
     bundledData.timeline = rec.data.timeline;
@@ -21,6 +22,7 @@ MA.SaveTimelineRow = function(roweditor, changes, rec, i) {
 };
 
 MA.SaveTreatmentRow = function(roweditor, changes, rec, i) {
+console.log("save treatment row");
     var bundledData = {};
     
     bundledData.name = rec.data.name;
@@ -60,7 +62,7 @@ MA.Treatment = {
                             height:200,
                             border: true,
                             trackMouseOver: false,
-                            plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':MA.SaveTimelineRow}})],
+                            plugins: [new Ext.ux.grid.MARowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':MA.SaveTimelineRow}})],
                             sm: new Ext.grid.RowSelectionModel(),
                             viewConfig: {
                                 forceFit: true,
@@ -107,18 +109,7 @@ MA.Treatment = {
                             ],
                             columns: [
                                       { header: "Timeline",  sortable:false, menuDisabled:true, dataIndex:'timeline', editor: new Ext.form.TextField({allowBlank:false}) },
-                                      { header: "Abbrev", sortable:false, menuDisabled:true, editor:new Ext.form.TextField({
-                                              editable:true,
-                                              forceSelection:false,
-                                              displayField:'value',
-                                              valueField:undefined,
-                                              hiddenName:'abbrevValue',
-                                              lazyRender:true,
-                                              allowBlank:true,
-                                              typeAhead:false,
-                                              triggerAction:'all',
-                                              listWidth:230
-                                          }), dataIndex:'abbreviation'
+                                      { header: "Abbrev", sortable:false, menuDisabled:true, editor:new Ext.form.TextField({ allowBlank:true }), dataIndex:'abbreviation'
                                       }
                             ],
                             store: timelineStore
@@ -138,7 +129,7 @@ MA.Treatment = {
                             height:200,
                             border: true,
                             trackMouseOver: false,
-                            plugins: [new Ext.ux.grid.RowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':MA.SaveTreatmentRow}})],
+                            plugins: [new Ext.ux.grid.MARowEditor({saveText: 'Update', errorSummary:true, listeners:{'afteredit':MA.SaveTreatmentRow}})],
                             sm: new Ext.grid.RowSelectionModel(),
                             store:treatmentStore,
                             viewConfig: {
@@ -217,18 +208,7 @@ MA.Treatment = {
                                     
                                 } 
                             }), dataIndex:'name' },
-                            { header: "Abbrev", sortable:false, menuDisabled:true, editor:new Ext.form.TextField({
-                                    editable:true,
-                                    forceSelection:false,
-                                    displayField:'value',
-                                    valueField:undefined,
-                                    hiddenName:'abbrevValue',
-                                    lazyRender:true,
-                                    allowBlank:true,
-                                    typeAhead:false,
-                                    triggerAction:'all',
-                                    listWidth:230
-                                }), dataIndex:'abbreviation'
+                            { header: "Abbrev", sortable:false, menuDisabled:true, editor:new Ext.form.TextField({ allowBlank:true }), dataIndex:'abbreviation'
                             }
                             ]
                       }
