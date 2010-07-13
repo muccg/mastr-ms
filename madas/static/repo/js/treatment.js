@@ -12,7 +12,6 @@ MA.TreatmentLoad = function () {
 };
 
 MA.SaveTimelineRow = function(roweditor, changes, rec, i) {
-console.log("save timeline row");
     var bundledData = {};
     
     bundledData.timeline = rec.data.timeline;
@@ -22,7 +21,6 @@ console.log("save timeline row");
 };
 
 MA.SaveTreatmentRow = function(roweditor, changes, rec, i) {
-console.log("save treatment row");
     var bundledData = {};
     
     bundledData.name = rec.data.name;
