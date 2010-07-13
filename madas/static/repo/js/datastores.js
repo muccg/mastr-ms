@@ -20,7 +20,7 @@ MA.DSLoaded = function(ds, recs, opts) {
     }
 };
 
-MA.DSLoadIgnoreException = function() {};
+MA.DSLoadIgnoreException = function() { MA.DSLoaded(this, null, null); };
 
 MA.DSLoadException = function(status, text, c, d, e) {
     var title = "Network Error";
