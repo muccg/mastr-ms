@@ -702,6 +702,13 @@ def recreate_sample_classes(request, experiment_id):
         if str(sc) != '':
             sc.class_id = str(sc)
             sc.save()
+            
+        #renumber all the samples
+        count = 1
+        for sample in sc.sample_set.all().order_by('sample_class_sequence', 'id'):
+            sample.sample_class_sequence = count
+            count = count + 1
+            sample.save()
 
     #purge anything not in foundclasses
     purgeable = currentsamples.exclude(id__in=foundclasses)

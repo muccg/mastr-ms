@@ -302,16 +302,17 @@ class Sample(models.Model):
     label = models.CharField(max_length=255)
     comment = models.TextField(null=True, blank=True)
     weight = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    sample_class_sequence = models.SmallIntegerField(default=1, db_index=True)
 
     def __unicode__(self):
-        return ("%s %s" % (self.sample_class, self.label)).replace('None', '--')
+        return u"%s-%s" % (self.sample_class.class_id, self.sample_class_sequence)
 
     def run_filename(self, run):
         if self.sample_class is None:
             print 'sample not in class'
             raise SampleNotInClassException
         else:
-            return self.sample_class.class_id + '-' + str(run.id) + '-' + str(self.id) + '.d'
+            return u"%s-%s_%s-%s.d" % (self.sample_class.class_id, self.sample_class_sequence, run.id, str(self.id))
 
     def is_valid_for_run(self):
         '''Test to determine whether this sample can be used in a run'''

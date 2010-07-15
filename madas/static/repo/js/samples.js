@@ -280,6 +280,7 @@ MA.ExperimentSamples = {
                     },
                     columns: [
                         { header: "ID", sortable:true, dataIndex:'id' },
+                        { header: "Seq", sortable:true, dataIndex:'sample_class_sequence' },
                         { header: "Label", sortable:true, editor:new Ext.form.TextField(), dataIndex:'label' },
                           { header: "Weight", sortable:true, editor:new Ext.form.NumberField({editable:true, maxValue:9999.99}), dataIndex:'weight' },
                         { header: "Comment", sortable:false, sortable:true, width:300, editor:new Ext.form.TextField(), dataIndex:'comment' }
@@ -435,6 +436,7 @@ MA.ExperimentSamplesOnly = {
                                mode:'local',
                                store: new Ext.data.ArrayStore({storeId:'classCombo', fields: ['key', 'value']})                               }),
                       renderer:renderClass },
+                      { header: "Seq", sortable:true, dataIndex:'sample_class_sequence' },
                       { header: "Last Status", sortable:true, width:300, dataIndex:'last_status' }
                       ],
             store: sampleStore

@@ -184,7 +184,8 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                         self.sampleSelModel,
                         {header: "ID", dataIndex: 'id', sortable: true},
                         {header: "Label", dataIndex: 'label', sortable: true},
-                        {header: "Class", dataIndex: 'sample_class__unicode', sortable: true}
+                        {header: "Class", dataIndex: 'sample_class__unicode', sortable: true},
+                       { header: "Seq", sortable:true, dataIndex:'sample_class_sequence' }
                     ],
                     viewConfig:{
                         forceFit:true

@@ -137,7 +137,7 @@ class TreatmentAdmin(ExtJsonInterface, admin.ModelAdmin):
         return form
 
 class SampleAdmin(ExtJsonInterface, admin.ModelAdmin):
-    list_display = ['label', 'comment', 'weight', 'sample_class', 'experiments_link', 'runs_link', 'logs_link']
+    list_display = ['label', 'comment', 'weight', 'sample_class', 'experiments_link', 'runs_link', 'logs_link', 'sample_class_sequence']
     search_fields = ['label', 'experiment__title', 'sample_class__organ__name']
     actions = ['create_run']
     inlines = [RunSampleInline]
