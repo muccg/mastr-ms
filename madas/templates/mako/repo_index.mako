@@ -53,9 +53,10 @@
             function callbacker(){
                 MA.InitApplication('${ APP_SECURE_URL }', '${ username }', '${ mainContentFunction }', '${ params }');
             }
+            Ext.onReady(callbacker);
         </script>
     </head>
-    <body onload="callbacker();">
+    <body>
         <div id="north">
             <div id="appTitle">MASTR MS</div>
             <div id="toolbar"></div>
