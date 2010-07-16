@@ -240,9 +240,14 @@ class StandardOperationProcedure(models.Model):
     defined_by = models.CharField(max_length=255, null=True, blank=True)
     replaces_document = models.CharField(max_length=255, null=True, blank=True)
     content = models.CharField(max_length=255, null=True, blank=True)
-    attached_pdf = models.TextField(null=True, blank=True)
-    experiments = models.ManyToManyField(Experiment, null=True, blank=True)
 
+    def _filepath(self, filename):
+        import settings, os
+        return os.path.join(settings.REPO_FILES_ROOT, 'sops', self.version, filename)
+
+    attached_pdf = models.FileField(upload_to=_filepath, null=True, blank=True)
+    experiments = models.ManyToManyField(Experiment, null=True, blank=True)
+    
     def __unicode__(self):
         return self.label
 

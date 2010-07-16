@@ -2,7 +2,7 @@ from django.db import transaction
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden, HttpResponseNotAllowed, HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
-from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RunSample, InstrumentMethod, ClientFile
+from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure
 from madas.m.models import Organisation, Formalquote
 from django.utils import webhelpers
 from django.contrib.auth.models import User
@@ -1199,6 +1199,22 @@ def downloadFile(request, *args):
     response = HttpResponse(wrapper, content_type='application/download')
     response['Content-Disposition'] = content_disposition
     response['Content-Length'] = os.path.getsize(filename)
+    return response 
+    
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
+def downloadSOPFile(request, sop_id):
+    print 'downloadSOPFile:', str('')
+    
+    sop = StandardOperationProcedure.objects.get(id=sop_id)
+    
+    import os
+    
+    wrapper = sop.attached_pdf.open()
+    content_disposition = 'attachment;  filename=\"%s\"' % sop.attached_pdf.name.split(os.sep)[-1]
+    response = HttpResponse(wrapper, content_type='application/download')
+    response['Content-Disposition'] = content_disposition
+    response['Content-Length'] = os.path.getsize(sop.attached_pdf.name)
     return response 
 
 def downloadClientFile(request, file_id):

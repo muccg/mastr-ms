@@ -18,6 +18,14 @@ MA.RemoveSOPRow = function(rec) {
     }
 };
 
+MA.DownloadSOPFile = function(sopID) {
+    window.location = wsBaseUrl + "downloadSOPFile/" + sopID;
+};
+
+function sopFileActionRenderer(val) {
+    return '<a href="#" onclick="MA.DownloadSOPFile(\''+val+'\')">download</a>';
+}
+
 MA.SamplePrep = {
     baseCls: 'x-plain',
     border:false,
@@ -86,7 +94,8 @@ MA.SamplePrep = {
                                 store: sopComboStore,
                                 listeners:{'selectionchange':function() { }}
                             }), dataIndex:'id', renderer: renderSOPLabel },
-                        { header: "Description", sortable:false, menuDisabled:true, dataIndex:'id', renderer: renderSOPDescription }
+                        { header: "Description", sortable:false, menuDisabled:true, dataIndex:'id', renderer: renderSOPDescription },
+                        { header: "View", sortable:false, menuDisabled:false, dataIndex:'id', renderer: sopFileActionRenderer }
                     ],
                     listeners: {'afteredit':function(e) { MA.SaveSOPRow(e); }},
                     store: sopStore
