@@ -1341,6 +1341,15 @@ def mark_run_complete(request, run_id):
     run = Run.objects.get(id=run_id)
     run.state = 2
     run.save()
+    
+    from madas.mail_functions import FixedEmailMessage
+    from appsettings.mastrms.prod import RETURN_EMAIL
+    
+    try:
+        e = FixedEmailMessage(subject='MASTR-MS Run ('+run.title+') Complete', body='Run ('+run.title+') has been marked as complete', from_email = RETURN_EMAIL, to = [run.creator.username])
+        e.send()
+    except e:
+        pass
 
     return HttpResponse(json.dumps({ "success": True }), content_type="text/plain")
     
