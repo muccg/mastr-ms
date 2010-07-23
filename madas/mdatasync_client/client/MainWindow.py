@@ -3,7 +3,8 @@ from StatusBar import StatusBar
 from SysTrayIcon import SystrayIcon
 from FileList import ListCtrlPanel
 import time
-
+import esky
+import sys
 from identifiers import *
 
 
@@ -25,8 +26,7 @@ class MainWindow(wx.Frame):
     def __init__(self, parent):
 
         wx.Frame.__init__(self, parent, -1, 'MS Datasync Application')
-       
-
+        self.countDownEnabled = True #sets the countdown to be active
 
         self.contentPanel = wx.Panel(self, -1)
         _cp = self.contentPanel
@@ -66,9 +66,10 @@ class MainWindow(wx.Frame):
         #status bars and timers etc, can enable/disable items in it.
         self.menuBar = wx.MenuBar()
         fileMenu = wx.Menu()
-        fileMenu.Append(ID_TEST_CONNECTION, "&Test Connection", "Test your connection to the server")
+        #fileMenu.Append(ID_TEST_CONNECTION, "&Test Connection", "Test your connection to the server")
         fileMenu.Append(ID_CHECK_NOW, "&Check Now", "Check for required uploads now")
         fileMenu.AppendSeparator()
+        fileMenu.Append(ID_PROGRAMUPDATES, "&Program Updates", "Check for new versions of this program")
         fileMenu.Append(ID_MINIMISE, "&Minimize", "Minimize the app to the system tray")
         fileMenu.Append(ID_QUIT, "&Quit", "Quits the application completely")
 
@@ -78,9 +79,6 @@ class MainWindow(wx.Frame):
 
         self.menuBar.Append(fileMenu, "&File")
         self.menuBar.Append(editMenu, "&Edit")
-
-
-
 
         #status bar
         self.StatusBar = StatusBar(self, self.log)
@@ -101,18 +99,16 @@ class MainWindow(wx.Frame):
         self.secondsUntilNextSync = 0
         self.syncFreq = 0 #local cache of syncfreq
         
-
-        
         #Menu Events
         self.SetMenuBar(self.menuBar)
         self.Bind(wx.EVT_MENU_HIGHLIGHT_ALL, self.OnMenuHighlight)
-        self.Bind(wx.EVT_MENU, self.__testMenuFunction, id=ID_TEST_CONNECTION )
+        #self.Bind(wx.EVT_MENU, self.__testMenuFunction, id=ID_TEST_CONNECTION )
         self.Bind(wx.EVT_MENU, self.OnCheckNow, id=ID_CHECK_NOW )
         self.Bind(wx.EVT_MENU, self.OnMenuMinimise, id=ID_MINIMISE )
         self.Bind(wx.EVT_MENU, self.OnMenuQuit, id=ID_QUIT)
         self.Bind(wx.EVT_MENU, self.OnMenuPreferences, id=ID_PREFERENCES )
         self.Bind(wx.EVT_MENU, self.pycrust, id=ID_PYCRUST )
-        
+        self.Bind(wx.EVT_MENU, self.OnUpdateProgram, id=ID_PROGRAMUPDATES ) 
        
         #Collapsible pane event (the logArea):
         self.Bind(wx.EVT_COLLAPSIBLEPANE_CHANGED, self.OnPaneChanged, self.logArea)
@@ -143,6 +139,12 @@ class MainWindow(wx.Frame):
         
         self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
         self.log('Finished loading application')
+
+    def PauseCountdown(self):
+        self.countDownEnabled = False
+
+    def UnPauseCountdown(self):
+        self.countDownEnabled = True
 
     def OnPaneChanged(self, event=None):
         if event:
@@ -181,6 +183,22 @@ class MainWindow(wx.Frame):
         # but in this case just call Skip so the default is done
         event.Skip() 
 
+    def OnUpdateProgram(self, event):
+        self.menuBar.Enable(ID_CHECK_NOW, False)
+        self.PauseCountdown()
+        if getattr(sys,"frozen",False):
+            self.log('Cheking for program updates')
+            app = esky.Esky(sys.executable,self.config.getValue('updateurl'))
+            try:
+                app.auto_update()
+            except Exception, e:
+                self.log("Error updating app: %s" % (str(e)), type=self.log.LOG_ERROR)
+        else:
+            self.log('App must be frozen to initiate update')
+        self.menuBar.Enable(ID_CHECK_NOW, True)   
+        self.UnPauseCoundown()
+
+
     def OnMenuMinimise(self, event):
         if not self.IsIconized():
             self.Iconize(True)
@@ -212,6 +230,8 @@ class MainWindow(wx.Frame):
         a.Destroy()
 
     def OnCheckNow(self, evt):
+        if self.state != APPSTATE.IDLE: #already busy. Just return
+            return
         #MSDSCheckFn is defined by the main app - MDataSyncApp. It just sets the method in a hacky way :(
         self.SetProgress(0) #set progress to 0 
         self.setState(APPSTATE.CHECKING_SYNCHUB)
@@ -261,6 +281,9 @@ class MainWindow(wx.Frame):
         self.OnMenuMinimise(event) #closing minimises
 
     def OnTimerTick(self, event):
+        if not self.countDownEnabled:
+            return
+
         if self.secondsUntilNextSync > 0:
             self.secondsUntilNextSync -= 1
             self.StatusBar.SetStatusText("Next sync in %s" % (str(self.secondsUntilNextSync) ), 1 )

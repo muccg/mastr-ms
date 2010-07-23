@@ -1,17 +1,34 @@
 from distutils.core import setup
+from esky import bdist_esky
 import py2exe
+
+class Target:
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+        self.version = "0.1"
+        self.company_name = "None"
+        self.copyright = "None"
+        self.name = "None"
+
+freeze_includes = ['encodings','encodings.*'] 
+
+freeze_excludes = [#'_ssl',  # Exclude _ssl
+                      'pyreadline', 'difflib', 'doctest',
+                      'pickle', 'calendar']  # Exclude standard library
+
 
 py2exe_options = dict(
             ascii=True,  # Exclude encodings
-            excludes=[#'_ssl',  # Exclude _ssl
-                      'pyreadline', 'difflib', 'doctest',
-                      'optparse', 'pickle', 'calendar'],  # Exclude standard library
+            excludes= freeze_excludes,
             dll_excludes=['msvcr71.dll', 'MSVCP90.dll'],  # Exclude msvcr71
-            includes=['encodings','encodings.*'],
+            includes= freeze_includes,
             compressed=True,  # Compress library.zip
                     )
 
-
+bdist_esky_options_py2exe = dict(
+            includes = freeze_includes,
+            freezer_options = py2exe_options,
+            freezer_module = 'py2exe')
 
 # I can use this to fool py2exe! Docs -
 #http://www.py2exe.org/index.cgi/OverridingCriteraForIncludingDlls
@@ -25,13 +42,6 @@ def isSystemDLL(pathname):
 
 py2exe.build_exe.isSystemDLL = isSystemDLL
 
-class Target:
-    def __init__(self, **kwargs):
-        self.__dict__.update(kwargs)
-        self.version = "0.1"
-        self.company_name = "None"
-        self.copyright = "None"
-        self.name = "None"
 
 mdatasync_target = Target(
     description = "Application to sync data from clients to server",
@@ -47,9 +57,10 @@ setup(name='msDataSync',
       version='0.1',
       description='msDataSync application',
       author='Brad Power',
+      scripts = ["main.py", "Simulator.py"],
       #console=['main.py'],
       windows = [mdatasync_target, mssimulator_target],
-      options={'py2exe': py2exe_options},
+      options={'py2exe': py2exe_options, 'bdist_esky' : bdist_esky_options_py2exe},
       )
 
 

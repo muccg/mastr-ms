@@ -2,7 +2,7 @@ import wx
 from MainWindow import MainWindow
 from MSDataSyncAPI import MSDataSyncAPI #, MSDSCheckFn
 import sys
-
+import esky
 
 
 class MDataSyncApp(wx.PySimpleApp):

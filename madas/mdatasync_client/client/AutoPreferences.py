@@ -20,7 +20,7 @@ class AutoPreferences(wx.Dialog):
         # creation, and then we create the GUI object using the Create
         # method.
 
-        self.preference_keys = ['localdir', 'logfile', 'syncfreq', 'user']
+        self.preference_keys = ['localdir', 'logfile', 'syncfreq', 'user', 'updateurl']
 
         pre = wx.PreDialog()
         pre.SetExtraStyle(wx.DIALOG_EX_CONTEXTHELP)
