@@ -727,7 +727,7 @@ def setFormalQuoteStatus(quoteobject, status):
 def formalAccept(request, *args):
     print '*** formalAccept: enter ***'
     #load original details
-    qid = request.REQUEST.get('id', None)
+    qid = request.REQUEST.get('quoterequestid', None)
     failed = False
     try:
         qr = Quoterequest.objects.filter(id = qid)[0]
