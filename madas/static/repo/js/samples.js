@@ -330,6 +330,76 @@ MA.SaveSampleOnlyRow = function(roweditor, changes, rec, i) {
     MA.SaveRowLiterals('sample', roweditor, bundledData, rec, i, MA.SampleLoadByExperiment);
 };
 
+MA.SampleCSVUploadForm = new Ext.Window({
+    title: 'Upload CSV of Samples',
+    closeAction:'hide',
+    width:300,
+    height:200,
+    minHeight:200,
+    minWidth:300,
+    id:'sampleCSVUploadWindow',
+    defaults: {
+        bodyStyle:'padding:15px;background:transparent;'
+    },
+    
+    items:[
+        {
+            id:'sampleCSVUpload',
+            xtype:'form',
+            fileUpload: true,
+            url: wsBaseUrl + 'uploadSampleCSV',
+            waitTitle: 'Uploading...',
+            border:false,
+            items:[
+                { 
+                    xtype: 'hidden',
+                    name: 'experiment_id',
+                    itemId: 'expIdField'
+                },
+                {
+                    xtype: 'panel',
+                    border: false,
+                    bodyStyle:'padding:15px;background:transparent;',
+                    html: 'Uploaded CSVs must be of the format:<br><br><code>label,weight,comment</code><br><br>',
+                },
+                {
+                    xtype: 'fileuploadfield',
+                    itemId: 'samplecsvupload',
+                    emptyText: '',
+                    fieldLabel: 'File',
+                    name: 'samplecsv'
+                }
+            ]
+        }
+    ],
+    buttons: [
+        {
+            text: 'Upload',
+            itemId:'csvUploadBtn',
+            handler: function(){
+                Ext.getCmp('sampleCSVUpload').getComponent('expIdField').setValue( MA.CurrentExperimentId() );
+            
+                Ext.getCmp('sampleCSVUpload').getForm().submit(
+                    {   
+                        successProperty: 'success',        
+                        success: function (form, action) {
+                            if (action.result.success === true) {
+                                form.reset(); 
+                                MA.ExperimentSamplesOnlyInit();
+                                Ext.getCmp('sampleCSVUploadWindow').hide();
+                            } 
+                        },
+                        failure: function (form, action) {
+                            //do nothing special. this gets called on validation failures and server errors
+                            alert('Error processing CSV. Some lines were not imported as they did not seem to be formatted properly.' );
+                        }
+                    }
+                );
+            }
+        }
+    ]
+});
+
 MA.ExperimentSamplesOnly = {
     title: 'Samples',
     region: 'center',
@@ -372,6 +442,15 @@ MA.ExperimentSamplesOnly = {
                 for (var i = 0; i < delIds.length; i++) {
                     MA.CRUDSomething("delete/sample/" + delIds[i], {}, MA.SampleLoadByExperiment);
                 }
+            }
+        },
+        {
+            text: 'Upload CSV file',
+            cls: 'x-btn-text-icon',
+            id: 'uploadsamplesbutton',
+            icon: 'static/repo/images/add.png',
+            handler: function () {
+                MA.SampleCSVUploadForm.show();
             }
         }
 //           },

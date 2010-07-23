@@ -1291,6 +1291,54 @@ def _handle_uploaded_file(f, name):
     print '*** _handle_uploaded_file: exit ***'
     return retval
     
+    
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
+def uploadCSVFile(request):
+
+    if request.GET:
+        args = request.GET
+    else:
+        args = request.POST
+
+    expId = args['experiment_id']
+    experiment = Experiment.objects.get(id=expId)
+
+    ############# FILE UPLOAD ########################
+    output = { 'success': True }
+    
+    invalidCount = 0
+    
+    try:
+        #TODO handle file uploads - check for error values
+        print request.FILES.keys()
+        if request.FILES.has_key('samplecsv'):
+            f = request.FILES['samplecsv']
+            
+            import csv
+            
+            data = csv.reader(f)
+            
+            for row in data:
+                try:
+                    s = Sample()
+                    s.label = row[0]
+                    s.weight = row[1]
+                    s.comment = row[2]
+                    s.experiment = experiment
+                    s.save()
+                except Exception, e:
+                    invalidCount = invalidCount + 1
+                    output = { 'success': False, 'invalidCount': invalidCount }            
+        else:
+            print '\tNo file attached.'
+    except Exception, e:
+        print '\tException: ', str(e)
+        output = { 'success': False }
+        
+    return HttpResponse(json.dumps(output))
+    
+    
 
 @staff_member_required
 @user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)

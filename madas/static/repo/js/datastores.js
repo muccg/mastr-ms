@@ -15,9 +15,9 @@ MA.DSLoaded = function(ds, recs, opts) {
         }
     }
     
-    if (allLoaded && MA.InitUI !== undefined) {
-        MA.InitUI();
-    }
+//    if (allLoaded && MA.InitUI !== undefined) {
+//        MA.InitUI();
+//    }
 };
 
 MA.DSLoadIgnoreException = function() { MA.DSLoaded(this, null, null); };
