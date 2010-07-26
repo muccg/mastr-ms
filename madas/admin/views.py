@@ -114,11 +114,23 @@ def user_search(request, *args):
                            ('physicalDeliveryOfficeName', 'physicalDeliveryOfficeName'), \
                            ('title', 'title'), \
                                 ])
-            f = _userload(entry['uid'][0])
-            if len(f) > 0:
-                d['isClient'] = f['isClient']
-            else:
-                d['isClient'] = False
+            
+            #f = _userload(entry['uid'][0])
+            #if len(f) > 0:
+            #    d['isClient'] = f['isClient']
+            #else:
+            #    d['isClient'] = False
+            
+            #Rather than do an expensive _userload for every user to determine
+            #if they are a client or not, we just test here to see if the 
+            #only group they are in is a status group. If so, they are a client.
+            #This is for performance - this was timing out on my local client.
+            
+            d['isClient'] = False
+            if entry.has_key('groups'):
+                e = entry['groups']
+                if len(e) == 1 and e[0] in settings.MADAS_STATUS_GROUPS:
+                    d['isClient'] = True
 
             newlist.append(d)
     except Exception, e:
