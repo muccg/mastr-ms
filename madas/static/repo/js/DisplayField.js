@@ -52,7 +52,7 @@ Ext.form.MADisplayField = Ext.extend(Ext.form.Field,  {
         }
         if (this.rendered) {
             if (this.inputEl) {
-                this.inputEl.value = v;
+                this.inputEl.dom.value = v;
             }
         }
         return this.rendered ? (this.el.dom.innerHTML = (Ext.isEmpty(v) ? '' : v)) : (this.value = v);
@@ -67,8 +67,7 @@ Ext.form.MADisplayField = Ext.extend(Ext.form.Field,  {
             Ext.form.MADisplayField.superclass.onRender.call(this, ct, position);
     
             this.wrap = this.el.wrap({cls: 'x-blahblahblahblah'});
-            this.inputEl = this.wrap.createChild({tag: "input", type:'hidden', name:this.getName(), value:''});
-            this.inputEl.value = this.getValue();
+            this.inputEl = this.wrap.createChild({tag: "input", type:'hidden', name:this.getName(), value:this.getValue()});
     }
     /** 
      * @cfg {String} inputType 
