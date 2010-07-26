@@ -304,7 +304,6 @@ MA.QuoteRequestEditLoaded = function () {
 		Ext.getCmp('downloadattachbutton').enable();
 	}
 	
-	Ext.getCmp('qre-id').setValue(Ext.getCmp('qre-hidden-id').getValue());
 }
 
 
@@ -344,11 +343,7 @@ MA.QuoteRequestEditCmp =
             waitMsgTarget: true,
 
             items: [
-                {  
-                    name: 'id',
-                    id: 'qre-hidden-id',
-                    xtype: 'hidden'
-                },{
+                {
                     name: 'id',
                     id: 'qre-id',
                     fieldLabel:'Request ID',
@@ -453,7 +448,7 @@ MA.QuoteRequestEditCmp =
 	            		id:'downloadattachbutton',
 	            		text:'Download Attachment',
 	            		handler: function() {
-	            				window.location = MA.BaseUrl + 'quote/downloadAttachment?quoterequestid=' + Ext.getCmp('qre-hidden-id').value;
+	            				window.location = MA.BaseUrl + 'quote/downloadAttachment?quoterequestid=' + Ext.getCmp('qre-id').getValue();
 	            			}
 	            		}
 	            	]
@@ -899,7 +894,6 @@ MA.ViewFormalInit = function(paramArray){
     formalQuoteCmp.load({url: MA.BaseUrl + 'quote/formalload', params: {'qid': id}, waitMsg:'Loading'});
 
     //set the quote id
-    Ext.getCmp('quov-hidden-id').setValue(id);
     Ext.getCmp('quov-qid').setValue(id);
 
 
@@ -950,10 +944,6 @@ MA.ViewFormalCmp = {
                 },
             
             {  
-                name: 'id',
-                id: 'quov-hidden-id',
-                xtype: 'hidden'
-            },{  
                 name: 'id',
                 id: 'quov-qid',
                 xtype:'madisplayfield',
