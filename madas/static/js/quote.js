@@ -352,7 +352,7 @@ MA.QuoteRequestEditCmp =
                     name: 'id',
                     id: 'qre-id',
                     fieldLabel:'Request ID',
-                    xtype: 'displayfield'
+                    xtype: 'madisplayfield'
                 },{
                     fieldLabel: 'Email address',
                     name: 'email',
@@ -956,7 +956,7 @@ MA.ViewFormalCmp = {
             },{  
                 name: 'id',
                 id: 'quov-qid',
-                xtype:'displayfield',
+                xtype:'madisplayfield',
                 fieldLabel:'Request ID'
             },{
                 fieldLabel: 'Email address',
