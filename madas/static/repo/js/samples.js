@@ -391,8 +391,8 @@ MA.SampleCSVUploadForm = new Ext.Window({
                         },
                         failure: function (form, action) {
                             //do nothing special. this gets called on validation failures and server errors
-                            alert('Error processing CSV. Some lines were not imported as they did not seem to be formatted properly. Some samples may have been imported successfully.');
                             MA.ExperimentSamplesOnlyInit();
+                            alert('Error processing CSV. Some lines were not imported as they did not seem to be formatted properly. Some samples may have been imported successfully.');
                         }
                     }
                 );
