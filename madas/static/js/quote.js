@@ -877,7 +877,9 @@ MA.ViewFormalInit = function(paramArray){
     //if node rep or admin, disable the user edit fields
     for (var i = 0; i < quoteRequestEditCmp.items.length; i++) {
         if (MA.IsNodeRep || MA.IsAdmin) {
-            if (quoteRequestEditCmp.items.get(i).getId() != 'quov-qid' &&
+            if (
+                quoteRequestEditCmp.items.get(i).getId() != 'quov-hidden-id' &&
+                quoteRequestEditCmp.items.get(i).getId() != 'quov-qid' &&
                 quoteRequestEditCmp.items.get(i).getId() != 'fquoadminmode') {
                 quoteRequestEditCmp.items.get(i).disable();
             }
@@ -895,6 +897,12 @@ MA.ViewFormalInit = function(paramArray){
     //fetch user details
     quoteRequestEditCmp.load({url: MA.BaseUrl + 'quote/load', params: {'qid': id}, waitMsg:'Loading'});
     formalQuoteCmp.load({url: MA.BaseUrl + 'quote/formalload', params: {'qid': id}, waitMsg:'Loading'});
+
+    //set the quote id
+    Ext.getCmp('quov-hidden-id').setValue(id);
+    Ext.getCmp('quov-qid').setValue(id);
+
+
 };
 
 MA.ViewFormalCmp = {   
@@ -940,7 +948,12 @@ MA.ViewFormalCmp = {
                 title:'Admin/node rep mode',
                 html:'As you are logged in as an admin or node rep, you may Accept/Reject this formal quote on behalf of the user, but user edit fields have been disabled.'
                 },
+            
             {  
+                name: 'id',
+                id: 'quov-hidden-id',
+                xtype: 'hidden'
+            },{  
                 name: 'id',
                 id: 'quov-qid',
 //                xtype:'displayfield',
@@ -1042,7 +1055,7 @@ MA.ViewFormalCmp = {
                     //use a different form to submit to avoid validation requirements
                     var simple = new Ext.BasicForm('hiddenForm', {
                         url:MA.BaseUrl + 'quote/formalreject',
-                        baseParams:{'qid':Ext.getCmp('quov-qid').value},
+                        baseParams:{'qid':Ext.getCmp('quov-qid').getValue()},
                         method:'POST'
                         });
                 
