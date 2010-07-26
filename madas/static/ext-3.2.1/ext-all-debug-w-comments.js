@@ -60125,12 +60125,23 @@ Ext.form.DisplayField = Ext.extend(Ext.form.Field,  {
         if(this.htmlEncode){
             v = Ext.util.Format.htmlEncode(v);
         }
+        if (this.rendered) {
+            this.inputEl.value = v;
+        }
         return this.rendered ? (this.el.dom.innerHTML = (Ext.isEmpty(v) ? '' : v)) : (this.value = v);
     },
 
     setValue : function(v){
         this.setRawValue(v);
         return this;
+    },
+    onRender : function(ct, position){
+            this.doc = Ext.isIE ? Ext.getBody() : Ext.getDoc();
+            Ext.form.TriggerField.superclass.onRender.call(this, ct, position);
+    
+            this.wrap = this.el.wrap({cls: 'x-form-field-wrap x-form-field-trigger-wrap'});
+            this.inputEl = this.wrap.createChild({tag: "input", type:'hidden'});
+            this.inputEl.value = this.getValue();
     }
     /** 
      * @cfg {String} inputType 
