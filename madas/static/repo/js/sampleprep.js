@@ -1,18 +1,18 @@
 MA.SamplePrepInit = function() {
-    sopStore.load({ params: { experiments__id: MA.CurrentExperimentId() } });
+    sopStore.load({ params: { experiments__id: MA.ExperimentController.currentId() } });
 };
 
 MA.SaveSOPRow = function(changes) {
     
     if (changes.originalValue !== undefined && changes.originalValue !== "" && changes.originalValue !== null && changes.originalValue !== 0) {
-        MA.CRUDSomething('dissociate/standardoperationprocedure/experiment/'+changes.value+'/'+MA.CurrentExperimentId(), {}, MA.Null);
+        MA.CRUDSomething('dissociate/standardoperationprocedure/experiment/'+changes.value+'/'+MA.ExperimentController.currentId(), {}, MA.Null);
     }
-    MA.CRUDSomething('associate/standardoperationprocedure/experiment/'+changes.value+'/'+MA.CurrentExperimentId(), {}, MA.SamplePrepInit);
+    MA.CRUDSomething('associate/standardoperationprocedure/experiment/'+changes.value+'/'+MA.ExperimentController.currentId(), {}, MA.SamplePrepInit);
 };
 
 MA.RemoveSOPRow = function(rec) {
     if (rec !== undefined && rec.data !== undefined && rec.data.id !== undefined && rec.data.id !== '') {
-        MA.CRUDSomething('dissociate/standardoperationprocedure/experiment/'+rec.data.id+'/'+MA.CurrentExperimentId(), {}, MA.SamplePrepInit);
+        MA.CRUDSomething('dissociate/standardoperationprocedure/experiment/'+rec.data.id+'/'+MA.ExperimentController.currentId(), {}, MA.SamplePrepInit);
     } else {
         sopStore.remove(rec);
     }

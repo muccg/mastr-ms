@@ -261,7 +261,7 @@ MA.ProjectCmp = {
                         'rowdblclick':function(el, ev) {
                             var sm = Ext.getCmp('project-experiments').getSelectionModel();
                             var rec = sm.getSelected();
-                            MA.LoadExperiment(rec.data.id);
+                            MA.ExperimentController.loadExperiment(rec.data.id);
                         }
                     }
                 }

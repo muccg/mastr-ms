@@ -121,32 +121,17 @@ MA.ChangeMainContent = function(contentName, paramArray){
             break;
             
         case 'experiment:my':
-            MA.CurrentExpId = 0;
             experimentListStore.reload();
             Ext.getCmp('center-panel').layout.setActiveItem('experiment-list');
             break;
         case 'experiment:new':
-            MA.CurrentExpId = 0;
-            var namefield = Ext.getCmp('experimentName');
-            var desc = Ext.getCmp('experimentDescription');
-            var comment = Ext.getCmp('experimentComment');
-            var formalQuote = Ext.getCmp('formalQuote');
-            var jobNumber = Ext.getCmp('jobNumber');
-            var et = Ext.getCmp("experimentTitle");
-            et.setTitle('New Experiment');
-            
-            namefield.setValue('');
-
-            MA.UpdateNav();       
-
-            desc.setValue('');
-            comment.setValue('');
-            formalQuote.clearValue();
-            jobNumber.setValue('');
+            MA.ExperimentController.createExperiment();
+            break;
             //fall through to force render of new experiment
         case 'experiment:view':
-            Ext.getCmp('center-panel').layout.setActiveItem('experimentTitle');
-            Ext.getCmp('expNav').getSelectionModel().selectFirstRow();     
+//            Ext.getCmp('center-panel').layout.setActiveItem('experimentTitle');
+//            Ext.getCmp('expNav').getSelectionModel().selectFirstRow();     
+            MA.ExperimentController.updateNav(0);
             
             break;
             

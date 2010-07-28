@@ -1,5 +1,5 @@
 MA.BioSourceInit = function() {
-    var expId = MA.CurrentExperimentId();
+    var expId = MA.ExperimentController.currentId();
     
     var loader = new Ajax.Request(wsBaseUrl + 'records/biologicalsource/experiment__id/'+expId, 
                                  { 
@@ -12,7 +12,7 @@ MA.BioSourceInit = function() {
 };
 
 MA.BioSourceLoad = function () {
-    var expId = MA.CurrentExperimentId();
+    var expId = MA.ExperimentController.currentId();
     organStore.load({ params: { experiment__id__exact: expId } });
 };
 
@@ -113,7 +113,9 @@ MA.SourceInfoLoadSuccess = function(response) {
 };
 
 MA.BioSourceBlur = function(invoker) {
-    var expId = MA.CurrentExperimentId();
+    MA.ExperimentController.mask.show();    
+
+    var expId = MA.ExperimentController.currentId();
     
     if (expId == 0) {
         MA.ExperimentDeferredInvocation = invoker;
@@ -175,6 +177,7 @@ MA.BioSourceBlur = function(invoker) {
                                  onSuccess:     MA.BioSourceBlurSuccess
                                  });
     }
+    
 };
 
 MA.SourceTypeSelect = function() {
@@ -207,6 +210,8 @@ MA.SourceTypeSelect = function() {
 };
 
 MA.BioSourceBlurSuccess = function(response) {
+    MA.ExperimentController.mask.hide();
+
     if (Ext.isDefined(response)) {
         if (!Ext.isDefined(response.responseJSON)) {
             Ext.Msg.alert('Error', 'An unexpected error has occurred. Your session may have timed out. Please reload your browser window.');
@@ -449,7 +454,7 @@ MA.BioSource = {
                         cls: 'x-btn-text-icon',
                         icon:'static/repo/images/add.png',
                         handler : function() {
-                           MA.CRUDSomething('create/organ/', {'experiment_id':MA.CurrentExperimentId(), 'name':'Unknown'}, MA.BioSourceLoad);
+                           MA.CRUDSomething('create/organ/', {'experiment_id':MA.ExperimentController.currentId(), 'name':'Unknown'}, MA.BioSourceLoad);
                         }
                         }, 
                         {

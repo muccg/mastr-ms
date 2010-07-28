@@ -1,7 +1,7 @@
 MA.TrackingSm = new Ext.grid.CheckboxSelectionModel({ width: 25 });
 
 MA.SampleTrackingInit = function() {
-    var expId = MA.CurrentExperimentId();
+    var expId = MA.ExperimentController.currentId();
     
     var classLoader = new Ajax.Request(wsBaseUrl + 'populate_select/sampleclass/id/class_id/experiment__id/'+escape(expId), 
                                      { 
@@ -29,7 +29,7 @@ MA.SampleTrackingInit = function() {
 };
 
 MA.SampleLogLoad = function () {
-    sampleLogStore.load({ params: { sample__experiment__id__exact: MA.CurrentExperimentId() } });
+    sampleLogStore.load({ params: { sample__experiment__id__exact: MA.ExperimentController.currentId() } });
 };
 
 MA.SampleLogSuccess = function() {

@@ -1,8 +1,6 @@
-MA.ExperimentInit = function() {
-    MA.LoadExperiment(MA.CurrentExperimentId());
-};
-
 MA.Blur = function(invoker) {
+    MA.ExperimentController.mask.show();
+
     if (invoker.index === -1) {
         Ext.getCmp("expContent").getLayout().setActiveItem(0);
     }
@@ -12,6 +10,10 @@ MA.Blur = function(invoker) {
     Ext.currentExperimentNavItem = invoker.index;
     
     MA.ExperimentDeferredInvocation = {'init':MA.Null, 'index':-1};
+    
+    (function () {
+        MA.ExperimentController.mask.hide();
+    }).defer(500);
 };
 
 MA.Null = function() {};
@@ -37,102 +39,297 @@ MA.CRUDSomething = function(remainderURL, params, callbackfn) {
     crudStore.load();
 };
 
-MA.ExperimentBlur = function(invoker) {
-    var expId = MA.CurrentExperimentId();
-    var expName = Ext.getCmp("experimentName").getValue();
-    var expDescription = Ext.getCmp("experimentDescription").getValue();
-    var expComment = Ext.getCmp("experimentComment").getValue();
-    var expFQuoteId = Ext.getCmp("formalQuote").getValue();
-    if (expFQuoteId === null) {
-        expFQuoteId = '';
-    }
-    var expJobNumber = Ext.getCmp("jobNumber").getValue();
-    if (expJobNumber === null) {
-        expJobNumber = '';
-    }
+MA.ExperimentController = {
+    init : function() {
+        MA.ExperimentController.loadExperiment(MA.ExperimentController.currentId());
+    },
     
-    if (!Ext.isDefined(expName) ||
-        expName === "") {
-        //seriously, this should never happen
-        MA.ExperimentBlurSuccess();
-        return;
-    }
-    
-    MA.ExperimentDeferredInvocation = invoker;
-
-    if (expId === 0) {
+    currentId : function() {
+        if (!this._currentExpId) {
+            return 0;
+        }
         
-        var saver = new Ajax.Request(wsBaseUrl + 'create/experiment/?title='+escape(expName)+'&description='+escape(expDescription)+'&comment='+escape(expComment)+'&status_id=2&formal_quote_id='+escape(expFQuoteId)+'&job_number='+escape(expJobNumber)+'&project_id='+escape(MA.currentProjectId), 
-                                             { 
-                                             asynchronous:true, 
-                                             evalJSON:'force',
-                                     onSuccess:     MA.ExperimentBlurSuccess,
-                                     onFailure:    MA.DSLoadException
-                                     });
-    } else {
-        var saver = new Ajax.Request(wsBaseUrl + 'update/experiment/'+expId+'/?title='+escape(expName)+'&description='+escape(expDescription)+'&comment='+escape(expComment)+'&status_id=2&formal_quote_id='+escape(expFQuoteId)+'&job_number='+escape(expJobNumber)+'&project_id='+escape(MA.currentProjectId), 
-                                     { 
-                                     asynchronous:true, 
-                                     evalJSON:'force',
-                                     onSuccess:     MA.ExperimentBlurSuccess,
-                                      onFailure:    MA.DSLoadException
-                                     });
-    }
-};
-
-MA.ExperimentBlurSuccess = function(response) {
-    if (Ext.isDefined(response)) {
-        if (!Ext.isDefined(response.responseJSON)) {
-            Ext.Msg.alert('Error', 'An unexpected error has occurred. Your session may have timed out. Please reload your browser window.');
+        return this._currentExpId;
+    },
+    
+    setCurrentId : function(newID) {
+        this._currentExpId = newID;
+    },
+    
+    blur : function(invoker) {
+        var expId = MA.ExperimentController.currentId();
+        var expName = Ext.getCmp("experimentName").getValue();
+        var expDescription = Ext.getCmp("experimentDescription").getValue();
+        var expComment = Ext.getCmp("experimentComment").getValue();
+        var expFQuoteId = Ext.getCmp("formalQuote").getValue();
+        if (expFQuoteId === null) {
+            expFQuoteId = '';
+        }
+        var expJobNumber = Ext.getCmp("jobNumber").getValue();
+        if (expJobNumber === null) {
+            expJobNumber = '';
+        }
+        
+        if (!Ext.isDefined(expName) ||
+            expName === "") {
+            //seriously, this should never happen
+            this.blurSuccess();
             return;
         }
         
-        MA.CurrentExpId = response.responseJSON.rows[0].id;
-    }
+        MA.ExperimentDeferredInvocation = invoker;
     
-    var index = MA.ExperimentDeferredInvocation.index;
+        if (expId === 0) {
+            
+            var saver = new Ajax.Request(wsBaseUrl + 'create/experiment/?title='+escape(expName)+'&description='+escape(expDescription)+'&comment='+escape(expComment)+'&status_id=2&formal_quote_id='+escape(expFQuoteId)+'&job_number='+escape(expJobNumber)+'&project_id='+escape(MA.currentProjectId), 
+                                                 { 
+                                                 asynchronous:true, 
+                                                 evalJSON:'force',
+                                         onSuccess:     MA.ExperimentController.blurSuccess,
+                                         onFailure:    MA.DSLoadException
+                                         });
+        } else {
+            var saver = new Ajax.Request(wsBaseUrl + 'update/experiment/'+expId+'/?title='+escape(expName)+'&description='+escape(expDescription)+'&comment='+escape(expComment)+'&status_id=2&formal_quote_id='+escape(expFQuoteId)+'&job_number='+escape(expJobNumber)+'&project_id='+escape(MA.currentProjectId), 
+                                         { 
+                                         asynchronous:true, 
+                                         evalJSON:'force',
+                                         onSuccess:     MA.ExperimentController.blurSuccess,
+                                          onFailure:    MA.DSLoadException
+                                         });
+        }
+        
+        MA.ExperimentController.mask.show();
+    },
 
-    if (index >= 0) {
-        Ext.getCmp("expContent").getLayout().setActiveItem(index); 
-        Ext.currentExperimentNavItem = index;
-    }
+    blurSuccess : function(response) {
+        MA.ExperimentController.mask.hide();
+    
+        if (Ext.isDefined(response)) {
+            if (!Ext.isDefined(response.responseJSON)) {
+                Ext.Msg.alert('Error', 'An unexpected error has occurred. Your session may have timed out. Please reload your browser window.');
+                return;
+            }
+            
+            MA.ExperimentController.setCurrentId(response.responseJSON.rows[0].id);
+        }
+        
+        var index = MA.ExperimentDeferredInvocation.index;
+    
+        if (index >= 0) {
+            Ext.getCmp("expContent").getLayout().setActiveItem(index); 
+            Ext.currentExperimentNavItem = index;
+        }
+    
+        MA.ExperimentDeferredInvocation.init();
+        
+        MA.ExperimentDeferredInvocation = {'index':-1, 'init':MA.Null};
+    },
 
-    MA.ExperimentDeferredInvocation.init();
-    
-    MA.ExperimentDeferredInvocation = {'index':-1, 'init':MA.Null};
-};
-
-MA.ExperimentShowFieldsets = function(organismType) {
-    Ext.getCmp('organismFieldset').hide();
-    Ext.getCmp('plantFieldset').hide();
-    Ext.getCmp('rankfield').hide();
-    Ext.getCmp('upperrankfield').setVisible(false);
-    Ext.getCmp('ncbifield').setVisible(false);
-    
-    if (organismType === undefined) {
-        return;
-    }
-    
-    if (organismType > 4) {  //4 here refers to food & beverage, or synthetic compound. everything else is an organism
+    showFieldsets : function(organismType) {
+        Ext.getCmp('organismFieldset').hide();
+        Ext.getCmp('plantFieldset').hide();
         Ext.getCmp('rankfield').hide();
-        Ext.getCmp('organismFieldset').setTitle('Subtype');
         Ext.getCmp('upperrankfield').setVisible(false);
         Ext.getCmp('ncbifield').setVisible(false);
-    } else {
-        Ext.getCmp('organismFieldset').show();
-        Ext.getCmp('rankfield').show();
-        Ext.getCmp('upperrankfield').setVisible(true);
-        Ext.getCmp('ncbifield').setVisible(true);
         
-    }
+        if (organismType === undefined) {
+            return;
+        }
+        
+        if (organismType > 4) {  //4 here refers to food & beverage, or synthetic compound. everything else is an organism
+            Ext.getCmp('rankfield').hide();
+            Ext.getCmp('organismFieldset').setTitle('Subtype');
+            Ext.getCmp('upperrankfield').setVisible(false);
+            Ext.getCmp('ncbifield').setVisible(false);
+        } else {
+            Ext.getCmp('organismFieldset').show();
+            Ext.getCmp('rankfield').show();
+            Ext.getCmp('upperrankfield').setVisible(true);
+            Ext.getCmp('ncbifield').setVisible(true);
+            
+        }
+        
+        if (organismType != 2) {
+            Ext.getCmp("plantFieldset").hide();
+        } else {
+            Ext.getCmp("plantFieldset").show();
+        }
+        
+        Ext.getCmp('speciesfield').enable();
+    },
     
-    if (organismType != 2) {
-        Ext.getCmp("plantFieldset").hide();
-    } else {
-        Ext.getCmp("plantFieldset").show();
-    }
+    loadExperiment : function(expId) {
+        
+        var fquoLoader = new Ajax.Request(wsBaseUrl + 'populate_select/formalquote/id/toemail/', 
+                                         { 
+                                         asynchronous:true, 
+                                         evalJSON:'force',
+                                         onSuccess: function(response) {
+                                             var fquoCombo = Ext.getCmp('formalQuote');
+                                             var data = response.responseJSON.response.value.items;
+                                             var massagedData = [];
+                                             
+                                             for (var idx = 0; idx < data.length; idx++) {
+                                                massagedData[idx] = [data[idx]['key'], '#'+data[idx]['key']+'  '+data[idx]['value']];
+                                             }
     
-    Ext.getCmp('speciesfield').enable();
+                                             //ensure that there is a blank entry
+                                             massagedData.unshift(['','  none  ']);
+                                             
+                                             fquoCombo.getStore().loadData(massagedData);
+                                             
+                                             fquoCombo.setValue(fquoCombo.getValue());
+                                             }
+                                         }
+                                         );
+        
+        var expLoader = new Ajax.Request(wsBaseUrl + "records/experiment/id/" + expId, 
+                                         { 
+                                         asynchronous:true, 
+                                         evalJSON:'force',
+                                         onSuccess: function(response) {
+                                                 var namefield = Ext.getCmp('experimentName');
+                                                 var desc = Ext.getCmp('experimentDescription');
+                                                 var comment = Ext.getCmp('experimentComment');
+                                                 var formalQuote = Ext.getCmp('formalQuote');
+                                                 var jobNumber = Ext.getCmp('jobNumber');
+    
+                                                 //update the fields on the sample tracking page
+                                                 var tnamefield = Ext.getCmp('trackingExperimentName');
+                                                 var tcomment = Ext.getCmp('trackingExperimentComment');
+                                                 var tformalQuote = Ext.getCmp('trackingFormalQuote');
+                                                 var tjobNumber = Ext.getCmp('trackingJobNumber');
+                                                 
+                                                 if (!namefield || !desc || !comment || !formalQuote || !jobNumber) {
+                                                     return;
+                                                 }
+                                                 
+                                                 namefield.setValue('');
+                                                 desc.setValue('');
+                                                 comment.setValue('');
+                                                 formalQuote.clearValue();
+                                                 jobNumber.setValue('');
+                                                    
+                                                 //tracking fields
+                                                 tnamefield.setValue('');
+                                                 tcomment.setValue('');
+                                                 tformalQuote.setValue('');
+                                                 tjobNumber.setValue('');
+    
+                                                 var rs = response.responseJSON.rows;
+                                                 
+                                                 if (rs.length > 0) {
+                                                     namefield.setValue(rs[0].title);
+                                                     desc.setValue(rs[0].description);
+                                                     comment.setValue(rs[0].comment);
+                                                     formalQuote.setValue(rs[0].formal_quote);
+                                                     jobNumber.setValue(rs[0].job_number);
+                                                     
+                                                     //tracking fields
+                                                     tnamefield.setValue(rs[0].title);
+                                                     tcomment.setValue(rs[0].comment);
+                                                     tformalQuote.setValue(rs[0].formal_quote);
+                                                     tjobNumber.setValue(rs[0].job_number);
+                                                 }
+                                         
+                                                 MA.ExperimentController.updateNav();
+    
+                                             }
+                                         }
+                                         );
+    
+        var changingExperiment = (MA.ExperimentController.currentId() != expId);
+        MA.ExperimentController.setCurrentId(expId);
+        
+        MA.MenuHandler({ id:'experiment:view' });
+    
+        // Eh, we'll check for IE 6 as well just in case.
+        if ((Ext.isIE6 || Ext.isIE7) && changingExperiment) {
+            /* This works around an apparent DOM manipulation timing bug in IE 7
+             * where the multitude of calls required to deselect a pane in the
+             * navigation and select the experiment details pane manages to confuse
+             * it, as ExtJS will continue to make calls to manipulate elements that
+             * are hidden, and things break. */
+            
+            MA.ExperimentController.mask.show();
+    
+            (function () {
+                Ext.getCmp('expNav').select(0);
+                MA.ExperimentController.mask.hide();
+            }).defer(500);
+        }
+        else {
+            Ext.getCmp('expContent').getLayout().setActiveItem(0);
+        }
+        
+        Ext.getCmp('center-panel').layout.setActiveItem('experimentTitle');
+    },
+    
+    updateNav : function(index) {
+        var en = Ext.getCmp("experimentName");
+        var ds = Ext.StoreMgr.get("navDS");
+        var et = Ext.getCmp("experimentTitle");
+        var na = Ext.getCmp("expNav");
+        
+        if (na.getSelectionCount() == 0 || index != null) {
+            na.select(index,index,false);
+        }
+        
+        var counter = 1;
+        if (en.getValue() === '') {
+            na.disable();
+        } else {
+            na.enable();
+        }
+                
+        if (this.currentId() == 0) {
+            et.setTitle('New Experiment');
+        } else {
+            et.setTitle('Experiment: '+en.getValue());
+        }
+    },
+    
+    createExperiment : function() {
+        this.setCurrentId(0);
+        var namefield = Ext.getCmp('experimentName');
+        var desc = Ext.getCmp('experimentDescription');
+        var comment = Ext.getCmp('experimentComment');
+        var formalQuote = Ext.getCmp('formalQuote');
+        var jobNumber = Ext.getCmp('jobNumber');
+        var et = Ext.getCmp("experimentTitle");
+        et.setTitle('New Experiment');
+        
+        namefield.setValue('');
+
+        MA.ExperimentController.updateNav(0);       
+
+        desc.setValue('');
+        comment.setValue('');
+        formalQuote.clearValue();
+        jobNumber.setValue('');
+
+        Ext.getCmp('center-panel').layout.setActiveItem('experimentTitle');
+//        Ext.getCmp('expNav').getSelectionModel().selectFirstRow();
+    },
+    
+    selectionChangeHandler : function(list, nodes) {
+        if (list.getSelectionCount() == 0) {
+            return;
+        }
+     
+        var index = list.getSelectedIndexes()[0];
+        var r = list.getSelectedRecords()[0];
+    
+        if (Ext.currentExperimentNavItem == index) {
+           return;
+        }
+        
+        var currItem = Ext.StoreMgr.get("navDS").getAt(Ext.currentExperimentNavItem);
+        var blurFn = currItem.get("blur");
+        if (blurFn !== null) {
+            blurFn({'init':r.get("init"), 'index':index});
+        }
+    }    
 };
 
 MA.LoadOrganismInfo = function(typeId, id) {
@@ -163,7 +360,7 @@ MA.ExperimentDetails = {
                 title:'Experiment',
                 autoHeight:true,
                 items: [
-                    { xtype:'textfield', fieldLabel:'Experiment name', width:700, enableKeyEvents:true, id:'experimentName', allowBlank:false, listeners:{'keydown':function(t, e){ MA.UpdateNav(); return true; }, 'keyup':function(t, e){ MA.UpdateNav(); return true; }}},
+                    { xtype:'textfield', fieldLabel:'Experiment name', width:700, enableKeyEvents:true, id:'experimentName', allowBlank:false, listeners:{'keydown':function(t, e){ MA.ExperimentController.updateNav(); return true; }, 'keyup':function(t, e){ MA.ExperimentController.updateNav(); return true; }}},
                     { xtype:'textarea', fieldLabel:'Experiment overview/aim', id:'experimentDescription', width:700, height:100 },
                     { xtype:'textarea', fieldLabel:'Comment', id:'experimentComment', width:700, height:100 },
                         new Ext.form.ComboBox({
@@ -247,24 +444,7 @@ MA.ExperimentCmp = {
                         singleSelect:true,
                         multiSelect:false,
                         listeners:{
-                            "selectionchange":function(list, nodes) {
-                                if (list.getSelectionCount() == 0) {
-                                    return;
-                                }
-                             
-                                var index = list.getSelectedIndexes()[0];
-                                var r = list.getSelectedRecords()[0];
-                            
-                                if (Ext.currentExperimentNavItem == index) {
-                                   return;
-                                }
-                                
-                                var currItem = Ext.StoreMgr.get("navDS").getAt(Ext.currentExperimentNavItem);
-                                var blurFn = currItem.get("blur");
-                                if (blurFn !== null) {
-                                    blurFn({'init':r.get("init"), 'index':index});
-                                }
-                            },
+                            "selectionchange": MA.ExperimentController.selectionChangeHandler,
                             "beforeselect":function(list, nodes, sel) {
                                 return !list.disabled;
                             }
@@ -277,7 +457,7 @@ MA.ExperimentCmp = {
                                 storeId:"navDS",
                                 fields: ["nav", "init", "blur", "enabled"],
                                 data: [ 
-                                    [ "Experiment Details", MA.ExperimentInit, MA.ExperimentBlur, true ],
+                                    [ "Experiment Details", MA.ExperimentController.init, MA.ExperimentController.blur, true ],
                                     [ "Source", MA.BioSourceInit, MA.BioSourceBlur, false ],
                                     [ "Treatment", MA.TreatmentInit, MA.Blur, false ],
                                     [ "Sample Preparation", MA.SamplePrepInit, MA.Blur, false ],
@@ -352,115 +532,6 @@ MA.ExperimentCmp = {
     }]
 };
 
-MA.LoadExperiment = function(expId) {
-    //if (expId == MA.CurrentExpId) {
-//        return;
-//    }
-    
-    var fquoLoader = new Ajax.Request(wsBaseUrl + 'populate_select/formalquote/id/toemail/', 
-                                     { 
-                                     asynchronous:true, 
-                                     evalJSON:'force',
-                                     onSuccess: function(response) {
-                                         var fquoCombo = Ext.getCmp('formalQuote');
-                                         var data = response.responseJSON.response.value.items;
-                                         var massagedData = [];
-                                         
-                                         for (var idx = 0; idx < data.length; idx++) {
-                                            massagedData[idx] = [data[idx]['key'], '#'+data[idx]['key']+'  '+data[idx]['value']];
-                                         }
-
-                                         //ensure that there is a blank entry
-                                         massagedData.unshift(['','  none  ']);
-                                         
-                                         fquoCombo.getStore().loadData(massagedData);
-                                         
-                                         fquoCombo.setValue(fquoCombo.getValue());
-                                         }
-                                     }
-                                     );
-    
-    var expLoader = new Ajax.Request(wsBaseUrl + "records/experiment/id/" + expId, 
-                                     { 
-                                     asynchronous:true, 
-                                     evalJSON:'force',
-                                     onSuccess: function(response) {
-                                             var namefield = Ext.getCmp('experimentName');
-                                             var desc = Ext.getCmp('experimentDescription');
-                                             var comment = Ext.getCmp('experimentComment');
-                                             var formalQuote = Ext.getCmp('formalQuote');
-                                             var jobNumber = Ext.getCmp('jobNumber');
-
-                                             //update the fields on the sample tracking page
-                                             var tnamefield = Ext.getCmp('trackingExperimentName');
-                                             var tcomment = Ext.getCmp('trackingExperimentComment');
-                                             var tformalQuote = Ext.getCmp('trackingFormalQuote');
-                                             var tjobNumber = Ext.getCmp('trackingJobNumber');
-                                             
-                                             if (!namefield || !desc || !comment || !formalQuote || !jobNumber) {
-                                                 return;
-                                             }
-                                             
-                                             namefield.setValue('');
-                                             desc.setValue('');
-                                             comment.setValue('');
-                                             formalQuote.clearValue();
-                                             jobNumber.setValue('');
-                                                
-                                             //tracking fields
-                                             tnamefield.setValue('');
-                                             tcomment.setValue('');
-                                             tformalQuote.setValue('');
-                                             tjobNumber.setValue('');
-
-                                             var rs = response.responseJSON.rows;
-                                             
-                                             if (rs.length > 0) {
-                                                 namefield.setValue(rs[0].title);
-                                                 desc.setValue(rs[0].description);
-                                                 comment.setValue(rs[0].comment);
-                                                 formalQuote.setValue(rs[0].formal_quote);
-                                                 jobNumber.setValue(rs[0].job_number);
-                                                 
-                                                 //tracking fields
-                                                 tnamefield.setValue(rs[0].title);
-                                                 tcomment.setValue(rs[0].comment);
-                                                 tformalQuote.setValue(rs[0].formal_quote);
-                                                 tjobNumber.setValue(rs[0].job_number);
-                                             }
-                                     
-                                             MA.UpdateNav();
-
-                                         }
-                                     }
-                                     );
-
-    var changingExperiment = (MA.CurrentExpId != expId);
-    MA.CurrentExpId = expId;
-    
-    MA.MenuHandler({ id:'experiment:view' });
-
-    // Eh, we'll check for IE 6 as well just in case.
-    if ((Ext.isIE6 || Ext.isIE7) && changingExperiment) {
-        /* This works around an apparent DOM manipulation timing bug in IE 7
-         * where the multitude of calls required to deselect a pane in the
-         * navigation and select the experiment details pane manages to confuse
-         * it, as ExtJS will continue to make calls to manipulate elements that
-         * are hidden, and things break. */
-        var mask = new Ext.LoadMask("center-panel", {
-            removeMask: true
-        });
-        mask.show();
-
-        (function () {
-            Ext.getCmp('expNav').select(0);
-            mask.hide();
-        }).defer(500);
-    }
-    else {
-        Ext.getCmp('expContent').getLayout().setActiveItem(0);
-    }
-};
 
 /**
  * madasInitApplication
@@ -479,15 +550,15 @@ MA.InitApplication = function() {
 
     MA.InitUI();
     
-    MA.Authorize('dashboard:list', [], function () { Ext.get("loginOverlay").remove(); });
+    MA.Authorize('dashboard:list', [], function () { Ext.get("loginOverlay").remove(); } );
 };
 
 MA.InitUI = function() {
    //the ViewPort defines the main layout for the entire Madas app
-   //the center-panel component is the main area where content is switched in and out
-   if (Ext.getCmp('viewport')) {
-       return;
-   }
+//   the center-panel component is the main area where content is switched in and out
+//   if (Ext.getCmp('viewport')) {
+//       return;
+//   }
     
     Ext.currentExperimentNavItem = 0;
    
@@ -527,31 +598,10 @@ MA.InitUI = function() {
 
         return false;
     });
+    
+    MA.ExperimentController.mask = new Ext.LoadMask("center-panel", {
+        removeMask: true
+    });
 };
 
-MA.UpdateNav = function() {
-    var en = Ext.getCmp("experimentName");
-    var ds = Ext.StoreMgr.get("navDS");
-    var et = Ext.getCmp("experimentTitle");
-    var na = Ext.getCmp("expNav");
-    
-    var counter = 1;
-    if (en.getValue() === '') {
-        na.disable();
-    } else {
-        na.enable();
-    }
-    
-    if (na.getSelectionCount() == 0) {
-        na.select(0,0,false);
-    }
-//    for (counter = 1; counter <= 8; counter++) {
-//        ds.getAt(counter).set("enabled", (en.getValue() !== ''));
-//    }
-    
-    if (MA.CurrentExperimentId() == 0) {
-        et.setTitle('New Experiment');
-    } else {
-        et.setTitle('Experiment: '+en.getValue());
-    }
-};
+
