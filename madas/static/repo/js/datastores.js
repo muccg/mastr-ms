@@ -48,14 +48,6 @@ MA.SaveRowLiterals = function(table, roweditor, changes, rec, i, callback) {
     }
 };
 
-MA.CurrentExperimentId = function() {
-    if (!MA.CurrentExpId) {
-        return 0;
-    }
-    
-    return MA.CurrentExpId;
-};
-
 MA.CurrentBioSourceId = function() {
     if (biologicalSourceStore.getTotalCount() < 1) {
         return 0;

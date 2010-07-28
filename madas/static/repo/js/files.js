@@ -1,5 +1,5 @@
 MA.FilesInit = function() {
-    var expId = MA.CurrentExperimentId();
+    var expId = MA.ExperimentController.currentId();
 
     //reload trees
     Ext.getCmp('filesTree').getLoader().load(Ext.getCmp('filesTree').getRootNode());
@@ -49,7 +49,7 @@ items:[
                        {
                            selectionchange: function(sm, node) {
                                if (node != null && node.isLeaf()) {
-                                   window.location = wsBaseUrl + 'downloadFile?file=' + node.id + '&experiment_id=' + MA.CurrentExperimentId();
+                                   window.location = wsBaseUrl + 'downloadFile?file=' + node.id + '&experiment_id=' + MA.ExperimentController.currentId();
                                }
                            }
                        }
@@ -66,7 +66,7 @@ items:[
                listeners:{
                     render: function() {
                         Ext.getCmp('filesTree').getLoader().on("beforeload", function(treeLoader, node) {
-                            treeLoader.baseParams.experiment = MA.CurrentExperimentId();
+                            treeLoader.baseParams.experiment = MA.ExperimentController.currentId();
                             }, this);
                         Ext.getCmp('filesTree').getRootNode().expand();
                     },
@@ -81,7 +81,7 @@ items:[
                                     headers: {
     //                                'my-header': 'foo'
                                     },
-                                         params: { file: de.dropNode.id, target: de.target.id, experiment_id: MA.CurrentExperimentId() }
+                                         params: { file: de.dropNode.id, target: de.target.id, experiment_id: MA.ExperimentController.currentId() }
                                     });
                    },
                    checkchange: function(node, checked){
@@ -90,7 +90,7 @@ items:[
                                        url: wsBaseUrl + 'shareFile',
                                        success: function() {  },
                                        failure: function() {  },
-                                       params: { file: node.id, checked: checked, experiment_id: MA.CurrentExperimentId() }
+                                       params: { file: node.id, checked: checked, experiment_id: MA.ExperimentController.currentId() }
                                                                    });
                                }
                 }

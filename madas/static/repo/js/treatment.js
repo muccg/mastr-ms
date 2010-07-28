@@ -4,11 +4,11 @@ MA.TreatmentInit = function() {
 };
 
 MA.TimelineLoad = function () {
-    timelineStore.load({ params: { experiment__id__exact: MA.CurrentExperimentId() } });
+    timelineStore.load({ params: { experiment__id__exact: MA.ExperimentController.currentId() } });
 };
 
 MA.TreatmentLoad = function () {
-    treatmentStore.load({ params: { experiment__id__exact: MA.CurrentExperimentId() } });
+    treatmentStore.load({ params: { experiment__id__exact: MA.ExperimentController.currentId() } });
 };
 
 MA.SaveTimelineRow = function(roweditor, changes, rec, i) {
@@ -73,7 +73,7 @@ MA.Treatment = {
                                     icon:'static/repo/images/add.png',
                                     handler : function(){
                                         MA.CRUDSomething('create/sampletimeline/', {
-                                            'experiment_id': MA.CurrentExperimentId(),
+                                            'experiment_id': MA.ExperimentController.currentId(),
                                             'timeline': '00:00'
                                         }, MA.TimelineLoad);
                                     }
@@ -141,7 +141,7 @@ MA.Treatment = {
                                     icon:'static/repo/images/add.png',
                                     handler : function(){
                                         MA.CRUDSomething('create/treatment/', {
-                                            'experiment_id': MA.CurrentExperimentId(),
+                                            'experiment_id': MA.ExperimentController.currentId(),
                                             'name': 'Unknown'
                                         }, MA.TreatmentLoad);
                                     }

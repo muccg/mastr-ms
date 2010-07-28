@@ -1,5 +1,5 @@
 MA.ExperimentSamplesInit = function() {
-    var expId = MA.CurrentExperimentId();
+    var expId = MA.ExperimentController.currentId();
     
     sampleClassStore.proxy.conn.url = wsBaseUrl + 'recreate_sample_classes/' + expId;
     sampleClassStore.load();
@@ -8,7 +8,7 @@ MA.ExperimentSamplesInit = function() {
 };
 
 MA.SampleLoadByExperiment = function () {
-    sampleStore.load({ params: { experiment__id__exact: MA.CurrentExperimentId() } });
+    sampleStore.load({ params: { experiment__id__exact: MA.ExperimentController.currentId() } });
 };
 
 MA.SampleLoadBySampleClass = function () {
@@ -102,7 +102,7 @@ MA.ExperimentSamples = {
                            }
                            
                            for (var i = 0; i < delIds.length; i++) {
-                           MA.CRUDSomething('sample_class_enable/'+delIds[i], {}, function() { var expId = MA.CurrentExperimentId(); sampleClassStore.proxy.conn.url = wsBaseUrl + 'recreate_sample_classes/' + expId;
+                           MA.CRUDSomething('sample_class_enable/'+delIds[i], {}, function() { var expId = MA.ExperimentController.currentId(); sampleClassStore.proxy.conn.url = wsBaseUrl + 'recreate_sample_classes/' + expId;
                                                   sampleClassStore.load(); });
                            }
                            
@@ -133,7 +133,7 @@ MA.ExperimentSamples = {
                                 }
                                 
                                 for (var i = 0; i < selIds.length; i++) {
-                                    MA.CRUDSomething('createSamples/', {'sample_class_id':selIds[i], 'experiment_id':MA.CurrentExperimentId(), 'replicates':reps}, function() { var sm = Ext.getCmp('sampleClasses').getSelectionModel(); var selected = sm.getSelected(); sm.clearSelections(); sm.selectRecords([selected]);  MA.ExperimentSamplesInit(); });
+                                    MA.CRUDSomething('createSamples/', {'sample_class_id':selIds[i], 'experiment_id':MA.ExperimentController.currentId(), 'replicates':reps}, function() { var sm = Ext.getCmp('sampleClasses').getSelectionModel(); var selected = sm.getSelected(); sm.clearSelections(); sm.selectRecords([selected]);  MA.ExperimentSamplesInit(); });
                                 }
                             }
                         },
@@ -194,7 +194,7 @@ MA.ExperimentSamples = {
                     handler: function () {
                         MA.CRUDSomething('create/sample/', {
                             'sample_class_id': MA.CurrentSampleClassId(),
-                            'experiment_id': MA.CurrentExperimentId()
+                            'experiment_id': MA.ExperimentController.currentId()
                         }, function () {
                             MA.SampleLoadBySampleClass();
                             MA.ExperimentSamplesInit();
@@ -293,7 +293,7 @@ MA.ExperimentSamples = {
 };
 
 MA.ExperimentSamplesOnlyInit = function() {
-    var expId = MA.CurrentExperimentId();
+    var expId = MA.ExperimentController.currentId();
     
     var classLoader = new Ajax.Request(wsBaseUrl + 'populate_select/sampleclass/id/class_id/experiment__id/'+escape(expId), 
                                      { 
@@ -377,7 +377,7 @@ MA.SampleCSVUploadForm = new Ext.Window({
             text: 'Upload',
             itemId:'csvUploadBtn',
             handler: function(){
-                Ext.getCmp('sampleCSVUpload').getComponent('expIdField').setValue( MA.CurrentExperimentId() );
+                Ext.getCmp('sampleCSVUpload').getComponent('expIdField').setValue( MA.ExperimentController.currentId() );
             
                 Ext.getCmp('sampleCSVUpload').getForm().submit(
                     {   
@@ -415,7 +415,7 @@ MA.ExperimentSamplesOnly = {
             id: 'addsamplesbutton',
             icon: 'static/repo/images/add.png',
             handler: function () {
-                MA.CRUDSomething('create/sample/', {'experiment_id':MA.CurrentExperimentId()}, MA.SampleLoadByExperiment);
+                MA.CRUDSomething('create/sample/', {'experiment_id':MA.ExperimentController.currentId()}, MA.SampleLoadByExperiment);
             }
         },
         {
@@ -454,35 +454,6 @@ MA.ExperimentSamplesOnly = {
                 MA.SampleCSVUploadForm.show();
             }
         }
-//           },
-//           {
-//               text: 'View Sample Log',
-//               cls: 'x-btn-text-icon',
-//               id:'viewsamplelogbutton',
-//               icon:'static/repo/images/s.gif',
-//               handler : function(){
-//                   var grid = Ext.getCmp('samplesOnly');
-//                   var delIds = []; 
-//                   
-//                   var selections = grid.getSelectionModel().getSelections();
-//                   if (!Ext.isArray(selections)) {
-//                       selections = [selections];
-//                   }
-//                   
-//                   for (var index = 0; index < selections.length; index++) {
-//                       if (!Ext.isObject(selections[index])) {
-//                           continue;
-//                       }
-//                       
-//                       delIds.push(selections[index].data.id);
-//                   }
-//                   
-//                   for (var i = 0; i < delIds.length; i++) {
-        //           MA.CRUDSomething('delete/sample/'+delIds[i], {}, function() { var eId = MA.CurrentExperimentId(); sampleStore.proxy.conn.url = wsBaseUrl + 'recordsSamples/experiment__id/' + eId;
-        //                                  sampleStore.load(); });
-//                   }
-//               }
-//           }
            ],
     items: [
             {

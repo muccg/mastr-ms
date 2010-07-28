@@ -1,11 +1,11 @@
 MA.AccessInit = function() {
-    userStore.load({ params: { experiment__id__exact: MA.CurrentExperimentId() } });
+    userStore.load({ params: { experiment__id__exact: MA.ExperimentController.currentId() } });
 };
 
 MA.SaveAccessRow = function(roweditor, changes, rec, i) {
     var bundledData = {};
     
-    bundledData.experiment_id = MA.CurrentExperimentId();
+    bundledData.experiment_id = MA.ExperimentController.currentId();
     bundledData.user_id = rec.data.user;
     bundledData.type_id = rec.data.type;
     bundledData.additional_info = rec.data.additional_info;
