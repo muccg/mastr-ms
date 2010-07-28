@@ -39,25 +39,27 @@ MA.CRUDSomething = function(remainderURL, params, callbackfn) {
     crudStore.load();
 };
 
-MA.ExperimentController = {
-    init : function() {
-        MA.ExperimentController.loadExperiment(MA.ExperimentController.currentId());
-    },
+function _ExperimentController() {
+    var self = this;
+
+    this.init = function() {
+        self.loadExperiment(self.currentId());
+    };
     
-    currentId : function() {
-        if (!this._currentExpId) {
+    this.currentId = function() {
+        if (!self._currentExpId) {
             return 0;
         }
         
-        return this._currentExpId;
-    },
+        return self._currentExpId;
+    };
     
-    setCurrentId : function(newID) {
-        this._currentExpId = newID;
-    },
+    this.setCurrentId = function(newID) {
+        self._currentExpId = newID;
+    };
     
-    blur : function(invoker) {
-        var expId = MA.ExperimentController.currentId();
+    this.blur = function(invoker) {
+        var expId = self.currentId();
         var expName = Ext.getCmp("experimentName").getValue();
         var expDescription = Ext.getCmp("experimentDescription").getValue();
         var expComment = Ext.getCmp("experimentComment").getValue();
@@ -73,7 +75,7 @@ MA.ExperimentController = {
         if (!Ext.isDefined(expName) ||
             expName === "") {
             //seriously, this should never happen
-            this.blurSuccess();
+            self.blurSuccess();
             return;
         }
         
@@ -85,7 +87,7 @@ MA.ExperimentController = {
                                                  { 
                                                  asynchronous:true, 
                                                  evalJSON:'force',
-                                         onSuccess:     MA.ExperimentController.blurSuccess,
+                                         onSuccess:     self.blurSuccess,
                                          onFailure:    MA.DSLoadException
                                          });
         } else {
@@ -93,16 +95,16 @@ MA.ExperimentController = {
                                          { 
                                          asynchronous:true, 
                                          evalJSON:'force',
-                                         onSuccess:     MA.ExperimentController.blurSuccess,
+                                         onSuccess:     self.blurSuccess,
                                           onFailure:    MA.DSLoadException
                                          });
         }
         
-        MA.ExperimentController.mask.show();
-    },
+        self.mask.show();
+    };
 
-    blurSuccess : function(response) {
-        MA.ExperimentController.mask.hide();
+    this.blurSuccess = function(response) {
+        self.mask.hide();
     
         if (Ext.isDefined(response)) {
             if (!Ext.isDefined(response.responseJSON)) {
@@ -110,7 +112,7 @@ MA.ExperimentController = {
                 return;
             }
             
-            MA.ExperimentController.setCurrentId(response.responseJSON.rows[0].id);
+            self.setCurrentId(response.responseJSON.rows[0].id);
         }
         
         var index = MA.ExperimentDeferredInvocation.index;
@@ -123,9 +125,9 @@ MA.ExperimentController = {
         MA.ExperimentDeferredInvocation.init();
         
         MA.ExperimentDeferredInvocation = {'index':-1, 'init':MA.Null};
-    },
+    };
 
-    showFieldsets : function(organismType) {
+    this.showFieldsets = function(organismType) {
         Ext.getCmp('organismFieldset').hide();
         Ext.getCmp('plantFieldset').hide();
         Ext.getCmp('rankfield').hide();
@@ -156,9 +158,9 @@ MA.ExperimentController = {
         }
         
         Ext.getCmp('speciesfield').enable();
-    },
+    };
     
-    loadExperiment : function(expId) {
+    this.loadExperiment = function(expId) {
         
         var fquoLoader = new Ajax.Request(wsBaseUrl + 'populate_select/formalquote/id/toemail/', 
                                          { 
@@ -232,14 +234,14 @@ MA.ExperimentController = {
                                                      tjobNumber.setValue(rs[0].job_number);
                                                  }
                                          
-                                                 MA.ExperimentController.updateNav();
+                                                 self.updateNav();
     
                                              }
                                          }
                                          );
     
-        var changingExperiment = (MA.ExperimentController.currentId() != expId);
-        MA.ExperimentController.setCurrentId(expId);
+        var changingExperiment = (self.currentId() != expId);
+        self.setCurrentId(expId);
         
         MA.MenuHandler({ id:'experiment:view' });
     
@@ -251,11 +253,11 @@ MA.ExperimentController = {
              * it, as ExtJS will continue to make calls to manipulate elements that
              * are hidden, and things break. */
             
-            MA.ExperimentController.mask.show();
+            self.mask.show();
     
             (function () {
                 Ext.getCmp('expNav').select(0);
-                MA.ExperimentController.mask.hide();
+                self.mask.hide();
             }).defer(500);
         }
         else {
@@ -263,9 +265,9 @@ MA.ExperimentController = {
         }
         
         Ext.getCmp('center-panel').layout.setActiveItem('experimentTitle');
-    },
+    };
     
-    updateNav : function(index) {
+    this.updateNav = function(index) {
         var en = Ext.getCmp("experimentName");
         var ds = Ext.StoreMgr.get("navDS");
         var et = Ext.getCmp("experimentTitle");
@@ -282,15 +284,15 @@ MA.ExperimentController = {
             na.enable();
         }
                 
-        if (this.currentId() == 0) {
+        if (self.currentId() == 0) {
             et.setTitle('New Experiment');
         } else {
             et.setTitle('Experiment: '+en.getValue());
         }
-    },
+    };
     
-    createExperiment : function() {
-        this.setCurrentId(0);
+    this.createExperiment = function() {
+        self.setCurrentId(0);
         var namefield = Ext.getCmp('experimentName');
         var desc = Ext.getCmp('experimentDescription');
         var comment = Ext.getCmp('experimentComment');
@@ -301,7 +303,7 @@ MA.ExperimentController = {
         
         namefield.setValue('');
 
-        MA.ExperimentController.updateNav(0);       
+        self.updateNav(0);       
 
         desc.setValue('');
         comment.setValue('');
@@ -310,9 +312,9 @@ MA.ExperimentController = {
 
         Ext.getCmp('center-panel').layout.setActiveItem('experimentTitle');
 //        Ext.getCmp('expNav').getSelectionModel().selectFirstRow();
-    },
+    };
     
-    selectionChangeHandler : function(list, nodes) {
+    this.selectionChangeHandler = function(list, nodes) {
         if (list.getSelectionCount() == 0) {
             return;
         }
@@ -329,8 +331,10 @@ MA.ExperimentController = {
         if (blurFn !== null) {
             blurFn({'init':r.get("init"), 'index':index});
         }
-    }    
+    };    
 };
+
+MA.ExperimentController = new _ExperimentController();
 
 MA.LoadOrganismInfo = function(typeId, id) {
     if (typeId == 2) {//plant
