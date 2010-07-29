@@ -526,12 +526,15 @@ def update_single_source(request, exp_id):
                 bs.microbialinfo_set.add(mi)
             else:
                 mi = bs.microbialinfo_set.all()[0]
-                mi.genus = args['genus']
-                mi.species = args['species']
-                mi.culture_collection_id = args['culture']
-                mi.media = args['media']
-                mi.fermentation_vessel = args['vessel']
-                mi.fermentation_mode = args['mode']
+                try:
+                    mi.genus = args['genus']
+                    mi.species = args['species']
+                    mi.culture_collection_id = args['culture']
+                    mi.media = args['media']
+                    mi.fermentation_vessel = args['vessel']
+                    mi.fermentation_mode = args['mode']
+                except:
+                    pass
                 try:
                     mi.innoculation_density = str(float(args['density']))
                 except:
@@ -552,12 +555,18 @@ def update_single_source(request, exp_id):
                     mi.ph = str(float(args['ph']))
                 except:
                     pass
-                mi.gas_type = args['gastype']
+                try:
+                    mi.gas_type = args['gastype']
+                except:
+                    pass
                 try:
                     mi.gas_flow_rate = str(float(args['flowrate']))
                 except:
                     pass
-                mi.gas_delivery_method = args['delivery']
+                try:
+                    mi.gas_delivery_method = args['delivery']
+                except:
+                    pass
                 
                 mi.save()
         elif int(args['type']) == 2:
@@ -1457,6 +1466,47 @@ def add_samples_to_run(request):
 
     # by the time you we get here we should have a valid run and valid samples
     run.add_samples(queryset)
+
+    return HttpResponse()
+    
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
+def add_samples_to_class(request):
+    '''Takes a run_id and a list of sample_ids and adds samples to the run after checking permissions etc.'''
+
+    if request.method == 'GET':
+        return HttpResponseNotAllowed(['POST'])
+
+    class_id = request.POST.get('class_id', None)
+    if not class_id:
+        return HttpResponseBadRequest("No class_id provided.\n")
+
+    try:
+        sampleclass = SampleClass.objects.get(id=class_id)
+    except ObjectDoesNotExist:
+        return HttpResponseNotFound("Class with id %s not found.\n" % class_id)
+
+    sample_id_str = request.POST.get('sample_ids', None)
+    if not sample_id_str:
+        return HttpResponseBadRequest("No sample_ids provided.\n")
+
+    sample_ids = [int(X) for X in sample_id_str.split(',')]
+    queryset = Sample.objects.filter(id__in=sample_ids)
+
+    if len(queryset) != len(sample_ids):
+        return HttpResponseNotFound("At least one of the samples can not be found.\n")
+
+    # check that each sample is permitted
+    samples = Sample.objects.filter(experiment__users=request.user)
+    allowed_set = set(list(samples))
+    qs_set = set(list(queryset))
+    if not qs_set.issubset(allowed_set):
+        return HttpResponseForbidden('Some samples do not belong to this user.\n')
+
+    # by the time you we get here we should have a valid run and valid samples
+    for sample in samples:
+        sample.sample_class = sampleclass
+        sample.save()
 
     return HttpResponse()
 
