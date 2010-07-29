@@ -360,7 +360,7 @@ MA.SampleCSVUploadForm = new Ext.Window({
                     xtype: 'panel',
                     border: false,
                     bodyStyle:'padding:15px;background:transparent;',
-                    html: 'Uploaded CSVs must be of the format:<br><br><code>label,weight,comment</code><br><br>',
+                    html: 'Uploaded CSVs must be of the format:<br><br><code>label,weight,comment</code><br><br>'
                 },
                 {
                     xtype: 'fileuploadfield',
