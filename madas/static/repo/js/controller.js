@@ -553,7 +553,8 @@ MA.InitApplication = function() {
     MA.MenuRender(username);
 
     MA.InitUI();
-    
+ 
+    // the loginOverlay must be removed or else the rest of the UI fails to render   
     MA.Authorize('dashboard:list', [], function () { Ext.get("loginOverlay").remove(); } );
 };
 
