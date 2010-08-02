@@ -244,6 +244,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
             buttons:[
                 {
                     text:'Delete Run',
+                    itemId:'deleteButton',
                     handler:function() {
                         self.deleteRun();
                     }
@@ -359,6 +360,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
 
         this.getFooterToolbar().getComponent("generateWorklistButton").disable();
         this.getFooterToolbar().getComponent("markCompleteButton").disable();
+        this.getFooterToolbar().getComponent("deleteButton").disable();
 
         this.sampleStore.load({ params: { run__id__exact: this.runId } });
     },
@@ -427,6 +429,14 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
 
         this.getFooterToolbar().getComponent("generateWorklistButton").enable();
         this.getFooterToolbar().getComponent("markCompleteButton").enable();
+        this.getFooterToolbar().getComponent("deleteButton").enable();
+
+
+        if (record.data.state == 2) {
+            this.getFooterToolbar().getComponent("generateWorklistButton").disable();
+            this.getFooterToolbar().getComponent("markCompleteButton").disable();
+            this.getFooterToolbar().getComponent("deleteButton").disable();
+        }
         
         this.sampleStore.load({ params: { run__id__exact: this.runId } });
     }
