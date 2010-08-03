@@ -15,17 +15,20 @@ class RunBuilder(object):
             self.validate()
             #if the validate fails we throw an exception
             
+            # TODO : remove and re-generate blanks and quality controls
+            
             from mako.template import Template
             
             mytemplate = Template(self.run.method.template)
             
             #create the variables to insert
-            render_vars = {'username':request.user.username,'run':self.run}
+            render_vars = {'username':request.user.username,'run':self.run,'runsamples':RunSample.objects.filter(run=self.run)}
             
             #write filenames into DB
             for rs in RunSample.objects.filter(run=self.run):
-                rs.filename = rs.sample.run_filename(self.run)
-                rs.save()
+                if rs.type == 0:
+                    rs.filename = rs.sample.run_filename(self.run)
+                    rs.save()
             
             #render
             return mytemplate.render(**render_vars)

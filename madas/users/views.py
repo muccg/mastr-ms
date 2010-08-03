@@ -382,6 +382,9 @@ def userSave(request, *args):
     return jsonResponse(request, [])
 
 def getNodeMemberships(groups):
+    if groups is None:
+        return []
+
     print '\tusers/getNodeMemberships'
     from madas.settings import MADAS_STATUS_GROUPS, MADAS_ADMIN_GROUPS
     specialNodes = MADAS_STATUS_GROUPS + MADAS_ADMIN_GROUPS

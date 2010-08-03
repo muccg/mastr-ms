@@ -91,7 +91,7 @@ def retrievePathsForFiles(request, *args):
                 runsamples = RunSample.objects.filter(run = run)
                 for rs in runsamples:
                     fname = rs.filename;
-                    abspath, relpath = rs.sample.experiment.ensure_dir()
+                    abspath, relpath = rs.filepaths()
                     print 'Filename: %s belongs in path %s' % ( fname, abspath )
                     if filesdict.has_key(fname):
                         print 'Duplicate path detected!!!'
@@ -163,7 +163,7 @@ def checkRunSampleFiles(request):
                 runsample = int(runsample)
                 try:
                     rs = RunSample.objects.get(id = runsample)
-                    abssamplepath, relsamplepath = rs.sample.experiment.ensure_dir()
+                    abssamplepath, relsamplepath = rs.filepaths()
                     complete_filename = os.path.join(abssamplepath, rs.filename)
                     fileexists = os.path.exists(complete_filename)
                     print 'Checking file %s:%s' % (complete_filename, str(fileexists))

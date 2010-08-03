@@ -357,7 +357,7 @@ class Run(models.Model):
         assert self.id, 'Run must have an id before samples can be added'
         for s in queryset:
             if s.is_valid_for_run():
-                rs, created = RunSample.objects.get_or_create(run=self, sample=s)
+                rs, created = RunSample.objects.get_or_create(run=self, sample=s, sequence=self.samples.count())
                 
     def remove_samples(self, queryset):
         assert self.id, 'Run must have an id before samples can be added'
@@ -379,6 +379,27 @@ class Run(models.Model):
             self.state = 1
 
         self.save()
+        
+    def ensure_dir(self):
+            ''' This function calculates where the storage area should be for the run data (blanks and QC files)
+                It create the directory if it does not exist.
+                It returns a tuple in form (abspath, relpath) where 
+                    abspath is the absolute path
+                    relpath is the path, relative to the settings.REPO_FILES_ROOT
+            '''
+            import settings, os
+            
+            yearpath = os.path.join('runs', str(self.created_on.year) )
+            monthpath = os.path.join(yearpath, str(self.created_on.month) )
+            runpath = os.path.join(monthpath, str(self.id) )
+           
+            abspath = os.path.join(settings.REPO_FILES_ROOT, runpath)
+    
+            if not os.path.exists(abspath):
+                os.makedirs(abspath)
+                
+            return (abspath, runpath)
+    
 
 class SampleLog(models.Model):
     LOG_TYPES = (
@@ -414,10 +435,17 @@ class UserExperiment(models.Model):
         return "%s-%s" % (self.user, self.experiment)
 
 class RunSample(models.Model):
+    RUNSAMPLE_TYPES = (
+        (0, u'Sample'),
+        (1, u'Blank'),
+        (2, u'Quality Control')
+    )
     run = models.ForeignKey(Run)
-    sample = models.ForeignKey(Sample)
+    sample = models.ForeignKey(Sample, null=True, blank=True)
     filename = models.CharField(max_length=255, null=True, blank=True)
     complete = models.BooleanField(default=False, db_index=True)
+    type = models.PositiveIntegerField(choices=RUNSAMPLE_TYPES, default=0)
+    sequence = models.PositiveIntegerField(null=False, default=0)
 
     class Meta:
         db_table = u'repository_run_samples'
@@ -433,6 +461,19 @@ class RunSample(models.Model):
     def save(self, *args, **kwargs):
         super(RunSample, self).save(*args, **kwargs)
         self.run.update_sample_counts()
+        
+    def filepaths(self):
+        if self.type == 0:
+            return self.sample.experiment.ensure_dir()
+        else:
+            return self.run.ensure_dir()
+            
+    def run_filename(self):
+        if self.type == 0:
+            return self.sample.run_filename(self.run)
+        else:
+            return self.filename
+            
         
 class ClientFile(models.Model):
     experiment = models.ForeignKey(Experiment)
