@@ -78,18 +78,18 @@ def processLogin(request, *args):
             cachedgroups = utils.getGroupsForSession(request, force_reload = True) #make sure this is reloaded - same session could have 2 logins.
 
         should_see_admin = False
-        request.user.is_staff = False
+        request.user.is_superuser = False
         for gr in cachedgroups:
             if gr == 'Administrators':
                 should_see_admin = True
     
         if should_see_admin is True:
             nextview = 'admin:adminrequests'
-            request.user.is_staff = True
-            print '\tAdmin! - Setting is_admin to ', request.user.is_staff
+            request.user.is_superuser = True
+            print '\tAdmin! - Setting is_superuser to ', request.user.is_superuser
         else:
-            request.user.is_staff = False
-            print '\tNot Admin! - Setting is_admin to ', request.user.is_staff
+            request.user.is_superuser = False
+            print '\tNot Admin! - Setting is_superuser to ', request.user.is_superuser
 
         
         
