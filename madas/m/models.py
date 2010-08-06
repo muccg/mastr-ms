@@ -44,6 +44,7 @@ class Formalquote(models.Model):
     toemail = models.CharField(max_length=100)
     status = models.CharField(max_length=20, default='new')
     downloaded = models.BooleanField()
+    purchase_order_number = models.CharField(max_length=100)
     class Meta:
         db_table = u'formalquote'
         verbose_name = "formal quote"

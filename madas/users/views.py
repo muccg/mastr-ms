@@ -98,9 +98,14 @@ def _userload(username):
     except Exception, e:
         print '\tEXCEPTION: get madas user group failed: ', str(e)
 
-    d['status'] = d['status'][0]
+    try:
+        d['status'] = d['status'][0]
+    except:
+        pass
+
     if isinstance(d['groups'], list) and len(d['groups']) > 0:
         d['groups'] = d['groups'][0]
+
 
     return d
     

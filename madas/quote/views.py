@@ -523,6 +523,7 @@ def formalLoad(request, *args, **kwargs):
                 'fromname' : '',
                 'officePhone' : '',
                 'tonode' : '',
+                'purchase_order_number' : ''
               }
 
     if qid is not '' or fqid is not '':
@@ -532,9 +533,9 @@ def formalLoad(request, *args, **kwargs):
         try:
             #This part gets us the linked formal quote data 
             if fqid != '':
-                retvals = Formalquote.objects.filter(id=fqid).values( 'id', 'quoterequestid', 'details', 'created', 'fromemail', 'toemail' )   
+                retvals = Formalquote.objects.filter(id=fqid).values( 'id', 'quoterequestid', 'details', 'created', 'fromemail', 'toemail', 'purchase_order_number' )   
             elif qid != '':
-                retvals = Formalquote.objects.filter(quoterequestid=qid).values( 'id', 'quoterequestid', 'details', 'created', 'fromemail', 'toemail' )
+                retvals = Formalquote.objects.filter(quoterequestid=qid).values( 'id', 'quoterequestid', 'details', 'created', 'fromemail', 'toemail', 'purchase_order_number' )
 
             if len(retvals) > 0:
                 retvals = retvals[0]
@@ -753,6 +754,13 @@ def formalAccept(request, *args):
         #mark the formal quote as accepted:
         fq = setFormalQuoteStatus(qr, QUOTE_STATE_ACCEPTED)
         
+        #add optional purchase_order_number to the qr
+        try:
+            po = request.REQUEST.get('purchase_order_number')
+            fq.purchase_order_number = po
+            fq.save()
+        except:
+            pass
 
         #leave acceptance in the quote history
         _addQuoteHistory(qr, qrvalues['email'], qr.tonode, qr.tonode, 'Formal quote accepted', qr.completed, qr.completed)

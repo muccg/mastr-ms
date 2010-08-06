@@ -138,8 +138,8 @@ def uniqueList(l):
     return result
 
 def getGroupsForSession(request, force_reload = False):
-    cachedgroups = request.session.get('cachedgroups', None)
-    if cachedgroups is None or force_reload:
+    cachedgroups = request.session.get('cachedgroups', [])
+    if cachedgroups is [] or force_reload:
         print '\tNo cached groups for %s. Fetching.' % (request.user.username)
         ld = LDAPHandler()
         g = ld.ldap_get_user_groups(request.user.username)

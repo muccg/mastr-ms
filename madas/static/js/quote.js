@@ -891,7 +891,9 @@ MA.ViewFormalInit = function(paramArray){
     
     //fetch user details
     quoteRequestEditCmp.load({url: MA.BaseUrl + 'quote/load', params: {'qid': id}, waitMsg:'Loading'});
-    formalQuoteCmp.load({url: MA.BaseUrl + 'quote/formalload', params: {'qid': id}, waitMsg:'Loading'});
+    formalQuoteCmp.load({url: MA.BaseUrl + 'quote/formalload', params: {'qid': id}, waitMsg:'Loading', success: function(form, action) {
+        Ext.getCmp('fquouserdetails-panel').getComponent('purchase_order_number').setValue(action.result.data.purchase_order_number);
+    }});
 
     //set the quote id
     Ext.getCmp('quov-qid').setValue(id);
@@ -1036,7 +1038,14 @@ MA.ViewFormalCmp = {
                 triggerAction:'all',
                 listWidth:230,
                 store: countryStore
-            })
+            }),
+            {
+                fieldLabel: 'Purchase Order #',
+                itemId: 'purchase_order_number',
+                name: 'purchase_order_number',
+                allowBlank:true,
+                xtype:'numberfield'
+            }
             ],
         buttons: [
             {
@@ -1109,13 +1118,13 @@ MA.ViewFormalCmp = {
                                         {name: 'tonode', mapping: 'tonode'},
                                         {name: 'pdf', mapping: 'pdf'},
                                         {name: 'fromname', mapping: 'fromname'},
-                                        {name: 'officePhone', mapping: 'officePhone'}
+                                        {name: 'officePhone', mapping: 'officePhone'},
+                                        {name: 'purchase_order_number', mapping: 'purchase_order_number'}
                                         ]),
         defaults: {width: 230},
         defaultType: 'textfield',
         trackResetOnLoad: true,
         waitMsgTarget: true,
-
         items: [
             {  
                 name: 'quoterequestid',
