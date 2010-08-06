@@ -82,7 +82,7 @@ body
 .x-item-disabled {
     color:black;
     cursor:default;
-    opacity:0.6;
+    opacity:0.8;
 }
 
 .x-form-display-field {
