@@ -21,8 +21,8 @@
     <title>Metabolomics Australia User and Quote Management System</title>
 
 <link rel="shortcut icon" href="/favicon.ico" />
-<link rel="stylesheet" type="text/css" href="${wh.url('/static/css/main.css')}"/>
 <link rel="stylesheet" href="${wh.url('/static/ext-3.1.0/resources/css/ext-all.css')}"/>
+<link rel="stylesheet" type="text/css" href="${wh.url('/static/css/main.css')}"/>
 <link rel="stylesheet" href="${wh.url('/static/ext-3.1.0/examples/ux/css/RowEditor.css')}"/>
 <link rel="stylesheet" type="text/css" href="${wh.url('/static/css/file-upload.css')}"/>
 <script src="${wh.url('/static/ext-3.1.0/adapter/ext/ext-base.js')}" type="text/javascript"></script>
