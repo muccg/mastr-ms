@@ -1,6 +1,11 @@
 MA.BioSourceInit = function() {
     var expId = MA.ExperimentController.currentId();
     
+    Ext.getCmp('organismBioSourceMicrobialFieldset').hide();
+    Ext.getCmp('organismBioSourcePlantFieldset').hide();
+    Ext.getCmp('organismBioSourceAnimalFieldset').hide();
+    Ext.getCmp('organismBioSourceHumanFieldset').hide();
+    
     var loader = new Ajax.Request(wsBaseUrl + 'records/biologicalsource/experiment__id/'+expId, 
                                  { 
                                  asynchronous:true, 
