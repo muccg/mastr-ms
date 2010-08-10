@@ -446,6 +446,7 @@ class RunSample(models.Model):
     complete = models.BooleanField(default=False, db_index=True)
     type = models.PositiveIntegerField(choices=RUNSAMPLE_TYPES, default=0)
     sequence = models.PositiveIntegerField(null=False, default=0)
+    vial_number = models.PositiveIntegerField(null=True)
 
     class Meta:
         db_table = u'repository_run_samples'

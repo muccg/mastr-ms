@@ -1,0 +1,1 @@
+alter table repository_run_samples add column vial_number integer;
