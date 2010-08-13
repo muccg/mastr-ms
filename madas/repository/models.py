@@ -437,8 +437,11 @@ class UserExperiment(models.Model):
 class RunSample(models.Model):
     RUNSAMPLE_TYPES = (
         (0, u'Sample'),
-        (1, u'Blank'),
-        (2, u'Quality Control')
+        (1, u'Standard'),
+        (2, u'Pooled Biological QC'),
+        (3, u'Instrument QC'),
+        (4, u'Solvent Blank'),
+        (5, u'Reagent Blank')
     )
     run = models.ForeignKey(Run)
     sample = models.ForeignKey(Sample, null=True, blank=True)
