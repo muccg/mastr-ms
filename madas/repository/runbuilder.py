@@ -24,7 +24,8 @@ class RunBuilder(object):
             self.validate()
             #if the validate fails we throw an exception
             
-            self.layout()
+            if self.run.state == 0:
+                self.layout()
             
             from mako.template import Template
             
@@ -38,6 +39,11 @@ class RunBuilder(object):
                 if rs.type == 0:
                     rs.filename = rs.sample.run_filename(self.run)
                     rs.save()
+            
+            #mark the run as in-progress and save it
+            if self.run.state == 0:
+                self.run.state = 1
+                self.run.save()
             
             #render
             return mytemplate.render(**render_vars)
@@ -73,6 +79,7 @@ class RunGroup(object):
             self.samples.insert(randloc,qc)
         
     def interleave_sweeps(self):
+        print 'interleave sweeps'
         #insert sweeps after each sample
         self._layout = []
         
@@ -90,6 +97,7 @@ class RunGroup(object):
             self._layout.append(sweep)
             
     def layout(self):
+        print 'layout'
         if len(self._layout) == 0:
             return self.samples
         else:
@@ -179,6 +187,7 @@ class GenericRunLayout(object):
         self.layout.extend(self.groups[len(self.groups) - 1].layout())
         
     def add_pooled_QC_padding(self):
+        print 'add pbqc padding'
         #add PBQCs at beginning and end of layout
         qc = RunSample()
         qc.run = self.run
@@ -199,6 +208,7 @@ class GenericRunLayout(object):
         self.layout.append(qc)
         
     def add_reagent_blank(self):
+        print 'add reagent blank'
         #add a blank to the beginning of the layout
         rb = RunSample()
         rb.run = self.run
@@ -210,6 +220,7 @@ class GenericRunLayout(object):
         self.layout.insert(0,rb)
         
     def add_solvent_padding(self):
+        print 'add solvent padding'
         #add 1 solvent at beginning, 2 at end
         solvent = RunSample()
         solvent.run = self.run
@@ -263,6 +274,7 @@ class GCRunLayout(GenericRunLayout):
         self.update_sequences()
 
     def add_instrument_QC_padding(self):
+        print 'add IQC padding'
         qc = RunSample()
         qc.run = self.run
         qc.type = 3
