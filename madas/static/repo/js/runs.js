@@ -23,11 +23,11 @@ MA.RunCmpRowSelect = function(view, nodes) {
 };
 
 MA.RunSaveCallback = function(id) {
-    Ext.getCmp('currentRunTitle').update(runStore.getById(id).data.title);
+    Ext.getCmp('currentRunTitle').update(selectableRunStore.getById(id).data.title);
 };
 
 MA.RunDeleteCallback = function() {
-    runStore.load();
+    selectableRunStore.load();
     MA.ClearCurrentRun();
 };
 
@@ -468,7 +468,7 @@ MA.RunCmp = new Ext.Window({
             id:'runlistview',
             region:'west',
             width:150,
-            store:runStore,
+            store:selectableRunStore,
             loadingText:'Loading...',
             columnSort:false,
             columns: [
@@ -480,8 +480,8 @@ MA.RunCmp = new Ext.Window({
                 'render': function() {
                     //register to be notified when the runstore loads so that we can update current sel
                     
-                    runStore.addListener("load", function() {
-                        var record = runStore.getById(Ext.getCmp('runDetails').runId);
+                    selectableRunStore.addListener("load", function() {
+                        var record = selectableRunStore.getById(Ext.getCmp('runDetails').runId);
                         if (record != null) {
                             var list = Ext.getCmp("runlistview");
                             list.refresh();
@@ -521,6 +521,7 @@ MA.RunCmp = new Ext.Window({
 //                        list.getNode(record).scrollIntoView(list.innerBody.dom.parentNode);
 //                    }, runStore, { single: true });
 
+                    selectableRunStore.load();
                     runStore.load();
                     MA.RunSaveCallback(id);
                 }
