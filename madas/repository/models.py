@@ -441,7 +441,8 @@ class RunSample(models.Model):
         (2, u'Pooled Biological QC'),
         (3, u'Instrument QC'),
         (4, u'Solvent Blank'),
-        (5, u'Reagent Blank')
+        (5, u'Reagent Blank'),
+        (6, u'Sweep')
     )
     run = models.ForeignKey(Run)
     sample = models.ForeignKey(Sample, null=True, blank=True)
@@ -463,6 +464,7 @@ class RunSample(models.Model):
         run.update_sample_counts()
 
     def save(self, *args, **kwargs):
+        print 'rs save with seq %s' % (self.sequence)
         super(RunSample, self).save(*args, **kwargs)
         self.run.update_sample_counts()
         
