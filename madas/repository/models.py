@@ -464,7 +464,6 @@ class RunSample(models.Model):
         run.update_sample_counts()
 
     def save(self, *args, **kwargs):
-        print 'rs save with seq %s' % (self.sequence)
         super(RunSample, self).save(*args, **kwargs)
         self.run.update_sample_counts()
         

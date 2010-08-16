@@ -24,14 +24,14 @@ class RunBuilder(object):
             self.validate()
             #if the validate fails we throw an exception
             
-            # TODO : remove and re-generate blanks and quality controls
+            self.layout()
             
             from mako.template import Template
             
             mytemplate = Template(self.run.method.template)
             
             #create the variables to insert
-            render_vars = {'username':request.user.username,'run':self.run,'runsamples':RunSample.objects.filter(run=self.run)}
+            render_vars = {'username':request.user.username,'run':self.run,'runsamples':RunSample.objects.filter(run=self.run).order_by('sequence')}
             
             #write filenames into DB
             for rs in RunSample.objects.filter(run=self.run):
@@ -244,7 +244,6 @@ class GenericRunLayout(object):
         for rs in self.layout:
             rs.sequence = count
             rs.save()
-            print 'seq %s' % (count)
             count = count + 1
         
 class GCRunLayout(GenericRunLayout):
