@@ -53,16 +53,24 @@ class RunGroup(object):
         self._layout = []
         self.sweeps = []
         self.pooled_qcs = []
+        self.run = None
         
     def add_pooled_QCs(self):
         #add pooled QCs into group
         if len(self.samples) >= 10:
             print 'add pbqc randomly'
-            pb = 'PBQC'
-            self.pooled_qcs = [pb]
+            
+            qc = RunSample()
+            qc.run = self.run
+            qc.type = 2
+            qc.save()
+            qc.filename = u'pbqc_%s-%s.d' % (self.run.id, qc.id)
+            qc.save()
+            
+            self.pooled_qcs = [qc]
             import random
             randloc = random.randint(0,len(self.samples))
-            self.samples.insert(randloc,pb)
+            self.samples.insert(randloc,qc)
         
     def interleave_sweeps(self):
         #insert sweeps after each sample
@@ -71,7 +79,13 @@ class RunGroup(object):
         for counter in range(len(self.samples)):
             self._layout.append(self.samples[counter])
             #create a sweep entry
-            sweep = 'sweep'
+            sweep = RunSample()
+            sweep.run = self.run
+            sweep.type = 6
+            sweep.save()
+            sweep.filename = u'sweep_%s-%s.d' % (self.run.id, sweep.id)
+            sweep.save()
+            
             self.sweeps.append(sweep)
             self._layout.append(sweep)
             
@@ -85,12 +99,9 @@ class RunGroup(object):
 class GenericRunLayout(object):
     def __init__(self, run):
         self.run = run
-        samples = self.run.samples.all()
-        self.samples = []
-        for sample in samples:
-            self.samples.append(sample)
         
     def clear(self):
+        print 'clearing'
         self.groups = []
         self.layout = []
         self.solvents = []
@@ -100,11 +111,17 @@ class GenericRunLayout(object):
         # and purge these meta samples from the RunSample table for this run
         RunSample.objects.filter(run=self.run,type__gt=0).delete()
         
+        #populate with RunSample entries that are now only sourced from Samples
+        self.samples = []
+        runsamples = RunSample.objects.filter(run=self.run)
+        for rs in runsamples:
+            self.samples.append(rs)
+        
     def perform_layout(self):
         print 'perform_layout'
         #process self.samples, following general rules to layout the rest
         self.clear()
-        
+
         self.randomize()
         self.split(10)
         map(RunGroup.add_pooled_QCs, self.groups)
@@ -112,6 +129,7 @@ class GenericRunLayout(object):
         self.add_pooled_QC_padding()
         self.add_reagent_blank()
         self.add_solvent_padding()
+        self.update_sequences()
         
     def randomize(self):
         #randomizes all items in the layout
@@ -126,6 +144,7 @@ class GenericRunLayout(object):
         if len(self.samples) <= 20:
             b = RunGroup()
             b.samples = self.samples[:]
+            b.run = self.run
             self.groups = [b]
         else:
             #split samples into groups
@@ -136,6 +155,7 @@ class GenericRunLayout(object):
             for a in grps:
                 b = RunGroup()
                 b.samples = a
+                b.run = self.run
                 self.groups.append(b)
 
     def interleave_solvents(self):
@@ -146,7 +166,13 @@ class GenericRunLayout(object):
         for counter in range(len(self.groups) - 1):
             self.layout.extend(self.groups[counter].layout())
             #create a solvent entry
-            solvent = 'solvent'
+            solvent = RunSample()
+            solvent.run = self.run
+            solvent.type = 4
+            solvent.save()
+            solvent.filename = u'solvent_%s-%s.d' % (self.run.id, solvent.id)
+            solvent.save()
+            
             self.solvents.append(solvent)
             self.layout.append(solvent)
             
@@ -154,22 +180,72 @@ class GenericRunLayout(object):
         
     def add_pooled_QC_padding(self):
         #add PBQCs at beginning and end of layout
-        qc = 'PBQC'
+        qc = RunSample()
+        qc.run = self.run
+        qc.type = 2
+        qc.save()
+        qc.filename = u'pbqc_%s-%s.d' % (self.run.id, qc.id)
+        qc.save()
+        
         self.layout.insert(0,qc)
-        end_qc = 'PBQC'
-        self.layout.append(end_qc)
+        
+        qc = RunSample()
+        qc.run = self.run
+        qc.type = 2
+        qc.save()
+        qc.filename = u'pbqc_%s-%s.d' % (self.run.id, qc.id)
+        qc.save()
+        
+        self.layout.append(qc)
         
     def add_reagent_blank(self):
         #add a blank to the beginning of the layout
-        rb = 'reagent'
+        rb = RunSample()
+        rb.run = self.run
+        rb.type = 5
+        rb.save()
+        rb.filename = u'reagent_%s-%s.d' % (self.run.id, rb.id)
+        rb.save()
+        
         self.layout.insert(0,rb)
         
     def add_solvent_padding(self):
         #add 1 solvent at beginning, 2 at end
-        solvent = 'solvent'
+        solvent = RunSample()
+        solvent.run = self.run
+        solvent.type = 4
+        solvent.save()
+        solvent.filename = u'solvent_%s-%s.d' % (self.run.id, solvent.id) 
+        solvent.save()
+        
         self.layout.insert(0,solvent)
+        
+        solvent = RunSample()
+        solvent.run = self.run
+        solvent.type = 4
+        solvent.save()
+        solvent.filename = u'solvent_%s-%s.d' % (self.run.id, solvent.id)
+        solvent.save()
+        
         self.layout.append(solvent)
+        
+        solvent = RunSample()
+        solvent.run = self.run
+        solvent.type = 4
+        solvent.save()
+        solvent.filename = u'solvent_%s-%s.d' % (self.run.id, solvent.id)
+        solvent.save()
+        
         self.layout.append(solvent)
+        
+    def update_sequences(self):
+        print 'updating sequences'
+        count = 1
+        for rs in self.layout:
+            rs.sequence = count
+            rs.save()
+            print 'seq %s' % (count)
+            count = count + 1
         
 class GCRunLayout(GenericRunLayout):
     def perform_layout(self):
@@ -185,8 +261,23 @@ class GCRunLayout(GenericRunLayout):
         self.add_instrument_QC_padding()
         self.add_reagent_blank()
         self.add_solvent_padding()
+        self.update_sequences()
 
     def add_instrument_QC_padding(self):
-        qc = 'IQC'
+        qc = RunSample()
+        qc.run = self.run
+        qc.type = 3
+        qc.save()
+        qc.filename = u'iqc_%s-%s.d' % (self.run.id, qc.id)
+        qc.save()
+        
         self.layout.insert(0,qc)
+        
+        qc = RunSample()
+        qc.run = self.run
+        qc.type = 3
+        qc.save()
+        qc.filename = u'iqc_%s-%s.d' % (self.run.id, qc.id)
+        qc.save()
+        
         self.layout.append(qc)
