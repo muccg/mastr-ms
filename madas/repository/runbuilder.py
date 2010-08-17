@@ -1,8 +1,10 @@
-from madas.repository.models import RunSample, SampleNotInClassException
+from madas.repository.models import RunSample, SampleNotInClassException, InstrumentSOP
 
 class RunBuilder(object):
     def __init__(self, run):
         self.run = run
+        # for now, just load up a default instrument SOP (don't touch the database)
+        self.instrumentSOP = InstrumentSOP()
 
     def validate(self):
         for sample in self.run.samples.all():
@@ -14,7 +16,7 @@ class RunBuilder(object):
         #validate first, this will throw an exception if failed
         self.validate()
         
-        layout = GCRunLayout(self.run)
+        layout = GCRunLayout(self.run, self.instrumentSOP)
         layout.perform_layout()
         print layout.layout
         #end result of a perform_layout is new RunSample entries to represent all other line items
@@ -54,16 +56,17 @@ class RunBuilder(object):
         
         
 class RunGroup(object):
-    def __init__(self):
+    def __init__(self, instrumentSOP):
         self.samples = []
         self._layout = []
         self.sweeps = []
         self.pooled_qcs = []
         self.run = None
+        self.instrumentSOP = instrumentSOP
         
     def add_pooled_QCs(self):
         #add pooled QCs into group
-        if len(self.samples) >= 10:
+        if len(self.samples) >= self.instrumentSOP.split_size:
             print 'add pbqc randomly'
             
             qc = RunSample()
@@ -105,8 +108,9 @@ class RunGroup(object):
 
         
 class GenericRunLayout(object):
-    def __init__(self, run):
+    def __init__(self, run, instrumentSOP):
         self.run = run
+        self.instrumentSOP = instrumentSOP
         
     def clear(self):
         print 'clearing'
@@ -131,7 +135,7 @@ class GenericRunLayout(object):
         self.clear()
 
         self.randomize()
-        self.split(10)
+        self.split(self.instrumentSOP.split_size)
         map(RunGroup.add_pooled_QCs, self.groups)
         self.interleave_solvents()
         self.add_pooled_QC_padding()
@@ -149,8 +153,8 @@ class GenericRunLayout(object):
     def split(self, length):
         print 'split'
         #if 20 or less samples, do not split
-        if len(self.samples) <= 20:
-            b = RunGroup()
+        if len(self.samples) <= self.instrumentSOP.split_threshhold:
+            b = RunGroup(self.instrumentSOP)
             b.samples = self.samples[:]
             b.run = self.run
             self.groups = [b]
@@ -161,7 +165,7 @@ class GenericRunLayout(object):
             
             self.groups = []
             for a in grps:
-                b = RunGroup()
+                b = RunGroup(self.instrumentSOP)
                 b.samples = a
                 b.run = self.run
                 self.groups.append(b)
@@ -263,7 +267,7 @@ class GCRunLayout(GenericRunLayout):
         self.clear()
                 
         self.randomize()
-        self.split(10)
+        self.split(self.instrumentSOP.split_size)
         map(RunGroup.add_pooled_QCs, self.groups)
         map(RunGroup.interleave_sweeps, self.groups)
         self.interleave_solvents()

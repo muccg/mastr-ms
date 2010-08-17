@@ -360,6 +360,9 @@ class ClientFileAdmin(ExtJsonInterface, admin.ModelAdmin):
         if request.user.is_superuser:
             return qs
         return qs.filter(experiment__users=request.user).distinct()
+        
+class InstrumentSOPAdmin(ExtJsonInterface, admin.ModelAdmin):
+    list_display = ['title','enabled']
 
 admin.site.register(OrganismType, OrganismTypeAdmin)
 admin.site.register(UserInvolvementType, UserInvolvementTypeAdmin)
@@ -380,3 +383,4 @@ admin.site.register(SampleClass, SampleClassAdmin)
 admin.site.register(SampleLog, SampleLogAdmin)
 admin.site.register(Run, RunAdmin)
 admin.site.register(ClientFile, ClientFileAdmin)
+admin.site.register(InstrumentSOP, InstrumentSOPAdmin)
