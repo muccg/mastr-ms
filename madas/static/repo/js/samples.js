@@ -107,8 +107,9 @@ MA.ExperimentSamples = {
                            }
                            
                         }
-                        },
-                        { xtype: "tbseparator" },
+                        }
+                    ],
+                    bbar: [
                         {
                             text:'Create',
                             cls: 'x-btn-text-icon',

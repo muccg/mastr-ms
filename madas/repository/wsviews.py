@@ -671,10 +671,23 @@ def recreate_sample_classes(request, experiment_id):
     #if they already exist, fine
     #if they no longer exist, delete
     #if they don't exist, create
-    currentsamples = SampleClass.objects.filter(biological_source__experiment__id = experiment_id)
+    currentsamples = SampleClass.objects.filter(experiment__id = experiment_id)
     
     #determine what to delete and what to add
     foundclasses = set()
+    standards_classes = SampleClass.objects.filter(experiment__id=experiment_id, is_standards_class=True)
+    if len(standards_classes) > 0:
+        foundclasses.add(standards_classes[0].id)
+        print 'found standards class'
+    else:
+        standards_class = SampleClass()
+        standards_class.experiment_id = experiment_id
+        standards_class.class_id = 'standards class'
+        standards_class.is_standards_class = True
+        standards_class.save()
+        foundclasses.add(standards_class.id)
+        print 'created standards class'
+    
     for combo in combos:
         #look for item in currentsamples, if it exists, add it to the foundclasses set
 
@@ -1367,7 +1380,7 @@ def sample_class_enable(request, id):
         
     sc.save()
         
-    return recordsSampleClasses(request, sc.biological_source.experiment.id)
+    return recordsSampleClasses(request, sc.experiment.id)
 
 
 @staff_member_required
