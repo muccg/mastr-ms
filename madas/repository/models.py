@@ -388,24 +388,24 @@ class Run(models.Model):
         self.save()
         
     def ensure_dir(self):
-            ''' This function calculates where the storage area should be for the run data (blanks and QC files)
-                It create the directory if it does not exist.
-                It returns a tuple in form (abspath, relpath) where 
-                    abspath is the absolute path
-                    relpath is the path, relative to the settings.REPO_FILES_ROOT
-            '''
-            import settings, os
+        ''' This function calculates where the storage area should be for the run data (blanks and QC files)
+            It create the directory if it does not exist.
+            It returns a tuple in form (abspath, relpath) where 
+                abspath is the absolute path
+                relpath is the path, relative to the settings.REPO_FILES_ROOT
+        '''
+        import settings, os
+        
+        yearpath = os.path.join('runs', str(self.created_on.year) )
+        monthpath = os.path.join(yearpath, str(self.created_on.month) )
+        runpath = os.path.join(monthpath, str(self.id) )
+       
+        abspath = os.path.join(settings.REPO_FILES_ROOT, runpath)
+
+        if not os.path.exists(abspath):
+            os.makedirs(abspath)
             
-            yearpath = os.path.join('runs', str(self.created_on.year) )
-            monthpath = os.path.join(yearpath, str(self.created_on.month) )
-            runpath = os.path.join(monthpath, str(self.id) )
-           
-            abspath = os.path.join(settings.REPO_FILES_ROOT, runpath)
-    
-            if not os.path.exists(abspath):
-                os.makedirs(abspath)
-                
-            return (abspath, runpath)
+        return (abspath, runpath)
     
 
 class SampleLog(models.Model):
@@ -493,3 +493,9 @@ class ClientFile(models.Model):
     downloaded = models.BooleanField(default=False, db_index=True)
     sharetimestamp = models.DateTimeField(auto_now=True)
     sharedby = models.ForeignKey(User)
+
+class InstrumentSOP(models.Model):
+    title = models.CharField(max_length=255)
+    enabled = models.BooleanField(default=True)
+    split_threshhold = models.PositiveIntegerField(default=20)
+    split_size = models.PositiveIntegerField(default=10)
