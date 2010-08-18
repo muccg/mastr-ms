@@ -61,7 +61,7 @@ class ProjectAdmin(ExtJsonInterface, admin.ModelAdmin):
         qs = super(ProjectAdmin, self).queryset(request)
         if request.user.is_superuser:
             return qs
-        return qs.filter(Q(experiment__users=request.user)|Q(client=request.user)).distinct()
+        return qs.filter(Q(experiment__users=request.user)|Q(client=request.user)|Q(experiment=None)).distinct()
 
     def experiments_link(self, obj):
         change_url = urlresolvers.reverse('admin:repository_experiment_changelist')

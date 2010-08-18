@@ -231,7 +231,8 @@ MA.ProjectCmp = {
                    }
                    //console.log(delIds);
                    for (var i = 0; i < delIds.length; i++) {
-                       MA.CRUDSomething('delete/experiment/'+delIds[i], {}, function() { experimentListStore.load(); });
+                       MA.CRUDSomething('delete/experiment/'+delIds[i], {}, function() { experimentListStore.proxy.conn.url = wsBaseUrl + 'recordsExperiments/' + MA.currentProjectId;
+                       experimentListStore.load(); });
                    }                        
                    }
                    
