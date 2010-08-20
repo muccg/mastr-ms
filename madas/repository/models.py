@@ -499,3 +499,5 @@ class InstrumentSOP(models.Model):
     enabled = models.BooleanField(default=True)
     split_threshhold = models.PositiveIntegerField(default=20)
     split_size = models.PositiveIntegerField(default=10)
+    vials_per_tray = models.PositiveIntegerField(default=98)
+    trays_max = models.PositiveIntegerField(default=1)
