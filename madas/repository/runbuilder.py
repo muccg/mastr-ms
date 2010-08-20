@@ -80,24 +80,6 @@ class RunGroup(object):
             import random
             randloc = random.randint(0,len(self.samples))
             self.samples.insert(randloc,qc)
-        
-    def interleave_sweeps(self):
-        print 'interleave sweeps'
-        #insert sweeps after each sample
-        self._layout = []
-        
-        for counter in range(len(self.samples)):
-            self._layout.append(self.samples[counter])
-            #create a sweep entry
-            sweep = RunSample()
-            sweep.run = self.run
-            sweep.type = 6
-            sweep.save()
-            sweep.filename = u'sweep_%s-%s.d' % (self.run.id, sweep.id)
-            sweep.save()
-            
-            self.sweeps.append(sweep)
-            self._layout.append(sweep)
             
     def layout(self):
         print 'layout'
@@ -269,12 +251,12 @@ class GCRunLayout(GenericRunLayout):
         self.randomize()
         self.split(self.instrumentSOP.split_size)
         map(RunGroup.add_pooled_QCs, self.groups)
-        map(RunGroup.interleave_sweeps, self.groups)
         self.interleave_solvents()
         self.add_pooled_QC_padding()
         self.add_instrument_QC_padding()
         self.add_reagent_blank()
         self.add_solvent_padding()
+        self.interleave_sweeps()
         self.update_sequences()
 
     def add_instrument_QC_padding(self):
@@ -296,3 +278,28 @@ class GCRunLayout(GenericRunLayout):
         qc.save()
         
         self.layout.append(qc)
+        
+        
+    def interleave_sweeps(self):
+        print 'interleave sweeps'
+        #insert sweeps after each sample
+        self._layout = []
+        self.sweeps = []
+        
+        for counter in range(len(self.layout)):
+            self._layout.append(self.layout[counter])
+            
+            #add a sweep after any sample, standard, pbqc or iqc
+            if self.layout[counter].type < 4:
+                #create a sweep entry
+                sweep = RunSample()
+                sweep.run = self.run
+                sweep.type = 6
+                sweep.save()
+                sweep.filename = u'sweep_%s-%s.d' % (self.run.id, sweep.id)
+                sweep.save()
+                
+                self.sweeps.append(sweep)
+                self._layout.append(sweep)
+            
+        self.layout = self._layout
