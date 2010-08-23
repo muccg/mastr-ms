@@ -82,31 +82,32 @@ MA.ExperimentSamples = {
                                                        }
                                                        }}                        }
                     }),
-                    tbar: [{
-                        text: 'Enable/Disable Sample Class',
-                        handler : function(){
-                           var grid = Ext.getCmp('sampleClasses');
-                           var delIds = []; 
-                           
-                           var selections = grid.getSelectionModel().getSelections();
-                           if (!Ext.isArray(selections)) {
-                           selections = [selections];
-                           }
-                           
-                           for (var index = 0; index < selections.length; index++) {
-                           if (!Ext.isObject(selections[index])) {
-                           continue;
-                           }
-                           
-                           delIds.push(selections[index].data.id);
-                           }
-                           
-                           for (var i = 0; i < delIds.length; i++) {
-                           MA.CRUDSomething('sample_class_enable/'+delIds[i], {}, function() { var expId = MA.ExperimentController.currentId(); sampleClassStore.proxy.conn.url = wsBaseUrl + 'recreate_sample_classes/' + expId;
-                                                  sampleClassStore.load(); });
-                           }
-                           
-                        }
+                    tbar: [
+                        {
+                            text: 'Enable/Disable Sample Class',
+                            handler : function(){
+                               var grid = Ext.getCmp('sampleClasses');
+                               var delIds = []; 
+                               
+                               var selections = grid.getSelectionModel().getSelections();
+                               if (!Ext.isArray(selections)) {
+                               selections = [selections];
+                               }
+                               
+                               for (var index = 0; index < selections.length; index++) {
+                               if (!Ext.isObject(selections[index])) {
+                               continue;
+                               }
+                               
+                               delIds.push(selections[index].data.id);
+                               }
+                               
+                               for (var i = 0; i < delIds.length; i++) {
+                               MA.CRUDSomething('sample_class_enable/'+delIds[i], {}, function() { var expId = MA.ExperimentController.currentId(); sampleClassStore.proxy.conn.url = wsBaseUrl + 'recreate_sample_classes/' + expId;
+                                                      sampleClassStore.load(); });
+                               }
+                               
+                            }
                         }
                     ],
                     bbar: [
@@ -454,8 +455,39 @@ MA.ExperimentSamplesOnly = {
             handler: function () {
                 MA.SampleCSVUploadForm.show();
             }
+        },
+        { xtype: "tbseparator" },
+        {
+            text: 'Add Selected Samples to Run',
+            cls: 'x-btn-text-icon',
+            icon: 'static/repo/images/add-to-run.png',
+            handler: function() {
+                //save changes to selected entries
+                var grid = Ext.getCmp('samplesOnly');
+                var selections = grid.getSelectionModel().getSelections();
+        
+                if (!Ext.isArray(selections)) {
+                    selections = [selections];
+                }
+        
+                if (selections.length > 0) {
+                    
+                    var ids = [];
+                    for (var idx in selections) {
+                        if (!Ext.isObject(selections[idx])) {
+                            continue;
+                        }
+                        
+                        ids.push(selections[idx].data.id);
+                    }
+                    
+                    Ext.getCmp("runDetails").addSample(ids);
+        
+                    MA.RunCmp.show();
+                }
+            }
         }
-           ],
+    ],
     items: [
             {
             xtype:'grid',
