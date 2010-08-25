@@ -54,6 +54,15 @@ class RunBuilder(object):
         except Exception, e:
             return 'Run validation error ' + str(e)
         
+class TrayLayoutDelegate(object):
+    def __init__(self):
+        self.vials = 98
+        self.trays = 1
+        self.sample_positions = range(1,84)
+        self.reagent_positions = [98]
+        self.solvent_positions = [97]
+        self.tms_positions = range(89,95)
+        self.sweep_positions = [85,86]
         
 class RunGroup(object):
     def __init__(self, instrumentSOP):
