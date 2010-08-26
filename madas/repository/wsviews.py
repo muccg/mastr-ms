@@ -379,7 +379,8 @@ def populate_select(request, model=None, key=None, value=None, field=None, match
                        'sampleclass': ['id', 'class_id', 'experiment__id'],
                        'formalquote': ['id', 'toemail'],
                        'instrumentmethod': ['id','title'],
-                       'machine': ['id','station_name']
+                       'machine': ['id','station_name'],
+                       'experimentstatus':['id','name']
                        }
 
 
