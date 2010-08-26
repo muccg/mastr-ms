@@ -127,6 +127,7 @@ MA.RunListCmp = {
             width: 520,
             border: false,
             bodyStyle: "background: #d0def0;",
+            autoScroll:true,
             items: [
                 new MA.RunDetail({
                     bodyStyle:'padding:10px;background:transparent;border-top:none;border-bottom:none;border-right:none;',

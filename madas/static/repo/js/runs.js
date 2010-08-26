@@ -71,6 +71,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         });
 
         var defaultConfig = {
+            autoScroll:true,
             labelWidth:160,
             items:[
                 {
@@ -342,6 +343,8 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
 
         this.pendingSampleStore.removeAll();
         this.runId = 0;
+        
+        self.setAutoScroll(true);
     },
     addSample: function (id) {
         if (Ext.isArray(id)) {
@@ -515,22 +518,12 @@ MA.RunCmp = new Ext.Window({
         },
         new MA.RunDetail({
             id:'runDetails',
+            autoScroll:true,
             region:'center',
             bodyStyle:'padding:20px;background:transparent;border-top:none;border-bottom:none;border-right:none;',
             listeners: {
                 "delete": MA.RunDeleteCallback,
                 "save": function (id) {
-//                    runStore.addListener("load", function () {
-//                        /* Need to reload the record from the store for list
-//                         * manipulation methods to work. No, I don't understand
-//                         * why either. */
-//                        var record = runStore.getById(id);
-//                        var list = Ext.getCmp("runlistview");
-//
-//                        list.select(record);
-//                        list.getNode(record).scrollIntoView(list.innerBody.dom.parentNode);
-//                    }, runStore, { single: true });
-
                     selectableRunStore.load();
                     runStore.load();
                     MA.RunSaveCallback(id);
