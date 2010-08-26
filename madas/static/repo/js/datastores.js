@@ -561,6 +561,18 @@ var involvementComboStore = new Ext.data.JsonStore(
                                         'loadexception':MA.DSLoadIgnoreException}
                         }
                     );
+                    
+var expStatusComboStore = new Ext.data.JsonStore(
+                        {
+                            storeId: 'expStatusCombo',
+                            autoLoad: true,
+                            url: wsBaseUrl + 'populate_select/experimentstatus/id/name',
+                            root: 'response.value.items',
+                            fields: ['value', 'key'],
+                            listeners: {'load':MA.DSLoaded,
+                                        'loadexception':MA.DSLoadIgnoreException}
+                        }
+                    );
 
 var machineStore = new Ext.data.JsonStore({
     autoLoad:true,

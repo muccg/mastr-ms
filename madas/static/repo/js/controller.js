@@ -67,6 +67,10 @@ function _ExperimentController() {
         if (expFQuoteId === null) {
             expFQuoteId = '';
         }
+        var expStatus = Ext.getCmp('expFieldset').getComponent('status').getValue();
+        if (expStatus === null) {
+            expStatus = '';
+        }
         var expJobNumber = Ext.getCmp("jobNumber").getValue();
         if (expJobNumber === null) {
             expJobNumber = '';
@@ -83,7 +87,7 @@ function _ExperimentController() {
     
         if (expId === 0) {
             
-            var saver = new Ajax.Request(wsBaseUrl + 'create/experiment/?title='+escape(expName)+'&description='+escape(expDescription)+'&comment='+escape(expComment)+'&status_id=2&formal_quote_id='+escape(expFQuoteId)+'&job_number='+escape(expJobNumber)+'&project_id='+escape(MA.currentProjectId), 
+            var saver = new Ajax.Request(wsBaseUrl + 'create/experiment/?title='+escape(expName)+'&description='+escape(expDescription)+'&comment='+escape(expComment)+'&status_id=2&formal_quote_id='+escape(expFQuoteId)+'&job_number='+escape(expJobNumber)+'&project_id='+escape(MA.currentProjectId)+'&status_id='+escape(expStatus), 
                                                  { 
                                                  asynchronous:true, 
                                                  evalJSON:'force',
@@ -91,7 +95,7 @@ function _ExperimentController() {
                                          onFailure:    MA.DSLoadException
                                          });
         } else {
-            var saver = new Ajax.Request(wsBaseUrl + 'update/experiment/'+expId+'/?title='+escape(expName)+'&description='+escape(expDescription)+'&comment='+escape(expComment)+'&status_id=2&formal_quote_id='+escape(expFQuoteId)+'&job_number='+escape(expJobNumber)+'&project_id='+escape(MA.currentProjectId), 
+            var saver = new Ajax.Request(wsBaseUrl + 'update/experiment/'+expId+'/?title='+escape(expName)+'&description='+escape(expDescription)+'&comment='+escape(expComment)+'&status_id=2&formal_quote_id='+escape(expFQuoteId)+'&job_number='+escape(expJobNumber)+'&project_id='+escape(MA.currentProjectId)+'&status_id='+escape(expStatus), 
                                          { 
                                          asynchronous:true, 
                                          evalJSON:'force',
@@ -211,6 +215,7 @@ function _ExperimentController() {
                                                  comment.setValue('');
                                                  formalQuote.clearValue();
                                                  jobNumber.setValue('');
+                                                 Ext.getCmp('expFieldset').getComponent('status').setValue('');
                                                     
                                                  //tracking fields
                                                  tnamefield.setValue('');
@@ -226,6 +231,8 @@ function _ExperimentController() {
                                                      comment.setValue(rs[0].comment);
                                                      formalQuote.setValue(rs[0].formal_quote);
                                                      jobNumber.setValue(rs[0].job_number);
+                                                     
+                                                     Ext.getCmp('expFieldset').getComponent('status').setValue(rs[0].status);
                                                      
                                                      //tracking fields
                                                      tnamefield.setValue(rs[0].title);
@@ -362,9 +369,27 @@ MA.ExperimentDetails = {
             items: [ 
                 { xtype:'fieldset', 
                 title:'Experiment',
+                id:'expFieldset',
                 autoHeight:true,
                 items: [
                     { xtype:'textfield', fieldLabel:'Experiment name', width:700, enableKeyEvents:true, id:'experimentName', allowBlank:false, listeners:{'keydown':function(t, e){ MA.ExperimentController.updateNav(); return true; }, 'keyup':function(t, e){ MA.ExperimentController.updateNav(); return true; }}},
+                    new Ext.form.ComboBox({
+                            fieldLabel:'Status',
+                            itemId:'status',
+                            name:'status',
+                            width:300,
+                            editable:false,
+                            forceSelection:true,
+                            displayField:'value',
+                            valueField:'key',
+                            hiddenName:'status',
+                            lazyRender:true,
+                            allowBlank:false,
+                            typeAhead:false,
+                            triggerAction:'all',
+                            listWidth:300,
+                            store: expStatusComboStore
+                        }),
                     { xtype:'textarea', fieldLabel:'Experiment overview/aim', id:'experimentDescription', width:700, height:100 },
                     { xtype:'textarea', fieldLabel:'Comment', id:'experimentComment', width:700, height:100 },
                         new Ext.form.ComboBox({
