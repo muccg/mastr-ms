@@ -447,6 +447,7 @@ MA.ExperimentSamplesOnly = {
                 }
             }
         },
+        { xtype: "tbseparator" },
         {
             text: 'Upload CSV file',
             cls: 'x-btn-text-icon',

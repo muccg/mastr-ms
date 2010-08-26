@@ -83,6 +83,12 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     style: "position: relative; top: 3px;",
                     text: renderRunState(0)
                 }),
+                new Ext.form.Label({
+                    fieldLabel: "Progress",
+                    itemId: "progress",
+                    style: "position: relative; top: 3px;",
+                    text: ''
+                }),
                 {
                     fieldLabel:'Title',
                     xtype:'textfield',
@@ -272,6 +278,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                                 url: wsBaseUrl + "mark_run_complete/" + self.runId,
                                 success: function () {
                                     self.getComponent("state").setText(renderRunState(2));
+                                    self.getComponent("progress").setText(renderRunProgress(1), false);
                                     self.fireEvent("save", self.runId);
                                 }
                             });
@@ -354,6 +361,8 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         this.pendingSampleStore.removeAll();
 
         this.getComponent("state").setText(renderRunState(0));
+        this.getComponent("progress").setText(renderRunProgress(0), false);
+
         this.getComponent("title").setValue("New Untitled Run");
         this.getComponent("method").clearValue();
         this.getComponent("machine").clearValue();
@@ -423,6 +432,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         this.pendingSampleStore.removeAll();
 
         this.getComponent("state").setText(renderRunState(record.data.state));
+        this.getComponent("progress").setText(renderRunProgress(null, null, record), false);
         this.getComponent("title").setValue(record.data.title);
         this.getComponent("method").setValue(record.data.method);
         this.getComponent("machine").setValue(record.data.machine);
