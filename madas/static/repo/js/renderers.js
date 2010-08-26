@@ -40,13 +40,18 @@ function renderSampleLogType(val) {
 }
 
 function renderRunProgress(val, meta, record) {
-    var progress = record.get("complete_sample_count") / record.get("sample_count");
+    var progress;
+    if (Ext.isDefined(val) || !Ext.isDefined(record)) {
+        progress = val;
+    } else {
+        progress = record.get("complete_sample_count") / record.get("sample_count");
+    }
 
     if (isNaN(progress)) {
         progress = 0.0;
     }
 
-    if (record.get("state") == 2) {
+    if (Ext.isDefined(record) && record.get("state") == 2) {
         progress = 1.0;
     }
 
