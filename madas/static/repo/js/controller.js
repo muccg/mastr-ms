@@ -252,6 +252,8 @@ function _ExperimentController() {
         
         MA.MenuHandler({ id:'experiment:view' });
     
+        MA.skipBlur = true;
+    
         // Eh, we'll check for IE 6 as well just in case.
         if ((Ext.isIE6 || Ext.isIE7) && changingExperiment) {
             /* This works around an apparent DOM manipulation timing bug in IE 7
@@ -333,10 +335,15 @@ function _ExperimentController() {
            return;
         }
         
-        var currItem = Ext.StoreMgr.get("navDS").getAt(Ext.currentExperimentNavItem);
-        var blurFn = currItem.get("blur");
-        if (blurFn !== null) {
-            blurFn({'init':r.get("init"), 'index':index});
+        if (MA.skipBlur) {
+            MA.Blur({'init':r.get("init"), 'index':index});
+            MA.skipBlur = false;
+        } else {
+            var currItem = Ext.StoreMgr.get("navDS").getAt(Ext.currentExperimentNavItem);
+            var blurFn = currItem.get("blur");
+            if (blurFn !== null) {
+                blurFn({'init':r.get("init"), 'index':index});
+            }
         }
     };    
 };
