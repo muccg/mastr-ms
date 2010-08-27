@@ -186,7 +186,7 @@ var userStore = new Ext.data.JsonStore(
  * recordsExperiments does some magic to fill in the principal, for now I'm
  * just going to hack the appropriate row filtering into repository.wsviews and
  * come back to this at a later stage. */
-var experimentListStore = new Ext.data.JsonStore(
+var experimentListStore = new Ext.data.GroupingStore(
                         {
                             storeId: 'experimentList',
                             autoLoad: false,
@@ -197,8 +197,9 @@ var experimentListStore = new Ext.data.JsonStore(
                             sortInfo: {
                                 field: 'id',
                                 direction: 'DESC'
-                            }
-                                    
+                            },
+                            reader:new Ext.data.JsonReader({}),
+                            groupField:'status'      
                         }
                     );
 

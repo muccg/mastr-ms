@@ -245,10 +245,11 @@ MA.ProjectCmp = {
                     id:'project-experiments',
                     trackMouseOver: false,
                     sm: new Ext.grid.RowSelectionModel( {singleSelect:true}),
-                    viewConfig: {
+                    view: new Ext.grid.GroupingView({
                         forceFit: true,
-                        autoFill:true
-                    },
+                        autoFill: true,
+                        hideGroupedColumn: true
+                    }),
                     columns: [
                         { header: "ID", sortable:false, menuDisabled:true, dataIndex:'id', width:50 },
                         { header: "Title", sortable:false, menuDisabled:true, dataIndex:'title' },

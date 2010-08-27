@@ -46,17 +46,18 @@ MA.ExperimentListCmp = {
             id:'experiments',
             trackMouseOver: false,
             sm: new Ext.grid.RowSelectionModel( {singleSelect:true}),
-            viewConfig: {
+            view: new Ext.grid.GroupingView({
                 forceFit: true,
-                autoFill:true
-            },
+                autoFill: true,
+                hideGroupedColumn: true
+            }),
             columns: [
                       { header: "ID", sortable:false, menuDisabled:true, dataIndex:'id', width:50 },
                 { header: "Title", sortable:false, menuDisabled:true, dataIndex:'title' },
                       { header: "Principal", sortable:false, menuDisabled:true, dataIndex:'principal' },
                       { header: "Client", sortable:false, menuDisabled:true, dataIndex:'client' },
                 { header: "Description", sortable:false, menuDisabled:true, width:300, dataIndex:'description' },
-                { header: "Status", sortable:false, menuDisabled:true, renderer:renderStatus, dataIndex:'status' }
+                { header: "Status", sortable:false, groupable:true, menuDisabled:true, renderer:renderStatus, dataIndex:'status' }
             ],
             store: experimentListStore,
             listeners: {
