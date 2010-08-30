@@ -184,6 +184,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     fieldLabel:'Samples',
                     xtype:'grid',
                     width:310,
+                    itemId:'samples',
                     height:120,
                     store:this.sampleStore,
                     loadMask:true,
@@ -207,6 +208,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                                 text:'Remove Samples',
                                 cls: 'x-btn-text-icon',
                                 icon:'static/repo/images/delete.png',
+                                itemId:'removeBtn',
                                 listeners: {
                                     'click': function(e) {
                                         //save changes to selected entries
@@ -373,6 +375,8 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         this.getFooterToolbar().getComponent("generateWorklistButton").disable();
         this.getFooterToolbar().getComponent("markCompleteButton").disable();
         this.getFooterToolbar().getComponent("deleteButton").disable();
+        
+        this.getComponent('samples').getBottomToolbar().getComponent('removeBtn').enable();
 
         this.sampleStore.load({ params: { run__id__exact: this.runId } });
     },
@@ -451,6 +455,12 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
             this.getFooterToolbar().getComponent("deleteButton").disable();
         }
         
+        if (record.data.state == 0) {
+            this.getComponent('samples').getBottomToolbar().getComponent('removeBtn').enable();
+        } else {
+            this.getComponent('samples').getBottomToolbar().getComponent('removeBtn').disable();
+        }
+       
         this.sampleStore.load({ params: { run__id__exact: this.runId } });
     }
 });
