@@ -27,7 +27,7 @@
 <link rel="stylesheet" type="text/css" href="${wh.url('/static/css/file-upload.css')}"/>
 <script src="${wh.url('/static/ext-3.1.0/adapter/ext/ext-base.js')}" type="text/javascript"></script>
 
-<script src="${wh.url('/static/ext-3.1.0/ext-all.js')}"></script>
+<script src="${wh.url('/static/ext-3.1.0/ext-all-debug.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/repo/js/DisplayField.js')}"></script>
 
 

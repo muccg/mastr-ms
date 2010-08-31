@@ -186,14 +186,14 @@ def sendRequest(request, *args):
 
 def listQuotes(request, *args):
     '''This corresponds to Madas Dashboard->Quotes->View Quote Requests
-       Accessible by Administrators, Node Reps
+       Accessible by Administrators, Node Reps and Clients but it filters down to just Client's quote requests if it is a Client
     '''
     ### Authorisation Check ###
     from madas.m.views import authorize
     from madas.settings import MADAS_STATUS_GROUPS, MADAS_ADMIN_GROUPS 
-    (auth_result, auth_response) = authorize(request, module = 'quote', internal=True, perms=MADAS_ADMIN_GROUPS)
-    if auth_result is not True:
-        return auth_response
+#    (auth_result, auth_response) = authorize(request, module = 'quote', internal=True, perms=MADAS_ADMIN_GROUPS)
+#    if auth_result is not True:
+#        return auth_response
     ### End Authorisation Check ###
     print '*** quote/listQuotes : enter *** '
     #TODO: Find out which nodes this user represents, or if they are an administrator
@@ -209,8 +209,18 @@ def listQuotes(request, *args):
     results = [] 
 
     try:
+        print '\tRetrieving quotes for: ', request.user.username
+        quoteslist = Quoterequest.objects.filter(emailaddressid__emailaddress=request.user.username).values('id', 'completed', 'unread', 'tonode', 'firstname', 'lastname', 'officephone', 'details', 'requesttime', 'emailaddressid__emailaddress' )
+        for ql in quoteslist:
+            ql['email'] = ql['emailaddressid__emailaddress']
+            del ql['emailaddressid__emailaddress']
+            results.append(ql)
+    except Exception, e:
+        print 'exception: ', str(e)
+
+    try:
         print '\tRetrieving quotes for: ', nodelist[0]
-        quoteslist = Quoterequest.objects.filter(tonode=nodelist[0]).values('id', 'completed', 'unread', 'tonode', 'firstname', 'lastname', 'officephone', 'details', 'requesttime', 'emailaddressid__emailaddress' )
+        quoteslist = Quoterequest.objects.filter(Q(tonode=nodelist[0]) | Q()).values('id', 'completed', 'unread', 'tonode', 'firstname', 'lastname', 'officephone', 'details', 'requesttime', 'emailaddressid__emailaddress' )
         for ql in quoteslist:
             ql['email'] = ql['emailaddressid__emailaddress']
             del ql['emailaddressid__emailaddress']

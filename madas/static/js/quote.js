@@ -237,6 +237,7 @@ MA.QuoteRequestListInit = function(){
         ]);
     var grid = new Ext.grid.GridPanel({
         id             : 'quoterequests-panel',
+        region         : 'center',
         ds             : dataStore,
         enableDragDrop : false,
         enableColumnMove: false,
@@ -260,8 +261,144 @@ MA.QuoteRequestListInit = function(){
     grid.on('rowdblclick', editHandler);
     
     //add this component to the center component
+    var detailPanel = new Ext.FormPanel({ 
+        region:'east',
+        width:340,
+        labelWidth: 100, // label settings here cascade unless overridden
+        url:MA.BaseUrl + 'quote/save',
+        method:'POST',
+        deferredRender:false,
+        reader: new Ext.data.JsonReader({successProperty:'success', root: 'data'}, 
+                                      [ {name: 'id', mapping: 'id'}, 
+                                        {name: 'tonode', mapping: 'tonode'},
+                                        {name: 'details', mapping: 'details'},
+                                        {name: 'requesttime', mapping: 'requesttime'},
+                                        {name: 'firstname', mapping: 'firstname'},
+                                        {name: 'lastname', mapping: 'lastname'},
+                                        {name: 'officephone', mapping: 'officephone'},
+                                        {name: 'completed', mapping: 'completed'},
+                                        {name: 'email', mapping: 'email'},
+                                        {name: 'attachment', mapping: 'attachment'}
+                                      ]),
+        title: 'Quote Request',
+        defaultType: 'textfield',
+        waitMsgTarget: true,
+        items: [
+            {
+                name: 'id',
+                fieldLabel:'Request ID',
+                xtype: 'madisplayfield'
+            },{
+                fieldLabel: 'Email address',
+                name: 'email',
+                xtype: 'emaildisplayfield',
+                allowBlank:false
+            },{
+                fieldLabel: 'First name',
+                name: 'firstname',
+                allowBlank:false,
+                maskRe: /[^,=]/,
+                disabled: true
+            },{
+                fieldLabel: 'Last name',
+                name: 'lastname',
+                allowBlank:false,
+                maskRe: /[^,=]/,
+                disabled: true
+            },{
+                fieldLabel: 'Office Phone',
+                name: 'officephone',
+                allowBlank:false,
+                maskRe: /[^,=]/,
+                disabled: true
+            }, new Ext.form.ComboBox({
+                fieldLabel: 'Country',
+                name: 'countryDisplay',
+                editable:false,
+                forceSelection:true,
+                displayField:'displayLabel',
+                valueField:'submitValue',
+                hiddenName:'country',
+                lazyRender:true,
+                disabled:true,
+                typeAhead:false,
+                mode:'local',
+                triggerAction:'all',
+                listWidth:230,
+                store: countryStore
+            }), new Ext.form.ComboBox({
+                fieldLabel: 'Send Request To',
+                id: 'redirectQuoteNode',
+                name: 'nodeDisplay',
+                editable:false,
+                forceSelection:true,
+                displayField:'name',
+                valueField:'submitValue',
+                hiddenName:'tonode',
+                lazyRender:true,
+                allowBlank:false,
+                typeAhead:false,
+                triggerAction:'all',
+                listWidth:230,
+                disabled: true,
+                store: new Ext.data.JsonStore({
+                    storeId: 'redirectQuoteNodeDS',
+                    url: MA.BaseUrl + 'quote/listGroups',
+                    root: 'response.value.items',
+                    fields: ['name', 'submitValue']
+                })
+            }),{
+                fieldLabel: 'Details (readonly)',
+                name: 'details',
+                xtype: 'textarea',
+                allowBlank:true,
+                grow:true,
+                growMax:360,
+                //disabled: true,
+                readOnly: true
+            },{
+                fieldLabel: 'Completed',
+                name: 'completed',
+                xtype: 'checkbox',
+                inputValue: '1'
+            },{
+                fieldLabel: 'Comment',
+                name: 'comment',
+                xtype: 'textarea',
+                allowBlank:false,
+                grow:true,
+                growMax:360
+            },{  
+                name: 'attachment',
+                inputType: 'hidden'
+            },{
+            	xtype:'panel', 
+            	width: 350, 
+            	style:'padding-top:8px;padding-left:100px;padding-bottom:8px;', 
+            	items: [
+            		{
+            		xtype:'button',
+            		id:'downloadattachbutton',
+            		text:'Download Attachment',
+            		handler: function() {
+            				window.location = MA.BaseUrl + 'quote/downloadAttachment?quoterequestid=' + Ext.getCmp('qre-id').getValue();
+            			}
+            		}
+            	]
+            }
+        ],
+        buttons: [
+            ]
+    });    
+    
+    var panel = new Ext.Panel({
+        layout:'border',
+        id:'quotelistpanel',
+        items:[grid,detailPanel]
+    });
+    
     var center = Ext.getCmp('center-panel');
-    center.add(grid);
+    center.add(panel);
 
 };
 
