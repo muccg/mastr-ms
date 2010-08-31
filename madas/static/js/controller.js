@@ -141,7 +141,7 @@ MA.ChangeMainContent = function(contentName, paramArray){
          
         case "quote:list":
             MA.QuoteRequestListInit();
-            Ext.getCmp('center-panel').layout.setActiveItem('quoterequests-panel');
+            Ext.getCmp('center-panel').layout.setActiveItem('quotelistpanel');
             break;
 
         case "quote:edit":

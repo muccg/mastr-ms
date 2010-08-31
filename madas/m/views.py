@@ -91,6 +91,10 @@ def authorize(request, module='/', perms = [], internal = False):
             print '\tAuthorization failure: %s does not in any of %s' % (request.user.username, perms)
         
 
+    if module == 'quote' and request.REQUEST.get('subaction', '') == 'edit' and request.session['isClient']:
+        authorized = False
+        print 'quote edit not for clients'
+
     print '\tuser authorized? : ', authorized
 
     if not authorized:
