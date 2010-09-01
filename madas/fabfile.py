@@ -14,19 +14,37 @@ env.content_excludes.extend([]) # add quoted patterns here for extra rsync exclu
 env.content_includes.extend([]) # add quoted patterns here for extra rsync includes
 
 def deploy():
-    ccg_deploy_user()
+    """
+    Make a user deployment
+    """
+    _ccg_deploy_user()
 
 def snapshot():
-    ccg_deploy_snapshot()
+    """
+    Make a snapshot deployment
+    """
+    _ccg_deploy_snapshot()
 
 def release():
-    ccg_deploy_release()
+    """
+    Make a release deployment
+    """
+    _ccg_deploy_release()
 
 def testrelease():
-    ccg_deploy_release(devrelease=True)
+    """
+    Make a release deployment using the dev settings file
+    """
+    _ccg_deploy_release(devrelease=True)
 
 def purge():
-    ccg_purge_user()
+    """
+    Remove the user deployment
+    """
+    _ccg_purge_user()
 
 def purge_snapshot():
-    ccg_purge_snapshot()
+    """
+    Remove the snapshot deployment
+    """
+    _ccg_purge_snapshot()
