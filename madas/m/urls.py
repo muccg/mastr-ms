@@ -12,6 +12,7 @@ urlpatterns = patterns(
     #(r'^(.*)/quote/listgroups', 'madas.quote.views.listGroups'),    
    
     #Quotes views 
+    (r'^(.*)quote/listFormal/(?P<qid>.*)$', 'madas.quote.views.listFormal', {'SSL':True}),
     (r'^(.*)quote/listFormal', 'madas.quote.views.listFormal', {'SSL':True}),
     (r'^quote/listAll', 'madas.quote.views.listAll', {'SSL':True}),
     (r'^quote/listGroups', 'madas.quote.views.listGroups', {'SSL':True}),
