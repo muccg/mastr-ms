@@ -210,7 +210,7 @@ def listQuotes(request, *args):
 
     try:
         print '\tRetrieving quotes for: ', request.user.username
-        quoteslist = Quoterequest.objects.filter(emailaddressid__emailaddress=request.user.username).values('id', 'completed', 'unread', 'tonode', 'firstname', 'lastname', 'officephone', 'details', 'requesttime', 'emailaddressid__emailaddress' )
+        quoteslist = Quoterequest.objects.filter(emailaddressid__emailaddress=request.user.username).values('id', 'completed', 'unread', 'tonode', 'firstname', 'lastname', 'officephone', 'details', 'country', 'requesttime', 'emailaddressid__emailaddress' )
         for ql in quoteslist:
             ql['email'] = ql['emailaddressid__emailaddress']
             del ql['emailaddressid__emailaddress']
@@ -220,7 +220,7 @@ def listQuotes(request, *args):
 
     try:
         print '\tRetrieving quotes for: ', nodelist[0]
-        quoteslist = Quoterequest.objects.filter(Q(tonode=nodelist[0]) | Q()).values('id', 'completed', 'unread', 'tonode', 'firstname', 'lastname', 'officephone', 'details', 'requesttime', 'emailaddressid__emailaddress' )
+        quoteslist = Quoterequest.objects.filter(Q(tonode=nodelist[0]) | Q()).values('id', 'completed', 'unread', 'tonode', 'firstname', 'lastname', 'officephone', 'details', 'country', 'requesttime', 'emailaddressid__emailaddress' )
         for ql in quoteslist:
             ql['email'] = ql['emailaddressid__emailaddress']
             del ql['emailaddressid__emailaddress']
@@ -231,7 +231,7 @@ def listQuotes(request, *args):
     if 'Administrators' in g:
         print '\tchecking administrators'
         print '\tRetrieving quotes for: Administrators' 
-        adminlist = Quoterequest.objects.filter(tonode='').values('id', 'completed', 'unread', 'tonode', 'firstname', 'lastname', 'officephone', 'details', 'requesttime', 'emailaddressid__emailaddress' )
+        adminlist = Quoterequest.objects.filter(tonode='').values('id', 'completed', 'unread', 'tonode', 'firstname', 'country', 'lastname', 'officephone', 'details', 'requesttime', 'emailaddressid__emailaddress' )
         print '\tadmini query finished'
         for ql in adminlist:
             ql['email'] = ql['emailaddressid__emailaddress']
@@ -324,7 +324,7 @@ def listAll(request, *args):
     return jsonResponse(request, []) 
 
 
-def listFormal(request, *args):
+def listFormal(request, *args, **kwargs):
     '''This corresponds to Madas Dashboard->Quotes->My Formal Quotes
        Accessible by Everyone
     '''
@@ -350,7 +350,10 @@ def listFormal(request, *args):
     else:
         fquoteslist = Formalquote.objects.filter(Q(fromemail__iexact=uname)|Q(toemail__iexact=uname)).values('id', 'quoterequestid', 'details', 'created', 'fromemail', 'toemail', 'status') 
     
-
+    qid = kwargs.get('qid', request.REQUEST.get('qid', '') )
+    if qid != '':
+        print 'filtering fquotes where qid is %s' % qid
+        fquoteslist = fquoteslist.filter(quoterequestid=qid)
 
     setRequestVars(request, success=True, items=fquoteslist, totalRows=len(fquoteslist), authenticated=True, authorized=True)
  
