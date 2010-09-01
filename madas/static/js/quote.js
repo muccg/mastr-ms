@@ -395,7 +395,7 @@ MA.QuoteRequestListInit = function(){
                 data: [ 
                 ]
             }
-          ),
+          )
     });
     
     var formalWrapper = new Ext.Panel({
