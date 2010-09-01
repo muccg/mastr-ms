@@ -375,6 +375,7 @@ MA.QuoteRequestListInit = function(){
         height:270,
         border:false,
         emptyText:'<div style="color:#999;padding:6px;">No formal quotes attached to this Quote Request</div>',
+        loadingText:'Loading...',
         singleSelect:true,
         multiSelect:false,
         listeners:{
