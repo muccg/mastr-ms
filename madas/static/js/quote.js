@@ -366,15 +366,15 @@ MA.QuoteRequestListInit = function(){
      } );
     
     var qrFormalPanel = new Ext.list.ListView({
-        title:'Formal Quotes',
+        title:'Formal Quote',
         hideMode:'offsets',
     	style:'background:white;',
     	selectedClass:'ma-list-selected',
     	id:'qrFormalPanel',
         hideHeaders:true,
-        height:270,
+        height:90,
         border:false,
-        emptyText:'<div style="color:#999;padding:6px;">No formal quotes attached to this Quote Request</div>',
+        emptyText:'<div style="color:#999;padding:6px;">No formal quote attached to this Quote Request</div>',
         loadingText:'Loading...',
         singleSelect:true,
         multiSelect:false,
@@ -401,9 +401,9 @@ MA.QuoteRequestListInit = function(){
     });
     
     var formalWrapper = new Ext.Panel({
-        title:'Formal Quotes',
+        title:'Formal Quote',
         region:'south',
-        height:200,
+        height:90,
         items:[qrFormalPanel]
     });
     
