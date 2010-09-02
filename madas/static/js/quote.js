@@ -446,8 +446,6 @@ MA.QuoteRequestListInit = function(){
                 });
             
             Ext.getCmp('qrFormalPanel').bindStore(dataStore);
-            
-            console.log("rebound");
         } else {
             rightPanel.disable();
         }
