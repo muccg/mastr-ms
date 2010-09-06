@@ -73,12 +73,12 @@ items:[
                fieldLabel: 'Office Phone (with area code)',
                name: 'telephoneNumber',
                allowBlank:false,
-               maskRe: /[^,=]/
+               xtype:'numberfield'
                },{
                fieldLabel: 'Home Phone (with area code)',
                name: 'homephone',
                allowBlank:true,
-               maskRe: /[^,=]/
+               xtype:'numberfield'
                },{
                fieldLabel: 'Position',
                name: 'title',

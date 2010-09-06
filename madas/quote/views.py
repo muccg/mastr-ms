@@ -339,6 +339,9 @@ def listFormal(request, *args, **kwargs):
     uname = request.user.username
     ld = LDAPHandler()
     g =  ld.ldap_get_user_groups(request.user.username)
+    if g is None:
+        g = []
+    
     from madas.users import views
 
     nodelist = views.getNodeMemberships(g)

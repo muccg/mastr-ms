@@ -450,7 +450,7 @@ def update_single_source(request, exp_id):
     for key in args.keys():
         if args[key] == '':
             args[key] = None
-        if key == 'sex' and args[key] == '':
+        if key == 'sex' and (args[key] == '' or args[key] == 'null'):
             args[key] = u'U'
     
     output = {'metaData': { 'totalProperty': 'results',
