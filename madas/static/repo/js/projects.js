@@ -250,12 +250,8 @@ MA.ProjectCmp = {
                                         , {}, function (store, records) { 
                                             Ext.getCmp('projManagerList').getStore().removeAll();
                                             
-                                            console.log(records);
                                             realRecords = records[0].data.managers;
-                                            console.log(realRecords);
                                             for (i = 0; i < realRecords.length; i++) {
-                                                console.log("Add");
-                                                console.log(realRecords[i]);
                                                 Ext.getCmp('projManagerList').getStore().add(new Ext.data.Record({'id':realRecords[i].id, 'username':realRecords[i].username})); 
                                             }
                                             Ext.getCmp('projManagerList').refresh();
