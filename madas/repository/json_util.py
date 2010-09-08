@@ -1,5 +1,7 @@
 import datetime
 import decimal
+from django.contrib.auth.models import User
+
 
 def makeJsonFriendly(data):
   '''Will traverse a dict or list compound data struct and
@@ -10,7 +12,7 @@ def makeJsonFriendly(data):
       if isinstance(data, list):
           for e in data:
               e = makeJsonFriendly(e)
-
+              
       elif isinstance(data, dict):
           for key in data.keys():
               data[key] = makeJsonFriendly(data[key])
@@ -29,6 +31,9 @@ def makeJsonFriendly(data):
           
       elif isinstance(data, decimal.Decimal):
           return str(data)
+
+      elif isinstance(data, User):
+          return {'id':data.id, 'username':data.username}
 
       else:
           pass # do nothing

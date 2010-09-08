@@ -486,6 +486,14 @@ class RunSample(models.Model):
         else:
             return self.filename
             
+    def get_sample_name(self):
+        #for now, just return the filename without the .d suffix
+        #this is a poor implementation
+        #TODO better implementation
+        return self.run_filename()[0:(len(self.run_filename()) - 2)]
+        
+    sample_name = property(get_sample_name, None)
+            
         
 class ClientFile(models.Model):
     experiment = models.ForeignKey(Experiment)

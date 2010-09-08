@@ -121,41 +121,37 @@ MA.ProjectCmp = {
         {
             region:'north',
             height:250,
+            layout:'border',
             items: [
                 {
                     border:false,
+                    region:'center',
                     xtype: 'form',
                     collapsible: false,
                     id:'project-form',
-                    bodyStyle: 'background-color:transparent',
+                    bodyStyle: 'padding:8px;background-color:transparent',
                     width:850,
+                    title:'Project details',
                     items: [ 
-                        { xtype:'fieldset', 
-                        title:'Project Details',
-                        bodyStyle: 'background-color:transparent',
-                        autoHeight:true,
-                        items: [
-                            { xtype:'textfield', fieldLabel:'Project title', width:700, id:'projectTitle', name:'title', allowBlank:false},
-                            { xtype:'textarea', fieldLabel:'Description', id:'projectDescription', width:700, height:100, name:'description' },
-                            new Ext.form.ComboBox({
-                                    fieldLabel:'Client',
-                                    id:'projectClientCombo',
-                                    name:'client',
-                                    width:700,
-                                    editable:false,
-                                    forceSelection:true,
-                                    displayField:'value',
-                                    valueField:'key',
-                                    hiddenName:'client_id',
-                                    lazyRender:true,
-                                    allowBlank:false,
-                                    typeAhead:false,
-                                    triggerAction:'all',
-                                    listWidth:230,
-                                    store: userComboStore
-                                })
-                            ]
-                        }
+                        { xtype:'textfield', fieldLabel:'Project title', width:700, id:'projectTitle', name:'title', allowBlank:false},
+                        { xtype:'textarea', fieldLabel:'Description', id:'projectDescription', width:700, height:100, name:'description' },
+                        new Ext.form.ComboBox({
+                                fieldLabel:'Client',
+                                id:'projectClientCombo',
+                                name:'client',
+                                width:700,
+                                editable:false,
+                                forceSelection:true,
+                                displayField:'value',
+                                valueField:'key',
+                                hiddenName:'client_id',
+                                lazyRender:true,
+                                allowBlank:false,
+                                typeAhead:false,
+                                triggerAction:'all',
+                                listWidth:230,
+                                store: userComboStore
+                            })
                     ],
                     buttons: [
                         {
@@ -188,6 +184,126 @@ MA.ProjectCmp = {
                                     });
                                 }
                             }
+                    ]
+                },
+                {
+                    region:'east',
+                    title:'Project managers',
+                    width:200,
+                    border:false,
+                    tbar:[
+                        {
+                            text: 'Add',
+                            cls: 'x-btn-text-icon',
+                            icon:'static/repo/images/add.png',
+                            handler : function(){
+                                //POP UP A WINDOW TO ASK WHICH USER TO ADD
+                                var addWindow = new Ext.Window({
+                                    title:'Add a Project Manager',
+                                    width:280,
+                                    height:130,
+                                    minHeight:130,
+                                    border:false,
+                                    bodyStyle:'padding:20px;background-color:transparent;',
+                                    x:290,
+                                    y:250,
+                                    layout:'vbox',
+                                    modal:true,
+                                    items:[
+                                        new Ext.form.ComboBox({
+                                                fieldLabel:'',
+                                                labelWidth:50,
+                                                itemId:'projManagerCombo',
+                                                name:'projManager',
+                                                width:200,
+                                                editable:false,
+                                                forceSelection:true,
+                                                displayField:'value',
+                                                valueField:'key',
+                                                hiddenName:'projManagerId',
+                                                lazyRender:true,
+                                                allowBlank:false,
+                                                typeAhead:false,
+                                                triggerAction:'all',
+                                                listWidth:200,
+                                                store: userComboStore
+                                            })
+                                    ],
+                                    buttons:[
+                                        {
+                                            text:'Cancel',
+                                            itemId:'cancel'
+                                        },
+                                        {
+                                            text:'Add',
+                                            itemId:'add'
+                                        }
+                                    ]
+                                });
+                                
+                                addWindow.show();
+                                
+                                addWindow.buttons[0].on('click', function() { addWindow.close(); } );
+                                addWindow.buttons[1].on('click', function() { 
+                                    if (addWindow.getComponent('projManagerCombo').isValid()) {
+                                        MA.CRUDSomething('associate/project/manager/'+MA.currentProjectId+'/'+addWindow.getComponent('projManagerCombo').getValue()
+                                        , {}, function (store, records) { 
+                                            Ext.getCmp('projManagerList').getStore().removeAll();
+                                            
+                                            console.log(records);
+                                            realRecords = records[0].data.managers;
+                                            console.log(realRecords);
+                                            for (i = 0; i < realRecords.length; i++) {
+                                                console.log("Add");
+                                                console.log(realRecords[i]);
+                                                Ext.getCmp('projManagerList').getStore().add(new Ext.data.Record({'id':realRecords[i].id, 'username':realRecords[i].username})); 
+                                            }
+                                            Ext.getCmp('projManagerList').refresh();
+                                            });
+                                        addWindow.close(); 
+                                    }
+                                } );
+                            }
+                        },
+                        {
+                            text: 'Remove',
+                            cls: 'x-btn-text-icon',
+                            icon:'static/repo/images/delete.png',
+                            handler : function(){
+                                   //remove currently selected users
+                                   var recs = Ext.getCmp('projManagerList').getSelectedRecords();
+                                   for (i = 0; i < recs.length; i++) {
+                                       var rec = recs[i];
+                                       MA.CRUDSomething('dissociate/project/manager/'+MA.currentProjectId+'/'+rec.data.id, {}, function () { Ext.getCmp('projManagerList').getStore().remove(rec); });
+                                   }
+                                   
+                            }
+                               
+                        }
+                    ],
+                    items:[
+                        {
+                            xtype:'listview',
+                            id:'projManagerList',
+                            store:new Ext.data.ArrayStore({}),
+                            loadingText:'Loading...',
+                            columnSort:false,
+                            columns: [
+                                {header: "username", dataIndex: 'username', 
+                                    tpl: '<div style="padding:4px">{username}</div>'}
+                            ],
+                            listeners:{
+                            },
+                            viewConfig:{
+                                forceFit:true
+                            },
+                            singleSelect:true,
+                            multiSelect:false,
+                            hideHeaders:true,
+                            style:'background:white;',
+                            autoScroll:true,
+                            reserveScrollOffset:true
+                        }
                     ]
                 }
             ]
@@ -298,6 +414,15 @@ MA.LoadProject = function (projId) {
                                                      titlefield.setValue(rs[0].title);
                                                      desc.setValue(rs[0].description);
                                                      clientCmp.setValue(rs[0].client);
+                                                                                                 
+                                                     var pmList = Ext.getCmp('projManagerList');
+                                                     var pmStore = pmList.getStore();
+                                                     pmStore.removeAll(false);
+                                                     for (i = 0; i < rs[0].managers.length; i++) {
+                                                         val = rs[0].managers[i];
+                                                         pmStore.add(new Ext.data.Record(val));
+                                                     }
+                                                     
                                                  }
                                          
                                              }
@@ -306,6 +431,6 @@ MA.LoadProject = function (projId) {
     
     experimentListStore.proxy.conn.url = wsBaseUrl + 'recordsExperiments/' + projId;
     experimentListStore.load();
-    
+  
     MA.MenuHandler({ id:'project:view' });
 };

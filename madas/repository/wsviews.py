@@ -58,6 +58,11 @@ def create_object(request, model):
         organ.name='Unknown'
         organ.save() 
     
+    if model == 'project':
+        user = User.objects.get(username=request.user.username)
+        obj.managers.add(user)
+        obj.save()
+    
     if model == 'biologicalsource':
         return records(request, 'organism', 'id', obj.organism.id)
         
@@ -181,7 +186,10 @@ def associate_object(request, model, association, parent_id, id):
     params = {'id':parent_id}
     rows = model_obj.objects.filter(**params)
     
-    assoc_model_obj = get_model('repository', association) # try to get app name dynamically at some point
+    if model == 'project' and association == 'manager':
+        assoc_model_obj = User
+    else:    
+        assoc_model_obj = get_model('repository', association) # try to get app name dynamically at some point
     assoc_params = {'id':id}
     assoc_rows = assoc_model_obj.objects.filter(**assoc_params)
 
@@ -267,6 +275,10 @@ def records(request, model, field, value):
     # add fields to meta data
     for f in model_obj._meta.fields:
         output['metaData']['fields'].append({'name':f.name})
+        
+    # add many to many
+    for f in model_obj._meta.many_to_many:
+        output['metaData']['fields'].append({'name':f.name})
 
     # add row count
     output['results'] = len(rows);
@@ -276,6 +288,13 @@ def records(request, model, field, value):
         d = {}
         for f in model_obj._meta.fields:
             d[f.name] = f.value_from_object(row)
+            
+        for f in model_obj._meta.many_to_many:
+            vals = []
+            for val in f.value_from_object(row):
+                vals.append(makeJsonFriendly(val))
+            d[f.name] = vals
+
         output['rows'].append(d)
 
     output = makeJsonFriendly(output)
