@@ -196,6 +196,7 @@ MA.ProjectCmp = {
                             text: 'Add',
                             cls: 'x-btn-text-icon',
                             icon:'static/repo/images/add.png',
+                            id:'projManagersAddButton',
                             handler : function(){
                                 //POP UP A WINDOW TO ASK WHICH USER TO ADD
                                 var addWindow = new Ext.Window({
@@ -265,6 +266,7 @@ MA.ProjectCmp = {
                             text: 'Remove',
                             cls: 'x-btn-text-icon',
                             icon:'static/repo/images/delete.png',
+                            id:'projManagersRemoveButton',
                             handler : function(){
                                    //remove currently selected users
                                    var recs = Ext.getCmp('projManagerList').getSelectedRecords();
@@ -405,6 +407,12 @@ MA.LoadProject = function (projId) {
     
                                                  var rs = response.responseJSON.rows;
 
+                                                 //enable or disable Add/Remove project managers based on access
+                                                 var showAddRemove = false;
+                                                 if (MA.isAdmin || MA.isisNodeRep) {
+                                                     showAddRemove = true;
+                                                 }
+
                                                  if (rs.length > 0) {
                                                      titleCmp.setTitle('Project: ' + rs[0].title);
                                                      titlefield.setValue(rs[0].title);
@@ -416,11 +424,21 @@ MA.LoadProject = function (projId) {
                                                      pmStore.removeAll(false);
                                                      for (i = 0; i < rs[0].managers.length; i++) {
                                                          val = rs[0].managers[i];
+                                                         if (rs[0].managers[i].id == MA.CurrentUserId) {
+                                                             showAddRemove = true;
+                                                         }
                                                          pmStore.add(new Ext.data.Record(val));
                                                      }
                                                      
                                                  }
                                          
+                                                 if (showAddRemove) {
+                                                     Ext.getCmp("projManagersAddButton").enable();
+                                                     Ext.getCmp("projManagersRemoveButton").enable();
+                                                 } else {
+                                                     Ext.getCmp("projManagersAddButton").disable();
+                                                     Ext.getCmp("projManagersRemoveButton").disable();
+                                                 }
                                              }
                                          }
                                          );

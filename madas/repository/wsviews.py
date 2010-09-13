@@ -14,6 +14,7 @@ from django.db.models import get_model
 from json_util import makeJsonFriendly
 from madas.utils import setRequestVars, jsonResponse
 from madas.repository.permissions import user_passes_test
+from django.db.models import Q
 
 
 @staff_member_required
@@ -863,7 +864,7 @@ def recordsExperimentsForProject(request, project_id):
     if request.user.is_superuser:
         rows = Experiment.objects.all()
     else:
-        rows = Experiment.objects.filter(users__id=request.user.id)
+        rows = Experiment.objects.filter(Q(project__managers=request.user.id)|Q(users__id=request.user.id))
     
     if project_id is not None:
         rows = rows.filter(project__id=project_id)

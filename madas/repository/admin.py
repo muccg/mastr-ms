@@ -26,7 +26,7 @@ class OrganAdmin(ExtJsonInterface, admin.ModelAdmin):
         qs = super(OrganAdmin, self).queryset(request)
         if request.user.is_superuser:
             return qs
-        return qs.filter(experiment__users=request.user)
+        return qs.filter(Q(experiment__project__managers=request.user)|Q(experiment__users=request.user))
 
     def get_form(self, request, obj=None):
         form = super(OrganAdmin, self).get_form(request, obj)
@@ -42,7 +42,7 @@ class BiologicalSourceAdmin(ExtJsonInterface, admin.ModelAdmin):
         qs = super(BiologicalSourceAdmin, self).queryset(request)
         if request.user.is_superuser:
             return qs
-        return qs.filter(experiment__users=request.user)
+        return qs.filter(Q(experiment__project__managers=request.user)|Q(experiment__users=request.user))
 
     def get_form(self, request, obj=None):
         form = super(BiologicalSourceAdmin, self).get_form(request, obj)
@@ -84,7 +84,7 @@ class ExperimentAdmin(ExtJsonInterface, admin.ModelAdmin):
         qs = super(ExperimentAdmin, self).queryset(request)
         if request.user.is_superuser:
             return qs
-        return qs.filter(users__id=request.user.id)
+        return qs.filter(Q(project__managers=request.user)|Q(users__id=request.user.id))
 
     def get_form(self, request, obj=None):
         form = super(ExperimentAdmin, self).get_form(request, obj)
@@ -111,7 +111,7 @@ class AnimalInfoAdmin(ExtJsonInterface, admin.ModelAdmin):
         qs = super(AnimalInfoAdmin, self).queryset(request)
         if request.user.is_superuser:
             return qs
-        return qs.filter(source__experiment__users=request.user)
+        return qs.filter(Q(source__experiment__project__managers=request.user)|Q(source__experiment__users=request.user))
 
     def get_form(self, request, obj=None):
         form = super(AnimalInfoAdmin, self).get_form(request, obj)
@@ -127,7 +127,7 @@ class TreatmentAdmin(ExtJsonInterface, admin.ModelAdmin):
         qs = super(TreatmentAdmin, self).queryset(request)
         if request.user.is_superuser:
             return qs
-        return qs.filter(experiment__users=request.user)
+        return qs.filter(Q(experiment__project__managers=request.user)|Q(experiment__users=request.user))
 
     def get_form(self, request, obj=None):
         form = super(TreatmentAdmin, self).get_form(request, obj)
@@ -146,7 +146,7 @@ class SampleAdmin(ExtJsonInterface, admin.ModelAdmin):
         qs = super(SampleAdmin, self).queryset(request)
         if request.user.is_superuser:
             return qs
-        return qs.filter(experiment__users=request.user)
+        return qs.filter(Q(experiment__project__managers=request.user)|Q(experiment__users=request.user))
 
     def get_form(self, request, obj=None):
         form = super(SampleAdmin, self).get_form(request, obj)
@@ -207,7 +207,7 @@ class SampleTimelineAdmin(ExtJsonInterface, admin.ModelAdmin):
         qs = super(SampleTimelineAdmin, self).queryset(request)
         if request.user.is_superuser:
             return qs
-        return qs.filter(experiment__users=request.user)
+        return qs.filter(Q(experiment__project__managers=request.user)|Q(experiment__users=request.user))
 
     def get_form(self, request, obj=None):
         form = super(SampleTimelineAdmin, self).get_form(request, obj)
@@ -250,7 +250,7 @@ class UserExperimentAdmin(ExtJsonInterface, admin.ModelAdmin):
         qs = super(UserExperimentAdmin, self).queryset(request)
         if request.user.is_superuser:
             return qs
-        return qs.filter(experiment__users=request.user)
+        return qs.filter(Q(experiment__project__managers=request.user)|Q(experiment__users=request.user))
 
     def get_form(self, request, obj=None):
         form = super(UserExperimentAdmin, self).get_form(request, obj)
@@ -271,7 +271,7 @@ class PlantInfoAdmin(ExtJsonInterface, admin.ModelAdmin):
         qs = super(PlantInfoAdmin, self).queryset(request)
         if request.user.is_superuser:
             return qs
-        return qs.filter(source__experiment__users=request.user)
+        return qs.filter(Q(source__experiment__project__managers=request.user)|Q(source__experiment__users=request.user))
 
     def get_form(self, request, obj=None):
         form = super(PlantInfoAdmin, self).get_form(request, obj)
@@ -289,7 +289,7 @@ class SampleClassAdmin(ExtJsonInterface, admin.ModelAdmin):
         qs = super(SampleClassAdmin, self).queryset(request)
         if request.user.is_superuser:
             return qs
-        return qs.filter(experiment__users=request.user)
+        return qs.filter(Q(experiment__project__managers=request.user)|Q(experiment__users=request.user))
 
     def get_form(self, request, obj=None):
         form = super(SampleClassAdmin, self).get_form(request, obj)
@@ -311,7 +311,7 @@ class SampleLogAdmin(ExtJsonInterface, admin.ModelAdmin):
         qs = super(SampleLogAdmin, self).queryset(request)
         if request.user.is_superuser:
             return qs
-        return qs.filter(sample__experiment__users=request.user)
+        return qs.filter(Q(sample__experiment__project__managers=request.user)|Q(sample__experiment__users=request.user))
 
     def get_form(self, request, obj=None):
         form = super(SampleLogAdmin, self).get_form(request, obj)
@@ -329,7 +329,7 @@ class RunAdmin(ExtJsonInterface, admin.ModelAdmin):
         qs = super(RunAdmin, self).queryset(request)
         if request.user.is_superuser:
             return qs
-        return qs.filter(Q(samples__experiment__users=request.user) | Q(creator=request.user)).distinct()
+        return qs.filter(Q(samples__experiment__project__managers=request.user)|Q(samples__experiment__users=request.user) | Q(creator=request.user)).distinct()
 
     def output_link(self, obj):
         output_url = urlresolvers.reverse('generate_worklist', kwargs={'run_id': obj.id})
@@ -359,7 +359,7 @@ class ClientFileAdmin(ExtJsonInterface, admin.ModelAdmin):
         qs = super(ClientFileAdmin, self).queryset(request)
         if request.user.is_superuser:
             return qs
-        return qs.filter(experiment__users=request.user).distinct()
+        return qs.filter(Q(experiment__project__managers=request.user)|Q(experiment__users=request.user)).distinct()
         
 class InstrumentSOPAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ['title','enabled']
