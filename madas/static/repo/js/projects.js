@@ -409,7 +409,7 @@ MA.LoadProject = function (projId) {
 
                                                  //enable or disable Add/Remove project managers based on access
                                                  var showAddRemove = false;
-                                                 if (MA.isAdmin || MA.isisNodeRep) {
+                                                 if (MA.IsAdmin || MA.IsNodeRep) {
                                                      showAddRemove = true;
                                                  }
 
