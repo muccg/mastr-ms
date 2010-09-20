@@ -47,6 +47,8 @@ MA.DashboardCmp = new MA.Dashboard.Component({
 
 
 MA.Dashboard.prepare = function () {
+    MA.Authorize('auth:auth');
+
     projectsListStore.load();
 
     runListStore.load();

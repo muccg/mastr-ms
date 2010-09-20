@@ -22,7 +22,7 @@ MA.CRUDSomething = function(remainderURL, params, callbackfn) {
     var paramString = '?';
     
     for (var index in params) {
-        paramString += escape(index) + '=' + escape(params[index]) + '&';
+        paramString += encodeURIComponent(index) + '=' + encodeURIComponent(params[index]) + '&';
     }
     
     //TODO append the parameters to the url 
@@ -59,6 +59,7 @@ function _ExperimentController() {
     };
     
     this.blur = function(invoker) {
+
         var expId = self.currentId();
         var expName = Ext.getCmp("experimentName").getValue();
         var expDescription = Ext.getCmp("experimentDescription").getValue();
@@ -87,7 +88,7 @@ function _ExperimentController() {
     
         if (expId === 0) {
             
-            var saver = new Ajax.Request(wsBaseUrl + 'create/experiment/?title='+escape(expName)+'&description='+escape(expDescription)+'&comment='+escape(expComment)+'&status_id=2&formal_quote_id='+escape(expFQuoteId)+'&job_number='+escape(expJobNumber)+'&project_id='+escape(MA.currentProjectId)+'&status_id='+escape(expStatus), 
+            var saver = new Ajax.Request(wsBaseUrl + 'create/experiment/?title='+encodeURIComponent(expName)+'&description='+encodeURIComponent(expDescription)+'&comment='+encodeURIComponent(expComment)+'&status_id=2&formal_quote_id='+encodeURIComponent(expFQuoteId)+'&job_number='+encodeURIComponent(expJobNumber)+'&project_id='+encodeURIComponent(MA.currentProjectId)+'&status_id='+encodeURIComponent(expStatus), 
                                                  { 
                                                  asynchronous:true, 
                                                  evalJSON:'force',
@@ -95,7 +96,7 @@ function _ExperimentController() {
                                          onFailure:    MA.DSLoadException
                                          });
         } else {
-            var saver = new Ajax.Request(wsBaseUrl + 'update/experiment/'+expId+'/?title='+escape(expName)+'&description='+escape(expDescription)+'&comment='+escape(expComment)+'&status_id=2&formal_quote_id='+escape(expFQuoteId)+'&job_number='+escape(expJobNumber)+'&project_id='+escape(MA.currentProjectId)+'&status_id='+escape(expStatus), 
+            var saver = new Ajax.Request(wsBaseUrl + 'update/experiment/'+expId+'/?title='+encodeURIComponent(expName)+'&description='+encodeURIComponent(expDescription)+'&comment='+encodeURIComponent(expComment)+'&status_id=2&formal_quote_id='+encodeURIComponent(expFQuoteId)+'&job_number='+encodeURIComponent(expJobNumber)+'&project_id='+encodeURIComponent(MA.currentProjectId)+'&status_id='+encodeURIComponent(expStatus), 
                                          { 
                                          asynchronous:true, 
                                          evalJSON:'force',
@@ -273,6 +274,8 @@ function _ExperimentController() {
             Ext.getCmp('expContent').getLayout().setActiveItem(0);
         }
         
+        MA.skipBlur = false;
+        
         Ext.getCmp('center-panel').layout.setActiveItem('experimentTitle');
     };
     
@@ -330,12 +333,13 @@ function _ExperimentController() {
      
         var index = list.getSelectedIndexes()[0];
         var r = list.getSelectedRecords()[0];
-    
+
         if (Ext.currentExperimentNavItem == index) {
            return;
         }
-        
+
         if (MA.skipBlur) {
+
             MA.Blur({'init':r.get("init"), 'index':index});
             MA.skipBlur = false;
         } else {
