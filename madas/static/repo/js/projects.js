@@ -18,20 +18,28 @@ MA.ProjectList = Ext.extend(Ext.Panel, {
                                         text: "New Project",
                                         cls: "x-btn-text-icon",
                                         icon: "static/repo/images/add.png",
-                                        handler: function () {
-                                            MA.MenuHandler({ "id": "project:new" });
+                                        handler: function (b, e) {
+                                            if (MA.IsAdmin || MA.IsNodeRep) {
+                                                MA.MenuHandler({ "id": "project:new" });
+                                            } else {
+                                                b.disable();
+                                            }
                                         }
                                     },
                                     {
                                         text: "Remove Project",
                                         cls: "x-btn-text-icon",
                                         icon: "static/repo/images/delete.png",
-                                        handler: function () {
-                                            var grid = self.getComponent("grid");
-                                            var selections = grid.getSelectionModel().getSelections();
-                    
-                                            grid.getStore().remove(selections);
-                                            self.fireEvent("delete", selections);
+                                        handler: function (b, e) {
+                                            if (MA.IsAdmin || MA.IsNodeRep) {
+                                                var grid = self.getComponent("grid");
+                                                var selections = grid.getSelectionModel().getSelections();
+                        
+                                                grid.getStore().remove(selections);
+                                                self.fireEvent("delete", selections);
+                                            } else {
+                                                b.disable();
+                                            }
                                         }
                                     }
                                 ],
