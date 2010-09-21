@@ -66,6 +66,42 @@ MA.Treatment = {
                                 forceFit: true,
                                 autoFill:true
                             },
+                            bbar: [
+                                {
+                                    text:'Create',
+                                    cls: 'x-btn-text-icon',
+                                    icon: 'static/repo/images/create-samples.png',
+                                    handler: function() {
+                                        console.log('a');
+                                        var reps = Ext.getCmp('timelineReplicateField').getValue();
+                                        
+                                        var grid = Ext.getCmp('dates');
+
+                                        console.log('b');
+
+                                        console.log('c');
+                                        for (var i = 0; i < parseInt(reps); i++) {
+                                            MA.CRUDSomething('create/sampletimeline/', {
+                                                'experiment_id': MA.ExperimentController.currentId(),
+                                                'timeline': '00:00'
+                                            }, MA.TimelineLoad);
+                                            console.log('d');
+                                        }
+                                    }
+                                },
+                                {
+                                    xtype:'numberfield',
+                                    id:'timelineReplicateField',
+                                    value:'1',
+                                    width:28
+                                },
+                                {
+                                    xtype:'panel',
+                                    html:' new timeline entries',
+                                    border:false,
+                                    bodyStyle:'background:transparent;padding:4px; color: #333'
+                                }
+                            ],
                             tbar: [
                                 {
                                     text: 'Add Time',
