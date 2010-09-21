@@ -72,20 +72,15 @@ MA.Treatment = {
                                     cls: 'x-btn-text-icon',
                                     icon: 'static/repo/images/create-samples.png',
                                     handler: function() {
-                                        console.log('a');
                                         var reps = Ext.getCmp('timelineReplicateField').getValue();
                                         
                                         var grid = Ext.getCmp('dates');
 
-                                        console.log('b');
-
-                                        console.log('c');
                                         for (var i = 0; i < parseInt(reps); i++) {
                                             MA.CRUDSomething('create/sampletimeline/', {
                                                 'experiment_id': MA.ExperimentController.currentId(),
                                                 'timeline': '00:00'
                                             }, MA.TimelineLoad);
-                                            console.log('d');
                                         }
                                     }
                                 },
