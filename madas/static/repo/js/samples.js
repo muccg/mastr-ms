@@ -60,6 +60,7 @@ MA.ExperimentSamples = {
                     border: false,
                     id:'sampleClasses',
                     trackMouseOver: false,
+                    loadMask:true,
                     sm: new Ext.grid.RowSelectionModel({
                                                        listeners:{'rowselect':function(sm, idx, rec) {
                                                        MA.CurrentSampleClassIdValue = rec.data.id;
