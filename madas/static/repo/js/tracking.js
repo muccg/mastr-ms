@@ -3,7 +3,7 @@ MA.TrackingSm = new Ext.grid.CheckboxSelectionModel({ width: 25 });
 MA.SampleTrackingInit = function() {
     var expId = MA.ExperimentController.currentId();
     
-    var classLoader = new Ajax.Request(wsBaseUrl + 'populate_select/sampleclass/id/class_id/experiment__id/'+escape(expId), 
+    var classLoader = new Ajax.Request(wsBaseUrl + 'populate_select/sampleclass/id/class_id/experiment__id/'+encodeURIComponent(expId), 
                                      { 
                                      asynchronous:false, 
                                      evalJSON:'force',
@@ -133,7 +133,7 @@ MA.SampleTracking = {
                                     }
                                     
                                     var saver = new Ajax.Request(
-                                        wsBaseUrl + 'batchcreate/samplelog/?type='+escape(logType)+'&description='+escape(comment)+'&sample_ids='+escape(ids.join(",")), 
+                                        wsBaseUrl + 'batchcreate/samplelog/?type='+encodeURIComponent(logType)+'&description='+encodeURIComponent(comment)+'&sample_ids='+encodeURIComponent(ids.join(",")), 
                                         { 
                                             asynchronous:true, 
                                             evalJSON:'force',

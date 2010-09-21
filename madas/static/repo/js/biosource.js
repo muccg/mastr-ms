@@ -137,45 +137,45 @@ MA.BioSourceBlur = function(invoker) {
         var src = Ext.getCmp('sourceType');
         switch (src.getValue()) {
             case 1:
-                extraParams = "&genus=" + escape(Ext.getCmp('microbial_genus').getValue());
-                extraParams += "&species=" + escape(Ext.getCmp('microbial_species').getValue());
-                extraParams += "&culture=" + escape(Ext.getCmp('microbial_culture').getValue());
-                extraParams += "&media=" + escape(Ext.getCmp('microbial_media').getValue());
-                extraParams += "&vessel=" + escape(Ext.getCmp('microbial_vessel').getValue());
-                extraParams += "&mode=" + escape(Ext.getCmp('microbial_mode').getValue());
-                extraParams += "&density=" + escape(Ext.getCmp('microbial_density').getValue());
-                extraParams += "&volume=" + escape(Ext.getCmp('microbial_volume').getValue());
-                extraParams += "&temperature=" + escape(Ext.getCmp('microbial_temperature').getValue());
-                extraParams += "&agitation=" + escape(Ext.getCmp('microbial_agitation').getValue());
-                extraParams += "&ph=" + escape(Ext.getCmp('microbial_ph').getValue());
-                extraParams += "&gastype=" + escape(Ext.getCmp('microbial_gastype').getValue());
-                extraParams += "&flowrate=" + escape(Ext.getCmp('microbial_flowrate').getValue());
-                extraParams += "&delivery=" + escape(Ext.getCmp('microbial_delivery').getValue());
+                extraParams = "&genus=" + encodeURIComponent(Ext.getCmp('microbial_genus').getValue());
+                extraParams += "&species=" + encodeURIComponent(Ext.getCmp('microbial_species').getValue());
+                extraParams += "&culture=" + encodeURIComponent(Ext.getCmp('microbial_culture').getValue());
+                extraParams += "&media=" + encodeURIComponent(Ext.getCmp('microbial_media').getValue());
+                extraParams += "&vessel=" + encodeURIComponent(Ext.getCmp('microbial_vessel').getValue());
+                extraParams += "&mode=" + encodeURIComponent(Ext.getCmp('microbial_mode').getValue());
+                extraParams += "&density=" + encodeURIComponent(Ext.getCmp('microbial_density').getValue());
+                extraParams += "&volume=" + encodeURIComponent(Ext.getCmp('microbial_volume').getValue());
+                extraParams += "&temperature=" + encodeURIComponent(Ext.getCmp('microbial_temperature').getValue());
+                extraParams += "&agitation=" + encodeURIComponent(Ext.getCmp('microbial_agitation').getValue());
+                extraParams += "&ph=" + encodeURIComponent(Ext.getCmp('microbial_ph').getValue());
+                extraParams += "&gastype=" + encodeURIComponent(Ext.getCmp('microbial_gastype').getValue());
+                extraParams += "&flowrate=" + encodeURIComponent(Ext.getCmp('microbial_flowrate').getValue());
+                extraParams += "&delivery=" + encodeURIComponent(Ext.getCmp('microbial_delivery').getValue());
                 break;
             case 2:
-                extraParams = "&development_stage=" + escape(Ext.getCmp('plant_development_stage').getValue());
+                extraParams = "&development_stage=" + encodeURIComponent(Ext.getCmp('plant_development_stage').getValue());
                 break;
             case 3:
-                extraParams = "&sex=" + escape(Ext.getCmp('animalGender').getValue());
-                extraParams += "&age=" + escape(Ext.getCmp('animalAge').getValue());
-                extraParams += "&parental_line=" + escape(Ext.getCmp('animalParentalLine').getValue());
-                extraParams += "&location=" + escape(Ext.getCmp('animal_location').getValue());
-//                extraParams += "&notes=" + escape(Ext.getCmp('animal_notes').getValue());
+                extraParams = "&sex=" + encodeURIComponent(Ext.getCmp('animalGender').getValue());
+                extraParams += "&age=" + encodeURIComponent(Ext.getCmp('animalAge').getValue());
+                extraParams += "&parental_line=" + encodeURIComponent(Ext.getCmp('animalParentalLine').getValue());
+                extraParams += "&location=" + encodeURIComponent(Ext.getCmp('animal_location').getValue());
+//                extraParams += "&notes=" + encodeURIComponent(Ext.getCmp('animal_notes').getValue());
                 break;
             case 4:
-                extraParams = "&sex=" + escape(Ext.getCmp('humanGender').getValue());
-                extraParams += "&date_of_birth=" + escape(Ext.util.Format.date(Ext.getCmp('human_dob').getValue(), 'Y-m-d'));
-                extraParams += "&bmi=" + escape(Ext.getCmp('human_bmi').getValue());
-                extraParams += "&diagnosis=" + escape(Ext.getCmp('human_diagnosis').getValue());
-                extraParams += "&location=" + escape(Ext.getCmp('human_location').getValue());
-//                extraParams += "&notes=" + escape(Ext.getCmp('human_notes').getValue());
+                extraParams = "&sex=" + encodeURIComponent(Ext.getCmp('humanGender').getValue());
+                extraParams += "&date_of_birth=" + encodeURIComponent(Ext.util.Format.date(Ext.getCmp('human_dob').getValue(), 'Y-m-d'));
+                extraParams += "&bmi=" + encodeURIComponent(Ext.getCmp('human_bmi').getValue());
+                extraParams += "&diagnosis=" + encodeURIComponent(Ext.getCmp('human_diagnosis').getValue());
+                extraParams += "&location=" + encodeURIComponent(Ext.getCmp('human_location').getValue());
+//                extraParams += "&notes=" + encodeURIComponent(Ext.getCmp('human_notes').getValue());
                 break;
             default:
                 break;
         }
 
         //this request should ask the server to rejig the single biosource that we currently permit
-        var saver = new Ajax.Request(wsBaseUrl + 'updateSingleSource/'+expId+'/?type='+escape(sourceType)+'&information='+escape(sourceInfo)+'&ncbi_id='+escape(sourceNCBI)+extraParams, 
+        var saver = new Ajax.Request(wsBaseUrl + 'updateSingleSource/'+expId+'/?type='+encodeURIComponent(sourceType)+'&information='+encodeURIComponent(sourceInfo)+'&ncbi_id='+encodeURIComponent(sourceNCBI)+extraParams, 
                                  { 
                                  asynchronous:true, 
                                  evalJSON:'force',

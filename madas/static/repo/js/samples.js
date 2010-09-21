@@ -297,7 +297,7 @@ MA.ExperimentSamples = {
 MA.ExperimentSamplesOnlyInit = function() {
     var expId = MA.ExperimentController.currentId();
     
-    var classLoader = new Ajax.Request(wsBaseUrl + 'populate_select/sampleclass/id/class_id/experiment__id/'+escape(expId), 
+    var classLoader = new Ajax.Request(wsBaseUrl + 'populate_select/sampleclass/id/class_id/experiment__id/'+encodeURIComponent(expId), 
                                      { 
                                      asynchronous:false, 
                                      evalJSON:'force',
