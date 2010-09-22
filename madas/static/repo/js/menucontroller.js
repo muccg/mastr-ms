@@ -32,11 +32,10 @@ MA.ChangeMainContent = function(contentName, paramArray){
     var cancelBackTarget = true; //whether or not this action should be invoked if a user clicks Cancel (where the variable is obeyed)
     
     Ext.QuickTips.init();
-    
     switch (contentName) {
             
         case "dashboard": 
-            if (paramArray) {
+            if (Ext.isDefined(paramArray) && paramArray.length > 1) {
                 resultContent = paramArray[0];
                 params = paramArray[1];
                 MA.Authorize(resultContent, params);
