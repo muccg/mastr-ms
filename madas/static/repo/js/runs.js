@@ -253,7 +253,43 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                             }
                         ]
                     }
-                }
+                },
+                {
+                    fieldLabel: 'Completed files',
+                   xtype:'treepanel',
+                   border: true,
+                   autoScroll: true,
+                   itemId:'runFiles',
+                   animate: true,
+                   useArrows: true,
+                   height:200,
+                   dataUrl:wsBaseUrl + 'files',
+                   requestMethod:'GET',
+                   root: {
+                       nodeType: 'async',
+                       text: 'Experiment',
+                       draggable: false,
+                       id: 'experimentRoot'
+                   },
+                   selModel: new Ext.tree.DefaultSelectionModel(
+                       { listeners:
+                           {
+                               selectionchange: function(sm, node) {
+                                   if (node != null && node.isLeaf()) {
+                                       window.location = wsBaseUrl + 'downloadFile?file=' + node.id + '&experiment_id=' + MA.ExperimentController.currentId();
+                                   }
+                               }
+                           }
+                       }),
+                   listeners:{
+                        render: function() {
+//                                        Ext.getCmp('filesTree').getLoader().on("beforeload", function(treeLoader, node) {
+//                                            treeLoader.baseParams.experiment = MA.ExperimentController.currentId();
+//                                            }, this);
+//                                        Ext.getCmp('filesTree').getRootNode().expand();
+                        }
+                    }
+               }
             ],
             buttons:[
                 {
@@ -353,6 +389,9 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         
         if (mode == 'viewer') {
             this.remove("samplesToAdd");
+            this.getComponent('samples').setHeight(200);
+        } else {
+            this.remove('runFiles');
         }
         
         self.setAutoScroll(true);
