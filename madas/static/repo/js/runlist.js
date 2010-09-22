@@ -138,7 +138,7 @@ MA.RunListCmp = {
                         "delete": function () { runListStore.reload(); runStore.reload(); },
                         "save": function () { runListStore.reload(); runStore.reload(); }
                     }
-                })
+                }, 'viewer')
             ]
         })
     ]

@@ -38,8 +38,12 @@ MA.ClearCurrentRun = function() {
 
 // Create a component we can use both here and from the run list.
 MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
-    constructor: function (config) {
+    constructor: function (config, mode) {
         var self = this;
+        if (!Ext.isDefined(mode)) {
+            mode = 'viewer';
+            // viewer mode doesn't show samples to add
+        }
 
         this.pendingSampleSelModel = new Ext.grid.CheckboxSelectionModel({ width: 25 });
         this.sampleSelModel = new Ext.grid.CheckboxSelectionModel({ width: 25 });
@@ -133,6 +137,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                 }),
                 {
                     fieldLabel:'Samples to Add',
+                    itemId:'samplesToAdd',
                     xtype:'grid',
                     width:310,
                     height:120,
@@ -346,6 +351,10 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         this.pendingSampleStore.removeAll();
         this.runId = 0;
         
+        if (mode == 'viewer') {
+            this.remove("samplesToAdd");
+        }
+        
         self.setAutoScroll(true);
     },
     addSample: function (id) {
@@ -539,6 +548,6 @@ MA.RunCmp = new Ext.Window({
                     MA.RunSaveCallback(id);
                 }
             }
-        })
+        }, 'editor')
     ]
 });
