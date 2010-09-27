@@ -316,18 +316,7 @@ def recordsClientFiles(request):
     ### End Authorisation Check ###
 
     # basic json that we will fill in
-    output = {'metaData': { 'totalProperty': 'results',
-                            'root': 'rows',
-                            'id': 'id',
-                            'successProperty': 'success',
-                            'fields': []
-                            },
-              'results': 0,
-              'authenticated': True,
-              'authorized': True,
-              'success': True,
-              'rows': []
-              }
+    output = []
 
     # TODO as above - do we need this now - ABM
     authenticated = request.user.is_authenticated()
@@ -335,38 +324,52 @@ def recordsClientFiles(request):
     if not authenticated or not authorized:
         return HttpResponse(json.dumps(output), status=401)
 
+    import os
 
-    rows = ClientFile.objects.filter(experiment__users=request.user) 
-
-    # add fields to meta data
-    for f in ClientFile._meta.fields:
-        output['metaData']['fields'].append({'name':f.name})
-        try:
-            f.rel.to
-            output['metaData']['fields'].append({
-                "name": f.name + "__unicode",
-                "type": "string",
-            })
-        except AttributeError:
-            pass
-
-    # add row count
-    output['results'] = len(rows);
-
-    # add rows
-    for row in rows:
-        d = {}
-        for f in ClientFile._meta.fields:
-            d[f.name] = f.value_from_object(row)
-            try:
-                d[f.name + "__unicode"] = unicode(getattr(row, f.name))
-            except:
-                pass
+    if args.get('node','dashboardFilesRoot') == 'dashboardFilesRoot':
+        print 'node is dashboardFilesRoot'
+        rows = ClientFile.objects.filter(experiment__users=request.user) 
+    
+        # add rows
+        for row in rows:
+            file = {}
+            file['text'] = row.filepath
             
-        output['rows'].append(d)
+            (abspath, exppath) = row.experiment.ensure_dir()
+            
+            filepath = abspath + os.sep + row.filepath
+            
+            print filepath
+            
+            if os.path.isdir(filepath):
+                file['leaf'] = False
+            else:
+                file['leaf'] = True
+            file['id'] = row.id
+    
+            output.append(file)
+            
+        return HttpResponse(json.dumps(output))
+    else:
+        # parse the node id as something useful
+        # it will be in the format: id/path/path
+        pathbits = args.get('node').split('/')
 
-    output = makeJsonFriendly(output)
-    return HttpResponse(json.dumps(output))
+        print 'pathbits[0] is ' + pathbits[0]
+
+        baseFile = ClientFile.objects.get(id=pathbits[0],experiment__users=request.user)
+                
+        if baseFile is not None:
+            (abspath, exppath) = baseFile.experiment.ensure_dir()
+    
+            joinedpath = baseFile.filepath + os.sep + os.sep.join(pathbits[1:])
+            
+            print 'joinedPath is ' + joinedpath
+            print 'abspath is ' + abspath
+            
+            return _fileList(request, abspath + os.sep, joinedpath, False, [], str(baseFile.id))
+        else:
+            return HttpResponse(json.dumps([]))
 
 
 @staff_member_required
@@ -1144,7 +1147,7 @@ def pendingFilesList(request):
     
 @staff_member_required
 @user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
-def _fileList(request, basepath, path, withChecks, sharedList):
+def _fileList(request, basepath, path, withChecks, sharedList, replacementBasepath = None):
 
     import os
 
@@ -1169,6 +1172,8 @@ def _fileList(request, basepath, path, withChecks, sharedList):
         if not path == '':
             filepath = basepath + path + os.sep + filename
             
+        print 'looking at file: ' + filepath
+            
         if os.access(filepath, os.R_OK):
             file = {}
             file['text'] = filename
@@ -1177,8 +1182,11 @@ def _fileList(request, basepath, path, withChecks, sharedList):
             else:
                 file['leaf'] = True
             file['id'] = filename
+
             if not path == '':
                 file['id'] = path + os.sep + filename
+                if replacementBasepath is not None:
+                    file['id'] = replacementBasepath + os.sep + filename
             if withChecks:
                 print 'checking'
                 file['checked'] = False
@@ -1186,6 +1194,7 @@ def _fileList(request, basepath, path, withChecks, sharedList):
                 for cf in sharedList:
                     if file['id'] == cf.filepath:
                         file['checked'] = True
+
             output.append(file)
         
     return HttpResponse(json.dumps(output))
@@ -1260,8 +1269,12 @@ def downloadSOPFile(request, sop_id):
     response['Content-Length'] = os.path.getsize(sop.attached_pdf.name)
     return response 
 
-def downloadClientFile(request, file_id):
+def downloadClientFile(request, filepath):
     print 'downloadClientFile:', str('')
+    
+    pathbits = filepath.split('/')
+    
+    file_id = pathbits[0]
 
     try:
         cf = ClientFile.objects.get(id=file_id, experiment__users=request.user)
@@ -1270,19 +1283,38 @@ def downloadClientFile(request, file_id):
     
     exp = cf.experiment
     exp.ensure_dir()
-    
-    import os, settings
-    filename = os.path.join(settings.REPO_FILES_ROOT, 'experiments', str(exp.created_on.year), str(exp.created_on.month), str(exp.id), cf.filepath)
-    from django.core.servers.basehttp import FileWrapper
-    from django.http import HttpResponse
 
-    from django.core.files import File
-    wrapper = File(open(filename, "rb"))
-    content_disposition = 'attachment;  filename=\"%s\"' % (str(cf.filepath))
-    response = HttpResponse(wrapper, content_type='application/download')
-    response['Content-Disposition'] = content_disposition
-    response['Content-Length'] = os.path.getsize(filename)
-    return response 
+    import os, settings
+
+
+    (abspath, exppath) = cf.experiment.ensure_dir()
+    
+    joinedpath = os.path.join(abspath, cf.filepath)
+    if len(pathbits) > 1:
+        joinedpath = joinedpath + os.sep + os.sep.join(pathbits[1:])
+
+    
+    filename = joinedpath
+    
+    print 'filename is '+filename
+    
+    outputname = pathbits[-1]
+    if len(pathbits) == 1:
+        outputname = cf.filepath
+    
+    if os.path.isdir(filename) or not os.path.exists(filename):
+        return HttpResponseNotFound("Cannot download file")
+    else:
+        from django.core.servers.basehttp import FileWrapper
+        from django.http import HttpResponse
+    
+        from django.core.files import File
+        wrapper = File(open(filename, "rb"))
+        content_disposition = 'attachment;  filename=\"%s\"' % outputname
+        response = HttpResponse(wrapper, content_type='application/download')
+        response['Content-Disposition'] = content_disposition
+        response['Content-Length'] = os.path.getsize(filename)
+        return response 
     
 @staff_member_required
 @user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
