@@ -27,6 +27,12 @@ function clientFileActionRenderer(val) {
 MA.DashboardCmp = {
     title:'Available files',
     style:'padding:40px',
+    tbar:[
+        {
+            xtype:'tbtext',
+            text:'Click a filename to download (folders cannot be downloaded)'
+        }
+    ],
     items:[
                 {
                    xtype:'treepanel',
