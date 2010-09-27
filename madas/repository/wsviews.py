@@ -302,7 +302,7 @@ def records(request, model, field, value):
     return HttpResponse(json.dumps(output))
 
 
-def recordsClientFiles(request):
+def recordsClientFiles(request, ):
 
     if request.GET:
         args = request.GET
@@ -328,10 +328,22 @@ def recordsClientFiles(request):
 
     if args.get('node','dashboardFilesRoot') == 'dashboardFilesRoot':
         print 'node is dashboardFilesRoot'
-        rows = ClientFile.objects.filter(experiment__users=request.user) 
+        rows = ClientFile.objects.filter(experiment__users=request.user).order_by('experiment') 
     
         # add rows
+        current_exp = {}
+        current_exp['id'] = None
         for row in rows:
+            # compare current exp
+            if row.experiment.id != current_exp['id']:
+                if current_exp['id'] != None:
+                    output.append(current_exp)
+                current_exp = {}
+                current_exp['id'] = row.experiment.id
+                current_exp['text'] = 'Experiment: ' + row.experiment.title
+                current_exp['leaf'] = False
+                current_exp['children'] = []
+        
             file = {}
             file['text'] = row.filepath
             
@@ -347,8 +359,10 @@ def recordsClientFiles(request):
                 file['leaf'] = True
             file['id'] = row.id
     
-            output.append(file)
+            current_exp['children'].append(file)
             
+        output.append(current_exp)
+        
         return HttpResponse(json.dumps(output))
     else:
         # parse the node id as something useful
