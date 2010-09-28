@@ -619,7 +619,7 @@ MA.InitUI = function() {
                 id:'center-panel',
                 layout: 'card',
                 layoutOnCardChange:true,
-                activeItem:2,
+                activeItem:1,
                 items: [MA.ExperimentCmp, MA.LoginCmp, MA.ClientsListCmp, MA.ProjectListCmp, MA.ProjectCmp, MA.RunListCmp, MA.DashboardCmp]
             },
                new Ext.BoxComponent({
