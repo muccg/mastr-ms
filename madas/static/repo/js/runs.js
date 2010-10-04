@@ -259,34 +259,34 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                    xtype:'treepanel',
                    border: true,
                    autoScroll: true,
-                   itemId:'runFiles',
+                   id:'runTree',
                    animate: true,
                    useArrows: true,
                    height:200,
-                   dataUrl:wsBaseUrl + 'files',
+                   dataUrl:wsBaseUrl + 'runFiles',
                    requestMethod:'GET',
                    root: {
                        nodeType: 'async',
-                       text: 'Experiment',
+                       text: 'Runs',
                        draggable: false,
-                       id: 'experimentRoot'
+                       id: 'runsRoot'
                    },
                    selModel: new Ext.tree.DefaultSelectionModel(
                        { listeners:
                            {
                                selectionchange: function(sm, node) {
                                    if (node != null && node.isLeaf()) {
-                                       window.location = wsBaseUrl + 'downloadFile?file=' + node.id + '&experiment_id=' + MA.ExperimentController.currentId();
+                                       window.location = wsBaseUrl + 'downloadFile?file=' + node.id + '&run_id=' + self.runId;
                                    }
                                }
                            }
                        }),
                    listeners:{
                         render: function() {
-//                                        Ext.getCmp('filesTree').getLoader().on("beforeload", function(treeLoader, node) {
-//                                            treeLoader.baseParams.experiment = MA.ExperimentController.currentId();
-//                                            }, this);
-//                                        Ext.getCmp('filesTree').getRootNode().expand();
+                            Ext.getCmp('runTree').getLoader().on("beforeload", function(treeLoader, node) {
+                                treeLoader.baseParams.run = self.runId;
+                                }, this);
+                            Ext.getCmp('runTree').getRootNode().expand();
                         }
                     }
                }
@@ -510,6 +510,8 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         }
        
         this.sampleStore.load({ params: { run__id__exact: this.runId } });
+        
+        Ext.getCmp('runTree').getLoader().load(Ext.getCmp('runTree').getRootNode());
     }
 });
 
