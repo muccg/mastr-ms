@@ -1137,6 +1137,32 @@ def experimentFilesList(request):
     print sharedList
     return _fileList(request, exppath, path, True, sharedList)
     
+    
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
+def runFilesList(request):
+    
+    if request.GET:
+        args = request.GET
+    else:
+        args = request.POST
+
+    path = args['node']
+    
+    if path == 'runsRoot':
+        path = ''
+    
+    if not 'run' in args or args['run'] == '0':
+        print 'invalid run'
+        return HttpResponse('[]')
+        
+    run = Run.objects.get(id=args['run'])
+    (abspath, relpath) = run.ensure_dir()
+        
+    runpath = abspath
+    
+    return _fileList(request, runpath, path, True, None)
+    
 
 @staff_member_required
 @user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
@@ -1162,7 +1188,7 @@ def pendingFilesList(request):
 @staff_member_required
 @user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
 def _fileList(request, basepath, path, withChecks, sharedList, replacementBasepath = None):
-
+    print 'fileList ' + basepath + ' ' + path
     import os
 
     output = []
