@@ -1358,6 +1358,35 @@ def downloadClientFile(request, filepath):
         response['Content-Disposition'] = content_disposition
         response['Content-Length'] = os.path.getsize(filename)
         return response 
+
+def downloadRunFile(request):
+    print 'downloadFile:', str('')
+    
+    args = request.REQUEST
+    
+    file = args['file']
+    lastbit = file.split('/')[-1]
+    
+    run = Run.objects.get(id=args['run_id'])
+    (abspath, relpath) = run.ensure_dir()
+    
+    import os, settings
+    filename = os.path.join(abspath, file)
+    
+    print 'download run file: ' + filename
+    
+    from django.core.servers.basehttp import FileWrapper
+    from django.http import HttpResponse
+
+    from django.core.files import File
+    wrapper = File(open(filename, "rb"))
+    content_disposition = 'attachment;  filename=\"%s\"' % (str(lastbit))
+    response = HttpResponse(wrapper, content_type='application/download')
+    response['Content-Disposition'] = content_disposition
+    response['Content-Length'] = os.path.getsize(filename)
+    return response 
+
+
     
 @staff_member_required
 @user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
