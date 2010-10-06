@@ -48,7 +48,7 @@ items:[
                    { listeners:
                        {
                            selectionchange: function(sm, node) {
-                               if (node != null && node.isLeaf()) {
+                               if (node != null) {
                                    window.location = wsBaseUrl + 'downloadFile?file=' + node.id + '&experiment_id=' + MA.ExperimentController.currentId();
                                }
                            }

@@ -269,14 +269,15 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                        nodeType: 'async',
                        text: 'Runs',
                        draggable: false,
-                       id: 'runsRoot'
+                       id: 'runsRoot',
+                       'metafile': true
                    },
                    selModel: new Ext.tree.DefaultSelectionModel(
                        { listeners:
                            {
                                selectionchange: function(sm, node) {
-                                   if (node != null && node.isLeaf()) {
-                                       window.location = wsBaseUrl + 'downloadFile?file=' + node.id + '&run_id=' + self.runId;
+                                  if (node != null && !node.attributes.metafile) {
+                                       window.location = wsBaseUrl + 'downloadRunFile?file=' + node.id + '&run_id=' + self.runId;
                                    }
                                }
                            }
