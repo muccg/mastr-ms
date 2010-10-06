@@ -30,7 +30,7 @@ MA.DashboardCmp = {
     tbar:[
         {
             xtype:'tbtext',
-            text:'Click a filename to download (folders cannot be downloaded)'
+            text:'Click a filename to download'
         }
     ],
     items:[
@@ -46,13 +46,14 @@ MA.DashboardCmp = {
                        nodeType: 'async',
                        text: 'Files',
                        draggable: false,
-                       id: 'dashboardFilesRoot'
+                       id: 'dashboardFilesRoot',
+                       'metafile': true
                    },
                    selModel: new Ext.tree.DefaultSelectionModel(
                        { listeners:
                            {
                                selectionchange: function(sm, node) {
-                                   if (node != null && node.isLeaf()) {
+                                   if (node != null && !node.attributes.metafile) {
                                        MA.DownloadClientFile(node.id);
                                    }
                                }

@@ -12,7 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.core import urlresolvers
 from django.db.models import get_model
 from json_util import makeJsonFriendly
-from madas.utils import setRequestVars, jsonResponse
+from madas.utils import setRequestVars, jsonResponse, zipdir
 from madas.repository.permissions import user_passes_test
 from django.db.models import Q
 
@@ -342,6 +342,7 @@ def recordsClientFiles(request, ):
                 current_exp['id'] = row.experiment.id
                 current_exp['text'] = 'Experiment: ' + row.experiment.title
                 current_exp['leaf'] = False
+                current_exp['metafile'] = True
                 current_exp['children'] = []
         
             file = {}
@@ -1288,9 +1289,19 @@ def downloadFile(request, *args):
     from django.core.servers.basehttp import FileWrapper
     from django.http import HttpResponse
 
+    pathbits = filepath.split('/')
+
+    lastbit = pathbits[-1]
+    
+    if os.path.isdir(filename):
+        tmpfilename = "/tmp/madas-zip-"+lastbit
+        zipdir(filename, tmpfilename)
+        filename = tmpfilename
+        lastbit = lastbit + ".zip"
+
     from django.core.files import File
     wrapper = File(open(filename, "rb"))
-    content_disposition = 'attachment;  filename=\"%s\"' % (str(file))
+    content_disposition = 'attachment;  filename=\"%s\"' % (str(lastbit))
     response = HttpResponse(wrapper, content_type='application/download')
     response['Content-Disposition'] = content_disposition
     response['Content-Length'] = os.path.getsize(filename)
@@ -1345,9 +1356,16 @@ def downloadClientFile(request, filepath):
     if len(pathbits) == 1:
         outputname = cf.filepath
     
-    if os.path.isdir(filename) or not os.path.exists(filename):
+    if not os.path.exists(filename):
         return HttpResponseNotFound("Cannot download file")
     else:
+    
+        if os.path.isdir(filename):
+            tmpfilename = "/tmp/madas-zip-"+outputname
+            zipdir(filename, tmpfilename)
+            filename = tmpfilename
+            outputname = outputname + ".zip"
+            
         from django.core.servers.basehttp import FileWrapper
         from django.http import HttpResponse
     
@@ -1374,6 +1392,12 @@ def downloadRunFile(request):
     filename = os.path.join(abspath, file)
     
     print 'download run file: ' + filename
+    
+    if os.path.isdir(filename):
+        tmpfilename = "/tmp/madas-zip-"+lastbit
+        zipdir(filename, tmpfilename)
+        filename = tmpfilename
+        lastbit = lastbit + ".zip"
     
     from django.core.servers.basehttp import FileWrapper
     from django.http import HttpResponse
