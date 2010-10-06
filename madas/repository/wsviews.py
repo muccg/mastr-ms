@@ -1159,9 +1159,12 @@ def runFilesList(request):
     run = Run.objects.get(id=args['run'])
     (abspath, relpath) = run.ensure_dir()
         
-    runpath = abspath
+    import os
+    runpath = abspath + os.sep
     
-    return _fileList(request, runpath, path, True, None)
+    print 'outputting file listing for ' + runpath + ' ' + path
+    
+    return _fileList(request, runpath, path, False, [])
     
 
 @staff_member_required
