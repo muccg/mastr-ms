@@ -265,9 +265,14 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                    height:200,
                    dataUrl:wsBaseUrl + 'runFiles',
                    requestMethod:'GET',
-                   root: {
+                    tbar:[
+                        {
+                            xtype:'tbtext',
+                            text:'Click a filename to download'
+                        }
+                    ],                   root: {
                        nodeType: 'async',
-                       text: 'Runs',
+                       text: 'Files',
                        draggable: false,
                        id: 'runsRoot',
                        'metafile': true
