@@ -42,13 +42,14 @@ items:[
                    nodeType: 'async',
                    text: 'Experiment',
                    draggable: false,
-                   id: 'experimentRoot'
+                   id: 'experimentRoot',
+                   'metafile': true
                },
                selModel: new Ext.tree.DefaultSelectionModel(
                    { listeners:
                        {
                            selectionchange: function(sm, node) {
-                               if (node != null) {
+                               if (node != null && !node.attributes.metafile) {
                                    window.location = wsBaseUrl + 'downloadFile?file=' + node.id + '&experiment_id=' + MA.ExperimentController.currentId();
                                }
                            }
