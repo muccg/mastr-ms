@@ -66,9 +66,9 @@ MA.RunList = Ext.extend(Ext.Panel, {
                         }
                     ],
                     listeners: {
-                        "rowclick": function () {
-                            self.fireEvent("click", this.getSelectionModel().getSelected().data.id);
-                        },
+//                        "rowclick": function () {
+//                            self.fireEvent("click", this.getSelectionModel().getSelected().data.id);
+//                        },
                         "rowdblclick": function () {
                             self.fireEvent("dblclick", this.getSelectionModel().getSelected().data.id);
                         }
@@ -80,8 +80,9 @@ MA.RunList = Ext.extend(Ext.Panel, {
         config = Ext.apply(defaultConfig, config);
 
         MA.RunList.superclass.constructor.call(this, config);
+        self.getComponent("grid").getSelectionModel().on('selectionchange', function(sm) { if (Ext.isDefined(self.getComponent("grid").getSelectionModel().getSelected())) { self.fireEvent("click", self.getComponent("grid").getSelectionModel().getSelected().data.id); } });
 
-        this.addEvents("click", "dblclick", "delete");
+        self.addEvents("click", "dblclick", "delete");
     },
     getStore: function () {
         return this.getComponent("grid").getStore();
