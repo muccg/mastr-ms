@@ -5,7 +5,7 @@ from django.contrib import admin
 admin.autodiscover()
 
 from madas.repository import admin as repoadmin
-from madas.m import admin as madasadmin
+from madas.quote import admin as madasadmin
 
 urlpatterns = patterns('',
 
@@ -26,5 +26,5 @@ urlpatterns = patterns('',
     (r'^javascript/(?P<path>.*)$', 'django.views.static.serve', {'document_root' : settings.MEDIA_ROOT, 'SSL' : True}),
 
     # madas
-    (r'^', include('madas.m.urls')),
+    (r'^', include('madas.quote.urls')),
 )

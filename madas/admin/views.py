@@ -5,7 +5,7 @@ from django.contrib.auth.ldap_helper import LDAPHandler
 from django.contrib.auth.models import User
 
 from madas.utils import setRequestVars, jsonResponse, json_encode, translate_dict
-from madas.m.models import Quoterequest, Formalquote, Organisation, UserOrganisation
+from madas.quote.models import Quoterequest, Formalquote, Organisation, UserOrganisation
 from django.db.models import Q
 from madas.repository.json_util import makeJsonFriendly
 from django.utils import simplejson as json
@@ -18,7 +18,7 @@ def admin_requests(request, *args):
     '''
     print '***admin requests : enter***'
     ### Authorisation Check ###
-    from madas.m.views import authorize
+    from madas.quote.views import authorize
     from settings import MADAS_STATUS_GROUPS, MADAS_ADMIN_GROUPS
     (auth_result, auth_response) = authorize(request, module = 'admin', internal=True, perms=MADAS_ADMIN_GROUPS)
     if auth_result is not True:
@@ -74,7 +74,7 @@ def user_search(request, *args):
        Accessible by Administrators, Node Reps
     '''
     ### Authorisation Check ###
-    from madas.m.views import authorize
+    from madas.quote.views import authorize
     from settings import MADAS_STATUS_GROUPS, MADAS_ADMIN_GROUPS
     (auth_result, auth_response) = authorize(request, module = 'admin', internal=True, perms=MADAS_ADMIN_GROUPS)
     if auth_result is not True:
@@ -147,7 +147,7 @@ def rejected_user_search(request, *args):
     '''
     print '***rejected_user_search : enter ***' 
     ### Authorisation Check ###
-    from madas.m.views import authorize
+    from madas.quote.views import authorize
     from settings import MADAS_STATUS_GROUPS, MADAS_ADMIN_GROUPS
     (auth_result, auth_response) = authorize(request, module = 'admin', internal=True, perms=MADAS_ADMIN_GROUPS)
     if auth_result is not True:
@@ -200,7 +200,7 @@ def deleted_user_search(request, *args):
     '''
     print '***deleted_user_search : enter ***' 
     ### Authorisation Check ###
-    from madas.m.views import authorize
+    from madas.quote.views import authorize
     from settings import MADAS_STATUS_GROUPS, MADAS_ADMIN_GROUPS
     (auth_result, auth_response) = authorize(request, module = 'admin', internal=True, perms=MADAS_ADMIN_GROUPS)
     if auth_result is not True:
@@ -249,7 +249,7 @@ def user_load(request, *args):
     '''
     print '***admin/user_load : enter ***' 
     ### Authorisation Check ###
-    from madas.m.views import authorize
+    from madas.quote.views import authorize
     from settings import MADAS_STATUS_GROUPS, MADAS_ADMIN_GROUPS
     (auth_result, auth_response) = authorize(request, module = 'admin', internal=True, perms=MADAS_ADMIN_GROUPS)
     if auth_result is not True:
@@ -281,7 +281,7 @@ def user_save(request, *args):
     '''
     print '***admin/user_save : enter ***' 
     ### Authorisation Check ###
-    from madas.m.views import authorize
+    from madas.quote.views import authorize
     from settings import MADAS_STATUS_GROUPS, MADAS_ADMIN_GROUPS
     (auth_result, auth_response) = authorize(request, module = 'admin', internal=True, perms=MADAS_ADMIN_GROUPS)
     if auth_result is not True:
@@ -352,7 +352,7 @@ def node_save(request, *args):
     '''
     print '*** node_save : enter ***'
     ### Authorisation Check ###
-    from madas.m.views import authorize
+    from madas.quote.views import authorize
     from settings import MADAS_STATUS_GROUPS, MADAS_ADMIN_GROUPS
     (auth_result, auth_response) = authorize(request, module = 'admin', internal=True, perms=MADAS_ADMIN_GROUPS)
     if auth_result is not True:
@@ -388,7 +388,7 @@ def node_delete(request, *args):
     '''
     print '*** node_delete : enter ***'
     ### Authorisation Check ###
-    from madas.m.views import authorize
+    from madas.quote.views import authorize
     from settings import MADAS_STATUS_GROUPS, MADAS_ADMIN_GROUPS
     (auth_result, auth_response) = authorize(request, module = 'admin', internal=True, perms=MADAS_ADMIN_GROUPS)
     if auth_result is not True:

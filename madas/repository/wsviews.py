@@ -3,7 +3,7 @@ from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidde
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure
-from madas.m.models import Organisation, Formalquote
+from madas.quote.models import Organisation, Formalquote
 from django.utils import webhelpers
 from django.contrib.auth.models import User
 from django.utils import simplejson as json
@@ -302,7 +302,7 @@ def records(request, model, field, value):
     return HttpResponse(json.dumps(output))
 
 
-def recordsClientFiles(request, ):
+def recordsClientFiles(request):
 
     if request.GET:
         args = request.GET
@@ -1289,7 +1289,7 @@ def downloadFile(request, *args):
     from django.core.servers.basehttp import FileWrapper
     from django.http import HttpResponse
 
-    pathbits = filepath.split('/')
+    pathbits = filename.split('/')
 
     lastbit = pathbits[-1]
     
