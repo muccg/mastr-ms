@@ -1,6 +1,6 @@
 from madas.admin.ext import ExtJsonInterface
 from madas.repository.models import *
-from m.models import Organisation, Formalquote
+from quote.models import Organisation, Formalquote
 from mdatasync_server.models import NodeClient
 from django.contrib import admin
 from django.http import HttpResponseRedirect

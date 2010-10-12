@@ -3,7 +3,7 @@ from django.contrib.auth.ldap_helper import LDAPHandler
 from madas.utils import setRequestVars, jsonResponse, translate_dict, makeJsonFriendly
 from django.conf import settings
 
-from madas.m.views import authorize
+from madas.quote.views import authorize
 
 def _translate_madas_to_ldap(mdict):
     retdict = translate_dict(mdict, [('username', 'uid'), \

@@ -2,7 +2,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime, date, time
-from m.models import Organisation, Formalquote
+from quote.models import Organisation, Formalquote
 from mdatasync_server.models import NodeClient
 
 class SampleNotInClassException(Exception):
