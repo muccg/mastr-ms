@@ -110,31 +110,6 @@ def retrievePathsForFiles(request, *args):
         status = 1
         error = str(e)
 
-    retfilesdict = {}
-    runsamplesdict = {}
-
-    #so by this stage, we can go through and test each sent file against the filesdict.
-    #we test the files in the recursive structure:
-    #At any given level, we test the files at that level, and then
-    #continue on for the directories, in a depth first manner
-    #i.e. (explore to the end of a dir before coming up for air)
-    #here is a little recursive closure 
-    def findfile_recursive(leveldict, fname):
-        '''checks the files ('.') at a given level first, and then calls itself on 
-           child directories.
-           Returns the full path of the found file, or None if not found
-        '''
-        ffretval = None
-
-        #first, check the files at this level:
-        if fname in leveldict['.']:
-            return leveldict['/']    
-        else:
-            for dir in leveldict.keys():
-                if dir not in ['.','/'] and not retval:
-                    ffretval = findfile_recursive(dir)
-        return ffretval            
-
     class FileList(object):
         def __init__(self, heirarchy):
             self.heirarchy = heirarchy
