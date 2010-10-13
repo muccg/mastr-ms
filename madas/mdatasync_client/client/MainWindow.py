@@ -266,8 +266,8 @@ class MainWindow(wx.Frame):
         print 'return function called'
         if retcode:
             self.log('Check function returned', type=self.log.LOG_DEBUG, thread = thread)
-        #else:
-        #    self.log(retstring, type=self.log.LOG_DEBUG)
+        else:
+            self.log(retstring, type=self.log.LOG_DEBUG)
         
 
     def __testMenuFunction(self, event):
