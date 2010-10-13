@@ -91,7 +91,7 @@ class MSDataSyncAPI(object):
         localindexdir = self.config.getLocalIndexPath() 
         filesdict = self.getFiles(localdir, ignoredirs=[localindexdir])
         
-        postvars = {'files' : simplejson.dumps(filesdict.keys()), 'organisation' : simplejson.dumps(organisation), 'sitename' : simplejson.dumps(sitename), 'stationname': simplejson.dumps(station)}
+        postvars = {'files' : simplejson.dumps(filesdict), 'organisation' : simplejson.dumps(organisation), 'sitename' : simplejson.dumps(sitename), 'stationname': simplejson.dumps(station)}
         try:
             f = urllib.urlopen(self.config.getValue('synchub'), urllib.urlencode(postvars))
             jsonret = f.read()
@@ -121,7 +121,6 @@ class MSDataSyncAPI(object):
         self.callingWindow = callingWindow
         
         copydict = {}
-        import os.path
         import os.path
         for filename in remotefilesdict.keys():
             fulllocalpath = os.path.join(filesdict[filename], filename)
@@ -156,8 +155,19 @@ class MSDataSyncAPI(object):
 
 
     def getFiles(self, dir, ignoredirs = []):
+        '''returns a dictionary like structure representing the 
+           files. Like this:
+           { '.' : [list of filenames],
+             '..' : 'path to this dir'
+             'dirname' : {dict like this one},
+             'dirname2' : {dict like this one},
+           }  
+        '''
+
         import os
         retfiles = {}
+        retfiles['/'] = dir
+        retfiles['.'] = {}
         for root, dirs, files in os.walk(dir):
             #print files
             shouldignore = False
@@ -168,12 +178,28 @@ class MSDataSyncAPI(object):
                     break
 
             if shouldignore:
+                print 'did an ignore of: ', root, dirs, files
                 continue #go to the next iteration of the loop 
 
+            #get the current 'node' of the dict for this level
+            path = root.split(dir)[1].split(os.sep)
+            node = retfiles
+            for p in path:
+                if len(p):
+                    node = node[p]
+                
+            #don't create ignored dirs..
+            for dirname in dirs:
+                if not node.has_key(dirname) and os.path.join(root, dirname) not in ignoredirs:
+                    print 'creating dirname:', dirname
+                    node[dirname] = {}
+                    node[dirname]['.'] = {}
+                    node[dirname]['/'] = os.path.join(root, dirname)
+
             for file in files:
-                if retfiles.has_key(file):
-                    self.log('Duplicate file detected: %s' % (file), thread=False, type=self.log.LOG_WARNING)
-                retfiles[file] = root
+                node['.'][file] = None
+        
+        print 'retfiles is: ', retfiles
         return retfiles
     
     #------- WORKER CLASS-----------------------
