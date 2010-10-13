@@ -8,6 +8,63 @@ from django.conf import settings
 import os
 import os.path
 
+class FileList(object):
+    def __init__(self, heirarchy):
+        self.heirarchy = heirarchy
+        self.currentnode = None
+        self.checknodes = [] #a queue of nodes for us to process
+        self.runsamplesdict = {}
+
+    def checkFiles(self, filesdict):
+        #beginning at the top of the heirarchy, we attempt matches at each level.
+        self.checknodes.append(self.heirarchy) #push on the root node
+        
+        while len(self.checknodes):
+            self.currentnode = self.checknodes.pop()
+            print 'currentnode is', self.currentnode
+            self.checknode(filesdict)
+
+    def markfound(self, entry, filesdictentry):
+        #Mark a piece of the heirarchy (a file or dir) as 'found' 
+        entry = filesdictentry[2] #the relative path
+        runid = filesdictentry[0] #the runid
+        runsampleid = filesdictentry[1] #the runsampleid
+        if runid not in self.runsamplesdict.keys():
+            self.runsamplesdict[runid] = []
+        self.runsamplesdict[runid].append(runsampleid) 
+    
+    def checknode(self, filesdict):
+        #if there are files at this node. 
+        if len(self.currentnode['.'].keys()):
+            for fname in self.currentnode['.'].keys():
+                #is the filename in the filesdict keys?
+                if fname in filesdict.keys():
+                    self.markfound(self.currentnode['.'][fname], filesdict[fname])
+                    #remove the entry from the filesdict - no point testing it
+                    #again.
+                    del filesdict[fname]
+                    print 'Found file: Setting %s to %s' % (fname, self.currentnode['.'][fname])
+                else:
+                    #delete entries that werent found
+                    del self.currentnode['.'][fname]
+                    print 'File %s not associated with a runsample, ignoring' % (fname)
+        #now that you have checked the files at a node, you need to 
+        #check the directories at the node.
+        #if the dir is found, mark it as such and do nothing else with it.
+        #otherwise, push each unfound dir as a new node on the checknodes 
+        #queue
+        for dir in self.currentnode.keys():
+            if dir not in ['.', '/']: #don't check the filelist or 'path' entry
+                if dir in filesdict.keys():
+                    #set the dir to contain the path, not a node.
+                    self.markfound(self.currentnode[dir], filesdict[dir])
+                    #remove the found entry from the filesdict
+                    del filesdict[dir]
+                    print 'Found dir: Setting %s to %s' % (dir, self.currentnode['.'][dir])
+                else:
+                    #push the dir onto the checknodes.
+                    self.checknodes.append(self.currentnode[dir])
+
 def jsonResponse(data):
     jdata = simplejson.dumps(data)
     return HttpResponse(jdata)
@@ -110,79 +167,11 @@ def retrievePathsForFiles(request, *args):
         status = 1
         error = str(e)
 
-    class FileList(object):
-        def __init__(self, heirarchy):
-            self.heirarchy = heirarchy
-            self.currentnode = None
-            self.checknodes = [] #a queue of nodes for us to process
-            self.runsamplesdict = {}
-
-        def checkFiles(self, filesdict):
-            #beginning at the top of the heirarchy, we attempt matches at each level.
-            self.checknodes.push(heirarchy) #push on the root node
-            
-            while len(checknodes):
-                self.currentnode = checknodes.pop()
-                self.checknode(filesdict)
-
-        def markfound(self, entry, filesdictentry):
-            '''Mark a piece of the heirarchy (a file or dir) as 'found' '''
-            entry = filesdictentry[2] #the relative path
-            runid = filesdictentry[0] #the runid
-            runsampleid = filesdictentry[1] #the runsampleid
-            if runid not in self.runsamplesdict.keys():
-                self.runsamplesdict[runid] = []
-            self.runsamplesdict[runid].append(runsampleid) 
-        
-        def checknode(self, filesdict):
-            #if there are files at this node. 
-            if len(self.currentnode['.'].keys()):
-                for fname in self.currentnode['.'].keys():
-                    #is the filename in the filesdict keys?
-                    if fname in filesdict.keys():
-                        self.markfound(self.currentnode['.'][fname], filesdict[fname])
-                        #remove the entry from the filesdict - no point testing it
-                        #again.
-                        del filesdict[fname]
-                        print 'Found file: Setting %s to %s' % (fname, self.currentnode['.'][fname])
-                    else:
-                        #delete entries that werent found
-                        del self.currentnode['.'][fname]
-                        print 'File %s not associated with a runsample, ignoring', fname
-            #now that you have checked the files at a node, you need to 
-            #check the directories at the node.
-            #if the dir is found, mark it as such and do nothing else with it.
-            #otherwise, push each unfound dir as a new node on the checknodes 
-            #queue
-            for dir in self.currentnode.keys():
-                if dir not in ['.', '/']: #don't check the filelist or 'path' entry
-                    if dir in filesdict.keys():
-                        #set the dir to contain the path, not a node.
-                        self.markfound(self.currentnode[dir], filesdict[dir])
-                        #remove the found entry from the filesdict
-                        del filesdict[dir]
-                        print 'Found dir: Setting %s to %s' % (dir, self.currentnode['.'][dir])
-                    else:
-                        #push the dir onto the checknodes.
-                        checknodes.push[self.currentnode[dir]]
-
+    print 'making filelist obj' 
     #So. Make a FileList object out of pfiles.
     fl = FileList(pfiles)
+    print 'checking files'
     fl.checkFiles(filesdict)
-
-    #for fname in pfiles:
-    #    fname = str(fname)
-    #    print 'fname is: ', fname
-    #    if fname in filesdict.keys(): #filesdict is keyed on filename
-    #        retfilesdict[fname] = filesdict[fname][2] #relative path is third item in the list
-    #        runid = filesdict[fname][0]
-    #        runsampleid = filesdict[fname][1]
-    #        if runid not in runsamplesdict.keys():
-    #            runsamplesdict[runid] = []
-    #        runsamplesdict[runid].append(runsampleid) 
-    #        print 'Setting %s to %s' % (fname, retfilesdict[fname])
-    #    else:
-    #        print '%s not associated with a runsample. Ignored' % (fname)
 
     #set the default host
     if host is None or len(host) == 0:

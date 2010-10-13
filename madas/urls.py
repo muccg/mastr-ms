@@ -5,7 +5,9 @@ from django.contrib import admin
 admin.autodiscover()
 
 from madas.repository import admin as repoadmin
-from madas.quote import admin as madasadmin
+
+#we don't need this line?
+#from madas.quote import admin as madasadmin
 
 urlpatterns = patterns('',
 
@@ -26,5 +28,6 @@ urlpatterns = patterns('',
     (r'^javascript/(?P<path>.*)$', 'django.views.static.serve', {'document_root' : settings.MEDIA_ROOT, 'SSL' : True}),
 
     # madas
-    (r'^', include('madas.quote.urls')),
+    #huh? this doesnt even exist..
+    #(r'^', include('madas.quote.urls')),
 )

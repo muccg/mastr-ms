@@ -99,12 +99,18 @@ class MSDataSyncAPI(object):
             returnFn(retcode = False, retstring = "Could not connect %s" % (str(e)) )
             return
 
-        #self.log('Synchub config: %s' % jsonret)
-        j = simplejson.loads(jsonret)
-        self.log('Synchub config loaded object is: %s' % j)
-        d = simplejson.loads(jsonret)
-        #print 'Returned Json Obj: ', d
-        
+
+        #now, if something goes wrong interpreting the result, don't panic.
+        try:
+            #self.log('Synchub config: %s' % jsonret)
+            j = simplejson.loads(jsonret)
+            self.log('Synchub config loaded object is: %s' % j)
+            d = simplejson.loads(jsonret)
+            #print 'Returned Json Obj: ', d
+        except Exception, e:
+            returnFn(retcode=False, retstring="Error: %s\nUnexpected response from server was: %s" % (e, jsonret))
+            return
+
         user = self.config.getValue('user')
         #remotehost = self.config.getValue('remotehost')
         #remotedir = self.config.getValue('remotedir')
