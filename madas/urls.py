@@ -6,8 +6,7 @@ admin.autodiscover()
 
 from madas.repository import admin as repoadmin
 
-#we don't need this line?
-#from madas.quote import admin as madasadmin
+from madas.quote import admin as madasadmin
 
 urlpatterns = patterns('',
 
