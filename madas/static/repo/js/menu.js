@@ -40,7 +40,7 @@ MA.MenuEnsure = function() {
 
 MA.MenuShow = function() {
 
-    Ext.BLANK_IMAGE_URL = 'static/ext-3.2.1/resources/images/default/s.gif';
+    Ext.BLANK_IMAGE_URL = 'static/ext-3.3.0/resources/images/default/s.gif';
 
     //disable certain menu items if the user is not an admin
     if (!MA.IsAdmin) {
