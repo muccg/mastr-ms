@@ -438,11 +438,11 @@ def populate_select(request, model=None, key=None, value=None, field=None, match
             raise ObjectDoesNotExist()
 
         if model == 'organisation':
-            model_obj = get_model('m', 'organisation')
+            model_obj = get_model('quote', 'organisation')
         elif model == 'user':
             model_obj = get_model('auth', 'user')
         elif model == 'formalquote':
-            model_obj = get_model('m', 'formalquote')
+            model_obj = get_model('quote', 'formalquote')
         elif model == 'machine':
             model_obj = get_model('mdatasync_server', 'nodeclient')
         else:
