@@ -82,7 +82,7 @@ function callbacker(){
 
 
 <div style="position:relative;">
-<div id="appLoad" style="z-index:1;position:absolute;left:0px;top:0px;width:400px;height:200px;background:white;padding:200px;"><img src="${wh.url('static/ext-3.1.0/resources/images/default/shared/large-loading.gif')}"> Loading...</div>
+<div id="appLoad" style="z-index:1;position:absolute;left:0px;top:0px;width:400px;height:200px;background:white;padding:200px;"><img src="${wh.url('static/ext-3.3.0/resources/images/default/shared/large-loading.gif')}"> Loading...</div>
 <div id="loginDiv" style="width:300;">
 <form id="loginForm" action="${wh.url('/login/processLogin')}" method="POST">
 <label class="x-form-item-label">Email address:</label>

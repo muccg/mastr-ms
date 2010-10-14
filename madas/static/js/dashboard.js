@@ -27,6 +27,7 @@ function clientFileActionRenderer(val) {
 MA.DashboardCmp = {
     title:'Available files',
     style:'padding:40px',
+    id:'dashboard-panel',
     tbar:[
         {
             xtype:'tbtext',
