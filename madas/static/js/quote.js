@@ -178,22 +178,22 @@ MA.QuoteRequestListInit = function(){
         
     var dataurl = MA.BaseUrl + "quote/list";
         
-    var madasReader = new MA.JsonReader({
+    var madasReader = new Ext.data.JsonReader({
         root            : 'response.value.items',
         versionProperty : 'response.value.version',
         totalProperty   : 'response.value.total_count'
         }, [
-            { name: 'id', sortType:'number' },
-            { name: 'firstname', sortType : 'string' },
-            { name: 'lastname', sortType : 'string' },
-            { name: 'email', sortType : 'string' },
-            { name: 'officephone', sortType : 'string' },
-            { name: 'requesttime', sortType: 'date' },
-            { name: 'completed', sortType: 'string' },
-            { name: 'unread', sortType: 'string' },
-            { name: 'details', sortType:'string'},
-            { name: 'tonode', sortType:'string'},
-            { name: 'country', sortType:'string'}
+            { name: 'id', sortType: Ext.data.SortTypes.asInt },
+            { name: 'firstname', sortType: Ext.data.SortTypes.asText },
+            { name: 'lastname', sortType: Ext.data.SortTypes.asText },
+            { name: 'email', sortType: Ext.data.SortTypes.asText },
+            { name: 'officephone', sortType: Ext.data.SortTypes.asText },
+            { name: 'requesttime', sortType: Ext.data.SortTypes.asDate },
+            { name: 'completed', sortType: Ext.data.SortTypes.asText },
+            { name: 'unread', sortType: Ext.data.SortTypes.asText },
+            { name: 'details', sortType: Ext.data.SortTypes.asText},
+            { name: 'tonode', sortType: Ext.data.SortTypes.asText},
+            { name: 'country', sortType: Ext.data.SortTypes.asText}
         ]);
     
     var dataStore = new Ext.data.GroupingStore({
@@ -424,18 +424,18 @@ MA.QuoteRequestListInit = function(){
             
             var dataurl = MA.BaseUrl + "quote/listFormal/" + rec.get("id");
                 
-            var madasReader = new MA.JsonReader({
+            var madasReader = new Ext.data.JsonReader({
                 root            : 'response.value.items',
                 versionProperty : 'response.value.version',
                 totalProperty   : 'response.value.total_count'
                 }, [//id, quoterequestid, details, created, fromemail, toemail, status
-                    { name: 'id', sortType:'number' },
-                    { name: 'quoterequestid', sortType : 'number' },
-                    { name: 'details', sortType : 'string' },
-                    { name: 'created', sortType : 'date' },
-                    { name: 'fromemail', sortType : 'string' },
-                    { name: 'toemail', sortType: 'string' },
-                    { name: 'status', sortType: 'string' }
+                    { name: 'id', sortType: Ext.data.SortTypes.asInt },
+                    { name: 'quoterequestid', sortType: Ext.data.SortTypes.asInt },
+                    { name: 'details', sortType: Ext.data.SortTypes.asText },
+                    { name: 'created', sortType: Ext.data.SortTypes.asDate },
+                    { name: 'fromemail', sortType: Ext.data.SortTypes.asText },
+                    { name: 'toemail', sortType: Ext.data.SortTypes.asText },
+                    { name: 'status', sortType: Ext.data.SortTypes.asText }
                 ]);
                 
             var dataStore = new Ext.data.Store({
@@ -471,7 +471,7 @@ MA.QuoteRequestEditInit = function (paramArray) {
     Ext.getCmp('formalquoteedit-panel').getForm().reset();
 
     //fetch user details
-    quoteRequestEditCmp.load({url: MA.BaseUrl + 'quote/load', params: {'qid': id}, waitMsg:'Loading'});
+    quoteRequestEditCmp.load({url: MA.BaseUrl + 'quote/load', params: {'qid': id}});
     formalQuoteCmp.load({url: MA.BaseUrl + 'quote/formalload', params: {'qid': id}, waitMsg:'Loading'});
 
     var quoteHistoryCmp = Ext.getCmp('qre-history');
@@ -850,21 +850,21 @@ MA.QuoteRequestListAllInit = function(){
         
     var dataurl = MA.BaseUrl + "quote/listAll";
         
-    var madasReader = new MA.JsonReader({
+    var madasReader = new Ext.data.JsonReader({
         root            : 'response.value.items',
         versionProperty : 'response.value.version',
         totalProperty   : 'response.value.total_count'
         }, [
-            { name: 'id', sortType:'number' },
-            { name: 'firstname', sortType : 'string' },
-            { name: 'lastname', sortType : 'string' },
-            { name: 'email', sortType : 'string' },
-            { name: 'officephone', sortType : 'string' },
-            { name: 'requesttime', sortType: 'date' },
-            { name: 'completed', sortType: 'string' },
-            { name: 'unread', sortType: 'string' },
-            { name: 'tonode', sortType: 'string' },
-            { name: 'changetimestamp', sortType: 'date'}
+            { name: 'id', sortType: Ext.data.SortTypes.asInt },
+            { name: 'firstname', sortType: Ext.data.SortTypes.asText },
+            { name: 'lastname', sortType: Ext.data.SortTypes.asText },
+            { name: 'email', sortType: Ext.data.SortTypes.asText },
+            { name: 'officephone', sortType: Ext.data.SortTypes.asText },
+            { name: 'requesttime', sortType: Ext.data.SortTypes.asDate },
+            { name: 'completed', sortType: Ext.data.SortTypes.asText },
+            { name: 'unread', sortType: Ext.data.SortTypes.asText },
+            { name: 'tonode', sortType: Ext.data.SortTypes.asText },
+            { name: 'changetimestamp', sortType: Ext.data.SortTypes.asDate}
         ]);
     
     var dataStore = new Ext.data.GroupingStore({
@@ -947,18 +947,18 @@ MA.FormalQuoteUserListInit = function(){
         
     var dataurl = MA.BaseUrl + "quote/listFormal";
         
-    var madasReader = new MA.JsonReader({
+    var madasReader = new Ext.data.JsonReader({
         root            : 'response.value.items',
         versionProperty : 'response.value.version',
         totalProperty   : 'response.value.total_count'
         }, [//id, quoterequestid, details, created, fromemail, toemail, status
-            { name: 'id', sortType:'number' },
-            { name: 'quoterequestid', sortType : 'number' },
-            { name: 'details', sortType : 'string' },
-            { name: 'created', sortType : 'date' },
-            { name: 'fromemail', sortType : 'string' },
-            { name: 'toemail', sortType: 'string' },
-            { name: 'status', sortType: 'string' }
+            { name: 'id', sortType: Ext.data.SortTypes.asInt },
+            { name: 'quoterequestid', sortType: Ext.data.SortTypes.asInt },
+            { name: 'details', sortType: Ext.data.SortTypes.asText },
+            { name: 'created', sortType: Ext.data.SortTypes.asDate },
+            { name: 'fromemail', sortType: Ext.data.SortTypes.asText },
+            { name: 'toemail', sortType: Ext.data.SortTypes.asText },
+            { name: 'status', sortType: Ext.data.SortTypes.asText }
         ]);
     
     var viewHandler = function(grid, rowIndex, e) {
@@ -1087,15 +1087,13 @@ MA.ViewFormalInit = function(paramArray){
     }
     
     //fetch user details
-    quoteRequestEditCmp.load({url: MA.BaseUrl + 'quote/load', params: {'qid': id}, waitMsg:'Loading'});
+    quoteRequestEditCmp.load({url: MA.BaseUrl + 'quote/load', params: {'qid': id}});
     formalQuoteCmp.load({url: MA.BaseUrl + 'quote/formalload', params: {'qid': id}, waitMsg:'Loading', success: function(form, action) {
         Ext.getCmp('fquouserdetails-panel').getComponent('purchase_order_number').setValue(action.result.data.purchase_order_number);
     }});
 
     //set the quote id
     Ext.getCmp('quov-qid').setValue(id);
-
-
 };
 
 MA.ViewFormalCmp = {   

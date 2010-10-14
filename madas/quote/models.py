@@ -74,7 +74,11 @@ class Organisation(models.Model):
     name = models.CharField(max_length=100)
     abn = models.CharField(max_length=100)
     user = models.ManyToManyField(User, through="UserOrganisation")
+    class Meta:
+        db_table = u'm_organisation'
     
 class UserOrganisation(models.Model):
     user = models.ForeignKey(User)
     organisation = models.ForeignKey(Organisation)
+    class Meta:
+        db_table = 'm_userorganisation'

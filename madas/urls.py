@@ -28,6 +28,5 @@ urlpatterns = patterns('',
     (r'^javascript/(?P<path>.*)$', 'django.views.static.serve', {'document_root' : settings.MEDIA_ROOT, 'SSL' : True}),
 
     # madas
-    #huh? this doesnt even exist..
-    #(r'^', include('madas.quote.urls')),
+    (r'^', include('madas.quote.urls')),
 )
