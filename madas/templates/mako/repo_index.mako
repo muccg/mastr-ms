@@ -3,16 +3,16 @@
     <head>
         <title>MASTR MS</title>
 
-        <link rel="stylesheet" href="static/ext-3.2.1/resources/css/ext-all.css"/>
+        <link rel="stylesheet" href="static/ext-3.3.0/resources/css/ext-all.css"/>
         <link rel="stylesheet" href="static/repo/main.css"/>
-        <link rel="stylesheet" href="static/ext-3.2.1/examples/ux/css/RowEditor.css"/>
+        <link rel="stylesheet" href="static/ext-3.3.0/examples/ux/css/RowEditor.css"/>
         <link rel="stylesheet" type="text/css" href="static/css/file-upload.css"/>
 
 
         <script src="static/repo/js/prototype.js" type="text/javascript"></script>
         <script src="static/repo/js/scriptaculous/scriptaculous.js" type="text/javascript"></script>
-        <script src="static/ext-3.2.1/adapter/prototype/ext-prototype-adapter.js" type="text/javascript"></script>
-        <script src="static/ext-3.2.1/ext-all-debug.js"></script>
+        <script src="static/ext-3.3.0/adapter/prototype/ext-prototype-adapter.js" type="text/javascript"></script>
+        <script src="static/ext-3.3.0/ext-all-debug.js"></script>
         <script src="static/repo/js/MARowEditor.js"></script>
         <script type="text/javascript" src="static/js/FileUploadField.js"></script>
 
@@ -125,7 +125,7 @@
                         <div class="x-panel-mr">
                             <div class="x-panel-mc">
                                 Loading...<br/>
-                                <img src="static/ext-3.2.1/resources/images/default/shared/loading-balls.gif" width="41" height="9" />
+                                <img src="static/ext-3.3.0/resources/images/default/shared/loading-balls.gif" width="41" height="9" />
                             </div>
                         </div>
                     </div>
