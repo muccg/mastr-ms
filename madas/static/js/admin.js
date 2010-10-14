@@ -23,13 +23,13 @@ MA.AdminRequestsInit = function(){
                                               versionProperty : 'response.value.version',
                                               totalProperty   : 'response.value.total_count'
                                               }, [
-                                                  { name: 'username', sortType : 'string' },
-                                                  { name: 'firstname', sortType : 'string' },
-                                                  { name: 'lastname', sortType : 'string' },
-                                                  { name: 'email', sortType : 'string' },
-                                                  { name: 'telephoneNumber', sortType : 'string' },
-                                                  { name: 'physicalDeliveryOfficeName', sortType : 'string' },
-                                                  { name: 'title', sortType : 'string' }
+                                                  { name: 'username', sortType : Ext.data.SortTypes.asText },
+                                                  { name: 'firstname', sortType : Ext.data.SortTypes.asText },
+                                                  { name: 'lastname', sortType : Ext.data.SortTypes.asText },
+                                                  { name: 'email', sortType : Ext.data.SortTypes.asText },
+                                                  { name: 'telephoneNumber', sortType : Ext.data.SortTypes.asText },
+                                                  { name: 'physicalDeliveryOfficeName', sortType : Ext.data.SortTypes.asText },
+                                                  { name: 'title', sortType : Ext.data.SortTypes.asText }
                                                   ]);
     
     var dataStore = new Ext.data.Store({
@@ -101,14 +101,14 @@ MA.UserSearchInit = function(){
                                               versionProperty : 'response.value.version',
                                               totalProperty   : 'response.value.total_count'
                                               }, [
-                                                  { name: 'isClient', sortType : 'string' },
-                                                  { name: 'username', sortType : 'string' },
-                                                  { name: 'firstname', sortType : 'string' },
-                                                  { name: 'lastname', sortType : 'string' },
-                                                  { name: 'email', sortType : 'string' },
-                                                  { name: 'telephoneNumber', sortType : 'string' },
-                                                  { name: 'physicalDeliveryOfficeName', sortType : 'string' },
-                                                  { name: 'title', sortType : 'string' }
+                                                  { name: 'isClient', sortType : Ext.data.SortTypes.asText },
+                                                  { name: 'username', sortType : Ext.data.SortTypes.asText },
+                                                  { name: 'firstname', sortType : Ext.data.SortTypes.asText },
+                                                  { name: 'lastname', sortType : Ext.data.SortTypes.asText },
+                                                  { name: 'email', sortType : Ext.data.SortTypes.asText },
+                                                  { name: 'telephoneNumber', sortType : Ext.data.SortTypes.asText },
+                                                  { name: 'physicalDeliveryOfficeName', sortType : Ext.data.SortTypes.asText },
+                                                  { name: 'title', sortType : Ext.data.SortTypes.asText }
                                                   ]);
     
     var dataStore = new Ext.data.Store({
@@ -188,13 +188,13 @@ MA.RejectedUserSearchInit = function(){
                                               versionProperty : 'response.value.version',
                                               totalProperty   : 'response.value.total_count'
                                               }, [
-                                                  { name: 'username', sortType : 'string' },
-                                                  { name: 'firstname', sortType : 'string' },
-                                                  { name: 'lastname', sortType : 'string' },
-                                                  { name: 'email', sortType : 'string' },
-                                                  { name: 'telephoneNumber', sortType : 'string' },
-                                                  { name: 'physicalDeliveryOfficeName', sortType : 'string' },
-                                                  { name: 'title', sortType : 'string' }
+                                                  { name: 'username', sortType : Ext.data.SortTypes.asText },
+                                                  { name: 'firstname', sortType : Ext.data.SortTypes.asText },
+                                                  { name: 'lastname', sortType : Ext.data.SortTypes.asText },
+                                                  { name: 'email', sortType : Ext.data.SortTypes.asText },
+                                                  { name: 'telephoneNumber', sortType : Ext.data.SortTypes.asText },
+                                                  { name: 'physicalDeliveryOfficeName', sortType : Ext.data.SortTypes.asText },
+                                                  { name: 'title', sortType : Ext.data.SortTypes.asText }
                                                   ]);
     
     var dataStore = new Ext.data.Store({
@@ -266,13 +266,13 @@ MA.DeletedUserSearchInit = function(){
                                               versionProperty : 'response.value.version',
                                               totalProperty   : 'response.value.total_count'
                                               }, [
-                                                  { name: 'username', sortType : 'string' },
-                                                  { name: 'firstname', sortType : 'string' },
-                                                  { name: 'lastname', sortType : 'string' },
-                                                  { name: 'email', sortType : 'string' },
-                                                  { name: 'telephoneNumber', sortType : 'string' },
-                                                  { name: 'physicalDeliveryOfficeName', sortType : 'string' },
-                                                  { name: 'title', sortType : 'string' }
+                                                  { name: 'username', sortType : Ext.data.SortTypes.asText },
+                                                  { name: 'firstname', sortType : Ext.data.SortTypes.asText },
+                                                  { name: 'lastname', sortType : Ext.data.SortTypes.asText },
+                                                  { name: 'email', sortType : Ext.data.SortTypes.asText },
+                                                  { name: 'telephoneNumber', sortType : Ext.data.SortTypes.asText },
+                                                  { name: 'physicalDeliveryOfficeName', sortType : Ext.data.SortTypes.asText },
+                                                  { name: 'title', sortType : Ext.data.SortTypes.asText }
                                                   ]);
     
     var dataStore = new Ext.data.Store({
@@ -412,25 +412,25 @@ MA.AdminUserEditCmp = {id:'adminuseredit-container-panel',
                                                  totalProperty   : 'response.value.total_count',
                                                  successProperty : 'success'
                                                  }, [
-                                                     { name: 'username', sortType : 'string' },
-                                                     { name: 'firstname', sortType : 'string' },
-                                                     { name: 'lastname', sortType : 'string' },
-                                                     { name: 'email', sortType : 'string' },
-                                                     { name: 'telephoneNumber', sortType : 'string' },
-                                                     { name: 'physicalDeliveryOfficeName', sortType : 'string' },
-                                                     { name: 'title', sortType : 'string' },
-                                                     { name: 'homephone', sortType : 'string' },
-                                                     { name: 'isAdmin', sortType : 'string' },
-                                                     { name: 'isNodeRep', sortType : 'string' },
-                                                     { name: 'node', sortType : 'string' },
-                                                     { name: 'status', sortType : 'string' },
-                                                     { name: 'dept', sortType : 'string' },
-                                                     { name: 'institute', sortType : 'string' },
-                                                     { name: 'organisation', sortType : 'string' },
-                                                     { name: 'address', sortType : 'string' },
-                                                     { name: 'supervisor', sortType : 'string' },
-                                                     { name: 'areaOfInterest', sortType : 'string' },
-                                                     { name: 'country', sortType : 'string' }
+                                                     { name: 'username', sortType : Ext.data.SortTypes.asText },
+                                                     { name: 'firstname', sortType : Ext.data.SortTypes.asText },
+                                                     { name: 'lastname', sortType : Ext.data.SortTypes.asText },
+                                                     { name: 'email', sortType : Ext.data.SortTypes.asText },
+                                                     { name: 'telephoneNumber', sortType : Ext.data.SortTypes.asText },
+                                                     { name: 'physicalDeliveryOfficeName', sortType : Ext.data.SortTypes.asText },
+                                                     { name: 'title', sortType : Ext.data.SortTypes.asText },
+                                                     { name: 'homephone', sortType : Ext.data.SortTypes.asText },
+                                                     { name: 'isAdmin', sortType : Ext.data.SortTypes.asText },
+                                                     { name: 'isNodeRep', sortType : Ext.data.SortTypes.asText },
+                                                     { name: 'node', sortType : Ext.data.SortTypes.asText },
+                                                     { name: 'status', sortType : Ext.data.SortTypes.asText },
+                                                     { name: 'dept', sortType : Ext.data.SortTypes.asText },
+                                                     { name: 'institute', sortType : Ext.data.SortTypes.asText },
+                                                     { name: 'organisation', sortType : Ext.data.SortTypes.asText },
+                                                     { name: 'address', sortType : Ext.data.SortTypes.asText },
+                                                     { name: 'supervisor', sortType : Ext.data.SortTypes.asText },
+                                                     { name: 'areaOfInterest', sortType : Ext.data.SortTypes.asText },
+                                                     { name: 'country', sortType : Ext.data.SortTypes.asText }
                                                      ]),
        title: 'Edit User',
        bodyStyle:'padding:5px 5px 0',
