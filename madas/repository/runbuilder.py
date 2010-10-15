@@ -23,36 +23,43 @@ class RunBuilder(object):
         
     def generate(self, request):
         try:
+            print 'validation started'
             self.validate()
             #if the validate fails we throw an exception
-            
-            if self.run.state == 0:
-                self.layout()
-            
-            from mako.template import Template
-            
-            mytemplate = Template(self.run.method.template)
-            
-            #create the variables to insert
-            render_vars = {'username':request.user.username,'run':self.run,'runsamples':RunSample.objects.filter(run=self.run).order_by('sequence')}
-            
-            #write filenames into DB
-            for rs in RunSample.objects.filter(run=self.run):
-                if rs.type == 0:
-                    rs.filename = rs.sample.run_filename(self.run)
-                    rs.save()
-            
-            #mark the run as in-progress and save it
-            if self.run.state == 0:
-                self.run.state = 1
-                self.run.save()
-            
-            #render
-            return mytemplate.render(**render_vars)
-        except SampleNotInClassException, e:
-            return 'Samples in the run need to be in sample classes before they can be used in a run'
+            print 'validation finished'
         except Exception, e:
             return 'Run validation error ' + str(e)
+        except SampleNotInClassException, e:
+            return 'Samples in the run need to be in sample classes before they can be used in a run'
+   
+        if self.run.state == 0:
+            self.layout()
+        
+        from mako.template import Template
+        
+        mytemplate = Template(self.run.method.template)
+        #we need to set a non ascii output encoding,
+        #because we have unicode chars that break 
+        #mako (>128)
+        mytemplate.output_encoding = "utf-8"
+
+        #create the variables to insert
+        render_vars = {'username':request.user.username,'run':self.run,'runsamples':RunSample.objects.filter(run=self.run).order_by('sequence')}
+        
+        print 'writing filenames'
+        #write filenames into DB
+        for rs in RunSample.objects.filter(run=self.run):
+            if rs.type == 0:
+                rs.filename = rs.sample.run_filename(self.run)
+                rs.save()
+        print 'finished writing filenames'
+        #mark the run as in-progress and save it
+        if self.run.state == 0:
+            self.run.state = 1
+            self.run.save()
+        
+        #render
+        return mytemplate.render(**render_vars)
         
 class TrayLayoutDelegate(object):
     def __init__(self):

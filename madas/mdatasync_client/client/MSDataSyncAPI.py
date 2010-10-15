@@ -126,13 +126,41 @@ class MSDataSyncAPI(object):
         callingWindow.setState(statuschange)
         self.callingWindow = callingWindow
         
-        copydict = {}
+        copydict = {} #this is our list of files to copy
         import os.path
-        for filename in remotefilesdict.keys():
-            fulllocalpath = os.path.join(filesdict[filename], filename)
-            fullremotepath = os.path.join(remotefilesdict[filename], filename)
-            #self.log( 'Copying %s to %s' % (fulllocalpath, "%s" %(os.path.join(localindexdir, fullremotepath) ) ) )
-            copydict[fulllocalpath] =  "%s" %(os.path.join(localindexdir, fullremotepath) )
+
+        #now we explore the returned heirarchy recursively, and flatten it into a 
+        #dict of source:dest's
+
+        def extract_file_target(node, resultdict):
+            '''method to recursively extract valid file targets from a nested dict structure
+               relies on external scope to contain 'localindexdir' string
+            '''
+            for filename in node['.'].keys():
+                #any keys in . should be valid targets.
+                #their full source path will be ['/'] joined with the 'key'.
+                #theif full dest path will be the 'value'
+                fulllocalpath = os.path.join(node['/'], filename)
+                fullremotepath = os.path.join(node['.'][filename], filename)
+                copydict[fulllocalpath] = "%s" %(os.path.join(localindexdir, fullremotepath) )
+            
+            #now for the directories
+            for dirname in node.keys():
+                if dirname not in ['.', '/']:
+                    #if the value is a dict, then this dir needs to be more thouroughly explored
+                    if isinstance(node[dirname], dict):
+                        extract_file_target(node[dirname], resultdict)
+                    else:
+                        fulllocalpath = os.path.join(node['/'], dirname)
+                        fullremotepath = os.path.join(node[dirname], dirname)
+                        copydict[fulllocalpath] = "%s" %(os.path.join(localindexdir, fullremotepath) )
+
+        #for filename in remotefilesdict.keys():
+        #    fulllocalpath = os.path.join(filesdict[filename], filename)
+        #    fullremotepath = os.path.join(remotefilesdict[filename], filename)
+        #    #self.log( 'Copying %s to %s' % (fulllocalpath, "%s" %(os.path.join(localindexdir, fullremotepath) ) ) )
+        #    copydict[fulllocalpath] =  "%s" %(os.path.join(localindexdir, fullremotepath) )
+        extract_file_target(remotefilesdict, copydict)
 
         callingWindow.SetProgress(20)
         self.log("Initiating file copy to local index (%d files)" % (len(copydict.keys())) )
@@ -315,7 +343,7 @@ class MSDSImpl(object):
 
     
     def serverCheckRunSampleFiles(self, runsampledict, baseurl):
-        self.log('Informing the server of transfer', thread = self.controller.useThreading)
+        self.log('Informing the server of transfer: %s' % (runsampledict), thread = self.controller.useThreading)
         postvars = {'runsamplefiles' : simplejson.dumps(runsampledict) }
         url = "%s%s/" % (baseurl, "checksamplefiles")
         try:
@@ -328,6 +356,7 @@ class MSDSImpl(object):
         
 
     def copyfiles(self, copydict):
+        '''Takes a dict keyed on source filename, and copies each one to the dest filename (value) '''
         import os.path
         print 'Copyfiles dict: ', copydict
         try:
