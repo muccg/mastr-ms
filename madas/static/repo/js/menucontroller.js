@@ -163,10 +163,11 @@ MA.ChangeMainContent = function(contentName, paramArray){
             
             experimentListStore.removeAll();
             Ext.getCmp('project-experiment-list').disable();
-            
-            //fall through to force render of new experiment
+            Ext.getCmp('center-panel').layout.setActiveItem('projectCmpTitle');            
+            break;
         case 'project:view':
             Ext.getCmp('center-panel').layout.setActiveItem('projectCmpTitle');
+            Ext.getCmp('project-experiment-list').enable();
             break;
 
         case "runs:list":
