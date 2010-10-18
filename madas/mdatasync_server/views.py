@@ -24,9 +24,9 @@ class FileList(object):
             print 'currentnode is', self.currentnode
             self.checknode(filesdict)
 
-    def markfound(self, entry, filesdictentry):
+    def markfound(self, node, fname, filesdictentry):
         #Mark a piece of the heirarchy (a file or dir) as 'found' 
-        entry = filesdictentry[2] #the relative path
+        node[fname] = filesdictentry[2] #the relative path
         runid = filesdictentry[0] #the runid
         runsampleid = filesdictentry[1] #the runsampleid
         if runid not in self.runsamplesdict.keys():
@@ -39,7 +39,7 @@ class FileList(object):
             for fname in self.currentnode['.'].keys():
                 #is the filename in the filesdict keys?
                 if fname in filesdict.keys():
-                    self.markfound(self.currentnode['.'][fname], filesdict[fname])
+                    self.markfound(self.currentnode['.'], fname, filesdict[fname])
                     #remove the entry from the filesdict - no point testing it
                     #again.
                     del filesdict[fname]

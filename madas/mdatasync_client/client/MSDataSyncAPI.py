@@ -140,9 +140,10 @@ class MSDataSyncAPI(object):
                 #any keys in . should be valid targets.
                 #their full source path will be ['/'] joined with the 'key'.
                 #theif full dest path will be the 'value'
-                fulllocalpath = os.path.join(node['/'], filename)
-                fullremotepath = os.path.join(node['.'][filename], filename)
-                copydict[fulllocalpath] = "%s" %(os.path.join(localindexdir, fullremotepath) )
+                if node['.'][filename] is not None:
+                    fulllocalpath = os.path.join(node['/'], filename)
+                    fullremotepath = os.path.join(node['.'][filename], filename)
+                    resultdict[fulllocalpath] = "%s" %(os.path.join(localindexdir, fullremotepath) )
             
             #now for the directories
             for dirname in node.keys():
@@ -153,7 +154,7 @@ class MSDataSyncAPI(object):
                     else:
                         fulllocalpath = os.path.join(node['/'], dirname)
                         fullremotepath = os.path.join(node[dirname], dirname)
-                        copydict[fulllocalpath] = "%s" %(os.path.join(localindexdir, fullremotepath) )
+                        resultdict[fulllocalpath] = "%s" %(os.path.join(localindexdir, fullremotepath) )
 
         #for filename in remotefilesdict.keys():
         #    fulllocalpath = os.path.join(filesdict[filename], filename)
