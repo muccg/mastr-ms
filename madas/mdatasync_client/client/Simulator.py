@@ -16,7 +16,7 @@ class GeneratePopup(wx.Dialog):
         self.listctrl = wx.ListBox(_cp, -1, style=wx.LB_MULTIPLE)
 
 
-        self.listctrl.InsertItems([str(i) for i in fileslist], 0)
+        self.listctrl.InsertItems([i for i in fileslist], 0)
         for p in xrange(0, len(fileslist)):
             self.listctrl.Select(p)
 
@@ -44,8 +44,8 @@ class GeneratePopup(wx.Dialog):
             listitem = self.listctrl.Items[selindex]
             try:
                 fname = os.path.join(self.destdir, listitem)
-                if not os.path.exists(str(fname)):
-                    open(str(fname), 'w').close()
+                if not os.path.exists(fname):
+                    open(fname, 'w').close()
                     self.log("Wrote item %d: %s" % (selindex, fname))
                 else:
                     self.log("Item %d already exits: %s" % (selindex, fname) )
@@ -115,7 +115,7 @@ class MainWindow(wx.Frame):
         fileslist = []
         for line in lineslist:
             try:
-                uname, srcdir, fname, methdir, methfile = line.split(',')
+                uname, srcdir, fname, methdir, methfile, sampname = line.split(',')
                 fileslist.append(fname)
             except:
                 pass
