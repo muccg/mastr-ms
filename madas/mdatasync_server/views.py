@@ -199,9 +199,9 @@ def checkRunSampleFiles(request):
     runsamplefilesjson = request.POST.get('runsamplefiles', None)
     if runsamplefilesjson is not None:
         runsamplefilesdict = simplejson.loads(runsamplefilesjson)
-        #so now we have a dict keyed on run, of sample id's whose file should have been received.
+        # so now we have a dict keyed on run, of sample id's whose file should have been received.
         print 'Checking run samples against:', runsamplefilesdict
-        #We iterate through each run, get the samples referred to, and ensure their file exists on disk.
+        # We iterate through each run, get the samples referred to, and ensure their file exists on disk.
         ret['description'] = ""
         for runid in runsamplefilesdict.keys():
             print 'Checking files from run %s', str(runid)
@@ -215,7 +215,8 @@ def checkRunSampleFiles(request):
                     fileexists = os.path.exists(complete_filename)
                     print 'Checking file %s:%s' % (complete_filename, str(fileexists))
                     
-                    #now change the value in the DB
+                    # now change the value in the DB
+                    print 'Changing value in DB'
                     rs.complete = fileexists
                     rs.save()
                     ret['success'] = True 
