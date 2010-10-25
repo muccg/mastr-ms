@@ -32,6 +32,12 @@ Ext.ux.grid.Search = function(config) {
 
 Ext.extend(Ext.ux.grid.Search, Ext.util.Observable, {
     /**
+     * @cfg {bool} disableSeparator
+     * added by N Takayama to make the separator user configurable
+     */
+    disableSeparator:false,
+
+    /**
      * @cfg {String} searchText Text to display on menu button
      */
      searchText:'Search'
@@ -161,7 +167,9 @@ Ext.extend(Ext.ux.grid.Search, Ext.util.Observable, {
             tb.addFill();
         }
         else {
-            tb.addSeparator();
+            if (!this.disableSeparator) {
+                tb.addSeparator();
+            }
         }
 
         // add menu button
