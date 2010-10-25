@@ -27,6 +27,7 @@ MA.ClientsListCmp = {
                       { header: "Client", menuDisabled:true, dataIndex:'client' }
             ],
             plugins:[new Ext.ux.grid.Search({
+                disableSeparator:true,
                  mode:'local'
                 ,iconCls:false
                 ,dateFormat:'m/d/Y'
