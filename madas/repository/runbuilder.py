@@ -1,4 +1,5 @@
 from madas.repository.models import RunSample, SampleNotInClassException, InstrumentSOP
+from django.http import HttpResponse
 
 class RunBuilder(object):
     def __init__(self, run):
@@ -59,7 +60,9 @@ class RunBuilder(object):
             self.run.save()
         
         #render
-        return mytemplate.render(**render_vars)
+        response = HttpResponse(content=mytemplate.render(**render_vars), content_type='text/html; charset=utf-8')
+
+        return response
         
 class TrayLayoutDelegate(object):
     def __init__(self):
