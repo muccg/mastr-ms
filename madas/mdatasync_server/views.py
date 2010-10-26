@@ -18,7 +18,11 @@ class FileList(object):
     def checkFiles(self, filesdict):
         #beginning at the top of the heirarchy, we attempt matches at each level.
         self.checknodes.append(self.heirarchy) #push on the root node
-        
+       
+        print 'DEBUG: the filenames coming out of the database are:'
+        for f in filesdict.keys():
+            print '\t', f
+
         while len(self.checknodes):
             self.currentnode = self.checknodes.pop()
             print 'currentnode is', self.currentnode
@@ -95,6 +99,11 @@ def getNodeClients(request, *args):
     return jsonResponse(result)
 
 def retrievePathsForFiles(request, *args):
+    '''This function is called as a webservice by the datasync client.
+       It expects a post var called 'files' which will be a json string
+       which represents a heirarchy of directories and files.
+    '''
+    
     status = 0 #no error
     error = '' #no error
     filesdict = {} 
@@ -114,6 +123,7 @@ def retrievePathsForFiles(request, *args):
         porganisation = simplejson.loads(request.POST.get('organisation', ''))
         psitename= simplejson.loads(request.POST.get('sitename', ''))
         pstation = simplejson.loads(request.POST.get('stationname', ''))
+        
         print 'Post var files passed through was: ', pfiles
         print 'Post var organisation passed through was: ', porganisation
         print 'Post var station passed through was: ', pstation
