@@ -276,7 +276,7 @@ function _ExperimentController() {
         
         MA.skipBlur = false;
         
-        Ext.getCmp('center-panel').layout.setActiveItem('experimentTitle');
+        Ext.getCmp('center-panel').layout.setActiveItem('expProjTitle');
     };
     
     this.updateNav = function(index) {
@@ -431,145 +431,152 @@ MA.ExperimentDetails = {
 
 
 MA.ExperimentCmp = { 
-    id:'experimentTitle',
-    title:'New Experiment',
-    layout:'border',
-    defaults: {
-        collapsible: false,
-        split: true,
-        bodyStyle: 'padding:15px'
-    },
-    tools: [
+id:'expProjTitle',
+layout:'fit',
+title:'Project',
+tools: [
         {
-            id:'left',
-            qtip: "Back to the project",
-            handler: function() {
-                MA.LoadProject(MA.currentProjectId);
-            }
+        id:'left',
+        qtip: "Back to the project",
+        handler: function() {
+        MA.LoadProject(MA.currentProjectId);
         }
-    ],
-    items: [{
-        region:'west',
-        margins: '5 0 0 0',
-        cmargins: '5 5 0 0',
-        width: 175,
-        minSize: 100,
-        maxSize: 250,
-        border: false,
-        baseCls: 'x-plain',
-        bodyStyle: 'padding:0px;padding-left:5px;',
-        layout:'anchor',
-        hideMode:'offsets',
-        items: [
-            {
-                title: 'Navigation',
-                frame: true,
-                style:'background:white;',
-                layout:'anchor',
-                hideMode:'offsets',
-                items: [
-                    {
-                        id: 'expNav',
-                        baseCls: 'x-plain',
-                        hideMode:'offsets',
-                    	style:'background:white;',
-                    	selectedClass:'ma-list-selected',
-                        xtype:'listview', 
-//                        border: false,
-//                        trackMouseOver: false,
-                        hideHeaders:true,
-//                        syncFocus: false,
-                        width:270,
-//                        autoHeight:true,
-                        singleSelect:true,
-                        multiSelect:false,
-                        listeners:{
-                            "selectionchange": MA.ExperimentController.selectionChangeHandler,
-                            "beforeselect":function(list, nodes, sel) {
-                                return !list.disabled;
-                            }
-                        },
-                        columns: [
-                            { header: "Nav",  dataIndex:'nav', sortable:false, menuDisabled:true }
-                        ],
-                        store: new Ext.data.SimpleStore(
-                            {
-                                storeId:"navDS",
-                                fields: ["nav", "init", "blur", "enabled"],
-                                data: [ 
-                                    [ "Experiment Details", MA.ExperimentController.init, MA.ExperimentController.blur, true ],
-                                    [ "Source", MA.BioSourceInit, MA.BioSourceBlur, false ],
-                                    [ "Treatment", MA.TreatmentInit, MA.Blur, false ],
-                                    [ "Sample Preparation", MA.SamplePrepInit, MA.Blur, false ],
-                                    [ "Sample Classes", MA.ExperimentSamplesInit, MA.Blur, false ],
-                                    [ "Samples", MA.ExperimentSamplesOnlyInit, MA.Blur, false ],
-                                    [ "Sample Tracking", MA.SampleTrackingInit, MA.Blur, false ],
-                                    [ "Files", MA.FilesInit, MA.Blur, false ],
-                                    [ "Access", MA.AccessInit, MA.Blur, false ]
-                                ]
-                            }
-                          )  
-                      }
-                ]
-            },
-            {
-            title: 'Current Run',
-            frame: true,
-            style:'background:white;margin-top:20px;',
-            items: [
-                {
-                    xtype:'panel',
-                    bodyStyle:'padding:4px;',
-                    id:'runPanel',
-                    items:[
-                        {
-                            xtype:'panel',
-                            html:'Selected samples will be added to:'
-                        },
-                        {
-                            xtype:'panel',
-                            html:'New Untitled Run',
-                            id:'currentRunTitle',
-                            style:'font-weight:bold;padding:6px;'
-                        },
-                        {
-                            xtype:'button',
-                            text:'View',
-                            handler:function(){MA.RunCmp.show();},
-                            style: "margin-left: auto; margin-right: auto"
-                        }
-                    ]
-                }
-            ]
-            }
-        ]
-    },{
-        id: 'expContent',
-        collapsible: false,
-        region:'center',
-        border: false,
-        margins: '5 0 0 0',
-        layout:'card',
-        activeItem:0,
-        bodyStyle:'padding:0px;',
-        forceLayout:true,
-        deferredRender:true,
-        defaults: {
-            forceLayout:true,
-            deferredRender:true
-        },
-        items:[
-            MA.ExperimentDetails,
-            MA.BioSource,
-            MA.Treatment,
-            MA.SamplePrep,
-            MA.ExperimentSamples,
-            MA.ExperimentSamplesOnly,
-            MA.SampleTracking,
-            MA.Files,
-            MA.Access
-        ]
-    }]
+        }
+        ],
+items:[
+       {
+       id:'experimentTitle',
+       title:'New Experiment',
+       layout:'border',
+       defaults: {
+       collapsible: false,
+       split: true,
+       bodyStyle: 'padding:15px'
+       },
+       items: [{
+               region:'west',
+               margins: '5 0 0 0',
+               cmargins: '5 5 0 0',
+               width: 175,
+               minSize: 100,
+               maxSize: 250,
+               border: false,
+               baseCls: 'x-plain',
+               bodyStyle: 'padding:0px;padding-left:5px;',
+               layout:'anchor',
+               hideMode:'offsets',
+               items: [
+                       {
+                       title: 'Navigation',
+                       frame: true,
+                       style:'background:white;',
+                       layout:'anchor',
+                       hideMode:'offsets',
+                       items: [
+                               {
+                               id: 'expNav',
+                               baseCls: 'x-plain',
+                               hideMode:'offsets',
+                               style:'background:white;',
+                               selectedClass:'ma-list-selected',
+                               xtype:'listview', 
+                               //                        border: false,
+                               //                        trackMouseOver: false,
+                               hideHeaders:true,
+                               //                        syncFocus: false,
+                               width:270,
+                               //                        autoHeight:true,
+                               singleSelect:true,
+                               multiSelect:false,
+                               listeners:{
+                               "selectionchange": MA.ExperimentController.selectionChangeHandler,
+                               "beforeselect":function(list, nodes, sel) {
+                               return !list.disabled;
+                               }
+                               },
+                               columns: [
+                                         { header: "Nav",  dataIndex:'nav', sortable:false, menuDisabled:true }
+                                         ],
+                               store: new Ext.data.SimpleStore(
+                                                               {
+                                                               storeId:"navDS",
+                                                               fields: ["nav", "init", "blur", "enabled"],
+                                                               data: [ 
+                                                                      [ "Experiment Details", MA.ExperimentController.init, MA.ExperimentController.blur, true ],
+                                                                      [ "Source", MA.BioSourceInit, MA.BioSourceBlur, false ],
+                                                                      [ "Treatment", MA.TreatmentInit, MA.Blur, false ],
+                                                                      [ "Sample Preparation", MA.SamplePrepInit, MA.Blur, false ],
+                                                                      [ "Sample Classes", MA.ExperimentSamplesInit, MA.Blur, false ],
+                                                                      [ "Samples", MA.ExperimentSamplesOnlyInit, MA.Blur, false ],
+                                                                      [ "Sample Tracking", MA.SampleTrackingInit, MA.Blur, false ],
+                                                                      [ "Files", MA.FilesInit, MA.Blur, false ],
+                                                                      [ "Access", MA.AccessInit, MA.Blur, false ]
+                                                                      ]
+                                                               }
+                                                               )  
+                               }
+                               ]
+                       },
+                       {
+                       title: 'Current Run',
+                       frame: true,
+                       style:'background:white;margin-top:20px;',
+                       items: [
+                               {
+                               xtype:'panel',
+                               bodyStyle:'padding:4px;',
+                               id:'runPanel',
+                               items:[
+                                      {
+                                      xtype:'panel',
+                                      html:'Selected samples will be added to:'
+                                      },
+                                      {
+                                      xtype:'panel',
+                                      html:'New Untitled Run',
+                                      id:'currentRunTitle',
+                                      style:'font-weight:bold;padding:6px;'
+                                      },
+                                      {
+                                      xtype:'button',
+                                      text:'View',
+                                      handler:function(){MA.RunCmp.show();},
+                                      style: "margin-left: auto; margin-right: auto"
+                                      }
+                                      ]
+                               }
+                               ]
+                       }
+                       ]
+               },{
+               id: 'expContent',
+               collapsible: false,
+               region:'center',
+               border: false,
+               margins: '5 0 0 0',
+               layout:'card',
+               activeItem:0,
+               bodyStyle:'padding:0px;',
+               forceLayout:true,
+               deferredRender:true,
+               defaults: {
+               forceLayout:true,
+               deferredRender:true
+               },
+               items:[
+                      MA.ExperimentDetails,
+                      MA.BioSource,
+                      MA.Treatment,
+                      MA.SamplePrep,
+                      MA.ExperimentSamples,
+                      MA.ExperimentSamplesOnly,
+                      MA.SampleTracking,
+                      MA.Files,
+                      MA.Access
+                      ]
+               }]
+       }
+       ]
 };
 
 

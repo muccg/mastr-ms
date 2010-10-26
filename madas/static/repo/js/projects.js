@@ -408,6 +408,8 @@ MA.LoadProject = function (projId) {
                                                  var desc = Ext.getCmp('projectDescription');
                                                  var titleCmp = Ext.getCmp('projectCmpTitle');
                                                  var clientCmp = Ext.getCmp('projectClientCombo');
+                                                 var projBarTitle = Ext.getCmp('expProjTitle');
+                                                 projBarTitle.setTitle('');
 
                                                  titleCmp.setTitle('');    
                                                  titlefield.setValue('');
@@ -423,6 +425,7 @@ MA.LoadProject = function (projId) {
 
                                                  if (rs.length > 0) {
                                                      titleCmp.setTitle('Project: ' + rs[0].title);
+                                                     projBarTitle.setTitle('Project: ' + rs[0].title);
                                                      titlefield.setValue(rs[0].title);
                                                      desc.setValue(rs[0].description);
                                                      clientCmp.setValue(rs[0].client);
