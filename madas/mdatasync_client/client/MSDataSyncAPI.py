@@ -362,9 +362,9 @@ class MSDSImpl(object):
         print 'Copyfiles dict: ', copydict
         try:
             for filename in copydict.keys():
-                self.log( '\tCopying %s to %s' % (str(os.path.normpath(filename)), str(os.path.normpath(copydict[filename]) ) ), thread=self.controller.useThreading  )
+                self.log( '\tCopying %s to %s' % (os.path.normpath(filename), os.path.normpath(copydict[filename] ) ), thread=self.controller.useThreading  )
                 print 'doing copyfile'
-                self.copyfile( str(os.path.normpath(filename)), str(os.path.normpath(copydict[filename])))
+                self.copyfile( os.path.normpath(filename), os.path.normpath(copydict[filename]))
         except Exception, e:
             self.log('Problem copying: %s' % (str(e)), type=self.log.LOG_ERROR,  thread = self.controller.useThreading )
 

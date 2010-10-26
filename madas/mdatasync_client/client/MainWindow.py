@@ -267,7 +267,7 @@ class MainWindow(wx.Frame):
         if retcode:
             self.log('Check function returned', type=self.log.LOG_DEBUG, thread = thread)
         else:
-            self.log(retstring, type=self.log.LOG_DEBUG)
+            self.log(retstring, type=self.log.LOG_DEBUG, thread=thread)
         
 
     def __testMenuFunction(self, event):
