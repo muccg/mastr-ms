@@ -26,6 +26,7 @@ class FileList(object):
         while len(self.checknodes):
             self.currentnode = self.checknodes.pop()
             print 'currentnode is', self.currentnode
+            print 'running checknode'
             self.checknode(filesdict)
 
     def markfound(self, node, fname, filesdictentry):
