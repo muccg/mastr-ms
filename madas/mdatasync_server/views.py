@@ -43,7 +43,7 @@ class FileList(object):
         if len(self.currentnode['.'].keys()):
             for fname in self.currentnode['.'].keys():
                 #is the filename in the filesdict keys?
-                print 'filename is: ', fname
+                print 'filename is: ', unicode(fname).encode('utf-8')
                 if fname in filesdict.keys():
                     self.markfound(self.currentnode['.'], fname, filesdict[fname])
                     #remove the entry from the filesdict - no point testing it
