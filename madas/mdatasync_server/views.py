@@ -49,11 +49,11 @@ class FileList(object):
                     #remove the entry from the filesdict - no point testing it
                     #again.
                     del filesdict[fname]
-                    print 'Found file: Setting %u to %u' % (fname, self.currentnode['.'][fname])
+                    print 'Found file: Setting %s to %s' % (fname.encode('utf-8'), self.currentnode['.'][fname].encode('utf-8'))
                 else:
                     #delete entries that werent found
                     del self.currentnode['.'][fname]
-                    print 'File %u not associated with a runsample, ignoring' % (fname)
+                    print 'File %s not associated with a runsample, ignoring' % (fname.encode('utf-8'))
         #now that you have checked the files at a node, you need to 
         #check the directories at the node.
         #if the dir is found, mark it as such and do nothing else with it.
@@ -66,7 +66,7 @@ class FileList(object):
                     self.markfound(self.currentnode[dir], filesdict[dir])
                     #remove the found entry from the filesdict
                     del filesdict[dir]
-                    print 'Found dir: Setting %u to %u' % (dir, self.currentnode['.'][dir])
+                    print 'Found dir: Setting %s to %s' % (dir.encode('utf-8'), self.currentnode['.'][dir].encode('utf-8'))
                 else:
                     #push the dir onto the checknodes.
                     self.checknodes.append(self.currentnode[dir])
