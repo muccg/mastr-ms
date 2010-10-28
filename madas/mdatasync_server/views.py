@@ -162,10 +162,10 @@ def retrievePathsForFiles(request, *args):
                 for rs in runsamples:
                     fname = rs.filename;
                     abspath, relpath = rs.filepaths()
-                    print 'Filename: %s belongs in path %s' % ( fname, abspath )
+                    print 'Filename: %s belongs in path %s' % ( fname.encode('utf-8'), abspath.encode('utf-8') )
                     if filesdict.has_key(fname):
                         print 'Duplicate path detected!!!'
-                        error = "%s, %s" % (error, "Duplicate filename detected for %s" % (fname))
+                        error = "%s, %s" % (error, "Duplicate filename detected for %s" % (fname.encode('utf-8')))
                         status = 2
                     #we use the relative path    
                     filesdict[fname] = [run.id, rs.id, relpath]
