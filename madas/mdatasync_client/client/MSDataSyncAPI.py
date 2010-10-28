@@ -315,7 +315,7 @@ class MSDSImpl(object):
         #Popen('rsync -t %s %s:%s' % (sourcedir, remotehost, remotedir) )
         
         #cmdhead = ['rsync', '-tavz'] #t, i=itemize-changes,a=archive,v=verbose,z=zip
-        cmdhead = ['rsync', '-avz'] #v=verbose,z=zip
+        cmdhead = ['rsync', '-avz'] #v=verbose,z=zip #a=archive (preserves times)
         cmdtail = ['--log-file=%s' % (logfile), str(sourcedir), '%s@%s:%s' % (str(remoteuser), str(remotehost), str(remotedir) )]
 
         cmd = []
@@ -338,8 +338,10 @@ class MSDSImpl(object):
         #for line in p.stdout:
         #    self.log("RSYNC %s: " % (line,), thread=self.controller.useThreading)
         
-        retcode = p.communicate()[0]
-        #self.log('the retcode was: %s' % (str(retcode),), Debug=True)
+        (retcode, pstderr) = p.communicate()
+
+        if len(pstderr) > 0:
+            self.log('Error Rsyncing: %s' % (str(pstderr),), type=self.log.LOG_ERROR, thread = self.controller.useThreading)
         return retcode
 
     
