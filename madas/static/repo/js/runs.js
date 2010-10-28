@@ -397,7 +397,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
             this.remove("samplesToAdd");
             this.getComponent('samples').setHeight(200);
         } else {
-            this.remove('runFiles');
+            this.remove('runTree');
         }
         
         self.setAutoScroll(true);

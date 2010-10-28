@@ -322,7 +322,7 @@ function _ExperimentController() {
         formalQuote.clearValue();
         jobNumber.setValue('');
 
-        Ext.getCmp('center-panel').layout.setActiveItem('experimentTitle');
+        Ext.getCmp('center-panel').layout.setActiveItem('expProjTitle');
 //        Ext.getCmp('expNav').getSelectionModel().selectFirstRow();
     };
     
