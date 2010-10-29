@@ -1236,7 +1236,8 @@ def _fileList(request, basepath, path, withChecks, sharedList, replacementBasepa
                 file['checked'] = False
                 
                 for cf in sharedList:
-                    if file['id'] == cf.filepath:
+                    import unicodedata as ud
+                    if ud.normalize('NFD',unicode(file['id'])) == ud.normalize('NFD',unicode(cf.filepath)):
                         file['checked'] = True
 
             output.append(file)
