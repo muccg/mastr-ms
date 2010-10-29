@@ -40,6 +40,7 @@ class FileList(object):
     
     def checknode(self, filesdict):
         #if there are files at this node. 
+        print '\nIn checknode, type of currentnode is: ', type(self.currentnode)
         print '\nIn checknode, currentnode is', self.currentnode 
         print 'at . is: ', self.currentnode['.']
         if len(self.currentnode['.'].keys()):
