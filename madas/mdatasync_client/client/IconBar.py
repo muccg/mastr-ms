@@ -45,5 +45,8 @@ class IconBar:
         icon = wx.EmptyIcon()
         icon.CopyFromBitmap(bmp)
 
+                
+
         return icon
+
 
