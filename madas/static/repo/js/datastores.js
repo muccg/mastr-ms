@@ -203,6 +203,23 @@ var experimentListStore = new Ext.data.GroupingStore(
                         }
                     );
 
+//store:runRelatedExperimentStore
+var runRelatedExperimentStore = new Ext.data.JsonStore(
+{
+    storeId: 'runRelatedExperimentStore',
+    autoLoad: false,
+    url: wsBaseUrl + 'recordsExperiments',
+    listeners: {'load':MA.DSLoaded,
+        'loadexception':MA.DSLoadException
+    },
+    sortInfo: {
+        field: 'id',
+        direction: 'DESC'
+    },
+    reader:new Ext.data.JsonReader({})     
+}
+);
+
 var projectsListStore = new Ext.data.JsonStore(
                         {
                             storeId: 'projectList',

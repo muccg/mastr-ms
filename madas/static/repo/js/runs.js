@@ -255,7 +255,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     }
                 },
                 {
-                    fieldLabel: 'Completed files',
+                    fieldLabel: 'Files - PBQCs, QCs and Sweeps',
                    xtype:'treepanel',
                    border: true,
                    autoScroll: true,
@@ -295,7 +295,39 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                             Ext.getCmp('runTree').getRootNode().expand();
                         }
                     }
-               }
+               },
+                {
+                    fieldLabel: 'Related Experiments',
+                    xtype:'listview',
+                    id:'runRelatedExperiments',
+                    store:runRelatedExperimentStore,
+                    loadingText:'Loading...',
+                    columnSort:false,
+                    hideHeaders:true,
+                    height:50,
+                    columns: [
+                    {header: "Double-click to view experiment", dataIndex: 'title'}
+                    ],
+                    listeners:{
+                        'dblclick':function(dv,idx,node,e) {
+                            val = dv.getRecord(node);
+                            if (Ext.isDefined(val)) {
+                                MA.currentProjectId = val.data.project;
+                                MA.ExperimentController.loadExperiment(val.data.id);
+                            }
+                        },
+                        'render': function() {
+                        }
+                    },
+                    viewConfig:{
+                        forceFit:true
+                    },
+                    singleSelect:true,
+                    multiSelect:false,
+                    style:'background:white;',
+                    autoScroll:true,
+                    reserveScrollOffset:true
+                }
             ],
             buttons:[
                 {
@@ -518,6 +550,9 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         this.sampleStore.load({ params: { run__id__exact: this.runId } });
         
         Ext.getCmp('runTree').getLoader().load(Ext.getCmp('runTree').getRootNode());
+        
+        runRelatedExperimentStore.proxy.conn.url = wsBaseUrl + 'records/experiment/sample__run__id/' + this.runId;
+        runRelatedExperimentStore.load({ });
     }
 });
 
