@@ -91,7 +91,7 @@ class MSDataSyncAPI(object):
         localindexdir = self.config.getLocalIndexPath() 
         filesdict = self.getFiles(localdir, ignoredirs=[localindexdir])
         
-        postvars = {'files' : simplejson.dumps(unicode(filesdict)), 'organisation' : simplejson.dumps(unicode(organisation)), 'sitename' : simplejson.dumps(unicode(sitename)), 'stationname': simplejson.dumps(unicode(station))}
+        postvars = {'files' : simplejson.dumps(filesdict), 'organisation' : simplejson.dumps(organisation), 'sitename' : simplejson.dumps(sitename), 'stationname': simplejson.dumps(station)}
         try:
             f = urllib.urlopen(self.config.getValue('synchub'), urllib.urlencode(postvars))
             jsonret = f.read()
@@ -232,9 +232,10 @@ class MSDataSyncAPI(object):
                     node[dirname]['/'] = os.path.join(root, dirname)
 
             for file in files:
+                print 'setting filename %s to None' % (file.encode('utf-8'))
                 node['.'][file] = None
         
-        print 'retfiles is: ', retfiles
+        print 'retfiles is: ', unicode(retfiles).encode('utf-8')
         return retfiles
     
     #------- WORKER CLASS-----------------------
