@@ -69,7 +69,7 @@ class FileList(object):
                     self.markfound(self.currentnode[dir], dir, filesdict[dir])
                     #remove the found entry from the filesdict
                     del filesdict[dir]
-                    print 'Found dir: Setting %s to %s' % (dir.encode('utf-8'), self.currentnode['.'][dir].encode('utf-8'))
+                    #print 'Found dir: Setting %s to %s' % ( dir.encode('utf-8'), self.currentnode['.'][dir].encode('utf-8') )
                 else:
                     #push the dir onto the checknodes.
                     self.checknodes.append(self.currentnode[dir])
