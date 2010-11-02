@@ -208,12 +208,12 @@ class MSDataSyncAPI(object):
             shouldignore = False
             for ignoredir in ignoredirs:
                 if root.startswith(ignoredir):
-                    print 'ignoring ', root
+                    print 'ignoring ', root.encode('utf-8')
                     shouldignore = True
                     break
 
             if shouldignore:
-                print 'did an ignore of: ', root, dirs, files
+                #print 'did an ignore of: ', root, dirs, files
                 continue #go to the next iteration of the loop 
 
             #get the current 'node' of the dict for this level
@@ -372,18 +372,17 @@ class MSDSImpl(object):
             self.log('Problem copying: %s' % (str(e)), type=self.log.LOG_ERROR,  thread = self.controller.useThreading )
 
     def copyfile(self, src, dst):
-        from shutil import copy2
+        from shutil import copy2, copytree
         import os.path
-        print 'getting path'
-        thepath = str(os.path.dirname(dst))
-        print 'finished getting path'
-        #print 'copyfile: %s to %s, path is %s' % (src, dst, thepath)
-        try:
-            if not os.path.exists(thepath):
-                self.log('Path %s did not exist - creating' % (thepath,) , thread = self.controller.useThreading )
-                os.makedirs(thepath)
-
-            copy2(src, dst)
+        try: 
+            if os.path.isdir(src) and not os.path.exists(dst):
+                copytree(src, dst)
+            else:    
+                thepath = str(os.path.dirname(dst))
+                if not os.path.exists(thepath):
+                    self.log('Path %s did not exist - creating' % (thepath,) , thread = self.controller.useThreading )
+                    os.makedirs(thepath)
+                copy2(src, dst)
         except Exception, e:
             self.log('Error copying %s to %s : %s' % (src, dst, e), type = self.log.LOG_ERROR,  thread = self.controller.useThreading )
 
