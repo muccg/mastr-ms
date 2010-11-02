@@ -40,8 +40,8 @@ function renderSampleLogType(val) {
 }
 
 function renderRunProgress(val, meta, record) {
-    var progress;
-    if (Ext.isDefined(val) || !Ext.isDefined(record)) {
+    var progress = 0.0;
+    if ((Ext.isDefined(val) && !isNaN(val))) {
         progress = val;
     } else {
         progress = record.get("complete_sample_count") / record.get("sample_count");
@@ -54,7 +54,7 @@ function renderRunProgress(val, meta, record) {
     if (Ext.isDefined(record) && record.get("state") == 2) {
         progress = 1.0;
     }
-
+    
     var text = Math.floor(progress * 100.0).toString() + "%";
 
     return "<div class='x-progress-wrap'>"
