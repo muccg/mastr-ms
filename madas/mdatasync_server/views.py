@@ -40,8 +40,8 @@ class FileList(object):
     
     def checknode(self, filesdict):
         #if there are files at this node. 
-        print '\nIn checknode, type of currentnode is: ', type(self.currentnode)
-        print '\nIn checknode, currentnode is', self.currentnode 
+        #print '\nIn checknode, type of currentnode is: ', type(self.currentnode)
+        #print '\nIn checknode, currentnode is', self.currentnode 
         print 'at . is: ', self.currentnode['.']
         if len(self.currentnode['.'].keys()):
             for fname in self.currentnode['.'].keys():
@@ -64,14 +64,16 @@ class FileList(object):
         #queue
         for dir in self.currentnode.keys():
             if dir not in ['.', '/']: #don't check the filelist or 'path' entry
+                print 'checking dir: %s' % (dir.encode('utf-8'))
                 if dir in filesdict.keys():
                     #set the dir to contain the path, not a node.
                     self.markfound(self.currentnode, dir, filesdict[dir])
                     #remove the found entry from the filesdict
                     del filesdict[dir]
-                    #print 'Found dir: Setting %s to %s' % ( dir.encode('utf-8'), self.currentnode['.'][dir].encode('utf-8') )
+                    print 'Found dir: Setting %s to %s' % ( dir.encode('utf-8'), self.currentnode[dir].encode('utf-8') )
                 else:
                     #push the dir onto the checknodes.
+                    print 'Could not find dir %s, pushing.' % (dir.encode('utf-8'))
                     self.checknodes.append(self.currentnode[dir])
 
 def jsonResponse(data):
