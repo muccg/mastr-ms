@@ -31,8 +31,7 @@ class FileList(object):
 
     def markfound(self, node, fname, filesdictentry):
         #Mark a file as 'found' (if it isnt a file it will be None)
-        if fname:
-            node[fname] = filesdictentry[2] #the relative path
+        node[fname] = filesdictentry[2] #the relative path
         runid = filesdictentry[0] #the runid
         runsampleid = filesdictentry[1] #the runsampleid
         if runid not in self.runsamplesdict.keys():
@@ -67,7 +66,7 @@ class FileList(object):
             if dir not in ['.', '/']: #don't check the filelist or 'path' entry
                 if dir in filesdict.keys():
                     #set the dir to contain the path, not a node.
-                    self.markfound(self.currentnode[dir], None, filesdict[dir])
+                    self.markfound(self.currentnode, dir, filesdict[dir])
                     #remove the found entry from the filesdict
                     del filesdict[dir]
                     #print 'Found dir: Setting %s to %s' % ( dir.encode('utf-8'), self.currentnode['.'][dir].encode('utf-8') )
