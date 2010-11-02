@@ -42,6 +42,10 @@ class GeneratePopup(wx.Dialog):
         print self.destdir
         for selindex in selindexes:
             listitem = self.listctrl.Items[selindex]
+            if listitem.endswith('.d'):
+                #create a directory instead, and blat a bunch of files there.
+
+            
             try:
                 fname = os.path.join(self.destdir, listitem)
                 if not os.path.exists(fname):

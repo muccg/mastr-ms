@@ -47,10 +47,10 @@ Section "" ;No components page, name is not important
 
   ; install cwrsync
   ; First, copy over the cwrsync installer
-  File ..\supportwin32\cwRsync_3.1.0_Installer.exe
+  File ..\supportwin32\cwRsync_4.0.5_Installer.exe
 
   ;Now run a silent install.
-  ExecWait '"cwRsync_3.1.0_Installer.exe" /S'
+  ExecWait '"cwRsync_4.0.5_Installer.exe" /S'
 
   ;Now set environment variables for CWRSYNCHOME and append to path
    
