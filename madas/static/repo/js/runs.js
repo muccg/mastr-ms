@@ -259,7 +259,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                    xtype:'treepanel',
                    border: true,
                    autoScroll: true,
-                   id:'runTree',
+                   itemId:'runTree',
                    animate: true,
                    useArrows: true,
                    height:200,
@@ -289,17 +289,17 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                        }),
                    listeners:{
                         render: function() {
-                            Ext.getCmp('runTree').getLoader().on("beforeload", function(treeLoader, node) {
+                            self.getComponent('runTree').getLoader().on("beforeload", function(treeLoader, node) {
                                 treeLoader.baseParams.run = self.runId;
                                 }, this);
-                            Ext.getCmp('runTree').getRootNode().expand();
+                            self.getComponent('runTree').getRootNode().expand();
                         }
                     }
                },
                 {
                     fieldLabel: 'Related Experiments',
                     xtype:'listview',
-                    id:'runRelatedExperiments',
+                    itemId:'runRelatedExperiments',
                     store:runRelatedExperimentStore,
                     loadingText:'Loading...',
                     columnSort:false,
@@ -525,7 +525,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         this.pendingSampleStore.removeAll();
 
         this.getComponent("state").setText(renderRunState(record.data.state));
-        this.getComponent("progress").setText(renderRunProgress(null, null, record), false);
+        this.getComponent("progress").setText(renderRunProgress(undefined, undefined, record), false);
         this.getComponent("title").setValue(record.data.title);
         this.getComponent("method").setValue(record.data.method);
         this.getComponent("machine").setValue(record.data.machine);
@@ -549,7 +549,9 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
        
         this.sampleStore.load({ params: { run__id__exact: this.runId } });
         
-        Ext.getCmp('runTree').getLoader().load(Ext.getCmp('runTree').getRootNode());
+        if (this.getComponent('runTree')) {
+            this.getComponent('runTree').getLoader().load(this.getComponent('runTree').getRootNode());
+        }
         
         runRelatedExperimentStore.proxy.conn.url = wsBaseUrl + 'records/experiment/sample__run__id/' + this.runId;
         runRelatedExperimentStore.load({ });
