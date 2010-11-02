@@ -66,7 +66,7 @@ class FileList(object):
             if dir not in ['.', '/']: #don't check the filelist or 'path' entry
                 if dir in filesdict.keys():
                     #set the dir to contain the path, not a node.
-                    self.markfound(self.currentnode[dir], filesdict[dir])
+                    self.markfound(self.currentnode[dir], dir, filesdict[dir])
                     #remove the found entry from the filesdict
                     del filesdict[dir]
                     print 'Found dir: Setting %s to %s' % (dir.encode('utf-8'), self.currentnode['.'][dir].encode('utf-8'))

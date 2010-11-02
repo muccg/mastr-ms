@@ -226,7 +226,7 @@ class MSDataSyncAPI(object):
             #don't create ignored dirs..
             for dirname in dirs:
                 if not node.has_key(dirname) and os.path.join(root, dirname) not in ignoredirs:
-                    print 'creating dirname:', dirname
+                    print 'creating dirname:', dirname.encode('utf-8')
                     node[dirname] = {}
                     node[dirname]['.'] = {}
                     node[dirname]['/'] = os.path.join(root, dirname)
