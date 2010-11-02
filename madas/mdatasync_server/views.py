@@ -228,7 +228,7 @@ def checkRunSampleFiles(request):
                     abssamplepath, relsamplepath = rs.filepaths()
                     complete_filename = os.path.join(abssamplepath, rs.filename)
                     fileexists = os.path.exists(complete_filename)
-                    print 'Checking file %s:%s' % (complete_filename.encode('utf-8'), fileexists.encode('utf-8'))
+                    print 'Checking file %s:%s' % (complete_filename.encode('utf-8'), fileexists)
                     
                     # now change the value in the DB
                     print 'Changing value in DB'
