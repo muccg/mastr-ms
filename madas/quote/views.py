@@ -85,7 +85,7 @@ def _handle_uploaded_file(f, name):
         for chunk in f.chunks():
             destination.write(chunk)
         
-        import grp
+        import grp, stat
         groupinfo = grp.getgrnam(settings.CHMOD_GROUP)
         gid = groupinfo.gr_gid
         
