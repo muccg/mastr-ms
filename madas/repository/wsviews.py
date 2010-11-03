@@ -1456,7 +1456,15 @@ def _handle_uploaded_file(f, name):
         destination = open(settings.REPO_FILES_ROOT + os.sep + 'pending' + os.sep + name, 'wb+')
         for chunk in f.chunks():
             destination.write(chunk)
+    
+        import grp
+        groupinfo = grp.getgrnam(settings.CHMOD_GROUP)
+        gid = groupinfo.gr_gid
+
+        os.fchown(destination.fileno(), os.getuid(), gid)
+
         destination.close()
+    
         retval = True
     except Exception, e:
         retval = False
