@@ -8,6 +8,11 @@ from django.conf import settings
 import os
 import os.path
 
+from django.contrib import logging
+#Create a logging object for ldap debugging
+logger = logging.getLogger('mdatasync_server')
+
+
 class FileList(object):
     def __init__(self, heirarchy):
         self.heirarchy = heirarchy
@@ -19,14 +24,14 @@ class FileList(object):
         #beginning at the top of the heirarchy, we attempt matches at each level.
         self.checknodes.append(self.heirarchy) #push on the root node
        
-        print 'DEBUG: the filenames coming out of the database are:'
+        logger.debug( 'The filenames coming out of the database are:' )
         for f in filesdict.keys():
-            print '\t', f.encode('utf-8')
+            logger.debug('\t%s' % (f.encode('utf-8') )
 
         while len(self.checknodes):
             self.currentnode = self.checknodes.pop()
-            print 'currentnode is', self.currentnode
-            print 'running checknode'
+            logger.debug('currentnode is %s' % ( self.currentnode ) )
+            logger.debug('running checknode')
             self.checknode(filesdict)
 
     def markfound(self, node, fname, filesdictentry):
@@ -42,21 +47,20 @@ class FileList(object):
         #if there are files at this node. 
         #print '\nIn checknode, type of currentnode is: ', type(self.currentnode)
         #print '\nIn checknode, currentnode is', self.currentnode 
-        print 'at . is: ', self.currentnode['.']
         if len(self.currentnode['.'].keys()):
             for fname in self.currentnode['.'].keys():
                 #is the filename in the filesdict keys?
-                print 'filename is: ', unicode(fname).encode('utf-8')
+                logger.debug('filename is: %s' % (unicode(fname).encode('utf-8') ) )
                 if fname in filesdict.keys():
                     self.markfound(self.currentnode['.'], fname, filesdict[fname])
                     #remove the entry from the filesdict - no point testing it
                     #again.
                     del filesdict[fname]
-                    print 'Found file: Setting %s to %s' % (fname.encode('utf-8'), self.currentnode['.'][fname].encode('utf-8'))
+                    logger.debug('Found file: Setting %s to %s' % (fname.encode('utf-8'), self.currentnode['.'][fname].encode('utf-8')) )
                 else:
                     #delete entries that werent found
                     del self.currentnode['.'][fname]
-                    print 'File %s not associated with a runsample, ignoring' % (fname.encode('utf-8'))
+                    logger.debug( 'File %s not associated with a runsample, ignoring' % (fname.encode('utf-8')) )
         #now that you have checked the files at a node, you need to 
         #check the directories at the node.
         #if the dir is found, mark it as such and do nothing else with it.
@@ -64,16 +68,16 @@ class FileList(object):
         #queue
         for dir in self.currentnode.keys():
             if dir not in ['.', '/']: #don't check the filelist or 'path' entry
-                print 'checking dir: %s' % (dir.encode('utf-8'))
+                logger.debug('checking dir: %s' % (dir.encode('utf-8')) )
                 if dir in filesdict.keys():
                     #set the dir to contain the path, not a node.
                     self.markfound(self.currentnode, dir, filesdict[dir])
                     #remove the found entry from the filesdict
                     del filesdict[dir]
-                    print 'Found dir: Setting %s to %s' % ( dir.encode('utf-8'), self.currentnode[dir].encode('utf-8') )
+                    logger.debug( 'Found dir: Setting %s to %s' % ( dir.encode('utf-8'), self.currentnode[dir].encode('utf-8') ))
                 else:
                     #push the dir onto the checknodes.
-                    print 'Could not find dir %s, pushing.' % (dir.encode('utf-8'))
+                    logger.debug('Could not find dir %s, pushing.' % (dir.encode('utf-8')) )
                     self.checknodes.append(self.currentnode[dir])
 
 def jsonResponse(data):
@@ -90,11 +94,11 @@ def configureNode(request, *args):
     return jsonResponse(nodeconfig.toDict())
 
 def getNodeClients(request, *args):
-    print 'trying getNodeClients'
+    logger.debug( 'trying getNodeClients' )
     ncs = NodeClient.objects.all()
     result = {}
     for n in ncs:
-        print 'checking a node'
+        logger.debug( 'checking a node' )
         if not result.has_key(n.organisation_name):
             result[n.organisation_name] = {}
         o = result[n.organisation_name]
@@ -131,10 +135,10 @@ def retrievePathsForFiles(request, *args):
         psitename= simplejson.loads(request.POST.get('sitename', ''))
         pstation = simplejson.loads(request.POST.get('stationname', ''))
         
-        print 'Post var files passed through was: ', pfiles
-        print 'Post var organisation passed through was: ', porganisation
-        print 'Post var station passed through was: ', pstation
-        print 'Post var sitename passed through was: ', psitename
+        logger.debug( 'Post var files passed through was: %s' % ( pfiles) )
+        logger.debug( 'Post var organisation passed through was: %s' % ( porganisation) )
+        logger.debug( 'Post var station passed through was: %s' % ( pstation ) )
+        logger.debug( 'Post var sitename passed through was: %s' % ( psitename) )
 
         #filter by client, node, whatever to 
         #get a list of filenames in the repository run samples table
@@ -142,7 +146,8 @@ def retrievePathsForFiles(request, *args):
         #for each filename that matches, you use the experiment's ensurepath 
         try:
             nodeclient = NodeClient.objects.get(organisation_name = porganisation, site_name=psitename, station_name = pstation)
-            print 'Nodeclient found.'
+            logger.debug( 'Nodeclient found.')
+            
             nchost = nodeclient.hostname
             if nchost is not None and len(nchost) > 0:
                 host = str(nchost)
@@ -167,9 +172,9 @@ def retrievePathsForFiles(request, *args):
                 for rs in runsamples:
                     fname = rs.filename;
                     abspath, relpath = rs.filepaths()
-                    print 'Filename: %s belongs in path %s' % ( fname.encode('utf-8'), abspath.encode('utf-8') )
+                    logger.debug( 'Filename: %s belongs in path %s' % ( fname.encode('utf-8'), abspath.encode('utf-8') ) )
                     if filesdict.has_key(fname):
-                        print 'Duplicate path detected!!!'
+                        logger.debug( 'Duplicate path detected!!!' )
                         error = "%s, %s" % (error, "Duplicate filename detected for %s" % (fname.encode('utf-8')))
                         status = 2
                     #we use the relative path    
@@ -184,10 +189,10 @@ def retrievePathsForFiles(request, *args):
         status = 1
         error = str(e)
 
-    print 'making filelist obj' 
+    logger.debug('making filelist obj')
     #So. Make a FileList object out of pfiles.
     fl = FileList(pfiles)
-    print 'checking files'
+    logger.debug('checking files')
     fl.checkFiles(filesdict)
 
     #set the default host
@@ -206,7 +211,7 @@ def retrievePathsForFiles(request, *args):
              #'rules' : None 
             }
 
-    print 'RETVAL is', retval
+    logger.debug('RETVAL is %s' % ( retval ) )
     return jsonResponse(retval)
 
 def checkRunSampleFiles(request):
@@ -217,12 +222,14 @@ def checkRunSampleFiles(request):
     if runsamplefilesjson is not None:
         runsamplefilesdict = simplejson.loads(runsamplefilesjson)
         # so now we have a dict keyed on run, of sample id's whose file should have been received.
-        print 'Checking run samples against:', runsamplefilesdict
+        lopgger.debug('Checking run samples against: %s' % ( runsamplefilesdict) )
         # We iterate through each run, get the samples referred to, and ensure their file exists on disk.
         ret['description'] = ""
         for runid in runsamplefilesdict.keys():
-            print 'Checking files from run %s', str(runid)
+            logger.debug('Checking files from run %s' % str(runid) )
             runsamples = runsamplefilesdict[runid]
+            ret['success'] = True 
+            ret['description'] = 'Success'
             for runsample in runsamples:
                 runsample = int(runsample)
                 try:
@@ -230,16 +237,13 @@ def checkRunSampleFiles(request):
                     abssamplepath, relsamplepath = rs.filepaths()
                     complete_filename = os.path.join(abssamplepath, rs.filename)
                     fileexists = os.path.exists(complete_filename)
-                    print 'Checking file %s:%s' % (complete_filename.encode('utf-8'), fileexists)
-                    
+                    logger.debug( 'Checking file %s:%s' % (complete_filename.encode('utf-8'), fileexists) )
                     # now change the value in the DB
-                    print 'Changing value in DB'
+                    logger.debug( 'Changing value in DB')
                     rs.complete = fileexists
                     rs.save()
-                    ret['success'] = True 
-                    ret['description'] = 'Success'
                 except Exception, e:
-                    print 'Error: %s' % (e)
+                    logger.debug('Error: %s' % (e) )
                     ret['success'] = False
                     ret['description'] = "%s, %s" % (ret['description'], str(e)) 
                 
@@ -247,7 +251,7 @@ def checkRunSampleFiles(request):
         ret['description'] = "No files given"
 
     return jsonResponse(ret)
-
+'''
 def defaultpage(request, *args):
     try:
         pfiles = request.POST.get('files', None)
@@ -293,7 +297,7 @@ def defaultpage(request, *args):
         return jsonResponse(d)
     except Exception, e:
         return jsonResponse(str(e))
-
+'''
 
 def logUpload(request, *args):
     fname_prefix = 'UNKNOWN_'
@@ -302,10 +306,10 @@ def logUpload(request, *args):
     
     if request.FILES.has_key('uploaded'):
         f = request.FILES['uploaded']
-        print 'Uploaded file name:', f._get_name()
+        logger.debug( 'Uploaded file name: %s' % ( f._get_name() ) )
         _handle_uploaded_file(f, str(os.path.join('synclogs', "%s%s" % (fname_prefix,'rsync.log')) ) )#dont allow them to replace arbitrary files
     else:
-        print 'No file in the post'
+        logger.debug( 'logupload: No file in the post' )
 
     return jsonResponse('ok')
 
@@ -316,10 +320,10 @@ def keyUpload(request, *args):
     
     if request.FILES.has_key('uploaded'):
         f = request.FILES['uploaded']
-        print 'Uploaded file name:', f._get_name()
+        logger.debug( 'Uploaded file name: %s' % ( f._get_name() ) )
         _handle_uploaded_file(f, str(os.path.join('publickeys', "%s%s" % (fname_prefix,'id_rsa.pub')) ) )#dont allow them to replace arbitrary files
     else:
-        print 'No file in the post'
+        logger.debug('Keyupload: No file in the post')
 
     return jsonResponse('ok')
 
@@ -328,13 +332,13 @@ def keyUpload(request, *args):
 def _handle_uploaded_file(f, name):
     '''Handles a file upload to the projects REPO_FILES_ROOT
        Expects a django InMemoryUpload object, and a filename'''
-    print '*** _handle_uploaded_file: enter ***'
+    logger.debug( '*** _handle_uploaded_file: enter ***')
     retval = False
     try:
         import os
         dest_fname = str(os.path.join(settings.REPO_FILES_ROOT, name))
         if not os.path.exists(os.path.dirname(dest_fname)):
-            print 'creating directory: ', os.path.dirname(dest_fname)
+            logger.debug('creating directory: %s' % ( os.path.dirname(dest_fname) ) )
             os.makedirs(os.path.dirname(dest_fname))
 
         destination = open(dest_fname, 'wb+')
@@ -344,8 +348,8 @@ def _handle_uploaded_file(f, name):
         retval = True
     except Exception, e:
         retval = False
-        print '\tException in file upload: ', str(e)
-    print '*** _handle_uploaded_file: exit ***'
+        logger.debug( '\tException in file upload: %s' % ( str(e) ) )
+    logger.debug( '*** _handle_uploaded_file: exit ***')
     return retval
 
 
