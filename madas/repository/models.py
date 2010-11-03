@@ -213,7 +213,7 @@ class Experiment(models.Model):
                 abspath is the absolute path
                 relpath is the path, relative to the settings.REPO_FILES_ROOT
         '''
-        import settings, os
+        import settings, os, stat
         
         yearpath = os.path.join('experiments', str(self.created_on.year) )
         monthpath = os.path.join(yearpath, str(self.created_on.month) )
@@ -395,7 +395,7 @@ class Run(models.Model):
                 abspath is the absolute path
                 relpath is the path, relative to the settings.REPO_FILES_ROOT
         '''
-        import settings, os
+        import settings, os, stat
         
         yearpath = os.path.join('runs', str(self.created_on.year) )
         monthpath = os.path.join(yearpath, str(self.created_on.month) )
