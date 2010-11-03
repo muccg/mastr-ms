@@ -222,7 +222,7 @@ def checkRunSampleFiles(request):
     if runsamplefilesjson is not None:
         runsamplefilesdict = simplejson.loads(runsamplefilesjson)
         # so now we have a dict keyed on run, of sample id's whose file should have been received.
-        lopgger.debug('Checking run samples against: %s' % ( runsamplefilesdict) )
+        logger.debug('Checking run samples against: %s' % ( runsamplefilesdict) )
         # We iterate through each run, get the samples referred to, and ensure their file exists on disk.
         ret['description'] = ""
         for runid in runsamplefilesdict.keys():
