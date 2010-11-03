@@ -10,6 +10,9 @@ if not os.environ.has_key('PROJECT_DIRECTORY'):
 from appsettings.default_dev import *
 from appsettings.mastrms.dev import *
 
+
+LOGS = ['mdatasync_server_log']
+
 # Defaults
 #LOGIN_URL
 #LOGIN_REDIRECT_URL
@@ -65,3 +68,4 @@ SITE_NAME = 'madas'
 # these are non-standard and override defaults
 MEDIA_ROOT = os.path.join(PROJECT_DIRECTORY,"static")
 MEDIA_URL = '/static/'
+
