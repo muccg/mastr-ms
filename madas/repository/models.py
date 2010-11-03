@@ -223,6 +223,7 @@ class Experiment(models.Model):
 
         if not os.path.exists(abspath):
             os.makedirs(abspath)
+            os.chmod(abspath, stat.S_IRUSR|stat.S_IWUSR|stat.S_IRGRP|stat.S_IWGRP)
             
         return (abspath, exppath)
 
@@ -404,6 +405,7 @@ class Run(models.Model):
 
         if not os.path.exists(abspath):
             os.makedirs(abspath)
+            os.chmod(abspath, stat.S_IRUSR|stat.S_IWUSR|stat.S_IRGRP|stat.S_IWGRP)
             
         return (abspath, runpath)
     
