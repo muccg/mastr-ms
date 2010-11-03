@@ -1192,31 +1192,24 @@ def pendingFilesList(request):
 @staff_member_required
 @user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
 def _fileList(request, basepath, path, withChecks, sharedList, replacementBasepath = None):
-    print 'fileList ' + basepath + ' ' + path
     import os
 
     output = []
 
     #verify that there is no up-pathing hack happening
     if len(os.path.abspath(basepath)) > len(os.path.commonprefix((basepath, os.path.abspath(basepath + path)))):
-        print 'uppath problem for '+os.path.commonprefix((basepath, os.path.abspath(basepath + path)))
         return HttpResponse(json.dumps(output))
 
     if not os.path.exists(basepath + path):
-        print 'error accessing path: ' + basepath + path
         return HttpResponse('[]')
 
     files = os.listdir(basepath + path)
     files.sort()
     
-    print str(len(files)) + ' files in ' + basepath + path
-    
     for filename in files:
         filepath = basepath + filename
         if not path == '':
             filepath = basepath + path + os.sep + filename
-            
-        print 'looking at file: ' + filepath
             
         if os.access(filepath, os.R_OK):
             file = {}
@@ -1232,7 +1225,6 @@ def _fileList(request, basepath, path, withChecks, sharedList, replacementBasepa
                 if replacementBasepath is not None:
                     file['id'] = replacementBasepath + os.sep + filename
             if withChecks:
-                print 'checking'
                 file['checked'] = False
                 
                 for cf in sharedList:
