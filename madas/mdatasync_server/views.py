@@ -26,7 +26,7 @@ class FileList(object):
        
         logger.debug( 'The filenames coming out of the database are:' )
         for f in filesdict.keys():
-            logger.debug('\t%s' % (f.encode('utf-8') )
+            logger.debug('\t%s' % (f.encode('utf-8') ) )
 
         while len(self.checknodes):
             self.currentnode = self.checknodes.pop()
