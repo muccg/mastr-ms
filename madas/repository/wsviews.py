@@ -1231,7 +1231,11 @@ def _fileList(request, basepath, path, withChecks, sharedList, replacementBasepa
                     import unicodedata as ud
                     import sys
                     
-                    a = ud.normalize('NFD',unicode(file['id'], sys.getfilesystemencoding(), errors="ignore")) 
+                    try:
+                        a = ud.normalize('NFD',unicode(file['id'], sys.getfilesystemencoding(), errors="ignore")) 
+                    except:
+                        a = ud.normalize('NFD',unicode(file['id'].encode('iso-8859-1'), encoding='iso-8859-1', errors="ignore")) 
+                            
                     b = ud.normalize('NFD',unicode(cf.filepath.encode('iso-8859-1'), encoding='iso-8859-1', errors="ignore"))
                     
                     if a == b:
