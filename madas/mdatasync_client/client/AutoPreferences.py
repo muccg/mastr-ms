@@ -129,14 +129,23 @@ class AutoPreferences(wx.Dialog):
         try:
             #Start the multipart encoded post of whatever file our log is saved to:
             posturl = self.config.getValue('synchub') + 'logupload/'
-
+            print 'reading logfile' 
             rsync_logfile = open(self.config.getValue('logfile'))
+            #print 'multipart encoding data'
             datagen, headers = multipart_encode( {'uploaded' : rsync_logfile, 'nodename' : self.config.getNodeName()} )
+            print 'posturl is: ', posturl
+            print 'datagen is ', datagen
+            print 'headers is ', headers
+            print 'forming request'
             request = urllib2.Request(posturl, datagen, headers)
-            print 'sending log %s to %s' % (rsync_logfile, posturl)
-            jsonret = urllib2.urlopen(request).read()
+            #print 'sending log %s to %s' % (rsync_logfile, posturl)
+            print 'opening url'
+            resp = urllib2.urlopen(request)
+            print 'reading response'
+            jsonret = resp.read()
+            print 'finished receiving data'
             retval = simplejson.loads(jsonret)
-            print 'OnSendLog: retval is %s' % (retval)
+            #print 'OnSendLog: retval is %s' % (retval)
             self.log('Log send response: %s' % (str(retval)) )
         except Exception, e:
             print 'OnSendLog: Exception occured: %s' % (str(e))
