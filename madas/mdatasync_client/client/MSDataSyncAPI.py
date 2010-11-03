@@ -50,7 +50,7 @@ class MSDataSyncAPI(object):
             return
         self._tasks.join()              # block until task queue is empty
         self._thread.die()              # tell the thread to die
-        print 'Flushing with None task'
+        #print 'Flushing with None task'
         self._appendTask( None, None )  # dummy task to force thread to run
         self._thread.join()             # wait until thread is done
         self._thread = None
@@ -156,12 +156,14 @@ class MSDataSyncAPI(object):
                         fullremotepath = os.path.join(node[dirname], dirname)
                         resultdict[fulllocalpath] = "%s" %(os.path.join(localindexdir, fullremotepath) )
 
-        #for filename in remotefilesdict.keys():
-        #    fulllocalpath = os.path.join(filesdict[filename], filename)
-        #    fullremotepath = os.path.join(remotefilesdict[filename], filename)
-        #    #self.log( 'Copying %s to %s' % (fulllocalpath, "%s" %(os.path.join(localindexdir, fullremotepath) ) ) )
-        #    copydict[fulllocalpath] =  "%s" %(os.path.join(localindexdir, fullremotepath) )
         extract_file_target(remotefilesdict, copydict)
+
+        self.log("Clearing local index directory")
+        try:
+            from shutil import rmtree
+            rmtree(localindexdir)
+        except Exception, e:
+            self.log('Could not clear local index dir: %s' % (str(e)), type=self.log.LOG_WARNING, thread=self.useThreading)
 
         callingWindow.SetProgress(20)
         self.log("Initiating file copy to local index (%d files)" % (len(copydict.keys())) )
@@ -362,11 +364,11 @@ class MSDSImpl(object):
     def copyfiles(self, copydict):
         '''Takes a dict keyed on source filename, and copies each one to the dest filename (value) '''
         import os.path
-        print 'Copyfiles dict: ', copydict
+        #print 'Copyfiles dict: ', copydict
         try:
             for filename in copydict.keys():
                 self.log( '\tCopying %s to %s' % (os.path.normpath(filename), os.path.normpath(copydict[filename] ) ), thread=self.controller.useThreading  )
-                print 'doing copyfile'
+                #print 'doing copyfile'
                 self.copyfile( os.path.normpath(filename), os.path.normpath(copydict[filename]))
         except Exception, e:
             self.log('Problem copying: %s' % (str(e)), type=self.log.LOG_ERROR,  thread = self.controller.useThreading )
@@ -387,7 +389,7 @@ class MSDSImpl(object):
             self.log('Error copying %s to %s : %s' % (src, dst, e), type = self.log.LOG_ERROR,  thread = self.controller.useThreading )
 
     def getFileTree(self, dir):
-        print 'Entered getFileTree: checking %s' % dir
+        #print 'Entered getFileTree: checking %s' % dir
         import os
         allfiles = []
         try:
@@ -401,5 +403,5 @@ class MSDSImpl(object):
                 self.log('File: %s' % (str(f)), thread = self.controller.useThreading )
         except Exception, e:
             self.log('getFileTree: Exception: %s' % (str(e)), self.log.LOG_ERROR, thread = self.controller.useThreading)
-        print 'Done with getFileTree'
+        #print 'Done with getFileTree'
         return allfiles
