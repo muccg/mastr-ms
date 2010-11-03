@@ -9,8 +9,7 @@ import os
 import os.path
 
 from django.contrib import logging
-#Create a logging object for ldap debugging
-logger = logging.getLogger('mdatasync_server')
+logger = logging.getLogger('mdatasync_server_log')
 
 
 class FileList(object):

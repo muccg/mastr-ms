@@ -6,6 +6,9 @@ from django.utils.webhelpers import url
 from appsettings.default_prod import *
 from appsettings.mastrms.prod import *
 
+
+LOGS = ['mdatasync_server_log']
+
 # Defaults
 #LOGIN_URL
 #LOGIN_REDIRECT_URL
@@ -55,3 +58,4 @@ SITE_NAME = 'madas'
 # these are non-standard and override defaults
 MEDIA_ROOT = os.path.join(PROJECT_DIRECTORY,"static")
 MEDIA_URL = '/static/'
+
