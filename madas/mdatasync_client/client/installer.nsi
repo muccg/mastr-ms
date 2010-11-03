@@ -56,7 +56,6 @@ Section "" ;No components page, name is not important
    
   ; include for some of the windows messages defines
   !include "winmessages.nsh"
-  #!include "envvarupdate.nsh"
   ; HKLM (all users) vs HKCU (current user) defines
   !define env_hklm 'HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"'
   !define env_hkcu 'HKCU "Environment"'
