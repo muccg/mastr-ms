@@ -288,12 +288,12 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                            }
                        }),
                    listeners:{
-//                        render: function() {
-//                            self.getComponent('runTree').getLoader().on("beforeload", function(treeLoader, node) {
-//                                treeLoader.baseParams.run = self.runId;
-//                                }, this);
+                        render: function() {
+                            self.getComponent('runTree').getLoader().on("beforeload", function(treeLoader, node) {
+                                treeLoader.baseParams.run = self.runId;
+                                }, this);
 //                            self.getComponent('runTree').getRootNode().expand();
-//                        }
+                        }
                     }
                },
                 {
