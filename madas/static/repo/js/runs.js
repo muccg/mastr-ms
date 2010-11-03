@@ -550,6 +550,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         this.sampleStore.load({ params: { run__id__exact: this.runId } });
         
         if (this.getComponent('runTree')) {
+            this.getComponent('runTree').getLoader().clearOnLoad = true;
             this.getComponent('runTree').getLoader().load(this.getComponent('runTree').getRootNode());
         }
         
