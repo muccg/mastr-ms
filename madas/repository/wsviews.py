@@ -1418,15 +1418,14 @@ def downloadRunFile(request):
 @user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
 def uploadFile(request):
 
-    if request.GET:
-        args = request.GET
-    else:
-        args = request.POST
+    args = request.POST
 
     ############# FILE UPLOAD ########################
     output = { 'success': True }
     
     try:
+        experiment_id = args['experimentId'];
+        
         #TODO handle file uploads - check for error values
         print request.FILES.keys()
         if request.FILES.has_key('attachfile'):
@@ -1434,7 +1433,7 @@ def uploadFile(request):
             print '\tuploaded file name: ', f._get_name()
             translated_name = f._get_name().replace(' ', '_')
             print '\ttranslated name: ', translated_name
-            _handle_uploaded_file(f, translated_name)
+            _handle_uploaded_file(f, translated_name, experiment_id)
             attachmentname = translated_name
         else:
             print '\tNo file attached.'
@@ -1445,7 +1444,7 @@ def uploadFile(request):
     return HttpResponse(json.dumps(output))
     
     
-def _handle_uploaded_file(f, name):
+def _handle_uploaded_file(f, name, experiment_id):
     '''Handles a file upload to the projects WRITABLE_DIRECTORY
        Expects a django InMemoryUpload object, and a filename'''
     print '*** _handle_uploaded_file: enter ***'
@@ -1453,7 +1452,13 @@ def _handle_uploaded_file(f, name):
     try:
         import os, settings
         
-        destination = open(settings.REPO_FILES_ROOT + os.sep + 'pending' + os.sep + name, 'wb+')
+        print 'exp is ' + experiment_id
+        
+        exp = Experiment.objects.get(id=experiment_id)
+        (exppath, blah) = exp.ensure_dir()
+    
+        print 'writing to file: ' + exppath + os.sep + name
+        destination = open(exppath + os.sep + name, 'wb+')
         for chunk in f.chunks():
             destination.write(chunk)
     
