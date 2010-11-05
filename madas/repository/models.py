@@ -223,7 +223,7 @@ class Experiment(models.Model):
 
         if not os.path.exists(abspath):
             os.makedirs(abspath)
-            os.chmod(abspath, stat.S_IRUSR|stat.S_IWUSR|stat.S_IRGRP|stat.S_IWGRP)
+            os.chmod(abspath, stat.S_IRWXU|stat.S_IRWXG)
         
         import grp
         groupinfo = grp.getgrnam(settings.CHMOD_GROUP)
@@ -411,7 +411,7 @@ class Run(models.Model):
 
         if not os.path.exists(abspath):
             os.makedirs(abspath)
-            os.chmod(abspath, stat.S_IRUSR|stat.S_IWUSR|stat.S_IRGRP|stat.S_IWGRP)
+            os.chmod(abspath, stat.S_IRWXU|stat.S_IRWXG)
             
         import grp
         groupinfo = grp.getgrnam(settings.CHMOD_GROUP)
