@@ -5,6 +5,8 @@ MA.FilesInit = function() {
     Ext.getCmp('filesTree').getLoader().load(Ext.getCmp('filesTree').getRootNode());
     
     Ext.getCmp('pendingFilesTree').getLoader().load(Ext.getCmp('pendingFilesTree').getRootNode());
+    
+    Ext.getCmp('uploadExperimentId').setValue(expId);
 };
 
 MA.Files = {
@@ -167,7 +169,12 @@ items:[
                                emptyText: '',
                                fieldLabel: 'File',
                                name: 'attachfile'
-                               }
+                               },
+                       {
+                           xtype:'hidden',
+                           id:'uploadExperimentId',
+                           name:'experimentId'
+                       }
                            ],
                        buttons: [
                                  {
@@ -181,8 +188,8 @@ items:[
                                                                                    form.reset(); 
                                                                                    
                                                                                   //reload the pending files tree
-                                                                                  Ext.getCmp('pendingFilesTree').getLoader().load(Ext.getCmp('pendingFilesTree').getRootNode());
-                                                                                   Ext.getCmp('pendingFilesTree').getRootNode().expand();
+                                                                                  Ext.getCmp('filesTree').getLoader().load(Ext.getCmp('filesTree').getRootNode());
+                                                                                   Ext.getCmp('filesTree').getRootNode().expand();
                                                                                    
                                                                                    } 
                                                                                    },
