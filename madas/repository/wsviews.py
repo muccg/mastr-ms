@@ -1450,7 +1450,7 @@ def _handle_uploaded_file(f, name, experiment_id):
     print '*** _handle_uploaded_file: enter ***'
     retval = False
     try:
-        import os, settings
+        import os, settings, stat
         
         print 'exp is ' + experiment_id
         
@@ -1467,6 +1467,7 @@ def _handle_uploaded_file(f, name, experiment_id):
         gid = groupinfo.gr_gid
 
         os.fchown(destination.fileno(), os.getuid(), gid)
+        os.fchmod(destination.fileno(), stat.S_IRUSR|stat.S_IWUSR|stat.S_IRGRP|stat.S_IWGRP)
 
         destination.close()
     
