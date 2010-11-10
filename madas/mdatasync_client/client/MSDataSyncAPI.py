@@ -83,10 +83,8 @@ class MSDataSyncAPI(object):
         organisation = self.config.getValue('organisation')
         station = self.config.getValue('stationname')
         sitename = self.config.getValue('sitename')
-
        
         #grab all files in our local dir:
-
         localdir = self.config.getValue('localdir')
         localindexdir = self.config.getLocalIndexPath() 
         filesdict = self.getFiles(localdir, ignoredirs=[localindexdir])
@@ -111,21 +109,34 @@ class MSDataSyncAPI(object):
             returnFn(retcode=False, retstring="Error: %s\nUnexpected response from server was: %s" % (e, jsonret))
             return
 
-        user = self.config.getValue('user')
-        #remotehost = self.config.getValue('remotehost')
-        #remotedir = self.config.getValue('remotedir')
-        remotehost = d['host']
+        rsyncconfig = {}
+        #Lets get any of the remote params
+        rsyncconfig['host'] = d['host']
+        #rootdir
+        rsyncconfig['rootdir'] = d['rootdir']
+        #flags, server is authoratative
+        if d['flags'] not in ['', '!'] :
+            rsyncconfig['flags'] = d['flags'].split(' ') #split on space
+        else:
+            rsyncconfig['flags'] = ['-rvz'] #r=recursive v=verbose,z=zip #a=archive (preserves times)
+        #User, client is authoratative
+        if self.config.getValue('user') in ['!', '']:
+            rsyncconfig['user'] = d['username'] #use the server value
+        else:
+            rsyncconfig['user'] = self.config.getValue('user')
+        #rules
+        rsyncconfig['rules'] = [d['rules']]
+
+        #Other variables for local analysis before syncing
         remotefilesdict = d['filesdict']
         remoterunsamplesdict = d['runsamplesdict']
-        remotefilesrootdir = d['rootdir']
 
         print "remote files dicrt" , remotefilesdict
         print "remote runsamples dict", remoterunsamplesdict
 
-
         callingWindow.setState(statuschange)
         self.callingWindow = callingWindow
-        
+
         copydict = {} #this is our list of files to copy
         import os.path
 
@@ -158,25 +169,31 @@ class MSDataSyncAPI(object):
 
         extract_file_target(remotefilesdict, copydict)
 
-        self.log("Clearing local index directory")
-        try:
-            from shutil import rmtree
-            rmtree(localindexdir)
-        except Exception, e:
-            self.log('Could not clear local index dir: %s' % (str(e)), type=self.log.LOG_WARNING, thread=self.useThreading)
-
-        callingWindow.SetProgress(20)
-        self.log("Initiating file copy to local index (%d files)" % (len(copydict.keys())) )
-        #copy all the files
-        self._appendTask(self.copyFilesReturn, self._impl.copyfiles, copydict)
-            
-        #now rsync the whole thing over
-        self._appendTask(self.rsyncReturn, self._impl.perform_rsync, "%s" % (localindexdir) , user, j['host'], remotefilesrootdir, rules=[j['rules']])
-
-        #now tell the server to check the files off
-        baseurl =  self.config.getValue('synchub')
-        self._appendTask(returnFn, self._impl.serverCheckRunSampleFiles, remoterunsamplesdict, baseurl)
+        if len(copydict.keys()):
         
+            self.log("Clearing local index directory")
+            try:
+                from shutil import rmtree
+                rmtree(localindexdir)
+            except Exception, e:
+                self.log('Could not clear local index dir: %s' % (str(e)), type=self.log.LOG_WARNING, thread=self.useThreading)
+
+            callingWindow.SetProgress(20)
+            self.log("Initiating file copy to local index (%d files)" % (len(copydict.keys())) )
+            #copy all the files
+            self._appendTask(self.copyFilesReturn, self._impl.copyfiles, copydict)
+            
+            #now rsync the whole thing over
+            self._appendTask(self.rsyncReturn, self._impl.perform_rsync, "%s" % (localindexdir) , rsyncconfig)
+
+            #now tell the server to check the files off
+            baseurl =  self.config.getValue('synchub')
+            self._appendTask(returnFn, self._impl.serverCheckRunSampleFiles, remoterunsamplesdict, baseurl)
+        else:
+            self.log("No files to sync.", thread = self.useThreading)
+            callingWindow.SetProgress(100)
+            from MainWindow import APPSTATE
+            callingWindow.setState(APPSTATE.IDLE)
 
     def defaultReturn(self, *args, **kwargs):
         #print 'rsync returned: ', retval
@@ -279,10 +296,9 @@ class MSDSImpl(object):
     def __init__(self, log, controller):
        self.log = log #we expect 'log' to be a callable function. 
        self.controller = controller
-    def perform_rsync(self, sourcedir, remoteuser, remotehost, remotedir, rules = []):
+    def perform_rsync(self, sourcedir, config):
         #self.log('checkRsync implementation entered!', Debug=True)
-       
-        
+      
         #fix the sourcedir.
         #On windows, the driveletter and colon make rsync think 
         #that it is a host:path pair. So on windows, we need to fix that.
@@ -318,14 +334,15 @@ class MSDSImpl(object):
         #Popen('rsync -t %s %s:%s' % (sourcedir, remotehost, remotedir) )
         
         #cmdhead = ['rsync', '-tavz'] #t, i=itemize-changes,a=archive,v=verbose,z=zip
-        cmdhead = ['rsync', '-avz'] #v=verbose,z=zip #a=archive (preserves times)
-        cmdtail = ['--log-file=%s' % (logfile), str(sourcedir), '%s@%s:%s' % (str(remoteuser), str(remotehost), str(remotedir) )]
+        cmdhead = ['rsync']
+        cmdhead.extend(config['flags']) 
+        cmdtail = ['--log-file=%s' % (logfile), str(sourcedir), '%s@%s:%s' % (str(config['user']), str(config['host']), str(config['rootdir']) )]
 
         cmd = []
         cmd.extend(cmdhead)
     
         #self.log('Rules is %s' %(str(rules)) )
-        
+        rules = config['rules'] 
         if rules is not None and len(rules) > 0:
             for r in rules:
                 if r is not None:

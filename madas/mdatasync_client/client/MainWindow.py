@@ -16,7 +16,6 @@ class APPSTATE:
     UPLOADING_DATA   = 'Uploading data'
     IDLE             = 'Idle'
 
-
 import weakref
 # Create and set a help provider.  Normally you would do this in
 # the app's OnInit as it must be done before any SetHelpText calls.
@@ -25,12 +24,11 @@ wx.HelpProvider.Set(provider)
 class MainWindow(wx.Frame):
     def __init__(self, parent):
 
-        wx.Frame.__init__(self, parent, -1, 'MS Datasync Application')
+        wx.Frame.__init__(self, parent, -1, 'MS Datasync Application: v%s' % (VERSION))
         self.countDownEnabled = True #sets the countdown to be active
 
         self.contentPanel = wx.Panel(self, -1)
         _cp = self.contentPanel
-
         
         logLabel = wx.StaticText(parent = _cp)
         logLabel.SetLabel(label="Log")
@@ -45,9 +43,6 @@ class MainWindow(wx.Frame):
         self.logTextCtrl = wx.TextCtrl(self.logAreaPane, -1, 
                                     style = wx.TE_MULTILINE|wx.TE_READONLY|wx.HSCROLL)
         
-        
-
-
         progress = wx.Gauge(parent = _cp, range=100, size=(500, 20))
         self.progress = progress
         
@@ -114,28 +109,22 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_COLLAPSIBLEPANE_CHANGED, self.OnPaneChanged, self.logArea)
 
         #now lay everything out.
-        
         self.logAreaSizer.Add(self.logTextCtrl, 1, flag=wx.ALL|wx.GROW|wx.EXPAND, border=2)
         self.logAreaPane.SetSizerAndFit(self.logAreaSizer)
-        #sizer.Fit(self)
         
         contentpanelsizer = wx.BoxSizer(wx.VERTICAL)
         contentpanelsizer.Add(progressLabel, 0, flag=wx.ALL, border=2)
         contentpanelsizer.Add(progress, 0, wx.ALL | wx.GROW|wx.EXPAND | wx.FIXED_MINSIZE, border=2)
         contentpanelsizer.Add(logLabel, 0, wx.ALL, border=2)
         contentpanelsizer.Add(self.logArea, 1, flag=wx.ALL | wx.GROW | wx.EXPAND | wx.FIXED_MINSIZE, border=2)
-        #mainpanelsizer.Add(self.StatusBar, 0, flag=wx.ALL, border=2)
 
-        #self.SetAutoLayout(True)
         self.contentPanel.SetSizerAndFit(contentpanelsizer)
         self.contentpanelsizer = contentpanelsizer
-        #self.contentpanelsizer.SetSizeHints(self)
         
-        
-        #self.SetSizer(contentpanelsizer)
+        #Expand the debug area by default:
+        self.logArea.Expand()
         
         self.OnPaneChanged() #force a layout fit
-
         
         self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
         self.log('Finished loading application')
@@ -151,8 +140,20 @@ class MainWindow(wx.Frame):
             print 'wx.EVT_COLLAPSIBLEPANE_CHANGED: %s' % event.Collapsed
 
         # redo the layout
-        self.logAreaSizer.Fit(self)#.contentPanel)
+        #if self.logArea.IsCollapsed():
+        #    self.contentpanelsizer.Fit(self)
+        #    #self.contentpanelsizer.Remove(self.logArea)
+        #    self.logAreaSizer.Fit(self)#.contentPanel)
+        #    self.contentpanelsizer.Fit(self)
+        #else:
+        #    #self.contentpanelsizer.Add(self.logArea, 1, flag=wx.ALL | wx.GROW | wx.EXPAND | wx.FIXED_MINSIZE, border=2)
+        #    self.logAreaSizer.Layout()#.contentPanel)
+        #    self.contentpanelsizer.Layout()
+        
+        #self.logAreaSizer.Fit(self)#.contentPanel)
         self.contentpanelsizer.Fit(self)
+        #self.logAreaSizer.Layout()#.contentPanel)
+        self.contentpanelsizer.Layout()
 
 
     def resetTimeTillNextSync(self, forceReset = False):
@@ -187,16 +188,18 @@ class MainWindow(wx.Frame):
         self.menuBar.Enable(ID_CHECK_NOW, False)
         self.PauseCountdown()
         if getattr(sys,"frozen",False):
-            self.log('Cheking for program updates')
-            app = esky.Esky(sys.executable,self.config.getValue('updateurl'))
+            url = self.config.getValue('updateurl')
+            self.log('Checking for program updates from %s' % (url))
+            app = esky.Esky(sys.executable,url)
             try:
                 app.auto_update()
             except Exception, e:
                 self.log("Error updating app: %s" % (str(e)), type=self.log.LOG_ERROR)
+            app.cleanup()    
         else:
             self.log('App must be frozen to initiate update')
         self.menuBar.Enable(ID_CHECK_NOW, True)   
-        self.UnPauseCoundown()
+        self.UnPauseCountdown()
 
 
     def OnMenuMinimise(self, event):

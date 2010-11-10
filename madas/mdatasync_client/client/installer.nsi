@@ -45,6 +45,12 @@ Section "" ;No components page, name is not important
   ; Put the genkeys batch file there
   File genkeys.bat
 
+  ; install VC redist
+  File ..\supportwin32\vcredist_x86.exe
+
+  ; Now silently install the vc redist
+  ExecWait '"vcredist_x86.exe" /q:a'
+
   ; install cwrsync
   ; First, copy over the cwrsync installer
   File ..\supportwin32\cwRsync_4.0.5_Installer.exe
