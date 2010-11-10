@@ -7,38 +7,181 @@
 """
 
 from __future__ import with_statement
+from __future__ import absolute_import
 
-import os
-import re
 import sys
-import shutil
-import zipfile
 import errno
-from itertools import tee, izip
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
 
-from distutils.util import get_platform as _distutils_get_platform
+#  Since esky apps are required to call the esky.run_startup_hooks() method on
+#  every invocation, we want as little overhead as possible when importing
+#  the main module.  We therefore use a simple lazy-loading scheme for many
+#  of our imports, built from the functions below.
 
+def lazy_import(func):
+    """Decorator for declaring a lazy import.
+
+    This decorator turns a function into an object that will act as a lazy
+    importer.  Whenever the object's attributes are accessed, the function
+    is called and its return value used in place of the object.  So you
+    can declare lazy imports like this:
+
+        @lazy_import
+        def socket():
+            import socket
+            return socket
+
+    The name "socket" will then be bound to a transparent object proxy which
+    will import the socket module upon first use.
+ 
+    The syntax here is slightly more verbose than other lazy import recipes,
+    but it's designed not to hide the actual "import" statements from tools
+    like py2exe or grep.
+    """
+    try:
+        f = sys._getframe(1)
+    except Exception:
+        namespace = None
+    else:
+        namespace = f.f_locals
+    return _LazyImport(func.func_name,func,namespace)
+
+
+
+class _LazyImport(object):
+    """Class representing a lazy import."""
+
+    def __init__(self,name,loader,namespace=None):
+        self._esky_lazy_target = _LazyImport
+        self._esky_lazy_name = name
+        self._esky_lazy_loader = loader
+        self._esky_lazy_namespace = namespace
+
+    def _esky_lazy_load(self):
+        if self._esky_lazy_target is _LazyImport:
+            self._esky_lazy_target = self._esky_lazy_loader()
+            ns = self._esky_lazy_namespace
+            if ns is not None:
+                try: 
+                    if ns[self._esky_lazy_name] is self:
+                        ns[self._esky_lazy_name] = self._esky_lazy_target
+                except KeyError:
+                    pass
+
+    def __getattribute__(self,attr):
+        try:
+            return object.__getattribute__(self,attr)
+        except AttributeError:
+            if self._esky_lazy_target is _LazyImport:
+                self._esky_lazy_load()
+            return getattr(self._esky_lazy_target,attr)
+
+    def __nonzero__(self):
+        if self._esky_lazy_target is _LazyImport:
+            self._esky_lazy_load()
+        return bool(self._esky_lazy_target)
+
+
+@lazy_import
+def os():
+    import os
+    return os
+
+@lazy_import
+def shutil():
+    import shutil
+    return shutil
+
+@lazy_import
+def re():
+    import re
+    return re
+
+@lazy_import
+def zipfile():
+    import zipfile
+    return zipfile
+
+@lazy_import
+def itertools():
+    import itertools
+    return itertools
+
+@lazy_import
+def StringIO():
+    try:
+        import cStringIO as StringIO
+    except ImportError:
+        import StringIO
+    return StringIO
+
+@lazy_import
+def distutils():
+    import distutils
+    import distutils.log   # need to prompt cxfreeze about this dep
+    import distutils.util
+    return distutils
+
+
+from esky.bootstrap import appdir_from_executable as _bs_appdir_from_executable
 from esky.bootstrap import get_best_version, get_all_versions,\
                            is_version_dir, is_installed_version_dir,\
                            is_uninstalled_version_dir,\
                            split_app_version, join_app_version, parse_version,\
                            get_original_filename, lock_version_dir,\
                            unlock_version_dir, fcntl, ESKY_CONTROL_DIR
-from esky.bootstrap import appdir_from_executable as _bs_appdir_from_executable
+
+
+def files_differ(file1,file2,start=0,stop=None):
+    """Check whether two files are actually different."""
+    try:
+        stat1 = os.stat(file1)
+        stat2 = os.stat(file2)
+    except EnvironmentError:
+         return True
+    if stop is None and stat1.st_size != stat2.st_size:
+        return True
+    f1 = open(file1,"rb")
+    try:
+        f2 = open(file2,"rb")
+        if start >= stat1.st_size:
+            return False
+        elif start < 0:
+            start = stat1.st_size + start
+        if stop is None or stop > stat1.st_size:
+            stop = stat1.st_size
+        elif stop < 0:
+            stop = stat1.st_size + stop
+        if stop <= start:
+            return False
+        toread = stop - start
+        f1.seek(start)
+        f2.seek(start)
+        try:
+            sz = min(1024*256,toread)
+            data1 = f1.read(sz)
+            data2 = f2.read(sz)
+            while sz > 0 and data1 and data2:
+                if data1 != data2:
+                    return True
+                toread -= sz
+                sz = min(1024*256,toread)
+                data1 = f1.read(sz)
+                data2 = f2.read(sz)
+            return (data1 != data2)
+        finally:
+            f2.close()
+    finally:
+        f1.close()
 
 
 def pairwise(iterable):
     """Iterator over pairs of elements from the given iterable."""
-    a,b = tee(iterable)
+    a,b = itertools.tee(iterable)
     try:
         b.next()
     except StopIteration:
         pass
-    return izip(a,b)
+    return itertools.izip(a,b)
 
 
 def common_prefix(iterables):
@@ -50,7 +193,7 @@ def common_prefix(iterables):
         raise ValueError("at least one iterable is required")
     for item in iterables:
         count = 0
-        for (c1,c2) in izip(prefix,item):
+        for (c1,c2) in itertools.izip(prefix,item):
             if c1 != c2:
                 break
             count += 1
@@ -202,7 +345,7 @@ def get_platform():
     is guaranteed not to contain any periods. This makes it much easier to
     parse out of filenames.
     """
-    return _distutils_get_platform().replace(".","_")
+    return distutils.util.get_platform().replace(".","_")
  
 
 def is_core_dependency(filenm):

@@ -1,3 +1,6 @@
+#This version must be incremented each build
+VERSION = "0.1.2"
+
 #Identifiers used in main window
 ID_TEST_CONNECTION = 101
 ID_CHECK_NOW = 102
