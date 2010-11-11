@@ -676,42 +676,45 @@ def recreate_sample_classes(request, experiment_id):
     combos = []
 
     for biosource in BiologicalSource.objects.filter(experiment__id=experiment_id):
-        zcombos = []
+        combosForBioSource = []
         for organ in Organ.objects.filter(experiment__id=experiment_id):
-            acombos = []
+            combosForOrgan = []
 
             base = { 'bs': biosource.id, 'o': organ.id }
             bcombos = [base]
 
-            newcombos = []
+            combosForTreatment = []
             for treatment in Treatment.objects.filter(experiment__id=experiment_id):
                 for combo in bcombos:
                     tmp = combo.copy()
                     tmp['treatment'] = treatment.id
-                    newcombos.append(tmp.copy())
-            if len(newcombos) == 0:
-                newcombos = bcombos[:]
+                    combosForTreatment.append(tmp.copy())
+            if len(combosForTreatment) == 0:
+                combosForTreatment = bcombos[:]
                 
-            acombos = acombos + newcombos
+            combosForOrgan = combosForTreatment[:]
             
-            newcombos = []
+            combosForTimeline = []
             for timeline in SampleTimeline.objects.filter(experiment__id=experiment_id):
-                for combo in acombos:
+                for combo in combosForOrgan:
                     tmp = combo.copy()
                     tmp['time'] = timeline.id
-                    newcombos.append(tmp.copy())
-                acombos = newcombos[:]
+                    combosForTimeline.append(tmp.copy())
+            if len(combosForTimeline) > 0:
+                combosForOrgan = combosForTimeline[:]
 
-            zcombos = zcombos + acombos
+            combosForBioSource = combosForBioSource + combosForOrgan
         
-        combos = combos + zcombos
+        combos = combos + combosForBioSource
         
+            
     #iterate over combos and current sampleclasses
     #if they already exist, fine
     #if they no longer exist, delete
     #if they don't exist, create
     currentsamples = SampleClass.objects.filter(experiment__id = experiment_id)
-    
+            #    print currentsamples[0]
+
     #determine what to delete and what to add
     foundclasses = set()
     standards_classes = SampleClass.objects.filter(experiment__id=experiment_id, is_standards_class=True)
@@ -737,6 +740,7 @@ def recreate_sample_classes(request, experiment_id):
         sc.experiment_id = experiment_id
         sc.class_id = 'sample class'
         
+        b = ''
         for key in combo.keys():
             if key == 'treatment':
                 sc.treatments_id = combo[key]
@@ -750,11 +754,15 @@ def recreate_sample_classes(request, experiment_id):
             elif key == 'time':
                 sc.timeline_id = combo[key]
                 a = a.filter(timeline__id = combo[key])
+            b = b + ' ' + str(key) + ' ' + str(combo[key])
+
+            #        print 'filtering with '+b
 
         if a:
             combo['id'] = a[0].id
             foundclasses.add(a[0].id)
             sc = a[0]
+                #            print 'found'
         else:
             #if not found, add it on the spot
             sc.save()
