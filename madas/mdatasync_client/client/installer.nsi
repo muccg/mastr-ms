@@ -59,25 +59,44 @@ Section "" ;No components page, name is not important
   ExecWait '"cwRsync_4.0.5_Installer.exe" /S'
 
   ;Now set environment variables for CWRSYNCHOME and append to path
-   
+  
+  ;Now we set them for this 'shell' so that our script can use them,
+  !define cwrsynchome '$PROGRAMFILES\CWRSYNC'
+  System::Call 'Kernel32::SetEnvironmentVariableA(t, t) i("CWRSYNCHOME", "${cwrsynchome}").r0'
+  StrCmp $0 0 error
+  System::Call 'Kernel32::SetEnvironmentVariableA(t, t) i("PATH", "%PATH%;${cwrsynchome}\BIN").r0'
+  StrCmp $0 0 error
+  Goto done
+  error:
+    MessageBox MB_OK "Can't set environment variable"
+  done:
+ 
+
   ; include for some of the windows messages defines
   !include "winmessages.nsh"
   ; HKLM (all users) vs HKCU (current user) defines
   !define env_hklm 'HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"'
   !define env_hkcu 'HKCU "Environment"'
   ; set variable
-  WriteRegExpandStr ${env_hkcu} "CWRSYNCHOME" "%PROGRAMFILES%\CWRSYNC"
+  WriteRegExpandStr ${env_hkcu} "CWRSYNCHOME" "${cwrsynchome}" 
   ; make sure windows knows about the change
   SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
   
+  DetailPrint "Sleeping 5 seconds"
+  Sleep 5000
+
   #now update path
   #${EnvVarUpdate} $0 "PATH" "A" "HKCU" "%CWRSYNCHOME%\BIN"
-  WriteRegExpandStr ${env_hkcu} "PATH" "%PATH%;%CWRSYNCHOME%\BIN"
+  WriteRegExpandStr ${env_hkcu} "PATH" "$%PATH%;${cwrsynchome}\BIN" 
   ; make sure windows knows about the change
   SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
+  
+  DetailPrint "Sleeping 5 seconds"
+  Sleep 5000
 
+  
   #install private key
-  ExecWait 'genkeys.bat'
+  ExecWait 'genkeys.bat >> genkeys_output.txt'
 
   ;Uninstall Information
   WriteRegStr HKLM "${REG_UNINSTALL}" "DisplayName" "MSDataSync -- Data Sync Application by CCG"
