@@ -22,10 +22,17 @@ urlpatterns = patterns('',
     # admin
     (r'^repoadmin/', include(admin.site.urls)),
 
-    # static
-    (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root' : settings.MEDIA_ROOT, 'SSL' : True}),
-    (r'^javascript/(?P<path>.*)$', 'django.views.static.serve', {'document_root' : settings.MEDIA_ROOT, 'SSL' : True}),
-
+    #(r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root' : settings.MEDIA_ROOT, 'SSL' : True} ),
     # madas
-    (r'^', include('madas.quote.urls')),
 )
+
+# static
+if settings.DEBUG:
+    print 'Running with django view for static path.'
+    urlpatterns += patterns('',
+        (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root' : settings.MEDIA_ROOT, 'SSL' : True} ),
+    )
+
+urlpatterns += patterns('', 
+    (r'^', include('madas.quote.urls')),
+    )
