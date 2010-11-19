@@ -137,8 +137,8 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     store: machineStore,
                     itemSelector: 'div.search-item',
                     tpl:new Ext.XTemplate(
-                    '<tpl for="."><div class="search-item">',
-                    '<b>{station_name}</b><br />{site_name}<br />{organisation_name}',
+                    '<tpl for="."><div style="padding:8px;border-bottom:1px solid gray;" class="search-item">',
+                    '<b>{station_name}</b><br />{organisation_name} > {site_name}',
                     '</div></tpl>'
                     )
                 }),
