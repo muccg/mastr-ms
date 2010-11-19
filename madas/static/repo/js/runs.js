@@ -124,16 +124,23 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     name: 'machine',
                     editable:false,
                     forceSelection:true,
-                    displayField:'value',
-                    valueField:'key',
+                    displayField:'station_name',
+                    valueField:'id',
                     hiddenName:'machine',
                     lazyRender:true,
                     allowBlank:false,
                     typeAhead:false,
                     triggerAction:'all',
+                    mode:'local',
                     listWidth:230,
                     width: 200,
-                    store: machineStore
+                    store: machineStore,
+                    itemSelector: 'div.search-item',
+                    tpl:new Ext.XTemplate(
+                    '<tpl for="."><div class="search-item">',
+                    '<b>{station_name}</b><br />{site_name}<br />{organisation_name}',
+                    '</div></tpl>'
+                    )
                 }),
                 {
                     fieldLabel:'Samples to Add',
