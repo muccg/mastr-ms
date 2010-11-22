@@ -33,7 +33,6 @@ class MDataSyncApp(wx.PySimpleApp):
         
         win.MSDSCheckFn = self.msds.checkRsync
         win.msds = self.msds
-        win.config = self.msds.config #TODO make this weakref
         win.resetTimeTillNextSync()
         #wx.Log_SetActiveTarget( wx.LogWindow(None, 'loggin...') )
         win.Show(True)

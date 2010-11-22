@@ -3,11 +3,11 @@ import urllib2
 try: import json as simplejson
 except ImportError: import simplejson
 
-class NodeConfigSelector(wx.Dialog):
+class NodeConfigSelector(wx.Panel):
 
     def __init__(self, parent, ID, log, nodes):
 
-        wx.Dialog.__init__(self, parent, ID, "Node Locator", size=(400,400))#, wx.DefaultSize, wx.DEFAULT_FRAME_STYLE)
+        wx.Panel.__init__(self, parent, ID) #, size=(400,400))#, wx.DefaultSize, wx.DEFAULT_FRAME_STYLE)
         self.log = log
         self.parentApp = parent
         self.sizer = wx.BoxSizer(wx.VERTICAL)
@@ -32,14 +32,12 @@ class NodeConfigSelector(wx.Dialog):
        
         #bind the onSetFocus
         self.syncHubString.Bind(wx.EVT_SET_FOCUS, self.focusResetButton)
-
-
         
         self.sizer.Add(self.syncHubLabel, 0, wx.ALIGN_CENTER | wx.ALL, 1)
         #Prepare the syncsizer
-        syncsizer.Add(self.syncHubOKIcon, 1, wx.ALIGN_LEFT | wx.ALL, 1)
-        syncsizer.Add(self.syncHubString, 4, wx.EXPAND | wx.CENTER | wx.ALL, 1)
-        syncsizer.Add(btn, 1, wx.ALIGN_RIGHT | wx.ALL, 1)
+        syncsizer.Add(btn, 1, wx.ALIGN_LEFT | wx.ALL, border=0)
+        syncsizer.Add(self.syncHubString, 4, wx.EXPAND | wx.CENTER | wx.ALL, border=0)
+        syncsizer.Add(self.syncHubOKIcon, 1, wx.ALIGN_LEFT | wx.ALL, border=0)
 
 
         syncsizer.Layout()
@@ -54,25 +52,6 @@ class NodeConfigSelector(wx.Dialog):
         self.nodes = nodes
         self.createTree()
         self.sizer.Add(self.tree, 2, wx.GROW|wx.ALIGN_LEFT|wx.ALL, 1)
-
-        #BUTTONS
-        btnsizer = wx.StdDialogButtonSizer()
-
-        #OK Button
-        btn = wx.Button(self, wx.ID_OK)
-        btn.SetDefault()
-        btnsizer.AddButton(btn)
-        btn.Bind(wx.EVT_BUTTON, self.OnOKClicked)
-        btn.Enable(False)
-        self.OKButton = btn
-
-        #Cancel Button
-        btn = wx.Button(self, wx.ID_CANCEL)
-        btn.SetHelpText("Cancel changes")
-        btnsizer.AddButton(btn)
-        btnsizer.Realize()
-
-        self.sizer.Add(btnsizer, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 1)
 
         self.SetSizer(self.sizer)
         self.sizer.Layout()
@@ -89,7 +68,6 @@ class NodeConfigSelector(wx.Dialog):
         j = self.getNodeNamesFromWeb()
         if j is not None:
             self.syncHubOKIcon.SetBitmap(self.SuccessImage)
-            self.OKButton.SetDefault() #set KB focus back to the OK button
         else:
             print 'Data was not available from the web.'
             self.syncHubOKIcon.SetBitmap(self.FailImage)
@@ -179,10 +157,6 @@ class NodeConfigSelector(wx.Dialog):
         item = evt.GetItem()
         if self.tree.GetChildrenCount(item) == 0:
             print self.getNodeConfigName(item)
-            self.OKButton.Enable(True)
-
-        else:
-            self.OKButton.Enable(False)
         print "OnSelChanged: ", self.GetItemText(evt.GetItem())
 
     #
