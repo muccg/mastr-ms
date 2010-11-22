@@ -6,7 +6,11 @@ import time
 import esky
 import sys
 from identifiers import *
-
+import urllib2
+from poster.encode import multipart_encode
+from poster import streaminghttp
+try: import json as simplejson
+except ImportError: import simplejson
 
 from WxLogger import Log
 
@@ -17,6 +21,8 @@ class APPSTATE:
     IDLE             = 'Idle'
 
 import weakref
+from config import CONFIG
+
 # Create and set a help provider.  Normally you would do this in
 # the app's OnInit as it must be done before any SetHelpText calls.
 provider = wx.SimpleHelpProvider()
@@ -24,6 +30,7 @@ wx.HelpProvider.Set(provider)
 class MainWindow(wx.Frame):
     def __init__(self, parent):
 
+        self.config = CONFIG
         wx.Frame.__init__(self, parent, -1, 'MS Datasync Application: v%s' % (VERSION))
         self.countDownEnabled = True #sets the countdown to be active
 
@@ -52,7 +59,9 @@ class MainWindow(wx.Frame):
             self.logTextCtrl.MacCheckSpelling(False)
         
         self.log = Log(self.logTextCtrl)
-        wx.Log_SetActiveTarget(self.log) 
+        wx.Log_SetActiveTarget(self.log)
+
+        
 
         #self.ListCtrlPanel = ListCtrlPanel(self, self.log)
 
@@ -108,13 +117,68 @@ class MainWindow(wx.Frame):
         #Collapsible pane event (the logArea):
         self.Bind(wx.EVT_COLLAPSIBLEPANE_CHANGED, self.OnPaneChanged, self.logArea)
 
+        #A button to send logs to the webserver
+        self.logbutton = wx.Button(self.logAreaPane, ID_SENDLOGS_BUTTON)
+        self.logbutton.SetLabel("Send Log")
+        self.logbutton.Bind(wx.EVT_BUTTON, self.OnSendLog)
+
+            
+
         #now lay everything out.
         self.logAreaSizer.Add(self.logTextCtrl, 1, flag=wx.ALL|wx.GROW|wx.EXPAND, border=2)
-        self.logAreaPane.SetSizerAndFit(self.logAreaSizer)
+        #Log  footer box
+        logfooterbox = wx.BoxSizer(wx.HORIZONTAL)
+        #A place to set the log variable
+        conf = self.config.getConfig()
+        if self.config.getConfig():
+            
+            
+            box = wx.BoxSizer(wx.HORIZONTAL)
+            ctrl = wx.TextCtrl(self.logAreaPane, -1, str(self.config.getValue('logfile')), size=(80,-1))
+            ctrl.SetHelpText(  self.config.getHelpText('logfile') )
+            
+            def OnLogFilenameSave(evt):
+                self.config.setValue('logfile', ctrl.GetValue() )
+                self.config.save()
+
+            label =  wx.StaticText(self.logAreaPane, -1, self.config.getFormalName('logfile'))
+            label.SetHelpText(self.config.getHelpText('logfile'))
+            btn = wx.Button(self.logAreaPane, -1)
+            btn.SetLabel('Set')
+            btn.Bind(wx.EVT_BUTTON, OnLogFilenameSave )
+            box.Add(label, 0, wx.ALIGN_LEFT| wx.ALIGN_CENTER_VERTICAL|wx.ALL, 0)
+            box.Add(ctrl, 1, wx.ALIGN_CENTRE|wx.ALL, 0)
+            box.Add(btn, 0, wx.ALIGN_RIGHT|wx.ALL, 0)
+            logfooterbox.Add(box, 1,  wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 0 )
+            
+            
         
+        logfooterbox.Add(self.logbutton, 0, wx.ALL, 0)
+        self.logAreaSizer.Add(logfooterbox, 0, flag=wx.ALL|wx.GROW|wx.EXPAND, border=2)
+        self.logAreaPane.SetSizerAndFit(self.logAreaSizer)
+       
+
+        #timing controls:
+        timingbox = wx.BoxSizer(wx.HORIZONTAL)
+        self.nextsynctxt = wx.StaticText(_cp, -1, label="Next Sync in: 00000000")
+        timingbox.Add(self.nextsynctxt, 1, wx.ALIGN_LEFT | wx.GROW | wx.EXPAND | wx.ALL, border=0)
+        self.freqspin = wx.SpinCtrl(_cp, -1)
+        self.freqspin.SetRange(1, 100000)
+        self.freqspin.SetValue(int(self.config.getValue('syncfreq')))
+        freqbox = wx.BoxSizer(wx.HORIZONTAL)
+        freqlab1 = wx.StaticText(_cp, -1, "Sync Frequency:")
+        freqlab2 = wx.StaticText(_cp, -1, "seconds")
+        freqbox.Add(freqlab1, 1, wx.ALIGN_LEFT | wx.ALL, border=0)
+        freqbox.Add(self.freqspin, 1, wx.ALIGN_RIGHT | wx.GROW | wx.EXPAND | wx.ALL, border=0)
+        freqbox.Add(freqlab2, 1, wx.ALIGN_LEFT | wx.ALL, border=0)
+
+        
+        #Populate the main window with the components
         contentpanelsizer = wx.BoxSizer(wx.VERTICAL)
         contentpanelsizer.Add(progressLabel, 0, flag=wx.ALL, border=2)
         contentpanelsizer.Add(progress, 0, wx.ALL | wx.GROW|wx.EXPAND | wx.FIXED_MINSIZE, border=2)
+        contentpanelsizer.Add(timingbox, 0, wx.ALL, border=0)
+        contentpanelsizer.Add(freqbox, 0, wx.ALL, border=0)
         contentpanelsizer.Add(logLabel, 0, wx.ALL, border=2)
         contentpanelsizer.Add(self.logArea, 1, flag=wx.ALL | wx.GROW | wx.EXPAND | wx.FIXED_MINSIZE, border=2)
 
@@ -225,8 +289,8 @@ class MainWindow(wx.Frame):
 
     def OnMenuPreferences(self, evt):
         '''open the prefs dialog which BLOCKS'''
-        import AutoPreferences
-        a = AutoPreferences.AutoPreferences(self, -1, self.config, self.log) 
+        import Preferences
+        a = Preferences.Preferences(self, -1, self.config, self.log) 
          # this does not return until the dialog is closed.
         val = a.ShowModal()
         #do something here with val if you like (==wx.ID_OK for instance)
@@ -289,6 +353,7 @@ class MainWindow(wx.Frame):
 
         if self.secondsUntilNextSync > 0:
             self.secondsUntilNextSync -= 1
+            self.nextsynctxt.SetLabel("Next Sync in %s" % (str(self.secondsUntilNextSync) ) )
             self.StatusBar.SetStatusText("Next sync in %s" % (str(self.secondsUntilNextSync) ), 1 )
         else:
             self.resetTimeTillNextSync(forceReset = True)
@@ -298,3 +363,38 @@ class MainWindow(wx.Frame):
         import wx.py as py
         w= py.crust.CrustFrame(parent = self)
         w.Show()
+
+
+    def OnSendLog(self, evt):
+        print 'send logs!'
+        self.logbutton.Disable()
+        origlabel = self.logbutton.GetLabel()
+        self.logbutton.SetLabel('Sending')
+        try:
+            #Start the multipart encoded post of whatever file our log is saved to:
+            posturl = self.config.getValue('synchub') + 'logupload/'
+            print 'reading logfile' 
+            rsync_logfile = open(self.config.getValue('logfile'))
+            #print 'multipart encoding data'
+            datagen, headers = multipart_encode( {'uploaded' : rsync_logfile, 'nodename' : self.config.getNodeName()} )
+            print 'posturl is: ', posturl
+            print 'datagen is ', datagen
+            print 'headers is ', headers
+            print 'forming request'
+            request = urllib2.Request(posturl, datagen, headers)
+            #print 'sending log %s to %s' % (rsync_logfile, posturl)
+            print 'opening url'
+            resp = urllib2.urlopen(request)
+            print 'reading response'
+            jsonret = resp.read()
+            print 'finished receiving data'
+            retval = simplejson.loads(jsonret)
+            #print 'OnSendLog: retval is %s' % (retval)
+            self.log('Log send response: %s' % (str(retval)) )
+        except Exception, e:
+            print 'OnSendLog: Exception occured: %s' % (str(e))
+            self.log('Exception occured sending log: %s' % (str(e)), type=self.log.LOG_ERROR)
+
+        self.logbutton.Enable()
+        self.logbutton.SetLabel(origlabel)
+        

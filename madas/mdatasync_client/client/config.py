@@ -1,6 +1,10 @@
 SAVEFILE_NAME = 'settings.cfg'
 import sys, os, string, time, cPickle
 import os.path
+
+
+#Dont instantiate this directly - use the module singleton defined at the end of this file
+
 class MSDSConfig(object):
     def __init__(self):
         self.store = {}
@@ -95,3 +99,4 @@ class MSDSConfig(object):
 
 
 
+CONFIG = MSDSConfig()

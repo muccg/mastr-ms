@@ -21,7 +21,7 @@ def nullFn(*args, **kwargs):
 
 MSDSCheckFn = nullFn 
 
-from config import MSDSConfig
+from config import CONFIG
 class MSDataSyncAPI(object):
     def __init__(self, log=None):
         import Queue
@@ -32,7 +32,7 @@ class MSDataSyncAPI(object):
             self.log = log
         
         self._impl = MSDSImpl(self.log, self) 
-        self.config = MSDSConfig()
+        self.config = CONFIG 
         self.useThreading = False
 
     def defaultLogSink(self, *args, **kwargs):
