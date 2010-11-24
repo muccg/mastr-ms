@@ -25,6 +25,60 @@ items:[
                { xtype:'tbtext', text:'Checkmarks indicate files that are visible to clients' }
            ]
        },
+       bbar: {
+           items: [
+           {
+               xtype:'form',
+               id:'pendingFileUpload',
+               fileUpload:true,
+               method:'POST',
+               width:200,
+               height:30,
+               border:false,
+               bodyStyle:'background:transparent;padding:4px;',
+               url:wsBaseUrl + 'uploadFile',
+               items: [
+               {
+                   hideLabel:true,
+                   xtype: 'fileuploadfield',
+                   id: 'quo-attach',
+                   emptyText: '',
+                   fieldLabel: 'File',
+                   name: 'attachfile'
+               },
+               {
+                   xtype:'hidden',
+                   id:'uploadExperimentId',
+                   name:'experimentId'
+               }
+               ]
+           }, 
+           {
+               text: 'Upload',
+               id:'upload file',
+               handler: function(){
+                   Ext.getCmp('pendingFileUpload').getForm().submit(
+                   {   successProperty: 'success',        
+                       success: function (form, action) {
+                           if (action.result.success === true) {
+                               form.reset(); 
+                               
+                               //reload the pending files tree
+                               Ext.getCmp('filesTree').getLoader().load(Ext.getCmp('filesTree').getRootNode());
+                               Ext.getCmp('filesTree').getRootNode().expand();
+                               
+                           } 
+                       },
+                       failure: function (form, action) {
+                           //do nothing special. this gets called on validation failures and server errors
+                           alert('error submitting form\n' + action.response );
+                       }
+                   });
+               }
+           }
+
+           ]
+       },
        items: [
                {
                xtype:'treepanel',
@@ -86,59 +140,9 @@ items:[
                                                                    });
                                }
                 }
-               },
-               
-               {
-                   xtype:'form',
-                   height:120,
-                   bodyStyle:'background:transparent;padding:4px;padding-top:15px;',
-                   id:'pendingFileUpload',
-                   fileUpload:true,
-                   region:'south',
-                   method:'POST',
-                   title:'Upload',
-                   url:wsBaseUrl + 'uploadFile',
-                   items: [
-                   {
-                       hideLabel:true,
-                       xtype: 'fileuploadfield',
-                       id: 'quo-attach',
-                       emptyText: '',
-                       fieldLabel: 'File',
-                       name: 'attachfile'
-                   },
-                   {
-                       xtype:'hidden',
-                       id:'uploadExperimentId',
-                       name:'experimentId'
-                   }
-                   ],
-                   buttons: [
-                   {
-                       text: 'Upload',
-                       id:'upload file',
-                       handler: function(){
-                           Ext.getCmp('pendingFileUpload').getForm().submit(
-                           {   successProperty: 'success',        
-                               success: function (form, action) {
-                                   if (action.result.success === true) {
-                                       form.reset(); 
-                                       
-                                       //reload the pending files tree
-                                       Ext.getCmp('filesTree').getLoader().load(Ext.getCmp('filesTree').getRootNode());
-                                       Ext.getCmp('filesTree').getRootNode().expand();
-                                       
-                                   } 
-                               },
-                               failure: function (form, action) {
-                                   //do nothing special. this gets called on validation failures and server errors
-                                   alert('error submitting form\n' + action.response );
-                               }
-                           });
-                       }
-                   }
-                   ]
                }
+               
+               
                ]
        }
        ]
