@@ -96,7 +96,7 @@ class MSDataSyncAPI(object):
         except Exception, e:
             returnFn(retcode = False, retstring = "Could not connect %s" % (str(e)) )
             return
-
+        print 'filesdict was: ', filesdict
 
         #now, if something goes wrong interpreting the result, don't panic.
         try:

@@ -46,15 +46,28 @@ class FileList(object):
         #if there are files at this node. 
         #print '\nIn checknode, type of currentnode is: ', type(self.currentnode)
         #print '\nIn checknode, currentnode is', self.currentnode 
+        
+        #create a list of uppercase keys to do the comparison with.
+        #we always do our comparisons with uppercase, so that they are case insensitive,
+        #remembering that the filesdict is keyed uppercase.
+        
         if len(self.currentnode['.'].keys()):
             for fname in self.currentnode['.'].keys():
+                upperfname = fname.upper() #uppercase the fname, since the filesdict is keyed on uppercase names
                 #is the filename in the filesdict keys?
                 logger.debug('filename is: %s' % (unicode(fname).encode('utf-8') ) )
-                if fname in filesdict.keys():
-                    self.markfound(self.currentnode['.'], fname, filesdict[fname])
+                if upperfname in filesdict.keys():
+                    self.markfound(self.currentnode['.'], fname, filesdict[upperfname])
+                    #rewrite the DB filename to be the supplied one.
+                    try:
+                        runsampleDBentry = RunSample.objects.get(id=filesdict[upperfname][1])
+                        runsampleDBentry.filename = fname
+                        runsampleDBentry.save()
+                    except Exception, e:
+                        logger.debug('Exception renaming runsample filename: %s' % (str(e)) )
                     #remove the entry from the filesdict - no point testing it
                     #again.
-                    del filesdict[fname]
+                    del filesdict[upperfname]
                     logger.debug('Found file: Setting %s to %s' % (fname.encode('utf-8'), self.currentnode['.'][fname].encode('utf-8')) )
                 else:
                     #delete entries that werent found
@@ -66,13 +79,22 @@ class FileList(object):
         #otherwise, push each unfound dir as a new node on the checknodes 
         #queue
         for dir in self.currentnode.keys():
-            if dir not in ['.', '/']: #don't check the filelist or 'path' entry
-                logger.debug('checking dir: %s' % (dir.encode('utf-8')) )
-                if dir in filesdict.keys():
+            upperdirname = dir.upper()
+            if upperdirname not in ['.', '/']: #don't check the filelist or 'path' entry
+                logger.debug('checking dir: %s' % (upperdirname.encode('utf-8')) )
+                if upperdirname in filesdict.keys():
                     #set the dir to contain the path, not a node.
-                    self.markfound(self.currentnode, dir, filesdict[dir])
+                    self.markfound(self.currentnode, dir, filesdict[upperdirname])
+                    #rewrite the DB filename to be the supplied one.
+                    try:
+                        runsampleDBentry =  RunSample.objects.get(id=filesdict[upperdirname][1])
+                        runsampleDBentry.filename = dir
+                        runsampleDBentry.save()
+                    except Exception, e:
+                        logger.debug('Exception renaming runsample filename: %s' % (str(e)) )
+
                     #remove the found entry from the filesdict
-                    del filesdict[dir]
+                    del filesdict[upperdirname]
                     logger.debug( 'Found dir: Setting %s to %s' % ( dir.encode('utf-8'), self.currentnode[dir].encode('utf-8') ))
                 else:
                     #push the dir onto the checknodes.
@@ -169,7 +191,7 @@ def retrievePathsForFiles(request, *args):
                 runsamples = RunSample.objects.filter(run = run)
                 #Build a filesdict of all the files for these runsamples
                 for rs in runsamples:
-                    fname = rs.filename;
+                    fname = rs.filename.upper() #Use uppercase filenames as keys.
                     abspath, relpath = rs.filepaths()
                     logger.debug( 'Filename: %s belongs in path %s' % ( fname.encode('utf-8'), abspath.encode('utf-8') ) )
                     if filesdict.has_key(fname):
