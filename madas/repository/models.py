@@ -387,10 +387,6 @@ class Run(models.Model):
 
         if self.complete_sample_count == self.sample_count:
             self.state = 2
-        elif self.incomplete_sample_count == self.sample_count:
-            self.state = 0
-        else:
-            self.state = 1
 
         self.save()
         
