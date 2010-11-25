@@ -73,6 +73,53 @@ class MSDataSyncAPI(object):
             if callback != None:
                 callback( result )
 
+
+    def handshakeRsync(self, returnFn = None):
+        if returnFn is None:
+            returnFn = self.defaultReturn
+
+        #get the local file list
+        organisation = self.config.getValue('organisation')
+        station = self.config.getValue('stationname')
+        sitename = self.config.getValue('sitename')
+        localindexdir = self.config.getLocalIndexPath() 
+
+        postvars = {'files' : simplejson.dumps({}), 'organisation' : simplejson.dumps(organisation), 'sitename' : simplejson.dumps(sitename), 'stationname': simplejson.dumps(station)}
+        try:
+            f = urllib.urlopen(self.config.getValue('synchub'), urllib.urlencode(postvars))
+            jsonret = f.read()
+        except Exception, e:
+            returnFn(retcode = False, retstring = "Could not connect %s" % (str(e)) )
+            return
+
+        print 'Checking response'
+        #now, if something goes wrong interpreting the result, don't panic.
+        try:
+            d = simplejson.loads(jsonret)
+            self.log('Synchub config loaded object is: %s' % j, type=self.log.LOG_WARNING, thread=self.useThreading)
+        except Exception, e:
+            returnFn(retcode=False, retstring="Error: %s\nUnexpected response from server was: %s" % (e, jsonret))
+            return
+
+    
+        #I want to do an rsync -n
+        rsyncconfig = {}
+        #Lets get any of the remote params
+        rsyncconfig['host'] = d['host']
+        #rootdir
+        rsyncconfig['rootdir'] = ''
+        #flags, server is authoratative
+        rsyncconfig['flags'] = ['n'] #n = dry run
+        #User, client is authoratative
+        if self.config.getValue('user') in ['!', '']:
+            rsyncconfig['user'] = d['username'] #use the server value
+        else:
+            rsyncconfig['user'] = self.config.getValue('user')
+        
+        print 'handshaking'
+        #now rsync the whole thing over
+        self._appendTask(self.rsyncReturn, self._impl.perform_rsync, "%s" % (localindexdir) , rsyncconfig)
+
     #Actual API methods that DO something
     def checkRsync(self, callingWindow, statuschange, notused, returnFn = None):
         if returnFn is None:
@@ -197,7 +244,7 @@ class MSDataSyncAPI(object):
 
     def defaultReturn(self, *args, **kwargs):
         #print 'rsync returned: ', retval
-        self.log('Default return callback:%s' % (str(args)), Debug=True, thread = self.useThreading)
+        self.log('Default return callback: args=%s, kwargs=%s' % (str(args), str(kwargs)), Debug=True, thread = self.useThreading)
 
     def copyFilesReturn(self, *args, **kwargs):
         self.log('Local file copy stage complete', thread = self.useThreading)

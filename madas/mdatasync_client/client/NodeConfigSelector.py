@@ -59,6 +59,8 @@ class NodeConfigSelector(wx.Panel):
         self.nodeconfigdict = {}
         self.refreshWebData()
 
+        self.selectNode()
+
     def focusResetButton(self, *args):
         self.RefreshButton.SetDefault()
 
@@ -74,6 +76,32 @@ class NodeConfigSelector(wx.Panel):
         
         self.setNodes(j)
 
+
+    def selectNode(self):
+        orgname = self.parentApp.config.getValue('organisation')
+        sitename = self.parentApp.config.getValue('sitename')
+        stationname = self.parentApp.config.getValue('stationname')
+        root = self.tree.GetRootItem()
+
+        def findnodebytext(node, text):
+            child, cookie = self.tree.GetFirstChild(node)
+            while child:
+                if self.tree.GetItemText(child) == text:
+                    return child
+                child, cookie = self.tree.GetNextChild(node, cookie)    
+            return None
+
+        org = findnodebytext(root, orgname)
+        if org is not None:
+            site = findnodebytext(org, sitename)
+            if site is not None:
+                station = findnodebytext(site, stationname)
+
+        if station is not None:        
+            self.tree.Expand(station)
+            self.tree.SelectItem(station)
+        
+        
 
     def getNodeNamesFromWeb(self):
         #get the data
@@ -156,7 +184,10 @@ class NodeConfigSelector(wx.Panel):
     def OnSelChanged(self, evt):
         item = evt.GetItem()
         if self.tree.GetChildrenCount(item) == 0:
-            print self.getNodeConfigName(item)
+            self.getNodeConfigName(item) #get into the nodeconfigdict
+            self.parentApp.setNodeConfigName(self.nodeconfigdict)
+            #print self.getNodeConfigName(item)
+            
         print "OnSelChanged: ", self.GetItemText(evt.GetItem())
 
     #

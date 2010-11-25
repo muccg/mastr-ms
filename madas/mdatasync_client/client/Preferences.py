@@ -155,6 +155,7 @@ class Preferences(wx.Dialog):
 
     def OnHandshake(self, evt):
         print 'OnHandshake!'
+        self.parentApp.MSDSHandshakeFn(returnFn=None)
 
     def save(self, *args):
         #k = self.config.getConfig().keys()

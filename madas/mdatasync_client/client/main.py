@@ -32,6 +32,7 @@ class MDataSyncApp(wx.PySimpleApp):
         self.msds.startThread() 
         
         win.MSDSCheckFn = self.msds.checkRsync
+        win.MSDSHandshakeFn = self.msds.handshakeRsync
         win.msds = self.msds
         win.resetTimeTillNextSync()
         #wx.Log_SetActiveTarget( wx.LogWindow(None, 'loggin...') )
