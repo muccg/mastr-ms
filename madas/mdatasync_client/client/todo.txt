@@ -1,19 +1,20 @@
-1. Install on windows, when you run rsync for the first time it asks if you want to 'unblock' it. A user can probably click on the dialogue, but it would be good if there was a way to automatically fix this.
-2. Rsync on unix (probably windows too) wants hosts authed for knownhosts file. Prompt for 'yes/no' answer, and then for passphrase :(
-3. The remote file structure needs to exist. The remote rsync fails if the path to the remote dump location isn't completely created first.
-    The remote side needed syncdir/org/sitename created. It seemed happy to create stationname/* itself.
-4. Dealing with errors on the gui client - popup a window? Have obvious ways of fixing errors, with a 'make it all better' button?
-5. Preferences- need to make sure ints are ints, strings are strings, perhaps reset to defaults if it doesnt make sense.
+TODO:
 
-6. If you start up and you have not yet got a nodeconfig set, you get weird errors, because the server gives you back an erroneous config.
+- Esky
+- Move progress bar to status bar
+- Warning on main window if not valid config on startup
+- Proper warning icons on prefs window if cant contact server
+- [DONE] Log text wraps
+- 'Send logs' sends rsync log + logging window contents
+- 'Send keys' sends email to techs
+- Front window frequency control actually sets frequency
+- front window resize actually causes resize (seems to when bigger, not when smaller?)
+- [DONE, NEEDS TESTING] Handshake 
+- [DONE] Current node selected in preds nodechooser on open
+- Be able to switch all debug off? (is this really needed?)
+- Node name displayed on front window (title bar? although warning icon would go next to...)
+- systray icon better, shows state, also shows error state with warning icon?
+- pycrust moved to help menu
+- about in help menu, with dev name + ccg logo
+- manual in help menu.
 
-7. If you start up and there isnt a settings.cfg, open up the preferences dialog.
-
-INSTALLER
-----------
-Needs to install:
-python
-wx
-cwrsync (ssh?)   #"cwrsync_install.exe /S" for silent mode works beautifully.
-the ssh private keys
-the app code.

@@ -40,6 +40,10 @@ class MainWindow(wx.Frame):
         logLabel = wx.StaticText(parent = _cp)
         logLabel.SetLabel(label="Log")
 
+        logWrap = wx.CheckBox(parent=_cp, label="Wrap")
+        logWrap.SetValue(False)
+        logWrap.Bind(wx.EVT_CHECKBOX, self.ToggleLogWrap)
+
         progressLabel = wx.StaticText(parent = _cp)
         progressLabel.SetLabel(label="Progress")
 
@@ -175,12 +179,16 @@ class MainWindow(wx.Frame):
         
         #Populate the main window with the components
         contentpanelsizer = wx.BoxSizer(wx.VERTICAL)
-        contentpanelsizer.Add(progressLabel, 0, flag=wx.ALL, border=2)
-        contentpanelsizer.Add(progress, 0, wx.ALL | wx.GROW|wx.EXPAND | wx.FIXED_MINSIZE, border=2)
+        contentpanelsizer.Add(progressLabel, 0, flag=wx.ALL, border=0)
+        contentpanelsizer.Add(progress, 0, wx.ALL | wx.GROW|wx.EXPAND | wx.FIXED_MINSIZE, border=0)
         contentpanelsizer.Add(timingbox, 0, wx.ALL, border=0)
         contentpanelsizer.Add(freqbox, 0, wx.ALL, border=0)
-        contentpanelsizer.Add(logLabel, 0, wx.ALL, border=2)
-        contentpanelsizer.Add(self.logArea, 1, flag=wx.ALL | wx.GROW | wx.EXPAND | wx.FIXED_MINSIZE, border=2)
+        
+        loghbox = wx.BoxSizer(wx.HORIZONTAL)
+        loghbox.Add(logLabel, 0, wx.ALL, border=0)
+        loghbox.Add(logWrap, 0, wx.ALL, border=0)
+        contentpanelsizer.Add(loghbox, 0)
+        contentpanelsizer.Add(self.logArea, 1, flag=wx.ALL | wx.GROW | wx.EXPAND | wx.FIXED_MINSIZE, border=0)
 
         self.contentPanel.SetSizerAndFit(contentpanelsizer)
         self.contentpanelsizer = contentpanelsizer
@@ -192,6 +200,11 @@ class MainWindow(wx.Frame):
         
         self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
         self.log('Finished loading application')
+
+    def ToggleLogWrap(self, evt):
+        self.logTextCtrl.SetWindowStyle(self.logTextCtrl.GetWindowStyle() ^ wx.HSCROLL)
+        self.logTextCtrl.Refresh()
+        #self.log('Toggling Wrapping', type=self.log.LOG_DEBUG)
 
     def PauseCountdown(self):
         self.countDownEnabled = False
