@@ -83,10 +83,14 @@ class MainWindow(wx.Frame):
 
         editMenu = wx.Menu()
         editMenu.Append(ID_PREFERENCES, "&Preferences", "Application Preferences")
-        editMenu.Append(ID_PYCRUST, "&Pycrust", "Pycrust")
 
+        helpMenu = wx.Menu()
+        helpMenu.Append(ID_ABOUT, "&About", "About")
+        helpMenu.Append(ID_PYCRUST, "&Pycrust", "Pycrust")
+        
         self.menuBar.Append(fileMenu, "&File")
         self.menuBar.Append(editMenu, "&Edit")
+        self.menuBar.Append(helpMenu, "&Help")
 
         #status bar
         self.StatusBar = StatusBar(self, self.log)
@@ -117,6 +121,7 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnMenuPreferences, id=ID_PREFERENCES )
         self.Bind(wx.EVT_MENU, self.pycrust, id=ID_PYCRUST )
         self.Bind(wx.EVT_MENU, self.OnUpdateProgram, id=ID_PROGRAMUPDATES ) 
+        self.Bind(wx.EVT_MENU, self.OnAbout, id=ID_ABOUT ) 
        
         #Collapsible pane event (the logArea):
         self.Bind(wx.EVT_COLLAPSIBLEPANE_CHANGED, self.OnPaneChanged, self.logArea)
@@ -299,6 +304,20 @@ class MainWindow(wx.Frame):
         self.log('Called Exit. Cleaning up...', type=self.log.LOG_DEBUG)
         self.Destroy()
 
+
+    def OnAbout(self, evt):
+        #a = About.About(self, -1)
+        #val = a.ShowModal()
+        #a.Destroy()
+        a = wx.AboutDialogInfo();
+        a.AddDeveloper("Brad Power")
+        a.AddDocWriter("Brad Power")
+        a.SetCopyright("(C) 2010 CCG")
+        a.SetDescription("MS data synchronisation tool for the Mastr-MS website")
+        a.SetName("MS Datasync")
+        a.SetVersion(VERSION)
+        a.SetWebSite("http://ccg.murdoch.edu.au")
+        wx.AboutBox(a);
 
     def OnMenuPreferences(self, evt):
         '''open the prefs dialog which BLOCKS'''
