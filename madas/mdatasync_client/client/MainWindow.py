@@ -44,8 +44,8 @@ class MainWindow(wx.Frame):
         logWrap.SetValue(False)
         logWrap.Bind(wx.EVT_CHECKBOX, self.ToggleLogWrap)
 
-        progressLabel = wx.StaticText(parent = _cp)
-        progressLabel.SetLabel(label="Progress")
+        #progressLabel = wx.StaticText(parent = _cp)
+        #progressLabel.SetLabel(label="Progress")
 
         #First thing, set up the log.
         self.logArea = wx.CollapsiblePane(_cp, -1, name='LogArea')
@@ -54,8 +54,6 @@ class MainWindow(wx.Frame):
         self.logTextCtrl = wx.TextCtrl(self.logAreaPane, -1, 
                                     style = wx.TE_MULTILINE|wx.TE_READONLY|wx.HSCROLL)
         
-        progress = wx.Gauge(parent = _cp, range=100, size=(500, 20))
-        self.progress = progress
         
 
         #modify the log
@@ -96,7 +94,12 @@ class MainWindow(wx.Frame):
         self.StatusBar = StatusBar(self, self.log)
         self.SetStatusBar(self.StatusBar)
         self.state = APPSTATE.IDLE
-        self.StatusBar.SetStatusText(self.state)
+        #self.StatusBar.SetStatusText(self.state)
+        
+        progress = wx.Gauge(self.StatusBar, -1, 100)
+        self.progress = progress
+
+        self.StatusBar.AddWidget(progress, pos=1)#, pos = 2)
 
         #sys tray icon
         self.SystrayIcon = SystrayIcon(self, self.log)
@@ -130,8 +133,6 @@ class MainWindow(wx.Frame):
         self.logbutton = wx.Button(self.logAreaPane, ID_SENDLOGS_BUTTON)
         self.logbutton.SetLabel("Send Log")
         self.logbutton.Bind(wx.EVT_BUTTON, self.OnSendLog)
-
-            
 
         #now lay everything out.
         self.logAreaSizer.Add(self.logTextCtrl, 1, flag=wx.ALL|wx.GROW|wx.EXPAND, border=2)
@@ -184,8 +185,8 @@ class MainWindow(wx.Frame):
         
         #Populate the main window with the components
         contentpanelsizer = wx.BoxSizer(wx.VERTICAL)
-        contentpanelsizer.Add(progressLabel, 0, flag=wx.ALL, border=0)
-        contentpanelsizer.Add(progress, 0, wx.ALL | wx.GROW|wx.EXPAND | wx.FIXED_MINSIZE, border=0)
+        #contentpanelsizer.Add(progressLabel, 0, flag=wx.ALL, border=0)
+        #contentpanelsizer.Add(progress, 0, wx.ALL | wx.GROW|wx.EXPAND | wx.FIXED_MINSIZE, border=0)
         contentpanelsizer.Add(timingbox, 0, wx.ALL, border=0)
         contentpanelsizer.Add(freqbox, 0, wx.ALL, border=0)
         
@@ -386,7 +387,7 @@ class MainWindow(wx.Frame):
         if self.secondsUntilNextSync > 0:
             self.secondsUntilNextSync -= 1
             self.nextsynctxt.SetLabel("Next Sync in %s" % (str(self.secondsUntilNextSync) ) )
-            self.StatusBar.SetStatusText("Next sync in %s" % (str(self.secondsUntilNextSync) ), 1 )
+            #self.StatusBar.SetStatusText("Next sync in %s" % (str(self.secondsUntilNextSync) ), 1 )
         else:
             self.resetTimeTillNextSync(forceReset = True)
             self.OnCheckNow(None)
