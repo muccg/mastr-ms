@@ -14,7 +14,11 @@ TODO:
 - Be able to switch all debug off? (is this really needed?)
 - Node name displayed on front window (title bar? although warning icon would go next to...)
 - systray icon better, shows state, also shows error state with warning icon?
-- pycrust moved to help menu
+- [DONE] pycrust moved to help menu
 - about in help menu, with dev name + ccg logo
 - manual in help menu.
+
+
+-Remote screenshots?
+
 
