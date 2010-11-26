@@ -15,7 +15,7 @@ TODO:
 - Node name displayed on front window (title bar? although warning icon would go next to...)
 - systray icon better, shows state, also shows error state with warning icon?
 - [DONE] pycrust moved to help menu
-- about in help menu, with dev name + ccg logo
+- [DONE] about in help menu, with dev name + ccg logo
 - manual in help menu.
 
 

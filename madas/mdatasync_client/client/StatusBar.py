@@ -1,8 +1,9 @@
 import wx
+from EnhancedStatusBar import EnhancedStatusBar
 
-class StatusBar(wx.StatusBar):
+class StatusBar(EnhancedStatusBar):
     def __init__(self, parent, log):
-        wx.StatusBar.__init__(self, parent, -1)
+        EnhancedStatusBar.__init__(self, parent, -1)
 
         #Make the SB with 3 feilds
         self.SetFieldsCount(3)
@@ -14,7 +15,7 @@ class StatusBar(wx.StatusBar):
         self.Bind(wx.EVT_IDLE, self.OnIdle)
 
         #Field 0: Text
-        self.SetStatusText("status goes here", 0)
+        #self.SetStatusText("status goes here", 0)
 
         #Field 1: A control
         #self.cb = wx.CheckBox(self, 1001, 'toggle ctrl')
