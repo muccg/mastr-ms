@@ -57,9 +57,9 @@ class NodeConfigSelector(wx.Panel):
         self.sizer.Layout()
 
         self.nodeconfigdict = {}
-        self.refreshWebData()
-
-        self.selectNode()
+        
+        #self.refreshWebData()
+        #self.selectNode()
 
     def focusResetButton(self, *args):
         self.RefreshButton.SetDefault()

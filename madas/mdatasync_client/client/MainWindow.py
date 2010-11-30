@@ -96,11 +96,6 @@ class MainWindow(wx.Frame):
         self.state = APPSTATE.IDLE
         #self.StatusBar.SetStatusText(self.state)
         
-        progress = wx.Gauge(self.StatusBar, -1, 100)
-        self.progress = progress
-
-        self.StatusBar.AddWidget(progress, pos=1)#, pos = 2)
-
         #sys tray icon
         self.SystrayIcon = SystrayIcon(self, self.log)
         self.SystrayIcon.SetIconTimer()
@@ -142,7 +137,6 @@ class MainWindow(wx.Frame):
         conf = self.config.getConfig()
         if self.config.getConfig():
             
-            
             box = wx.BoxSizer(wx.HORIZONTAL)
             ctrl = wx.TextCtrl(self.logAreaPane, -1, str(self.config.getValue('logfile')), size=(80,-1))
             ctrl.SetHelpText(  self.config.getHelpText('logfile') )
@@ -161,12 +155,9 @@ class MainWindow(wx.Frame):
             box.Add(btn, 0, wx.ALIGN_RIGHT|wx.ALL, 0)
             logfooterbox.Add(box, 1,  wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 0 )
             
-            
-        
         logfooterbox.Add(self.logbutton, 0, wx.ALL, 0)
         self.logAreaSizer.Add(logfooterbox, 0, flag=wx.ALL|wx.GROW|wx.EXPAND, border=2)
         self.logAreaPane.SetSizerAndFit(self.logAreaSizer)
-       
 
         #timing controls:
         timingbox = wx.BoxSizer(wx.HORIZONTAL)
@@ -182,7 +173,6 @@ class MainWindow(wx.Frame):
         freqbox.Add(self.freqspin, 1, wx.ALIGN_RIGHT | wx.GROW | wx.EXPAND | wx.ALL, border=0)
         freqbox.Add(freqlab2, 1, wx.ALIGN_LEFT | wx.ALL, border=0)
 
-        
         #Populate the main window with the components
         contentpanelsizer = wx.BoxSizer(wx.VERTICAL)
         #contentpanelsizer.Add(progressLabel, 0, flag=wx.ALL, border=0)
@@ -347,9 +337,9 @@ class MainWindow(wx.Frame):
 
     def _SetProgress(self, prognum, add = False):
         if (add):
-            prognum += self.progress.GetValue()
+            prognum += self.StatusBar.getProgress()
 
-        self.progress.SetValue(prognum)
+        self.StatusBar.setProgress(prognum)
 
 
     def CheckReturnFn(self, retcode = True, retstring = "", *args):
