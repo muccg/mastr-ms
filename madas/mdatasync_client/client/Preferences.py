@@ -122,7 +122,7 @@ class Preferences(wx.Dialog):
         self.SetSizer(sizer)
         sizer.Fit(self)
 
-    
+
     def OKPressed(self, *args):
         self.save(args)
         self.EndModal(0)
@@ -155,7 +155,7 @@ class Preferences(wx.Dialog):
 
     def OnHandshake(self, evt):
         print 'OnHandshake!'
-        self.parentApp.MSDSHandshakeFn(returnFn=None)
+        self.parentApp.MSDSHandshakeFn(self.parentApp, returnFn=None)
 
     def save(self, *args):
         #k = self.config.getConfig().keys()
@@ -180,20 +180,3 @@ class Preferences(wx.Dialog):
             self.config.setValue(k, datadict[k])
         self.setNodeConfigLabel()
         
-    #def openNodeChooser(self, *args):
-    #    self.nodeconfigselector = NodeConfigSelector.NodeConfigSelector(self, ID_NODESELECTOR_DIALOG, self.log, None)
-    #
-    #    self.nodeconfigselector.createTree()
-    #    self.nodeconfigselector.ShowModal()
-    #    self.nodeconfigselector.Destroy()
-
-    def postRsyncLog(self, *args):
-        import MultipartPostHandler, urllib2, sys
-        opener = urllib2.build_opener(MultipartPostHandler.MultipartPostHandler)
-        params = {'uploaded' : open("rsync.log")}
-        a = opener.open(self.config.getValue('synchub') + 'logupload/')
-        resp = a.read()
-        print resp
-
-    def postRSAKey(self, *args):
-        pass

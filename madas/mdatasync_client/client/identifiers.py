@@ -20,5 +20,5 @@ ID_HANDSHAKE_BUTTON = 210
 ID_GENERATEFILES_BUTTON = 208 #in the simulator application
 ID_CLEARINPUT_BUTTON = 209 #in the simulator application
 #Node config selector window
-
+ID_SENDSCREENSHOT_BUTTON = 212
 

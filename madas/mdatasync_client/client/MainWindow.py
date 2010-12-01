@@ -128,6 +128,9 @@ class MainWindow(wx.Frame):
         self.logbutton = wx.Button(self.logAreaPane, ID_SENDLOGS_BUTTON)
         self.logbutton.SetLabel("Send Log")
         self.logbutton.Bind(wx.EVT_BUTTON, self.OnSendLog)
+        self.screenshotbutton = wx.Button(self.logAreaPane, ID_SENDSCREENSHOT_BUTTON)
+        self.screenshotbutton.SetLabel("Send Shot")
+        self.screenshotbutton.Bind(wx.EVT_BUTTON, self.OnTakeScreenshot)
 
         #now lay everything out.
         self.logAreaSizer.Add(self.logTextCtrl, 1, flag=wx.ALL|wx.GROW|wx.EXPAND, border=2)
@@ -156,6 +159,7 @@ class MainWindow(wx.Frame):
             logfooterbox.Add(box, 1,  wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 0 )
             
         logfooterbox.Add(self.logbutton, 0, wx.ALL, 0)
+        logfooterbox.Add(self.screenshotbutton, 0, wx.ALL, 0)
         self.logAreaSizer.Add(logfooterbox, 0, flag=wx.ALL|wx.GROW|wx.EXPAND, border=2)
         self.logAreaPane.SetSizerAndFit(self.logAreaSizer)
 
@@ -315,6 +319,12 @@ class MainWindow(wx.Frame):
         import Preferences
         a = Preferences.Preferences(self, -1, self.config, self.log) 
          # this does not return until the dialog is closed.
+       
+        a.Show() #Show the dialog first
+        #Now refresh its stuff
+        a.nodeconfigselector.refreshWebData()
+        a.nodeconfigselector.selectNode()
+        #Now make it modal
         val = a.ShowModal()
         #do something here with val if you like (==wx.ID_OK for instance)
         a.Destroy()
@@ -420,4 +430,81 @@ class MainWindow(wx.Frame):
 
         self.logbutton.Enable()
         self.logbutton.SetLabel(origlabel)
-        
+
+    def OnTakeScreenshot(self, event):
+        """ Takes a screenshot of the screen at give pos & size (rect). """
+        print 'Taking screenshot...'
+        rect = self.GetRect()
+        # see http://aspn.activestate.com/ASPN/Mail/Message/wxpython-users/3575899
+        # created by Andrea Gavana
+ 
+        # adjust widths for Linux (figured out by John Torres 
+        # http://article.gmane.org/gmane.comp.python.wxpython/67327)
+        if sys.platform == 'linux2':
+            client_x, client_y = self.ClientToScreen((0, 0))
+            border_width = client_x - rect.x
+            title_bar_height = client_y - rect.y
+            rect.width += (border_width * 2)
+            rect.height += title_bar_height + border_width
+ 
+        #Create a DC for the whole screen area
+        dcScreen = wx.ScreenDC()
+ 
+        #Create a Bitmap that will hold the screenshot image later on
+        #Note that the Bitmap must have a size big enough to hold the screenshot
+        #-1 means using the current default colour depth
+        bmp = wx.EmptyBitmap(rect.width, rect.height)
+ 
+        #Create a memory DC that will be used for actually taking the screenshot
+        memDC = wx.MemoryDC()
+ 
+        #Tell the memory DC to use our Bitmap
+        #all drawing action on the memory DC will go to the Bitmap now
+        memDC.SelectObject(bmp)
+ 
+        #Blit (in this case copy) the actual screen on the memory DC
+        #and thus the Bitmap
+        memDC.Blit( 0, #Copy to this X coordinate
+                    0, #Copy to this Y coordinate
+                    rect.width, #Copy this width
+                    rect.height, #Copy this height
+                    dcScreen, #From where do we copy?
+                    rect.x, #What's the X offset in the original DC?
+                    rect.y  #What's the Y offset in the original DC?
+                    )
+ 
+        #Select the Bitmap out of the memory DC by selecting a new
+        #uninitialized Bitmap
+        memDC.SelectObject(wx.NullBitmap)
+ 
+        img = bmp.ConvertToImage()
+        import time
+        timetext = time.asctime().replace(' ', '_')
+        fileName = "screenshot_%s.png" % (timetext)
+        img.SaveFile(fileName, wx.BITMAP_TYPE_PNG)
+        print '...saving as png!'
+
+        try:
+            #Start the multipart encoded post of whatever file our log is saved to:
+            posturl = self.config.getValue('synchub') + 'logupload/'
+            print 'reading imagefile' 
+            ssfile = open(fileName)
+            #print 'multipart encoding data'
+            datagen, headers = multipart_encode( {'uploaded' : ssfile, 'nodename' : self.config.getNodeName()} )
+            print 'posturl is: ', posturl
+            print 'datagen is ', datagen
+            print 'headers is ', headers
+            print 'forming request'
+            request = urllib2.Request(posturl, datagen, headers)
+            #print 'sending log %s to %s' % (rsync_logfile, posturl)
+            print 'opening url'
+            resp = urllib2.urlopen(request)
+            print 'reading response'
+            jsonret = resp.read()
+            print 'finished receiving data'
+            retval = simplejson.loads(jsonret)
+            #print 'OnSendLog: retval is %s' % (retval)
+            self.log('Log send response: %s' % (str(retval)) )
+        except Exception, e:
+            print 'OnSendScreenShot: Exception occured: %s' % (str(e))
+            self.log('Exception occured sending screenshot: %s' % (str(e)), type=self.log.LOG_ERROR)

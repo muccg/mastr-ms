@@ -67,6 +67,7 @@ class NodeConfigSelector(wx.Panel):
 
     def refreshWebData(self, *args):
         self.parentApp.config.setValue('synchub', self.syncHubString.Value )
+        self.parentApp.config.save()
         j = self.getNodeNamesFromWeb()
         if j is not None:
             self.syncHubOKIcon.SetBitmap(self.SuccessImage)
@@ -91,6 +92,7 @@ class NodeConfigSelector(wx.Panel):
                 child, cookie = self.tree.GetNextChild(node, cookie)    
             return None
 
+        station = None
         org = findnodebytext(root, orgname)
         if org is not None:
             site = findnodebytext(org, sitename)
@@ -108,7 +110,7 @@ class NodeConfigSelector(wx.Panel):
         retval = None
         try:
             req = urllib2.Request(self.parentApp.config.getValue('synchub') + 'nodes/')
-            f = urllib2.urlopen(req)
+            f = urllib2.urlopen(req, None, 1) #one second timeout
             jsonret = f.read()
             print 'node config: %s' % jsonret 
             retval = simplejson.loads(jsonret)

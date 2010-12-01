@@ -74,16 +74,16 @@ class MSDataSyncAPI(object):
                 callback( result )
 
 
-    def handshakeRsync(self, returnFn = None):
+    def handshakeRsync(self, callingWindow, returnFn = None):
         if returnFn is None:
             returnFn = self.defaultReturn
-
+        self.callingWindow = callingWindow
         #get the local file list
         organisation = self.config.getValue('organisation')
         station = self.config.getValue('stationname')
         sitename = self.config.getValue('sitename')
         localindexdir = self.config.getLocalIndexPath() 
-
+        self.log("Handshaking with server %s" % (self.config.getValue('synchub')), type=self.log.LOG_NORMAL, thread=self.useThreading)
         postvars = {'files' : simplejson.dumps({}), 'organisation' : simplejson.dumps(organisation), 'sitename' : simplejson.dumps(sitename), 'stationname': simplejson.dumps(station)}
         try:
             f = urllib.urlopen(self.config.getValue('synchub'), urllib.urlencode(postvars))
@@ -96,7 +96,7 @@ class MSDataSyncAPI(object):
         #now, if something goes wrong interpreting the result, don't panic.
         try:
             d = simplejson.loads(jsonret)
-            self.log('Synchub config loaded object is: %s' % j, type=self.log.LOG_WARNING, thread=self.useThreading)
+            self.log('Synchub config loaded object is: %s' % simplejson.dumps(d, sort_keys=True, indent=2), type=self.log.LOG_NORMAL, thread=self.useThreading)
         except Exception, e:
             returnFn(retcode=False, retstring="Error: %s\nUnexpected response from server was: %s" % (e, jsonret))
             return
@@ -118,7 +118,7 @@ class MSDataSyncAPI(object):
         
         print 'handshaking'
         #now rsync the whole thing over
-        self._appendTask(self.rsyncReturn, self._impl.perform_rsync, "%s" % (localindexdir) , rsyncconfig)
+        self._appendTask(self.handshakeReturn, self._impl.perform_rsync, "%s" % (localindexdir) , rsyncconfig)
 
     #Actual API methods that DO something
     def checkRsync(self, callingWindow, statuschange, notused, returnFn = None):
@@ -136,6 +136,7 @@ class MSDataSyncAPI(object):
         localindexdir = self.config.getLocalIndexPath() 
         filesdict = self.getFiles(localdir, ignoredirs=[localindexdir])
         
+        self.log("Syncing with server %s" % (self.config.getValue('synchub')), type=self.log.LOG_NORMAL, thread=self.useThreading)
         postvars = {'files' : simplejson.dumps(filesdict), 'organisation' : simplejson.dumps(organisation), 'sitename' : simplejson.dumps(sitename), 'stationname': simplejson.dumps(station)}
         try:
             f = urllib.urlopen(self.config.getValue('synchub'), urllib.urlencode(postvars))
@@ -143,14 +144,14 @@ class MSDataSyncAPI(object):
         except Exception, e:
             returnFn(retcode = False, retstring = "Could not connect %s" % (str(e)) )
             return
-        print 'filesdict was: ', filesdict
 
         #now, if something goes wrong interpreting the result, don't panic.
         try:
             #self.log('Synchub config: %s' % jsonret)
-            j = simplejson.loads(jsonret)
-            self.log('Synchub config loaded object is: %s' % j)
             d = simplejson.loads(jsonret)
+            self.log('Synchub config loaded object is: %s' % simplejson.dumps(d, sort_keys=True, indent=2), type=self.log.LOG_NORMAL, thread=self.useThreading)
+
+
             #print 'Returned Json Obj: ', d
         except Exception, e:
             returnFn(retcode=False, retstring="Error: %s\nUnexpected response from server was: %s" % (e, jsonret))
@@ -254,6 +255,9 @@ class MSDataSyncAPI(object):
         self.log('Remote transfer stage complete', thread = self.useThreading)
         self.callingWindow.SetProgress(90) 
 
+    def handshakeReturn(self, *args, **kwargs):
+        self.log('Handshake complete', thread = self.useThreading)
+        self.callingWindow.SetProgress(100)  
 
     def getFiles(self, dir, ignoredirs = []):
         '''returns a dictionary like structure representing the 
