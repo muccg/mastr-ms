@@ -16,7 +16,7 @@ class StatusBar(ESB.EnhancedStatusBar):
 
         #Make the SB with 3 feilds
         self.SetFieldsCount(3)
-        self.SetSize((-1, 23))
+        #self.SetSize((-1, 23))
         #Set the relative Widths
         self.SetStatusWidths( [-1,-3, -1] )
         self.log = log
@@ -68,7 +68,7 @@ class StatusBar(ESB.EnhancedStatusBar):
 
     def setProgress(self, value, progressdescription = ""):
         self.progress.SetValue(value)
-        self.progresstext.SetValue(progressdescription)
+        #self.progresstext.SetValue(progressdescription)
 
 
     def getProgress(self):
