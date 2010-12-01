@@ -1,12 +1,12 @@
 TODO:
 
 - Esky
-- Move progress bar to status bar
+- [DONE] Move progress bar to status bar
 - Warning on main window if not valid config on startup
 - Proper warning icons on prefs window if cant contact server
 - [DONE] Log text wraps
 - 'Send logs' sends rsync log + logging window contents
-- 'Send keys' sends email to techs
+- [DONE] 'Send keys' sends email to techs
 - Front window frequency control actually sets frequency
 - front window resize actually causes resize (seems to when bigger, not when smaller?)
 - [DONE, NEEDS TESTING] Handshake 
