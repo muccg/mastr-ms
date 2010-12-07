@@ -31,7 +31,11 @@ MA.DSLoadException = function(status, text, c, d, e) {
     if (text === undefined) {
         text = "An unidentified error occurred, please try again. (Code: "+status+")";
     } else if (Ext.isObject(text)) {
-        text = "An error occurred, code: "+c.status+" message: "+c.statusText;
+        if (c.status == 200) {
+            text = "Session timeout occurred.";
+        } else {
+            text = "An error occurred, code: "+c.status+" message: "+c.statusText;
+        }
     }
     
     Ext.Msg.alert(title, text);
