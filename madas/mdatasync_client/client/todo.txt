@@ -7,7 +7,7 @@ TODO:
 - [DONE] Log text wraps
 - 'Send logs' sends rsync log + logging window contents
 - [DONE] 'Send keys' sends email to techs
-- Front window frequency control actually sets frequency
+- [DONE] Front window frequency control actually sets frequency
 - front window resize actually causes resize (seems to when bigger, not when smaller?)
 - [DONE, NEEDS TESTING] Handshake 
 - [DONE] Current node selected in preds nodechooser on open
