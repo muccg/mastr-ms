@@ -1,5 +1,5 @@
 #This version must be incremented each build
-VERSION = "0.1.2"
+VERSION = "0.1.4"
 
 #Identifiers used in main window
 ID_TEST_CONNECTION = 101

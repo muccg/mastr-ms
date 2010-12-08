@@ -170,19 +170,20 @@ class MainWindow(wx.Frame):
         self.freqspin = wx.SpinCtrl(_cp, -1)
         self.freqspin.SetRange(1, 100000)
         self.freqspin.SetValue(int(self.config.getValue('syncfreq')))
-        freqbox = wx.BoxSizer(wx.HORIZONTAL)
+        self.freqspin.Bind(wx.EVT_SPINCTRL, self.OnSpin)
+        #freqbox = wx.BoxSizer(wx.HORIZONTAL)
         freqlab1 = wx.StaticText(_cp, -1, "Sync Frequency:")
-        freqlab2 = wx.StaticText(_cp, -1, "seconds")
-        freqbox.Add(freqlab1, 1, wx.ALIGN_LEFT | wx.ALL, border=0)
-        freqbox.Add(self.freqspin, 1, wx.ALIGN_RIGHT | wx.GROW | wx.EXPAND | wx.ALL, border=0)
-        freqbox.Add(freqlab2, 1, wx.ALIGN_LEFT | wx.ALL, border=0)
+        freqlab2 = wx.StaticText(_cp, -1, "mins")
+        timingbox.Add(freqlab1, 0, wx.ALIGN_LEFT | wx.ALL, border=0)
+        timingbox.Add(self.freqspin, 0, wx.ALIGN_RIGHT | wx.GROW | wx.EXPAND | wx.ALL, border=0)
+        timingbox.Add(freqlab2, 0, wx.ALIGN_LEFT | wx.ALL, border=0)
 
         #Populate the main window with the components
         contentpanelsizer = wx.BoxSizer(wx.VERTICAL)
         #contentpanelsizer.Add(progressLabel, 0, flag=wx.ALL, border=0)
         #contentpanelsizer.Add(progress, 0, wx.ALL | wx.GROW|wx.EXPAND | wx.FIXED_MINSIZE, border=0)
         contentpanelsizer.Add(timingbox, 0, wx.ALL, border=0)
-        contentpanelsizer.Add(freqbox, 0, wx.ALL, border=0)
+        #contentpanelsizer.Add(freqbox, 0, wx.ALL, border=0)
         
         loghbox = wx.BoxSizer(wx.HORIZONTAL)
         loghbox.Add(logLabel, 0, wx.ALL, border=0)
@@ -249,6 +250,12 @@ class MainWindow(wx.Frame):
             self.menuBar.Enable(ID_CHECK_NOW, False)
         else:
             self.menuBar.Enable(ID_CHECK_NOW, True)
+
+    def OnSpin(self, event):
+        self.config.setValue('syncfreq', self.freqspin.GetValue())
+        self.config.save()
+        self.resetTimeTillNextSync()
+
 
     def OnMenuHighlight(self, event):
         # Show how to get menu item info from this event handler
