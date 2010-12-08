@@ -288,8 +288,9 @@ def bootstrap():
 
     This function searches the application directory to find the highest-
     numbered version of the application that is fully installed, then
-    chain-loads that version of the application.
+    chainloads that version of the application.
     """
+    sys.executable = abspath(sys.executable)
     appdir = appdir_from_executable(sys.executable)
     vsdir = pathjoin(appdir,ESKY_APPDATA_DIR)
     # TODO: remove compatability hook for ESKY_APPDATA_DIR="".
@@ -408,6 +409,7 @@ def _chainload(target_dir):
                 raise exc_type,exc_value,traceback
             else:
                 raise exc_value
+        raise RuntimeError("couldn't chainload any executables")
 
 
 def get_best_version(appdir,include_partial_installs=False,appname=None):
