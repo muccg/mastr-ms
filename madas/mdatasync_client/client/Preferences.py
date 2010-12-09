@@ -4,7 +4,8 @@ from poster.encode import multipart_encode
 from poster import streaminghttp
 try: import json as simplejson
 except ImportError: import simplejson
-
+import os
+import os.path
 import NodeConfigSelector
 
 from identifiers import *
@@ -136,8 +137,9 @@ class Preferences(wx.Dialog):
         try:
             #Start the multipart encoded post of whatever file our log is saved to:
             posturl = self.config.getValue('synchub') + 'keyupload/'
-
-            keyfile = open(os.path.join(DATADIR, 'id_rsa.pub') )
+            
+            #key is in the dir above the datadir
+            keyfile = open(os.path.join(DATADIR, '..', 'id_rsa.pub') )
             datagen, headers = multipart_encode( {'uploaded' : keyfile, 'nodename' : self.config.getNodeName()} )
             request = urllib2.Request(posturl, datagen, headers)
             print 'sending log %s to %s' % (keyfile, posturl)
