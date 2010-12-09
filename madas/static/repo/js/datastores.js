@@ -389,6 +389,22 @@ var humanStore = new Ext.data.JsonStore(
                                          }
                                          );
 
+var experimentRunStore = new Ext.data.JsonStore(
+                                                {
+                                                storeId: 'experimentRunStore',
+                                                autoLoad: true,
+                                                url: adminBaseUrl + "repository/run/ext/json",
+                                                restful: true,
+                                                listeners: {'load':MA.DSLoaded,
+                                                'loadexception':MA.DSLoadIgnoreException
+                                                },
+                                                sortInfo: {
+                                                field: 'id',
+                                                direction: 'DESC'
+                                                }
+                                                }
+                                                );
+
 var selectableRunStore = new Ext.data.JsonStore(
                         {
                             storeId: 'run',
