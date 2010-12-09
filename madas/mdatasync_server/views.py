@@ -333,7 +333,7 @@ def logUpload(request, *args):
                 body ="An MS Datasync logfile has been uploaded: %s\r\n" % (written_logfile_name)
             else:
                 body = "MS Datasync logfile upload failed: %s\r\n" % (written_logfile_name)
-            e = FixedEmailMessage(subject="MS Datasync Log Upload (%s)" % (f._get_name()), body=body, from_email = RETURN_EMAIL, to = [LOGS_TO_EMAIL])
+            e = FixedEmailMessage(subject="MS Datasync Log Upload (%s)" % (fname_prefix), body=body, from_email = RETURN_EMAIL, to = [LOGS_TO_EMAIL])
             e.send()
         except Exception, e:
             logger.debug( 'Unable to send "Log Sent" email: %s' % (str(e)) )
@@ -360,7 +360,7 @@ def keyUpload(request, *args):
                 body ="An MS Datasync keyfile has been uploaded: %s\r\n" % (written_logfile_name)
             else:
                 body = "MS Datasync keyfile upload failed: %s\r\n" % (written_logfile_name)
-            e = FixedEmailMessage(subject="MS Datasync Public Key upload (%s)" % (f._get_name()), body=body, from_email = RETURN_EMAIL, to = [KEYS_TO_EMAIL])
+            e = FixedEmailMessage(subject="MS Datasync Public Key upload (%s)" % (fname_prefix), body=body, from_email = RETURN_EMAIL, to = [KEYS_TO_EMAIL])
             e.send()
         except Exception, e:
             logger.debug( 'Unable to send "Key Sent" email: %s' % (str(e)) )
