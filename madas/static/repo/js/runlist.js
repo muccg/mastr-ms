@@ -146,6 +146,66 @@ MA.RunListCmp = {
 };
 
 
+MA.ExperimentRunsInit = function() {
+    Ext.getCmp('center-panel').layout.setActiveItem('experiment-runs-list');
+    
+    runListStore.proxy.conn.url = adminBaseUrl + "repository/run/ext/json?samples__experiment="+MA.ExperimentController.currentId();
+    runListStore.load();
+};
+
+MA.ExperimentRunListCmp = {
+title: "Runs",
+region: "center",
+cmargins: "0 0 0 0",
+collapsible: false,
+id: "experiment-runs-list",
+bodyStyle: "padding: 0",
+layout: "border",
+defaults: {
+split: true
+},
+items: [
+        new MA.RunList({
+                       border: false,
+                       id: "experimentruns",
+                       region: "center",
+                       listeners: {
+                       click: function (id) {
+                       var detail = Ext.getCmp("experiment-run-list-detail");
+                       detail.selectRun(runListStore.getById(id));
+                       },
+                       "delete": function (id) {
+                       var detail = Ext.getCmp("experiment-run-list-detail");
+                       if (detail.runId == id) {
+                       detail.clearRun();
+                       }
+                       }
+                       },
+                       store:experimentRunStore
+                       }),
+        new Ext.Panel({
+                      region: "east",
+                      width: 520,
+                      border: false,
+                      bodyStyle: "background: #d0def0;",
+                      autoScroll:true,
+                      items: [
+                              new MA.RunDetail({
+                                               bodyStyle:'padding:10px;background:transparent;border-top:none;border-bottom:none;border-right:none;',
+                                               border: false,
+                                               flex: 0,
+                                               id: "experiment-run-list-detail",
+                                               listeners: {
+                                               "delete": function () { runListStore.reload(); runStore.reload(); },
+                                               "save": function () { runListStore.reload(); runStore.reload(); }
+                                               }
+                                               }, 'viewer')
+                              ]
+                      })
+        ]
+};
+
+
 MA.LoadRun = function (id) {
     Ext.getCmp("runs").select(id);
     Ext.getCmp("run-list-detail").selectRun(runListStore.getById(id));

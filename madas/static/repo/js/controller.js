@@ -510,7 +510,8 @@ items:[
                                                                       [ "Samples", MA.ExperimentSamplesOnlyInit, MA.Blur, false ],
                                                                       [ "Sample Tracking", MA.SampleTrackingInit, MA.Blur, false ],
                                                                       [ "Files", MA.FilesInit, MA.Blur, false ],
-                                                                      [ "Access", MA.AccessInit, MA.Blur, false ]
+                                                                      [ "Access", MA.AccessInit, MA.Blur, false ],
+                                                                      [ "Runs", MA.ExperimentRunsInit, MA.Blur, false]
                                                                       ]
                                                                }
                                                                )  
@@ -572,13 +573,13 @@ items:[
                       MA.ExperimentSamplesOnly,
                       MA.SampleTracking,
                       MA.Files,
-                      MA.Access
+                      MA.Access,
+                      MA.ExperimentRunListCmp
                       ]
                }]
        }
        ]
 };
-
 
 /**
  * madasInitApplication
