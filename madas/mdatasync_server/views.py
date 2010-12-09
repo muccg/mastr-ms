@@ -11,6 +11,49 @@ import os.path
 from django.contrib import logging
 logger = logging.getLogger('mdatasync_server_log')
 
+from settings import KEYS_TO_EMAIL, LOGS_TO_EMAIL, RETURN_EMAIL
+
+from django.core.mail import EmailMessage
+
+class FixedEmailMessage(EmailMessage):
+    def __init__(self, subject='', body='', from_email=None, to=None, cc=None,
+                 bcc=None, connection=None, attachments=None, headers=None):
+        """
+        Initialize a single email message (which can be sent to multiple
+        recipients).
+
+        All strings used to create the message can be Unicode strings (or UTF-8
+        bytestrings). The SafeMIMEText class will handle any necessary encoding
+        conversions.
+        """
+        to_cc_bcc_types = (type(None), list, tuple)
+        # test for typical error: people put strings in to, cc and bcc fields
+        # see documentation at http://www.djangoproject.com/documentation/email/
+        assert isinstance(to, to_cc_bcc_types)
+        assert isinstance(cc, to_cc_bcc_types)
+        assert isinstance(bcc, to_cc_bcc_types)
+        super(FixedEmailMessage, self).__init__(subject, body, from_email, to,
+                                           bcc, connection, attachments, headers)
+        if cc:
+            self.cc = list(cc)
+        else:
+            self.cc = []
+
+    def recipients(self):
+        """
+        Returns a list of all recipients of the email (includes direct
+        addressees as well as Bcc entries).
+        """
+        return self.to + self.cc + self.bcc
+
+    def message(self):
+        msg = super(FixedEmailMessage, self).message()
+        del msg['Bcc'] # if you still use old django versions
+        if self.cc:
+            msg['Cc'] = ', '.join(self.cc)
+        return msg
+
+
 
 class FileList(object):
     def __init__(self, heirarchy):
@@ -51,7 +94,7 @@ class FileList(object):
         #we always do our comparisons with uppercase, so that they are case insensitive,
         #remembering that the filesdict is keyed uppercase.
         
-        if len(self.currentnode['.'].keys()):
+        if (self.currentnode.has_key('.')) and len(self.currentnode['.'].keys()):
             for fname in self.currentnode['.'].keys():
                 upperfname = fname.upper() #uppercase the fname, since the filesdict is keyed on uppercase names
                 #is the filename in the filesdict keys?
@@ -272,55 +315,9 @@ def checkRunSampleFiles(request):
         ret['description'] = "No files given"
 
     return jsonResponse(ret)
-'''
-def defaultpage(request, *args):
-    try:
-        pfiles = request.POST.get('files', None)
-        porganisation = simplejson.loads(request.POST.get('organisation', ''))
-        psitename= simplejson.loads(request.POST.get('sitename', ''))
-        pstation = simplejson.loads(request.POST.get('stationname', ''))
-        print 'Post var files passed through was: ', pfiles
-        print 'Post var organisation passed through was: ', porganisation
-        print 'Post var station passed through was: ', pstation
-        print 'Post var sitename passed through was: ', psitename
-
-        #try to get a config for this node/station
-        try:
-            ncs = NodeClient.objects.filter(organisation_name = porganisation, site_name = psitename, station_name = pstation)
-            rulesset = NodeRules.objects.filter(parent_node = ncs)
-        except:
-            print 'Could not get a matching nodeclient'
-        n = ncs[0]
-        print 'Current nodeconfig is : ', n 
-        rules = [x.__unicode__() for x in rulesset]
-        path = '%s/pending/%s/%s/%s' % (settings.PERSISTENT_FILESTORE, porganisation, psitename, pstation)
-        
-        #make sure the path exists
-        if not os.path.exists(path):
-            print 'Creating %s' % (path)
-            try:
-                os.makedirs(path)
-            except:
-                print 'Could not make the path!'
-
-        import webhelpers
-        host = request.__dict__['META']['SERVER_NAME'] #might not be right name
-        #host = request.__dict__['META']['REMOTE_ADDR'] #might be client address?
-        #host = request.__dict__['META']['HTTP_HOST'] #would include port
-
-        #hardcoded return
-        d = {'host':host,
-             'path':path,
-             'rules' : rules
-             #'rules' : None 
-            }
-        print 'rules DICT: ', d
-        return jsonResponse(d)
-    except Exception, e:
-        return jsonResponse(str(e))
-'''
 
 def logUpload(request, *args):
+    print 'LOGUPLOAD'
     fname_prefix = 'UNKNOWN_'
     if request.POST.has_key('nodename'):
         fname_prefix = request.POST['nodename'] + '_'
@@ -328,7 +325,19 @@ def logUpload(request, *args):
     if request.FILES.has_key('uploaded'):
         f = request.FILES['uploaded']
         logger.debug( 'Uploaded file name: %s' % ( f._get_name() ) )
-        _handle_uploaded_file(f, str(os.path.join('synclogs', "%s%s" % (fname_prefix,'rsync.log')) ) )#dont allow them to replace arbitrary files
+        written_logfile_name = str(os.path.join('synclogs', "%s%s" % (fname_prefix,f._get_name()) ) ) 
+        write_success = _handle_uploaded_file(f, written_logfile_name )#dont allow them to replace arbitrary files
+
+        try:
+            if write_success:
+                body ="An MS Datasync logfile has been uploaded: %s\r\n" % (written_logfile_name)
+            else:
+                body = "MS Datasync logfile upload failed: %s\r\n" % (written_logfile_name)
+            e = FixedEmailMessage(subject="MS Datasync Log Upload", body=body, from_email = RETURN_EMAIL, to = [LOGS_TO_EMAIL])
+            e.send()
+        except Exception, e:
+            logger.debug( 'Unable to send "Log Sent" email: %s' % (str(e)) )
+
     else:
         logger.debug( 'logupload: No file in the post' )
 
@@ -342,7 +351,20 @@ def keyUpload(request, *args):
     if request.FILES.has_key('uploaded'):
         f = request.FILES['uploaded']
         logger.debug( 'Uploaded file name: %s' % ( f._get_name() ) )
-        _handle_uploaded_file(f, str(os.path.join('publickeys', "%s%s" % (fname_prefix,'id_rsa.pub')) ) )#dont allow them to replace arbitrary files
+        written_logfile_name = str(os.path.join('publickeys', "%s%s" % (fname_prefix,'id_rsa.pub')) )
+        _handle_uploaded_file(f, written_logfile_name)#dont allow them to replace arbitrary files
+        write_success = _handle_uploaded_file(f, written_logfile_name )#dont allow them to replace arbitrary files
+
+        try:
+            if write_success:
+                body ="An MS Datasync keyfile has been uploaded: %s\r\n" % (written_logfile_name)
+            else:
+                body = "MS Datasync keyfile upload failed: %s\r\n" % (written_logfile_name)
+            e = FixedEmailMessage(subject="MS Datasync Public Key upload", body=body, from_email = RETURN_EMAIL, to = [KEYS_TO_EMAIL])
+            e.send()
+        except Exception, e:
+            logger.debug( 'Unable to send "Key Sent" email: %s' % (str(e)) )
+         
     else:
         logger.debug('Keyupload: No file in the post')
 
@@ -372,39 +394,5 @@ def _handle_uploaded_file(f, name):
         logger.debug( '\tException in file upload: %s' % ( str(e) ) )
     logger.debug( '*** _handle_uploaded_file: exit ***')
     return retval
-
-
-'''
-def defaultpage(request, *args):
-    try:
-
-        pfiles = request.POST.get('files', None)
-        porganisation = simplejson.loads(request.POST.get('organisation', ''))
-        psitename= simplejson.loads(request.POST.get('sitename', ''))
-        pstation = simplejson.loads(request.POST.get('station', ''))
-        print 'Post var files passed through was: ', pfiles
-        print 'Post var organisation passed through was: ', porganisation
-        print 'Post var station passed through was: ', pstation
-        print 'Post var sitename passed through was: ', psitename
-
-        #try to get a config for this node/station
-        n = nodeconfig.toDict()
-        print 'Current nodeconfig is : ', n 
-        if n.has_key(porganisation) and n[porganisation].has_key(psitename):
-            rules = n[pnode][pstation] 
-        else:
-            rules = None
-        #hardcoded return
-        d = {'host':'127.0.0.1',
-             'path':'/tmp/madas/filedata/pending/%s' % (pstation),
-             'rules' : rules
-             #'rules' : None 
-            }
-        print 'rules DICT: ', d
-        return jsonResponse(d)
-    except Exception, e:
-        return jsonResponse(str(e))
-'''
-
 
 

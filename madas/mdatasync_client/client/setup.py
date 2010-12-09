@@ -1,16 +1,17 @@
 from distutils.core import setup
 from esky import bdist_esky
+from esky.bdist_esky import Executable
 import py2exe
 
 from identifiers import VERSION
 
-class Target:
-    def __init__(self, **kwargs):
-        self.__dict__.update(kwargs)
-        self.version = VERSION 
-        self.company_name = "None"
-        self.copyright = "None"
-        self.name = "None"
+#class Target:
+#    def __init__(self, **kwargs):
+#        self.__dict__.update(kwargs)
+#        self.version = VERSION 
+#        self.company_name = "None"
+#        self.copyright = "None"
+#        self.name = "None"
 
 freeze_includes = ['encodings','encodings.*'] 
 
@@ -45,13 +46,13 @@ def isSystemDLL(pathname):
 py2exe.build_exe.isSystemDLL = isSystemDLL
 
 
-mdatasync_target = Target(
+mdatasync_target = Executable(
     gui_only = True,
     description = "Application to sync data from clients to server",
     script = "main.py",
     dest_base = "mdatasync")
 
-mssimulator_target = Target(
+mssimulator_target = Executable(
     gui_only = True,
     description = "A tool to generate sample mass spec files from worklists",
     script = "Simulator.py",
@@ -61,9 +62,11 @@ setup(name='msDataSync',
       version=VERSION,
       description='msDataSync application',
       author='CCG/Brad Power',
-      scripts = ["main.py", "Simulator.py"],
+      #scripts = ["main.py", "Simulator.py"],
+      scripts = [mdatasync_target, mssimulator_target],
       #console=['main.py'],
-      windows = [mdatasync_target, mssimulator_target],
+      #windows = [mdatasync_target, mssimulator_target],
+      #windows = ["main.py", "Simulator.py"],
       options={'py2exe': py2exe_options, 'bdist_esky' : bdist_esky_options_py2exe},
       )
 

@@ -37,18 +37,12 @@ class MainWindow(wx.Frame):
         self.contentPanel = wx.Panel(self, -1)
         _cp = self.contentPanel
         
-        logLabel = wx.StaticText(parent = _cp)
-        logLabel.SetLabel(label="Log")
-
-        logWrap = wx.CheckBox(parent=_cp, label="Wrap")
-        logWrap.SetValue(False)
-        logWrap.Bind(wx.EVT_CHECKBOX, self.ToggleLogWrap)
 
         #progressLabel = wx.StaticText(parent = _cp)
         #progressLabel.SetLabel(label="Progress")
 
         #First thing, set up the log.
-        self.logArea = wx.CollapsiblePane(_cp, -1, name='LogArea')
+        self.logArea = wx.CollapsiblePane(_cp, -1, "Log", name='LogArea')
         self.logAreaPane = self.logArea.GetPane() 
         self.logAreaSizer = wx.BoxSizer(wx.VERTICAL) 
         self.logTextCtrl = wx.TextCtrl(self.logAreaPane, -1, 
@@ -131,9 +125,12 @@ class MainWindow(wx.Frame):
         self.screenshotbutton = wx.Button(self.logAreaPane, ID_SENDSCREENSHOT_BUTTON)
         self.screenshotbutton.SetLabel("Send Shot")
         self.screenshotbutton.Bind(wx.EVT_BUTTON, self.OnTakeScreenshot)
+        logWrap = wx.CheckBox(parent=self.logAreaPane, label="Wrap")
+        logWrap.SetValue(False)
+        logWrap.Bind(wx.EVT_CHECKBOX, self.ToggleLogWrap)
 
         #now lay everything out.
-        self.logAreaSizer.Add(self.logTextCtrl, 1, flag=wx.ALL|wx.GROW|wx.EXPAND, border=2)
+        self.logAreaSizer.Add(self.logTextCtrl, 1, flag=wx.ALL|wx.GROW|wx.EXPAND, border=0)
         #Log  footer box
         logfooterbox = wx.BoxSizer(wx.HORIZONTAL)
         #A place to set the log variable
@@ -160,13 +157,13 @@ class MainWindow(wx.Frame):
             
         logfooterbox.Add(self.logbutton, 0, wx.ALL, 0)
         logfooterbox.Add(self.screenshotbutton, 0, wx.ALL, 0)
+        logfooterbox.Add(logWrap, 0, wx.ALIGN_LEFT| wx.ALIGN_CENTER_VERTICAL|wx.ALL, 0)
         self.logAreaSizer.Add(logfooterbox, 0, flag=wx.ALL|wx.GROW|wx.EXPAND, border=2)
         self.logAreaPane.SetSizerAndFit(self.logAreaSizer)
 
         #timing controls:
         timingbox = wx.BoxSizer(wx.HORIZONTAL)
-        self.nextsynctxt = wx.StaticText(_cp, -1, label="Next Sync in: 00000000")
-        timingbox.Add(self.nextsynctxt, 1, wx.ALIGN_LEFT | wx.GROW | wx.EXPAND | wx.ALL, border=0)
+        self.nextsynctxt = wx.StaticText(_cp, -1, label="Next Sync in:")
         self.freqspin = wx.SpinCtrl(_cp, -1)
         self.freqspin.SetRange(1, 100000)
         self.freqspin.SetValue(int(self.config.getValue('syncfreq')))
@@ -174,22 +171,18 @@ class MainWindow(wx.Frame):
         #freqbox = wx.BoxSizer(wx.HORIZONTAL)
         freqlab1 = wx.StaticText(_cp, -1, "Sync Frequency:")
         freqlab2 = wx.StaticText(_cp, -1, "mins")
-        timingbox.Add(freqlab1, 0, wx.ALIGN_LEFT | wx.ALL, border=0)
-        timingbox.Add(self.freqspin, 0, wx.ALIGN_RIGHT | wx.GROW | wx.EXPAND | wx.ALL, border=0)
-        timingbox.Add(freqlab2, 0, wx.ALIGN_LEFT | wx.ALL, border=0)
+        freqbox = wx.BoxSizer(wx.HORIZONTAL)
+        freqbox.Add(freqlab1, 1, wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL | wx.ALL, border=0)
+        freqbox.Add(self.freqspin, 1, wx.ALIGN_RIGHT | wx.GROW | wx.EXPAND | wx.ALL, border=0)
+        freqbox.Add(freqlab2, 1, wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL | wx.ALL, border=0)
+        timingbox.Add(self.nextsynctxt, 1, wx.ALIGN_LEFT | wx.GROW | wx.EXPAND | wx.ALL, border=0)
+        timingbox.Add(freqbox, 1, wx.ALIGN_RIGHT | wx.GROW | wx.EXPAND | wx.ALL, border=0)
 
         #Populate the main window with the components
         contentpanelsizer = wx.BoxSizer(wx.VERTICAL)
-        #contentpanelsizer.Add(progressLabel, 0, flag=wx.ALL, border=0)
-        #contentpanelsizer.Add(progress, 0, wx.ALL | wx.GROW|wx.EXPAND | wx.FIXED_MINSIZE, border=0)
-        contentpanelsizer.Add(timingbox, 0, wx.ALL, border=0)
-        #contentpanelsizer.Add(freqbox, 0, wx.ALL, border=0)
-        
-        loghbox = wx.BoxSizer(wx.HORIZONTAL)
-        loghbox.Add(logLabel, 0, wx.ALL, border=0)
-        loghbox.Add(logWrap, 0, wx.ALL, border=0)
-        contentpanelsizer.Add(loghbox, 0)
-        contentpanelsizer.Add(self.logArea, 1, flag=wx.ALL | wx.GROW | wx.EXPAND | wx.FIXED_MINSIZE, border=0)
+        contentpanelsizer.Add(timingbox, 0, wx.GROW | wx.EXPAND | wx.ALL, border=0)
+        contentpanelsizer.Add(self.logArea, 1, wx.ALL | wx.GROW | wx.EXPAND, border=0)
+        #contentpanelsizer.Add(self.logArea, 1, wx.ALL | wx.GROW | wx.EXPAND | wx.FIXED_MINSIZE, border=0)
 
         self.contentPanel.SetSizerAndFit(contentpanelsizer)
         self.contentpanelsizer = contentpanelsizer
@@ -273,10 +266,24 @@ class MainWindow(wx.Frame):
         self.PauseCountdown()
         if getattr(sys,"frozen",False):
             url = self.config.getValue('updateurl')
-            self.log('Checking for program updates from %s' % (url))
             app = esky.Esky(sys.executable,url)
             try:
-                app.auto_update()
+                self.log("The current version is: %s" % (str( app.active_version ) ) )
+                self.log('Checking for program updates from %s' % (url))
+                v = app.find_update()
+                if v:
+                    self.log("A newer version %s is available" % (str(v)) )
+                    self.log("Fetching %s" % (str(v)))
+                    app.fetch_version(v)
+                    self.log("Completed download. Installing %s" % (str(v)) )
+                    app.install_version(v)
+                    wx.MessageBox('Upgrade to %s complete. The application will now close. Please restart it manually.' % (str(v)), 'Upgrade Complete!')
+                    app.reinitialize()
+                    self.OnMenuQuit(None)
+                else:
+                    self.log("There are no better versions available")
+                    app.cleanup()
+                #app.auto_update()
             except Exception, e:
                 self.log("Error updating app: %s" % (str(e)), type=self.log.LOG_ERROR)
             app.cleanup()    
@@ -486,8 +493,8 @@ class MainWindow(wx.Frame):
  
         img = bmp.ConvertToImage()
         import time
-        timetext = time.asctime().replace(' ', '_')
-        fileName = "screenshot_%s.png" % (timetext)
+        timetext = time.asctime().replace(' ', '_').replace(':', '-')
+        fileName = os.path.join(DATADIR, "screenshot_%s.png" % (timetext))
         img.SaveFile(fileName, wx.BITMAP_TYPE_PNG)
         print '...saving as png!'
 
@@ -511,7 +518,7 @@ class MainWindow(wx.Frame):
             print 'finished receiving data'
             retval = simplejson.loads(jsonret)
             #print 'OnSendLog: retval is %s' % (retval)
-            self.log('Log send response: %s' % (str(retval)) )
+            self.log('Screenshot send response: %s' % (str(retval)) )
         except Exception, e:
             print 'OnSendScreenShot: Exception occured: %s' % (str(e))
             self.log('Exception occured sending screenshot: %s' % (str(e)), type=self.log.LOG_ERROR)

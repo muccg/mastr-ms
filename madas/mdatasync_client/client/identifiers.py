@@ -1,5 +1,24 @@
+import os
+import os.path
 #This version must be incremented each build
-VERSION = "0.1.4"
+VERSION = "0.2.7"
+
+#We need a strange looking datadir because of esky.
+#Esky has an outer 'bootstrapper' exe, and all contents and
+#updates are installed in directories under that.
+#So if we keep config and other data in a subdir of our 'working dir' or even in it,
+#it will be lost when we install a new version. We need our data dir to be in a common
+#place. 
+#The logic is:
+#if your parent dir's parent contains a dir called 'appdata', then store your datadir at that level.
+#otherwise, store your data dir in your parent dir. This is because of how Esky packages 
+#the app initially as opposed to what it looks like once you have done an update.
+
+DATADIRNAME = 'data' #what we want the final leaf dir to be called
+DATADIR = os.path.join('..', DATADIRNAME) #in parent as a default
+if os.path.exists(os.path.join('..', '..', 'appdata') ):
+    DATADIR = os.path.join('..','..', DATADIRNAME)
+
 
 #Identifiers used in main window
 ID_TEST_CONNECTION = 101

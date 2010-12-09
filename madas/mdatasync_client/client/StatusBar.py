@@ -10,7 +10,7 @@ class StatusBar(ESB.EnhancedStatusBar):
         self.STATUS_ICONS = {
             'error' : wx.ArtProvider_GetBitmap(wx.ART_ERROR, wx.ART_TOOLBAR, (16,16)),
             'warning' : wx.ArtProvider_GetBitmap(wx.ART_HELP, wx.ART_TOOLBAR, (16,16)),
-            'ok' :  wx.ArtProvider_GetBitmap(wx.ART_TICK_MARK, wx.ART_MESSAGE_BOX,(16,16))
+            'ok' :  wx.ArtProvider_GetBitmap(wx.ART_TICK_MARK, wx.ART_TOOLBAR,(16,16))
             }
 
 

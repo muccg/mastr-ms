@@ -137,7 +137,7 @@ class Preferences(wx.Dialog):
             #Start the multipart encoded post of whatever file our log is saved to:
             posturl = self.config.getValue('synchub') + 'keyupload/'
 
-            keyfile = open('id_rsa.pub')
+            keyfile = open(os.path.join(DATADIR, 'id_rsa.pub') )
             datagen, headers = multipart_encode( {'uploaded' : keyfile, 'nodename' : self.config.getNodeName()} )
             request = urllib2.Request(posturl, datagen, headers)
             print 'sending log %s to %s' % (keyfile, posturl)
