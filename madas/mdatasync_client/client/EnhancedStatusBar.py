@@ -118,7 +118,8 @@ class EnhancedStatusBar(wx.StatusBar):
                 
                 if verticalalignment == ESB_EXACT_FIT:
                     widget.SetSize((rect.width-2, rect.height-2))
-                    widget.SetPosition((rect.x-1, rect.y-1))
+                    #widget.SetPosition((rect.x-1, rect.y-1)) #Progress bar didnt seem positioned correctly.
+                    widget.SetPosition((rect.x+1, rect.y+1))
                 elif verticalalignment == ESB_ALIGN_CENTER_VERTICAL:
                     if widgetsize[1] < rect.width - 1:
                         diffs = (rect.height - widgetsize[1])/2

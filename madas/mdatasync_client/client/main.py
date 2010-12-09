@@ -3,7 +3,9 @@ from MainWindow import MainWindow
 from MSDataSyncAPI import MSDataSyncAPI #, MSDSCheckFn
 import sys
 import esky
-
+from identifiers import *
+import os
+import os.path
 
 class MDataSyncApp(wx.PySimpleApp):
     def OnInit(self):
@@ -42,8 +44,14 @@ class MDataSyncApp(wx.PySimpleApp):
 
     
 
-
-m = MDataSyncApp()
-#sys.stdout = m.win.log 
-m.MainLoop()
-m.msds.stopThread() #stop the thread if there is one.
+if __name__ == "__main__":
+    if not os.path.exists(DATADIR):
+        try:
+            os.mkdir(DATADIR)
+        except:
+            print 'Unable to create data directory. Please create manually: %s' % os.normpath(DATADIR)
+            exit()
+    m = MDataSyncApp()
+    #sys.stdout = m.win.log 
+    m.MainLoop()
+    m.msds.stopThread() #stop the thread if there is one.

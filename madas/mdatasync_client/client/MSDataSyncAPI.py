@@ -14,6 +14,9 @@
 try: import json as simplejson
 except ImportError: import simplejson
 import urllib
+import os
+import os.path
+from identifiers import *
 
 def nullFn(*args, **kwargs):
     print 'null fn'
@@ -109,7 +112,7 @@ class MSDataSyncAPI(object):
         #rootdir
         rsyncconfig['rootdir'] = ''
         #flags, server is authoratative
-        rsyncconfig['flags'] = ['n'] #n = dry run
+        rsyncconfig['flags'] = ['-n'] #n = dry run
         #User, client is authoratative
         if self.config.getValue('user') in ['!', '']:
             rsyncconfig['user'] = d['username'] #use the server value
@@ -186,7 +189,6 @@ class MSDataSyncAPI(object):
         self.callingWindow = callingWindow
 
         copydict = {} #this is our list of files to copy
-        import os.path
 
         #now we explore the returned heirarchy recursively, and flatten it into a 
         #dict of source:dest's
@@ -347,7 +349,7 @@ class MSDSImpl(object):
     def __init__(self, log, controller):
        self.log = log #we expect 'log' to be a callable function. 
        self.controller = controller
-    def perform_rsync(self, sourcedir, config):
+    def perform_rsync(self, sourcedir, rsyncconfig):
         #self.log('checkRsync implementation entered!', Debug=True)
       
         #fix the sourcedir.
@@ -381,19 +383,19 @@ class MSDSImpl(object):
             sourcedir += '/' #make sure it ends in a slash
 
         from subprocess import Popen, PIPE, STDOUT
-        logfile = 'rsync_log.txt'
+        logfile = CONFIG.getValue('logfile')
         #Popen('rsync -t %s %s:%s' % (sourcedir, remotehost, remotedir) )
         
         #cmdhead = ['rsync', '-tavz'] #t, i=itemize-changes,a=archive,v=verbose,z=zip
         cmdhead = ['rsync']
-        cmdhead.extend(config['flags']) 
-        cmdtail = ['--log-file=%s' % (logfile), str(sourcedir), '%s@%s:%s' % (str(config['user']), str(config['host']), str(config['rootdir']) )]
+        cmdhead.extend(rsyncconfig['flags']) 
+        cmdtail = ['--log-file=%s' % (logfile), str(sourcedir), '%s@%s:%s' % (str(rsyncconfig['user']), str(rsyncconfig['host']), str(rsyncconfig['rootdir']) )]
 
         cmd = []
         cmd.extend(cmdhead)
     
         #self.log('Rules is %s' %(str(rules)) )
-        rules = config['rules'] 
+        rules = rsyncconfig.get('rules', None) 
         if rules is not None and len(rules) > 0:
             for r in rules:
                 if r is not None:

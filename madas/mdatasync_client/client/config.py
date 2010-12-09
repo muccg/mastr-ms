@@ -1,6 +1,7 @@
-SAVEFILE_NAME = 'settings.cfg'
 import sys, os, string, time, cPickle
 import os.path
+from identifiers import *
+SAVEFILE_NAME = os.path.join(DATADIR, 'settings.cfg')
 
 
 #Dont instantiate this directly - use the module singleton defined at the end of this file
@@ -8,7 +9,7 @@ import os.path
 class MSDSConfig(object):
     def __init__(self):
         self.store = {}
-        '''hardcoded config for now'''
+        '''hardcoded config for the initial object creation'''
         #format is:
         #key: [value, formalKeyName, helpText]
         #e.g.:
@@ -21,8 +22,8 @@ class MSDSConfig(object):
               'organisation'  : ['defaultorg',  'Organisation', 'Identifies which organisation your site belongs to. It is important that this is correct.', False],
                    'localdir' : ['syncdir','Data root directory', 'The local root directory for the data.'],
                    'synchub'  : ['https://ccg.murdoch.edu.au/madas/sync/', 'SyncHub Address', 'The web address of the synchub server'],
-                   'updateurl' : ['https://ccg.murdoch.edu.au/madas/mdatasync_update', 'Program Update URL', 'The web address of the server that should be contacted for program updates'],
-                   'logfile'  : ['rsync_log.txt', 'Local Log File', 'Sync operations are logged to this file'],
+                   'updateurl' : ['http://ccg.murdoch.edu.au/ma/', 'Program Update URL', 'The web address of the server that should be contacted for program updates'],
+                   'logfile'  : [os.path.join(DATADIR, 'rsync_log.txt'), 'Local Log File', 'Sync operations are logged to this file'],
                    'syncfreq' : [30, 'Sync Frequency (Mins)', 'How often the application should push updates to the server'],
                    'localindexdir' : ['.local_index', 'Local Index Directory', 'Temporary storage area for data transfer'],
             }
