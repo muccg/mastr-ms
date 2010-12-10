@@ -19,8 +19,8 @@ class MDataSyncApp(wx.PySimpleApp):
         
         self.msds.isMSWINDOWS = False
         if wx.Platform == "__WXMSW__":
-            sys.stderr = open("errorlogfile.txt","w")  #log to file
-            sys.stdout = open("outlogfile.txt","w")  #log to file
+            sys.stderr = open(os.path.join(DATADIR, "errorlogfile.txt"),"w")  #log to file
+            sys.stdout = open(os.path.join(DATADIR, "outlogfile.txt"),"w")  #log to file
             win.getLog()("Running on Windows")
             self.msds.isMSWINDOWS = True
         elif wx.Platform == "__WXMAC__":
