@@ -502,7 +502,7 @@ class MainWindow(wx.Frame):
             #Start the multipart encoded post of whatever file our log is saved to:
             posturl = self.config.getValue('synchub') + 'logupload/'
             print 'reading imagefile' 
-            ssfile = open(fileName)
+            ssfile = open(fileName, "rb")
             #print 'multipart encoding data'
             datagen, headers = multipart_encode( {'uploaded' : ssfile, 'nodename' : self.config.getNodeName()} )
             print 'posturl is: ', posturl
