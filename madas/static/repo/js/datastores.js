@@ -245,13 +245,13 @@ var projectsListStore = new Ext.data.JsonStore(
 var clientsListStore = new Ext.data.JsonStore(
                         {
                             storeId: 'clientsList',
-                            autoLoad: false,
-                            url: wsBaseUrl + 'recordsClients',
+                            autoLoad: true,
+                            url: wsBaseUrl + 'recordsClientList',
                             listeners: {'load':MA.DSLoaded,
                                         'loadexception':MA.DSLoadException
                                         },
                             sortInfo: {
-                                field: 'id',
+                                field: 'username',
                                 direction: 'DESC'
                             }
                                     
@@ -602,6 +602,18 @@ var userComboStore = new Ext.data.JsonStore(
                             fields: ['value', 'key'],
                             listeners: {'load':MA.DSLoaded,
                                         'loadexception':MA.DSLoadIgnoreException}
+                        }
+                    );
+
+var clientComboStore = new Ext.data.JsonStore(
+                        {
+                            storeId: 'clientCombo',
+                            autoLoad: true,
+                            url: adminBaseUrl + "auth/user/ext/json?run__id__exact=0",
+                            root: 'response.value.items',
+                            fields: ['value', 'key'],
+                            listeners: {'load':MA.DSLoaded,
+                            'loadexception':MA.DSLoadIgnoreException}
                         }
                     );
                     

@@ -134,7 +134,7 @@ def user_search(request, *args):
 
             newlist.append(d)
     except Exception, e:
-        print json_encode(f)   
+        print json_encode(e)   
 
 
 
