@@ -2,7 +2,7 @@ from django.db import transaction
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden, HttpResponseNotAllowed, HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
-from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure
+from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure, MadasUser
 from madas.quote.models import Organisation, Formalquote
 from django.utils import webhelpers
 from django.contrib.auth.models import User
@@ -298,6 +298,90 @@ def records(request, model, field, value):
 
         output['rows'].append(d)
 
+    output = makeJsonFriendly(output)
+    return HttpResponse(json.dumps(output))
+
+
+@staff_member_required
+@user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
+def recordsClientList(request):
+    
+    from quote.models import UserOrganisation
+    
+    if request.GET:
+        args = request.GET
+    else:
+        args = request.POST
+    
+    ### TODO why do we need this, we'll get a 403 from decorator now if not logged in and not in group - ABM
+    authenticated = request.user.is_authenticated()
+    if not authenticated == True:
+        return jsonResponse(request, [])
+    ### End Authorisation Check ###
+    
+    # basic json that we will fill in
+    output = {'metaData': { 'totalProperty': 'results',
+        'root': 'rows',
+            'id': 'id',
+                'successProperty': 'success',
+                    'fields': []
+                        },
+                            'results': 0,
+                                'authenticated': True,
+                                    'authorized': True,
+                                        'success': True,
+                                            'rows': []
+                                            }
+
+    # TODO as above - do we need this now - ABM
+    authenticated = request.user.is_authenticated()
+    authorized = True # need to change this
+    if not authenticated or not authorized:
+        return HttpResponse(json.dumps(output), status=401)
+        
+        
+    rows = MadasUser.objects.order_by('username') 
+    
+    # add fields to meta data
+    output['metaData']['fields'].append({'name':'username'})
+    output['metaData']['fields'].append({'name':'id'})
+    output['metaData']['fields'].append({'name':'organisation_name'})
+
+    
+    # add rows
+    for row in rows:
+        import madas.users 
+        from madas.users.views import _userload, getNodeMemberships
+        muser = _userload(row.username)
+        muser['isClient'] = False
+        if muser.has_key('groups'):
+            g = muser['groups']
+            print 'u has groups? len '+str(len(g))
+            nm = getNodeMemberships(g)
+            if len(nm) == 0:
+                print 'is client, yo'
+                muser['isClient'] = True
+        else:
+            print 'd has no groups, fool!'
+        if muser['isClient'] == False:
+            continue
+        
+        d = {}
+        d['username'] = row.username
+        d['id'] = row.id
+    
+        #add organisation name if it exists
+        userorgs = UserOrganisation.objects.filter(user=row)
+        userorgname = ''
+        if len(userorgs) > 0:
+            userorgname = userorgs[0].organisation.name
+        d['organisation_name'] = userorgname
+
+        output['rows'].append(d)
+
+    # add row count
+    output['results'] = len(output['rows'])
+            
     output = makeJsonFriendly(output)
     return HttpResponse(json.dumps(output))
 
