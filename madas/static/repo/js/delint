@@ -1,0 +1,1 @@
+java -jar compiler.jar --js controller.js --js datastores.js --js access.js --js biosource.js --js clients.js --js dashboard.js --js files.js --js growth.js --js login.js --js menu.js --js menucontroller.js --js projects.js --js renderers.js --js runlist.js --js runs.js --js sampleprep.js --js samples.js --js tracking.js --js treatment.js> /dev/null
