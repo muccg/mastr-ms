@@ -17,6 +17,7 @@ MA.RunList = Ext.extend(Ext.Panel, {
                 new Ext.grid.GridPanel({
                     border: false,
                     itemId: "grid",
+                    loadMask : true,
                     selModel: new Ext.grid.RowSelectionModel({ singleSelect: true }),
                     view: new Ext.grid.GroupingView({
                         forceFit: true,
