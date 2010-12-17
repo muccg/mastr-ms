@@ -363,7 +363,7 @@ def recordsClientList(request):
                 muser['isClient'] = True
         else:
             print 'd has no groups, fool!'
-        if muser['isClient'] == False:
+        if not args.get('allUsers','0') == '1' and muser['isClient'] == False:
             continue
         
         d = {}
