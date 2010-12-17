@@ -24,7 +24,7 @@ MA.ClientsListCmp = {
             },
             columns: [
                       { header: "ID", menuDisabled:true, dataIndex:'id', width:50 },
-                      { header: "Client", menuDisabled:true, dataIndex:'client' }
+                      { header: "Client", menuDisabled:true, dataIndex:'username' }
             ],
             plugins:[new Ext.ux.grid.Search({
                 disableSeparator:true,

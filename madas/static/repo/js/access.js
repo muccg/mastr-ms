@@ -83,14 +83,20 @@ MA.Access = {
                         { header: "Name", sortable:false, menuDisabled:true, editor:new Ext.form.ComboBox({
                                 editable:false,
                                 forceSelection:true,
-                                displayField:'value',
-                                valueField:'key',
+                                displayField:'username',
+                                valueField:'id',
+                                hiddenName:'client_id',
                                 lazyRender:true,
                                 allowBlank:false,
                                 typeAhead:false,
                                 triggerAction:'all',
                                 listWidth:230,
-                                store: userComboStore
+                                store: userListStore,
+                                itemSelector: 'div.search-item',
+                                tpl:new Ext.XTemplate(
+                                '<tpl for="."><div style="padding:8px;padding-top:5px;padding-bottom:5px;border-bottom:1px solid #ccc;" class="search-item">',
+                                '{username}<br /><span style="color:#666;">{organisation_name}</span>',
+                                '</div></tpl>')
                             }), dataIndex: 'user', renderer:renderUser },
                         { header: "Involvement", sortable:false, menuDisabled:true, editor:new Ext.form.ComboBox(
                             {

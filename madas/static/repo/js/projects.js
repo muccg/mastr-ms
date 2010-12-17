@@ -162,7 +162,7 @@ MA.ProjectCmp = {
                                 itemSelector: 'div.search-item',
                                 tpl:new Ext.XTemplate(
                                 '<tpl for="."><div style="padding:8px;padding-top:5px;padding-bottom:5px;border-bottom:1px solid #ccc;" class="search-item">',
-                                '{username}<br /><span style="color:#666;">{first_name} {last_name}</span>',
+                                '{username}<br /><span style="color:#666;">{organisation_name}</span>',
                                 '</div></tpl>'
                                 )
                             })
