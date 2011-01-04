@@ -1,6 +1,7 @@
 import datetime
 import decimal
 from django.contrib.auth.models import User
+from madas.repository.models import Sample
 
 
 def makeJsonFriendly(data):
@@ -35,6 +36,9 @@ def makeJsonFriendly(data):
       elif isinstance(data, User):
           return {'id':data.id, 'username':data.username}
 
+      elif isinstance(data, Sample):
+          return data.id
+      
       else:
           pass # do nothing
       
