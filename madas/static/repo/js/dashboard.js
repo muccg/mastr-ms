@@ -4,6 +4,7 @@ Ext.ns("MA.Dashboard");
 MA.Dashboard.Component = Ext.extend(Ext.Panel, {
     constructor: function (config) {
         var defaultConfig = {
+            border:false,
             defaults: {
                 margins: "5px",
                 split: true,
