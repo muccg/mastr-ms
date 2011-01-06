@@ -330,7 +330,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     },
                     singleSelect:true,
                     multiSelect:false,
-                    style:'background:white;',
+                    style:'background:white;border: 1px solid #99BBE8;',
                     autoScroll:true,
                     reserveScrollOffset:true
                 }
