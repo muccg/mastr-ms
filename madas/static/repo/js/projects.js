@@ -108,6 +108,7 @@ MA.ProjectListCmp = new MA.ProjectList({
     collapsible: false,
     id:'projects-list',
     bodyStyle: 'padding:0px;',
+    border:false,
     listeners: {
         dblclick: function (id) {
             MA.LoadProject(id);

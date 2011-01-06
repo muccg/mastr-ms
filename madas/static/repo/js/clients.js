@@ -9,6 +9,7 @@ MA.ClientsListCmp = {
     defaults: {
         split: true
     },
+    border:false,
     items: [
         {
             xtype:'grid',

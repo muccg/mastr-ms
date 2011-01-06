@@ -99,6 +99,7 @@ MA.RunListCmp = {
     title: "Runs",
     region: "center",
     cmargins: "0 0 0 0",
+    border:false,
     collapsible: false,
     id: "runs-list",
     bodyStyle: "padding: 0",
