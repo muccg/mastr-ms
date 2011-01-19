@@ -6,6 +6,7 @@ import esky
 from identifiers import *
 import os
 import os.path
+import plogging
 
 class MDataSyncApp(wx.PySimpleApp):
     def OnInit(self):
@@ -51,6 +52,8 @@ if __name__ == "__main__":
         except:
             print 'Unable to create data directory. Please create manually: %s' % os.normpath(DATADIR)
             exit()
+    plogging.init_logger(name='client', logfile='clientlog.log')
+    
     m = MDataSyncApp()
     #sys.stdout = m.win.log 
     m.MainLoop()

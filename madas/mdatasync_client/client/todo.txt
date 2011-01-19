@@ -17,7 +17,7 @@ TODO:
 - [DONE] pycrust moved to help menu
 - [DONE] about in help menu, with dev name + ccg logo
 - manual in help menu.
-
+- Every save resets the time till next sync
 
 -Remote screenshots?
 
