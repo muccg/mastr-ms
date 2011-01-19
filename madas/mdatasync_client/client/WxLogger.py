@@ -1,5 +1,7 @@
 import wx
 import time
+import plogging
+outlog = plogging.getLogger('client')
 
 class Log(wx.PyLog):
     def __init__(self, textCtrl, logTime=0):
@@ -18,12 +20,15 @@ class Log(wx.PyLog):
         
         if type == self.LOG_DEBUG:
             message = 'DEBUG: ' + message
+            outlog.debug(message)
             textstyle.SetTextColour(wx.Colour(0,0,255) ) #blue
         elif type == self.LOG_WARNING:
             message = 'WARNING: ' + message
+            outlog.warning(message)
             textstyle.SetTextColour(wx.Colour(255,128,64) ) #orange
         elif type == self.LOG_ERROR:
             message = 'ERROR: ' + message
+            outlog.fatal(message)
             textstyle.SetTextColour(wx.Colour(255,0,0) ) #red
         else: #type == normal
             textstyle.SetTextColour(wx.Colour(0,0,0) ) #black
@@ -35,7 +40,6 @@ class Log(wx.PyLog):
             self.tc.AppendText(message + '\n')
 
     def __call__(self, *args, **kwargs):
-        print 'startlog',
         #print '__call__ with args:%s and kwargs:%s' % (str(*args), str(**kwargs))
         thread = kwargs.get('thread', False)
 
@@ -45,5 +49,3 @@ class Log(wx.PyLog):
         else:
             #print 'LOG: notcallafter:', args
             self.DoLogString(*args, **kwargs)
-        print 'endlog'
-

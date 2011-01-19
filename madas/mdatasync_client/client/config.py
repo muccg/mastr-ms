@@ -2,6 +2,8 @@ import sys, os, string, time, cPickle
 import os.path
 from identifiers import *
 SAVEFILE_NAME = os.path.join(DATADIR, 'settings.cfg')
+import plogging
+outlog = plogging.getLogger('client')
 
 
 #Dont instantiate this directly - use the module singleton defined at the end of this file
@@ -24,6 +26,7 @@ class MSDSConfig(object):
                    'synchub'  : ['https://ccg.murdoch.edu.au/madas/sync/', 'SyncHub Address', 'The web address of the synchub server'],
                    'updateurl' : ['http://ccg.murdoch.edu.au/ma/', 'Program Update URL', 'The web address of the server that should be contacted for program updates'],
                    'logfile'  : [os.path.join(DATADIR, 'rsync_log.txt'), 'Local Log File', 'Sync operations are logged to this file'],
+                   'loglevel' : [plogging.get_level('client'), "Log Level", "The log level of the client"],
                    'syncfreq' : [30, 'Sync Frequency (Mins)', 'How often the application should push updates to the server'],
                    'localindexdir' : ['.local_index', 'Local Index Directory', 'Temporary storage area for data transfer'],
             }
@@ -51,12 +54,13 @@ class MSDSConfig(object):
         try:
             fo = open(SAVEFILE_NAME, "rb")
         except IOError:
-            print 'No saved config existed: %s' % (SAVEFILE_NAME)
+            outlog.warning('No saved config existed: %s' % (SAVEFILE_NAME))
         try:
             savedstore = cPickle.load(fo)
             retval = True
         except Exception, e:
-            print 'Exception reading saved configuration: %s' % (str(e))
+            outlog.warning('Exception reading saved configuration: %s' % (str(e)) )
+            
         
         if retval:
             self.store.update(savedstore) 

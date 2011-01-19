@@ -9,9 +9,11 @@ import NodeConfigSelector
 
 from identifiers import *
 import  wx.lib.filebrowsebutton as filebrowse
-
+import plogging
 #register the streamind http and https handlers with urllib2
 streaminghttp.register_openers()
+
+outlog = plogging.getLogger('client')
 
 class AutoPreferences(wx.Dialog):
     def __init__(self, parent, ID, config, log):
@@ -122,40 +124,40 @@ class AutoPreferences(wx.Dialog):
         self.EndModal(0)
 
     def OnSendLog(self, evt):
-        print 'send logs!'
+        outlog.debug('send logs!')
         self.logbutton.Disable()
         origlabel = self.logbutton.GetLabel()
         self.logbutton.SetLabel('Sending')
         try:
             #Start the multipart encoded post of whatever file our log is saved to:
             posturl = self.config.getValue('synchub') + 'logupload/'
-            print 'reading logfile' 
+            outlog.debug('reading logfile' )
             rsync_logfile = open(self.config.getValue('logfile'))
             #print 'multipart encoding data'
             datagen, headers = multipart_encode( {'uploaded' : rsync_logfile, 'nodename' : self.config.getNodeName()} )
-            print 'posturl is: ', posturl
-            print 'datagen is ', datagen
-            print 'headers is ', headers
-            print 'forming request'
+            outlog.debug('posturl is: %s' % (posturl) )
+            outlog.debug('datagen is %s' % (datagen) )
+            outlog.debug('headers is %s' % (headers) )
+            outlog.debug('forming request')
             request = urllib2.Request(posturl, datagen, headers)
             #print 'sending log %s to %s' % (rsync_logfile, posturl)
-            print 'opening url'
+            outlog.debug('opening url')
             resp = urllib2.urlopen(request)
-            print 'reading response'
+            outlog.debug('reading response')
             jsonret = resp.read()
-            print 'finished receiving data'
+            outlog.debug('finished receiving data')
             retval = simplejson.loads(jsonret)
             #print 'OnSendLog: retval is %s' % (retval)
             self.log('Log send response: %s' % (str(retval)) )
         except Exception, e:
-            print 'OnSendLog: Exception occured: %s' % (str(e))
+            outlog.warning( 'OnSendLog: Exception occured: %s' % (str(e)) )
             self.log('Exception occured sending log: %s' % (str(e)), type=self.log.LOG_ERROR)
 
         self.logbutton.Enable()
         self.logbutton.SetLabel(origlabel)
 
     def OnSendKey(self, evt):
-        print 'send keys!'
+        outlog.debug('send keys!')
         self.keybutton.Disable()
         origlabel = self.keybutton.GetLabel()
         self.keybutton.SetLabel('Sending')
@@ -167,13 +169,13 @@ class AutoPreferences(wx.Dialog):
             keyfile = open('id_rsa.pub')
             datagen, headers = multipart_encode( {'uploaded' : keyfile, 'nodename' : self.config.getNodeName()} )
             request = urllib2.Request(posturl, datagen, headers)
-            print 'sending log %s to %s' % (keyfile, posturl)
+            outlog.debug('sending log %s to %s' % (keyfile, posturl) )
             jsonret = urllib2.urlopen(request).read()
             retval = simplejson.loads(jsonret)
-            print 'OnSendKey: retval is %s' % (retval)
+            outlog.debug('OnSendKey: retval is %s' % (retval) )
             self.log('Key send response: %s' % (str(retval)) )
         except Exception, e:
-            print 'OnSendKey: Exception occured: %s' % (str(e))
+            outlog.warning( 'OnSendKey: Exception occured: %s' % (str(e)) )
             self.log('Exception occured sending key: %s' % (str(e)), type=self.log.LOG_ERROR)
 
 
@@ -184,7 +186,7 @@ class AutoPreferences(wx.Dialog):
         #k = self.config.getConfig().keys()
         for key in self.preference_keys:
             if self.config.getShowVar(key): #if this is var shown on this dialog (not in the tree)
-                print 'Setting config at %s to %s' % (str(key), self.fields[key].GetValue())
+                outlog.debug('Setting config at %s to %s' % (str(key), self.fields[key].GetValue()) )
                 self.config.setValue(key, self.fields[key].GetValue())
 
         #call the method that will serialise the config.

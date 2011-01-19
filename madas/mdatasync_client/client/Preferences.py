@@ -10,9 +10,11 @@ import NodeConfigSelector
 
 from identifiers import *
 import  wx.lib.filebrowsebutton as filebrowse
+import plogging
 
 #register the streamind http and https handlers with urllib2
 streaminghttp.register_openers()
+outlog = plogging.getLogger('client')
 
 class Preferences(wx.Dialog):
     def __init__(self, parent, ID, config, log):
@@ -21,7 +23,7 @@ class Preferences(wx.Dialog):
         # creation, and then we create the GUI object using the Create
         # method.
 
-        self.preference_keys = ['localdir', 'user', 'updateurl']
+        self.preference_keys = ['localdir', 'user', 'updateurl', 'loglevel']
 
         pre = wx.PreDialog()
         pre.SetExtraStyle(wx.DIALOG_EX_CONTEXTHELP)
@@ -88,6 +90,9 @@ class Preferences(wx.Dialog):
                     ctrl = filebrowse.DirBrowseButton(self, -1, size=(450, -1), changeCallback = None, labelText=self.config.getFormalName(key), startDirectory = str(self.config.getValue(key)) )
                     ctrl.SetValue(str(self.config.getValue(key)) )
                     box.Add(ctrl, 1, wx.ALIGN_RIGHT|wx.ALL, border=0)
+                
+                if key == 'loglevel':
+                    pass
                 else: 
                     label = wx.StaticText(self, -1, self.config.getFormalName(key))
                     label.SetHelpText(self.config.getHelpText(key))
@@ -129,7 +134,7 @@ class Preferences(wx.Dialog):
         self.EndModal(0)
 
     def OnSendKey(self, evt):
-        print 'send keys!'
+        outlog.debug('send keys!')
         self.keybutton.Disable()
         origlabel = self.keybutton.GetLabel()
         self.keybutton.SetLabel('Sending')
@@ -142,13 +147,13 @@ class Preferences(wx.Dialog):
             keyfile = open(os.path.join(DATADIR, '..', 'id_rsa.pub') )
             datagen, headers = multipart_encode( {'uploaded' : keyfile, 'nodename' : self.config.getNodeName()} )
             request = urllib2.Request(posturl, datagen, headers)
-            print 'sending log %s to %s' % (keyfile, posturl)
+            outlog.debug('sending log %s to %s' % (keyfile, posturl) )
             jsonret = urllib2.urlopen(request).read()
             retval = simplejson.loads(jsonret)
-            print 'OnSendKey: retval is %s' % (retval)
+            outlog.debug('OnSendKey: retval is %s' % (retval) )
             self.log('Key send response: %s' % (str(retval)) )
         except Exception, e:
-            print 'OnSendKey: Exception occured: %s' % (str(e))
+            outlog.warning( 'OnSendKey: Exception occured: %s' % (str(e)) )
             self.log('Exception occured sending key: %s' % (str(e)), type=self.log.LOG_ERROR)
 
 
@@ -156,14 +161,15 @@ class Preferences(wx.Dialog):
         self.keybutton.SetLabel(origlabel)
 
     def OnHandshake(self, evt):
-        print 'OnHandshake!'
+        outlog.info('OnHandshake!')
+        self.save()
         self.parentApp.MSDSHandshakeFn(self.parentApp, returnFn=None)
 
     def save(self, *args):
         #k = self.config.getConfig().keys()
         for key in self.preference_keys:
             if self.config.getShowVar(key): #if this is var shown on this dialog (not in the tree)
-                print 'Setting config at %s to %s' % (str(key), self.fields[key].GetValue())
+                outlog.debug('Setting config at %s to %s' % (str(key), self.fields[key].GetValue()) )
                 self.config.setValue(key, self.fields[key].GetValue())
 
         #call the method that will serialise the config.

@@ -2,6 +2,8 @@ import wx
 import urllib2
 try: import json as simplejson
 except ImportError: import simplejson
+import plogging
+outlog = plogging.getLogger('client')
 
 class NodeConfigSelector(wx.Panel):
 
@@ -72,7 +74,7 @@ class NodeConfigSelector(wx.Panel):
         if j is not None:
             self.syncHubOKIcon.SetBitmap(self.SuccessImage)
         else:
-            print 'Data was not available from the web.'
+            outlog.debug('Data was not available from the web.')
             self.syncHubOKIcon.SetBitmap(self.FailImage)
         
         self.setNodes(j)
@@ -112,12 +114,12 @@ class NodeConfigSelector(wx.Panel):
             req = urllib2.Request(self.parentApp.config.getValue('synchub') + 'nodes/')
             f = urllib2.urlopen(req, None, 1) #one second timeout
             jsonret = f.read()
-            print 'node config: %s' % jsonret 
+            outlog.debug('node config: %s' % jsonret  )
             retval = simplejson.loads(jsonret)
             assert isinstance(retval, dict), 'Returned json was not a dict'
-            print 'node config loaded object is: %s' % retval
+            outlog.debug( 'node config loaded object is: %s' % (retval) )
         except Exception, e:
-            print 'Error retrieving node config data: %s' % (str(e))
+            outlog.warning( 'Error retrieving node config data: %s' % (str(e)) )
             retval = None
             
         return retval
@@ -130,7 +132,7 @@ class NodeConfigSelector(wx.Panel):
         #draw the tree control
         if self.tree is not None:
             #cleanup
-            print 'removing tree'
+            outlog.info('removing tree')
             #self.sizer.Remove(self.tree)
             self.tree.DeleteAllItems()
 
@@ -177,11 +179,11 @@ class NodeConfigSelector(wx.Panel):
         
 
     def OnItemExpanded(self, evt):
-        print "OnItemExpanded: ", self.GetItemText(evt.GetItem() )
+        outlog.info( "OnItemExpanded: %s" % (self.GetItemText(evt.GetItem()) ) )
         self.Layout()
 
     def OnItemCollapsed(self, evt):
-        print "OnItemCollapsed: ", self.GetItemText(evt.GetItem() )
+        outlog.info( "OnItemCollapsed: %s" % (self.GetItemText(evt.GetItem()) ) )
     #
     def OnSelChanged(self, evt):
         item = evt.GetItem()
@@ -190,11 +192,11 @@ class NodeConfigSelector(wx.Panel):
             self.parentApp.setNodeConfigName(self.nodeconfigdict)
             #print self.getNodeConfigName(item)
             
-        print "OnSelChanged: ", self.GetItemText(evt.GetItem())
+        outlog.info( "OnSelChanged: %s" % (self.GetItemText(evt.GetItem()) ) )
 
     #
     def OnActivated(self, evt):
-        print "OnActivated: ", self.GetItemText(evt.GetItem()) 
+        outlog.info( "OnActivated: %s" % (self.GetItemText(evt.GetItem()) ) )
 
    
     def AddTreeNodes(self, parentItem, items):
@@ -208,7 +210,7 @@ class NodeConfigSelector(wx.Panel):
                 if type(item) == str:
                     self.tree.AppendItem(parentItem, item)
                 else:
-                    print 'item wasnt a string.: %s' % str(item)
+                    outlog.debug('item wasnt a string.: %s' % str(item))
                     newItem = self.tree.AppendItem(parentItem, str(item))
                     #self.AddTreeNodes(newItem, str(item[0]))
             

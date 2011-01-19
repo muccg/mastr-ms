@@ -11,7 +11,7 @@ from poster.encode import multipart_encode
 from poster import streaminghttp
 try: import json as simplejson
 except ImportError: import simplejson
-
+import plogging
 from WxLogger import Log
 
 class APPSTATE:  
@@ -23,6 +23,8 @@ class APPSTATE:
 import weakref
 from config import CONFIG
 
+outlog = plogging.getLogger('client')
+
 # Create and set a help provider.  Normally you would do this in
 # the app's OnInit as it must be done before any SetHelpText calls.
 provider = wx.SimpleHelpProvider()
@@ -31,6 +33,7 @@ class MainWindow(wx.Frame):
     def __init__(self, parent):
 
         self.config = CONFIG
+        plogging.set_level('client', self.config.getValue('loglevel'))
         wx.Frame.__init__(self, parent, -1, 'MS Datasync Application: v%s' % (VERSION))
         self.countDownEnabled = True #sets the countdown to be active
 
@@ -208,7 +211,7 @@ class MainWindow(wx.Frame):
 
     def OnPaneChanged(self, event=None):
         if event:
-            print 'wx.EVT_COLLAPSIBLEPANE_CHANGED: %s' % event.Collapsed
+            outlog.debug('wx.EVT_COLLAPSIBLEPANE_CHANGED: %s' % event.Collapsed)
 
         # redo the layout
         #if self.logArea.IsCollapsed():
@@ -377,7 +380,7 @@ class MainWindow(wx.Frame):
             self.setState(APPSTATE.IDLE)
             self.SetProgress(100)
         
-        print 'return function called'
+        outlog.debug('return function called')
         if retcode:
             self.log('Check function returned', type=self.log.LOG_DEBUG, thread = thread)
         else:
@@ -413,33 +416,33 @@ class MainWindow(wx.Frame):
 
 
     def OnSendLog(self, evt):
-        print 'send logs!'
+        outlog.debug('send logs!')
         self.logbutton.Disable()
         origlabel = self.logbutton.GetLabel()
         self.logbutton.SetLabel('Sending')
         try:
             #Start the multipart encoded post of whatever file our log is saved to:
             posturl = self.config.getValue('synchub') + 'logupload/'
-            print 'reading logfile' 
+            outlog.debug('reading logfile' )
             rsync_logfile = open(self.config.getValue('logfile'))
             #print 'multipart encoding data'
             datagen, headers = multipart_encode( {'uploaded' : rsync_logfile, 'nodename' : self.config.getNodeName()} )
-            print 'posturl is: ', posturl
-            print 'datagen is ', datagen
-            print 'headers is ', headers
-            print 'forming request'
+            outlog.debug('posturl is: %s' % (str(posturl)) )
+            outlog.debug('datagen is %s' % (str(datagen)) )
+            outlog.debug('headers is %s' % (str(headers)) )
+            outlog.debug('forming request')
             request = urllib2.Request(posturl, datagen, headers)
             #print 'sending log %s to %s' % (rsync_logfile, posturl)
-            print 'opening url'
+            outlog.debug( 'opening url')
             resp = urllib2.urlopen(request)
-            print 'reading response'
+            outlog.debug( 'reading response')
             jsonret = resp.read()
-            print 'finished receiving data'
+            outlog.debug('finished receiving data')
             retval = simplejson.loads(jsonret)
             #print 'OnSendLog: retval is %s' % (retval)
             self.log('Log send response: %s' % (str(retval)) )
         except Exception, e:
-            print 'OnSendLog: Exception occured: %s' % (str(e))
+            outlog.warning('OnSendLog: Exception occured: %s' % (str(e)) )
             self.log('Exception occured sending log: %s' % (str(e)), type=self.log.LOG_ERROR)
 
         self.logbutton.Enable()
@@ -447,7 +450,7 @@ class MainWindow(wx.Frame):
 
     def OnTakeScreenshot(self, event):
         """ Takes a screenshot of the screen at give pos & size (rect). """
-        print 'Taking screenshot...'
+        outlog.info('Taking screenshot...')
         rect = self.GetRect()
         # see http://aspn.activestate.com/ASPN/Mail/Message/wxpython-users/3575899
         # created by Andrea Gavana
@@ -496,29 +499,29 @@ class MainWindow(wx.Frame):
         timetext = time.asctime().replace(' ', '_').replace(':', '-')
         fileName = os.path.join(DATADIR, "screenshot_%s.png" % (timetext))
         img.SaveFile(fileName, wx.BITMAP_TYPE_PNG)
-        print '...saving as png!'
+        outlog.info('...saving as png!')
 
         try:
             #Start the multipart encoded post of whatever file our log is saved to:
             posturl = self.config.getValue('synchub') + 'logupload/'
-            print 'reading imagefile' 
+            outlog.info( 'reading imagefile' )
             ssfile = open(fileName, "rb")
             #print 'multipart encoding data'
             datagen, headers = multipart_encode( {'uploaded' : ssfile, 'nodename' : self.config.getNodeName()} )
-            print 'posturl is: ', posturl
-            print 'datagen is ', datagen
-            print 'headers is ', headers
-            print 'forming request'
+            outlog.debug('posturl is: %s' % (str(posturl)) )
+            outlog.debug('datagen is %s' % (str(datagen)) )
+            outlog.debug('headers is %s' % (str(headers)) )
+            outlog.debug('forming request')
             request = urllib2.Request(posturl, datagen, headers)
             #print 'sending log %s to %s' % (rsync_logfile, posturl)
-            print 'opening url'
+            outlog.debug( 'opening url')
             resp = urllib2.urlopen(request)
-            print 'reading response'
+            outlog.debug('reading response')
             jsonret = resp.read()
-            print 'finished receiving data'
+            outlog.debug( 'finished receiving data' )
             retval = simplejson.loads(jsonret)
             #print 'OnSendLog: retval is %s' % (retval)
             self.log('Screenshot send response: %s' % (str(retval)) )
         except Exception, e:
-            print 'OnSendScreenShot: Exception occured: %s' % (str(e))
+            outlog.warning( 'OnSendScreenShot: Exception occured: %s' % (str(e)) )
             self.log('Exception occured sending screenshot: %s' % (str(e)), type=self.log.LOG_ERROR)

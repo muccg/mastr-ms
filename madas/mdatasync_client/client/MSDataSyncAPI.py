@@ -17,9 +17,12 @@ import urllib
 import os
 import os.path
 from identifiers import *
+import plogging
+outlog = plogging.getLogger('client')
+
 
 def nullFn(*args, **kwargs):
-    print 'null fn'
+    outlog.debug('null fn')
     pass
 
 MSDSCheckFn = nullFn 
@@ -70,7 +73,7 @@ class MSDataSyncAPI(object):
             try:
                 result = command( *args, **kwargs )
             except Exception, e:
-                print 'Error running command (nonthreaded): %s' % (str(e))
+                outlog.warning( 'Error running command (nonthreaded): %s' % (str(e)) )
                 #print 'command(args, kwargs) was: %s(%s,%s)' % (str(command), str(args), str(kwargs))
                 result = None
             if callback != None:
@@ -95,7 +98,7 @@ class MSDataSyncAPI(object):
             returnFn(retcode = False, retstring = "Could not connect %s" % (str(e)) )
             return
 
-        print 'Checking response'
+        outlog.debug( 'Checking response' )
         #now, if something goes wrong interpreting the result, don't panic.
         try:
             d = simplejson.loads(jsonret)
@@ -119,7 +122,7 @@ class MSDataSyncAPI(object):
         else:
             rsyncconfig['user'] = self.config.getValue('user')
         
-        print 'handshaking'
+        outlog.info( 'Handshaking' )
         #now rsync the whole thing over
         self._appendTask(self.handshakeReturn, self._impl.perform_rsync, "%s" % (localindexdir) , rsyncconfig)
 
@@ -182,8 +185,8 @@ class MSDataSyncAPI(object):
         remotefilesdict = d['filesdict']
         remoterunsamplesdict = d['runsamplesdict']
 
-        print "remote files dicrt" , remotefilesdict
-        print "remote runsamples dict", remoterunsamplesdict
+        outlog.debug( "remote files dict: %s" % ( unicode(remotefilesdict).encode('utf-8') ) )
+        outlog.debug( "remote runsamples dict: %s" % (unicode(remoterunsamplesdict).encode('utf-8') ) )
 
         callingWindow.setState(statuschange)
         self.callingWindow = callingWindow
@@ -280,7 +283,7 @@ class MSDataSyncAPI(object):
             shouldignore = False
             for ignoredir in ignoredirs:
                 if root.startswith(ignoredir):
-                    print 'ignoring ', root.encode('utf-8')
+                    #print 'ignoring ', root.encode('utf-8')
                     shouldignore = True
                     break
 
@@ -298,16 +301,16 @@ class MSDataSyncAPI(object):
             #don't create ignored dirs..
             for dirname in dirs:
                 if not node.has_key(dirname) and os.path.join(root, dirname) not in ignoredirs:
-                    print 'creating dirname:', dirname.encode('utf-8')
+                    outlog.debug( 'creating dirname: %s' % ( dirname.encode('utf-8') ) )
                     node[dirname] = {}
                     node[dirname]['.'] = {}
                     node[dirname]['/'] = os.path.join(root, dirname)
 
             for file in files:
-                print 'setting filename %s to None' % (file.encode('utf-8'))
+                #print 'setting filename %s to None' % (file.encode('utf-8'))
                 node['.'][file] = None
         
-        print 'retfiles is: ', unicode(retfiles).encode('utf-8')
+        #print 'retfiles is: ', unicode(retfiles).encode('utf-8')
         return retfiles
     
     #------- WORKER CLASS-----------------------
@@ -331,7 +334,7 @@ class MSDataSyncAPI(object):
                     #print 'worker thread executing %s with args %s' % (str(command), str(args))
                     result = command( *args, **kwargs )
                 except Exception, e:
-                    print 'Error running command (threaded): ', e
+                    outlog.warning( 'Error running command (threaded): %s' % ( str(e) ) )
                     #print 'command(args, kwargs) was: %s(%s,%s)' % (str(command), str(args), str(kwargs))
 
                     result = None
@@ -368,14 +371,15 @@ class MSDSImpl(object):
             #os.path.splitdrive splits the path into drive,path : ('c:', '\something\\somethingelse')
             drive,winpath = os.path.splitdrive(os.path.normpath(sourcedir))
             drive = str(drive)
-            print 'drive is ', drive
-            print 'winpath is ', winpath
+            outlog.debug('drive is %s' % (drive) )
+            
+            outlog.debug('winpath is %s' % (winpath) )
             #so for the winpath, we replace all \\ and then \ with /
             winpath=winpath.replace(os.sep, '/')
             winpath=winpath.replace('\\', '/')
             #then we take the drive letter (drive[0]) and put it after /cygdrive
             cygpath = "/%s/%s%s/" % ('cygdrive', drive[0], winpath)
-            print 'cygpath is: ', cygpath
+            outlog.debug('cygpath is: %s' % ( cygpath ) )
             sourcedir = cygpath
 
         else:
@@ -383,7 +387,7 @@ class MSDSImpl(object):
             sourcedir += '/' #make sure it ends in a slash
 
         from subprocess import Popen, PIPE, STDOUT
-        logfile = CONFIG.getValue('logfile')
+        logfile = CONFIG.getValue('logfile').replace('\\', '/') #if its a windows path, convert it. cwrsync wants posix paths ALWAYS
         #Popen('rsync -t %s %s:%s' % (sourcedir, remotehost, remotedir) )
         
         #cmdhead = ['rsync', '-tavz'] #t, i=itemize-changes,a=archive,v=verbose,z=zip
