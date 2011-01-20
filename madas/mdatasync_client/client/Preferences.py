@@ -90,9 +90,41 @@ class Preferences(wx.Dialog):
                     ctrl = filebrowse.DirBrowseButton(self, -1, size=(450, -1), changeCallback = None, labelText=self.config.getFormalName(key), startDirectory = str(self.config.getValue(key)) )
                     ctrl.SetValue(str(self.config.getValue(key)) )
                     box.Add(ctrl, 1, wx.ALIGN_RIGHT|wx.ALL, border=0)
-                
-                if key == 'loglevel':
-                    pass
+                elif key == 'loglevel':
+                    levelslist = [
+                                    plogging.LoggingLevels.INFO.name, 
+                                    plogging.LoggingLevels.DEBUG.name, 
+                                    plogging.LoggingLevels.WARNING.name, 
+                                    plogging.LoggingLevels.FATAL.name, 
+                                    plogging.LoggingLevels.CRITICAL.name 
+                                 ]
+                    
+                    ctrl =  wx.Choice(self, -1, choices=levelslist )
+
+                    #make a 'getvalue' for the control:
+                    def gv(self):
+                        label = self.GetStringSelection()
+                        level = plogging.LoggingLevels.getByName(label)
+                        ret = plogging.LoggingLevels.WARNING #a good default, just in case 
+                        if (level):
+                            ret = level
+                        #actually set the logging level
+                        plogging.set_level('client', ret)
+                        return ret
+                    
+                    #ctrl.GetValue = instancemethod(gv, ctrl, wx.Choice)
+                    from types import MethodType
+                    ctrl.GetValue = MethodType(gv, ctrl)
+                    
+                    self.Bind(wx.EVT_CHOICE, self.logLevelChoose, ctrl)
+
+                    #Lastly, lets select the current logging level.
+                    n = ctrl.FindString(self.config.getValue('loglevel').name)
+                    if n != wx.NOT_FOUND:
+                        ctrl.Select(n)
+                    label = wx.StaticText(self, -1, self.config.getFormalName(key))
+                    box.Add(label, 0, wx.ALIGN_LEFT| wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=0)
+                    box.Add(ctrl, 1, wx.ALIGN_RIGHT|wx.ALL, border=0 )
                 else: 
                     label = wx.StaticText(self, -1, self.config.getFormalName(key))
                     label.SetHelpText(self.config.getHelpText(key))
@@ -128,6 +160,10 @@ class Preferences(wx.Dialog):
         self.SetSizer(sizer)
         sizer.Fit(self)
 
+
+    def logLevelChoose(self, event):
+        #self.log('Logging level set to: %s (%s)' % (event.GetString(), plogging.LoggingLevels.getByName(event.GetString()).value ) )
+        self.log('Logging level set to: %s' % (event.GetString()) )
 
     def OKPressed(self, *args):
         self.save(args)

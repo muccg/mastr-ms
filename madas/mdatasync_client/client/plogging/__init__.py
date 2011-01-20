@@ -22,13 +22,34 @@ class LoggingLevels(object):
     FATAL = LoggingLevelEntry(logging.FATAL, 'fatal')
     CRITICAL = LoggingLevelEntry(logging.CRITICAL, 'critical')
 
-DEBUG = True
+    @staticmethod
+    def getByValue(value):
+        for o in [LoggingLevels.INFO, 
+                  LoggingLevels.DEBUG, 
+                  LoggingLevels.WARNING, 
+                  LoggingLevels.FATAL, 
+                  LoggingLevels.CRITICAL]:
+            if o.value == value:
+                return o
+        return None        
+    @staticmethod
+    def getByName(name):
+        for o in [LoggingLevels.INFO, 
+                  LoggingLevels.DEBUG, 
+                  LoggingLevels.WARNING, 
+                  LoggingLevels.FATAL, 
+                  LoggingLevels.CRITICAL]:
+            if o.name == name:
+                return o
+        return None        
+
+DEBUG = False 
 loggers = {}
 levels = {}
 
 
 LOG_DIRECTORY = '.'
-LOGGING_LEVEL = LoggingLevels.DEBUG if DEBUG else LoggingLevels.CRITICAL
+LOGGING_LEVEL = LoggingLevels.DEBUG if DEBUG else LoggingLevels.WARNING
 LOGGING_FORMATTER = logging.Formatter("%(asctime)s:%(name)s:%(levelname)s:%(filename)s:%(lineno)s:%(funcName)s:%(message)s")
 
 def getLogger(name):
