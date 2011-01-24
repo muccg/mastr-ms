@@ -12,12 +12,15 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     (r'^conf', 'madas.mdatasync_server.views.configureNode'),
+    (r'^utils', 'madas.mdatasync_server.views.utils'),
     (r'^nodes', 'madas.mdatasync_server.views.getNodeClients'),
     (r'^syncadmin/(.*)', admin.site.root),
     (r'^logupload/', 'madas.mdatasync_server.views.logUpload'),
     (r'^keyupload/', 'madas.mdatasync_server.views.keyUpload'),
     (r'^checksamplefiles/', 'madas.mdatasync_server.views.checkRunSampleFiles'),
+    (r'files/(?P<path>.*)$', 'madas.mdatasync_server.views.serve_file'),
     (r'^(.*)', 'madas.mdatasync_server.views.retrievePathsForFiles'),
+    #(r'^viewlog/(?P<filename>.*)$', 'madas.mdatasync_server.views.viewlog'),
     #(r'^(.*)', 'madas.mdatasync_server.views.defaultpage'),
     # madas
 )

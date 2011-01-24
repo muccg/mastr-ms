@@ -7,9 +7,14 @@ from mdatasync_server.rules import *
 from django.conf import settings
 import os
 import os.path
+import posixpath, urllib, mimetypes
+from django.shortcuts import render_to_response, get_object_or_404
+from django.contrib.auth.decorators import login_required
+
 
 from django.contrib import logging
 logger = logging.getLogger('mdatasync_server_log')
+logger.setLevel(logging.WARNING) #the default
 
 from settings import KEYS_TO_EMAIL, LOGS_TO_EMAIL, RETURN_EMAIL
 
@@ -317,7 +322,7 @@ def checkRunSampleFiles(request):
     return jsonResponse(ret)
 
 def logUpload(request, *args):
-    print 'LOGUPLOAD'
+    logger.info('LOGUPLOAD')
     fname_prefix = 'UNKNOWN_'
     if request.POST.has_key('nodename'):
         fname_prefix = request.POST['nodename'] + '_'
@@ -395,4 +400,55 @@ def _handle_uploaded_file(f, name):
     logger.debug( '*** _handle_uploaded_file: exit ***')
     return retval
 
+@login_required
+def utils(request):
+    if request.method == 'GET':
+        #Screenshots and logs are in the same dir.
+        import os
+        fileslist = os.listdir(os.path.join(settings.REPO_FILES_ROOT , 'synclogs') )
+        logslist = []
+        shotslist = []
+        for fname in fileslist:
+            print fname
+            if fname.endswith('.png'):
+                shotslist.append(fname)
+            else:    
+                logslist.append(fname)
 
+            logslist.sort()
+            shotslist.sort()
+            currentLogLevel = logger.getEffectiveLevel()
+        return render_to_response("utils.mako", {'logslist':logslist, 'shotslist':shotslist, 'currentLogLevel':currentLogLevel 's':settings, 'request':request })
+    else:
+        return HttpResponse('post')
+
+@login_required
+def serve_file(request, path):
+    root = settings.PERSISTENT_FILESTORE
+    path = posixpath.normpath(urllib.unquote(path))
+    path = path.lstrip('/') 
+    fullpath = os.path.join(root, path)
+    if not os.path.isfile(fullpath):
+        raise Http404, '"%s" does not exist' % fullpath
+    contents = open(fullpath, 'rb').read()
+    mimetype = mimetypes.guess_type(fullpath)[0] or 'application/octet-stream'
+    response = HttpResponse(contents, mimetype=mimetype)
+    response["Content-Length"] = len(contents)
+    return response
+
+@login_required
+def set_log_level(request):
+    msg = 'Ok'
+    if request.method == POST:
+        newlevel = request.POST['loglevel']
+        if newlevel in [logging.INFO, logging.DEBUG, logging.WARNING, logging.FATAL, logging.CRITICAL]:
+            logger.setLevel(newlevel)
+            msg = 'Logging level set to %s' % (str(newlevel)) 
+        else:
+            msg = 'Unable to set logging level to %s, no such level exists' % (str(newlevel)) 
+    logger.info('test')
+    logger.debug('test')
+    logger.warning('test')
+    logger.fatal('test')
+    logger.critical('test')
+    return HttpResponse(msg)    
