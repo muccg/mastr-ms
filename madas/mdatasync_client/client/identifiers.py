@@ -1,7 +1,7 @@
 import os
 import os.path
 #This version must be incremented each build
-VERSION = "0.3.0"
+VERSION = "0.3.1"
 
 #We need a strange looking datadir because of esky.
 #Esky has an outer 'bootstrapper' exe, and all contents and

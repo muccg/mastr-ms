@@ -48,7 +48,7 @@ loggers = {}
 levels = {}
 
 
-LOG_DIRECTORY = '.'
+LOG_DIRECTORY = os.path.join('..', 'data')
 LOGGING_LEVEL = LoggingLevels.DEBUG if DEBUG else LoggingLevels.WARNING
 LOGGING_FORMATTER = logging.Formatter("%(asctime)s:%(name)s:%(levelname)s:%(filename)s:%(lineno)s:%(funcName)s:%(message)s")
 
