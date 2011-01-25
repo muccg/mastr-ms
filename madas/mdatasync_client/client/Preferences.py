@@ -92,8 +92,8 @@ class Preferences(wx.Dialog):
                     box.Add(ctrl, 1, wx.ALIGN_RIGHT|wx.ALL, border=0)
                 elif key == 'loglevel':
                     levelslist = [
-                                    plogging.LoggingLevels.INFO.name, 
                                     plogging.LoggingLevels.DEBUG.name, 
+                                    plogging.LoggingLevels.INFO.name, 
                                     plogging.LoggingLevels.WARNING.name, 
                                     plogging.LoggingLevels.FATAL.name, 
                                     plogging.LoggingLevels.CRITICAL.name 
