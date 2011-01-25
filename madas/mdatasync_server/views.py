@@ -402,25 +402,40 @@ def _handle_uploaded_file(f, name):
 
 @login_required
 def utils(request):
-    if request.method == 'GET':
-        #Screenshots and logs are in the same dir.
-        import os
-        fileslist = os.listdir(os.path.join(settings.REPO_FILES_ROOT , 'synclogs') )
-        logslist = []
-        shotslist = []
-        for fname in fileslist:
-            print fname
-            if fname.endswith('.png'):
-                shotslist.append(fname)
-            else:    
-                logslist.append(fname)
+    success = True
+    message = ''
+    #First, if they posted, they want to change the log level.
+    if request.method == 'POST': 
+        #set the log level:
+        ll = request.POST.get('loglevel', None)
+        success = True
+        if ll:
+            success, message = set_log_level(int(ll))
+        else:
+            success = False
+            message = 'No valid log level posted.'
 
-            logslist.sort()
-            shotslist.sort()
-            currentLogLevel = logger.getEffectiveLevel()
-        return render_to_response("utils.mako", {'logslist':logslist, 'shotslist':shotslist, 'currentLogLevel':currentLogLevel 's':settings, 'request':request })
-    else:
-        return HttpResponse('post')
+    #now we proceed as normal.
+
+    #Screenshots and logs are in the same dir.
+    import os
+    fileslist = os.listdir(os.path.join(settings.REPO_FILES_ROOT , 'synclogs') )
+    logslist = []
+    shotslist = []
+    for fname in fileslist:
+        print fname
+        if fname.endswith('.png'):
+            shotslist.append(fname)
+        else:    
+            logslist.append(fname)
+
+        logslist.sort()
+        shotslist.sort()
+        currentLogLevel = logger.getEffectiveLevel()
+        levelnames = ['Debug', 'Info', 'Warning', 'Critical', 'Fatal']
+        levelvalues = [logging.DEBUG, logging.INFO, logging.WARNING, logging.CRITICAL, logging.FATAL]
+    return render_to_response("utils.mako", {'logslist':logslist, 'shotslist':shotslist, 'currentLogLevel':currentLogLevel, 'levelnames':levelnames, 'levelvalues':levelvalues , 'success':success, 'message':message})
+
 
 @login_required
 def serve_file(request, path):
@@ -436,19 +451,17 @@ def serve_file(request, path):
     response["Content-Length"] = len(contents)
     return response
 
-@login_required
-def set_log_level(request):
-    msg = 'Ok'
-    if request.method == POST:
-        newlevel = request.POST['loglevel']
-        if newlevel in [logging.INFO, logging.DEBUG, logging.WARNING, logging.FATAL, logging.CRITICAL]:
-            logger.setLevel(newlevel)
-            msg = 'Logging level set to %s' % (str(newlevel)) 
-        else:
-            msg = 'Unable to set logging level to %s, no such level exists' % (str(newlevel)) 
-    logger.info('test')
-    logger.debug('test')
-    logger.warning('test')
-    logger.fatal('test')
-    logger.critical('test')
-    return HttpResponse(msg)    
+def set_log_level(newlevel):
+    success = True 
+    if newlevel in [logging.INFO, logging.DEBUG, logging.WARNING, logging.FATAL, logging.CRITICAL]:
+        logger.setLevel(newlevel)
+        msg = 'Logging level set to %s' % (str(newlevel)) 
+    else:
+        success = False
+        msg = 'Unable to set logging level to %s, no such level exists' % (str(newlevel)) 
+    #logger.debug('test')
+    #logger.info('test')
+    #logger.warning('test')
+    #logger.critical('test')
+    #logger.fatal('test')
+    return (success, msg)    
