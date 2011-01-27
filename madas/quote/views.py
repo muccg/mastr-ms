@@ -1,13 +1,19 @@
 # Create your views here.
 
+import settings
 from django.db import models
 from django.contrib.auth.ldap_helper import LDAPHandler
 
 from madas.utils import setRequestVars, jsonResponse, json_encode
 from madas.quote.models import Quoterequest, Formalquote, Quotehistory, Emailmap
 from django.db.models import Q
-
-from madas import settings
+from django.http import HttpResponse, HttpResponseRedirect
+from django.core.urlresolvers import reverse
+from django.shortcuts import render_to_response, render_mako
+from django.utils.webhelpers import siteurl, wsgibase
+import django.utils.webhelpers as webhelpers
+from madas.login.views import processLogin 
+from string import *
 
 QUOTE_STATE_DOWNLOADED = 'downloaded'
 QUOTE_STATE_NEW = 'new' #is the default on the DB column
@@ -902,17 +908,7 @@ def downloadAttachment(request, *args):
     response['Content-Length'] = os.path.getsize(filename)
     return response 
 
-# Create your views here.
 
-from django.db import models
-from django.http import HttpResponse, HttpResponseRedirect
-from django.core.urlresolvers import reverse
-#from django.core import serializers
-#from django.utils import simplejson
-from madas.utils import setRequestVars, jsonResponse
-from django.shortcuts import render_to_response, render_mako
-from webhelpers import siteurl
-from madas.login.views import processLogin
 
 def check_default(request):
     return True
@@ -971,7 +967,6 @@ def authorize(request, module='/', perms = [], internal = False):
     request.session['params'] = cachedparams
     request.session['redirectMainContentFunction'] = redirectMainContentFunction
 
-    from webhelpers import wsgibase
     print '\tmodule: %s, perms: %s, internal: %s, basepath: %s' % (str(module), str(perms), str(internal), str(wsgibase()))
     #Check the current user status
     authenticated = request.user.is_authenticated()   
@@ -1094,10 +1089,6 @@ def redirectMain(request, *args, **kwargs):
     print 'redirectMain is redirecting to ', siteurl(request)
     return HttpResponseRedirect(siteurl(request))
     
-from django.conf import settings
-from webhelpers import siteurl
-from string import *
-import webhelpers
 def serveIndex(request, *args, **kwargs):
     for k in kwargs:
         print '%s : %s' % (k, kwargs[k])

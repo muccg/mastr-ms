@@ -7,7 +7,8 @@ from django.core.urlresolvers import reverse
 #from django.utils import simplejson
 from madas.utils import setRequestVars, jsonResponse
 from django.shortcuts import render_to_response, render_mako
-from webhelpers import siteurl
+from django.utils.webhelpers import siteurl, wsgibase
+import django.utils.webhelpers as webhelpers
 from madas.login.views import processLogin
 from django.contrib.auth.models import User
 
@@ -61,7 +62,6 @@ def authorize(request, module='/', perms = [], internal = False):
     request.session['params'] = cachedparams
     request.session['redirectMainContentFunction'] = redirectMainContentFunction
 
-    from webhelpers import wsgibase
     print '\tmodule: %s, perms: %s, internal: %s, basepath: %s' % (str(module), str(perms), str(internal), str(wsgibase()))
     #Check the current user status
     authenticated = request.user.is_authenticated()   
@@ -176,10 +176,6 @@ def redirectMain(request, *args, **kwargs):
     return HttpResponseRedirect(siteurl(request))
 
     
-from django.conf import settings
-from webhelpers import siteurl
-from string import *
-import webhelpers
 def serveIndex(request, *args, **kwargs):
     for k in kwargs:
         print '%s : %s' % (k, kwargs[k])
