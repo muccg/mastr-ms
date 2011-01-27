@@ -1,6 +1,6 @@
 # Create your views here.
 from django.http import HttpResponse, HttpResponseRedirect
-from webhelpers import siteurl
+from django.utils.webhelpers import siteurl
 
 from madas.utils import setRequestVars, jsonResponse
 from django.contrib.auth.ldap_helper import LDAPHandler
@@ -178,7 +178,6 @@ def forgotPasswordRedirect(request, *args):
         request.session['resetPasswordEmail'] = request.REQUEST['em']
         request.session['resetPasswordValidationKey'] = request.REQUEST['vk']
         from django.http import HttpResponseRedirect
-        from madas.webhelpers import siteurl
         
         return HttpResponseRedirect(siteurl(request))
         #return jsonResponse(request, args) 

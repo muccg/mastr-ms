@@ -10,6 +10,7 @@ import os.path
 import posixpath, urllib, mimetypes
 from django.shortcuts import render_to_response, get_object_or_404
 from django.contrib.auth.decorators import login_required
+import django.utils.webhelpers as webhelpers
 
 
 from django.contrib import logging
@@ -188,7 +189,6 @@ def retrievePathsForFiles(request, *args):
     error = '' #no error
     filesdict = {} 
     rules = []
-    import webhelpers
     #default host is this host.
     host = None 
     defaultHost = request.__dict__['META']['SERVER_NAME'] 
@@ -434,7 +434,7 @@ def utils(request):
         currentLogLevel = logger.getEffectiveLevel()
         levelnames = ['Debug', 'Info', 'Warning', 'Critical', 'Fatal']
         levelvalues = [logging.DEBUG, logging.INFO, logging.WARNING, logging.CRITICAL, logging.FATAL]
-    return render_to_response("utils.mako", {'logslist':logslist, 'shotslist':shotslist, 'currentLogLevel':currentLogLevel, 'levelnames':levelnames, 'levelvalues':levelvalues , 'success':success, 'message':message})
+    return render_to_response("utils.mako", {'wh':webhelpers, 'logslist':logslist, 'shotslist':shotslist, 'currentLogLevel':currentLogLevel, 'levelnames':levelnames, 'levelvalues':levelvalues , 'success':success, 'message':message})
 
 
 @login_required
