@@ -17,7 +17,6 @@ import django.utils.webhelpers as webhelpers
 from django.contrib import logging
 LOGNAME = 'mdatasync_server_log'
 logger = logging.getLogger(LOGNAME)
-logger.setLevel(logging.WARNING) #the default
 
 from settings import KEYS_TO_EMAIL, LOGS_TO_EMAIL, RETURN_EMAIL
 
