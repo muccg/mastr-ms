@@ -1,5 +1,5 @@
 # Create your views here.
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.utils import simplejson
 from mdatasync_server.models import *
 from repository.models import *  
@@ -13,8 +13,10 @@ from django.contrib.auth.decorators import login_required
 import django.utils.webhelpers as webhelpers
 
 
+
 from django.contrib import logging
-logger = logging.getLogger('mdatasync_server_log')
+LOGNAME = 'mdatasync_server_log'
+logger = logging.getLogger(LOGNAME)
 logger.setLevel(logging.WARNING) #the default
 
 from settings import KEYS_TO_EMAIL, LOGS_TO_EMAIL, RETURN_EMAIL
@@ -420,22 +422,73 @@ def utils(request):
     #Screenshots and logs are in the same dir.
     import os
     fileslist = os.listdir(os.path.join(settings.REPO_FILES_ROOT , 'synclogs') )
-    logslist = []
+    clientlogslist = []
     shotslist = []
     for fname in fileslist:
         print fname
         if fname.endswith('.png'):
             shotslist.append(fname)
         else:    
-            logslist.append(fname)
+            clientlogslist.append(fname)
 
-        logslist.sort()
-        shotslist.sort()
-        currentLogLevel = logger.getEffectiveLevel()
-        levelnames = ['Debug', 'Info', 'Warning', 'Critical', 'Fatal']
-        levelvalues = [logging.DEBUG, logging.INFO, logging.WARNING, logging.CRITICAL, logging.FATAL]
-    return render_to_response("utils.mako", {'wh':webhelpers, 'logslist':logslist, 'shotslist':shotslist, 'currentLogLevel':currentLogLevel, 'levelnames':levelnames, 'levelvalues':levelvalues , 'success':success, 'message':message})
+    serverloglist = os.listdir(settings.LOG_DIRECTORY)
+    serverloglist.sort()
+    clientlogslist.sort()
+    shotslist.sort()
+    currentLogLevel = logger.getEffectiveLevel()
+    levelnames = ['Debug', 'Info', 'Warning', 'Critical', 'Fatal']
+    levelvalues = [logging.DEBUG, logging.INFO, logging.WARNING, logging.CRITICAL, logging.FATAL]
+    return render_to_response("utils.mako", {'wh':webhelpers, 'serverloglist':serverloglist, 'clientlogslist':clientlogslist, 'shotslist':shotslist, 'currentLogLevel':currentLogLevel, 'levelnames':levelnames, 'levelvalues':levelvalues , 'success':success, 'message':message})
 
+@login_required
+def tail_log(request, filename=None, linesback=10, since=0):
+    since = int(since)
+    linesback = int(linesback)
+    avgcharsperline=75
+    pos = 0
+    if filename is None:
+        filename = 'mdatasync_server_log.log'
+
+    logfilename = os.path.join(settings.LOG_DIRECTORY, filename)
+    file = open(logfilename,'r')
+
+    while 1:
+        if (since):
+            try: file.seek(since,os.SEEK_SET) #seek from start of file.
+            except IOError: file.seek(0)
+    
+        else: #else seek from the end
+            try: file.seek(-1 * avgcharsperline * linesback,2)
+            except IOError: file.seek(0)
+        
+        if file.tell() == 0: atstart=1
+        else: atstart=0
+
+        lines=file.read().split("\n")
+        pos = file.tell()
+        
+        #break if we were in 'since' mode, or we had enough lines, or we can't go back further
+        if since or (len(lines) > (linesback+1)) or atstart: break
+        
+        #Otherwise, we are wanting to get more lines.
+        #The lines are bigger than we thought
+        avgcharsperline=int(avgcharsperline * 1.3) #Inc avg for retry
+    file.close()
+
+    out=""
+    if not since:
+        if len(lines) > linesback: 
+            start=len(lines)-linesback -1
+        else: 
+            start=0
+
+        for l in lines[start:len(lines)-1]: 
+            out=out + l + "\n"
+    else:
+        for l in lines:
+            out += l + "\n"
+
+    return HttpResponse(simplejson.dumps({'data' : out, 'position':pos}) )
 
 @login_required
 def serve_file(request, path):

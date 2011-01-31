@@ -1,6 +1,6 @@
 from django.core.mail import send_mail
 from appsettings.mastrms.prod import RETURN_EMAIL
-from webhelpers import siteurl
+from django.utils.webhelpers import siteurl
 
 from django.core.mail import EmailMessage
 
