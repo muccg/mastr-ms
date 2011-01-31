@@ -290,11 +290,15 @@ def records(request, model, field, value):
         for f in model_obj._meta.fields:
             d[f.name] = f.value_from_object(row)
             
-        for f in model_obj._meta.many_to_many:
-            vals = []
-            for val in f.value_from_object(row):
-                vals.append(makeJsonFriendly(val))
-            d[f.name] = vals
+        if model == 'run':
+            #Runs should not return their collection of RunSamples, as they cannot be json serialized
+            pass
+        else:
+            for f in model_obj._meta.many_to_many:
+                vals = []
+                for val in f.value_from_object(row):
+                    vals.append(makeJsonFriendly(val))
+                d[f.name] = vals
 
         output['rows'].append(d)
 
