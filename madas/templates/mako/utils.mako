@@ -125,7 +125,7 @@ bgcol="blue"
 </form>    
 
 
-<p><input type="button" value="Tail" onclick="sendRequest('/sync/taillog/'+ getServerLogfilename() +'/50/' + pos.toString() + '/', handleTail);"></p>
+<p><input type="button" value="Tail" onclick="sendRequest('${wh.url('/sync/taillog/')}' + getServerLogfilename() +'/50/' + pos.toString() + '/', handleTail);"></p>
 
 <div id='Logcontents' style="height: 400px; overflow:auto;"></div>
 <script>
