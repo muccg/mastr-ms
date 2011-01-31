@@ -19,8 +19,8 @@ urlpatterns = patterns('',
     (r'^keyupload/', 'madas.mdatasync_server.views.keyUpload'),
     (r'^checksamplefiles/', 'madas.mdatasync_server.views.checkRunSampleFiles'),
     (r'files/(?P<path>.*)$', 'madas.mdatasync_server.views.serve_file'),
+    (r'^taillog/(?P<filename>.*)/(?P<linesback>\d*)/(?P<since>\d*)/$', 'madas.mdatasync_server.views.tail_log'),
     (r'^(.*)', 'madas.mdatasync_server.views.retrievePathsForFiles'),
-    #(r'^viewlog/(?P<filename>.*)$', 'madas.mdatasync_server.views.viewlog'),
     #(r'^(.*)', 'madas.mdatasync_server.views.defaultpage'),
     # madas
 )
