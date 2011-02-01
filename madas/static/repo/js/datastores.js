@@ -247,8 +247,7 @@ var clientsListStore = new Ext.data.JsonStore(
                             storeId: 'clientsList',
                             autoLoad: true,
                             url: wsBaseUrl + 'recordsClientList',
-                            listeners: {'load':MA.DSLoaded,
-                                        'loadexception':MA.DSLoadException
+                            listeners: {'load':MA.DSLoaded
                                         },
                             sortInfo: {
                                 field: 'username',
@@ -263,9 +262,7 @@ var userListStore = new Ext.data.JsonStore(
                             storeId: 'clientsList',
                             autoLoad: true,
                             url: wsBaseUrl + 'recordsClientList?allUsers=1',
-                            listeners: {'load':MA.DSLoaded,
-                                'loadexception':MA.DSLoadException
-                            },
+                            listeners: {'load':MA.DSLoaded},
                             sortInfo: {
                             field: 'username',
                             direction: 'DESC'
