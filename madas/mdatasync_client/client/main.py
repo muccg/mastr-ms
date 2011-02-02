@@ -52,7 +52,7 @@ if __name__ == "__main__":
         except:
             print 'Unable to create data directory. Please create manually: %s' % os.normpath(DATADIR)
             exit()
-    plogging.init_logger(name='client', logfile='clientlog.log')
+    plogging.init_logger(name='client', logfile=os.path.join(DATADIR, 'clientlog.log'))
     
     m = MDataSyncApp()
     #sys.stdout = m.win.log 

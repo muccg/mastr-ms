@@ -48,7 +48,7 @@ loggers = {}
 levels = {}
 
 
-LOG_DIRECTORY = os.path.join('..', 'data')
+#LOG_DIRECTORY = os.path.join('..', 'data')
 LOGGING_LEVEL = LoggingLevels.DEBUG if DEBUG else LoggingLevels.WARNING
 LOGGING_FORMATTER = logging.Formatter("%(asctime)s:%(name)s:%(levelname)s:%(filename)s:%(lineno)s:%(funcName)s:%(message)s")
 
@@ -63,7 +63,7 @@ def getLogger(name):
 
 def init_logger(name = "default", logfile = "default.log"):
     #print "logging::init_logger(",name,",",logfile,")"
-    fh = logging.handlers.TimedRotatingFileHandler(os.path.join(LOG_DIRECTORY,logfile), 'midnight')
+    fh = logging.handlers.TimedRotatingFileHandler(logfile), 'midnight')
     fh.setFormatter(LOGGING_FORMATTER)
     
     logger = logging.getLogger(name)
