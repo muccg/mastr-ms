@@ -63,7 +63,7 @@ def getLogger(name):
 
 def init_logger(name = "default", logfile = "default.log"):
     #print "logging::init_logger(",name,",",logfile,")"
-    fh = logging.handlers.TimedRotatingFileHandler(logfile), 'midnight')
+    fh = logging.handlers.TimedRotatingFileHandler(logfile, 'midnight')
     fh.setFormatter(LOGGING_FORMATTER)
     
     logger = logging.getLogger(name)
