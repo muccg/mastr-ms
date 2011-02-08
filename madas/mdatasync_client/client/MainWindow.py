@@ -6,9 +6,6 @@ import time
 import esky
 import sys
 from identifiers import *
-import urllib2
-import urllib
-from poster.encode import multipart_encode, MultipartParam
 from poster import streaminghttp
 try: import json as simplejson
 except ImportError: import simplejson
@@ -429,19 +426,12 @@ class MainWindow(wx.Frame):
             #Start the multipart encoded post of whatever file our log is saved to:
             posturl = self.config.getValue('synchub') + 'logupload/'
             outlog.debug('reading logfile' )
-            rsync_logfile = open(self.config.getValue('logfile'))
-            #print 'multipart encoding data'
-            datagen, headers = multipart_encode( {'uploaded' : rsync_logfile, 'nodename' : self.config.getNodeName()} )
-            outlog.debug('posturl is: %s' % (str(posturl)) )
-            outlog.debug('datagen is %s' % (str(datagen)) )
-            outlog.debug('headers is %s' % (str(headers)) )
-            outlog.debug('forming request')
-            request = urllib2.Request(posturl, datagen, headers)
-            #print 'sending log %s to %s' % (rsync_logfile, posturl)
+            rsync_logfile_path = self.config.getValue('logfile')
+            rsync_logfile = os.path.split(rsync_logfile_path)[1]
+            http = yaphc.Http()
+            request = yaphc.PostRequest(posturl, params={'nodename': self.config.getNodeName()}, files=[('uploaded', rsync_logfile, rsync_logfile_path)])
             outlog.debug( 'opening url')
-            resp = urllib2.urlopen(request)
-            outlog.debug( 'reading response')
-            jsonret = resp.read()
+            resp, jsonret = http.make_request(request)
             outlog.debug('finished receiving data')
             retval = simplejson.loads(jsonret)
             #print 'OnSendLog: retval is %s' % (retval)

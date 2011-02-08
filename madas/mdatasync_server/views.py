@@ -13,7 +13,6 @@ from django.contrib.auth.decorators import login_required
 import django.utils.webhelpers as webhelpers
 
 
-
 from django.contrib import logging
 LOGNAME = 'mdatasync_server_log'
 logger = logging.getLogger(LOGNAME)
@@ -323,7 +322,7 @@ def checkRunSampleFiles(request):
     return jsonResponse(ret)
 
 def logUpload(request, *args):
-    logger.info('LOGUPLOAD')
+    logger.debug('LOGUPLOAD')
     fname_prefix = 'UNKNOWN_'
     if request.POST.has_key('nodename'):
         fname_prefix = request.POST['nodename'] + '_'
@@ -339,7 +338,7 @@ def logUpload(request, *args):
                 body ="An MS Datasync logfile has been uploaded: %s\r\n" % (written_logfile_name)
             else:
                 body = "MS Datasync logfile upload failed: %s\r\n" % (written_logfile_name)
-            e = FixedEmailMessage(subject="MS Datasync Log Upload (%s)" % (fname_prefix), body=body, from_email = RETURN_EMAIL, to = [LOGS_TO_EMAIL])
+            e = FixedEmailMessage(subject="MS Datasync Log Upload (%s)" % (fname_prefix.strip('_')), body=body, from_email = RETURN_EMAIL, to = [LOGS_TO_EMAIL])
             e.send()
         except Exception, e:
             logger.debug( 'Unable to send "Log Sent" email: %s' % (str(e)) )

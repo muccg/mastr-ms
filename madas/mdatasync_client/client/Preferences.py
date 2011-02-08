@@ -1,7 +1,5 @@
 import wx
 import urllib2
-from poster.encode import multipart_encode
-from poster import streaminghttp
 try: import json as simplejson
 except ImportError: import simplejson
 import os
@@ -12,8 +10,11 @@ from identifiers import *
 import  wx.lib.filebrowsebutton as filebrowse
 import plogging
 
-#register the streamind http and https handlers with urllib2
-streaminghttp.register_openers()
+import yaphc
+from httplib2 import Http
+from urllib import urlencode
+
+
 outlog = plogging.getLogger('client')
 
 class Preferences(wx.Dialog):
@@ -31,7 +32,6 @@ class Preferences(wx.Dialog):
         pre.width = 400
         #Turn the object into a proper dialog wrapper.
         self.PostCreate(pre)
-
         
         self.log = log
         self.parentApp = parent
@@ -40,10 +40,6 @@ class Preferences(wx.Dialog):
         # Now continue with the normal construction of the dialog
         # contents
         sizer = wx.BoxSizer(wx.VERTICAL)
-        #label = wx.StaticText(self, -1, "DataSync Preferences")
-        #label.SetHelpText("Preference settings for the DataSync application")
-        #sizer.Add(label, 0, wx.ALIGN_CENTER|wx.ALL, 2)
-
         self.nodeconfigselector = None 
         #Get the rest of the config
         k = self.config.getConfig().keys()
@@ -180,12 +176,16 @@ class Preferences(wx.Dialog):
             posturl = self.config.getValue('synchub') + 'keyupload/'
             
             #key is in the dir above the datadir
-            keyfile = open(os.path.join(DATADIR, '..', 'id_rsa.pub') )
-            datagen, headers = multipart_encode( {'uploaded' : keyfile, 'nodename' : self.config.getNodeName()} )
-            request = urllib2.Request(posturl, datagen, headers)
-            outlog.debug('sending log %s to %s' % (keyfile, posturl) )
-            jsonret = urllib2.urlopen(request).read()
+            keyfile = 'id_rsa.pub'
+            keyfilepath = os.path.join(DATADIR, '..', keyfile)
+            http = yaphc.Http()
+            request = yaphc.PostRequest(posturl, params={'nodename': self.config.getNodeName()}, files=[('uploaded', keyfile, keyfilepath)])
+            outlog.debug( 'opening url')
+            resp, jsonret = http.make_request(request)
+            outlog.debug('finished receiving data')
             retval = simplejson.loads(jsonret)
+            
+            outlog.debug('sending log %s to %s' % (keyfile, posturl) )
             outlog.debug('OnSendKey: retval is %s' % (retval) )
             self.log('Key send response: %s' % (str(retval)) )
         except Exception, e:
