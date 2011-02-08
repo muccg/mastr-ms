@@ -7,12 +7,17 @@ import esky
 import sys
 from identifiers import *
 import urllib2
-from poster.encode import multipart_encode
+import urllib
+from poster.encode import multipart_encode, MultipartParam
 from poster import streaminghttp
 try: import json as simplejson
 except ImportError: import simplejson
 import plogging
 from WxLogger import Log
+
+import yaphc
+from httplib2 import Http
+from urllib import urlencode
 
 class APPSTATE:  
 
@@ -497,30 +502,23 @@ class MainWindow(wx.Frame):
         img = bmp.ConvertToImage()
         import time
         timetext = time.asctime().replace(' ', '_').replace(':', '-')
-        fileName = os.path.join(DATADIR, "screenshot_%s.png" % (timetext))
-        img.SaveFile(fileName, wx.BITMAP_TYPE_PNG)
+        fileName = "screenshot_%s.png" % (timetext)
+        fullfileName = os.path.join(DATADIR, fileName)
+        img.SaveFile(fullfileName, wx.BITMAP_TYPE_PNG)
         outlog.info('...saving as png!')
 
         try:
+
             #Start the multipart encoded post of whatever file our log is saved to:
             posturl = self.config.getValue('synchub') + 'logupload/'
             outlog.info( 'reading imagefile' )
-            ssfile = open(fileName, "rb")
-            #print 'multipart encoding data'
-            datagen, headers = multipart_encode( {'uploaded' : ssfile, 'nodename' : self.config.getNodeName()} )
-            outlog.debug('posturl is: %s' % (str(posturl)) )
-            outlog.debug('datagen is %s' % (str(datagen)) )
-            outlog.debug('headers is %s' % (str(headers)) )
-            outlog.debug('forming request')
-            request = urllib2.Request(posturl, datagen, headers)
-            #print 'sending log %s to %s' % (rsync_logfile, posturl)
+            http = yaphc.Http()
+            request = yaphc.PostRequest(posturl, params={'nodename': self.config.getNodeName()}, files=[('uploaded', fileName, fullfileName)])
             outlog.debug( 'opening url')
-            resp = urllib2.urlopen(request)
+            resp, jsonret = http.make_request(request)
             outlog.debug('reading response')
-            jsonret = resp.read()
             outlog.debug( 'finished receiving data' )
             retval = simplejson.loads(jsonret)
-            #print 'OnSendLog: retval is %s' % (retval)
             self.log('Screenshot send response: %s' % (str(retval)) )
         except Exception, e:
             outlog.warning( 'OnSendScreenShot: Exception occured: %s' % (str(e)) )
