@@ -6,7 +6,6 @@ import time
 import esky
 import sys
 from identifiers import *
-from poster import streaminghttp
 try: import json as simplejson
 except ImportError: import simplejson
 import plogging
