@@ -86,8 +86,8 @@ Section "" ;No components page, name is not important
   Sleep 5000
 
   #now update path
-  #${EnvVarUpdate} $0 "PATH" "A" "HKCU" "%CWRSYNCHOME%\BIN"
-  WriteRegExpandStr ${env_hkcu} "PATH" "$%PATH%;${cwrsynchome}\BIN" 
+  ${EnvVarUpdate} $0 "PATH" "A" "HKCU" "%CWRSYNCHOME%\BIN"
+  #WriteRegExpandStr ${env_hkcu} "PATH" "$%PATH%;${cwrsynchome}\BIN" 
   ; make sure windows knows about the change
   SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
   
