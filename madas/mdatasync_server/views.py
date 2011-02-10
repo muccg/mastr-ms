@@ -251,6 +251,7 @@ def retrievePathsForFiles(request, *args):
 
         except Exception, e:
             status = 1
+            logger.debug("exception encountered")
             error = "%s, %s" % (error, 'Unable to resolve end machine to stored NodeClient: %s' % str(e) )
         
 

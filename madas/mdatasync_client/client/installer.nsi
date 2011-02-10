@@ -6,6 +6,7 @@
 ; there. 
 
 ;--------------------------------
+!include EnvVarUpdate.nsh
 
 ; The name of the installer
 Name "MSDataSync"
@@ -99,7 +100,7 @@ Section "" ;No components page, name is not important
   ExecWait 'genkeys.bat >> genkeys_output.txt'
 
   ;Uninstall Information
-  WriteRegStr HKLM "${REG_UNINSTALL}" "DisplayName" "MSDataSync -- Data Sync Application by CCG"
+    WriteRegStr HKLM "${REG_UNINSTALL}" "DisplayName" "MSDataSync -- Data Sync Application by CCG"
   WriteRegStr HKLM "${REG_UNINSTALL}" "UninstallString" "$\"$INSTDIR\uninstall.exe$\""
   WriteUninstaller "$INSTDIR\uninstall.exe"
   
@@ -108,6 +109,8 @@ SectionEnd ; end the section
 Section Uninstall
   ;TODO: remove cwrsync
 
+  ;Remove PATH entry
+  ${un.EnvVarUpdate} $0 "PATH" "A" "HKCU" "%CWRSYNCHOME%\BIN"
 
   ;Removes directory and registry key:
   RMDIR /r $INSTDIR
