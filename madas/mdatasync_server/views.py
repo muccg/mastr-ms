@@ -227,18 +227,23 @@ def retrievePathsForFiles(request, *args):
             if ncuname is not None and len(ncuname) > 0:
                 username = str(ncuname)
 
+            logger.debug('Checking for rules')
             try:
                 rulesset = NodeRules.objects.filter(parent_node = nodeclient)
                 rules = [x.__unicode__() for x in rulesset]
             except Exception, e:
                 status = 1
                 error = '%s, %s' % (error, 'Unable to resolve ruleset: %s' % (str(e)))
+            
+            logger.debug('Finding runs for this nodeclient')
             #now get the runs for that nodeclient
             runs = Run.objects.filter(machine = nodeclient) 
             for run in runs:
+                logger.debug('Finding runsamples for run')
                 runsamples = RunSample.objects.filter(run = run)
                 #Build a filesdict of all the files for these runsamples
                 for rs in runsamples:
+                    logger.debug('Getting files for runsamples');
                     fname = rs.filename.upper() #Use uppercase filenames as keys.
                     abspath, relpath = rs.filepaths()
                     logger.debug( 'Filename: %s belongs in path %s' % ( fname.encode('utf-8'), abspath.encode('utf-8') ) )
