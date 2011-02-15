@@ -336,13 +336,18 @@ class Sample(models.Model):
             return False
         return True
 
-    
+
+class RUN_STATES:
+    NEW = (0, u"New")
+    IN_PROGRESS = (1, u"In Progress")
+    COMPLETE = (2, u"Complete")
+
 class Run(models.Model):
-    RUN_STATES = (
-        (0, u"New"),
-        (1, u"In Progress"),
-        (2, u"Complete"),
-    )
+    
+    RUN_STATES_TUPLES = (
+        RUN_STATES.NEW,
+        RUN_STATES.IN_PROGRESS,
+        RUN_STATES.COMPLETE)
 
     method = models.ForeignKey(InstrumentMethod)
     created_on = models.DateField(null=False, default=date.today)
@@ -351,7 +356,7 @@ class Run(models.Model):
     samples = models.ManyToManyField(Sample, through="RunSample")
     machine = models.ForeignKey(NodeClient, null=True, blank=True)
     generated_output = models.TextField(null=True, blank=True)
-    state = models.SmallIntegerField(choices=RUN_STATES, default=0, db_index=True)
+    state = models.SmallIntegerField(choices=RUN_STATES_TUPLES, default=0, db_index=True)
     sample_count = models.IntegerField(default=0)
     incomplete_sample_count = models.IntegerField(default=0)
     complete_sample_count = models.IntegerField(default=0)
@@ -386,7 +391,7 @@ class Run(models.Model):
         self.complete_sample_count = self.sample_count - self.incomplete_sample_count
 
         if self.complete_sample_count == self.sample_count:
-            self.state = 2
+            self.state = RUN_STATES.COMPLETE[0] 
 
         self.save()
         

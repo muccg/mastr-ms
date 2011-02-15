@@ -2,7 +2,7 @@ from django.db import transaction
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden, HttpResponseNotAllowed, HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
-from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure, MadasUser
+from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RUN_STATES, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure, MadasUser
 from madas.quote.models import Organisation, Formalquote
 from django.utils import webhelpers
 from django.contrib.auth.models import User
@@ -1670,7 +1670,7 @@ def mark_run_complete(request, run_id):
         sample.save()
         
     run = Run.objects.get(id=run_id)
-    run.state = 2
+    run.state = RUN_STATES.COMPLETE[0]
     run.save()
     
     from madas.mail_functions import FixedEmailMessage

@@ -1,4 +1,4 @@
-from madas.repository.models import RunSample, SampleNotInClassException, InstrumentSOP
+from madas.repository.models import RunSample, RUN_STATES, SampleNotInClassException, InstrumentSOP
 from django.http import HttpResponse
 
 class RunBuilder(object):
@@ -33,7 +33,7 @@ class RunBuilder(object):
         except SampleNotInClassException, e:
             return 'Samples in the run need to be in sample classes before they can be used in a run'
    
-        if self.run.state == 0:
+        if self.run.state == RUN_STATES.NEW[0]:
             self.layout()
         
         from mako.template import Template
@@ -55,8 +55,8 @@ class RunBuilder(object):
                 rs.save()
         print 'finished writing filenames'
         #mark the run as in-progress and save it
-        if self.run.state == 0:
-            self.run.state = 1
+        if self.run.state == RUN_STATES.NEW[0]:
+            self.run.state = RUN_STATES.IN_PROGRESS[0] 
             self.run.save()
         
         #render

@@ -240,19 +240,24 @@ def retrievePathsForFiles(request, *args):
             runs = Run.objects.filter(machine = nodeclient) 
             for run in runs:
                 logger.debug('Finding runsamples for run')
-                runsamples = RunSample.objects.filter(run = run)
-                #Build a filesdict of all the files for these runsamples
-                for rs in runsamples:
-                    logger.debug('Getting files for runsamples');
-                    fname = rs.filename.upper() #Use uppercase filenames as keys.
-                    abspath, relpath = rs.filepaths()
-                    logger.debug( 'Filename: %s belongs in path %s' % ( fname.encode('utf-8'), abspath.encode('utf-8') ) )
-                    if filesdict.has_key(fname):
-                        logger.debug( 'Duplicate path detected!!!' )
-                        error = "%s, %s" % (error, "Duplicate filename detected for %s" % (fname.encode('utf-8')))
-                        status = 2
-                    #we use the relative path    
-                    filesdict[fname] = [run.id, rs.id, relpath]
+                
+                if run.state == RUN_STATES.COMPLETE[0]:
+                    logger.info('Run was already complete');
+                    
+                else:
+                    runsamples = RunSample.objects.filter(run = run)
+                    #Build a filesdict of all the files for these runsamples
+                    for rs in runsamples:
+                        logger.debug('Getting files for runsamples');
+                        fname = rs.filename.upper() #Use uppercase filenames as keys.
+                        abspath, relpath = rs.filepaths()
+                        logger.debug( 'Filename: %s belongs in path %s' % ( fname.encode('utf-8'), abspath.encode('utf-8') ) )
+                        if filesdict.has_key(fname):
+                            logger.debug( 'Duplicate path detected!!!' )
+                            error = "%s, %s" % (error, "Duplicate filename detected for %s" % (fname.encode('utf-8')))
+                            status = 2
+                        #we use the relative path    
+                        filesdict[fname] = [run.id, rs.id, relpath]
 
         except Exception, e:
             status = 1
