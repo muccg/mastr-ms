@@ -141,9 +141,9 @@ class MSDataSyncAPI(object):
         localdir = self.config.getValue('localdir')
         localindexdir = self.config.getLocalIndexPath() 
         filesdict = self.getFiles(localdir, ignoredirs=[localindexdir])
-        
+        syncold = self.config.getValue('syncold') 
         self.log("Syncing with server %s" % (self.config.getValue('synchub')), type=self.log.LOG_NORMAL, thread=self.useThreading)
-        postvars = {'files' : simplejson.dumps(filesdict), 'organisation' : simplejson.dumps(organisation), 'sitename' : simplejson.dumps(sitename), 'stationname': simplejson.dumps(station)}
+        postvars = {'files' : simplejson.dumps(filesdict), 'organisation' : simplejson.dumps(organisation), 'sitename' : simplejson.dumps(sitename), 'stationname': simplejson.dumps(station), 'syncold': syncold}
         outlog.debug("Sync request to server. Postvars: %s" % (str(postvars)) )
         try:
             f = urllib.urlopen(self.config.getValue('synchub'), urllib.urlencode(postvars))

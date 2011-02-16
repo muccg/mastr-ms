@@ -29,6 +29,7 @@ class MSDSConfig(object):
                    'loglevel' : [plogging.get_level('client'), "Log Level", "The log level of the client"],
                    'syncfreq' : [30, 'Sync Frequency (Mins)', 'How often the application should push updates to the server'],
                    'localindexdir' : ['.local_index', 'Local Index Directory', 'Temporary storage area for data transfer'],
+                   'syncold' : [False, 'Sync Completed', 'When checked, includes already completed run data for transfer'],
             }
         self.load()
 

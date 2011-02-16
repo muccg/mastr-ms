@@ -203,11 +203,13 @@ def retrievePathsForFiles(request, *args):
         porganisation = simplejson.loads(request.POST.get('organisation', ''))
         psitename= simplejson.loads(request.POST.get('sitename', ''))
         pstation = simplejson.loads(request.POST.get('stationname', ''))
-        
+        syncold = simplejson.loads(request.POST.get('syncold', False) #defaults to false
+
         logger.debug( 'Post var files passed through was: %s' % ( pfiles) )
         logger.debug( 'Post var organisation passed through was: %s' % ( porganisation) )
         logger.debug( 'Post var station passed through was: %s' % ( pstation ) )
         logger.debug( 'Post var sitename passed through was: %s' % ( psitename) )
+        logger.debug( 'Post var syncold passed through was: %s' % ( str(syncold) ) )
 
         #filter by client, node, whatever to 
         #get a list of filenames in the repository run samples table
@@ -241,7 +243,7 @@ def retrievePathsForFiles(request, *args):
             for run in runs:
                 logger.debug('Finding runsamples for run')
                 
-                if run.state == RUN_STATES.COMPLETE[0]:
+                if not syncold and run.state == RUN_STATES.COMPLETE[0]:
                     logger.info('Run was already complete');
                     
                 else:
