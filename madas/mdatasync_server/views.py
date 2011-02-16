@@ -244,7 +244,7 @@ def retrievePathsForFiles(request, *args):
                 logger.debug('Finding runsamples for run')
                 
                 if not syncold and run.state == RUN_STATES.COMPLETE[0]:
-                    logger.info('Run was already complete');
+                    logger.info('Run was already complete')
                     
                 else:
                     runsamples = RunSample.objects.filter(run = run)
