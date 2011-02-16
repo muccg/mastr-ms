@@ -24,7 +24,7 @@ class Preferences(wx.Dialog):
         # creation, and then we create the GUI object using the Create
         # method.
 
-        self.preference_keys = ['localdir', 'user', 'updateurl', 'loglevel']
+        self.preference_keys = ['localdir', 'user', 'updateurl', 'loglevel', 'syncold']
 
         pre = wx.PreDialog()
         pre.SetExtraStyle(wx.DIALOG_EX_CONTEXTHELP)
@@ -82,9 +82,21 @@ class Preferences(wx.Dialog):
         for key in self.preference_keys:
             if self.config.getShowVar(key):
                 box = wx.BoxSizer(wx.HORIZONTAL)
-                if key == 'localdir':
+                if key == 'syncold':
+                    ctrl = wx.CheckBox(self, -1, "Sync Completed")
+                    self.Bind(wx.EVT_CHECKBOX, self.toggleSyncChoose, ctrl)
+                    #populate the checkbox with the current value
+                    val = self.config.getValue(key)
+                    if val:
+                        ctrl.SetValue(wx.CHK_CHECKED)
+                    else:
+                        ctrl.SetValue(wx.CHK_UNCHECKED)
+                    ctrl.SetHelpText(self.config.getHelpText(key))    
+                    box.Add(ctrl, 1, wx.ALIGN_RIGHT|wx.ALL, border=0)    
+                elif key == 'localdir':
                     ctrl = filebrowse.DirBrowseButton(self, -1, size=(450, -1), changeCallback = None, labelText=self.config.getFormalName(key), startDirectory = str(self.config.getValue(key)) )
                     ctrl.SetValue(str(self.config.getValue(key)) )
+                    ctrl.SetHelpText(self.config.getHelpText(key))
                     box.Add(ctrl, 1, wx.ALIGN_RIGHT|wx.ALL, border=0)
                 elif key == 'loglevel':
                     levelslist = [
@@ -119,6 +131,7 @@ class Preferences(wx.Dialog):
                     if n != wx.NOT_FOUND:
                         ctrl.Select(n)
                     label = wx.StaticText(self, -1, self.config.getFormalName(key))
+                    ctrl.SetHelpText(self.config.getHelpText(key))
                     box.Add(label, 0, wx.ALIGN_LEFT| wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=0)
                     box.Add(ctrl, 1, wx.ALIGN_RIGHT|wx.ALL, border=0 )
                 else: 
@@ -156,6 +169,11 @@ class Preferences(wx.Dialog):
         self.SetSizer(sizer)
         sizer.Fit(self)
 
+
+    def toggleSyncChoose(self, event):
+        #Set the value of the checkbox to whatever the opposite of the current config value is.
+        currentvalue = self.config.getValue('syncold')
+        self.config.setValue('syncold', not currentvalue)
 
     def logLevelChoose(self, event):
         #self.log('Logging level set to: %s (%s)' % (event.GetString(), plogging.LoggingLevels.getByName(event.GetString()).value ) )
