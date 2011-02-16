@@ -203,7 +203,7 @@ def retrievePathsForFiles(request, *args):
         porganisation = simplejson.loads(request.POST.get('organisation', ''))
         psitename= simplejson.loads(request.POST.get('sitename', ''))
         pstation = simplejson.loads(request.POST.get('stationname', ''))
-        syncold = simplejson.loads(request.POST.get('syncold', False)) #defaults to false
+        syncold = simplejson.loads(request.POST.get('syncold', 'false')) #defaults to false
 
         logger.debug( 'Post var files passed through was: %s' % ( pfiles) )
         logger.debug( 'Post var organisation passed through was: %s' % ( porganisation) )
