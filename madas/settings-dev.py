@@ -10,9 +10,6 @@ if not os.environ.has_key('PROJECT_DIRECTORY'):
 from appsettings.default_dev import *
 from appsettings.mastrms.dev import *
 
-#fake chmod settings - dont check in!
-#CHMOD_USER = 'bpower'
-#CHMOD_GROUP = 'bpower'
 
 
 LOGS = ['mdatasync_server_log']
