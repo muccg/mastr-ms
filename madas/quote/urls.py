@@ -20,6 +20,7 @@ urlpatterns = patterns(
     (r'^quote/list', 'madas.quote.views.listQuotes', {'SSL':True}),
     (r'^quote/history', 'madas.quote.views.history', {'SSL':True}),
     (r'^quote/load', 'madas.quote.views.load', {'SSL':True}),
+    (r'^quote/listNeedsAttention', 'madas.quote.views.listQuotesRequiringAttention', {'SSL':True}),
     (r'^quote/formalload', 'madas.quote.views.formalLoad', {'SSL':True}),
     (r'^quote/formalsave', 'madas.quote.views.formalSave', {'SSL':True}),
     (r'^quote/formalreject', 'madas.quote.views.formalReject', {'SSL':True}),

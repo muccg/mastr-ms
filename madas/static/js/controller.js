@@ -44,6 +44,7 @@ MA.ChangeMainContent = function(contentName, paramArray){
                 break;
             }
             //default
+            MA.DashboardInit();
             Ext.getCmp('center-panel').layout.setActiveItem('dashboard-panel'); 
             break;
 
@@ -265,7 +266,7 @@ MA.InitApplication = function(appSecureUrl, username, mainContentFunction, param
                 id:'center-panel',
                 layout: 'card',
                 activeItem:0,
-                items: [MA.DashboardCmp, MA.LoginCmp, MA.RegistrationCmp, MA.NotAuthorizedCmp, MA.AdminUserEditCmp, 
+                items: [MA.LoginCmp, MA.RegistrationCmp, MA.NotAuthorizedCmp, MA.AdminUserEditCmp, 
                         MA.UserEditCmp, MA.ForgotPasswordCmp, MA.ResetPasswordCmp, MA.NodeManagementCmp,
                         MA.OrgManagementCmp,
                         MA.RequestQuoteCmp, MA.QuoteRequestEditCmp, MA.ViewFormalCmp,
@@ -287,9 +288,9 @@ MA.InitApplication = function(appSecureUrl, username, mainContentFunction, param
 
 MA.Message = function(paramArray) {
 
-    Ext.Msg.alert("", paramArray['message']);
+    Ext.Msg.alert("", paramArray.message);
 
-}
+};
 
 /**
  * madasAjaxMetadataProcess
@@ -325,4 +326,4 @@ MA.AjaxMetadataProcess = function(ajaxData) {
    
    return true;
 
-}
+};

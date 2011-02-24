@@ -254,6 +254,7 @@ def jsonResponse(request, *args):
 
     a['isAdmin'] = request.session.get('isAdmin', False)
     a['isNodeRep'] = request.session.get('isNodeRep', False)
+    a['isClient'] = request.session.get('isClient', False)
 
     #### response 'items' ####    
     resp = {}

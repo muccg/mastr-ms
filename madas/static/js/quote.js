@@ -212,7 +212,7 @@ MA.QuoteRequestListInit = function(){
         });
     var editHandler = function(el, ev) {
         if (selectionModel.hasSelection()) {
-            MA.Authorize('quote:edit', [selectionModel.getSelected().data['id']]);
+            MA.Authorize('quote:edit', [selectionModel.getSelected().data.id, 'quote:list']);
         }
     };
     var topToolbar = new Ext.Toolbar({
@@ -222,12 +222,12 @@ MA.QuoteRequestListInit = function(){
         });
     var selectionModel = new Ext.grid.RowSelectionModel({ singleSelect: true });
     var checkBoxRenderer = function (val){
-        if(val == true){
+        if(val === true){
             return '*';
         } else {
             return '';
         }
-    }
+    };
     var colModel = new Ext.grid.ColumnModel([
         {header: 'ID', align : 'left', sortable: true, dataIndex: 'id', width:35 },
         {header: 'Unread', align:'center', sortable: true, dataIndex: 'unread', renderer: checkBoxRenderer, width:35 },
@@ -252,12 +252,12 @@ MA.QuoteRequestListInit = function(){
         tbar           : topToolbar,
         trackMouseOver : false,
         plugins:[new Ext.ux.grid.Search({
-             mode:'local'
-            ,iconCls:false
-            ,dateFormat:'m/d/Y'
-            ,minLength:0
-            ,width:150
-            ,position:'top'
+             mode:'local',
+            iconCls:false,
+            dateFormat:'m/d/Y',
+            minLength:0,
+            width:150,
+            position:'top'
         })]
     });
     selectionModel.on('selectionchange', function() { var editBtn = Ext.getCmp('quoterequestsEditBtn'); if (selectionModel.hasSelection()) { editBtn.enable(); } else { editBtn.disable(); } } );
@@ -383,7 +383,7 @@ MA.QuoteRequestListInit = function(){
                 if (list.getSelectionCount() > 0) {
                     sel = list.getSelectedRecords()[0];
                     list.clearSelections(true);
-                    MA.Authorize('quote:viewformal', {"qid" : sel.data['quoterequestid']});
+                    MA.Authorize('quote:viewformal', {"qid" : sel.data.quoterequestid});
                 }
             }
         },
@@ -418,13 +418,16 @@ MA.QuoteRequestListInit = function(){
     
     selectionModel.on('selectionchange', function(sm) { 
         var rec = sm.getSelected();
+        var dataurl;
+        var madasReader;
+        var dataStore;
     
         if (Ext.isDefined(rec)) {
             rightPanel.enable();
             
-            var dataurl = MA.BaseUrl + "quote/listFormal/" + rec.get("id");
+            dataurl = MA.BaseUrl + "quote/listFormal/" + rec.get("id");
                 
-            var madasReader = new Ext.data.JsonReader({
+            madasReader = new Ext.data.JsonReader({
                 root            : 'response.value.items',
                 versionProperty : 'response.value.version',
                 totalProperty   : 'response.value.total_count'
@@ -438,7 +441,7 @@ MA.QuoteRequestListInit = function(){
                     { name: 'status', sortType: Ext.data.SortTypes.asText }
                 ]);
                 
-            var dataStore = new Ext.data.Store({
+            dataStore = new Ext.data.Store({
                 autoLoad   : true,
                 reader     : madasReader,
                 sortInfo   : {field: 'created', direction: 'DESC'},
@@ -464,7 +467,12 @@ MA.QuoteRequestListInit = function(){
 
 MA.QuoteRequestEditInit = function (paramArray) {
     var id = paramArray[0];
+    var returnTo = 'dashboard';
+    if (paramArray.length > 1) {
+        returnTo = paramArray[1];
+    }
     var quoteRequestEditCmp = Ext.getCmp('quoterequestedit-panel');
+    quoteRequestEditCmp.returnTo = returnTo;
     var formalQuoteCmp = Ext.getCmp('formalquoteedit-panel');
 
     Ext.getCmp('quoterequestedit-panel').getForm().reset();
@@ -493,7 +501,7 @@ MA.QuoteRequestEditInit = function (paramArray) {
 
 
 MA.QuoteRequestEditLoaded = function () {
-	if (Ext.getCmp('attachment').value == null || Ext.getCmp('attachment').value == '') {
+	if (Ext.getCmp('attachment').value === null || Ext.getCmp('attachment').value === '') {
 		Ext.getCmp('downloadattachbutton').setText('no attachments');
 		Ext.getCmp('downloadattachbutton').disable();
 	} else {
@@ -501,7 +509,7 @@ MA.QuoteRequestEditLoaded = function () {
 		Ext.getCmp('downloadattachbutton').enable();
 	}
 	
-}
+};
 
 
 MA.QuoteRequestEditCmp =
@@ -655,9 +663,10 @@ MA.QuoteRequestEditCmp =
                  {
                  text: 'Go Back',
                  handler: function(){
-                        Ext.getCmp('quoterequestedit-panel').getForm().reset();
+                        var quoteRequestEditCmp = Ext.getCmp('quoterequestedit-panel');
+                        quoteRequestEditCmp.getForm().reset();
                         MA.QuoteEditVisualToggle(false);
-                        MA.ChangeMainContent('quote:list');
+                        MA.ChangeMainContent(quoteRequestEditCmp.returnTo);
                     }
                  },
                  {//this could be an Edit Details button, but functionality has been temporarily limited for practical purposes
@@ -697,7 +706,7 @@ MA.QuoteRequestEditCmp =
 
                                     //display a success alert that auto-closes in 5 seconds
                                     Ext.Msg.alert("Quote Request Saved", "(this message will auto-close in 5 seconds)");
-                                    setTimeout("Ext.Msg.hide()", 5000);
+                                    setTimeout(Ext.Msg.hide, 5000);
 
                                     //load up the menu and next content area as declared in response
                                     MA.ChangeMainContent(action.result.mainContentFunction);
@@ -781,7 +790,7 @@ MA.QuoteRequestEditCmp =
     
                                     //display a success alert that auto-closes in 5 seconds
                                     Ext.Msg.alert("Formal Quote Saved", "(this message will auto-close in 5 seconds)");
-                                    setTimeout("Ext.Msg.hide()", 5000);
+                                    setTimeout(Ext.Msg.hide, 5000);
 
                                     //load up the menu and next content area as declared in response
                                     MA.ChangeMainContent(action.result.mainContentFunction);
@@ -839,8 +848,7 @@ MA.RenderQuoteHistory = function(el, success, response, options) {
             '<div style="color:#999999;">Comment:</div>',
             '{comment}',
         '</div>',
-        '</tpl>'
-    );
+        '</tpl>');
     t.overwrite(el, Ext.util.JSON.decode(response.responseText));   
     
     window.setTimeout("MA.QuoteRequestEditLoaded()", 1000);
@@ -893,12 +901,12 @@ MA.QuoteRequestListAllInit = function(){
         });
     var selectionModel = new Ext.grid.RowSelectionModel({ singleSelect: true });
     var checkBoxRenderer = function (val){
-        if(val == true){
+        if(val === true){
             return '*';
         } else {
             return '';
         }
-    }
+    };
     var colModel = new Ext.grid.ColumnModel([
         {header: 'ID', align : 'left', sortable: true, dataIndex: 'id', width:25 },
         {header: 'Unread', align:'center', sortable: true, dataIndex: 'unread', renderer: checkBoxRenderer, width:35 },
@@ -924,12 +932,12 @@ MA.QuoteRequestListAllInit = function(){
         tbar           : topToolbar,
         trackMouseOver : false,
         plugins:[new Ext.ux.grid.Search({
-             mode:'local'
-            ,iconCls:false
-            ,dateFormat:'m/d/Y'
-            ,minLength:0
-            ,width:150
-            ,position:'top'
+            mode:'local',
+            iconCls:false,
+            dateFormat:'m/d/Y',
+            minLength:0,
+            width:150,
+            position:'top'
         })]
     });
     /**
@@ -964,8 +972,8 @@ MA.FormalQuoteUserListInit = function(){
     var viewHandler = function(grid, rowIndex, e) {
         var selectionModel = grid.getSelectionModel();
     
-        if (selectionModel.hasSelection() && selectionModel.getSelected().data['quoterequestid'] !== '') {
-            MA.Authorize('quote:viewformal', {"qid" : selectionModel.getSelected().data['quoterequestid']});
+        if (selectionModel.hasSelection() && selectionModel.getSelected().data.quoterequestid !== '') {
+            MA.Authorize('quote:viewformal', {"qid" : selectionModel.getSelected().data.quoterequestid});
         }
     };
     
@@ -991,12 +999,12 @@ MA.FormalQuoteUserListInit = function(){
         });
     var selectionModel = new Ext.grid.RowSelectionModel({ singleSelect: true });
     var checkBoxRenderer = function (val){
-        if(val == true){
+        if(val === true){
             return '*';
         } else {
             return '';
         }
-    }
+    };
     var colModel = new Ext.grid.ColumnModel([
         {header: 'ID', align : 'left', sortable: true, dataIndex: 'id', width:25 },
         {header: 'QID', align : 'left', sortable: true, dataIndex: 'quoterequestid', width:25 },
@@ -1019,12 +1027,12 @@ MA.FormalQuoteUserListInit = function(){
         tbar           : topToolbar,
         trackMouseOver : false,
         plugins:[new Ext.ux.grid.Search({
-             mode:'local'
-            ,iconCls:false
-            ,dateFormat:'m/d/Y'
-            ,minLength:0
-            ,width:150
-            ,position:'top'
+            mode:'local',
+            iconCls:false,
+            dateFormat:'m/d/Y',
+            minLength:0,
+            width:150,
+            position:'top'
         })]
     });
     selectionModel.on('selectionchange', function() { var viewBtn = Ext.getCmp('fquoListViewBtn'); if (selectionModel.hasSelection()) { viewBtn.enable(); } else { viewBtn.disable(); } } );
@@ -1058,11 +1066,11 @@ MA.FquoValidatePassword = function (textfield, event) {
         confirmEl.markInvalid('Password and Confirm Password must match');
         submitEl.disable();
         return false;
-    };
+    }
 };
 
 MA.ViewFormalInit = function(paramArray){
-    var id = paramArray["qid"];
+    var id = paramArray.qid;
     var quoteRequestEditCmp = Ext.getCmp('fquouserdetails-panel');
     var formalQuoteCmp = Ext.getCmp('formalquoteview-panel');
 
