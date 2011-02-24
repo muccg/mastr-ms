@@ -196,6 +196,35 @@ def sendRequest(request, *args):
     print '*** quote:sendRequest: exit ***'
     return jsonResponse(request, [])       
 
+def listQuotesRequiringAttention(request):
+    '''Used by dashboard to list the quotes that aren't Completed and don't have
+       a formal quote yet.'''
+
+    # TODO return unauth
+    assert 'Administrators' in g or 'Node Reps' in g
+   
+    qs = Quoterequest.objects.filter(completed=False,formalquote__id=None)
+    import utils
+    g = utils.getGroupsForSession(request)
+    if 'Node Reps' in g and 'Administrators' not in g:
+        from madas.users import views
+        print '\tcalling'
+        nodelist = views.getNodeMemberships(g)
+        node = nodelist[0]
+        qs.filter(tonode=node) 
+
+    results = []
+    qs.values('id', 'unread', 'firstname', 'lastname', 'requesttime', 'tonode', 'emailaddressid__emailaddress' )
+    for ql in quoteslist:
+            ql['email'] = ql['emailaddressid__emailaddress']
+            del ql['emailaddressid__emailaddress']
+            results.append(ql)
+
+    results = []
+
+    setRequestVars(request, items=resultsset, totalRows=len(resultsset), success=True, authenticated=True, authorized=True)
+    return jsonResponse(request, [])
+
 
 def listQuotes(request, *args):
     '''This corresponds to Madas Dashboard->Quotes->View Quote Requests
@@ -938,7 +967,7 @@ def authorize(request, module='/', perms = [], internal = False):
         #except Exception, e:
         #    print '\tException: Could not deserialise params (%s): %s' % (params, str(e))
         #    params = None
-    redirectMainContentFunction = request.session.get('redirectMainContentFunction', None)
+    redirectMainContentFunction = request.session.get('redirectMainContentFunction')
     if redirectMainContentFunction is not None:
         print '\tUsing session params ', redirectMainContentFunction
         cachedparams = request.session.get('params', None)
@@ -970,6 +999,7 @@ def authorize(request, module='/', perms = [], internal = False):
     print '\tmodule: %s, perms: %s, internal: %s, basepath: %s' % (str(module), str(perms), str(internal), str(wsgibase()))
     #Check the current user status
     authenticated = request.user.is_authenticated()   
+    print request.user
     print '\tuser.is_authenticated was: ', authenticated
   
     #If they are authenticated, make sure they have their groups cached in the session
@@ -1131,10 +1161,10 @@ def serveIndex(request, *args, **kwargs):
         else:
             params = request.session.get('params', '')
 
-    #print 'serve index...' 
+    print 'serve index...' 
     #print settings.APP_SECURE_URL
     #print request.username
-    #print request.session.get('mainContentFunction', '')
+    #print request.session.get('mainContentFunction', 'AAAAAAAA')
     request.params = params
     from django.utils import simplejson
     m = simplejson.JSONEncoder()
@@ -1145,8 +1175,8 @@ def serveIndex(request, *args, **kwargs):
     else:
         sendparams = ''
     
-    mcf = request.session.get('redirectMainContentFunction', 'dashboard')
-    
+    mcf = request.session.get('redirectMainContentFunction')
+    if mcf is None: mcf = 'dashboard'
     request.session['redirectMainContentFunction'] = None
     
     return render_mako('index.mako', 

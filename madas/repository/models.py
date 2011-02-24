@@ -342,6 +342,14 @@ class RUN_STATES:
     IN_PROGRESS = (1, u"In Progress")
     COMPLETE = (2, u"Complete")
 
+    @staticmethod
+    def name(state_id):
+        for x in (RUN_STATES.NEW, RUN_STATES.IN_PROGRESS, RUN_STATES.COMPLETE):
+            if x[0] == state_id:
+                return x[1]
+        return ''
+        
+
 class Run(models.Model):
     
     RUN_STATES_TUPLES = (

@@ -15,6 +15,7 @@ from json_util import makeJsonFriendly
 from madas.utils import setRequestVars, jsonResponse, zipdir
 from madas.repository.permissions import user_passes_test
 from django.db.models import Q
+from datetime import datetime, timedelta
 
 
 @staff_member_required
@@ -305,6 +306,90 @@ def records(request, model, field, value):
     output = makeJsonFriendly(output)
     return HttpResponse(json.dumps(output))
 
+def recent_experiments(request):
+     ### TODO why do we need this, we'll get a 403 from decorator now if not logged in and not in group - ABM
+    authenticated = request.user.is_authenticated()
+    if not authenticated == True:
+        return jsonResponse(request, [])
+    ### End Authorisation Check ###
+    
+    # basic json that we will fill in
+    output = {'metaData': { 'totalProperty': 'results',
+        'root': 'rows',
+            'id': 'id',
+                'successProperty': 'success',
+                    'fields': []
+                        },
+                            'results': 0,
+                                'authenticated': True,
+                                    'authorized': True,
+                                        'success': True,
+                                            'rows': []
+                                            }
+    output['metaData']['fields'].append({'name':'id'})
+    output['metaData']['fields'].append({'name':'title'})
+    output['metaData']['fields'].append({'name':'status'})
+    user = request.user
+    ninety_days_ago = datetime.now() - timedelta(90)
+    experiments = Experiment.objects.filter(
+        Q(project__client=user) | 
+        Q(project__managers=user) | 
+        Q(users=user)
+        ).filter(created_on__gt=ninety_days_ago) 
+    for experiment in experiments:
+        output['rows'].append({
+            'id': experiment.id,
+            'title': experiment.title,
+            'status': experiment.status.name
+        })
+
+    output['results'] = len(output['rows'])
+            
+    output = makeJsonFriendly(output)
+    return HttpResponse(json.dumps(output))
+
+def recent_runs(request):
+     ### TODO why do we need this, we'll get a 403 from decorator now if not logged in and not in group - ABM
+    authenticated = request.user.is_authenticated()
+    if not authenticated == True:
+        return jsonResponse(request, [])
+    ### End Authorisation Check ###
+    
+    # basic json that we will fill in
+    output = {'metaData': { 'totalProperty': 'results',
+        'root': 'rows',
+            'id': 'id',
+                'successProperty': 'success',
+                    'fields': []
+                        },
+                            'results': 0,
+                                'authenticated': True,
+                                    'authorized': True,
+                                        'success': True,
+                                            'rows': []
+                                            }
+    output['metaData']['fields'].append({'name':'id'})
+    output['metaData']['fields'].append({'name':'title'})
+    output['metaData']['fields'].append({'name':'method'})
+    output['metaData']['fields'].append({'name':'machine'})
+    output['metaData']['fields'].append({'name':'state'})
+    user = request.user
+    ninety_days_ago = datetime.now() - timedelta(90)
+    runs = Run.objects.filter(creator=user, created_on__gt=ninety_days_ago) 
+    for run in runs:
+        output['rows'].append({
+            'id': run.id,
+            'title': run.title,
+            'machine': str(run.machine),
+            'method': str(run.method),
+            'state': RUN_STATES.name(run.state)
+        })
+
+    output['results'] = len(output['rows'])
+            
+    output = makeJsonFriendly(output)
+    return HttpResponse(json.dumps(output))
+
 
 @staff_member_required
 @user_passes_test(lambda u: (u and u.groups.filter(name='mastaff')) or False)
@@ -450,12 +535,15 @@ def recordsClientFiles(request):
     
             current_exp['children'].append(file)
             
-        output.append(current_exp)
+        if current_exp['id'] != None:
+            output.append(current_exp)
         
         return HttpResponse(json.dumps(output))
     else:
         # parse the node id as something useful
         # it will be in the format: id/path/path
+    
+        print args.get('node')
         pathbits = args.get('node').split('/')
 
         print 'pathbits[0] is ' + pathbits[0]

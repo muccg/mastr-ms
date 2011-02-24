@@ -19,6 +19,8 @@ MA.LoginExecute = function(paramArray){
                             Ext.getCmp('login-panel').getForm().submit(
                                 {   successProperty: 'success',        
                                     success: function (form, action) {
+                                        var resultContent;
+                                        var params;
                                         if (action.result.success === true) {
                                             //Ext.Msg.alert ('Result: ' + action.result.toString())
                                             form.reset(); 
@@ -27,8 +29,8 @@ MA.LoginExecute = function(paramArray){
                                                 Ext.getCmp('userMenu').setText('User: '+action.result.username);
                                             }
                                             
-                                            var resultContent = action.result.mainContentFunction;
-                                            var params = action.result.params;
+                                            resultContent = action.result.mainContentFunction;
+                                            params = action.result.params;
                                             if (MA.PostLoginParamArray) {
                                                 resultContent = MA.PostLoginParamArray[0];
                                                 params = MA.PostLoginParamArray[1];
@@ -39,7 +41,7 @@ MA.LoginExecute = function(paramArray){
                                     },
                                     failure: function (form, action) {
                                         Ext.Msg.alert('Login failure', '(this dialog will auto-close in 3 seconds)');
-                                        setTimeout('Ext.Msg.hide()', 3000);
+                                        setTimeout(Ext.Msg.hide, 3000);
                                     }
                                 });
                         };
@@ -56,7 +58,7 @@ MA.ForgotPasswordExecute = function(){
                                     },
                                     failure: function (form, action) {
                                         Ext.Msg.alert('Submit failure', '(this dialog will auto-close in 3 seconds)');
-                                        setTimeout('Ext.Msg.hide()', 3000);
+                                        setTimeout(Ext.Msg.hide, 3000);
                                     }
                                 });
                         };
@@ -162,8 +164,9 @@ MA.NotAuthorizedCmp = { id: 'notauthorized-panel', title: 'Not Authorized', html
  * used to check if the user is still logged in, and if they can access the requested view
  */
 MA.Authorize = function(requestedView, params) {
-    if (requestedView == 'notauthorized')
+    if (requestedView === 'notauthorized') {
         return MA.ChangeMainContent(requestedView, params);
+    }
     
     //the module we need to auth against is the first part of the requestedView
     //ie admin/adminrequest
@@ -191,11 +194,13 @@ MA.Authorize = function(requestedView, params) {
                 Ext.getCmp('userMenu').setText('User: '+action.result.username);
                 MA.IsAdmin = action.result.isAdmin;
                 MA.IsNodeRep = action.result.isNodeRep;
+                MA.IsClient = action.result.isClient;
                 MA.IsLoggedIn = true;
             }
             if (! action.result.authenticated) {
                 MA.IsAdmin = false;
                 MA.IsNodeRep = false;
+                MA.IsClient = false;
                 MA.IsLoggedIn = false;
                 Ext.getCmp('userMenu').setText('User: none');
             }
@@ -243,7 +248,7 @@ MA.LogoutInit = function(){
                 MA.IsLoggedIn = false;
             
                 Ext.Msg.alert('Successfully logged out', '(this dialog will auto-close in 3 seconds)');
-                setTimeout('Ext.Msg.hide()', 3000);
+                setTimeout(Ext.Msg.hide, 3000);
             
                 //load up the menu and next content area as declared in response
                 MA.ChangeMainContent(action.result.mainContentFunction);
@@ -251,7 +256,7 @@ MA.LogoutInit = function(){
         },
         failure: function (form, action) {
             Ext.Msg.alert('Logout failure', '(this dialog will auto-close in 3 seconds)');
-            setTimeout('Ext.Msg.hide()', 3000);
+            setTimeout(Ext.Msg.hide, 3000);
         }
     };
 
@@ -279,7 +284,7 @@ MA.ResetPasswordValidatePassword = function (textfield, event) {
         confirmEl.markInvalid('Password and Confirm Password must match');
         submitEl.disable();
         return false;
-    };
+    }
 };
 
 MA.ResetPasswordInit = function() {
@@ -366,7 +371,7 @@ MA.ResetPasswordCmp = {id:'resetpassword-container-panel',
                                             
                                             //display a success alert that auto-closes in 5 seconds
                                             Ext.Msg.alert("Password reset successfully", "(this message will auto-close in 5 seconds)");
-                                            setTimeout("Ext.Msg.hide()", 5000);
+                                            setTimeout(Ext.Msg.hide, 5000);
                                             
                                             //load up the menu and next content area as declared in response
                                             MA.ChangeMainContent(action.result.mainContentFunction);

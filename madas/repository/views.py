@@ -171,9 +171,14 @@ def redirectMain(request, *args, **kwargs):
     if kwargs.has_key('params'):
         request.session['params'] = kwargs['params']    
         request.session['params'].insert(0, red_str)
+        print "Params: " + str(request.session['params'])
 
-    print 'redirectMain is redirecting to ', siteurl(request)
-    return HttpResponseRedirect(siteurl(request))
+    site = siteurl(request)
+    if '/repo' in request.META['PATH_INFO']:
+        site += 'repo/'
+
+    print 'redirectMain is redirecting to ', site
+    return HttpResponseRedirect(site)
 
     
 def serveIndex(request, *args, **kwargs):
@@ -196,11 +201,11 @@ def serveIndex(request, *args, **kwargs):
 
             #parse the qs args
             argsdict = {}
-            qsargs = strip(qsargs, '?') #strip off ?
-            vars = split(qsargs, '&')
+            qsargs = qsargs.strip('?') 
+            vars = qsargs.split('&')
             for var in vars:
-                if len(split(var, '=')) > 1:
-                    (key,val) = split(var, '=')
+                if len(var.split('=')) > 1:
+                    (key,val) = var.split('=')
                     if key is not None and val is not None:
                         argsdict[key] = val
 

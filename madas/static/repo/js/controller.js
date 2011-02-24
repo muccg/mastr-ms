@@ -39,7 +39,7 @@ MA.CRUDSomething = function(remainderURL, params, callbackfn) {
     crudStore.load();
 };
 
-function _ExperimentController() {
+function ExperimentController() {
     var self = this;
 
     this.init = function() {
@@ -60,6 +60,7 @@ function _ExperimentController() {
     
     this.blur = function(invoker) {
 
+        var saver;
         var expId = self.currentId();
         var expName = Ext.getCmp("experimentName").getValue();
         var expDescription = Ext.getCmp("experimentDescription").getValue();
@@ -88,7 +89,7 @@ function _ExperimentController() {
     
         if (expId === 0) {
             
-            var saver = new Ajax.Request(wsBaseUrl + 'create/experiment/?title='+encodeURIComponent(expName)+'&description='+encodeURIComponent(expDescription)+'&comment='+encodeURIComponent(expComment)+'&status_id=2&formal_quote_id='+encodeURIComponent(expFQuoteId)+'&job_number='+encodeURIComponent(expJobNumber)+'&project_id='+encodeURIComponent(MA.currentProjectId)+'&status_id='+encodeURIComponent(expStatus), 
+            saver = new Ajax.Request(wsBaseUrl + 'create/experiment/?title='+encodeURIComponent(expName)+'&description='+encodeURIComponent(expDescription)+'&comment='+encodeURIComponent(expComment)+'&status_id=2&formal_quote_id='+encodeURIComponent(expFQuoteId)+'&job_number='+encodeURIComponent(expJobNumber)+'&project_id='+encodeURIComponent(MA.currentProjectId)+'&status_id='+encodeURIComponent(expStatus), 
                                                  { 
                                                  asynchronous:true, 
                                                  evalJSON:'force',
@@ -96,7 +97,7 @@ function _ExperimentController() {
                                          onFailure:    MA.DSLoadException
                                          });
         } else {
-            var saver = new Ajax.Request(wsBaseUrl + 'update/experiment/'+expId+'/?title='+encodeURIComponent(expName)+'&description='+encodeURIComponent(expDescription)+'&comment='+encodeURIComponent(expComment)+'&status_id=2&formal_quote_id='+encodeURIComponent(expFQuoteId)+'&job_number='+encodeURIComponent(expJobNumber)+'&project_id='+encodeURIComponent(MA.currentProjectId)+'&status_id='+encodeURIComponent(expStatus), 
+            saver = new Ajax.Request(wsBaseUrl + 'update/experiment/'+expId+'/?title='+encodeURIComponent(expName)+'&description='+encodeURIComponent(expDescription)+'&comment='+encodeURIComponent(expComment)+'&status_id=2&formal_quote_id='+encodeURIComponent(expFQuoteId)+'&job_number='+encodeURIComponent(expJobNumber)+'&project_id='+encodeURIComponent(MA.currentProjectId)+'&status_id='+encodeURIComponent(expStatus), 
                                          { 
                                          asynchronous:true, 
                                          evalJSON:'force',
@@ -177,7 +178,7 @@ function _ExperimentController() {
                                              var massagedData = [];
                                              
                                              for (var idx = 0; idx < data.length; idx++) {
-                                                massagedData[idx] = [data[idx]['key'], '#'+data[idx]['key']+'  '+data[idx]['value']];
+                                                massagedData[idx] = [data[idx].key, '#'+data[idx].key + '  ' + data[idx].value];
                                              }
     
                                              //ensure that there is a blank entry
@@ -285,7 +286,7 @@ function _ExperimentController() {
         var et = Ext.getCmp("experimentTitle");
         var na = Ext.getCmp("expNav");
         
-        if (na.getSelectionCount() == 0 || index != null) {
+        if (na.getSelectionCount() === 0 || index !== null) {
             na.select(index,index,false);
         }
         
@@ -296,7 +297,7 @@ function _ExperimentController() {
             na.enable();
         }
                 
-        if (self.currentId() == 0) {
+        if (self.currentId() === 0) {
             et.setTitle('New Experiment');
         } else {
             et.setTitle('Experiment: '+en.getValue());
@@ -327,7 +328,9 @@ function _ExperimentController() {
     };
     
     this.selectionChangeHandler = function(list, nodes) {
-        if (list.getSelectionCount() == 0) {
+        var currItem;
+        var blurFn;
+        if (list.getSelectionCount() === 0) {
             return;
         }
      
@@ -343,16 +346,16 @@ function _ExperimentController() {
             MA.Blur({'init':r.get("init"), 'index':index});
             MA.skipBlur = false;
         } else {
-            var currItem = Ext.StoreMgr.get("navDS").getAt(Ext.currentExperimentNavItem);
-            var blurFn = currItem.get("blur");
+            currItem = Ext.StoreMgr.get("navDS").getAt(Ext.currentExperimentNavItem);
+            blurFn = currItem.get("blur");
             if (blurFn !== null) {
                 blurFn({'init':r.get("init"), 'index':index});
             }
         }
     };    
-};
+}
 
-MA.ExperimentController = new _ExperimentController();
+MA.ExperimentController = new ExperimentController();
 
 MA.LoadOrganismInfo = function(typeId, id) {
     if (typeId == 2) {//plant
@@ -585,7 +588,7 @@ items:[
  * madasInitApplication
  * initializes the main application interface and any required variables
  */
-MA.InitApplication = function() {
+MA.InitApplication = function(appSecureUrl, username, mainContentFunction, params) {
     //various global settings for Ext
     Ext.BLANK_IMAGE_URL = 'static/ext-3.3.0/resources/images/default/s.gif';
     Ext.QuickTips.init();
@@ -593,12 +596,18 @@ MA.InitApplication = function() {
     // turn on validation errors beside the field globally
     Ext.form.Field.prototype.msgTarget = 'side';
     
-    var username = "";
     MA.MenuRender(username);
 
     MA.InitUI();
  
     // the loginOverlay must be removed or else the rest of the UI fails to render   
+    var paramArray;
+    if (params) {
+        paramArray = params; //eval is evil
+    }
+
+    //alert(mainContentFunction);
+    //MA.Authorize(mainContentFunction, paramArray);
     MA.Authorize('dashboard:list', [], null );
 
     Ext.get("loginOverlay").remove();
