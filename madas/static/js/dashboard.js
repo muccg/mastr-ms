@@ -15,36 +15,26 @@
  * along with Madas.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-
-MA.DownloadClientFile = function(fileID) {
-    window.location = MA.BaseUrl + "ws/downloadClientFile/" + fileID;
-};
-
-function clientFileActionRenderer(val) {
-    return '<a href="#" onclick="MA.DownloadClientFile(\''+val+'\')">download</a>';
-}
-
-var selectionModel = new Ext.grid.RowSelectionModel({ 
-    singleSelect: true
-});
-
-MA.DashboardCreatePendingUserRequests = function() {
+MA.Dashboard.CreatePendingUserRequests = function() {
     var dataurl = MA.BaseUrl + "admin/adminrequests";
+    var selectionModel = new Ext.grid.RowSelectionModel({ 
+        singleSelect: true
+    });
     var madasReader = new MA.JsonReader({
-                                              root            : 'response.value.items',
-                                              versionProperty : 'response.value.version',
-                                              totalProperty   : 'response.value.total_count'
-                                              }, [
-                                                  { name: 'isClient', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'username', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'firstname', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'lastname', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'email', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'telephoneNumber', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'physicalDeliveryOfficeName', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'title', sortType : Ext.data.SortTypes.asText }
-                                                  ]);
+            root: 'response.value.items',
+            versionProperty: 'response.value.version',
+            totalProperty: 'response.value.total_count'
+        }, 
+        [
+            { name: 'isClient', sortType : Ext.data.SortTypes.asText },
+            { name: 'username', sortType : Ext.data.SortTypes.asText },
+            { name: 'firstname', sortType : Ext.data.SortTypes.asText },
+            { name: 'lastname', sortType : Ext.data.SortTypes.asText },
+            { name: 'email', sortType : Ext.data.SortTypes.asText },
+            { name: 'telephoneNumber', sortType : Ext.data.SortTypes.asText },
+            { name: 'physicalDeliveryOfficeName', sortType : Ext.data.SortTypes.asText },
+            { name: 'title', sortType : Ext.data.SortTypes.asText }
+        ]);
 
 
     function editUser(username) {
@@ -64,77 +54,58 @@ MA.DashboardCreatePendingUserRequests = function() {
     });
 
     return new Ext.Panel({
-
-    title:'Pending User Requests',
-    style:'padding:20px 20px 0px 20px',
-    id:'dashboard-pending-user-requests',
-    tbar: toolbar,
-    init: function() {
-        this.items.items[0].store.load();
-    },
-    items:[
-                {
-                    xtype:'grid',
-                    border: false,
-                    autoScroll: true,
-                    stripeRows: true,
-                    height: 110,
-                    autoExpandColumn: 'username',
-                    ds: new Ext.data.Store({
-                        id         : 'bSId',
-//                        autoLoad   : true,
-                        reader     : madasReader,
-                        sortInfo   : {field: 'lastname', direction: 'ASC'},
-                        url        : dataurl
-                    }),
-                    sm: selectionModel,
-                    listeners: {
-                        rowdblclick: function(grid, rowIndex, evt) {
-                            var record = grid.store.getAt(rowIndex);
-                            editUser(record.get('username'));
-                        }
-                    },
-
-                    columns: [
-                        {
-                            header: 'First Name',
-                            sortable: true,
-                            width: 100,
-                            dataIndex: 'firstname'
-                        },
-                        {
-                            header: 'Last Name',
-                            sortable: true,
-                            width: 100,
-                            dataIndex: 'lastname'
-                        },
-                        {
-                            id: 'username',
-                            header: 'Username',
-                            dataIndex: 'username'
-                        }
-                    ]
-              }
-       ]
+        title:'Pending User Requests',
+        style:'padding:20px 20px 0px 20px',
+        id:'dashboard-pending-user-requests',
+        tbar: toolbar,
+        init: function() {
+            this.items.items[0].store.load();
+        },
+        items:[{
+            xtype:'grid',
+            border: false,
+            autoScroll: true,
+            stripeRows: true,
+            height: 110,
+            autoExpandColumn: 'username',
+            ds: new Ext.data.Store({
+                id: 'bSId',
+                reader     : madasReader,
+                sortInfo   : {field: 'lastname', direction: 'ASC'},
+                url        : dataurl
+            }),
+            sm: selectionModel,
+            listeners: {
+                rowdblclick: function(grid, rowIndex, evt) {
+                    var record = grid.store.getAt(rowIndex);
+                    editUser(record.get('username'));
+                }
+            },
+            columns: [{
+                    header: 'First Name',
+                    sortable: true,
+                    width: 100,
+                    dataIndex: 'firstname'
+                },{
+                    header: 'Last Name',
+                    sortable: true,
+                    width: 100,
+                    dataIndex: 'lastname'
+                },{
+                    id: 'username',
+                    header: 'Username',
+                    dataIndex: 'username'
+                }
+            ]
+        }]
     });
    };
 
-
-
-
-                            
-var checkBoxRenderer = function (val){
-        if(val === true){
-            return '*';
-        } else {
-            return '';
-        }
-};
-
-
-
-MA.DashboardCreateQuotesRequiringAttention = function() {
-    var madasReader2 = new Ext.data.JsonReader({
+MA.Dashboard.CreateQuotesRequiringAttention = function() {
+    var selectionModel = new Ext.grid.RowSelectionModel({ 
+        singleSelect: true
+    });
+    var madasReader = new Ext.data.JsonReader({
         root            : 'response.value.items',
         versionProperty : 'response.value.version',
         totalProperty   : 'response.value.total_count'
@@ -152,7 +123,7 @@ MA.DashboardCreateQuotesRequiringAttention = function() {
             { name: 'country', sortType: Ext.data.SortTypes.asText}
         ]);
 
-    var dataurl2 = MA.BaseUrl + "quote/listNeedsAttention";
+    var dataurl = MA.BaseUrl + "quote/listNeedsAttention";
     var editQuote = function(quote_id) {
         MA.Authorize('quote:edit', [quote_id]);
     };
@@ -162,45 +133,41 @@ MA.DashboardCreateQuotesRequiringAttention = function() {
         }
     };
 
-    var toolbar2 = new Ext.Toolbar({
+    var toolbar = new Ext.Toolbar({
         items   : [
             { id: 'quoteEditBtn', text: 'Edit', handler: quoteEditHandler }
         ]
     });
 
     return new Ext.Panel({
-
-    title:'Quotes Requiring Attention',
-    style:'padding:20px 20px 0px 20px',
-    id:'dashboard-quotes-requiring-attention',
-    tbar: toolbar2,
-    init: function() {
-        this.items.items[0].store.load();
-    },
-    items:[
-                {
-                    xtype:'grid',
-                    border: false,
-                    autoScroll: true,
-                    stripeRows: true,
-                    height: 150,
-                    ds: new Ext.data.Store({
-                        id         : 'bSId',
-//                        autoLoad   : true,
-                        reader     : madasReader2,
-                        sortInfo   : {field: 'requesttime', direction: 'DESC'},
-                        url        : dataurl2
-                    }),
-                    sm: selectionModel,
-                    listeners: {
-                        rowdblclick: function(grid, rowIndex, evt) {
-                            var record = grid.store.getAt(rowIndex);
-                            editQuote(record.get('id'));
-                        }
-                    },
-
-                    columns: [
-                        {
+        title:'Quotes Requiring Attention',
+        style:'padding:20px 20px 0px 20px',
+        id:'dashboard-quotes-requiring-attention',
+        tbar: toolbar,
+        init: function() {
+            this.items.items[0].store.load();
+        },
+        items:[{
+            xtype:'grid',
+            border: false,
+            autoScroll: true,
+            stripeRows: true,
+            height: 150,
+            ds: new Ext.data.Store({
+                id         : 'bSId',
+                reader     : madasReader,
+                sortInfo   : {field: 'requesttime', direction: 'DESC'},
+                url        : dataurl
+            }),
+            sm: selectionModel,
+            listeners: {
+                rowdblclick: function(grid, rowIndex, evt) {
+                    var record = grid.store.getAt(rowIndex);
+                    editQuote(record.get('id'));
+                }
+            },
+            columns: [
+                       {
                             header: 'ID',
                             sortable: true,
                             width: 40,
@@ -210,7 +177,7 @@ MA.DashboardCreateQuotesRequiringAttention = function() {
                             header: 'Unread',
                             sortable: true,
                             width: 60,
-                            renderer: checkBoxRenderer,
+                            renderer: MA.Utils.GridCheckboxRenderer,
                             dataIndex: 'unread'
                         },
                         {
@@ -248,7 +215,10 @@ MA.DashboardCreateQuotesRequiringAttention = function() {
     });
    };
 
-MA.DashboardCreateRecentExperiments = function() {
+MA.Dashboard.CreateRecentExperiments = function() {
+    var selectionModel = new Ext.grid.RowSelectionModel({ 
+        singleSelect: true
+    });
     var madasReader = new Ext.data.JsonReader({
         root            : 'response.value.items',
         versionProperty : 'response.value.version',
@@ -276,60 +246,48 @@ MA.DashboardCreateRecentExperiments = function() {
     });
 
     return new Ext.Panel({
-
-    title:'Recent Experiments',
-    style:'padding:20px 20px 0px 20px',
-    id:'dashboard-recent-experiments',
-    //tbar: toolbar,
-    init: function() {
-        this.items.items[0].store.load();
-    },
-    items:[
-                {
-                    xtype:'grid',
-                    border: false,
-                    autoScroll: true,
-                    stripeRows: true,
-                    height: 150,
-                    ds: new Ext.data.Store({
-                        id         : 'bSId',
-                        reader     : madasReader,
-                        url        : dataurl
-                    }),
-                    sm: selectionModel,
-/*
-                    listeners: {
-                        rowdblclick: function(grid, rowIndex, evt) {
-                            var record = grid.store.getAt(rowIndex);
-                            editQuote(record.get('id'));
-                        }
-                    },
-*/
-                    columns: [
-                        {
-                            header: 'ID',
-                            sortable: true,
-                            width: 40,
-                            dataIndex: 'id'
-                        },
-                        {
-                            header: 'Title',
-                            width: 300,
-                            dataIndex: 'title'
-                        },
-                        {
-                            header: 'Status',
-                            sortable: true,
-                            width: 100,
-                            dataIndex: 'status'
-                        }
-                    ]
-              }
+        title:'Recent Experiments',
+        style:'padding:20px 20px 0px 20px',
+        id:'dashboard-recent-experiments',
+        init: function() {
+            this.items.items[0].store.load();
+        },
+        items:[{
+            xtype:'grid',
+            border: false,
+            autoScroll: true,
+            stripeRows: true,
+            height: 150,
+            ds: new Ext.data.Store({
+                id         : 'bSId',
+                reader     : madasReader,
+                url        : dataurl
+            }),
+            sm: selectionModel, 
+            columns: [{
+                    header: 'ID',
+                    sortable: true,
+                    width: 40,
+                    dataIndex: 'id'
+                },{
+                    header: 'Title',
+                    width: 300,
+                    dataIndex: 'title'
+                },{
+                    header: 'Status',
+                    sortable: true,
+                    width: 100,
+                    dataIndex: 'status'
+                }
+            ]}
        ]
     });
    };
 
-MA.DashboardCreateRecentRuns = function() {
+MA.Dashboard.CreateRecentRuns = function() {
+    var selectionModel = new Ext.grid.RowSelectionModel({ 
+        singleSelect: true
+    });
     var madasReader = new Ext.data.JsonReader({
         root            : 'response.value.items',
         versionProperty : 'response.value.version',
@@ -357,15 +315,13 @@ MA.DashboardCreateRecentRuns = function() {
     });
 
     return new Ext.Panel({
-
-    title:'Recent Runs',
-    style:'padding:20px 20px 0px 20px',
-    id:'dashboard-recent-runs',
-    //tbar: toolbar,
-    init: function() {
-        this.items.items[0].store.load();
-    },
-    items:[
+        title:'Recent Runs',
+        style:'padding:20px 20px 0px 20px',
+        id:'dashboard-recent-runs',
+        init: function() {
+            this.items.items[0].store.load();
+        },
+        items:[
                 {
                     xtype:'grid',
                     border: false,
@@ -377,15 +333,7 @@ MA.DashboardCreateRecentRuns = function() {
                         reader     : madasReader,
                         url        : dataurl
                     }),
-                    sm: selectionModel,
-/*
-                    listeners: {
-                        rowdblclick: function(grid, rowIndex, evt) {
-                            var record = grid.store.getAt(rowIndex);
-                            editQuote(record.get('id'));
-                        }
-                    },
-*/
+                    sm: selectionModel, 
                     columns: [
                         {
                             header: 'ID',
@@ -422,21 +370,22 @@ MA.DashboardCreateRecentRuns = function() {
 
 
 
-MA.DashboardCreateAvailableFiles = function() {
-    return new Ext.Panel({
+MA.Dashboard.CreateAvailableFiles = function() {
+    var downloadClientFile = function(fileID) {
+        window.location = MA.BaseUrl + "ws/downloadClientFile/" + fileID;
+    };
 
-    title:'Available files',
-    style:'padding:20px 20px 0px 20px',
-    id:'dashboard-available-files',
-    tbar:[
-        {
+    return new Ext.Panel({
+        title:'Available files',
+        style:'padding:20px 20px 0px 20px',
+        id:'dashboard-available-files',
+        tbar:[{
             xtype:'tbtext',
             text:'Click a filename to download'
-        }
-    ],
-    init: function() {
-    },
-    items:[
+        }],
+        init: function() {
+        },
+        items:[
                 {
                    xtype:'treepanel',
                    border: false,
@@ -457,7 +406,7 @@ MA.DashboardCreateAvailableFiles = function() {
                            {
                                selectionchange: function(sm, node) {
                                    if (node !== null && !node.attributes.metafile) {
-                                       MA.DownloadClientFile(node.id);
+                                       downloadClientFile(node.id);
                                    }
                                }
                            }
@@ -471,7 +420,7 @@ MA.DashboardCreateAvailableFiles = function() {
     });
    };
 
-MA.DashboardCreateToolbar = function() {
+MA.Dashboard.CreateToolbar = function() {
     return {
         init: function() {},
         style: 'padding: 20px 20px 0px 20px',
@@ -490,11 +439,10 @@ MA.DashboardCreateToolbar = function() {
 };
 
 
-MA.DashboardCreateAdminDashboard = function() {
+MA.Dashboard.CreateAdminDashboard = function() {
     return new Ext.Container({
         id: 'dashboard-panel',
         autoScroll: true,
-        //    layout: 'column',
         init: function() {
             var i;
             for (i=0; i < this.items.length; i++) {
@@ -502,19 +450,18 @@ MA.DashboardCreateAdminDashboard = function() {
             }
         },
         items: [
-            MA.DashboardCreateToolbar(),
-            MA.DashboardCreatePendingUserRequests(),
-            MA.DashboardCreateQuotesRequiringAttention(),
-            MA.DashboardCreateRecentExperiments()
+            MA.Dashboard.CreateToolbar(),
+            MA.Dashboard.CreatePendingUserRequests(),
+            MA.Dashboard.CreateQuotesRequiringAttention(),
+            MA.Dashboard.CreateRecentExperiments()
         ]
     });
 };
 
-MA.DashboardCreateClientDashboard = function() {
+MA.Dashboard.CreateClientDashboard = function() {
     return new Ext.Container({
         id: 'dashboard-panel',
         autoScroll: true,
-        //    layout: 'column',
         init: function() {
             var i;
             for (i=0; i < this.items.length; i++) {
@@ -522,18 +469,17 @@ MA.DashboardCreateClientDashboard = function() {
             }
         },
         items: [
-            MA.DashboardCreateToolbar(),
-            MA.DashboardCreateRecentExperiments(),
-            MA.DashboardCreateAvailableFiles()
+            MA.Dashboard.CreateToolbar(),
+            MA.Dashboard.CreateRecentExperiments(),
+            MA.Dashboard.CreateAvailableFiles()
         ]
     });
 };
 
-MA.DashboardCreateStaffDashboard = function() {
+MA.Dashboard.CreateStaffDashboard = function() {
     return new Ext.Container({
         id: 'dashboard-panel',
         autoScroll: true,
-        //    layout: 'column',
         init: function() {
             var i;
             for (i=0; i < this.items.length; i++) {
@@ -541,34 +487,34 @@ MA.DashboardCreateStaffDashboard = function() {
             }
         },
         items: [
-            MA.DashboardCreateToolbar(),
-            MA.DashboardCreateRecentExperiments(),
-            MA.DashboardCreateRecentRuns()
+            MA.Dashboard.CreateToolbar(),
+            MA.Dashboard.CreateRecentExperiments(),
+            MA.Dashboard.CreateRecentRuns()
         ]
     });
 };
 
 
-MA.DashboardCreateDashboard = function() {
+MA.Dashboard.Create = function() {
     if (!MA.IsLoggedIn) {
         return MA.NotAuthorizedCmp;
     }
     if (MA.IsAdmin || MA.IsNodeRep) {
-        return MA.DashboardCreateAdminDashboard();
+        return MA.Dashboard.CreateAdminDashboard();
     } else if (MA.IsClient) {
-        return MA.DashboardCreateClientDashboard();
+        return MA.Dashboard.CreateClientDashboard();
     } else {
-        return MA.DashboardCreateStaffDashboard();
+        return MA.Dashboard.CreateStaffDashboard();
     }
 };
 
-MA.DashboardCreated = false;
-MA.DashboardInit = function(){
+MA.Dashboard.IsCreated = false;
+MA.Dashboard.Init = function(){
     var dboard;
-    if (!MA.DashboardCreated) {
-        dboard = MA.DashboardCreateDashboard();
+    if (!MA.Dashboard.IsCreated) {
+        dboard = MA.Dashboard.Create();
         Ext.getCmp('center-panel').add(dboard);
-        MA.DashboardCreated = true;
+        MA.Dashboard.IsCreated = true;
     }
     Ext.getCmp('dashboard-panel').init();
 };

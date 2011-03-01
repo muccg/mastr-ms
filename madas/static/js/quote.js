@@ -221,17 +221,10 @@ MA.QuoteRequestListInit = function(){
             ]       
         });
     var selectionModel = new Ext.grid.RowSelectionModel({ singleSelect: true });
-    var checkBoxRenderer = function (val){
-        if(val === true){
-            return '*';
-        } else {
-            return '';
-        }
-    };
     var colModel = new Ext.grid.ColumnModel([
         {header: 'ID', align : 'left', sortable: true, dataIndex: 'id', width:35 },
-        {header: 'Unread', align:'center', sortable: true, dataIndex: 'unread', renderer: checkBoxRenderer, width:35 },
-        {header: 'Completed', align:'center', sortable: true, dataIndex: 'completed', renderer: checkBoxRenderer, width:50 },
+        {header: 'Unread', align:'center', sortable: true, dataIndex: 'unread', renderer: MA.Utils.GridCheckboxRenderer, width:35 },
+        {header: 'Completed', align:'center', sortable: true, dataIndex: 'completed', renderer: MA.Utils.GridCheckboxRenderer, width:50 },
         {header: 'Email', width:185, align : 'left', sortable: true, dataIndex: 'email' },
         {header: 'First Name', align : 'left', sortable: true, dataIndex: 'firstname' },
         {header: 'Last Name', align : 'left', sortable: true, dataIndex: 'lastname' },
@@ -900,17 +893,10 @@ MA.QuoteRequestListAllInit = function(){
             ] */      
         });
     var selectionModel = new Ext.grid.RowSelectionModel({ singleSelect: true });
-    var checkBoxRenderer = function (val){
-        if(val === true){
-            return '*';
-        } else {
-            return '';
-        }
-    };
     var colModel = new Ext.grid.ColumnModel([
         {header: 'ID', align : 'left', sortable: true, dataIndex: 'id', width:25 },
-        {header: 'Unread', align:'center', sortable: true, dataIndex: 'unread', renderer: checkBoxRenderer, width:35 },
-        {header: 'Completed', align:'center', sortable: true, dataIndex: 'completed', renderer: checkBoxRenderer, width:50 },
+        {header: 'Unread', align:'center', sortable: true, dataIndex: 'unread', renderer: MA.Utils.GridCheckboxRenderer, width:35 },
+        {header: 'Completed', align:'center', sortable: true, dataIndex: 'completed', renderer: MA.Utils.GridCheckboxRenderer, width:50 },
         {header: 'Email', width:185, align : 'left', sortable: true, dataIndex: 'email' },
         {header: 'First Name', align : 'left', sortable: true, dataIndex: 'firstname' },
         {header: 'Last Name', align : 'left', sortable: true, dataIndex: 'lastname' },
@@ -998,13 +984,7 @@ MA.FormalQuoteUserListInit = function(){
             ] 
         });
     var selectionModel = new Ext.grid.RowSelectionModel({ singleSelect: true });
-    var checkBoxRenderer = function (val){
-        if(val === true){
-            return '*';
-        } else {
-            return '';
-        }
-    };
+
     var colModel = new Ext.grid.ColumnModel([
         {header: 'ID', align : 'left', sortable: true, dataIndex: 'id', width:25 },
         {header: 'QID', align : 'left', sortable: true, dataIndex: 'quoterequestid', width:25 },

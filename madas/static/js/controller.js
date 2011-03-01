@@ -44,7 +44,7 @@ MA.ChangeMainContent = function(contentName, paramArray){
                 break;
             }
             //default
-            MA.DashboardInit();
+            MA.Dashboard.Init();
             Ext.getCmp('center-panel').layout.setActiveItem('dashboard-panel'); 
             break;
 
