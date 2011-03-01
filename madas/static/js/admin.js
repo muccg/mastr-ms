@@ -123,15 +123,8 @@ MA.UserSearchInit = function(){
                                          forceFit: true
                                          });
     var selectionModel = new Ext.grid.RowSelectionModel({ singleSelect: true });
-    var checkBoxRenderer = function (val){
-        if(val == true){
-            return '*';
-        } else {
-            return '';
-        }
-    }
     var colModel = new Ext.grid.ColumnModel([	
-                                             {header: 'Client?', width:35, sortable:true, dataIndex:'isClient', renderer: checkBoxRenderer},
+                                             {header: 'Client?', width:35, sortable:true, dataIndex:'isClient', renderer: MA.Utils.GridCheckboxRenderer},
                                              {header: 'Username', width:185, align : 'left', sortable: true, dataIndex: 'username', sortable: true },
                                              {header: 'First Name', align : 'left', sortable: true, dataIndex: 'firstname', sortable: true },
                                              {header: 'Last Name', align : 'left', sortable: true, dataIndex: 'lastname', sortable: true },
