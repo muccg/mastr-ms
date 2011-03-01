@@ -33,12 +33,13 @@
 
 <!-- setup variable -->
 <script>
-Ext.ns('MA');
+Ext.ns('MA', 'MA.Dashboard', 'MA.Utils');
 MA.BaseUrl = '${ APP_SECURE_URL }';
 </script>
 
 <!-- Madas scripts -->
 <script type="text/javascript" src="${wh.url('/static/js/madasJsonReader.js')}"></script>
+<script type="text/javascript" src="${wh.url('/static/js/utils.js')}"></script>
 
 <script type="text/javascript" src="${wh.url('/static/js/datastores.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/FileUploadField.js')}"></script>
