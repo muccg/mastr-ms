@@ -25,14 +25,12 @@
  * situations where a page displays but the content fails
  */
 MA.ChangeMainContent = function(contentName, paramArray){
-
     //Ext.get('center').dom.innerHTML = '';
     var showMenu = true;
     var affectMenu = true;
     var cancelBackTarget = true; //whether or not this action should be invoked if a user clicks Cancel (where the variable is obeyed)
-
+    console.log('MA.ChangeMainContent was called with content: ' + contentName);
     Ext.QuickTips.init();
-    //alert('called ChangeMainContent, contentName was: ' + contentName);
     
     switch (contentName) {
     
@@ -40,7 +38,6 @@ MA.ChangeMainContent = function(contentName, paramArray){
             if (paramArray) {
                 resultContent = paramArray[0];
                 params = paramArray[1];
-                MA.Authorize(resultContent, params);
                 break;
             }
             //default
@@ -167,6 +164,66 @@ MA.ChangeMainContent = function(contentName, paramArray){
         	Ext.getCmp('center-panel').layout.setActiveItem('fquolist-panel');
         	break;
 
+        case 'client:list':
+            clientsListStore.reload();
+            Ext.getCmp('center-panel').layout.setActiveItem('clients-list');
+            break;
+
+        case "project:list":
+            clientsListStore.load();
+            projectsListStore.load();
+
+            Ext.getCmp('center-panel').layout.setActiveItem('projects-list');
+            break;
+
+        case 'project:new':
+            MA.currentProjectId = 0;
+            var titlefield = Ext.getCmp('projectTitle');
+            var desc = Ext.getCmp('projectDescription');
+
+            titlefield.setValue('');
+            desc.setValue('');
+
+            experimentListStore.removeAll();
+            Ext.getCmp('project-experiment-list').disable();
+            Ext.getCmp('center-panel').layout.setActiveItem('projectCmpTitle');
+            break;
+
+        case 'project:view':
+            expStatusComboStore.load();
+            machineStore.load();
+            sopLookupStore.load();
+            userComboStore.load();
+            involvementComboStore.load();
+            Ext.getCmp('center-panel').layout.setActiveItem('projectCmpTitle');
+            Ext.getCmp('project-experiment-list').enable();
+            break;
+
+        case 'experiment:new':
+            MA.ExperimentController.createExperiment();
+            break;
+
+        case "run:list":
+            runListStore.load({callback: function() {
+                runListStore.sort([
+                    {
+                        field: "state",
+                        direction: "DESC"
+                    },
+                    {
+                        field: "id",
+                        direction: "DESC"
+                    }
+                ]);
+            }});
+
+            Ext.getCmp("center-panel").layout.setActiveItem("runs-list");
+            break;
+
+        case "repo:admin":
+            document.location = 'repoadmin/';
+            break;
+
     	case "help:screencasts-quoterequest":
     	    MA.ScreencastsInit('madas_requesting_quote.flv');
     	    Ext.getCmp('center-panel').layout.setActiveItem('screencasts-container-panel');
@@ -234,15 +291,18 @@ MA.ChangeMainContent = function(contentName, paramArray){
  */
 MA.InitApplication = function(appSecureUrl, username, mainContentFunction, params) {
    //various global settings for Ext
-    Ext.BLANK_IMAGE_URL = appSecureUrl + 'static/ext-3.3.0/resources/images/default/s.gif';
+   Ext.BLANK_IMAGE_URL = appSecureUrl + 'static/ext-3.3.0/resources/images/default/s.gif';
    Ext.QuickTips.init();
-    MA.BaseUrl = appSecureUrl;
+   MA.BaseUrl = appSecureUrl;
    
    MA.LoginSubmitURL = appSecureUrl + 'login/processLogin';
+   MA.ResetUser();
    MA.InitFunction = mainContentFunction;
 
    // turn on validation errors beside the field globally
    Ext.form.Field.prototype.msgTarget = 'side';
+
+   Ext.currentExperimentNavItem = 0;
 
    //the ViewPort defines the main layout for the entire Madas app
    //the center-panel component is the main area where content is switched in and out
@@ -270,6 +330,10 @@ MA.InitApplication = function(appSecureUrl, username, mainContentFunction, param
                         MA.UserEditCmp, MA.ForgotPasswordCmp, MA.ResetPasswordCmp, MA.NodeManagementCmp,
                         MA.OrgManagementCmp,
                         MA.RequestQuoteCmp, MA.QuoteRequestEditCmp, MA.ViewFormalCmp,
+                        MA.ExperimentCmp,
+                        MA.ProjectListCmp, MA.ProjectCmp, 
+                        MA.ClientsListCmp,
+                        MA.RunListCmp,
                         MA.ScreencastsCmp]
             }
             ]
@@ -279,10 +343,17 @@ MA.InitApplication = function(appSecureUrl, username, mainContentFunction, param
     
     var paramArray;
     if (params) {
-        paramArray = params; //eval is evil
+        paramArray = JSON.parse(params); //eval is evil
+        console.log('In InitApplication, params is: ' + params)
     }
+
+    MA.ExperimentController.mask = new Ext.LoadMask("center-panel", {
+        removeMask: true
+    });
    
-    MA.Authorize(mainContentFunction, paramArray);
+    MA.GetUserInfo(function() {
+        MA.ChangeMainContent(mainContentFunction, paramArray);
+    });
 };
 
 
@@ -292,38 +363,3 @@ MA.Message = function(paramArray) {
 
 };
 
-/**
- * madasAjaxMetadataProcess
- * look at the other headers in the header of an ajax request for a livegrid or other Object
- * assessing whether the user has timed-out or is not authorized to perform that action
- */
-MA.AjaxMetadataProcess = function(ajaxData) {
-    
-   //look for specific sentinel values in the json
-   //var authenticated = ajaxData.response.value.authenticated;
-   //var authorized = ajaxData.response.value.authorized;
-
-    var authenticated = ajaxData.authenticated;
-    var authorized = ajaxData.authorized;
-
-   if (authenticated != 1) {
-        //trigger the login page
-        MA.IsLoggedIn = false;
-        MA.IsAdmin = false;
-        Ext.getCmp('userMenu').setText('User: none');
-
-        MA.ChangeMainContent('login');
-        //return false to tell the JsonReader to abort
-        return false;
-   }
-   
-   if (authorized != 1) {
-        //trigger a notauthorized page
-        MA.ChangeMainContent('notauthorized');
-        //return false to tell the JsonReader to abort
-        return false;
-   }
-   
-   return true;
-
-};

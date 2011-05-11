@@ -1,27 +1,30 @@
-from madas.utils import setRequestVars, jsonResponse, json_encode
+from madas.utils.data_utils import jsonResponse, jsonErrorResponse
+from madas.users.MAUser import *
+from madas.utils.mail_functions import sendRegistrationToAdminEmail
+from django.contrib import logging
 
+logger = logging.getLogger('madas_log')
 
 def submit(request, *args):
     '''This adds a new user into ldap with no groups
     '''
-    print '*** registration/submit ***' 
+    detailsDict = getDetailsFromRequest(request)
 
-    import madas.users 
-    from madas.users.views import _usersave, _userload
-    
-    if {} == _userload(request.REQUEST['email']):
-        oldstatus, status =  _usersave(request, request.REQUEST['email'], admin=False)
+    #check that the user doesn't already exist.
+    if {} == loadMadasUser(detailsDict['username']):
+        #if not, add the user
+        adminUser = getMadasUser('nulluser') #a user who doesn't exist
+        adminUser.IsAdmin = True #make them a priveleged user.
+        #saveMadasUser will add the user if they do not exist already.
+        success = saveMadasUser(adminUser, detailsDict['username'], detailsDict['details'], detailsDict['status'], detailsDict['password'])
         
-        #HACK, save again to try to put the password in
-        oldstatus, status =  _usersave(request, request.REQUEST['email'], admin=False)
-
-        from mail_functions import sendRegistrationToAdminEmail
+        if not success:
+            logger.warning("Could not add new user %s" % (detailsDict['username']))
+        else:
+            sendRegistrationToAdminEmail(request, 'trac-nema@ccg.murdoch.edu.au')
         
-        sendRegistrationToAdminEmail(request, 'trac-nema@ccg.murdoch.edu.au')
-        
-        setRequestVars(request, success=True, data = None, totalRows = 0, authenticated = True, authorized = True, mainContentFunction='login')
+        return jsonResponse()
     else:
-        setRequestVars(request, success=False, data = None, totalRows = 0, authenticated = True, authorized = True, mainContentFunction='error:existingRegistration')
+        logger.warning("User %s already existed, aborting registration" % (detailsDict['username'])) 
+        return jsonErrorResponse('User already exists')
 
-    print '*** registration/submit end ***' 
-    return jsonResponse(request, [])

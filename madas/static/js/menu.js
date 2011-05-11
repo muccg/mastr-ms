@@ -30,6 +30,16 @@ MA.MenuRender = function(username) {
                     ]
                     }
                 },
+                { xtype: 'tbbutton', text:'Repository', id:'repo', menu:{
+                    items: [
+                        {text:'Projects', id:'project:list', handler: MA.MenuHandler},
+                        {text:'Clients', id:'client:list', handler: MA.MenuHandler},
+                        {text:'Runs', id:'run:list', handler: MA.MenuHandler},
+                        new Ext.menu.Separator(),
+                        {text:'Admin', id:'repo:admin', handler: MA.MenuHandler}
+                    ]
+                    }
+                },
                 { xtype: 'tbbutton', text:'Help', menu:{
                     items: [
                             {text:'Screencasts', id:'help:screencasts', menu: {
@@ -69,49 +79,57 @@ MA.MenuRender = function(username) {
 }
 
 MA.MenuEnsure = function() {
-    if (MA.IsLoggedIn) 
+    if (MA.CurrentUser.IsLoggedIn) 
         MA.MenuShow();
     else 
         MA.MenuHide();
 }
 
 MA.MenuShow = function() {
-
+    var isPrivileged = (MA.CurrentUser.IsAdmin || MA.CurrentUser.IsMastrAdmin || MA.CurrentUser.IsNodeRep || MA.CurrentUser.IsProjectLeader);
     Ext.BLANK_IMAGE_URL = MA.BaseUrl + 'static/ext-3.3.0/resources/images/default/s.gif';
 
     //disable certain menu items if the user is not an admin
-    if (!MA.IsAdmin) {
-        Ext.getCmp('admin:nodelist').disable();
-        if (!MA.IsNodeRep) {
-	        Ext.get('admin').hide();
-            Ext.getCmp('helpadmin:screencasts').disable();
-        }
-        else {
-        	Ext.get('admin').show();
-            Ext.getCmp('helpadmin:screencasts').enable();
-        }
-    } else {
-        Ext.getCmp('admin:nodelist').enable();
+    if (isPrivileged) {
         Ext.get('admin').show();
-        Ext.getCmp('helpadmin:screencasts').enable();
+    } else {
+	    Ext.get('admin').hide();
+
     }
+    Ext.getCmp('admin:nodelist').setDisabled(!MA.CurrentUser.IsAdmin);
+    Ext.getCmp('admin:orglist').setDisabled(!MA.CurrentUser.IsAdmin);
+    Ext.getCmp('helpadmin:screencasts').setDisabled(!MA.CurrentUser.IsAdmin);
+
+    Ext.getCmp('admin:adminrequests').setDisabled(!(MA.CurrentUser.IsAdmin || MA.CurrentUser.IsNodeRep));
+    Ext.getCmp('admin:usersearch').setDisabled(!isPrivileged);
+    Ext.getCmp('admin:rejectedUsersearch').setDisabled(!(MA.CurrentUser.IsAdmin || MA.CurrentUser.IsNodeRep));
+    Ext.getCmp('admin:deletedUsersearch').setDisabled(!(MA.CurrentUser.IsAdmin || MA.CurrentUser.IsNodeRep));
+
+    Ext.getCmp('repo:admin').setDisabled(!(MA.CurrentUser.IsAdmin || MA.CurrentUser.IsMastrAdmin))
+    Ext.getCmp('client:list').setDisabled(!(MA.CurrentUser.IsAdmin || MA.CurrentUser.IsMastrAdmin || MA.CurrentUser.IsProjectLeader))
 
     Ext.get('login').hide();
     Ext.get('dashboard').show();
     Ext.get('userMenu').show();
     Ext.getCmp('quote:list').show();
-    Ext.getCmp('quote:listAll').show();
+    Ext.getCmp('quote:listAll').setDisabled(!(MA.CurrentUser.IsAdmin || MA.CurrentUser.IsNodeRep));
     Ext.getCmp('quote:listFormal').show();
+
+    if (MA.CurrentUser.IsAdmin || MA.CurrentUser.IsMastrAdmin || MA.CurrentUser.IsProjectLeader || MA.CurrentUser.IsMastrStaff) {
+        Ext.get('repo').show();
+    } else {
+        Ext.get('repo').hide();
+    }
 
 }
 
 MA.MenuHandler = function(item) {
     //we authorize every access to check for session timeout and authorization to specific pages
-    if (item.id.substr(0,4) == "help") {
+    //if (item.id.substr(0,4) == "help") {
         MA.ChangeMainContent(item.id);
-    } else {
-        MA.Authorize(item.id);
-    }
+    //} else {
+    //    MA.Authorize(item.id);
+    //}
 }
 
 MA.LogoutHandler = function() {
@@ -127,6 +145,7 @@ MA.MenuHide = function() {
     Ext.getCmp('quote:list').hide();
     Ext.getCmp('quote:listAll').hide();
     Ext.getCmp('quote:listFormal').hide();
+    Ext.get('repo').hide();
     Ext.getCmp('helpadmin:screencasts').disable();
 }
 

@@ -10,20 +10,26 @@ from madas.quote import admin as madasadmin
 
 urlpatterns = patterns('',
 
-#    (r'^(.*)/authorize', 'madas.madas.views.authorize'),
-#    (r'^(.*)/index', 'madas.madas.views.serveIndex'),
+    (r'^userinfo', 'madas.users.views.userinfo'),
     (r'^status/', status_view),
     (r'^sync/', include('madas.mdatasync_server.urls')),
 
     # madasrepo
-    (r'^repo/', include('madas.repository.urls')),
     (r'^ws/', include('madas.repository.wsurls')),
 
-    # admin
+    # repoadmin
     (r'^repoadmin/', include(admin.site.urls)),
 
-    #(r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root' : settings.MEDIA_ROOT, 'SSL' : True} ),
-    # madas
+    # madas admin
+    (r'^admin/', include('madas.admin.urls')),
+    # madas quotes
+    (r'^quote/', include('madas.quote.urls')),
+    # madas registration
+    (r'^registration/', include('madas.registration.urls')),
+    # madas login
+    (r'^login/', include('madas.login.urls')),
+    # madas users 
+    (r'^user/', include('madas.users.urls')),
 )
 
 # static
@@ -32,7 +38,7 @@ if settings.DEBUG:
     urlpatterns += patterns('',
         (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root' : settings.MEDIA_ROOT, 'SSL' : True} ),
     )
-
+    #default view
 urlpatterns += patterns('', 
-    (r'^', include('madas.quote.urls')),
+    (r'^', 'madas.login.views.serveIndex', {'SSL':True}),
     )

@@ -25,10 +25,17 @@
 <link rel="stylesheet" type="text/css" href="${wh.url('/static/css/main.css')}"/>
 <link rel="stylesheet" href="${wh.url('/static/ext-3.3.0/examples/ux/css/RowEditor.css')}"/>
 <link rel="stylesheet" type="text/css" href="${wh.url('/static/css/file-upload.css')}"/>
+<!--
 <script src="${wh.url('/static/ext-3.3.0/adapter/ext/ext-base.js')}" type="text/javascript"></script>
-
+-->
+<script type="text/javascript" src="${wh.url('/static/js/repo/prototype.js')}"></script>
+<script type="text/javascript" src="${wh.url('/static/js/repo/scriptaculous/scriptaculous.js')}"></script>
+<script src="${wh.url('/static/ext-3.3.0/adapter/prototype/ext-prototype-adapter.js')}" type="text/javascript"></script>
+<!--
 <script src="${wh.url('/static/ext-3.3.0/ext-all.js')}"></script>
-<script type="text/javascript" src="${wh.url('/static/repo/js/DisplayField.js')}"></script>
+-->
+<script src="${wh.url('/static/ext-3.3.0/ext-all-debug.js')}"></script>
+<script type="text/javascript" src="${wh.url('/static/js/repo/DisplayField.js')}"></script>
 
 
 <!-- setup variable -->
@@ -38,12 +45,32 @@ MA.BaseUrl = '${ APP_SECURE_URL }';
 </script>
 
 <!-- Madas scripts -->
-<script type="text/javascript" src="${wh.url('/static/js/madasJsonReader.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/utils.js')}"></script>
 
-<script type="text/javascript" src="${wh.url('/static/js/datastores.js')}"></script>
+<script type="text/javascript" src="${wh.url('/static/js/json2.js')}"></script>
+<script type="text/javascript" src="${wh.url('/static/js/repo/datastores.js')}"></script>
+<script type="text/javascript" src="${wh.url('/static/js/repo/renderers.js')}"></script>
+<script type="text/javascript" src="${wh.url('/static/js/repo/GridSearch.js')}"></script>
+<script type="text/javascript" src="${wh.url('/static/js/repo/MARowEditor.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/FileUploadField.js')}"></script>
-<script type="text/javascript" src="${wh.url('/static/js/GridSearch.js')}"></script>
+
+
+
+<script type="text/javascript" src="${wh.url('/static/js/repo/samples.js')}"></script>
+<script type="text/javascript" src="${wh.url('/static/js/repo/tracking.js')}"></script>
+<script type="text/javascript" src="${wh.url('/static/js/repo/biosource.js')}"></script>
+<script type="text/javascript" src="${wh.url('/static/js/repo/treatment.js')}"></script>
+<script type="text/javascript" src="${wh.url('/static/js/repo/sampleprep.js')}"></script>
+<script type="text/javascript" src="${wh.url('/static/js/repo/access.js')}"></script>
+<script type="text/javascript" src="${wh.url('/static/js/repo/files.js')}"></script>
+<script type="text/javascript" src="${wh.url('/static/js/repo/runs.js')}"></script>
+<script type="text/javascript" src="${wh.url('/static/js/repo/runlist.js')}"></script>
+
+<script type="text/javascript" src="${wh.url('/static/js/repo/projects.js')}"></script>
+<script type="text/javascript" src="${wh.url('/static/js/repo/clients.js')}"></script>
+
+
+<script type="text/javascript" src="${wh.url('/static/js/datastores.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/menu.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/registration.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/login.js')}"></script>
@@ -54,7 +81,6 @@ MA.BaseUrl = '${ APP_SECURE_URL }';
 <script type="text/javascript" src="${wh.url('/static/js/quote.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/swfobject.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/screencasts.js')}"></script>
-
 
 <script>
 var callbackCount = 0;
@@ -68,9 +94,9 @@ function callbacker(){
         return;
     }
     
-    MA.InitApplication('${ APP_SECURE_URL }', '${ username }', '${ mainContentFunction }', "${ params }");
+    MA.InitApplication('${ APP_SECURE_URL }', '${ username }', '${ mainContentFunction }', '${ params }');
     document.getElementById("appLoad").style.display = "none";
-    document.getElementById('loginDiv').style.display = 'none';
+    //document.getElementById('loginDiv').style.display = 'none';
 }
 </script>
 
