@@ -15,6 +15,41 @@
  * along with Madas.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+MA.ResetUser = function()
+{
+    MA.CurrentUser = {
+        IsAdmin: false,
+        IsNodeRep: false,
+        IsClient: false,
+        IsStaff: false,
+        IsLoggedIn: false,
+        Username: "",
+        // Mastr MS membership
+        IsMastrAdmin: false,
+        IsProjectLeader: false, 
+        IsMastrStaff: false
+    };
+}
+
+Ext.Ajax.on('requestexception', function(conn, response, options, e)
+{
+    if (response.status == 401)
+    {
+        console.log("GLOBAL XHR error handler: Unauthenticated. Resetting user.");
+        MA.ResetUser();
+        MA.ChangeMainContent('login');
+    }
+    else if (response.status == 403)
+    {
+        console.log("GLOBAL XHR error handler: Unauthorised.");
+        MA.ChangeMainContent('notauthorized');
+    }
+    else
+    {
+        //console.log("GLOBAL XHR error handler: Uncaught response (" + response.status + ")");
+    }
+});
+
 MA.LoginExecute = function(paramArray){
                             Ext.getCmp('login-panel').getForm().submit(
                                 {   successProperty: 'success',        
@@ -22,11 +57,11 @@ MA.LoginExecute = function(paramArray){
                                         var resultContent;
                                         var params;
                                         if (action.result.success === true) {
-                                            //Ext.Msg.alert ('Result: ' + action.result.toString())
+                                            //console.log("Login Execute: "  + action.result.toString());
                                             form.reset(); 
                                             //load up the menu and next content area as declared in response
                                             if (action.result.username) {
-                                                Ext.getCmp('userMenu').setText('User: '+action.result.username);
+                                                Ext.getCmp('userMenu').setText('User: aaa '+action.result.username);
                                             }
                                             
                                             resultContent = action.result.mainContentFunction;
@@ -36,7 +71,7 @@ MA.LoginExecute = function(paramArray){
                                                 params = MA.PostLoginParamArray[1];
                                             }
                                             
-                                            MA.Authorize(resultContent, params);
+                                            MA.ChangeMainContent(resultContent, params);
                                         } 
                                     },
                                     failure: function (form, action) {
@@ -64,7 +99,6 @@ MA.ForgotPasswordExecute = function(){
                         };
 
 MA.RequestQuoteButtonHandler = function() {
-    //MA.Authorize('quote:request');
     MA.ChangeMainContent('quote:request');
 };
 
@@ -80,7 +114,7 @@ MA.LoginCmp = {id:'login-container-panel',
                        y:10,
                        items: [{
                                xtype:'panel',
-                               html:'Welcome to the <a href="http://www.metabolomics.net.au/">Metabolomics Australia</a> User and Quote Management System. This site allows existing and prospective clients of Metabolomics Australia to obtain a quote for accessing the many services offered my Metabolomics Australia.                               <p> <br>                              To make an inquiry about any of the services offered by Metabolomics Australia, clients are encouraged to fill out an online inquiry form by clicking the "Make an Inquiry" button, below.                               <p> <br>                              Existing clients can login to the website using the form to the right, or if required request a new password by <a href="#" onclick="MA.Authorize(\'login:forgotpassword\')">clicking here</a>.<br><br>'
+                               html:'Welcome to the <a href="http://www.metabolomics.net.au/">Metabolomics Australia</a> User and Quote Management System. This site allows existing and prospective clients of Metabolomics Australia to obtain a quote for accessing the many services offered my Metabolomics Australia.                               <p> <br>                              To make an inquiry about any of the services offered by Metabolomics Australia, clients are encouraged to fill out an online inquiry form by clicking the "Make an Inquiry" button, below.                               <p> <br>                              Existing clients can login to the website using the form to the right, or if required request a new password by <a href="#" onclick="MA.ChangeMainContent(\'login:forgotpassword\')">clicking here</a>.<br><br>'
                                },
                                {
                                xtype:'button',
@@ -110,7 +144,7 @@ MA.LoginCmp = {id:'login-container-panel',
                             el:"loginDiv"
                         },
                             {xtype:'panel', width: 350, style:'padding-top:4px;padding-left:80px;', html: '<a href="#" onclick="MA.ChangeMainContent(\'registration\')">Click here</a> to register for an account' },
-                        {xtype:'panel', width: 350, style:'padding-top:4px;padding-left:80px;', html: '<a href="#" onclick="MA.Authorize(\'login:forgotpassword\')">Forgot your password?</a>' }
+                        {xtype:'panel', width: 350, style:'padding-top:4px;padding-left:80px;', html: '<a href="#" onclick="MA.ChangeMainContent(\'login:forgotpassword\')">Forgot your password?</a>' }
                     ]}
                     ]
                 };
@@ -146,7 +180,7 @@ MA.ForgotPasswordCmp = {id:'forgot-password-container-panel',
                         text: 'Cancel',
                         handler: function(){
                             Ext.getCmp('forgot-password-panel').getForm().reset(); 
-                            MA.Authorize('login');
+                            MA.ChangeMainContent('login');
                             }
                         },{
                         text: 'Submit',
@@ -159,63 +193,23 @@ MA.ForgotPasswordCmp = {id:'forgot-password-container-panel',
                 
 MA.NotAuthorizedCmp = { id: 'notauthorized-panel', title: 'Not Authorized', html: 'You are not authorized to access this page' };
 
-/**
- * authorize
- * used to check if the user is still logged in, and if they can access the requested view
- */
-MA.Authorize = function(requestedView, params) {
-    if (requestedView === 'notauthorized') {
-        return MA.ChangeMainContent(requestedView, params);
-    }
-    
-    //the module we need to auth against is the first part of the requestedView
-    //ie admin/adminrequest
-    //we authorize against admin/authorize
-    var viewSplit = requestedView.split(":");
-    var module = viewSplit[0];
-    
-    var action = "";
-    if (viewSplit.length > 1) {
-        action = viewSplit[1];
-    }
-
-    //submit form
-    var simple = new Ext.BasicForm('hiddenForm', {
-        url:MA.BaseUrl + module+'/authorize',
-        baseParams:{'subaction':action, 'params':Ext.util.JSON.encode(params)},
-        method:'POST'
-        });
-
-    var submitOptions = {
-        successProperty: 'success',        
-        success: function (form, action) {
-            //load up the menu and next content area as declared in response
-            if (action.result.username) {
-                Ext.getCmp('userMenu').setText('User: '+action.result.username);
-                MA.IsAdmin = action.result.isAdmin;
-                MA.IsNodeRep = action.result.isNodeRep;
-                MA.IsClient = action.result.isClient;
-                MA.IsLoggedIn = true;
-            }
-            if (! action.result.authenticated) {
-                MA.IsAdmin = false;
-                MA.IsNodeRep = false;
-                MA.IsClient = false;
-                MA.IsLoggedIn = false;
-                Ext.getCmp('userMenu').setText('User: none');
-            }
-            MA.ChangeMainContent(action.result.mainContentFunction, action.result.params);
-        },
-        failure: function (form, action) {
-            //load up the menu and next content area as declared in response
-            //alert(action.response.responseText);
-            MA.ChangeMainContent(action.result.mainContentFunction, action.result.params);
-        }
-    };
-
-    simple.submit(submitOptions);
+MA.GetUserInfo = function(callback) {
+    //console.log("Called GetUserInfo");
+    var simplereq = Ext.Ajax.request({
+            url:MA.BaseUrl+'userinfo',
+            success: function(response) {
+                   //console.log(this);
+                   MA.CurrentUser = Ext.decode(response.responseText);
+                   if (callback !== undefined) {
+                        callback();
+                   }
+            },
+            failure: function() {
+                   //console.log('Failed to get userinfo');
+                   MA.ResetUser();
+            },
+    });
 };
-
 
 MA.LoginInit = function(paramArray) {
     
@@ -243,9 +237,9 @@ MA.LogoutInit = function(){
         successProperty: 'success',        
         success: function (form, action) {
             if (action.result.success === true) { 
-                MA.IsAdmin = false;
+                MA.CurrentUser.IsAdmin = false;
                 Ext.getCmp('userMenu').setText('User: none');
-                MA.IsLoggedIn = false;
+                MA.CurrentUser.IsLoggedIn = false;
             
                 Ext.Msg.alert('Successfully logged out', '(this dialog will auto-close in 3 seconds)');
                 setTimeout(Ext.Msg.hide, 3000);
@@ -357,7 +351,7 @@ MA.ResetPasswordCmp = {id:'resetpassword-container-panel',
                         text: 'Cancel',
                         handler: function(){
                             Ext.getCmp('resetpassword-panel').getForm().reset(); 
-                            MA.Authorize('login');
+                            MA.ChangeMainContent('login');
                             }
                         },{
                         text: 'Save',

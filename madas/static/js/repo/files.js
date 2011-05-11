@@ -114,7 +114,7 @@ items:[
                         Ext.getCmp('filesTree').getLoader().on("beforeload", function(treeLoader, node) {
                             treeLoader.baseParams.experiment = MA.ExperimentController.currentId();
                             }, this);
-                        Ext.getCmp('filesTree').getRootNode().expand();
+                        //Ext.getCmp('filesTree').getRootNode().expand();
                     },
                    nodedrop: function(de) {
                         Ext.Ajax.request({

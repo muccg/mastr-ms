@@ -1,4 +1,6 @@
 import datetime
+import os
+import zipfile
 from decimal import Decimal
 from django.core.serializers.json import DateTimeAwareJSONEncoder
 from django.db.models import Model
@@ -42,6 +44,7 @@ def makeJsonFriendly(data):
             return data #unmodified
     except Exception, e:
         print 'makeJsonFriendly encountered an error: ', str(e)
+    #print 'end makeJsonFriendly'    
     return data
 
 # ------------------------------------------------------------------------------
@@ -137,89 +140,22 @@ def uniqueList(l):
 
     return result
 
-def getGroupsForSession(request, force_reload = False):
-    cachedgroups = request.session.get('cachedgroups', [])
-    if cachedgroups is [] or force_reload:
-        print '\tNo cached groups for %s. Fetching.' % (request.user.username)
-        ld = LDAPHandler()
-        g = ld.ldap_get_user_groups(request.user.username)
-        request.session['cachedgroups'] = g
-        print '\tStored groups for %s: %s' % (request.user.username, request.session.get('cachedgroups') )
-        cachedgroups = g
-        
-        request.session['isNodeRep'] = False
-        request.session['isAdmin'] = False
-
-        if cachedgroups:
-            request.session['isClient'] = False
-        
-            for group in cachedgroups:
-                if group == 'Administrators':
-                    request.session['isAdmin'] = True
-                if group == 'Node Reps':
-                    request.session['isNodeRep'] = True
-
-            if len(cachedgroups) == 1 and cachedgroups[0] == 'User':        
-                request.session['isClient'] = True
-                print 'isClient'
-
-    return cachedgroups
-
-def setRequestVars(request, success=False, authenticated = 0, authorized = 0, totalRows = 0, mainContentFunction = '', username='', params = None, items=None, data=None):
-    """Make sure we set the session vars the same way each time, with sensible defaults"""
-    
-    if params is None:
-        p = request.REQUEST.get('params', None)
-        if p is not None:
-            p = json_decode(p)
-            print '\tSet Request Vars decoded params as : ', p
-        params = p
-    
-    print '\tSet Request Vars params are ', params
-
-    store = {}
-    store['success']              = success
-    store['authenticated']        = authenticated
-    store['authorized']           = authorized
-    store['totalRows']            = totalRows
-    store['mainContentFunction']  = mainContentFunction
-    store['params']               = params
-    #print 'Setting params. ', params, 'Type was: ', type(request.store['params'])
-    if items is None:
-        store['items']            = items
-    else:
-        store['items']            = list(items)
-    #print 'setSessionVars, mainContentFunction is: ', request.store['mainContentFunction'] 
-    
-    if data is not None:
-        store['data'] = data
-
-    #set the store on the session
-    request.session['store'] = store
-
-def get_var(dictionary, key, defaultvalue):
-    if dictionary.has_key(key):
-        v = dictionary[key]
-        #if type(v) is list and len(v) ==1:
-        #    v = v[0] 
-        return v 
-    else:
-        return defaultvalue
-
-def translate_dict(data, tuplelist, includeRest = False):
+def translate_dict(data, tuplelist, includeRest = False, createEmpty=False):
     """takes data (should be a dict) and tuple list (list of tuples)
        for each tuple in the list, if the key (element 1) exists in the dict
        then its value is associated with a new key (element 2) in a new
        dict, which is returned.
        if 'includeRest' is True, any keys not mentioned are transplanted to 
        the new dict 'as is'
+       if 'createNew' is True, if a key in the tuple doesn't exist, then it 
+       is created in the new dict anyway
     """
     returnval = {}
     oldkeylist = []
     for oldkey, newkey in tuplelist:
         oldkeylist.append(oldkey)
-        val = get_var(data, oldkey, 'KEYNOTFOUND!!')
-        if val != 'KEYNOTFOUND!!':
+        val = data.get(oldkey, None)
+        if val != None or createEmpty:
             returnval[newkey] = val
         #otherwise dont bother adding this key, it wasnt in the original data
     if includeRest is True:
@@ -238,55 +174,36 @@ def param_remap(d):
             d['qid'] = v
     return d
 
-def jsonResponse(request, *args):
-    #print 'Using jsonResponse'
-    s = request.session.get('store', {} )
-    a = {}
-    a['success'] =          get_var(s, 'success', True)
-    a['data'] =             get_var(s, 'data', None)
-    a['totalRows'] =        get_var(s, 'totalRows', 0)
-    a['authenticated'] =    get_var(s, 'authenticated', 0)
-    a['authorized'] =       get_var(s, 'authorized', 0)
-    a['user_id'] =          request.user.id
-    a['username'] =         request.user.username
-    #TODO: This isnt quite right. admin != node rep, node rep != admin
-
-
-    a['isAdmin'] = request.session.get('isAdmin', False)
-    a['isNodeRep'] = request.session.get('isNodeRep', False)
-    a['isClient'] = request.session.get('isClient', False)
-
-    #### response 'items' ####    
-    resp = {}
-    resp['value'] = {}
-    i = get_var(s, 'items', None)
-    if i is not None:
-        #print 'Making friendly: ', i
-        #print dir(i)
-        makeJsonFriendly(i)
-
-    resp['value']['items'] = i #i 
-    resp['value']['total_count'] = a['totalRows']
-    resp['value']['version'] = 1 #TODO: work out where this comes from.
-    a['response'] = resp 
-    ###############################
-
-    ### Data ###
-    data = get_var(s, 'data', None) 
-    if data is not None:
-        a['data'] = makeJsonFriendly(data)
-
-
-    a['mainContentFunction'] = get_var(s, 'mainContentFunction', '')
-    a['params'] = json_decode(s.get('params', ''))
-    retdata = json_encode(a)
-    
-    request.session['store'] = {}
-    
+def jsonErrorResponse(msg='An error occured'):
+    retdata = json.dumps({
+        'success': False,
+        'msg': msg
+    })
     return HttpResponse(retdata)
 
-import os
-import zipfile
+def jsonResponse(data={}, items=None, mainContentFunction=None, params=None):
+    #Sometimes we are passed 'data', and sometimes 'items'. We need to make
+    #a decision based on which one we are going to use for the 'totalRows'.
+    if items:
+        totalrows = len(items)
+    else:    
+        totalrows = len(data)
+    version = 1
+    response = {'value': {'items':makeJsonFriendly(items), 'version':1, 'total_count':totalrows}}
+    
+    retval = {'success': True, 
+              'data':makeJsonFriendly(data), 
+              'totalRows':totalrows,
+              'response': response 
+              }
+    if params:
+        retval['params'] = params
+    if mainContentFunction:
+        retval['mainContentFunction'] = mainContentFunction
+
+    retdata = json.dumps(retval)
+    return HttpResponse(retdata)
+
 
 def zipdir(dirPath=None, zipFilePath=None, includeDirInZip=True):
 

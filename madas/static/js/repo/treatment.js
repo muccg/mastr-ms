@@ -70,7 +70,7 @@ MA.Treatment = {
                                 {
                                     text:'Create',
                                     cls: 'x-btn-text-icon',
-                                    icon: 'static/repo/images/create-samples.png',
+                                    icon: 'static/images/create-samples.png',
                                     handler: function() {
                                         var reps = Ext.getCmp('timelineReplicateField').getValue();
                                         
@@ -101,7 +101,7 @@ MA.Treatment = {
                                 {
                                     text: 'Add Time',
                                     cls: 'x-btn-text-icon',
-                                    icon:'static/repo/images/add.png',
+                                    icon:'static/images/add.png',
                                     handler : function(){
                                         MA.CRUDSomething('create/sampletimeline/', {
                                             'experiment_id': MA.ExperimentController.currentId(),
@@ -112,7 +112,7 @@ MA.Treatment = {
                                 {
                                     text: 'Remove Time',
                                     cls: 'x-btn-text-icon',
-                                    icon:'static/repo/images/delete.png',
+                                    icon:'static/images/delete.png',
                                     handler : function(){
                                         var grid = Ext.getCmp('dates');
                                         var delIds = []; 
@@ -169,7 +169,7 @@ MA.Treatment = {
                                 {
                                     text: 'Add Treatment',
                                     cls: 'x-btn-text-icon',
-                                    icon:'static/repo/images/add.png',
+                                    icon:'static/images/add.png',
                                     handler : function(){
                                         MA.CRUDSomething('create/treatment/', {
                                             'experiment_id': MA.ExperimentController.currentId(),
@@ -180,7 +180,7 @@ MA.Treatment = {
                                 {
                                     text: 'Remove Treatment',
                                     cls: 'x-btn-text-icon',
-                                    icon:'static/repo/images/delete.png',
+                                    icon:'static/images/delete.png',
                                     handler : function(){
                                         var grid = Ext.getCmp('othertreat');
                                         var delIds = []; 

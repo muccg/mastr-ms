@@ -166,7 +166,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                             { 
                                 text:'Remove Samples',
                                 cls: 'x-btn-text-icon',
-                                icon:'static/repo/images/delete.png',
+                                icon:'static/images/delete.png',
                                 listeners: {
                                     'click': function(e) {
                                         //save changes to selected entries
@@ -219,7 +219,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                             { 
                                 text:'Remove Samples',
                                 cls: 'x-btn-text-icon',
-                                icon:'static/repo/images/delete.png',
+                                icon:'static/images/delete.png',
                                 itemId:'removeBtn',
                                 listeners: {
                                     'click': function(e) {
@@ -578,7 +578,7 @@ MA.RunCmp = new Ext.Window({
     tbar: [{
         text: 'Create New',
         cls: 'x-btn-text-icon',
-        icon:'static/repo/images/add.png',
+        icon:'static/images/add.png',
         handler : function(){
                 MA.CreateNewRun();
             }

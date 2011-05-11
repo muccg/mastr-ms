@@ -1,97 +1,42 @@
 # Create your views here.
-
+import os, grp, stat
 import settings
-from django.db import models
-from django.contrib.auth.ldap_helper import LDAPHandler
 
-from madas.utils import setRequestVars, jsonResponse, json_encode
-from madas.quote.models import Quoterequest, Formalquote, Quotehistory, Emailmap
+from django.db import models
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
-from django.shortcuts import render_to_response, render_mako
 from django.utils.webhelpers import siteurl, wsgibase
-import django.utils.webhelpers as webhelpers
-from madas.login.views import processLogin 
-from string import *
+from django.core.servers.basehttp import FileWrapper
+from django.utils import simplejson
+from django.core.mail import send_mail
+from django.contrib import logging
+
+from madas.decorators import *
+from madas.utils.data_utils import jsonResponse, json_encode, uniqueList
+from madas.quote.models import Quoterequest, Formalquote, Quotehistory, Emailmap
+from madas.users.MAUser import *
+from madas.login.URLState import getCurrentURLState
+#from string import *
+from madas.utils.mail_functions import sendQuoteRequestConfirmationEmail, sendQuoteRequestToAdminEmail, sendFormalQuoteEmail, sendFormalStatusEmail
+
+logger = logging.getLogger('madas_log')
 
 QUOTE_STATE_DOWNLOADED = 'downloaded'
 QUOTE_STATE_NEW = 'new' #is the default on the DB column
 QUOTE_STATE_ACCEPTED = 'accepted'
 QUOTE_STATE_REJECTED = 'rejected'
 
-def listGroups(request, *args):
-    ### Authorisation Check ###
-    from madas.quote.views import authorize
-    from settings import MADAS_STATUS_GROUPS, MADAS_ADMIN_GROUPS
-    (auth_result, auth_response) = authorize(request, module = 'quote', internal=True, perms=MADAS_ADMIN_GROUPS)
-    #We ignore the auth result here, because we want pages to be able to use listGroups when not authed (i.e. Make an Inquiry)
-    #if auth_result is not True:
-    #    return auth_response
-    ### End Authorisation Check ###
-  
-    #debug function    
-    ld = LDAPHandler()
-    r = ld.ldap_list_groups()
-    print 'listGroups: the groups were: ', r
-    groups = []
-    if not request.REQUEST.has_key('ignoreNone'):    
-        d = {'name':'Don\'t Know', 'submitValue':''}
-        groups.append(d)
-
-    for groupname in r:
-
-        #Cull out the admin groups and the status groups
-        if groupname not in MADAS_STATUS_GROUPS and groupname not in MADAS_ADMIN_GROUPS:
-            d = {'name':groupname, 'submitValue':groupname}
-            groups.append(d)       
-    
-         
-    setRequestVars(request, success=True, items=groups, totalRows=len(groups), authenticated=True, authorized=True)
-    return jsonResponse(request, [])
-    
-
-def listRestrictedGroups(request, *args):
-    print '*** list Restricted Groups : enter ***'
-    import utils
-    g = utils.getGroupsForSession(request)
-    if 'Administrators' in g:
-        retval = listGroups(request)
-    else:
-        from madas.users.views import getNodeMemberships
-        n = getNodeMemberships(g)
-        print 'NodeMemberships: ', n
-        groups = []
-        
-        from settings import MADAS_STATUS_GROUPS, MADAS_ADMIN_GROUPS
-
-        for groupname in n:
-
-            #Cull out the admin groups and the status groups
-            if groupname not in MADAS_STATUS_GROUPS and groupname not in MADAS_ADMIN_GROUPS:
-                d = {'name':groupname, 'submitValue':groupname}
-                groups.append(d) 
-            
-            groups.append({'name':'Don\'t Know', 'submitValue':''})
-        
-        setRequestVars(request, items=groups, success=True, totalRows=len(groups), authenticated=True, authorized=True)
-        retval = jsonResponse(request, [])
-    print '*** list Restricted Groups : exit ***'
-    return retval 
-
-
 def _handle_uploaded_file(f, name):
     '''Handles a file upload to the projects QUOTE_FILES_ROOT
        Expects a django InMemoryUpload object, and a filename'''
-    print '*** _handle_uploaded_file: enter ***'
+    logger.debug('*** _handle_uploaded_file: enter ***')
     retval = False
     try:
-        import os
         destination = open(os.path.join(settings.QUOTE_FILES_ROOT, name ), 'wb+')
         for chunk in f.chunks():
             destination.write(chunk)
         
-        import grp, stat
         groupinfo = grp.getgrnam(settings.CHMOD_GROUP)
         gid = groupinfo.gr_gid
         
@@ -101,43 +46,31 @@ def _handle_uploaded_file(f, name):
         retval = True
     except Exception, e:
         retval = False
-        print '\tException in file upload: ', str(e)
-    print '*** _handle_uploaded_file: exit ***'
+        logger.debug('\tException in file upload: %s' % (str(e)) )
+    logger.debug('*** _handle_uploaded_file: exit ***')
     return retval
 
 def _findAdminOrNodeRepEmailTarget(groupname = 'Administrators'): #TODO use MADAS_ADMIN_GROUP constant
-    print '*** _findAdminOrNodeRepEmailTarget : enter ***'
+    logger.debug('*** _findAdminOrNodeRepEmailTarget : enter ***')
     #find an admin, or a node rep for the group passed in.
     #if no group was passed, we assume 'Administrators'
     grouplist = []
     grouplist.append(groupname)
-    if groupname is not 'Administrators':
-        grouplist.append('Node Reps')
+    if groupname is not MADAS_ADMIN_GROUP:
+        grouplist.append(MADAS_NODEREP_GROUP)
     
-    ld = LDAPHandler()
-    users = ld.ldap_list_users(grouplist)
-    print '\t Users found: ', users
+    users = getMadasUsersFromGroups(grouplist) 
+    
+    logger.debug('\t Users found: %s' % (users))
    
     #NOTE: If this function finds multiple users to email, it only returns the
     #      first one. If we ever need to change this, here is the place to do it!
     retval = users
-    print 'returning all records: ', retval
-    print '*** _findAdminOrNodeRepEmailTarget : exit ***'
+    logger.debug( '*** _findAdminOrNodeRepEmailTarget : exit ***' )
     return retval 
 
-
-
 def sendRequest(request, *args):
-    print '***quote: sendRequest***'
-    ### Authorisation Check ###
-    from madas.quote.views import authorize
-    from settings import MADAS_STATUS_GROUPS, MADAS_ADMIN_GROUPS
-    (auth_result, auth_response) = authorize(request, module = 'quote', internal=True)
-    if auth_result is not True:
-        return auth_response
-    ### End Authorisation Check ###
-
-    print '\tgetting args'
+    logger.debug('***quote: sendRequest***')
     email = request.REQUEST.get('email', None)
     firstname = request.REQUEST.get('firstname', None)
     lastname = request.REQUEST.get('lastname', None)
@@ -146,70 +79,54 @@ def sendRequest(request, *args):
     details = request.REQUEST.get('details', None)
     country = request.REQUEST.get('country', None)
     fileName = request.REQUEST.get('fileName', None)
-    print '\tfinished getting args' 
 
     try:
         #add the new quote to the DB
         qr = _addQuoteRequest(email, firstname, lastname, officePhone, toNode, country, details)
     except Exception, e:
-        print 'Exception adding quote request: ', str(e) 
+        logger.warning('Exception adding quote request: %s' % (str(e) ))
   
     #TODO: if there is an exception here, we should really abort.
 
     try:
-        #TODO handle file uploads - check for error values
         if request.FILES.has_key('attachfile'):
             f = request.FILES['attachfile']
-            print '\tuploaded file name: ', f._get_name()
             translated_name = 'quote_attachment_' + str(qr.id) + '_' + f._get_name().replace(' ', '_')
-            print '\ttranslated name: ', translated_name
             _handle_uploaded_file(f, translated_name)
             qr.attachment = translated_name
-        else:
-            print '\tNo file attached.'
-
         qr.save()
 
     except Exception, e:
-        print '\tException: ', str(e)
+        logger.warning('\tException: %s' % (str(e) ))
 
     try: 
-        from django.core.mail import send_mail
-        #: to client
-        from madas.mail_functions import sendQuoteRequestConfirmationEmail
         sendQuoteRequestConfirmationEmail(request, qr.id, email) 
-        
         #email the administrator(s) for the node 
-        print 'Argument to _findAdminOrNodeRepEmailTarget is: ', toNode
+        logger.debug('Argument to _findAdminOrNodeRepEmailTarget is: %s' % (str(toNode)) )
         if toNode == '': #if the node was 'Dont Know'
-            searchgroups = 'Administrators'
+            searchgroups = MADAS_ADMIN_GROUP
         else:
             searchgroups = toNode
         targetUsers = _findAdminOrNodeRepEmailTarget(groupname = searchgroups)
-        from madas.mail_functions import sendQuoteRequestToAdminEmail
         for targetUser in targetUsers:
             sendQuoteRequestToAdminEmail(request, qr.id, firstname, lastname, targetUser['uid'][0]) #toemail should be a string, but ldap returns are all lists
     except Exception, e:
-        print 'Error sending mail in SendRequest: ', str(e)
+        logger.warning('Error sending mail in SendRequest: %s' % ( str(e) ) )
 
-    setRequestVars(request, success=True, authenticated=True, authorized=True, mainContentFunction='quote:request')
-    print '*** quote:sendRequest: exit ***'
-    return jsonResponse(request, [])       
+    logger.debug( '*** quote:sendRequest: exit ***' )
+    return jsonResponse( mainContentFunction='quote:request')       
 
+@admins_or_nodereps
 def listQuotesRequiringAttention(request):
     '''Used by dashboard to list the quotes that aren't Completed and don't have
        a formal quote yet.'''
 
-    # TODO return unauth
-    assert 'Administrators' in g or 'Node Reps' in g
-   
     qs = Quoterequest.objects.filter(completed=False,formalquote__id=None)
-    import utils
-    g = utils.getGroupsForSession(request)
-    if 'Node Reps' in g and 'Administrators' not in g:
-        from madas.users import views
-        print '\tcalling'
-        nodelist = views.getNodeMemberships(g)
+    
+    #If they are a noderep (only), we filter the qs by node
+    currentuser = getCurrentUser(request)
+    if currentuser.IsNodeRep and not currentuser.IsAdmin:
+        nodelist = getMadasNodeMemberships(currentuser.CachedGroups)
         node = nodelist[0]
         qs.filter(tonode=node) 
 
@@ -222,98 +139,52 @@ def listQuotesRequiringAttention(request):
 
     results = []
 
-    setRequestVars(request, items=resultsset, totalRows=len(resultsset), success=True, authenticated=True, authorized=True)
-    return jsonResponse(request, [])
+    return jsonResponse( items=resultsset)
 
 
 def listQuotes(request, *args):
     '''This corresponds to Madas Dashboard->Quotes->View Quote Requests
        Accessible by Administrators, Node Reps and Clients but it filters down to just Client's quote requests if it is a Client
     '''
-    ### Authorisation Check ###
-    from madas.quote.views import authorize
-    from madas.settings import MADAS_STATUS_GROUPS, MADAS_ADMIN_GROUPS 
-#    (auth_result, auth_response) = authorize(request, module = 'quote', internal=True, perms=MADAS_ADMIN_GROUPS)
-#    if auth_result is not True:
-#        return auth_response
-    ### End Authorisation Check ###
-    print '*** quote/listQuotes : enter *** '
-    #TODO: Find out which nodes this user represents, or if they are an administrator
-    import utils
-    g = utils.getGroupsForSession(request)
-
-    print '\tgroups was : ' + str(g)
-    from madas.users import views
-    print '\tcalling'
-    nodelist = views.getNodeMemberships(g)
-    print '\tnode was : ' , nodelist
+    g = getCurrentUser(request).CachedGroups
+    nodelist = getMadasNodeMemberships(g)
 
     results = [] 
-
-    try:
-        print '\tRetrieving quotes for: ', request.user.username
-        quoteslist = Quoterequest.objects.filter(emailaddressid__emailaddress=request.user.username).values('id', 'completed', 'unread', 'tonode', 'firstname', 'lastname', 'officephone', 'details', 'country', 'requesttime', 'emailaddressid__emailaddress' )
-        for ql in quoteslist:
-            ql['email'] = ql['emailaddressid__emailaddress']
-            del ql['emailaddressid__emailaddress']
-            results.append(ql)
-    except Exception, e:
-        print 'exception: ', str(e)
-
-    try:
-        print '\tRetrieving quotes for: ', nodelist[0]
+    quoteslist = []
+    if MADAS_NODEREP_GROUP in g:
+        #retrieve quotes for the first node in the list (there shouldnt be more than 1)
         quoteslist = Quoterequest.objects.filter(Q(tonode=nodelist[0]) | Q()).values('id', 'completed', 'unread', 'tonode', 'firstname', 'lastname', 'officephone', 'details', 'country', 'requesttime', 'emailaddressid__emailaddress' )
-        for ql in quoteslist:
-            ql['email'] = ql['emailaddressid__emailaddress']
-            del ql['emailaddressid__emailaddress']
-            results.append(ql)
-    except Exception, e:
-        print 'exception: ', str(e)
-
-    if 'Administrators' in g:
-        print '\tchecking administrators'
-        print '\tRetrieving quotes for: Administrators' 
-        adminlist = Quoterequest.objects.filter(tonode='').values('id', 'completed', 'unread', 'tonode', 'firstname', 'country', 'lastname', 'officephone', 'details', 'requesttime', 'emailaddressid__emailaddress' )
-        print '\tadmini query finished'
-        for ql in adminlist:
-            ql['email'] = ql['emailaddressid__emailaddress']
-            del ql['emailaddressid__emailaddress']
-            results.append(ql)
-        print '\tkey renaming finished'
-
-    try:
-        from madas import utils
-        #these may not be unique. need to uniquify them.
-        resultsset = utils.uniqueList(results) 
-    except Exception, e:
-        print '\tEXCEPTION when constructing unique list:', str(e) 
-    print '\tfinished generating quoteslist' 
-
-    setRequestVars(request, items=resultsset, totalRows=len(resultsset), success=True, authenticated=True, authorized=True) 
-    print '*** quote/listQuotes : exit *** '
-    return jsonResponse(request, [])       
+    else: #they are just a client. Show only their own quotes
+        quoteslist = Quoterequest.objects.filter(emailaddressid__emailaddress=request.user.username).values('id', 'completed', 'unread', 'tonode', 'firstname', 'lastname', 'officephone', 'details', 'country', 'requesttime', 'emailaddressid__emailaddress' )
     
+    quoteslist = list(quoteslist) #convert to normal list
+
+    #If they are an admin, ALSO show quotes which don't yet have a node
+    if MADAS_ADMIN_GROUP in g:
+        homelessquotes = Quoterequest.objects.filter(tonode='').values('id', 'completed', 'unread', 'tonode', 'firstname', 'country', 'lastname', 'officephone', 'details', 'requesttime', 'emailaddressid__emailaddress' )
+        quoteslist += list(homelessquotes)
+    
+    #transform the email field to be named correctly.
+    for ql in quoteslist:
+        ql['email'] = ql['emailaddressid__emailaddress']
+        del ql['emailaddressid__emailaddress']
+        results.append(ql)
+
+    #make the list unique. We can't use a set because the list contains unhashable types
+    resultsset = uniqueList(results)
+    
+
+    return jsonResponse( items=resultsset)       
+
+@admins_or_nodereps
 def listAll(request, *args):
     '''This corresponds to Madas Dashboard->Quotes->Overview List
        Accessible by Administrators, Node Reps
     '''
-    ### Authorisation Check ###
-    from madas.quote.views import authorize
-    from madas.settings import MADAS_STATUS_GROUPS, MADAS_ADMIN_GROUPS 
-    (auth_result, auth_response) = authorize(request, module = 'quote', internal=True, perms=MADAS_ADMIN_GROUPS)
-    if auth_result is not True:
-        return auth_response
-    ### End Authorisation Check ###
-    print '*** quote/listAll - enter ***'
-    ld = LDAPHandler()
-    g =  ld.ldap_get_user_groups(request.user.username)
+    logger.debug( '*** quote/listAll - enter ***' )
+    g = getCurrentUser(request).CachedGroups
 
-    print '\tgroups was : ' + str(g)
-    from madas.users import views
-    print '\tcalling'
-    nodelist = views.getNodeMemberships(g)
-    print '\tnode was : ' , nodelist
-
+    nodelist = getMadasNodeMemberships(g)
     results = [] 
 
     try:
@@ -330,12 +201,10 @@ def listAll(request, *args):
             
             results.append(ql)
     except Exception, e:
-        print '\texception getting quotes: ', str(e)
+        logger.debug('\texception getting quotes: %s' % ( (str(e)) ) )
 
-    if 'Administrators' in g:
-        print '\tchecking administrators'
+    if MADAS_ADMIN_GROUP in g:
         adminlist = Quoterequest.objects.filter(tonode='Administrators').values('id', 'completed', 'unread', 'tonode', 'firstname', 'lastname', 'officephone', 'details', 'requesttime', 'emailaddressid__emailaddress' )
-        print '\tadmini query finished'
         for ql in adminlist:
             ql['email'] = ql['emailaddressid__emailaddress']
             del ql['emailaddressid__emailaddress']
@@ -347,49 +216,28 @@ def listAll(request, *args):
                 ql['changetimestamp'] = qh.changetimestamp
             
             results.append(ql)
-        print '\tkey renaming finished'
 
     try:
-        from madas import utils
-        resultsset = utils.uniqueList(results) #these may not be unique. need to uniquify them.
+        resultsset = uniqueList(results) #these may not be unique. need to uniquify them.
     except Exception, e:
-        print '\tException making results set unique', str(e) 
-    print '\tfinished generating quoteslist' 
+        logger.warning('\tException making results set unique %s' % ( str(e) ) )
+    logger.debug('\tfinished generating quoteslist')
 
-    #TODO: The actual query should look like this
-
-#        $sql .= "LEFT JOIN emailmap em ON em.id = qr.emailaddressid WHERE qr.tonode = :tonode";
-    #$sql = "select qr.id, qr.completed, qr.unread, qr.tonode, qr.firstname, qr.lastname, qr.officephone, qr.details, to_char(qr.requesttime, 'YYYY/MM/DD HH24:MI:SS') as requesttime, em.emailaddress as email, to_char(qrh.changetimestamp, 'YYYY/MM/DD HH24:MI:SS') as changetimestamp from quoterequest as qr left join (select max(changetimestamp) as changetimestamp, quoteid from quotehistory where completed = true group by quoteid) as qrh on qr.id = qrh.quoteid left join emailmap em on em.id = qr.emailaddressid";
-
-    setRequestVars(request, items=resultsset, success=True, totalRows=len(resultsset), authenticated=True, authorized=True) 
-    print '*** quote/listAll - exit ***'
-    return jsonResponse(request, []) 
+    logger.debug('*** quote/listAll - exit ***')
+    return jsonResponse( items=resultsset) 
 
 
 def listFormal(request, *args, **kwargs):
     '''This corresponds to Madas Dashboard->Quotes->My Formal Quotes
        Accessible by Everyone
     '''
-    print '*** listFormal : enter ***'
-    ### Authorisation Check ###
-    from madas.quote.views import authorize
-    (auth_result, auth_response) = authorize(request, module = 'quote', internal=True)
-    if auth_result is not True:
-        return auth_response
-    ### End Authorisation Check ###
-    
+    logger.debug('*** listFormal : enter ***')
     uname = request.user.username
-    ld = LDAPHandler()
-    g =  ld.ldap_get_user_groups(request.user.username)
-    if g is None:
-        g = []
-    
-    from madas.users import views
-
-    nodelist = views.getNodeMemberships(g)
+    currentUser = getCurrentUser(request)
+    nodelist = getMadasNodeMemberships(currentUser.CachedGroups)
 
     #if a noderep or admin, and you have a node:
-    if ('Administrators' in g or 'Node Reps' in g) and len(nodelist) > 0:
+    if (currentUser.IsAdmin or currentUser.IsNodeRep) and len(nodelist) > 0:
         fquoteslist = Formalquote.objects.filter(Q(fromemail__iexact=uname)|Q(toemail__iexact=uname)|Q(quoterequestid__tonode=nodelist[0])).values('id', 'quoterequestid', 'details', 'created', 'fromemail', 'toemail', 'status')        
     #otherwise show all quotes to me, from me, or from this node.
     else:
@@ -397,16 +245,15 @@ def listFormal(request, *args, **kwargs):
     
     qid = kwargs.get('qid', request.REQUEST.get('qid', '') )
     if qid != '':
-        print 'filtering fquotes where qid is %s' % qid
+        logger.debug('filtering fquotes where qid is %s' % (qid) )
         fquoteslist = fquoteslist.filter(quoterequestid=qid)
 
-    setRequestVars(request, success=True, items=fquoteslist, totalRows=len(fquoteslist), authenticated=True, authorized=True)
- 
-    print '*** listFormal : exit ***'
-    return jsonResponse(request, []) 
+    logger.debug('*** listFormal : exit ***')
+    return jsonResponse( items=list(fquoteslist)) 
+
 
 def _loadQuoteRequest(qid):
-    print '\tload: qid was ', qid
+    logger.debug('\t_loadQuoteRequest: qid was %s' % (qid) )
     if qid is not None and qid.isdigit() and qid is not '':
         qr = Quoterequest.objects.filter(id = qid).values('id', 'emailaddressid__emailaddress', 'tonode', 'details', 'requesttime', 'unread', 'completed', 'firstname', 'lastname', 'officephone', 'country', 'attachment')
         try:
@@ -414,20 +261,20 @@ def _loadQuoteRequest(qid):
                 ql['email'] = ql['emailaddressid__emailaddress']
                 del ql['emailaddressid__emailaddress']
         except Exception, e:
-            print 'exception: ', str(e)
+            logger.warning('exception: %s' % (str(e)))
 
     else:
         qr = [{}]
- 
+
+    #TODO: REFACTOR If there was more than one quote request, something went wrong, and we should error
     qr = qr[0]    
-    print '\tqr:', qr
     
     return qr
     
-
+@authentication_required
 def load(request, *args):
     '''load quote details'''
-    print '*** load : enter ***'
+    logger.debug('*** load : enter ***')
     qid = request.REQUEST.get('qid', None)
     if qid is None:
         qid = request.REQUEST.get('quoterequestid', None)
@@ -446,15 +293,13 @@ def load(request, *args):
         suc = False
         qr = []
 
-    #TODO: mark quote as 'read' if not already.: updateQuoteRequestStatus($qid, $data['tonode'], ($data['completed'])?1:0, 0);
-    setRequestVars(request, data=qr, totalRows=len(qr), success = suc, authenticated = True, authorized = True )
-    print '*** load : exit ***'
-    return jsonResponse( request, [] )
+    logger.debug('*** load : exit ***')
+    return jsonResponse(  data=qr, success=suc )
     
 def history(request, *args):
-    print '***quote/history : enter***'
+    logger.debug('***quote/history : enter***')
     qid = request.REQUEST.get('qid', None)
-    print '\tHistory: qid was ', qid
+    logger.debug('\tHistory: qid was %s' % (str(qid)))
     if qid is not None:
         qh = Quotehistory.objects.filter(quoteid = qid).values()
     else:
@@ -465,29 +310,27 @@ def history(request, *args):
     #anyway, because they were probably retrieved in order.
     qh.sort(lambda x,y: cmp(x['changetimestamp'],y['changetimestamp']))
     qh.reverse()
-    print '\t', qh 
-    setRequestVars(request, data=qh, totalRows=len(qh), success = True, authenticated = True, authorized = True )
-    print '***quote/history : exit***'
-    return jsonResponse( request, [] )
+    logger.debug('***quote/history : exit***')
+    return jsonResponse( data = qh )
 
 
 def _getEmailMapping(email):
-    print '*** _getEmailMapping: enter***'
+    logger.debug( '*** _getEmailMapping: enter***' )
     retval = None
     try:
         emmap = Emailmap.objects.get(emailaddress = email)
         retval = emmap
     except Emailmap.DoesNotExist, e:
         #we need to create a new entry.
-        print '\tCreating new email mapping'
+        logger.debug( '\tCreating new email mapping' )
         newEmail = Emailmap(emailaddress = email)
         try:
             newEmail.save()
             retval = newEmail
         except Exception, e:
-            print '\tEmailMapping exception', e
+            logger.warning('\tEmailMapping exception: %s' % (str(e)) )
             retval = None
-    print '*** _getEmailMapping: exit ***'
+    logger.debug('*** _getEmailMapping: exit ***')
     return retval
 
 def _updateQuoteRequestStatus(qr, tonode, completed=0, unread=0):
@@ -497,7 +340,7 @@ def _updateQuoteRequestStatus(qr, tonode, completed=0, unread=0):
     qr.save()
 
 def _addQuoteHistory(qr, emailaddress, newnode, oldnode, comment, newcompleted, oldcompleted):
-    print '*** _addQuoteHistory: enter ***'
+    logger.debug('*** _addQuoteHistory: enter ***')
     #get the email mapping for this email address
     emailobj = _getEmailMapping(emailaddress)
     #store the history details
@@ -507,13 +350,12 @@ def _addQuoteHistory(qr, emailaddress, newnode, oldnode, comment, newcompleted, 
         q.save()
         retval = q
     except Exception, e:
-        print '\tThere was an error adding a Quotehistory entry: ', str(e)
+        logger.warning('\tThere was an error adding a Quotehistory entry: %s' % (str(e)) )
 
-    print '*** _addQuoteHistory: exit***'
+    logger.debug('*** _addQuoteHistory: exit***')
     return retval
 
 def _addQuoteRequest(emailaddress, firstname, lastname, officephone, tonode, country, details):
-    #TODO: input value checking
     retval = None
     emailobj = _getEmailMapping(emailaddress)
     if emailobj is not None:
@@ -524,7 +366,7 @@ def _addQuoteRequest(emailaddress, firstname, lastname, officephone, tonode, cou
     return retval
 
 def save(request, *args):
-    print '*** quote: save : enter ***'
+    logger.debug('*** quote: save : enter ***')
     id = request.POST.get('id', '')
     id = int(id)
     comment = request.POST.get('comment', '')
@@ -537,35 +379,29 @@ def save(request, *args):
     if toNode is None:
         #no new toNode supplied? Use the old one...
         toNode = qr.tonode
-    print '\ttoNode is ', toNode
+    logger.debug('\ttoNode is %s' % (str(toNode)) )
     #if the node has changed, email the administrator(s) for the new node
-    
     try:
         if toNode != qr.tonode:
             targetusers = _findAdminOrNodeRepEmailTarget(groupname = toNode)
             #email the administrators for the node
             for targetuser in targetusers:
                 targetemail = targetuser['uid'][0]
-                from mail_functions import sendQuoteRequestToAdminEmail
                 sendQuoteRequestToAdminEmail(request, id, email, '', targetemail) 
     except Exception, e:
-        print 'Exception emailing change to quote request: ', str(e) 
+        logger.warning('Exception emailing change to quote request: %s' % (str(e)) ) 
 
     _updateQuoteRequestStatus(qr, toNode, completed=completed, unread=0);       
 
     #add the comment to the history
     retval = _addQuoteHistory(qr, email, toNode, qr.tonode, comment, completed, qr.completed)
 
-    setRequestVars(request, success=True, authenticated=True, authorized=True, mainContentFunction = 'quote:list') 
-    print '*** quote: save : exit ***'
-    return jsonResponse(request, []) 
+    logger.debug('*** quote: save : exit ***')
+    return jsonResponse( mainContentFunction='quote:list') 
      
-
-
-
 def formalLoad(request, *args, **kwargs):
     '''allow loading either by quote id, or formalquoteid'''
-    print '***formalLoad : enter ***'#, args, kwargs
+    logger.debug('***formalLoad : enter ***')
   
     #get qid from quargs, then request, then blank 
     qid = kwargs.get('qid', request.REQUEST.get('qid', '') )
@@ -599,17 +435,10 @@ def formalLoad(request, *args, **kwargs):
                 retvals = retvals[0]
                 rows = len(retvals)
 
-                #TODO need to load up a bunch of user details here.
-
                 #get the details of the auth user in the toemail
-                ld = LDAPHandler()
-                d = ld.ldap_get_user_details(retvals['fromemail'])
+                d = getMadasUserDetails(retvals['fromemail'])
                 if len(d) > 0:
-                    #TODO: isnt this dict meant to go through some sort of translation function so that I don't have to access 
-                    #       raw LDAP fields here?
-                    from madas.users.views import _translate_ldap_to_madas
                     d = _translate_ldap_to_madas(d)
-                    print '\tRetrieved user details: ', d
                     retvals['fromname'] = d['firstname'][0] + ' ' + d['lastname'][0]
                     retvals['officePhone'] = d['telephoneNumber']
                     
@@ -618,45 +447,39 @@ def formalLoad(request, *args, **kwargs):
                     retvals['tonode'] = qr.tonode
                 retvals['pdf'] = retvals['details']
                 
-                e = ld.ldap_get_user_details(retvals['toemail'])
-                if len(e) > 0:
-                    ### Authorisation Check ### we do this here because we need to allow auth if the request is for a formal quote sent to an unregistered user
-                    from madas.quote.views import authorize
-                    from settings import MADAS_STATUS_GROUPS, MADAS_ADMIN_GROUPS
-                    (auth_result, auth_response) = authorize(request, module = 'quote', internal=True)
-                    if auth_result is not True:
-                        return auth_response
-                    ### End Authorisation Check ###  
-
             else:
-                print '\tNo formal quotes.'
+                logger.debug('\tNo formal quotes.')
                 retvals = retdata 
                 rows = 0
         except Exception, e:
-            print 'Exception (Retvals was %s): %s' % (str(retvals), str(e))
-        #so now, we want some user details.
+            logger.warning('Exception (Retvals was %s): %s' % (str(retvals), str(e)) )
     else:
-        print '\tNo qid or fqid passed'
+        logger.warning('\tNo qid or fqid passed')
         
-    setRequestVars(request, success=True, data=retvals, totalRows=1, params=[], authenticated=True, authorized=True) 
-    print '***formalLoad : exit ***'
-    return jsonResponse(request, []) 
-              
+    logger.warning('***formalLoad : exit ***')
+    return jsonResponse(data=retvals) 
+   
+   
+def viewFormalRedirect(request, *args):
+    urlstate = getCurrentURLState(request)
+    urlstate.redirectMainContentFunction = 'quote:viewformal'
+    urlstate.params = ['quote:viewformal', {'qid':int(request.REQUEST.get('quoterequestid', 0))}]
+    return HttpResponseRedirect(siteurl(request)) 
+
 def addFormalQuote(fromemail, toemail, quoterequestid, details):
     '''adds a formal quote to the database'''
-    print '*** addFormalQuote : enter ***'
+    logger.debug('*** addFormalQuote : enter ***')
     fromemail = fromemail.strip()
     tomemail = toemail.strip()
     retval = None
     if fromemail == '' or toemail == '':
-        print '\tNo from email or to email specified when adding a formal quote. Aborting.'
+        logger.warning('\tNo from email or to email specified when adding a formal quote. Aborting.')
     else:
         details = details.strip()
 
         try:
             #delete any formal quotes already attached to this quote
             qr = Quoterequest.objects.filter(id = quoterequestid)[0]
-            print 'QR is ', qr
             try: 
                 q = Formalquote.objects.get(quoterequestid = qr.id)
             except Exception, e:
@@ -665,7 +488,7 @@ def addFormalQuote(fromemail, toemail, quoterequestid, details):
             if q is not None:
                 q.delete()
         except Exception, e:
-            print '\tError deleting old formalquote entry for quoteid: ', quoterequestid, ': ', str(e)
+            logger.warning('\tError deleting old formalquote entry for quoteid %s : %s ' % ( str(quoterequestid), str(e)) )
             qr = None
 
         if qr is not None:
@@ -673,76 +496,62 @@ def addFormalQuote(fromemail, toemail, quoterequestid, details):
                 newrecord = Formalquote(quoterequestid = qr, details = details, fromemail = fromemail, toemail=toemail)
                 newrecord.save()
             except Exception, e:
-                print '\tException adding new formalquotedata. : ', str(e)
+                logger.warning('\tException adding new formalquotedata. : %s' % (str(e)))
 
             retval = newrecord.id
         else:
             retval = None
-    print '*** addFormalQuote : exit ***'
+    logger.debug('*** addFormalQuote : exit ***')
     return retval
 
 def formalSave(request, *args):
     '''Called when the user clicks the 'Send Formal Quote' button'''
-    print '***formalSave : enter ***'
-    ### Authorisation Check ###
-    from madas.quote.views import authorize
-    from settings import MADAS_STATUS_GROUPS, MADAS_ADMIN_GROUPS
-    (auth_result, auth_response) = authorize(request, module = 'quote', internal=True, perms=MADAS_ADMIN_GROUPS)
-    if auth_result is not True:
-        return auth_response
-    ### End Authorisation Check ###
+    logger.debug('***formalSave : enter ***')
     qid = request.REQUEST.get('quoterequestid', 'wasnt there')
     email = request.user.username
-    #print '\tQID: ', qid
-    #print '\tREQUEST :', request.REQUEST.__dict__
-
     attachmentname = ''
 
-    ######## GET INITIAL DETAILS ####################
-    print '\tGetting quote details'
+    # Get initial details
+    logger.debug('\tGetting quote details')
     try:
         #qr = Quoterequest.objects.get(id = qid)
         qr_obj = Quoterequest.objects.filter(id=qid)
         qr = qr_obj.values('id', 'completed', 'unread', 'tonode', 'firstname', 'lastname', 'officephone', 'details', 'requesttime', 'emailaddressid__emailaddress' )
         qr = qr[0]
         qr_obj = qr_obj[0]
-        print 'QR is : ', qr
         for key in qr.keys():
-            print '\t\t',key, qr[key]
+            logger.debug('\t\t',key, qr[key])
     except Exception, e:
-        print '\tException getting old details: ', str(e)
+        logger.warning('\tException getting old details: %s' % (str(e)) )
 
-    ############# FILE UPLOAD ########################
+    # File upload
     try:
-        #TODO handle file uploads - check for error values
-        print request.FILES.keys()
+        #TODO: REFACTOR : there is other code just like this...'
         if request.FILES.has_key('pdf'):
             f = request.FILES['pdf']
-            print '\tuploaded file name: ', f._get_name()
+            logger.debug('\tuploaded file name: %s' % (f._get_name()) )
             translated_name = 'formalquote_' + str(qr_obj.id) + '_' + f._get_name().replace(' ', '_')
-            print '\ttranslated name: ', translated_name
+            logger.debug('\ttranslated name: %s' % (translated_name))
             _handle_uploaded_file(f, translated_name)
             attachmentname = translated_name
         else:
-            print '\tNo file attached.'
+            logger.debug('\tNo file attached.')
     except Exception, e:
-        print '\tException: ', str(e)
+       logger.warning('\tException: %s' % ( str(e) ) )
     
 
     ################# ADD FORMAL QUOTE ################
-    print '\tAdding formal quote'
+    logger.debug('\tAdding formal quote')
     try:
         newfqid = addFormalQuote(email, qr['emailaddressid__emailaddress'], qid, attachmentname)
-        print '\tAdding history'
+        logger.debug('\tAdding history')
         _addQuoteHistory(qr_obj, qr['emailaddressid__emailaddress'], qr['tonode'], qr['tonode'], 'Formal quote created/modified', qr['completed'], qr['completed'])
-        print '\tFinished adding history'
+        logger.debug('\tFinished adding history')
     except Exception, e:
-        print '\tException: ', str(e)
+        logger.warning('\tException: %s' % (str(e)) )
     
-    from django.core.mail import send_mail
     toemail = qr['emailaddressid__emailaddress']
     fromemail = email
-    from madas.mail_functions import sendFormalQuoteEmail
     #get the list of admins or nodereps which should be notified:
     #note this is completely unsafe if the sequense above caused an exception retrieving the quote details.
     tonode = qr['tonode']
@@ -750,13 +559,10 @@ def formalSave(request, *args):
     cc = [str(c['uid'][0]) for c in cc]
     if toemail in cc:
         cc.remove(toemail)
-    print 'cc list is: %s' % str(cc)
+    logger.debug('cc list is: %s' % str(cc))
     sendFormalQuoteEmail(request, qid, attachmentname, toemail, cclist = cc, fromemail=fromemail)
-    #print '\tSetting request vars: '
-    setRequestVars(request, data=None, totalRows=0, authenticated=True, authorized=True, success=True, mainContentFunction = 'quote:list') 
-    #print '\tDone setting request vars'
-    print '***formalSave : exit ***'
-    return jsonResponse(request, []) 
+    logger.debug('***formalSave : exit ***')
+    return jsonResponse( mainContentFunction='quote:list') 
 
 
 def setFormalQuoteStatus(quoteobject, status):
@@ -776,7 +582,7 @@ def setFormalQuoteStatus(quoteobject, status):
         fq.save()
         retval = fq
     except Exception, e:
-        print '\tError updating formalquote status: ', str(e)
+        logger.warning('\tError updating formalquote status: %s' % (str(e)) )
 
     return retval
 
@@ -784,7 +590,7 @@ def setFormalQuoteStatus(quoteobject, status):
 
 
 def formalAccept(request, *args):
-    print '*** formalAccept: enter ***'
+    logger.debug( '*** formalAccept: enter ***' )
     #load original details
     qid = request.REQUEST.get('id', None)
     failed = False
@@ -792,7 +598,7 @@ def formalAccept(request, *args):
         qr = Quoterequest.objects.filter(id = qid)[0]
         qrvalues = _loadQuoteRequest(qid)
     except Exception, e:
-        print '\tException: Error getting initial quote: ', e
+        logger.warning('\tException: Error getting initial quote: %s' % (str(e)) )
         failed = True
 
     if not failed:
@@ -801,55 +607,41 @@ def formalAccept(request, *args):
         #TODO: this section needs some help - can edit arbitrary user details via this form...
         u = request.REQUEST.get('email')
         
-        from madas.quote.views import authorize
-        from settings import MADAS_STATUS_GROUPS, MADAS_ADMIN_GROUPS
-        (auth_result, auth_response) = authorize(request, module = 'quote', internal=True, perms=MADAS_ADMIN_GROUPS)
-        if auth_result is not True:  #allow node reps to accept quotes but not edit the user details
-            from madas.users.views import _usersave
-            _usersave(request, u)
+        #TODO: REFACTOR when removing authorize, this part has now been commented out
+        #if auth_result is not True:  #allow node reps to accept quotes but not edit the user details
+        #    from madas.users.views import _usersave
+        #    _usersave(request, u)
 
         #and then...
         #mark the formal quote as accepted:
         fq = setFormalQuoteStatus(qr, QUOTE_STATE_ACCEPTED)
         
         #add optional purchase_order_number to the qr
-        try:
-            po = request.REQUEST.get('purchase_order_number')
-            fq.purchase_order_number = po
-            fq.save()
-        except:
-            pass
+        po = request.REQUEST.get('purchase_order_number')
+        fq.purchase_order_number = po
+        fq.save()
 
         #leave acceptance in the quote history
         _addQuoteHistory(qr, qrvalues['email'], qr.tonode, qr.tonode, 'Formal quote accepted', qr.completed, qr.completed)
 
-    #email the node rep
+        #email the node rep
         targetusers = _findAdminOrNodeRepEmailTarget(groupname = qr.tonode)
-        from django.core.mail import send_mail
-        from madas.mail_functions import sendFormalStatusEmail
         for targetuser in targetusers:
             toemail = targetuser['uid'][0]
             sendFormalStatusEmail(request, qid, 'accepted', toemail, fromemail = qrvalues['email'])
-        #except Exception, e:
-        #    print '\tException: ', str(e)
-        #    failed = True
 
-
-    setRequestVars(request, success=not failed, data = None, totalRows = 0, authenticated = True, authorized = True, mainContentFunction='dashboard')
-    print '*** formalAccept: exit ***'
-    return jsonResponse(request, [])
-
-
+    logger.debug('*** formalAccept: exit ***')
+    return jsonResponse( success=not failed, mainContentFunction='dashboard')
 
 def formalReject(request, *args):
-    print '*** formalReject : enter ***'
+    logger.debug('*** formalReject : enter ***')
     qid = request.REQUEST.get('qid', None)
     try:
         qrq = Quoterequest.objects.filter(id = qid)
         qr = qrq[0]
         qrvalues = qrq.values('id', 'emailaddressid__emailaddress', 'tonode', 'details', 'requesttime', 'unread', 'completed', 'firstname', 'lastname', 'officephone', 'country', 'attachment' )[0]
     except Exception, e:
-        print '\tError getting initial quote: ', e
+        logger.warning('\tError getting initial quote: %s' % (str(e)) )
         qr = None
 
     if qr is not None:
@@ -859,27 +651,18 @@ def formalReject(request, *args):
             _addQuoteHistory(qr, qrvalues['emailaddressid__emailaddress'], qr.tonode, qr.tonode, 'Formal quote rejected', qr.completed, qr.completed)
             #email the node rep
             targetusers = _findAdminOrNodeRepEmailTarget(groupname = qr.tonode)
-            from django.core.mail import send_mail
-            from madas.mail_functions import sendFormalStatusEmail
             for targetuser in targetusers:
                 toemail = targetuser['uid'][0]
                 sendFormalStatusEmail(request, qid, 'rejected', toemail, fromemail = qrvalues['emailaddressid__emailaddress'])
         except Exception, e:
-            print 'DEBUG Exception: ', str(e)
-    #TODO: base success on email success? qr != None?
-    setRequestVars(request, success=True, data = None, totalRows = 0, authenticated = True, authorized = True, mainContentFunction='dashboard')
-    print '***formalReject : exit ***'
-    return jsonResponse(request, []) 
+            logger.debug( 'DEBUG Exception: %s' % (str(e)) )
+    logger.debug('***formalReject : exit ***')
+    return jsonResponse( mainContentFunction='dashboard') 
 
-
-
-def viewFormal(request, *args):
-    '''this would be viewing the quote from an email link. Currently this url /quote/viewformal is passed to loadquote().'''
-    pass
 
 
 def downloadPDF(request, *args):
-    print '*** downloadPDF: Enter ***'
+    logger.debug('*** downloadPDF: Enter ***')
     quoterequestid = request.REQUEST.get('quoterequestid', None)
     qrobj = Quoterequest.objects.filter(id = quoterequestid)
     qr = qrobj.values('id', 'completed', 'unread', 'tonode', 'firstname', 'lastname', 'officephone', 'details', 'requesttime', 'emailaddressid__emailaddress' )
@@ -890,15 +673,11 @@ def downloadPDF(request, *args):
     fqr = fqrob.values('id', 'quoterequestid', 'details', 'created', 'fromemail', 'toemail', 'status', 'downloaded')
     fqrob = fqrob[0]
     fqr = fqr[0]
-    import os
-    import madas
-    filename = os.path.join(madas.settings.QUOTE_FILES_ROOT, fqr['details'])
-    print '\tThe filename is: ', filename
+    filename = os.path.join(settings.QUOTE_FILES_ROOT, fqr['details'])
+    logger.debug('\tThe filename is: %s' % ( filename ) )
      
    
     try:
-        from django.core.servers.basehttp import FileWrapper
-        from django.http import HttpResponse
         wrapper = FileWrapper(file(filename))
         content_disposition = 'attachment;  filename=\"%s\"' % (fqr['details'])
         response = HttpResponse(wrapper, content_type='application/pdf')
@@ -912,9 +691,9 @@ def downloadPDF(request, *args):
 
     except Exception, e:
         response = HttpResponse('Error: The Quote file could not be retrieved')
-        print '\tException: ', str(e)
+        logger.warning('\tException: %s' % (str(e)) )
     
-    print '*** downloadPDF: Exit ***'
+    logger.debug('*** downloadPDF: Exit ***')
     return response 
 
 
@@ -922,271 +701,13 @@ def downloadAttachment(request, *args):
     quoterequestid = request.REQUEST.get('quoterequestid', None)
     qr = Quoterequest.objects.get(id = quoterequestid)
 
-    print 'downloadAttachment:', str(qr)
+    logger.debug('downloadAttachment: %s' % (str(qr)) )
     
-    import os
-    import madas
-    filename = os.path.join(madas.settings.QUOTE_FILES_ROOT, qr.attachment)
-    from django.core.servers.basehttp import FileWrapper
-    from django.http import HttpResponse
-
+    filename = os.path.join(settings.QUOTE_FILES_ROOT, qr.attachment)
     wrapper = FileWrapper(file(filename))
     content_disposition = 'attachment;  filename=\"%s\"' % (str(qr.attachment))
     response = HttpResponse(wrapper, content_type='application/download')
     response['Content-Disposition'] = content_disposition
     response['Content-Length'] = os.path.getsize(filename)
     return response 
-
-
-
-def check_default(request):
-    return True
-
-def login(request, *args):
-    success = processLogin(request, args)
-    return HttpResponseRedirect(siteurl(request)) 
-
-def authorize(request, module='/', perms = [], internal = False):
-    print '*** authorize : enter ***'
-
-    print 'Subaction: ', request.REQUEST.get('subaction', '')
-
-
-    #A variable used to determine if we bother using any of the params (session or request)
-    #that we see here. Default should be no, unless under specific circumstances
-    #namely doing a password reset or viewing a quote from an external link.
-    usecachedparams = False 
-    cachedparams = ''
-
-        #from django.core import serializers
-        #json_serializer = serializers.get_serializer("json")()
-        #
-        #try:
-        #    #TODO: This is never going to work. Its not a deserializer.
-        #    params = json_serializer.deserialize(params) 
-        #except Exception, e:
-        #    print '\tException: Could not deserialise params (%s): %s' % (params, str(e))
-        #    params = None
-    redirectMainContentFunction = request.session.get('redirectMainContentFunction')
-    if redirectMainContentFunction is not None:
-        print '\tUsing session params ', redirectMainContentFunction
-        cachedparams = request.session.get('params', None)
-    #else:
-        #passing through params of None means the request params are used anyway
-
-    if module == 'quote':
-        cachedparams = request.session.get('params', None)
-
-    print '\tcachedparams: ', cachedparams
-
-
-    #check if the session is still valid. If not, log the user out.
-    loggedin = request.session.get('loggedin', False)
-    if not loggedin:
-        if not request.user.is_anonymous():
-            #if request.user:
-            #    request.user.logout() #session gets flushed here
-            request.session.delete()
-        else:
-            #print request.session.__dict__
-            if redirectMainContentFunction is not None and\
-               redirectMainContentFunction != 'login:resetpassword':
-                request.session.delete()
-
-    request.session['params'] = cachedparams
-    request.session['redirectMainContentFunction'] = redirectMainContentFunction
-
-    print '\tmodule: %s, perms: %s, internal: %s, basepath: %s' % (str(module), str(perms), str(internal), str(wsgibase()))
-    #Check the current user status
-    authenticated = request.user.is_authenticated()   
-    print request.user
-    print '\tuser.is_authenticated was: ', authenticated
-  
-    #If they are authenticated, make sure they have their groups cached in the session
-    if authenticated:
-        import utils
-        cachedgroups = utils.getGroupsForSession(request)
- 
-    #here we check the module and the permissions
-    authorized = True
-    if len(perms) > 0:
-        authorized = False
-        cachedgroups = request.session.get('cachedgroups', [])
-        for perm in perms:
-            if perm in cachedgroups:
-                authorized = True
- 
-        if not authorized:        
-            print '\tAuthorization failure: %s does not in any of %s' % (request.user.username, perms)
-        
-    if module == 'quote' and request.REQUEST.get('subaction', '') == 'edit' and request.session.get('isClient', False):
-        authorized = False
-        print 'quote edit not for clients'
-
-    print '\tuser authorized? : ', authorized
-
-    if not authorized:
-        destination = 'notauthorized'
-    else:
-        destination = module 
-        print '\tauthorize: destination was ', destination
-        
-        s = request.REQUEST.get('subaction', '')
-        print '\tsubaction was "%s"' % (s)        
-        #we want to take them to the login page, UNLESS the destination:subaction was 
-        #quote:request or login:forgotpassword or login:<nothing>
-        if not authenticated:
-            #if not internal and
-            if ( destination != 'quote' and s != 'request' and\
-                 destination != 'login' and s != 'resetpassword' and\
-                 destination != 'login' and s != 'forgotpassword'):
-                print '\tDestination is now login'
-                destination = 'login'
-            else:
-                usecachedparams = True
-                if s is not None and s != '':
-                    destination +=  ':' + s
-        else:
-            if s is not None and str(s) != '':
-                #Append the subaction
-                destination += ':' + str(s)
-  
-        #despite all that, respect the redirectMainContentFunction if is is not None
-        #TODO: This is a bit of a hack - we do this here so that we don't wreck
-        #the /viewquote?id=1234 functionality. Really, it would be better to have a
-        #cleaner way of doing it without having to explicitly check for the
-        #redirectMainControlFunction here in authorise, but for the moment this works.
-        if redirectMainContentFunction is not None:
-            if redirectMainContentFunction == 'login:resetpassword':
-                print '\tUsing redirectMainContentFunction because it was something useful'
-                destination = redirectMainContentFunction
-                request.session['redirectMainContentFunction'] = None
-
-        print '\tDestination is now "%s"' % (destination)
-
-
-    if usecachedparams:
-        params = cachedparams 
-    else:
-        params = request.REQUEST.get('params', '')
-        print params
-
-    if authenticated or destination.startswith('login') or destination.startswith('quote'):
-        if destination == 'login':
-            print 'destination was login, so we are setting our request vars'
-        setRequestVars(request, success=True, authenticated=authenticated, authorized=authorized, mainContentFunction=destination, params=params) 
-    
-    if destination == 'quote:viewformal' and cachedparams:
-        print 'rejigging for viewformal'
-        setRequestVars(request, success=True, authenticated=authenticated, authorized=authorized, mainContentFunction=destination, params=cachedparams[1])
-    
-    if destination == 'dashboard':
-        request.session['redirectMainContentFunction'] = None
-        request.session['params'] = None
-    
-    #We only need to be 'authorized' to be allowed to render the page.
-    #if authenticated and authorized:
-    if authorized:
-        aa = True
-    else:
-        aa = False
-
-    print '*** authorize : exit ***'
-    if not internal:
-        return jsonResponse(request, []) 
-    else:
-        return (aa, jsonResponse(request, []) )  
-
-from django.template import Context, loader
-
-def redirectMain(request, *args, **kwargs):
-    #If we have 'params' in the kwargs, we want to store them in the session.
-    #We will want to retrieve them on the other side of the redirect, which
-    #will probably be the login function.
-   
-    if kwargs.has_key('module'):
-        red_str = kwargs['module']
-        if kwargs.has_key('submodule'):
-            red_str += ':%s' % (kwargs['submodule'])
-
-        print 'Setting session[redirectMainContentFunction] to %s' % (red_str)
-        request.session['redirectMainContentFunction'] = red_str 
-    
-    if kwargs.has_key('params'):
-        request.session['params'] = kwargs['params']    
-        request.session['params'].insert(0, red_str)
-
-    print 'redirectMain is redirecting to ', siteurl(request)
-    return HttpResponseRedirect(siteurl(request))
-    
-def serveIndex(request, *args, **kwargs):
-    for k in kwargs:
-        print '%s : %s' % (k, kwargs[k])
-    #so the 'cruft' key will contain a string.
-    #we can split this string into 'module/submodule', and have a querystring for good measure
-    #we put it in the 'params', and let the login page interpret it.
-    if kwargs.has_key('cruft'):
-        import re
-        #m = re.match(r'(\w+)\/(\w+)?\?(.*)?', kwargs['cruft'])
-        m = re.match(r'(\w+)\/(\w+)?', kwargs['cruft'])
-        if m is not None:
-            fullstring = m.group(0)
-            modname = m.group(1)
-            funcname = m.group(2)
-            qsargs = request.META['QUERY_STRING']
-            #for k in request.__dict__['META'].keys():
-            #    print '%s : %s ' % (k, request.__dict__['META'][k])
-
-            #parse the qs args
-            argsdict = {}
-            qsargs = strip(qsargs, '?') #strip off ?
-            vars = split(qsargs, '&')
-            for var in vars:
-                if len(split(var, '=')) > 1:
-                    (key,val) = split(var, '=')
-                    if key is not None and val is not None:
-                        argsdict[key] = val
-
-
-            from utils import param_remap
-            argsdict = param_remap(argsdict)
-
-            print 'module: %s, funcname %s, argsdict %s' % (modname, funcname, argsdict)
-        #else:
-        #    print 'No match'
-
-            params = [argsdict]
-            print 'redirecting'
-            return redirectMain(request, module = modname, submodule = funcname, params = params)
-        else:
-            params = request.session.get('params', '')
-
-    print 'serve index...' 
-    #print settings.APP_SECURE_URL
-    #print request.username
-    #print request.session.get('mainContentFunction', 'AAAAAAAA')
-    request.params = params
-    from django.utils import simplejson
-    m = simplejson.JSONEncoder()
-    paramstr = m.encode(params)
-    
-    if params:
-        sendparams = params[1]
-    else:
-        sendparams = ''
-    
-    mcf = request.session.get('redirectMainContentFunction')
-    if mcf is None: mcf = 'dashboard'
-    request.session['redirectMainContentFunction'] = None
-    
-    return render_mako('index.mako', 
-                        APP_SECURE_URL = siteurl(request),#settings.APP_SECURE_URL,
-                        username = request.user.username,
-                        mainContentFunction = mcf,
-                        wh = webhelpers,
-                        params = sendparams # params[1] #None #['quote:viewformal', {'qid': 83}]
-                      )
-
-def serverinfo(request):
-    return render_mako('serverinfo.mako', s=settings, request=request, g=globals() )
 

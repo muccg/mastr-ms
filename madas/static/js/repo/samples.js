@@ -115,7 +115,7 @@ MA.ExperimentSamples = {
                         {
                             text:'Create',
                             cls: 'x-btn-text-icon',
-                            icon: 'static/repo/images/create-samples.png',
+                            icon: 'static/images/create-samples.png',
                             handler: function() {
                                 var reps = Ext.getCmp('replicateField').getValue();
                                 
@@ -193,7 +193,7 @@ MA.ExperimentSamples = {
                     cls: 'x-btn-text-icon',
                     disabled: true,
                     id: 'addsamplebutton',
-                    icon: 'static/repo/images/add.png',
+                    icon: 'static/images/add.png',
                     handler: function () {
                         MA.CRUDSomething('create/sample/', {
                             'sample_class_id': MA.CurrentSampleClassId(),
@@ -209,7 +209,7 @@ MA.ExperimentSamples = {
                     cls: 'x-btn-text-icon',
                     disabled: true,
                     id: 'removesamplebutton',
-                    icon: 'static/repo/images/delete.png',
+                    icon: 'static/images/delete.png',
                     handler: function () {
                         var grid = Ext.getCmp('samples');
                         var delIds = []; 
@@ -239,7 +239,7 @@ MA.ExperimentSamples = {
                 {
                     text: 'Add Selected Samples to Run',
                     cls: 'x-btn-text-icon',
-                    icon: 'static/repo/images/add-to-run.png',
+                    icon: 'static/images/add-to-run.png',
                     handler: function() {
                         //save changes to selected entries
                         var grid = Ext.getCmp('samples');
@@ -416,7 +416,7 @@ MA.ExperimentSamplesOnly = {
             text: 'Add Sample',
             cls: 'x-btn-text-icon',
             id: 'addsamplesbutton',
-            icon: 'static/repo/images/add.png',
+            icon: 'static/images/add.png',
             handler: function () {
                 MA.CRUDSomething('create/sample/', {'experiment_id':MA.ExperimentController.currentId()}, MA.SampleLoadByExperiment);
             }
@@ -425,7 +425,7 @@ MA.ExperimentSamplesOnly = {
             text: 'Remove Sample',
             cls: 'x-btn-text-icon',
             id: 'removesamplesbutton',
-            icon: 'static/repo/images/delete.png',
+            icon: 'static/images/delete.png',
             handler: function () {
                 var grid = Ext.getCmp('samplesOnly');
                 var delIds = []; 
@@ -453,7 +453,7 @@ MA.ExperimentSamplesOnly = {
             text: 'Upload CSV file',
             cls: 'x-btn-text-icon',
             id: 'uploadsamplesbutton',
-            icon: 'static/repo/images/add.png',
+            icon: 'static/images/add.png',
             handler: function () {
                 MA.SampleCSVUploadForm.show();
             }
@@ -462,7 +462,7 @@ MA.ExperimentSamplesOnly = {
         {
             text: 'Add Selected Samples to Run',
             cls: 'x-btn-text-icon',
-            icon: 'static/repo/images/add-to-run.png',
+            icon: 'static/images/add-to-run.png',
             handler: function() {
                 //save changes to selected entries
                 var grid = Ext.getCmp('samplesOnly');

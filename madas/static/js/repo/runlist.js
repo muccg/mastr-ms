@@ -47,7 +47,7 @@ MA.RunList = Ext.extend(Ext.Panel, {
                         {
                             text: "Remove Run",
                             cls: "x-btn-text-icon",
-                            icon: "static/repo/images/delete.png",
+                            icon: "static/images/delete.png",
                             handler: function () {
                                 var selModel = self.getComponent("grid").getSelectionModel();
 

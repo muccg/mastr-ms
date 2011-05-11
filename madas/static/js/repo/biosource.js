@@ -457,7 +457,7 @@ MA.BioSource = {
                     tbar: [{
                         text: 'Add Organ/Part',
                         cls: 'x-btn-text-icon',
-                        icon:'static/repo/images/add.png',
+                        icon:'static/images/add.png',
                         handler : function() {
                            MA.CRUDSomething('create/organ/', {'experiment_id':MA.ExperimentController.currentId(), 'name':'Unknown'}, MA.BioSourceLoad);
                         }
@@ -465,7 +465,7 @@ MA.BioSource = {
                         {
                         text: 'Remove Organ/Part',
                         cls: 'x-btn-text-icon',
-                        icon:'static/repo/images/delete.png',
+                        icon:'static/images/delete.png',
                         handler : function(){
                             var grid = Ext.getCmp('organs');
                             var delIds = []; 

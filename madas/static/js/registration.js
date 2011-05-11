@@ -137,32 +137,30 @@ items:[
                  text: 'Submit',
                  id:'registrationSubmit',
                  handler: function(){
-                 Ext.getCmp('registration-panel').getForm().submit(
-                                                                   {   successProperty: 'success',        
-                                                                   success: function (form, action) {
-                                                                   if (action.result.success === true) {
-                                                                   form.reset(); 
-                                                                   
-                                                                   //display a success alert that auto-closes in 5 seconds
-                                                                   Ext.Msg.alert("Registration request sent successfully", "We will contact you via email or phone as soon as possible. Thank you for your inquiry.");
-                                                                   
-                                                                   //load up the menu and next content area as declared in response
-                                                                   MA.ChangeMainContent(action.result.mainContentFunction);
-                                                                   } 
-                                                                   },
-                                                                   failure: function (form, action) {
-                                                                   //do nothing special. this gets called on validation failures and server errors
-                                                                   try {
-                                                                   if (action.result.mainContentFunction == "error:existingRegistration") {
-                                                                   alert('That email address is already registered. Perhaps try logging in, or use the "Forgot your password?" link from the Login page');
-                                                                   } else {
-                                                                   alert('error submitting form\n' + action.response );
-                                                                   }
-                                                                   } catch (e) {
-                                                                   alert('error submitting form, processing error:\n' + action.response );
-                                                                   }
-                                                                   }
-                                                                   });
+                    Ext.getCmp('registration-panel').getForm().submit({
+                        successProperty: 'success',        
+                        success: function (form, action) {
+                            if (action.result.success === true) {
+                                form.reset(); 
+                                //display a success alert that auto-closes in 5 seconds
+                                Ext.Msg.alert("Registration request sent successfully", "We will contact you via email or phone as soon as possible. Thank you for your inquiry.");
+                                //load up the menu and next content area as declared in response
+                                MA.ChangeMainContent(action.result.mainContentFunction);
+                            } 
+                        },
+                        failure: function (form, action) {
+                            //do nothing special. this gets called on validation failures and server errors
+                            try {
+                                if (action.result.msg === "User already exists") {
+                                    alert('That email address is already registered. Perhaps try logging in, or use the "Forgot your password?" link from the Login page');
+                                } else {
+                                    alert('Error submitting form\n' + action.response.msg );
+                                }
+                            } catch (e) {
+                                alert('Error submitting form, processing error:\n' + action.response );
+                            }
+                        }
+                    });
                  }
                  }
                  ]

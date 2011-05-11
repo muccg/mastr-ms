@@ -70,12 +70,13 @@ MA.UserEditCmp = {id:'useredit-container-panel',
                     url:MA.BaseUrl + 'user/userSave',
                     method:'POST',
                     frame:true,
-                    reader: new MA.JsonReader({
+                    reader: new Ext.data.JsonReader({
                                                               root            : 'data',
-                                                              versionProperty : 'response.value.version',
-                                                              totalProperty   : 'response.value.total_count',
-                                                              successProperty : 'success'
-                                                              }, [
+                                                              //versionProperty : 'response.value.version',
+                                                              //totalProperty   : 'response.value.total_count',
+                                                              totalProperty   : 'totalRows',
+                                                              successProperty : 'success',
+                                                              fields: [
                                                                   { name: 'username', sortType : 'string' },
                                                                   { name: 'firstname', sortType : 'string' },
                                                                   { name: 'lastname', sortType : 'string' },
@@ -94,7 +95,7 @@ MA.UserEditCmp = {id:'useredit-container-panel',
                                                                   { name: 'supervisor', sortType : 'string' },
                                                                   { name: 'areaOfInterest', sortType : 'string' },
                                                                   { name: 'country', sortType : 'string' }
-                                                                  ]),
+                                                                  ]}),
                     title: 'Edit My Details',
                     bodyStyle:'padding:5px 5px 0',
                     width: 380,
@@ -210,7 +211,7 @@ MA.UserEditCmp = {id:'useredit-container-panel',
                         text: 'Cancel',
                         handler: function(){
                             Ext.getCmp('useredit-panel').getForm().reset(); 
-                            MA.Authorize('dashboard');
+                            MA.ChangeMainContent('dashboard');
                             }
                         },{
                         text: 'Save',

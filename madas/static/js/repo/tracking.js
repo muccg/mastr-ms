@@ -109,7 +109,7 @@ MA.SampleTracking = {
                     { 
                         text:'Save',
                         cls: 'x-btn-text-icon',
-                        icon: 'static/repo/images/save.png',
+                        icon: 'static/images/save.png',
                         listeners: {
                             'click': function(e) {
                                 //save changes to selected entries

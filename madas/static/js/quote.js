@@ -32,9 +32,9 @@ MA.RequestQuoteInit = function () {
 	var reqQuoCmp = Ext.getCmp('requestquote-panel');   
 
     //fetch user details
-    reqQuoCmp.load({url: MA.BaseUrl + 'user/userload', waitMsg:'Loading'});
-
-    //reqQuoCmp.doLayout();
+    if (MA.CurrentUser.IsLoggedIn)
+        reqQuoCmp.load({url: MA.BaseUrl + 'user/userload', waitMsg:'Loading'});
+    reqQuoCmp.doLayout();
     
     return;
 };
@@ -119,7 +119,7 @@ MA.RequestQuoteCmp =
                     listWidth:230,
                     store: new Ext.data.JsonStore({
                         storeId:'sendToStore',
-                        url: MA.BaseUrl + 'quote/listGroups',
+                        url: MA.BaseUrl + 'user/listAllNodes',
                         root: 'response.value.items',
                         fields: ['name', 'submitValue']
                     })
@@ -130,13 +130,15 @@ MA.RequestQuoteCmp =
                     allowBlank:false,
                     grow:true,
                     growMax:360
-                },{
+                }
+                ,{
                         xtype: 'fileuploadfield',
                         id: 'quo-attach',
-                        emptyText: '',
-                        fieldLabel: 'Attach a File (optional)',
-                        name: 'attachfile'
-                } 
+                        emptyText: 'Attach a file',
+                        fieldLabel: 'File',
+                        name: 'attachfile',
+                        buttonText: '...',
+                }
             ],
             buttons: [
                  {
@@ -212,7 +214,8 @@ MA.QuoteRequestListInit = function(){
         });
     var editHandler = function(el, ev) {
         if (selectionModel.hasSelection()) {
-            MA.Authorize('quote:edit', [selectionModel.getSelected().data.id, 'quote:list']);
+            //MA.Authorize('quote:edit', [selectionModel.getSelected().data.id, 'quote:list']);
+            MA.ChangeMainContent('quote:edit', [selectionModel.getSelected().data.id, 'quote:list']);
         }
     };
     var topToolbar = new Ext.Toolbar({
@@ -276,6 +279,7 @@ MA.QuoteRequestListInit = function(){
                                         {name: 'lastname', mapping: 'lastname'},
                                         {name: 'officephone', mapping: 'officephone'},
                                         {name: 'completed', mapping: 'completed'},
+                                        {name: 'country', mapping: 'country'},
                                         {name: 'email', mapping: 'email'},
                                         {name: 'attachment', mapping: 'attachment'}
                                       ]),
@@ -376,7 +380,8 @@ MA.QuoteRequestListInit = function(){
                 if (list.getSelectionCount() > 0) {
                     sel = list.getSelectedRecords()[0];
                     list.clearSelections(true);
-                    MA.Authorize('quote:viewformal', {"qid" : sel.data.quoterequestid});
+                    //MA.Authorize('quote:viewformal', {"qid" : sel.data.quoterequestid});
+                    MA.ChangeMainContent('quote:viewformal', {"qid" : sel.data.quoterequestid});
                 }
             }
         },
@@ -528,6 +533,7 @@ MA.QuoteRequestEditCmp =
                                             {name: 'lastname', mapping: 'lastname'},
                                             {name: 'officephone', mapping: 'officephone'},
                                             {name: 'completed', mapping: 'completed'},
+                                            {name: 'country', mapping: 'country'},
                                             {name: 'email', mapping: 'email'},
                                             {name: 'attachment', mapping: 'attachment'}
                                           ]),
@@ -605,7 +611,7 @@ MA.QuoteRequestEditCmp =
                     disabled: true,
                     store: new Ext.data.JsonStore({
                         storeId: 'redirectQuoteNodeDS',
-                        url: MA.BaseUrl + 'quote/listGroups',
+                        url: MA.BaseUrl + 'user/listAllNodes',
                         root: 'response.value.items',
                         fields: ['name', 'submitValue']
                     })
@@ -681,13 +687,17 @@ MA.QuoteRequestEditCmp =
                  id: 'cancelEditQuoteRequestBtn',
                  hidden : true,
                  handler: function(){
-                    Ext.getCmp('quoterequestedit-panel').getForm().reset();
+                    quoteReqEditCmp = Ext.getCmp('quoterequestedit-panel');
+                    quoteReqEditCmp.getForm().reset();
+                    
+                    //trying to reload the data into the form
+                    //quoteReqEditCmp.load({url: MA.BaseUrl + 'quote/load', params: {'qid': quoteReqEditCmp.getForm().findField("id").getValue()}});
                     MA.QuoteEditVisualToggle(false);
                     }
                  },
                  {
                  text: 'Save',
-                 id:'requestQuoteSubmit',
+                 id:'editQuoteSubmit',
                  handler: function(){
                     Ext.getCmp('quoterequestedit-panel').getForm().submit(
                         {   successProperty: 'success',
@@ -959,7 +969,8 @@ MA.FormalQuoteUserListInit = function(){
         var selectionModel = grid.getSelectionModel();
     
         if (selectionModel.hasSelection() && selectionModel.getSelected().data.quoterequestid !== '') {
-            MA.Authorize('quote:viewformal', {"qid" : selectionModel.getSelected().data.quoterequestid});
+            //MA.Authorize('quote:viewformal', {"qid" : selectionModel.getSelected().data.quoterequestid});
+            MA.ChangeMainContent('quote:viewformal', {"qid" : selectionModel.getSelected().data.quoterequestid});
         }
     };
     
@@ -1050,13 +1061,16 @@ MA.FquoValidatePassword = function (textfield, event) {
 };
 
 MA.ViewFormalInit = function(paramArray){
+    console.log(paramArray);
     var id = paramArray.qid;
+    console.log('the id is now: ' + id);
+
     var quoteRequestEditCmp = Ext.getCmp('fquouserdetails-panel');
     var formalQuoteCmp = Ext.getCmp('formalquoteview-panel');
 
     //if node rep or admin, disable the user edit fields
     for (var i = 0; i < quoteRequestEditCmp.items.length; i++) {
-        if (MA.IsNodeRep || MA.IsAdmin) {
+        if (MA.CurrentUser.IsNodeRep || MA.CurrentUser.IsAdmin) {
             if (
                 quoteRequestEditCmp.items.get(i).getId() != 'quov-hidden-id' &&
                 quoteRequestEditCmp.items.get(i).getId() != 'quov-qid' &&
@@ -1068,7 +1082,7 @@ MA.ViewFormalInit = function(paramArray){
         }
     }
     
-    if (MA.IsNodeRep || MA.IsAdmin) {
+    if (MA.CurrentUser.IsNodeRep || MA.CurrentUser.IsAdmin) {
         Ext.getCmp('fquoadminmode').show();
     } else {
         Ext.getCmp('fquoadminmode').hide();
@@ -1246,7 +1260,7 @@ MA.ViewFormalCmp = {
                         success: function (form, action) {
                             if (action.result.success === true) { 
                             
-                                Ext.Msg.alert('Formal quote rejected', 'close this window when you are ready');
+                                Ext.Msg.alert('Formal quote rejected', 'The formal quote has been rejected.');
                                 
                                 //load up the menu and next content area as declared in response
                                 MA.ChangeMainContent(action.result.mainContentFunction);

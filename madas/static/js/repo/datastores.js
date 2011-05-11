@@ -1,7 +1,7 @@
 //var wsBaseUrl = "http://boromir5.localdomain/madasrepo/ntakayama/ws/";
 //var baseUrl = "/madas/ntakayama/repo/";
-var adminBaseUrl = baseUrl + "repoadmin/";
-var wsBaseUrl = baseUrl + "ws/";
+var adminBaseUrl = MA.BaseUrl + "repoadmin/";
+var wsBaseUrl = MA.BaseUrl + "ws/";
 var storesNeededForRendering = [];
 
 MA.DSLoaded = function(ds, recs, opts) {
@@ -163,7 +163,7 @@ var sopStore = new Ext.data.JsonStore(
 var sopLookupStore = new Ext.data.JsonStore(
                         {
                             storeId: 'sopLookup',
-                            autoLoad: true,
+                            autoLoad: false,
                             url: adminBaseUrl + "repository/standardoperationprocedure/ext/json",
                             remoteSort: true,
                             restful: true,
@@ -245,7 +245,7 @@ var projectsListStore = new Ext.data.JsonStore(
 var clientsListStore = new Ext.data.JsonStore(
                         {
                             storeId: 'clientsList',
-                            autoLoad: true,
+                            autoLoad: false,
                             url: wsBaseUrl + 'recordsClientList',
                             listeners: {'load':MA.DSLoaded
                                         },
@@ -260,7 +260,7 @@ var clientsListStore = new Ext.data.JsonStore(
 var userListStore = new Ext.data.JsonStore(
                         {
                             storeId: 'clientsList',
-                            autoLoad: true,
+                            autoLoad: false,
                             url: wsBaseUrl + 'recordsClientList?allUsers=1',
                             listeners: {'load':MA.DSLoaded},
                             sortInfo: {
@@ -405,7 +405,7 @@ var humanStore = new Ext.data.JsonStore(
 var experimentRunStore = new Ext.data.JsonStore(
                                                 {
                                                 storeId: 'experimentRunStore',
-                                                autoLoad: true,
+                                                autoLoad: false,
                                                 url: adminBaseUrl + "repository/run/ext/json",
                                                 restful: true,
                                                 listeners: {'load':MA.DSLoaded,
@@ -421,7 +421,7 @@ var experimentRunStore = new Ext.data.JsonStore(
 var selectableRunStore = new Ext.data.JsonStore(
                         {
                             storeId: 'run',
-                            autoLoad: true,
+                            autoLoad: false,
                             url: adminBaseUrl + "repository/run/ext/json?state=0",
                             restful: true,
                             listeners: {'load':MA.DSLoaded,
@@ -437,7 +437,7 @@ var selectableRunStore = new Ext.data.JsonStore(
 var runStore = new Ext.data.JsonStore(
                         {
                             storeId: 'run',
-                            autoLoad: true,
+                            autoLoad: false,
                             url: adminBaseUrl + "repository/run/ext/json",
                             restful: true,
                             listeners: {'load':MA.DSLoaded,
@@ -453,7 +453,7 @@ var runStore = new Ext.data.JsonStore(
 var runSampleStore = new Ext.data.JsonStore(
                         {
                             storeId: 'runsamples',
-                            autoLoad: true,
+                            autoLoad: false,
                             url: adminBaseUrl + "repository/sample/ext/json?run__id__exact=0",
                             restful: true,
                             listeners: {'load':MA.DSLoaded,
@@ -469,7 +469,7 @@ var runSampleStore = new Ext.data.JsonStore(
 var machineStore = new Ext.data.JsonStore(
 {
     storeId: 'machineStore',
-    autoLoad: true,
+    autoLoad: false,
     url: adminBaseUrl + 'mdatasync_server/nodeclient/ext/json',
     restful: false,
     listeners: {'load':MA.DSLoaded,
@@ -487,7 +487,7 @@ var machineStore = new Ext.data.JsonStore(
 var organismTypeComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'organismTypeCombo',
-                            autoLoad: true,
+                            autoLoad: false,
                                                     method:'GET',
                             url: wsBaseUrl + 'populate_select/organismtype/id/name/',
                             root: 'response.value.items',
@@ -609,7 +609,7 @@ var sopComboStore = new Ext.data.JsonStore(
 var userComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'userCombo',
-                            autoLoad: true,
+                            autoLoad: false,
                             url: wsBaseUrl + 'populate_select/user/id/username',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
@@ -621,7 +621,7 @@ var userComboStore = new Ext.data.JsonStore(
 var clientComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'clientCombo',
-                            autoLoad: true,
+                            autoLoad: false,
                             url: adminBaseUrl + "auth/user/ext/json?run__id__exact=0",
                             root: 'response.value.items',
                             fields: ['value', 'key'],
@@ -633,7 +633,7 @@ var clientComboStore = new Ext.data.JsonStore(
 var involvementComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'involvementCombo',
-                            autoLoad: true,
+                            autoLoad: false,
                             url: wsBaseUrl + 'populate_select/userinvolvementtype/id/name',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
@@ -645,7 +645,7 @@ var involvementComboStore = new Ext.data.JsonStore(
 var expStatusComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'expStatusCombo',
-                            autoLoad: true,
+                            autoLoad: false,
                             url: wsBaseUrl + 'populate_select/experimentstatus/id/name',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
@@ -655,7 +655,7 @@ var expStatusComboStore = new Ext.data.JsonStore(
                     );
 
 var methodStore = new Ext.data.JsonStore({
-    autoLoad:true,
+    autoLoad:false,
     storeId:'methodStore',
     url: wsBaseUrl + 'populate_select/instrumentmethod/id/title/',
     root: 'response.value.items',

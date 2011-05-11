@@ -59,7 +59,7 @@ MA.SamplePrep = {
                     tbar: [{
                         text: 'Choose a SOP',
                         cls: 'x-btn-text-icon',
-                        icon:'static/repo/images/add.png',
+                        icon:'static/images/add.png',
                         handler : function(){
                                 sopStore.add(new Ext.data.Record({'id':'', 'description':''}));
                             }
@@ -67,7 +67,7 @@ MA.SamplePrep = {
                         {
                         text: 'Remove SOP',
                         cls: 'x-btn-text-icon',
-                        icon:'static/repo/images/delete.png',
+                        icon:'static/images/delete.png',
                         handler : function(){
                             var grid = Ext.getCmp('standop');
                             var store = Ext.StoreMgr.get('sopStore');

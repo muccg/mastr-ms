@@ -18,7 +18,7 @@ MA.AdminRequestsInit = function(){
     
 	var dataurl = MA.BaseUrl + "admin/adminrequests";
     
-    var madasReader = new MA.JsonReader({
+    var madasReader = new Ext.data.JsonReader({
                                               root            : 'response.value.items',
                                               versionProperty : 'response.value.version',
                                               totalProperty   : 'response.value.total_count'
@@ -45,7 +45,7 @@ MA.AdminRequestsInit = function(){
                                          });
     var editHandler = function(el, ev) {
         if (selectionModel.hasSelection()) {
-            MA.Authorize('admin:useredit', [selectionModel.getSelected().data['username']]);
+            MA.ChangeMainContent('admin:useredit', [selectionModel.getSelected().data['username']]);
         }
     };
     var topToolbar = new Ext.Toolbar({
@@ -96,7 +96,7 @@ MA.UserSearchInit = function(){
     
 	var dataurl = MA.BaseUrl + "admin/usersearch";
     
-    var madasReader = new MA.JsonReader({
+    var madasReader = new Ext.data.JsonReader({
                                               root            : 'response.value.items',
                                               versionProperty : 'response.value.version',
                                               totalProperty   : 'response.value.total_count'
@@ -134,7 +134,7 @@ MA.UserSearchInit = function(){
                                              ]);
     var editHandler = function(el, ev) {
         if (selectionModel.hasSelection()) {
-            MA.Authorize('admin:useredit', [selectionModel.getSelected().data['username']]);
+            MA.ChangeMainContent('admin:useredit', [selectionModel.getSelected().data['username']]);
         }
     };
     var topToolbar = new Ext.Toolbar({
@@ -176,7 +176,7 @@ MA.RejectedUserSearchInit = function(){
     
 	var dataurl = MA.BaseUrl + "admin/rejectedUsersearch";
     
-    var madasReader = new MA.JsonReader({
+    var madasReader = new Ext.data.JsonReader({
                                               root            : 'response.value.items',
                                               versionProperty : 'response.value.version',
                                               totalProperty   : 'response.value.total_count'
@@ -212,7 +212,7 @@ MA.RejectedUserSearchInit = function(){
                                              ]);
     var editHandler = function(el, ev) {
         if (selectionModel.hasSelection()) {
-            MA.Authorize('admin:useredit', [selectionModel.getSelected().data['username']]);
+            MA.ChangeMainContent('admin:useredit', [selectionModel.getSelected().data['username']]);
         }
     };
     var topToolbar = new Ext.Toolbar({
@@ -254,7 +254,7 @@ MA.DeletedUserSearchInit = function(){
     
 	var dataurl = MA.BaseUrl + "admin/deletedUsersearch";
     
-    var madasReader = new MA.JsonReader({
+    var madasReader = new Ext.data.JsonReader({
                                               root            : 'response.value.items',
                                               versionProperty : 'response.value.version',
                                               totalProperty   : 'response.value.total_count'
@@ -290,7 +290,7 @@ MA.DeletedUserSearchInit = function(){
                                              ]);
     var editHandler = function(el, ev) {
         if (selectionModel.hasSelection()) {
-            MA.Authorize('admin:useredit', [selectionModel.getSelected().data['username']]);
+            MA.ChangeMainContent('admin:useredit', [selectionModel.getSelected().data['username']]);
         }
     };
     var topToolbar = new Ext.Toolbar({
@@ -332,6 +332,7 @@ MA.DeletedUserSearchInit = function(){
 MA.AdminUserEditInit = function (paramArray) {
     var username = paramArray[0];
     var adminUserEditCmp = Ext.getCmp('adminuseredit-panel');   
+    var user = MA.CurrentUser;
     
     //fetch user details
     adminUserEditCmp.load({url: MA.BaseUrl + 'admin/userload', params: {'username': username}, waitMsg:'Loading'});
@@ -341,15 +342,15 @@ MA.AdminUserEditInit = function (paramArray) {
     Ext.getCmp("adminUserEditConfirmPassword").on('blur', MA.AdminUserEditValidatePassword);
     
     Ext.getCmp('adminUserEditSubmit').enable();
-    
-    //if user is not an admin, disable certain UI components in the form
-    if (!MA.IsAdmin) {
-        Ext.getCmp('adminUserEditIsAdmin').disable();
-        Ext.getCmp('adminUserEditNode').disable();
-    } else {
-        Ext.getCmp('adminUserEditIsAdmin').enable();
-        Ext.getCmp('adminUserEditNode').enable();
-    }  
+    //Load the organisation store
+    Ext.getCmp('adminUserEditOrganisation').store.load();
+
+    Ext.getCmp('adminUserEditIsAdmin').setDisabled(!user.IsAdmin);
+    Ext.getCmp('adminUserEditIsNodeRep').setDisabled(!(user.IsAdmin || user.IsNodeRep));
+    Ext.getCmp('adminUserEditNode').setDisabled(!user.IsAdmin);
+    Ext.getCmp('adminUserEditIsMastrAdmin').setDisabled(!(user.IsAdmin || user.IsMastrAdmin));
+    Ext.getCmp('adminUserEditIsProjectLeader').setDisabled(!(user.IsAdmin || user.IsMastrAdmin || user.isProjectLeader));
+    Ext.getCmp('adminUserEditIsMastrStaff').setDisabled(!(user.IsAdmin || user.IsMastrAdmin || user.isProjectLeader));
     
     //reload the combobox
     if (Ext.StoreMgr.containsKey('adminUserEditNodeDS')) {
@@ -399,8 +400,9 @@ MA.AdminUserEditCmp = {id:'adminuseredit-container-panel',
            url:MA.BaseUrl + 'admin/userSave',
            method:'POST',
            frame:true,
-           reader: new MA.JsonReader({
+           reader: new Ext.data.JsonReader({
                                                  root            : 'data',
+                                                 idProperty      : 'username',
                                                  versionProperty : 'response.value.version',
                                                  totalProperty   : 'response.value.total_count',
                                                  successProperty : 'success'
@@ -415,6 +417,9 @@ MA.AdminUserEditCmp = {id:'adminuseredit-container-panel',
                                                      { name: 'homephone', sortType : Ext.data.SortTypes.asText },
                                                      { name: 'isAdmin', sortType : Ext.data.SortTypes.asText },
                                                      { name: 'isNodeRep', sortType : Ext.data.SortTypes.asText },
+                                                     { name: 'isMastrAdmin', sortType : Ext.data.SortTypes.asText },
+                                                     { name: 'isProjectLeader', sortType : Ext.data.SortTypes.asText },
+                                                     { name: 'isMastrStaff', sortType : Ext.data.SortTypes.asText },
                                                      { name: 'node', sortType : Ext.data.SortTypes.asText },
                                                      { name: 'status', sortType : Ext.data.SortTypes.asText },
                                                      { name: 'dept', sortType : Ext.data.SortTypes.asText },
@@ -499,6 +504,24 @@ MA.AdminUserEditCmp = {id:'adminuseredit-container-panel',
                name: 'isNodeRep', 
                inputValue: 'true',
                fieldLabel: 'Node Rep'
+               },{
+               xtype:'checkbox',
+               id: 'adminUserEditIsMastrAdmin',
+               name: 'isMastrAdmin',
+               inputValue: 'true',
+               fieldLabel: 'Mastr Administrator'
+               },{
+               xtype:'checkbox',
+               id: 'adminUserEditIsProjectLeader',
+               name: 'isProjectLeader',
+               inputValue: 'true',
+               fieldLabel: 'Project Leader'
+               },{
+               xtype:'checkbox',
+               id: 'adminUserEditIsMastrStaff',
+               name: 'isMastrStaff',
+               inputValue: 'true',
+               fieldLabel: 'Mastr Staff'
                }, new Ext.form.ComboBox({
                                         fieldLabel: 'Node',
                                         id: 'adminUserEditNode',
@@ -514,7 +537,7 @@ MA.AdminUserEditCmp = {id:'adminuseredit-container-panel',
                                         listWidth:230,
                                         store: new Ext.data.JsonStore({
                                                                       storeId: 'adminUserEditNodeDS',
-                                                                      url: MA.BaseUrl + 'admin/listGroups',
+                                                                      url: MA.BaseUrl + 'user/listAllNodes',
                                                                       root: 'response.value.items',
                                                                       fields: ['name', 'submitValue']
                                                                       })
@@ -563,7 +586,7 @@ MA.AdminUserEditCmp = {id:'adminuseredit-container-panel',
                                         triggerAction:'all',
                                         listWidth:230,
                                         store: new Ext.data.JsonStore({
-                                                                      autoLoad:true,
+                                                                      autoLoad:false,
                                                                       storeId: 'organisationDS',
                                                                       url: MA.BaseUrl + 'admin/listOrganisations',
                                                                       root: 'response.value.items',
@@ -604,7 +627,7 @@ MA.AdminUserEditCmp = {id:'adminuseredit-container-panel',
                  text: 'Cancel',
                  handler: function(){
                  Ext.getCmp('adminuseredit-panel').getForm().reset(); 
-                 MA.Authorize(MA.CancelBackTarget)
+                 MA.ChangeMainContent(MA.CancelBackTarget)
                  }
                  },{
                  text: 'Save',
@@ -620,8 +643,8 @@ MA.AdminUserEditCmp = {id:'adminuseredit-container-panel',
                                                                     Ext.Msg.alert("User details saved successfully", "(this message will auto-close in 5 seconds)");
                                                                     setTimeout("Ext.Msg.hide()", 5000);
                                                                     
-                                                                    //load up the menu and next content area as declared in response
-                                                                    MA.ChangeMainContent(action.result.mainContentFunction);
+                                                                    //MA.ChangeMainContent(action.result.mainContentFunction);
+                                                                    MA.ChangeMainContent(MA.CancelBackTarget)
                                                                     } 
                                                                     },
                                                                     failure: function (form, action) {
@@ -740,7 +763,7 @@ id:'nodedetails-panel',
 url:MA.BaseUrl + 'admin/nodesave',
 region: 'center',
 method:'POST',
-reader: new MA.JsonReader(),
+reader: new Ext.data.JsonReader(),
 bodyStyle: 'padding:10px;',
 title: 'Node Details',
 defaults: {width: 230},
@@ -767,7 +790,7 @@ buttons: [
                              }
                              },
                              failure: function (form, action) {
-                             //do nothing special. this gets called on validation failures and server errors
+                                Ext.Msg.alert("Error", action.result.msg);
                              }
                              });
           } }
@@ -792,7 +815,7 @@ items: [
                 { id: 'minus', qtip: 'Delete currently selected node', handler: MA.NodeManagementDeleteTool }
                 ],
         store: new Ext.data.JsonStore({
-                                      url: MA.BaseUrl + 'admin/listGroups',
+                                      url: MA.BaseUrl + 'user/listAllNodes',
                                       baseParams: { 'ignoreNone' : 'on' },
                                       root: 'response.value.items',
                                       fields: ['name', 'submitValue']
@@ -931,7 +954,7 @@ MA.OrgDetailsCmp = {
     url:MA.BaseUrl + 'admin/orgsave',
     region: 'center',
     method:'POST',
-    reader: new MA.JsonReader(),
+    reader: new Ext.data.JsonReader(),
     bodyStyle: 'padding:10px;',
     title: 'Organisation Details',
     defaults: {width: 230},
