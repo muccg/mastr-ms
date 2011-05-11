@@ -13,7 +13,7 @@ from django.core.mail import send_mail
 from django.contrib import logging
 
 from madas.decorators import *
-from madas.utils.data_utils import jsonResponse, json_encode, uniqueList
+from madas.utils.data_utils import jsonResponse, jsonErrorResponse, json_encode, uniqueList
 from madas.quote.models import Quoterequest, Formalquote, Quotehistory, Emailmap
 from madas.users.MAUser import *
 from madas.login.URLState import getCurrentURLState
@@ -294,7 +294,9 @@ def load(request, *args):
         qr = []
 
     logger.debug('*** load : exit ***')
-    return jsonResponse(  data=qr, success=suc )
+    if not suc:
+        return jsonErrorResponse("Couldn't load quote " + qid)
+    return jsonResponse(data=qr)
     
 def history(request, *args):
     logger.debug('***quote/history : enter***')
@@ -631,7 +633,9 @@ def formalAccept(request, *args):
             sendFormalStatusEmail(request, qid, 'accepted', toemail, fromemail = qrvalues['email'])
 
     logger.debug('*** formalAccept: exit ***')
-    return jsonResponse( success=not failed, mainContentFunction='dashboard')
+    if failed:
+        return jsonErrorResponse("Couldn't load initial quote " + qid)
+    return jsonResponse(mainContentFunction='dashboard')
 
 def formalReject(request, *args):
     logger.debug('*** formalReject : enter ***')

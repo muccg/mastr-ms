@@ -12,7 +12,7 @@ from django.utils.webhelpers import siteurl, wsgibase
 
 from madas import settings #for LDAP details only, can remove when LDAP is removed
 from madas.settings import MADAS_SESSION_TIMEOUT
-from madas.utils.data_utils import jsonResponse
+from madas.utils.data_utils import jsonResponse, jsonErrorResponse
 from madas.users.MAUser import *
 from madas.login.URLState import getCurrentURLState
 from madas.utils.mail_functions import sendForgotPasswordEmail, sendPasswordChangedEmail
@@ -177,13 +177,14 @@ def processResetPassword(request, *args):
                 
         else:
             logger.warning('\tEither no vk stored in ldap, or key mismatch. uservk was %s, storedvk was %s' % (vk, userdetails.get('pager', None)) )
-            success = False
 
     else:
         logger.warning('Process reset password: argument error (all blank)')
         success = False
         request.session.flush() #if we don't flush here, we are leaving the redirect function the same.
-    return jsonResponse(success=success, mainContentFunction='login') 
+    if not success:
+        return jsonErrorResponse("Coulnd't reset password")
+    return jsonResponse(mainContentFunction='login') 
 
 #TODO not sure this function is even needed
 def unauthenticated(request, *args):
