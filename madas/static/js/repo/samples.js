@@ -5,10 +5,15 @@ MA.ExperimentSamplesInit = function() {
     sampleClassStore.load();
     
     sampleStore.removeAll();
+    randomisableSampleStore.removeAll();
 };
 
-MA.SampleLoadByExperiment = function () {
-    sampleStore.load({ params: { experiment__id__exact: MA.ExperimentController.currentId() } });
+MA.SampleLoadByExperiment = function (randomise) {
+    var params = { experiment__id__exact: MA.ExperimentController.currentId() };
+    if (randomise) {
+        params.randomise = true;
+    }
+    randomisableSampleStore.load({ params: params});
 };
 
 MA.SampleLoadBySampleClass = function () {
@@ -488,6 +493,15 @@ MA.ExperimentSamplesOnly = {
                     MA.RunCmp.show();
                 }
             }
+        },
+        { xtype: "tbseparator" },
+        {
+            text: 'Randomise Samples',
+            cls: 'x-btn-text-icon',
+            icon: 'static/images/refresh.png',
+            handler: function() {
+                MA.SampleLoadByExperiment(true);
+            }
         }
     ],
     items: [
@@ -525,7 +539,7 @@ MA.ExperimentSamplesOnly = {
                       { header: "Seq", sortable:true, dataIndex:'sample_class_sequence' },
                       { header: "Last Status", sortable:true, width:300, dataIndex:'last_status' }
                       ],
-            store: sampleStore
+            store: randomisableSampleStore
             }
             ]
 };

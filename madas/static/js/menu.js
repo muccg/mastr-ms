@@ -21,7 +21,7 @@ MA.MenuRender = function(username) {
                     ]
                     }
                 },
-                { xtype: 'tbbutton', text:'Quotes', menu:{
+                { xtype: 'tbbutton', text:'Quotes', id:'quote', menu:{
                     items: [
                         {text:'Make an Inquiry', id:'quote:request', handler: MA.MenuHandler},
                         {text:'View Quote Requests', id:'quote:list', handler: MA.MenuHandler},
@@ -40,7 +40,7 @@ MA.MenuRender = function(username) {
                     ]
                     }
                 },
-                { xtype: 'tbbutton', text:'Help', menu:{
+                { xtype: 'tbbutton', text:'Help', id:'help', menu:{
                     items: [
                             {text:'Screencasts', id:'help:screencasts', menu: {
                             items: [
