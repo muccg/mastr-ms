@@ -389,6 +389,14 @@ def removeMadasUserFromGroup(user, groupname):
     if groupname in user.CachedGroups:
         ld.ldap_remove_user_from_group(user.Username, groupname)
 
+def ensureDjangoUserExists(username):
+    try:
+        django_user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        django_user = User.objects.create_user(username, username)
+        django_user.set_unusable_password()
+        django_user.save()
+
 def set_superuser(user, superuser=False):
     django_user = User.objects.get(username=user.Username)
     django_user.is_superuser = superuser
@@ -410,6 +418,8 @@ def saveMadasUser(currentUser, username, changeddetails, changedstatus, password
         if not addMadasUser(username, changeddetails):
             return False
     existingUser = getMadasUser(username)
+
+    ensureDjangoUserExists(username)
     
     #translate their details to ldap
     existing_details = _translate_madas_to_ldap(existingUser.CachedDetails)

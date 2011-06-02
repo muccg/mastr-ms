@@ -998,6 +998,86 @@ def recordsSampleClasses(request, experiment_id):
 def recordsExperiments(request):
    return recordsExperimentsForProject(request, None)
 
+@mastr_users_only
+def recordsSamplesForExperiment(request):
+    args = request.REQUEST
+       
+    # basic json that we will fill in
+    output = {'metaData': {
+                  'successProperty': 'success',
+                  'root': 'rows',
+                  'idProperty': 'id',
+                  'fields': [{
+                            "type": "int", 
+                            "name": "id"
+                        },{
+                            "type": "auto", 
+                            "name": "sample_id"
+                        }, {
+                            "type": "auto", 
+                            "name": "sample_class"
+                        }, {
+                            "type": "string", 
+                            "name": "sample_class__unicode"
+                        }, {
+                            "type": "auto", 
+                            "name": "experiment"
+                        }, {
+                            "type": "string", 
+                            "name": "experiment__unicode"
+                        }, {
+                            "type": "auto", 
+                            "name": "label"
+                        }, {
+                            "type": "auto", 
+                            "name": "comment"
+                        }, {
+                            "type": "auto", 
+                            "name": "weight"
+                        }, {
+                            "type": "int", 
+                            "name": "sample_class_sequence"
+                        }
+                    ],
+                },
+             'rows': []}
+
+    experiment_id = args['experiment__id__exact']
+    rows = Sample.objects.filter(experiment__id=experiment_id)
+
+    randomise = args.get('randomise', False)
+    if not randomise:
+        sort_by = args.get('sort', 'id')
+        sort_dir = args.get('dir', 'ASC')
+        if sort_dir == 'DESC':
+            sort = '-' + sort_by
+        else:
+            sort = sort_by
+
+        rows = rows.order_by(sort)
+    
+    # add rows
+    for row in rows:
+        d = {}
+        d['comment'] = row.comment
+        d['weight'] = row.weight
+        d['sample_class__unicode'] = unicode(row.sample_class)
+        d['sample_class_sequence'] = row.sample_class_sequence
+        d['label'] = row.label
+        d['experiment'] = row.experiment.id
+        d['sample_id'] = row.sample_id
+        d['experiment__unicode'] = unicode(row.experiment)
+        d['id'] = row.id
+        d['sample_class'] = row.sample_class.id
+
+        output['rows'].append(d)
+
+    if randomise:
+        import random
+        random.shuffle(output['rows'])
+
+    output = makeJsonFriendly(output)
+    return HttpResponse(json.dumps(output))
 
 @mastr_users_only
 def recordsExperimentsForProject(request, project_id):

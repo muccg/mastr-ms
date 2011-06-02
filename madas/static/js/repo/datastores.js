@@ -291,6 +291,22 @@ var sampleClassStore = new Ext.data.JsonStore(
                                          }
                                              );
 
+var randomisableSampleStore = new Ext.data.JsonStore(
+                                              {
+                                              storeId: 'randomisablesamples',
+                                              autoLoad: false,
+                                              url: wsBaseUrl + 'recordsSamplesForExperiment',
+                                              remoteSort: true,
+                                              restful: true,
+                                              listeners: {'load':MA.DSLoaded,
+                                              'loadexception':MA.DSLoadException},
+                                              sortInfo: {
+                                                  field: 'id',
+                                                  direction: 'DESC'
+                                              }
+                                              }
+                                              );
+ 
 var sampleStore = new Ext.data.JsonStore(
                                               {
                                               storeId: 'samples',

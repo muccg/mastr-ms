@@ -328,7 +328,11 @@ class Sample(models.Model):
             print 'sample not in class'
             raise SampleNotInClassException
         else:
-            return u"%s-%s_%s-%s.d" % (self.sample_class.class_id, self.sample_class_sequence, run.id, str(self.id))
+            result = u"%s-%s" % (self.sample_class.class_id, self.sample_class_sequence)
+            if self.label:
+                result += "-%s" % self.label
+            result += "_%s-%s.d" % (run.id, str(self.id))
+            return result
 
     def is_valid_for_run(self):
         '''Test to determine whether this sample can be used in a run'''
