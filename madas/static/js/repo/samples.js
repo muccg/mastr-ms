@@ -10,7 +10,7 @@ MA.ExperimentSamplesInit = function() {
 
 MA.SampleLoadByExperiment = function (randomise) {
     var params = { experiment__id__exact: MA.ExperimentController.currentId() };
-    if (randomise) {
+    if (typeof(randomise) !== 'undefined' && randomise === true) {
         params.randomise = true;
     }
     randomisableSampleStore.load({ params: params});

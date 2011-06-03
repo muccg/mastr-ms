@@ -1068,7 +1068,7 @@ def recordsSamplesForExperiment(request):
         d['sample_id'] = row.sample_id
         d['experiment__unicode'] = unicode(row.experiment)
         d['id'] = row.id
-        d['sample_class'] = row.sample_class.id
+        d['sample_class'] = row.sample_class.id if row.sample_class else None
 
         output['rows'].append(d)
 
