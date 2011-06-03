@@ -14,6 +14,10 @@ MA.SampleLoadByExperiment = function (randomise) {
         params.randomise = true;
     }
     randomisableSampleStore.load({ params: params});
+    // lastOptions will be used again when sorting by header click etc. so we 
+    // have to remove randomise or all consequent responses will be randomised
+    var lastOptions = randomisableSampleStore.lastOptions;
+    delete lastOptions.params.randomise;
 };
 
 MA.SampleLoadBySampleClass = function () {
