@@ -1792,7 +1792,7 @@ def mark_run_complete(request, run_id):
     run.state = RUN_STATES.COMPLETE[0]
     run.save()
     
-    from madas.mail_functions import FixedEmailMessage
+    from madas.utils.mail_functions import FixedEmailMessage
     from appsettings.mastrms.prod import RETURN_EMAIL
     
     try:
