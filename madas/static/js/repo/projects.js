@@ -35,10 +35,9 @@ MA.CRUDSomething = function(remainderURL, params, callbackfn) {
                                              method:'GET',
                                              url: wsBaseUrl + remainderURL + paramString,
                                              listeners: {
-                                                'load':callbackfn,
-                                                'exception':MA.DSLoadException}
+                                                'load':callbackfn
                                              }
-                                             );
+                                             });
     crudStore.load();
 };
 
@@ -132,7 +131,6 @@ function ExperimentController() {
             Ext.getCmp("expContent").getLayout().setActiveItem(index); 
             Ext.currentExperimentNavItem = index;
         }
-    
         MA.ExperimentDeferredInvocation.init();
         
         MA.ExperimentDeferredInvocation = {'index':-1, 'init':MA.Null};
@@ -312,6 +310,7 @@ function ExperimentController() {
     this.createExperiment = function() {
         self.setCurrentId(0);
         var namefield = Ext.getCmp('experimentName');
+        var statuscombo = namefield.ownerCt.getComponent('status');
         var desc = Ext.getCmp('experimentDescription');
         var comment = Ext.getCmp('experimentComment');
         var formalQuote = Ext.getCmp('formalQuote');
@@ -323,6 +322,7 @@ function ExperimentController() {
 
         self.updateNav(0);       
 
+        statuscombo.setValue(1);
         desc.setValue('');
         comment.setValue('');
         formalQuote.clearValue();
@@ -358,6 +358,11 @@ function ExperimentController() {
             }
         }
     };    
+
+
+    this.initialSave = function() {
+        MA.ExperimentController.blur({'init': MA.ExperimentController.updateNav, 'index': 0});
+    };
 }
 
 MA.ExperimentController = new ExperimentController();
@@ -391,7 +396,27 @@ MA.ExperimentDetails = {
                 id:'expFieldset',
                 autoHeight:true,
                 items: [
-                    { xtype:'textfield', fieldLabel:'Experiment name', width:700, enableKeyEvents:true, id:'experimentName', allowBlank:false, listeners:{'keydown':function(t, e){ MA.ExperimentController.updateNav(); return true; }, 'keyup':function(t, e){ MA.ExperimentController.updateNav(); return true; }}},
+                    { xtype:'textfield', 
+                      fieldLabel:'Experiment name', 
+                      width:700, 
+                      enableKeyEvents:true, 
+                      id:'experimentName', 
+                      allowBlank:false, 
+                      listeners:{
+                        'keydown':function(t, e){ 
+                            MA.ExperimentController.updateNav(); 
+                            return true; 
+                        }, 
+                        'keyup':function(t, e){ 
+                            MA.ExperimentController.updateNav(); 
+                            return true; 
+                        },
+                        'blur': function() {
+                            MA.ExperimentController.initialSave(); 
+                            return true; 
+                        }
+                      }
+                    },
                     new Ext.form.ComboBox({
                             fieldLabel:'Status',
                             itemId:'status',

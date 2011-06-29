@@ -16,6 +16,7 @@ from madas.utils.data_utils import jsonResponse, zipdir
 from madas.repository.permissions import user_passes_test
 from django.db.models import Q
 from datetime import datetime, timedelta
+from django.core.mail import mail_admins
 
 
 @mastr_users_only
@@ -384,7 +385,7 @@ def recent_runs(request):
 
 @mastr_users_only
 def recordsClientList(request):
-    
+    assert False 
     from quote.models import UserOrganisation
     
     if request.GET:
@@ -1125,7 +1126,7 @@ def recordsExperimentsForProject(request, project_id):
     for row in rows:
         d = {}
         d['id'] = row.id
-        d['status'] = row.status.id
+        d['status'] = row.status.id if row.status else None
         d['title'] = row.title
         d['description'] = row.description
         d['job_number'] = row.job_number
@@ -1928,3 +1929,28 @@ def remove_samples_from_run(request):
     run.remove_samples(queryset)
 
     return HttpResponse()
+
+def report_error(request):
+    success = True
+    try:
+        subject = ' client-side error'
+        message = """
+A client-side error has been reported from IP: %s.
+
+Additional notes entered by the user:
+%s
+
+Details of the error:
+
+%s""" % (request.META.get('REMOTE_ADDR'), request.REQUEST.get('notes'), request.REQUEST.get('details'))
+
+        mail_admins(subject, message, fail_silently=False)
+    except:
+        success = False
+        raise
+
+    output = {}
+    output["success"] = success
+    return HttpResponse(json.dumps(output))
+
+

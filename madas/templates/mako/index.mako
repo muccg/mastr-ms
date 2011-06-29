@@ -45,7 +45,9 @@ MA.BaseUrl = '${ APP_SECURE_URL }';
 </script>
 
 <!-- Madas scripts -->
+<script type="text/javascript" src="${wh.url('/static/js/FieldLabeler.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/utils.js')}"></script>
+<script type="text/javascript" src="${wh.url('/static/js/global.js')}"></script>
 
 <script type="text/javascript" src="${wh.url('/static/js/json2.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/repo/datastores.js')}"></script>
