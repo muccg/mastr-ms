@@ -385,7 +385,6 @@ def recent_runs(request):
 
 @mastr_users_only
 def recordsClientList(request):
-    assert False 
     from quote.models import UserOrganisation
     
     if request.GET:
