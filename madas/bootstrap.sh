@@ -90,10 +90,10 @@ then
     # we need to jump through a few legacy hoops to make this happen
 
     if [ -d tmp ]
-        rm -Rf tmp
     then
-        mkdir tmp
+        rm -Rf tmp
     fi
+    mkdir tmp
     cd tmp
     rm -rf ccgapps-settings 
     svn export svn+ssh://ccg.murdoch.edu.au/store/techsvn/ccg/ccgapps-settings
