@@ -90,9 +90,9 @@ then
     # we need to jump through a few legacy hoops to make this happen
 
     if [ -d tmp ]
-        mkdir tmp
-    then
         rm -Rf tmp
+    then
+        mkdir tmp
     fi
     cd tmp
     rm -rf ccgapps-settings 
