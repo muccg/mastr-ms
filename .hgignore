@@ -1,0 +1,7 @@
+.*\.pyc$
+^madas/virt_madas/*
+^madas/tmp/*
+^madas/scratch/*
+^madas/log/*
+^madas/virtualenv*
+^madas/settings.py$
