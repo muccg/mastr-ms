@@ -649,24 +649,8 @@ MA.ProjectList = Ext.extend(Ext.Panel, {
                                                 b.disable();
                                             }
                                         }
-                                    },
-                                    {
-                                        text: "Remove Project",
-                                        cls: "x-btn-text-icon",
-                                        icon: "static/images/delete.png",
-                                        handler: function (b, e) {
-                                            if (MA.CurrentUser.IsAdmin || MA.CurrentUser.IsMastrAdmin || MA.CurrentUser.IsProjectLeader) {
-                                                var grid = self.getComponent("grid");
-                                                var selections = grid.getSelectionModel().getSelections();
-                        
-                                                grid.getStore().remove(selections);
-                                                self.fireEvent("delete", selections);
-                                            } else {
-                                                b.disable();
-                                            }
-                                        }
                                     }
-                                ],
+                          ],
                     trackMouseOver: false,
                     plugins:[new Ext.ux.grid.Search({
                          mode:'local'
