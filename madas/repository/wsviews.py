@@ -1081,7 +1081,6 @@ def recordsSamplesForExperiment(request):
 
 @mastr_users_only
 def recordsExperimentsForProject(request, project_id):
-
     if request.GET:
         args = request.GET
     else:
@@ -1186,7 +1185,6 @@ def recordsClients(request, *args):
 
 @mastr_users_only
 def recordsSamples(request, experiment_id):
-
     if request.GET:
         args = request.GET
     else:
@@ -1932,7 +1930,7 @@ def remove_samples_from_run(request):
 def report_error(request):
     success = True
     try:
-        subject = ' client-side error'
+        subject = 'MADAS client-side error'
         message = """
 A client-side error has been reported from IP: %s.
 

@@ -38,6 +38,7 @@ MA.reportError = function(type, errorMsg) {
     var fullMsg = 'Error Type: ' + type;
     fullMsg += '\nOccured at: ' + new Date();
     fullMsg += '\nUser: ' + MA.CurrentUser.Username;
+    fullMsg += '\nUser Agent: ' + navigator.userAgent; 
     fullMsg += '\n' + errorMsg;
     MA.ErrorReportWindow.show(); 
     MA.ErrorReportForm.getForm().setValues({
@@ -46,6 +47,23 @@ MA.reportError = function(type, errorMsg) {
     });
 };
 
+MA.dataProxyErrorHandler = function(proxy, type, action, options, response, error) {
+    var message = '';
+    if (type === 'response' && (response.status === 401 || response.status === 403)) {
+        // HTTP Unauthorized and HTTP Forbidden responses aren't really errors
+        // Global Handler will take care of these
+        return;
+    }
+    message += "URL: " + Ext.encode(proxy.api[action].url);
+    message += "\nType: " + Ext.encode(type);
+    message += "\nResponse: " + Ext.encode(response);
+    message += "\nError: " + Ext.encode(error);
+    MA.reportError('DataProxy Exception', message);
+};
+
+Ext.data.DataProxy.on('exception', MA.dataProxyErrorHandler);
+
+/*
 Ext.data.DataProxy.on('exception', function(proxy, type, action, options, response, error) {
     var message = '';
     message += "URL: " + Ext.encode(proxy.api[action].url);
@@ -54,7 +72,7 @@ Ext.data.DataProxy.on('exception', function(proxy, type, action, options, respon
     message += "\nError: " + Ext.encode(error);
     MA.reportError('DataProxy Exception', message);
 });
-
+*/
 MA.ErrorReportForm = new Ext.form.FormPanel({
         baseCls: 'x-plain',
         border: false,
