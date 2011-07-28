@@ -1,0 +1,2 @@
+#Env for ubuntu_10_10_amd64_clientdev
+echo "export LD_LIBRARY_PATH=$PWD/$VPYTHON_DIR/lib/python2.6/site-packages/wxPython-2.9.1.1-py2.6-linux-x86_64.egg" >> $VPYTHON_DIR/bin/activate
