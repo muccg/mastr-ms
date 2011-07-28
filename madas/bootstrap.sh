@@ -15,10 +15,31 @@ PIP_DOWNLOAD_CACHE='/tmp/'
 export PIP_DOWNLOAD_CACHE
 INSTALL_EGGS=1 #if this is 1, we will install eggs from eggs/...
 CONFIG_DIR=""
+TARGET_PYTHON="python"
+
+help() {
+    echo >&2 "Usage $0 [-p targetpython] [-c configname]"
+            echo >&2 "target python is the interpreter you want your virtual python to be based on (default=python)"
+            echo >&2 "configname is the name of a subdir of eggs containing custom eggs for your environment"
+            exit 1;
+    
+}
+
 if [ $# -eq 1 ]
 then
-    CONFIG_DIR=$1
+    help;
 fi
+
+#parse command line options
+while getopts p:c: opt
+do case "$opt" in 
+    p)      TARGET_PYTHON="$OPTARG";;
+    c)      CONFIG_DIR="$OPTARG";;
+    [?]|*)  help;; 
+    esac
+done
+
+#First, lets check to see if the config dir exists
 EGGS_PATH="$EGGS_DIR$CONFIG_DIR/$EGGS_PATTERN"
 if [ ! -d $EGGS_DIR$CONFIG_DIR ]
 then
@@ -45,6 +66,8 @@ then
         INSTALL_EGGS=0
     fi
 fi
+
+
 
 if [ $INSTALL_EGGS -eq 1 ]
 then
@@ -82,13 +105,13 @@ then
         # build virtualenv
         tar zxvf $VIRTUALENV_TARBALL
         cd $VIRTUALENV
-        python setup.py build
+        $TARGET_PYTHON setup.py build
         cd ..
 
     fi
        
     # create a virtual python in the current directory
-    python $VIRTUALENV/build/lib*/virtualenv.py --no-site-packages $VPYTHON_DIR
+    $TARGET_PYTHON $VIRTUALENV/build/lib*/virtualenv.py --no-site-packages $VPYTHON_DIR
 
     # we use fab for deployments
     ./$VPYTHON_DIR/bin/pip install fabric
