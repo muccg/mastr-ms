@@ -1,21 +1,24 @@
 # Create your views here.
+import os
+import os.path
+import posixpath, urllib, mimetypes
+import pickle
+from datetime import datetime
+import copy
+from django.shortcuts import render_to_response, get_object_or_404
+from django.contrib.auth.decorators import login_required
+import django.utils.webhelpers as webhelpers
 from django.http import HttpResponse, Http404
 from django.utils import simplejson
 from mdatasync_server.models import *
 from repository.models import *  
 from mdatasync_server.rules import *
 from django.conf import settings
-import os
-import os.path
-import posixpath, urllib, mimetypes
-from django.shortcuts import render_to_response, get_object_or_404
-from django.contrib.auth.decorators import login_required
-import django.utils.webhelpers as webhelpers
-
 
 from django.contrib import logging
 LOGNAME = 'mdatasync_server_log'
 logger = logging.getLogger(LOGNAME)
+logger.setLevel(logging.DEBUG)
 
 from settings import KEYS_TO_EMAIL, LOGS_TO_EMAIL, RETURN_EMAIL
 
@@ -59,11 +62,47 @@ class FixedEmailMessage(EmailMessage):
             msg['Cc'] = ', '.join(self.cc)
         return msg
 
+#This is an object which we will serialise to disk,
+#representing a snapshot of client state. It is refreshed
+#every time a client syncs
+class ClientState(object):
+    def __init__(self, org=None, site=None, station = None):
+        self.files = {} #the list of files that the client reports it has
+        self.lastSyncAttempt = None #the last time the client contacted the service
+        self.organisation = org
+        self.sitename = site
+        self.station = station
+
+
+def get_saved_client_state(org, site, station):
+    #look for the file, if exists, try deserialising and returning
+    clientstatedir = os.path.join(settings.REPO_FILES_ROOT , 'synclogs')
+    clientstatefname = os.path.join(clientstatedir, "STATE_%s_%s_%s.dat" % (org, site, station))
+    if os.path.exists(clientstatefname):
+        try:
+            with open(clientstatefname) as f:
+                clientstate = pickle.load(f)
+            return clientstate
+        except Exception, e:
+            logger.warning("%s could not be un-pickled: %s" % (clientstatefname, e) )
+    else:
+        logger.debug("File %s did not exist." % (clientstatefname) )
+    #else reuturn a new Clientstate object
+    return ClientState(org=org, site=site, station=station)
+
+def save_client_state(clientstate):
+    clientstatedir = os.path.join(settings.REPO_FILES_ROOT , 'synclogs')
+    clientstatefname = os.path.join(clientstatedir, "STATE_%s_%s_%s.dat" % (clientstate.organisation, clientstate.sitename, clientstate.station))
+    try:
+        with open(clientstatefname, "wb") as f:
+            pickle.dump(clientstate, f)
+    except Exception, e:
+        logger.warning("Could not save clientstate. %s" % (str(e)))
 
 
 class FileList(object):
     def __init__(self, heirarchy):
-        self.heirarchy = heirarchy
+        self.heirarchy = copy.deepcopy(heirarchy)
         self.currentnode = None
         self.checknodes = [] #a queue of nodes for us to process
         self.runsamplesdict = {}
@@ -179,6 +218,14 @@ def getNodeClients(request, *args):
 
     return jsonResponse(result)
 
+def nodeinfo(request, organisation="", sitename="", station=""):
+    logger.debug("Searching for node org=%s, sitename=%s, station=%s" % (organisation, sitename, station))
+    nodeclient = NodeClient.objects.get(organisation_name = organisation, site_name=sitename, station_name = station)
+    clientstate = get_saved_client_state(organisation, sitename, station)
+    #return HttpResponse( simplejson.dumps(nodeclient.__dict__) + simplejson.dumps(clientstate.__dict__) )   
+    return HttpResponse( simplejson.dumps(clientstate.__dict__) )   
+
+
 def retrievePathsForFiles(request, *args):
     '''This function is called as a webservice by the datasync client.
        It expects a post var called 'files' which will be a json string
@@ -195,81 +242,82 @@ def retrievePathsForFiles(request, *args):
     flags = None
     username = None
 
-    try:
-        pfiles = request.POST.get('files', {})
-        #pfiles is json for a heirarchy of files and directories
+    pfiles = request.POST.get('files', None)
+    #pfiles is json for a heirarchy of files and directories
+    if pfiles is not None:
         pfiles = simplejson.loads(pfiles)
-        #pfiles is now our heirarchy of file and directory names.
-        porganisation = simplejson.loads(request.POST.get('organisation', ''))
-        psitename= simplejson.loads(request.POST.get('sitename', ''))
-        pstation = simplejson.loads(request.POST.get('stationname', ''))
-        syncold = simplejson.loads(request.POST.get('syncold', 'false')) #defaults to false
+    else:
+        pfiles = {} 
+    #pfiles is now our heirarchy of file and directory names.
+    porganisation = simplejson.loads(request.POST.get('organisation', "null"))
+    psitename= simplejson.loads(request.POST.get('sitename', "null"))
+    pstation = simplejson.loads(request.POST.get('stationname', "null"))
+    syncold = simplejson.loads(request.POST.get('syncold', 'false')) #defaults to false
 
-        logger.debug( 'Post var files passed through was: %s' % ( pfiles) )
-        logger.debug( 'Post var organisation passed through was: %s' % ( porganisation) )
-        logger.debug( 'Post var station passed through was: %s' % ( pstation ) )
-        logger.debug( 'Post var sitename passed through was: %s' % ( psitename) )
-        logger.debug( 'Post var syncold passed through was: %s' % ( str(syncold) ) )
+    logger.debug( 'Post var files passed through was: %s' % ( pfiles) )
+    logger.debug( 'Post var organisation passed through was: %s' % ( porganisation) )
+    logger.debug( 'Post var station passed through was: %s' % ( pstation ) )
+    logger.debug( 'Post var sitename passed through was: %s' % ( psitename) )
+    logger.debug( 'Post var syncold passed through was: %s' % ( str(syncold) ) )
 
-        #filter by client, node, whatever to 
-        #get a list of filenames in the repository run samples table
-        #to compare against.
-        #for each filename that matches, you use the experiment's ensurepath 
+    #get the saved client state, so we can update it
+    clientstate = get_saved_client_state(porganisation, psitename, pstation)
+
+    #filter by client, node, whatever to 
+    #get a list of filenames in the repository run samples table
+    #to compare against.
+    #for each filename that matches, you use the experiment's ensurepath 
+    try:
+        nodeclient = NodeClient.objects.get(organisation_name = porganisation, site_name=psitename, station_name = pstation)
+        logger.debug( 'Nodeclient found.')
+        
+        nchost = nodeclient.hostname
+        if nchost is not None and len(nchost) > 0:
+            host = str(nchost)
+        ncflags = nodeclient.flags
+        if ncflags is not None and len(ncflags) > 0:
+            flags = str(ncflags)
+        ncuname = nodeclient.username
+        if ncuname is not None and len(ncuname) > 0:
+            username = str(ncuname)
+
+        logger.debug('Checking for rules')
         try:
-            nodeclient = NodeClient.objects.get(organisation_name = porganisation, site_name=psitename, station_name = pstation)
-            logger.debug( 'Nodeclient found.')
-            
-            nchost = nodeclient.hostname
-            if nchost is not None and len(nchost) > 0:
-                host = str(nchost)
-            ncflags = nodeclient.flags
-            if ncflags is not None and len(ncflags) > 0:
-                flags = str(ncflags)
-            ncuname = nodeclient.username
-            if ncuname is not None and len(ncuname) > 0:
-                username = str(ncuname)
-
-            logger.debug('Checking for rules')
-            try:
-                rulesset = NodeRules.objects.filter(parent_node = nodeclient)
-                rules = [x.__unicode__() for x in rulesset]
-            except Exception, e:
-                status = 1
-                error = '%s, %s' % (error, 'Unable to resolve ruleset: %s' % (str(e)))
-            
-            logger.debug('Finding runs for this nodeclient')
-            #now get the runs for that nodeclient
-            runs = Run.objects.filter(machine = nodeclient) 
-            for run in runs:
-                logger.debug('Finding runsamples for run')
-                
-                if (not syncold) and run.state == RUN_STATES.COMPLETE[0]:
-                    logger.info('Run was already complete')
-                    
-                else:
-                    runsamples = RunSample.objects.filter(run = run)
-                    #Build a filesdict of all the files for these runsamples
-                    for rs in runsamples:
-                        logger.debug('Getting files for runsamples');
-                        fname = rs.filename.upper() #Use uppercase filenames as keys.
-                        abspath, relpath = rs.filepaths()
-                        logger.debug( 'Filename: %s belongs in path %s' % ( fname.encode('utf-8'), abspath.encode('utf-8') ) )
-                        if filesdict.has_key(fname):
-                            logger.debug( 'Duplicate path detected!!!' )
-                            error = "%s, %s" % (error, "Duplicate filename detected for %s" % (fname.encode('utf-8')))
-                            status = 2
-                        #we use the relative path    
-                        filesdict[fname] = [run.id, rs.id, relpath]
-
+            rulesset = NodeRules.objects.filter(parent_node = nodeclient)
+            rules = [x.__unicode__() for x in rulesset]
         except Exception, e:
             status = 1
-            logger.debug("exception encountered")
-            error = "%s, %s" % (error, 'Unable to resolve end machine to stored NodeClient: %s' % str(e) )
+            error = '%s, %s' % (error, 'Unable to resolve ruleset: %s' % (str(e)))
         
+        logger.debug('Finding runs for this nodeclient')
+        #now get the runs for that nodeclient
+        runs = Run.objects.filter(machine = nodeclient) 
+        for run in runs:
+            logger.debug('Finding runsamples for run')
+            
+            if (not syncold) and run.state == RUN_STATES.COMPLETE[0]:
+                logger.info('Run was already complete')
+                
+            else:
+                runsamples = RunSample.objects.filter(run = run)
+                #Build a filesdict of all the files for these runsamples
+                for rs in runsamples:
+                    logger.debug('Getting files for runsamples');
+                    fname = rs.filename.upper() #Use uppercase filenames as keys.
+                    abspath, relpath = rs.filepaths()
+                    logger.debug( 'Filename: %s belongs in path %s' % ( fname.encode('utf-8'), abspath.encode('utf-8') ) )
+                    if filesdict.has_key(fname):
+                        logger.debug( 'Duplicate path detected!!!' )
+                        error = "%s, %s" % (error, "Duplicate filename detected for %s" % (fname.encode('utf-8')))
+                        status = 2
+                    #we use the relative path    
+                    filesdict[fname] = [run.id, rs.id, relpath]
 
     except Exception, e:
         status = 1
-        error = str(e)
+        logger.debug("exception encountered")
+        error = "%s, %s" % (error, 'Unable to resolve end machine to stored NodeClient: %s' % str(e) )
+        
 
     logger.debug('making filelist obj')
     #So. Make a FileList object out of pfiles.
@@ -292,6 +340,11 @@ def retrievePathsForFiles(request, *args):
              'flags': flags,
              #'rules' : None 
             }
+
+    clientstate.files = pfiles 
+    clientstate.lastSyncAttempt = str(datetime.now()) 
+    #save the client state
+    save_client_state(clientstate)
 
     logger.debug('RETVAL is %s' % ( retval ) )
     return jsonResponse(retval)
@@ -431,8 +484,10 @@ def utils(request):
     #now we proceed as normal.
 
     #Screenshots and logs are in the same dir.
-    import os
-    fileslist = os.listdir(os.path.join(settings.REPO_FILES_ROOT , 'synclogs') )
+    clientlogdir = os.path.join(settings.REPO_FILES_ROOT , 'synclogs')
+    fileslist = []
+    if os.path.exists(clientlogdir):
+        fileslist = os.listdir(clientlogdir )
     clientlogslist = []
     shotslist = []
     for fname in fileslist:
