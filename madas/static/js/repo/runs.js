@@ -634,9 +634,12 @@ MA.RunCmp = new Ext.Window({
             listeners: {
                 "delete": MA.RunDeleteCallback,
                 "save": function (id) {
-                    selectableRunStore.load();
                     runStore.load();
-                    MA.RunSaveCallback(id);
+                    selectableRunStore.load({
+                        callback: function() {
+                            MA.RunSaveCallback(id);
+                        }
+                    });
                 }
             }
         }, 'editor')
