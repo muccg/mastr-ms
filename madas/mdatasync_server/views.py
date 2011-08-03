@@ -223,7 +223,8 @@ def nodeinfo(request, organisation="", sitename="", station=""):
     nodeclient = NodeClient.objects.get(organisation_name = organisation, site_name=sitename, station_name = station)
     clientstate = get_saved_client_state(organisation, sitename, station)
     #return HttpResponse( simplejson.dumps(nodeclient.__dict__) + simplejson.dumps(clientstate.__dict__) )   
-    return HttpResponse( simplejson.dumps(clientstate.__dict__) )   
+    return render_to_response("node.mako", {'clientstate': clientstate.__dict__, 'wh':webhelpers} ) 
+
 
 
 def retrievePathsForFiles(request, *args):
