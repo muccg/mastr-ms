@@ -198,8 +198,12 @@ items: [
                                                flex: 0,
                                                id: "experiment-run-list-detail",
                                                listeners: {
-                                               "delete": function () { runListStore.reload(); runStore.reload(); },
-                                               "save": function () { runListStore.reload(); runStore.reload(); }
+                                               "delete": function () { 
+        runListStore.proxy.conn.url = adminBaseUrl + "repository/run/ext/json?samples__experiment="+MA.ExperimentController.currentId();
+runListStore.reload(); runStore.reload(); },
+                                               "save": function () { 
+        runListStore.proxy.conn.url = adminBaseUrl + "repository/run/ext/json?samples__experiment="+MA.ExperimentController.currentId();
+runListStore.reload(); runStore.reload(); }
                                                }
                                                }, 'viewer')
                               ]
