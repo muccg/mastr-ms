@@ -191,6 +191,7 @@ MA.ChangeMainContent = function(contentName, paramArray){
 
         case 'project:view':
             expStatusComboStore.load();
+            methodStore.load();
             machineStore.load();
             sopLookupStore.load();
             userComboStore.load();
@@ -204,6 +205,8 @@ MA.ChangeMainContent = function(contentName, paramArray){
             break;
 
         case "run:list":
+            methodStore.load();
+            machineStore.load();
             runListStore.load({callback: function() {
                 runListStore.sort([
                     {
