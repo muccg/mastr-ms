@@ -584,6 +584,11 @@ MA.RunCmp = new Ext.Window({
             }
         }
     ],
+    listeners: {
+        "beforeshow": function (w) {
+             selectableRunStore.load();
+        }
+    },
     items:[
     
         {
@@ -615,6 +620,7 @@ MA.RunCmp = new Ext.Window({
                             MA.CreateNewRun();
                         }
                     });
+                    selectableRunStore.load();
                 }
             },
             viewConfig:{
