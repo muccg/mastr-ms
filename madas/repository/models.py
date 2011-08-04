@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from datetime import datetime, date, time
 from quote.models import Organisation, Formalquote
 from mdatasync_server.models import NodeClient
+import grp
 
 class SampleNotInClassException(Exception):
     pass
@@ -426,7 +427,6 @@ class Run(models.Model):
             os.makedirs(abspath)
             os.chmod(abspath, stat.S_IRWXU|stat.S_IRWXG)
             
-        import grp
         groupinfo = grp.getgrnam(settings.CHMOD_GROUP)
         gid = groupinfo.gr_gid
         
