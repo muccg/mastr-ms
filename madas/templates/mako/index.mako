@@ -21,20 +21,21 @@
     <title>Metabolomics Australia User and Quote Management System</title>
 
 <link rel="shortcut icon" href="/favicon.ico" />
-<link rel="stylesheet" href="${wh.url('/static/ext-3.3.0/resources/css/ext-all.css')}"/>
+<link rel="stylesheet" href="${wh.url('/static/ext-3.4.0/resources/css/ext-all.css')}"/>
 <link rel="stylesheet" type="text/css" href="${wh.url('/static/css/main.css')}"/>
-<link rel="stylesheet" href="${wh.url('/static/ext-3.3.0/examples/ux/css/RowEditor.css')}"/>
+<link rel="stylesheet" href="${wh.url('/static/ext-3.4.0/examples/ux/css/RowEditor.css')}"/>
 <link rel="stylesheet" type="text/css" href="${wh.url('/static/css/file-upload.css')}"/>
 <!--
-<script src="${wh.url('/static/ext-3.3.0/adapter/ext/ext-base.js')}" type="text/javascript"></script>
+<script type="text/javascript" src="${wh.url('/static/js/repo/scriptaculous/scriptaculous.js')}"></script>
+<script type="text/javascript" src="${wh.url('/static/js/repo/prototype.js')}"></script>
+<script src="${wh.url('/static/ext-3.4.0/adapter/ext/ext-base.js')}" type="text/javascript"></script>
+<script src="${wh.url('/static/ext-3.4.0/adapter/prototype/ext-prototype-adapter.js')}" type="text/javascript"></script>
+<script src="${wh.url('/static/ext-3.3.0/ext-all.js')}"></script>
 -->
 <script type="text/javascript" src="${wh.url('/static/js/repo/prototype.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/repo/scriptaculous/scriptaculous.js')}"></script>
-<script src="${wh.url('/static/ext-3.3.0/adapter/prototype/ext-prototype-adapter.js')}" type="text/javascript"></script>
-<!--
-<script src="${wh.url('/static/ext-3.3.0/ext-all.js')}"></script>
--->
-<script src="${wh.url('/static/ext-3.3.0/ext-all-debug.js')}"></script>
+<script src="${wh.url('/static/ext-3.4.0/adapter/ext/ext-base-debug.js')}" type="text/javascript"></script>
+<script src="${wh.url('/static/ext-3.4.0/ext-all-debug.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/repo/DisplayField.js')}"></script>
 
 
@@ -111,7 +112,7 @@ function callbacker(){
 
 
 <div style="position:relative;">
-<div id="appLoad" style="z-index:1;position:absolute;left:0px;top:0px;width:400px;height:200px;background:white;padding:200px;"><img src="${wh.url('static/ext-3.3.0/resources/images/default/shared/large-loading.gif')}"> Loading...</div>
+<div id="appLoad" style="z-index:1;position:absolute;left:0px;top:0px;width:400px;height:200px;background:white;padding:200px;"><img src="${wh.url('static/ext-3.4.0/resources/images/default/shared/large-loading.gif')}"> Loading...</div>
 <div id="loginDiv" style="width:300;">
 <form id="loginForm" action="${wh.url('/login/processLogin')}" method="POST">
 <label class="x-form-item-label">Email address:</label>
