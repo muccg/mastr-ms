@@ -220,47 +220,51 @@ def getNodeClients(request, *args):
 
 def nodeinfo(request, organisation="", sitename="", station=""):
     logger.debug("Searching for node org=%s, sitename=%s, station=%s" % (organisation, sitename, station))
-    nodeclient = NodeClient.objects.get(organisation_name = organisation, site_name=sitename, station_name = station) 
-    
-    clientstate = get_saved_client_state(organisation, sitename, station)
+    try:
+        nodeclient = NodeClient.objects.get(organisation_name = organisation, site_name=sitename, station_name = station) 
+        if nodeclient is None:
+            raise Exception("No nodeclient existed with organisation=%s, sitename=%s, station=%s" % (organisation, sitename, station))
+        clientstate = get_saved_client_state(organisation, sitename, station)
     #return HttpResponse( simplejson.dumps(nodeclient.__dict__) + simplejson.dumps(clientstate.__dict__) )   
-    timediff = datetime.now() - clientstate.lastSyncAttempt
+        timediff = datetime.now() - clientstate.lastSyncAttempt
     
-    return render_to_response("node.mako", {'nodeclient':nodeclient, 'expectedfiles': getExpectedFilesForNode(nodeclient, include_completed=True), 'timediff': timediff, 'clientstate': clientstate.__dict__, 'wh':webhelpers} ) 
+        return render_to_response("node.mako", {'nodeclient':nodeclient, 'expectedfiles': getExpectedFilesForNode(nodeclient, include_completed=True), 'timediff': timediff, 'clientstate': clientstate.__dict__, 'wh':webhelpers} ) 
+
+    except Exception, e:
+        return HttpResponse("Could not display node info: %s", (e))
 
 
 def getExpectedFilesForNode(nodeclient, include_completed = False):
     incomplete = {}
     complete = {}
-    target_dict = incomplete
 
      #now get the runs for that nodeclient
     runs = Run.objects.filter(machine = nodeclient) 
     for run in runs:
+        target_dict = incomplete
         logger.debug('Finding runsamples for run')
         
-        if run.state == RUN_STATES.COMPLETE[0]:
-            if not include_completed:
-                break
-            else:
+        if (run.state != RUN_STATES.COMPLETE[0]) or ( (run.state == RUN_STATES.COMPLETE[0]) and include_completed):
+            if include_completed:
                 target_dict = complete
             
-        runsamples = RunSample.objects.filter(run = run)
-        #Build a filesdict of all the files for these runsamples
-        for rs in runsamples:
-            logger.debug('Getting files for runsamples');
-            fname = rs.filename.upper() #Use uppercase filenames as keys.
-            abspath, relpath = rs.filepaths()
-            logger.debug( 'Filename: %s belongs in path %s' % ( fname.encode('utf-8'), abspath.encode('utf-8') ) )
-            if target_dict.has_key(fname):
-                logger.debug( 'Duplicate path detected!!!' )
-                error = "%s, %s" % (error, "Duplicate filename detected for %s" % (fname.encode('utf-8')))
-                status = 2
-            #we use the relative path
-            if not(target_dict.has_key(run.id)):
-                target_dict[run.id] = {}
+            runsamples = RunSample.objects.filter(run = run)
+            #Build a filesdict of all the files for these runsamples
+            for rs in runsamples:
+                logger.debug('Getting files for runsamples');
+                fname = rs.filename.upper() #Use uppercase filenames as keys.
+                abspath, relpath = rs.filepaths()
+                logger.debug( 'Filename: %s belongs in path %s' % ( fname.encode('utf-8'), abspath.encode('utf-8') ) )
+                if target_dict.has_key(fname):
+                    logger.debug( 'Duplicate path detected!!!' )
+                    error = "%s, %s" % (error, "Duplicate filename detected for %s" % (fname.encode('utf-8')))
+                    status = 2
+                #we use the relative path
+                if not(target_dict.has_key(run.id)):
+                    target_dict[run.id] = {}
 
-            target_dict[run.id][fname] = [run.id, rs.id, relpath]
+                logger.debug("Adding %s to target_dict" % (fname) )
+                target_dict[run.id][fname] = [run.id, rs.id, relpath]
 
     return {'complete': complete, 'incomplete': incomplete}
     
@@ -302,6 +306,8 @@ def retrievePathsForFiles(request, *args):
     #get the saved client state, so we can update it
     clientstate = get_saved_client_state(porganisation, psitename, pstation)
 
+    filesdict = {}
+
     #filter by client, node, whatever to 
     #get a list of filenames in the repository run samples table
     #to compare against.
@@ -332,6 +338,13 @@ def retrievePathsForFiles(request, *args):
         
         #now get the runs for that nodeclient
         expectedFiles = getExpectedFilesForNode(nodeclient, include_completed=syncold)
+        #merge complete and incomplete
+        for runid in expectedFiles['incomplete'].keys():
+            logger.debug("INCOMPLETE: adding files for run %d" % (runid) )
+            filesdict.update(expectedFiles['incomplete'][runid])
+        for runid in expectedFiles['complete'].keys():
+            logger.debug("COMPLETE: adding files for run %d" % (runid ))
+            filesdict.update(d)
         '''
         runs = Run.objects.filter(machine = nodeclient) 
         for run in runs:
@@ -357,16 +370,10 @@ def retrievePathsForFiles(request, *args):
         '''
     except Exception, e:
         status = 1
-        logger.debug("exception encountered")
+        logger.debug("exception encountered: %s" % (e))
         error = "%s, %s" % (error, 'Unable to resolve end machine to stored NodeClient: %s' % str(e) )
         
    
-    #merge complete and incomplete
-    filesdict = {}
-    for d in expectedFiles['incomplete'].values():
-        filesdict.update(d)
-    for d in expectedFiles['complete'].values():
-        filesdict.update(d)
 
     logger.debug('making filelist obj')
     #So. Make a FileList object out of pfiles.
