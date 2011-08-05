@@ -206,6 +206,7 @@ class MSDataSyncAPI(object):
                 #their full source path will be ['/'] joined with the 'key'.
                 #theif full dest path will be the 'value'
                 if node['.'][filename] is not None:
+                    outlog.debug("Client: adding file")
                     fulllocalpath = os.path.join(node['/'], filename)
                     fullremotepath = os.path.join(node['.'][filename], filename)
                     resultdict[fulllocalpath] = "%s" %(os.path.join(localindexdir, fullremotepath) )
@@ -217,6 +218,7 @@ class MSDataSyncAPI(object):
                     if isinstance(node[dirname], dict):
                         extract_file_target(node[dirname], resultdict)
                     else:
+                        outlog.debug("Client: adding dir")
                         fulllocalpath = os.path.join(node['/'], dirname)
                         fullremotepath = os.path.join(node[dirname], dirname)
                         resultdict[fulllocalpath] = "%s" %(os.path.join(localindexdir, fullremotepath) )
