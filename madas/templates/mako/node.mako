@@ -54,12 +54,61 @@ function createXMLHTTPObject() {
 	return xmlhttp;
 }
 
+
+function updateCanvas(canvasJq, presentfiles, missingfiles){
+    var canvasEl = canvasJq[0];
+    canvasEl.width=canvasJq.width();
+    canvasEl.height=canvasJq.height();
+    console.log("Width:" + canvasEl.width);
+    var cOffset = canvasJq.offset();
+    var ctx = canvasEl.getContext("2d");
+    ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+    ctx.beginPath();
+
+    var drawlines = function(index, element){
+        var li=$(element);
+        if(li.attr("rel"))
+        {
+            //console.log("rel was" + li.attr("rel"));
+            //var srcOffset=li.offset();
+            var srcOffset=li.position();
+            var srcMidHeight=li.height()/2;
+            console.log("Looking for #" + li.attr("rel"));
+            var targetLi=$("#"+li.attr("rel"));
+
+            if(targetLi.length)
+            {
+                console.log("Found target");
+                //var trgOffset=targetLi.offset();
+                var trgOffset=targetLi.position();
+                var trgMidHeight=li.height()/2;
+                
+                console.log("srcOffset:" + srcOffset + ", trgOffset: " + trgOffset);
+                ctx.moveTo(srcOffset.left - cOffset.left, srcOffset.top - cOffset.top + srcMidHeight);
+                ctx.lineTo(trgOffset.left - cOffset.left, trgOffset.top - cOffset.top + trgMidHeight);
+                //console.log("Move to:" + srcOffset.left - cOffset.left + "," +  srcOffset.top - cOffset.top + srcMidHeight )
+            }
+        }
+    }
+
+    $('.file').each(function(index, element){
+        drawlines(index, element);
+    });
+    ctx.stroke();
+    ctx.closePath();
+}
+
+
 $(document).ready(function(){
     // first example
     $("#clientfiles").treeview();
     $("#servercomplete").treeview();
     $("#serverincomplete").treeview();
+
+    updateCanvas($("#canvas"), $(".file") );
+
 });
+
 
 </script>
 
@@ -86,12 +135,18 @@ $(document).ready(function(){
                 retstr += gendir(dirdict[elem])
             
             elif isinstance(dirdict[elem], dict):
-                retstr += "<li class=\"closed\"><span class=\"folder\">%s</span>" % (elem)
+                retstr += '<li id=\"%s\" class="closed"><span class=\"folder\">%s</span>' % (str(elem).upper().replace('-', '_').replace('.', '_'), str(elem).upper())
+                #retstr += '<li id=\"%s\"><span class=\"folder\">%s</span>' % (str(elem).upper().replace('-', '_').replace('.', '_'), str(elem).upper())
                 retstr += gendir(dirdict[elem])
-                retstr += "</li>"
+                retstr += '</li>'
             else:
-                retstr += "<li><span class=\"file\">%s</span></li>" % (elem)
-        retstr += "</ul>"
+                if dirdict[elem] is not None and dirdict[elem][3]:
+                    img = wh.url('/static/images/refresh.png')
+                else:
+                    img = wh.url('/static/images/delete.png')
+                retstr += '<li id=\"%s\"><span class=\"file\" rel="%s"><img src=\"%s\"></img>%s' % (elem+"dd", elem.replace('-', '_').replace('.', '_'), img, elem)
+                retstr += '</span></li>'
+        retstr += '</ul>'
         return retstr
 %>
 
@@ -136,7 +191,6 @@ $(document).ready(function(){
             ${ gendir(expectedfiles['incomplete']) }
         </ul>
     </div>
-
 </div>
 <!--
 <ul id="browser" class="filetree">
@@ -167,6 +221,7 @@ $(document).ready(function(){
 -->
 
 </div>
+<canvas id="canvas" style="width:800px; height:800px; position: absolute; z-index:-1;"></canvas>
 </body>
 </html>
 

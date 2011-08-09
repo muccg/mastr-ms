@@ -226,12 +226,15 @@ def nodeinfo(request, organisation="", sitename="", station=""):
             raise Exception("No nodeclient existed with organisation=%s, sitename=%s, station=%s" % (organisation, sitename, station))
         clientstate = get_saved_client_state(organisation, sitename, station)
     #return HttpResponse( simplejson.dumps(nodeclient.__dict__) + simplejson.dumps(clientstate.__dict__) )   
-        timediff = datetime.now() - clientstate.lastSyncAttempt
-    
-        return render_to_response("node.mako", {'nodeclient':nodeclient, 'expectedfiles': getExpectedFilesForNode(nodeclient, include_completed=True), 'timediff': timediff, 'clientstate': clientstate.__dict__, 'wh':webhelpers} ) 
+        timediff = datetime.now() - datetime.now() 
+        if clientstate.lastSyncAttempt is not None:
+            timediff = datetime.now() - clientstate.lastSyncAttempt
+
+        expectedfiles = getExpectedFilesForNode(nodeclient, include_completed=True)
+        return render_to_response("node.mako", {'nodeclient':nodeclient, 'expectedfiles': expectedfiles, 'timediff': timediff, 'clientstate': clientstate.__dict__, 'wh':webhelpers} ) 
 
     except Exception, e:
-        return HttpResponse("Could not display node info: %s", (e))
+        return HttpResponse("Could not display node info: %s" % (e))
 
 
 def getExpectedFilesForNode(nodeclient, include_completed = False):
@@ -245,7 +248,7 @@ def getExpectedFilesForNode(nodeclient, include_completed = False):
         logger.debug('Finding runsamples for run')
         
         if (run.state != RUN_STATES.COMPLETE[0]) or ( (run.state == RUN_STATES.COMPLETE[0]) and include_completed):
-            if include_completed:
+            if include_completed and run.state == RUN_STATES.COMPLETE[0]:
                 target_dict = complete
             
             runsamples = RunSample.objects.filter(run = run)
@@ -264,7 +267,7 @@ def getExpectedFilesForNode(nodeclient, include_completed = False):
                     target_dict[run.id] = {}
 
                 logger.debug("Adding %s to target_dict" % (fname) )
-                target_dict[run.id][fname] = [run.id, rs.id, relpath]
+                target_dict[run.id][fname] = [run.id, rs.id, relpath, os.path.exists(os.path.join(abspath, rs.filename))]
 
     return {'complete': complete, 'incomplete': incomplete}
     
@@ -344,7 +347,7 @@ def retrievePathsForFiles(request, *args):
             filesdict.update(expectedFiles['incomplete'][runid])
         for runid in expectedFiles['complete'].keys():
             logger.debug("COMPLETE: adding files for run %d" % (runid ))
-            filesdict.update(d)
+            filesdict.update(expectedFiles['complete'][runid])
         '''
         runs = Run.objects.filter(machine = nodeclient) 
         for run in runs:
@@ -405,6 +408,19 @@ def retrievePathsForFiles(request, *args):
     logger.debug('RETVAL is %s' % ( retval ) )
     return jsonResponse(retval)
 
+def checkRunSampleFileExists(runsampleid):
+    fileexists = False
+    try:
+        rs = RunSample.objects.get(id=runsampleid)
+        abssamplepath, relsamplepath = rs.filepaths()
+        complete_filename = os.path.join(abssamplepath, rs.filename)
+        fileexists = os.path.exists(complete_filename)
+        logger.debug( 'Checking file %s:%s' % (complete_filename.encode('utf-8'), fileexists) )
+    except Exception, e:
+        logger.debug('Could not check runsample file for runsampleid: %s: %s' % (str(runsampleid), e))
+    
+    return fileexists
+
 def checkRunSampleFiles(request):
     ret = {}
     ret['success'] = False;
@@ -425,13 +441,7 @@ def checkRunSampleFiles(request):
                 runsample = int(runsample)
                 try:
                     rs = RunSample.objects.get(id = runsample)
-                    abssamplepath, relsamplepath = rs.filepaths()
-                    complete_filename = os.path.join(abssamplepath, rs.filename)
-                    fileexists = os.path.exists(complete_filename)
-                    logger.debug( 'Checking file %s:%s' % (complete_filename.encode('utf-8'), fileexists) )
-                    # now change the value in the DB
-                    logger.debug( 'Changing value in DB')
-                    rs.complete = fileexists
+                    rs.complete = checkRunSampleFileExists(runsample) 
                     rs.save()
                 except Exception, e:
                     logger.debug('Error: %s' % (e) )
