@@ -361,6 +361,8 @@ class Run(models.Model):
         RUN_STATES.IN_PROGRESS,
         RUN_STATES.COMPLETE)
 
+    experiment = models.ForeignKey(Experiment, null=True)
+
     method = models.ForeignKey(InstrumentMethod)
     created_on = models.DateField(null=False, default=date.today)
     creator = models.ForeignKey(User)
