@@ -63,49 +63,57 @@ function updateCanvas(canvasJq, presentfiles, missingfiles){
     var cOffset = canvasJq.offset();
     var ctx = canvasEl.getContext("2d");
     ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
-    ctx.beginPath();
 
     var drawlines = function(index, element){
         var li=$(element);
         if(li.attr("rel"))
         {
-            //console.log("rel was" + li.attr("rel"));
-            //var srcOffset=li.offset();
-            var srcOffset=li.position();
+            var srcOffset=li.offset();
+            if (!(li.is(":visible"))){
+                srcOffset=li.parents(".closed").offset();
+            }
             var srcMidHeight=li.height()/2;
-            console.log("Looking for #" + li.attr("rel"));
             var targetLi=$("#"+li.attr("rel"));
 
             if(targetLi.length)
             {
-                console.log("Found target");
-                //var trgOffset=targetLi.offset();
-                var trgOffset=targetLi.position();
+                //console.log("Found target");
+                var trgOffset=targetLi.offset();
                 var trgMidHeight=li.height()/2;
-                
-                console.log("srcOffset:" + srcOffset + ", trgOffset: " + trgOffset);
                 ctx.moveTo(srcOffset.left - cOffset.left, srcOffset.top - cOffset.top + srcMidHeight);
-                ctx.lineTo(trgOffset.left - cOffset.left, trgOffset.top - cOffset.top + trgMidHeight);
-                //console.log("Move to:" + srcOffset.left - cOffset.left + "," +  srcOffset.top - cOffset.top + srcMidHeight )
+                ctx.lineTo(trgOffset.left + targetLi.width()/2 - cOffset.left, trgOffset.top - cOffset.top + trgMidHeight);
             }
         }
     }
 
-    $('.file').each(function(index, element){
+    ctx.beginPath();
+    ctx.strokeStyle = "#00FF00";
+    presentfiles.each(function(index, element){
+        drawlines(index, element);
+    });
+    ctx.stroke();
+    ctx.closePath();
+   
+    ctx.beginPath();
+    ctx.strokeStyle = "#FF0000";
+    missingfiles.each(function(index, element){
         drawlines(index, element);
     });
     ctx.stroke();
     ctx.closePath();
 }
 
+function updatelines(){
+    
+    updateCanvas($("#canvas"), $(".present"), $(".missing") );
+}
 
 $(document).ready(function(){
     // first example
     $("#clientfiles").treeview();
     $("#servercomplete").treeview();
     $("#serverincomplete").treeview();
-
-    updateCanvas($("#canvas"), $(".file") );
+    updatelines();
 
 });
 
@@ -135,16 +143,18 @@ $(document).ready(function(){
                 retstr += gendir(dirdict[elem])
             
             elif isinstance(dirdict[elem], dict):
-                retstr += '<li id=\"%s\" class="closed"><span class=\"folder\">%s</span>' % (str(elem).upper().replace('-', '_').replace('.', '_'), str(elem).upper())
-                #retstr += '<li id=\"%s\"><span class=\"folder\">%s</span>' % (str(elem).upper().replace('-', '_').replace('.', '_'), str(elem).upper())
+                #retstr += '<li id=\"%s\" class="closed"><span class=\"folder\">%s</span>' % (str(elem).upper().replace('-', '_').replace('.', '_'), str(elem).upper())
+                retstr += '<li id=\"%s\" class="closed" onclick="updatelines();"><span class=\"folder\">%s</span>' % (str(elem).upper().replace('-', '_').replace('.', '_'), str(elem).upper())
                 retstr += gendir(dirdict[elem])
                 retstr += '</li>'
             else:
                 if dirdict[elem] is not None and dirdict[elem][3]:
                     img = wh.url('/static/images/refresh.png')
+                    statusclass = "present"
                 else:
+                    statusclass = "missing"
                     img = wh.url('/static/images/delete.png')
-                retstr += '<li id=\"%s\"><span class=\"file\" rel="%s"><img src=\"%s\"></img>%s' % (elem+"dd", elem.replace('-', '_').replace('.', '_'), img, elem)
+                retstr += '<li id=\"%s\"><span class=\"file %s\" rel="%s"><img src=\"%s\"></img>%s' % (elem+"dd", statusclass, elem.replace('-', '_').replace('.', '_'), img, elem)
                 retstr += '</span></li>'
         retstr += '</ul>'
         return retstr
@@ -221,7 +231,7 @@ $(document).ready(function(){
 -->
 
 </div>
-<canvas id="canvas" style="width:800px; height:800px; position: absolute; z-index:-1;"></canvas>
+<canvas id="canvas" style="width:1000px; height:1000px; position: absolute; z-index:-1;"></canvas>
 </body>
 </html>
 
