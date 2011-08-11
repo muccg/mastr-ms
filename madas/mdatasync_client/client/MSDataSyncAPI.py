@@ -202,6 +202,7 @@ class MSDataSyncAPI(object):
                relies on external scope to contain 'localindexdir' string
             '''
             for filename in node['.'].keys():
+                outlog.debug("Checking for %s" % (filename))
                 #any keys in . should be valid targets.
                 #their full source path will be ['/'] joined with the 'key'.
                 #theif full dest path will be the 'value'
@@ -216,6 +217,7 @@ class MSDataSyncAPI(object):
                 if dirname not in ['.', '/']:
                     #if the value is a dict, then this dir needs to be more thouroughly explored
                     if isinstance(node[dirname], dict):
+                        outlog.debug("Checking dir %s" % (dirname))
                         extract_file_target(node[dirname], resultdict)
                     else:
                         outlog.debug("Client: adding dir")

@@ -121,6 +121,8 @@ class FileList(object):
             logger.debug('running checknode')
             self.checknode(filesdict)
 
+        return self.heirarchy
+
     def markfound(self, node, fname, filesdictentry):
         #Mark a file as 'found' (if it isnt a file it will be None)
         node[fname] = filesdictentry[2] #the relative path
@@ -166,28 +168,28 @@ class FileList(object):
         #if the dir is found, mark it as such and do nothing else with it.
         #otherwise, push each unfound dir as a new node on the checknodes 
         #queue
-        for dir in self.currentnode.keys():
-            upperdirname = dir.upper()
+        for dirname in self.currentnode.keys():
+            upperdirname = dirname.upper()
             if upperdirname not in ['.', '/']: #don't check the filelist or 'path' entry
                 logger.debug('checking dir: %s' % (upperdirname.encode('utf-8')) )
                 if upperdirname in filesdict.keys():
                     #set the dir to contain the path, not a node.
-                    self.markfound(self.currentnode, dir, filesdict[upperdirname])
+                    self.markfound(self.currentnode, dirname, filesdict[upperdirname])
                     #rewrite the DB filename to be the supplied one.
                     try:
                         runsampleDBentry =  RunSample.objects.get(id=filesdict[upperdirname][1])
-                        runsampleDBentry.filename = dir
+                        runsampleDBentry.filename = dirname
                         runsampleDBentry.save()
                     except Exception, e:
                         logger.debug('Exception renaming runsample filename: %s' % (str(e)) )
 
                     #remove the found entry from the filesdict
                     del filesdict[upperdirname]
-                    logger.debug( 'Found dir: Setting %s to %s' % ( dir.encode('utf-8'), self.currentnode[dir].encode('utf-8') ))
+                    logger.debug( 'Found dir: Setting %s to %s' % ( dirname.encode('utf-8'), self.currentnode[dirname].encode('utf-8') ))
                 else:
                     #push the dir onto the checknodes.
-                    logger.debug('Could not find dir %s, pushing.' % (dir.encode('utf-8')) )
-                    self.checknodes.append(self.currentnode[dir])
+                    logger.debug('Could not find dir %s, pushing.' % (dirname.encode('utf-8')) )
+                    self.checknodes.append(self.currentnode[dirname])
 
 def jsonResponse(data):
     jdata = simplejson.dumps(data)
@@ -382,7 +384,7 @@ def retrievePathsForFiles(request, *args):
     #So. Make a FileList object out of pfiles.
     fl = FileList(pfiles)
     logger.debug('checking files')
-    fl.checkFiles(filesdict)
+    wantedfiles = fl.checkFiles(filesdict)
 
     #set the default host
     if host is None or len(host) == 0:
@@ -390,7 +392,7 @@ def retrievePathsForFiles(request, *args):
 
     retval = {'status': status,
              'error' : error,
-             'filesdict':pfiles,
+             'filesdict':wantedfiles,
              'runsamplesdict' : fl.runsamplesdict,
              'rootdir' : settings.REPO_FILES_ROOT,
              'rules' : rules,
