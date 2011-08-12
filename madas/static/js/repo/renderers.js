@@ -40,22 +40,34 @@ function renderSampleLogType(val) {
 }
 
 function renderRunProgress(val, meta, record) {
+    // Always Ignore the val, here because ExtJS can't pass it in
+    // the progress is calculated and not sent through in the JSON
     var progress = 0.0;
-    if ((Ext.isDefined(val) && !isNaN(val))) {
-        progress = val;
-    } else {
-        progress = record.get("complete_sample_count") / record.get("sample_count");
+    if (Ext.isDefined(record)) {
+        if (record.get("state") == 2) { // Completed
+            progress = 1.0;
+        } 
+        else {
+            progress = record.get("complete_sample_count") / record.get("sample_count");
+        }
     }
-
     if (isNaN(progress)) {
         progress = 0.0;
     }
 
-    if (Ext.isDefined(record) && record.get("state") == 2) {
-        progress = 1.0;
-    }
-    
-    var text = Math.floor(progress * 100.0).toString() + "%";
+    return renderRunProgressBar(progress * 100.0);
+}
+
+function renderNoRunProgress() {
+    return renderRunProgressBar(0);
+}
+
+function renderCompleteRunProgress() {
+    return renderRunProgressBar(100);
+}
+
+function renderRunProgressBar(percent) {
+    var text = percent.toString() + "%";
 
     return "<div class='x-progress-wrap'>"
         + "<div class='x-progress-inner'>"

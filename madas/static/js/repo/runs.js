@@ -11,6 +11,17 @@ MA.CreateNewRun = function() {
     Ext.getCmp('currentRunTitle').update("New Untitled Run");
 };
 
+
+MA.ReloadRunStores = function(spec) {
+    var params = {'experiment__id': MA.ExperimentController.currentId()};
+    var options = {'params': params};
+    if (spec && spec.callback) {
+        options.callback = spec.callback;
+    }
+    newRunsStore.load(options);
+    experimentRunStore.load({'params': params});
+};
+
 MA.RunCmpRowSelect = function(view, nodes) {
     if (nodes.length == 0) {
 //        Ext.getCmp("runDetails").createRun();
@@ -23,11 +34,11 @@ MA.RunCmpRowSelect = function(view, nodes) {
 };
 
 MA.RunSaveCallback = function(id) {
-    Ext.getCmp('currentRunTitle').update(selectableRunStore.getById(id).data.title);
+    Ext.getCmp('currentRunTitle').update(newRunsStore.getById(id).data.title);
 };
 
 MA.RunDeleteCallback = function() {
-    selectableRunStore.load();
+    MA.ReloadRunStores();
     MA.ClearCurrentRun();
 };
 
@@ -366,7 +377,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                                 url: wsBaseUrl + "mark_run_complete/" + self.runId,
                                 success: function () {
                                     self.getComponent("state").setText(renderRunState(2));
-                                    self.getComponent("progress").setText(renderRunProgress(1), false);
+                                    self.getComponent("progress").setText(renderCompleteRunProgress(), false);
                                     self.fireEvent("save", self.runId);
                                 }
                             });
@@ -388,6 +399,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                             };
 
                             var values = {};
+                            values.experiment_id = MA.ExperimentController.currentId();
                             values.title = self.getComponent('title').getValue();
                             values.method_id = self.getComponent('method').getValue();
                             values.machine_id = self.getComponent('machine').getValue();
@@ -458,7 +470,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         this.pendingSampleStore.removeAll();
 
         this.getComponent("state").setText(renderRunState(0));
-        this.getComponent("progress").setText(renderRunProgress(0), false);
+        this.getComponent("progress").setText(renderNoRunProgress(), false);
 
         this.getComponent("title").setValue("New Untitled Run");
         this.getComponent("method").clearValue();
@@ -560,7 +572,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
             this.getComponent('runTree').getLoader().load(this.getComponent('runTree').getRootNode());
         }
         
-        runRelatedExperimentStore.proxy.conn.url = wsBaseUrl + 'records/experiment/sample__run__id/' + this.runId;
+        runRelatedExperimentStore.proxy.conn.url = wsBaseUrl + 'records/experiment/run__id/' + this.runId;
         runRelatedExperimentStore.load({ });
     }
 });
@@ -586,7 +598,8 @@ MA.RunCmp = new Ext.Window({
     ],
     listeners: {
         "beforeshow": function (w) {
-             selectableRunStore.load();
+            MA.ReloadRunStores();
+             //selectableRunStore.load();
         }
     },
     items:[
@@ -596,7 +609,7 @@ MA.RunCmp = new Ext.Window({
             id:'runlistview',
             region:'west',
             width:150,
-            store:selectableRunStore,
+            store:newRunsStore,
             loadingText:'Loading...',
             columnSort:false,
             columns: [
@@ -608,8 +621,8 @@ MA.RunCmp = new Ext.Window({
                 'render': function() {
                     //register to be notified when the runstore loads so that we can update current sel
                     
-                    selectableRunStore.addListener("load", function() {
-                        var record = selectableRunStore.getById(Ext.getCmp('runDetails').runId);
+                    newRunsStore.addListener("load", function() {
+                        var record = newRunsStore.getById(Ext.getCmp('runDetails').runId);
                         if (record != null) {
                             var list = Ext.getCmp("runlistview");
                             list.refresh();
@@ -620,7 +633,7 @@ MA.RunCmp = new Ext.Window({
                             MA.CreateNewRun();
                         }
                     });
-                    selectableRunStore.load();
+                    //selectableRunStore.load();
                 }
             },
             viewConfig:{
@@ -640,9 +653,7 @@ MA.RunCmp = new Ext.Window({
             listeners: {
                 "delete": MA.RunDeleteCallback,
                 "save": function (id) {
-                    runStore.load();
-                    selectableRunStore.load({
-                        callback: function() {
+                    MA.ReloadRunStores({callback: function() {
                             MA.RunSaveCallback(id);
                         }
                     });
