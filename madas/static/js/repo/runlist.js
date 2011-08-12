@@ -150,9 +150,7 @@ MA.RunListCmp = {
 
 MA.ExperimentRunsInit = function() {
     Ext.getCmp('center-panel').layout.setActiveItem('experiment-runs-list');
-    
-    runListStore.proxy.conn.url = adminBaseUrl + "repository/run/ext/json?samples__experiment="+MA.ExperimentController.currentId();
-    runListStore.load();
+    runListStore.load({'params': {'experiment__id': MA.ExperimentController.currentId()}});
 };
 
 MA.ExperimentRunListCmp = {
