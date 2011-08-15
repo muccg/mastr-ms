@@ -66,8 +66,10 @@ function updateCanvas(canvasJq, presentfiles, missingfiles){
 
     var drawlines = function(index, element){
         var li=$(element);
+        console.log("missing");
         if(li.attr("rel"))
         {
+	    console.log("rel");
             var srcOffset=li.offset();
             if (!(li.is(":visible"))){
                 srcOffset=li.parents(".closed").offset();
@@ -77,7 +79,7 @@ function updateCanvas(canvasJq, presentfiles, missingfiles){
 
             if(targetLi.length)
             {
-                //console.log("Found target");
+                console.log("Found target");
                 var trgOffset=targetLi.offset();
                 var trgMidHeight=li.height()/2;
                 ctx.moveTo(srcOffset.left - cOffset.left, srcOffset.top - cOffset.top + srcMidHeight);
@@ -93,14 +95,14 @@ function updateCanvas(canvasJq, presentfiles, missingfiles){
     });
     ctx.stroke();
     ctx.closePath();
-   
+    
     ctx.beginPath();
     ctx.strokeStyle = "#FF0000";
     missingfiles.each(function(index, element){
-        drawlines(index, element);
+	drawlines(index, element);
     });
     ctx.stroke();
-    ctx.closePath();
+    ctx.closePath(); 
 }
 
 function updatelines(){
@@ -188,7 +190,6 @@ $(document).ready(function(){
    <div>
     <strong>Rsync flags:</strong> ${nodeclient.flags}
    </div>
-
     <div>
         <strong> Expected complete</strong> (${ len(expectedfiles['complete']) } runs)
         <ul id='servercomplete' class="filetree">
