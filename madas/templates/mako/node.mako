@@ -173,7 +173,7 @@ $(document).ready(function(){
     </div>
     <div>
     <strong>Last Requested Sync:</strong> ${clientstate['lastSyncAttempt']} <em>(${timediff.seconds//3600}h ${ (timediff.seconds%3600)//60}m ${timediff.seconds%60}s ago)</em>
-    <strong>Last Error Result:</strong> ${clientstate.get('lastError', "Unable to retrieve last error"}
+    <strong>Last Error Result:</strong> ${clientstate.get('lastError', "Unable to retrieve last error")}
     </div>
     <strong>Client Files:</strong>
     <ul id="clientfiles" class="filetree">
