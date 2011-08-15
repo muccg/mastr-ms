@@ -72,6 +72,7 @@ class ClientState(object):
         self.organisation = org
         self.sitename = site
         self.station = station
+        self.lastError = ""
 
 
 def get_saved_client_state(org, site, station):
@@ -452,6 +453,18 @@ def checkRunSampleFiles(request):
                 
     else:
         ret['description'] = "No files given"
+   
+    logger.debug("POST: %s" % (str(request.POST)) )
+    org = request.POST.get('organisation', None)
+    site = request.POST.get('sitename', None)
+    station = request.POST.get('stationname', None)
+    if (org is not None) and (site is not None) and (station is not None):
+        clientstate = get_saved_client_state(org, site, station)
+        clientstate.lastError = request.POST.get('lastError', "No Error")
+        save_client_state(clientstate)
+        logger.debug("Saved lastError in client state")
+    else:
+        logger.debug("Could not get clientstate details: %s, %s, %s" % (org, site, station))
 
     return jsonResponse(ret)
 
@@ -551,6 +564,7 @@ def utils(request):
 
     #now we proceed as normal.
 
+    nodeclients = NodeClient.objects.all()
     #Screenshots and logs are in the same dir.
     clientlogdir = os.path.join(settings.REPO_FILES_ROOT , 'synclogs')
     fileslist = []
@@ -572,7 +586,7 @@ def utils(request):
     currentLogLevel = logger.getEffectiveLevel()
     levelnames = ['Debug', 'Info', 'Warning', 'Critical', 'Fatal']
     levelvalues = [logging.DEBUG, logging.INFO, logging.WARNING, logging.CRITICAL, logging.FATAL]
-    return render_to_response("utils.mako", {'wh':webhelpers, 'serverloglist':serverloglist, 'clientlogslist':clientlogslist, 'shotslist':shotslist, 'currentLogLevel':currentLogLevel, 'levelnames':levelnames, 'levelvalues':levelvalues , 'success':success, 'message':message})
+    return render_to_response("utils.mako", {'wh':webhelpers, 'serverloglist':serverloglist, 'clientlogslist':clientlogslist, 'shotslist':shotslist, 'currentLogLevel':currentLogLevel, 'levelnames':levelnames, 'levelvalues':levelvalues , 'success':success, 'message':message, 'nodeclients': nodeclients})
 
 @login_required
 def tail_log(request, filename=None, linesback=10, since=0):

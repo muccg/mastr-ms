@@ -57,6 +57,21 @@ function createXMLHTTPObject() {
 <div style="width:700px; margin-left:50px; padding:10px">
 <h2>MDatasync Utils</h2></br></br>
 
+
+<div style="padding-top:10px; padding-bottom: 10px;">
+<h3>Nodes</h3>
+<table numcols=2 cellpadding=3 cellspacing=0>
+%for num3,nc in enumerate(nodeclients):
+<%    nodeurl = "/sync/node/%s/%s/%s/" % (nc.organisation_name, nc.site_name, nc.station_name)
+    nodename = "%s.%s.%s" % (nc.organisation_name, nc.site_name, nc.station_name)
+
+%>
+    <tr bgcolor="${'#f0f0f0' if num3%2 else '#e0e0e0'}"><td><td><a href="${wh.url(nodeurl)}">${ nodename }</td></tr>
+%endfor
+</table>
+
+</div>
+
 <div style= "padding-top:10px; padding-bottom:10px;">
 <h3>Submitted Logs</h3>
 <p>Number of Logs: ${len(clientlogslist)}</p>
