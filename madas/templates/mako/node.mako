@@ -9,6 +9,10 @@
 <script type="text/javascript" src="${wh.url('/static/js/jquery.cookie.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/jquery.treeview.js')}"></script>
 
+<style type="text/css">
+.missingchild { border: 2px solid #ffaaaa; -webkit-border-radius: 5px; -moz-border-radius: 5px; }
+</style>
+
 <script>
 var pos = 0;
 var serverlogfilename = "";
@@ -70,18 +74,24 @@ function updateCanvas(canvasJq, presentfiles, missingfiles){
         if(li.attr("rel"))
         {
 	    //console.log("rel");
-            var srcOffset=li.offset();
+            var srcelem;
             if (!(li.is(":visible"))){
-                srcOffset=li.parents(".closed").offset();
+                srcElem = li.parents(".closed")
             }
-            var srcMidHeight=li.height()/2;
+            else {
+                srcElem = li;
+            }
+
+
+            var srcOffset=srcElem.offset();
+            var srcMidHeight=srcElem.height()/2;
             var targetLi=$("#"+li.attr("rel"));
 
             if(targetLi.length)
             {
                 //console.log("Found target");
                 var trgOffset=targetLi.offset();
-                var trgMidHeight=li.height()/2;
+                var trgMidHeight=targetLi.height()/2;
                 ctx.moveTo(srcOffset.left - cOffset.left, srcOffset.top - cOffset.top + srcMidHeight);
                 ctx.lineTo(trgOffset.left + targetLi.width()/2 - cOffset.left, trgOffset.top - cOffset.top + trgMidHeight);
             }
@@ -114,12 +124,23 @@ function updatelines(){
     updateCanvas($("#canvas"), $(".present"), $(".missing") );
 }
 
+function updateFolders(){
+    //var subs = $(".folder").children()
+    //for (var fileindex = 0; fileindex<subs.length(); fileindex++){
+    //    if 
+    //}
+
+    $(".missing").parent().parent().parent().addClass("missingchild");
+}
+
 $(document).ready(function(){
     // first example
     $("#clientfiles").treeview();
     $("#servercomplete").treeview();
     $("#serverincomplete").treeview();
     updatelines();
+    updateFolders();
+
 
 });
 
@@ -149,7 +170,6 @@ $(document).ready(function(){
                 retstr += gendir(dirdict[elem])
             
             elif isinstance(dirdict[elem], dict):
-                #retstr += '<li id=\"%s\" class="closed"><span class=\"folder\">%s</span>' % (str(elem).upper().replace('-', '_').replace('.', '_'), str(elem).upper())
                 retstr += '<li id=\"%s\" class="closed" onclick="updatelines();"><span class=\"folder\">%s</span>' % (str(elem).upper().replace('-', '_').replace('.', '_'), str(elem).upper())
                 retstr += gendir(dirdict[elem])
                 retstr += '</li>'
@@ -210,33 +230,7 @@ $(document).ready(function(){
         </ul>
     </div>
 </div>
-<!--
-<ul id="browser" class="filetree">
-		<li><span class="folder">Folder 1</span>
-			<ul>
-				<li><span class="file">Item 1.1</span></li>
-			</ul>
-		</li>
-		<li><span class="folder">Folder 2</span>
-			<ul>
-				<li><span class="folder">Subfolder 2.1</span>
-					<ul id="folder21">
-						<li><span class="file">File 2.1.1</span></li>
-						<li><span class="file">File 2.1.2</span></li>
-					</ul>
-				</li>
-				<li><span class="file">File 2.2</span></li>
-			</ul>
-		</li>
-		<li class="closed"><span class="folder">Folder 3 (closed at start)</span>
-			<ul>
-				<li><span class="file">File 3.1</span></li>
-			</ul>
-		</li>
-		<li><span class="file">File 4</span></li>
-	</ul>
 <div style= "padding-top:10px; padding-bottom:10px;">
--->
 
 </div>
 <canvas id="canvas" style="width:1000px; height:3000px; position: absolute; z-index:-1;"></canvas>
