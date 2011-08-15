@@ -59,17 +59,17 @@ function updateCanvas(canvasJq, presentfiles, missingfiles){
     var canvasEl = canvasJq[0];
     canvasEl.width=canvasJq.width();
     canvasEl.height=canvasJq.height();
-    console.log("Width:" + canvasEl.width);
+    //console.log("Width:" + canvasEl.width);
     var cOffset = canvasJq.offset();
     var ctx = canvasEl.getContext("2d");
     ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
 
     var drawlines = function(index, element){
         var li=$(element);
-        console.log("missing");
+        //console.log("missing");
         if(li.attr("rel"))
         {
-	    console.log("rel");
+	    //console.log("rel");
             var srcOffset=li.offset();
             if (!(li.is(":visible"))){
                 srcOffset=li.parents(".closed").offset();
@@ -79,7 +79,7 @@ function updateCanvas(canvasJq, presentfiles, missingfiles){
 
             if(targetLi.length)
             {
-                console.log("Found target");
+                //console.log("Found target");
                 var trgOffset=targetLi.offset();
                 var trgMidHeight=li.height()/2;
                 ctx.moveTo(srcOffset.left - cOffset.left, srcOffset.top - cOffset.top + srcMidHeight);
@@ -88,6 +88,7 @@ function updateCanvas(canvasJq, presentfiles, missingfiles){
         }
     }
 
+    ctx.save()
     ctx.beginPath();
     ctx.strokeStyle = "#00FF00";
     presentfiles.each(function(index, element){
@@ -95,7 +96,9 @@ function updateCanvas(canvasJq, presentfiles, missingfiles){
     });
     ctx.stroke();
     ctx.closePath();
-    
+    ctx.restore()
+
+    ctx.save()
     ctx.beginPath();
     ctx.strokeStyle = "#FF0000";
     missingfiles.each(function(index, element){
@@ -103,6 +106,7 @@ function updateCanvas(canvasJq, presentfiles, missingfiles){
     });
     ctx.stroke();
     ctx.closePath(); 
+    ctx.restore();
 }
 
 function updatelines(){
@@ -169,6 +173,7 @@ $(document).ready(function(){
     </div>
     <div>
     <strong>Last Requested Sync:</strong> ${clientstate['lastSyncAttempt']} <em>(${timediff.seconds//3600}h ${ (timediff.seconds%3600)//60}m ${timediff.seconds%60}s ago)</em>
+    <strong>Last Error Result:</strong> ${clientstate['lastError']}
     </div>
     <strong>Client Files:</strong>
     <ul id="clientfiles" class="filetree">
@@ -232,7 +237,7 @@ $(document).ready(function(){
 -->
 
 </div>
-<canvas id="canvas" style="width:1000px; height:1000px; position: absolute; z-index:-1;"></canvas>
+<canvas id="canvas" style="width:1000px; height:3000px; position: absolute; z-index:-1;"></canvas>
 </body>
 </html>
 
