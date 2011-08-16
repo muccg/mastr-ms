@@ -10,10 +10,6 @@ if not os.environ.has_key('PROJECT_DIRECTORY'):
 from appsettings.default_dev import *
 from appsettings.mastrms.dev import *
 
-
-
-LOGS = ['mdatasync_server_log', 'madas_log']
-
 # Defaults
 #LOGIN_URL
 #LOGIN_REDIRECT_URL
@@ -69,3 +65,16 @@ SITE_NAME = 'madas'
 MEDIA_ROOT = os.path.join(PROJECT_DIRECTORY,"static")
 MEDIA_URL = '/static/'
 
+
+##
+## LOGGING
+##
+import logging, logging.handlers
+LOG_DIRECTORY = os.path.join(PROJECT_DIRECTORY,"logs")
+LOGGING_LEVEL = logging.DEBUG
+install_name = PROJECT_DIRECTORY.split('/')[-2]
+LOGGING_FORMATTER = logging.Formatter('DEV_MADAS [%(name)s:' + install_name + ':%(levelname)s:%(filename)s:%(lineno)s:%(funcName)s] %(message)s')
+LOGS = ['mdatasync_server_log', 'madas_log']
+
+print 'importing ccglogging'
+import ccglogging
