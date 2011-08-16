@@ -221,6 +221,7 @@ def getNodeClients(request, *args):
 
     return jsonResponse(result)
 
+@login_required
 def nodeinfo(request, organisation="", sitename="", station=""):
     logger.debug("Searching for node org=%s, sitename=%s, station=%s" % (organisation, sitename, station))
     try:
