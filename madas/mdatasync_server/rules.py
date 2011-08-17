@@ -1,5 +1,4 @@
 class ActionType:
-    ionsole.log('the id is now: ' + id);
     EXCLUDE = 1
     INCLUDE = 2
     UPDATE_EXISTING = 4
