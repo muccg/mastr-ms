@@ -29,7 +29,6 @@ MA.ChangeMainContent = function(contentName, paramArray){
     var showMenu = true;
     var affectMenu = true;
     var cancelBackTarget = true; //whether or not this action should be invoked if a user clicks Cancel (where the variable is obeyed)
-    console.log('MA.ChangeMainContent was called with content: ' + contentName);
     Ext.QuickTips.init();
     
     switch (contentName) {
@@ -347,7 +346,6 @@ MA.InitApplication = function(appSecureUrl, username, mainContentFunction, param
     var paramArray;
     if (params) {
         paramArray = JSON.parse(params); //eval is evil
-        console.log('In InitApplication, params is: ' + params)
     }
 
     MA.ExperimentController.mask = new Ext.LoadMask("center-panel", {

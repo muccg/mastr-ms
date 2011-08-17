@@ -1061,9 +1061,7 @@ MA.FquoValidatePassword = function (textfield, event) {
 };
 
 MA.ViewFormalInit = function(paramArray){
-    console.log(paramArray);
     var id = paramArray.qid;
-    console.log('the id is now: ' + id);
 
     var quoteRequestEditCmp = Ext.getCmp('fquouserdetails-panel');
     var formalQuoteCmp = Ext.getCmp('formalquoteview-panel');
