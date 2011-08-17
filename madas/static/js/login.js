@@ -38,7 +38,6 @@ MA.LoginExecute = function(paramArray){
                                         var resultContent;
                                         var params;
                                         if (action.result.success === true) {
-                                            //console.log("Login Execute: "  + action.result.toString());
                                             form.reset(); 
                                             //load up the menu and next content area as declared in response
                                             if (action.result.username) {
@@ -175,18 +174,15 @@ MA.ForgotPasswordCmp = {id:'forgot-password-container-panel',
 MA.NotAuthorizedCmp = { id: 'notauthorized-panel', title: 'Not Authorized', html: 'You are not authorized to access this page' };
 
 MA.GetUserInfo = function(callback) {
-    //console.log("Called GetUserInfo");
     var simplereq = Ext.Ajax.request({
             url:MA.BaseUrl+'userinfo',
             success: function(response) {
-                   //console.log(this);
                    MA.CurrentUser = Ext.decode(response.responseText);
                    if (callback !== undefined) {
                         callback();
                    }
             },
             failure: function() {
-                   //console.log('Failed to get userinfo');
                    MA.ResetUser();
             },
     });

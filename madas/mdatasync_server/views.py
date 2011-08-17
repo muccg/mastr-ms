@@ -135,8 +135,6 @@ class FileList(object):
     
     def checknode(self, filesdict):
         #if there are files at this node. 
-        #print '\nIn checknode, type of currentnode is: ', type(self.currentnode)
-        #print '\nIn checknode, currentnode is', self.currentnode 
         
         #create a list of uppercase keys to do the comparison with.
         #we always do our comparisons with uppercase, so that they are case insensitive,
@@ -574,7 +572,6 @@ def utils(request):
     clientlogslist = []
     shotslist = []
     for fname in fileslist:
-        print fname
         if fname.endswith('.png'):
             shotslist.append(fname)
         else:    
