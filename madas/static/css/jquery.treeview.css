@@ -5,7 +5,7 @@
 }
 
 .treeview ul {
-	background-color: transparent;
+	background-color: transparent!important;
 	margin-top: 4px;
 }
 

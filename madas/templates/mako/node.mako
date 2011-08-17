@@ -10,7 +10,7 @@
 <script type="text/javascript" src="${wh.url('/static/js/jquery.treeview.js')}"></script>
 
 <style type="text/css">
-.missingchild { border: 2px solid #ffaaaa; -webkit-border-radius: 5px; -moz-border-radius: 5px; }
+.missingchild { border: 2px solid #ffaaaa; -webkit-border-radius: 5px; -moz-border-radius: 5px; z-index: -1; }
 </style>
 
 <script>
@@ -151,7 +151,8 @@ $(document).ready(function(){
 </%def>
 <head>
 <body>
-<div style="width:700px; margin-left:50px; padding:10px">
+<div style="width:700px; margin-left:50px; padding:10px;">
+
 <!--generate file structure html !-->
 <% 
     def gendir(dirdict):
@@ -233,7 +234,7 @@ $(document).ready(function(){
 <div style= "padding-top:10px; padding-bottom:10px;">
 
 </div>
-<canvas id="canvas" style="width:1000px; height:3000px; position: absolute; z-index:-1;"></canvas>
+<canvas id="canvas" style="width:1000px; height:3000px; position: absolute; top: 0px; left: 0px; z-index: -1;"></canvas>
 </body>
 </html>
 
