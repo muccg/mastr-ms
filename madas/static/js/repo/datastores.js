@@ -419,11 +419,12 @@ var experimentRunStore = new Ext.data.JsonStore(
                                                 }
                                                 );
 
-var selectableRunStore = new Ext.data.JsonStore(
+var newRunsStore = new Ext.data.JsonStore(
                         {
                             storeId: 'run',
                             autoLoad: false,
-                            url: adminBaseUrl + "repository/run/ext/json?state=0",
+                            url: adminBaseUrl + "repository/run/ext/json",
+                            baseParams: {'state': 0},
                             restful: true,
                             listeners: {'load':MA.DSLoaded,
                                         'loadexception':MA.DSLoadIgnoreException
