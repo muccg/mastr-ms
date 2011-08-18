@@ -141,7 +141,7 @@ MA.RunListCmp = {
                         "delete": function () { runListStore.reload(); runStore.reload(); },
                         "save": function () { runListStore.reload(); runStore.reload(); }
                     }
-                }, 'viewer')
+                })
             ]
         })
     ]
@@ -150,9 +150,8 @@ MA.RunListCmp = {
 
 MA.ExperimentRunsInit = function() {
     Ext.getCmp('center-panel').layout.setActiveItem('experiment-runs-list');
-    
-    runListStore.proxy.conn.url = adminBaseUrl + "repository/run/ext/json?samples__experiment="+MA.ExperimentController.currentId();
-    runListStore.load();
+    runListStore.load({'params': {'experiment__id': MA.ExperimentController.currentId()}});
+    Ext.getCmp('experiment-run-list-detail').clearRun();
 };
 
 MA.ExperimentRunListCmp = {
@@ -184,7 +183,7 @@ items: [
                        }
                        },
                        store:experimentRunStore
-                       }),
+                       }, mode='editor'),
         new Ext.Panel({
                       region: "east",
                       width: 520,
@@ -199,13 +198,13 @@ items: [
                                                id: "experiment-run-list-detail",
                                                listeners: {
                                                "delete": function () { 
-        runListStore.proxy.conn.url = adminBaseUrl + "repository/run/ext/json?samples__experiment="+MA.ExperimentController.currentId();
+        //runListStore.proxy.conn.url = adminBaseUrl + "repository/run/ext/json?samples__experiment="+MA.ExperimentController.currentId();
 runListStore.reload(); runStore.reload(); },
                                                "save": function () { 
-        runListStore.proxy.conn.url = adminBaseUrl + "repository/run/ext/json?samples__experiment="+MA.ExperimentController.currentId();
+        //runListStore.proxy.conn.url = adminBaseUrl + "repository/run/ext/json?samples__experiment="+MA.ExperimentController.currentId();
 runListStore.reload(); runStore.reload(); }
                                                }
-                                               }, 'viewer')
+                                               }, {allowCreatingNewRun: true})
                               ]
                       })
         ]

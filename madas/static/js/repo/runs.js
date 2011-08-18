@@ -5,10 +5,19 @@
 
 MA.CreateNewRun = function() {
     Ext.getCmp('runlistview').clearSelections();
-
     Ext.getCmp("runDetails").createRun();
-    
     Ext.getCmp('currentRunTitle').update("New Untitled Run");
+};
+
+
+MA.ReloadRunStores = function(spec) {
+    var params = {'experiment__id': MA.ExperimentController.currentId()};
+    var options = {'params': params};
+    if (spec && spec.callback) {
+        options.callback = spec.callback;
+    }
+    newRunsStore.load(options);
+    experimentRunStore.load({'params': params});
 };
 
 MA.RunCmpRowSelect = function(view, nodes) {
@@ -23,11 +32,11 @@ MA.RunCmpRowSelect = function(view, nodes) {
 };
 
 MA.RunSaveCallback = function(id) {
-    Ext.getCmp('currentRunTitle').update(selectableRunStore.getById(id).data.title);
+    Ext.getCmp('currentRunTitle').update(newRunsStore.getById(id).data.title);
 };
 
 MA.RunDeleteCallback = function() {
-    selectableRunStore.load();
+    MA.ReloadRunStores();
     MA.ClearCurrentRun();
 };
 
@@ -40,9 +49,15 @@ MA.ClearCurrentRun = function() {
 MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
     constructor: function (config, mode) {
         var self = this;
-        if (!Ext.isDefined(mode)) {
-            mode = 'viewer';
-            // viewer mode doesn't show samples to add
+        this.allowCreatingNewRun = false;
+        this.allowAddingSamples = false;
+        if (Ext.isDefined(mode)) {
+            if (mode.allowCreatingNewRun) {
+                this.allowCreatingNewRun = true;
+            }
+            if (mode.allowAddingSamples) {
+                this.allowAddingSamples = true;
+            }
         }
 
         this.pendingSampleSelModel = new Ext.grid.CheckboxSelectionModel({ width: 25 });
@@ -338,6 +353,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
             buttons:[
                 {
                     text:'Delete Run',
+                    disabled: true,
                     itemId:'deleteButton',
                     handler:function() {
                         self.deleteRun();
@@ -366,7 +382,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                                 url: wsBaseUrl + "mark_run_complete/" + self.runId,
                                 success: function () {
                                     self.getComponent("state").setText(renderRunState(2));
-                                    self.getComponent("progress").setText(renderRunProgress(1), false);
+                                    self.getComponent("progress").setText(renderCompleteRunProgress(), false);
                                     self.fireEvent("save", self.runId);
                                 }
                             });
@@ -375,6 +391,8 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                 },
                 { 
                     text:'Save Run',
+                    itemId: 'saveButton',
+                    disabled: !this.allowCreatingNewRun,
                     handler:function() {
                         if (self.isValid()) {
                             var runSaveCallback = function (store, records, options) {
@@ -394,6 +412,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
 
                             if (self.runId == 0) {
                                 //create new
+                                values.experiment_id = MA.ExperimentController.currentId();
                                 MA.CRUDSomething('create/run/', values, runSaveCallback);
                             } else {
                                 //update
@@ -431,7 +450,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         this.pendingSampleStore.removeAll();
         this.runId = 0;
         
-        if (mode == 'viewer') {
+        if (!this.allowAddingSamples) {
             this.remove("samplesToAdd");
             this.getComponent('samples').setHeight(200);
         } else {
@@ -440,27 +459,35 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         
         self.setAutoScroll(true);
     },
-    addSample: function (id) {
-        if (Ext.isArray(id)) {
-            for (var i = 0; i < id.length; i++) {
-                this.addSample(id[i]);
+    clearSamples: function() {
+        this.pendingSampleStore.removeAll();
+    },
+    addSample: function (sample_id) {
+        if (Ext.isArray(sample_id)) {
+            for (var i = 0; i < sample_id.length; i++) {
+                this.addSample(sample_id[i]);
             }
             return;
         }
 
-        this.pendingSampleStore.add(new this.PendingSampleRecord({ id: id }, id));
+        this.pendingSampleStore.add(new this.PendingSampleRecord({ 'id': sample_id }, sample_id));
     },
     clearRun: function () {
         this.createRun();
     },
     createRun: function () {
         this.runId = 0;
-        this.pendingSampleStore.removeAll();
+        //this.pendingSampleStore.removeAll();
 
-        this.getComponent("state").setText(renderRunState(0));
-        this.getComponent("progress").setText(renderRunProgress(0), false);
-
+        if (this.allowCreatingNewRun) {
+            this.getFooterToolbar().getComponent("saveButton").enable();
+        } else {
+            this.getFooterToolbar().getComponent("saveButton").disable();
+        }
         this.getComponent("title").setValue("New Untitled Run");
+        this.getComponent("state").setText(renderRunState(0));
+        this.getComponent("progress").setText(renderNoRunProgress(), false);
+
         this.getComponent("method").clearValue();
         this.getComponent("machine").clearValue();
 
@@ -469,6 +496,8 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         this.getFooterToolbar().getComponent("deleteButton").disable();
         
         this.getComponent('samples').getBottomToolbar().getComponent('removeBtn').enable();
+
+        runRelatedExperimentStore.removeAll();
 
         this.sampleStore.load({ params: { run__id__exact: this.runId } });
     },
@@ -528,7 +557,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
     },
     selectRun: function (record) {
         this.runId = record.data.id;
-        this.pendingSampleStore.removeAll();
+        //this.pendingSampleStore.removeAll();
 
         this.getComponent("state").setText(renderRunState(record.data.state));
         this.getComponent("progress").setText(renderRunProgress(undefined, undefined, record), false);
@@ -536,6 +565,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         this.getComponent("method").setValue(record.data.method);
         this.getComponent("machine").setValue(record.data.machine);
 
+        this.getFooterToolbar().getComponent("saveButton").enable();
         this.getFooterToolbar().getComponent("generateWorklistButton").enable();
         this.getFooterToolbar().getComponent("markCompleteButton").enable();
         this.getFooterToolbar().getComponent("deleteButton").enable();
@@ -560,7 +590,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
             this.getComponent('runTree').getLoader().load(this.getComponent('runTree').getRootNode());
         }
         
-        runRelatedExperimentStore.proxy.conn.url = wsBaseUrl + 'records/experiment/sample__run__id/' + this.runId;
+        runRelatedExperimentStore.proxy.conn.url = wsBaseUrl + 'records/experiment/run__id/' + this.runId;
         runRelatedExperimentStore.load({ });
     }
 });
@@ -586,7 +616,8 @@ MA.RunCmp = new Ext.Window({
     ],
     listeners: {
         "beforeshow": function (w) {
-             selectableRunStore.load();
+            MA.ReloadRunStores();
+            //selectableRunStore.load();
         }
     },
     items:[
@@ -596,7 +627,7 @@ MA.RunCmp = new Ext.Window({
             id:'runlistview',
             region:'west',
             width:150,
-            store:selectableRunStore,
+            store:newRunsStore,
             loadingText:'Loading...',
             columnSort:false,
             columns: [
@@ -608,8 +639,8 @@ MA.RunCmp = new Ext.Window({
                 'render': function() {
                     //register to be notified when the runstore loads so that we can update current sel
                     
-                    selectableRunStore.addListener("load", function() {
-                        var record = selectableRunStore.getById(Ext.getCmp('runDetails').runId);
+                    newRunsStore.addListener("load", function() {
+                        var record = newRunsStore.getById(Ext.getCmp('runDetails').runId);
                         if (record != null) {
                             var list = Ext.getCmp("runlistview");
                             list.refresh();
@@ -620,7 +651,7 @@ MA.RunCmp = new Ext.Window({
                             MA.CreateNewRun();
                         }
                     });
-                    selectableRunStore.load();
+                    //selectableRunStore.load();
                 }
             },
             viewConfig:{
@@ -640,14 +671,12 @@ MA.RunCmp = new Ext.Window({
             listeners: {
                 "delete": MA.RunDeleteCallback,
                 "save": function (id) {
-                    runStore.load();
-                    selectableRunStore.load({
-                        callback: function() {
+                    MA.ReloadRunStores({callback: function() {
                             MA.RunSaveCallback(id);
                         }
                     });
                 }
             }
-        }, 'editor')
+        }, {allowCreatingNewRun: true, allowAddingSamples: true})
     ]
 });
