@@ -257,6 +257,9 @@ def getExpectedFilesForNode(nodeclient, include_completed = False):
             #Build a filesdict of all the files for these runsamples
             for rs in runsamples:
                 logger.debug('Getting files for runsamples');
+                #if rs.filename not None or rs.filename not "":
+                #    continue #move to the next record - this one has no filename
+                
                 fname = rs.filename.upper() #Use uppercase filenames as keys.
                 abspath, relpath = rs.filepaths()
                 logger.debug( 'Filename: %s belongs in path %s' % ( fname.encode('utf-8'), abspath.encode('utf-8') ) )
