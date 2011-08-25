@@ -150,8 +150,8 @@ MA.RunListCmp = {
 
 MA.ExperimentRunsInit = function() {
     Ext.getCmp('center-panel').layout.setActiveItem('experiment-runs-list');
-    runListStore.load({'params': {'experiment__id': MA.ExperimentController.currentId()}});
-    Ext.getCmp('experiment-run-list-detail').clearRun();
+    //Ext.getCmp('experiment-run-list-detail').clearRun();
+    Ext.getCmp('experiment-runs-list').init();
 };
 
 MA.ExperimentRunListCmp = {
@@ -207,7 +207,20 @@ runListStore.reload(); runStore.reload(); }
                                                }, {allowCreatingNewRun: true})
                               ]
                       })
-        ]
+        ],
+
+    init: function() {
+        var selectionModel = Ext.getCmp("experimentruns").getComponent("grid").getSelectionModel();
+        var detailsPanel = Ext.getCmp('experiment-run-list-detail');
+        var id;
+        runListStore.load({'params': {'experiment__id': MA.ExperimentController.currentId()}});
+        if (selectionModel.hasSelection()) {
+            detailsPanel.selectRun(selectionModel.getSelected());
+        } else {
+            detailsPanel.clearRun();
+        }
+    }
+
 };
 
 
