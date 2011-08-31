@@ -375,6 +375,7 @@ class Run(models.Model):
     sample_count = models.IntegerField(default=0)
     incomplete_sample_count = models.IntegerField(default=0)
     complete_sample_count = models.IntegerField(default=0)
+    rule_generator = models.ForeignKey('RunRuleGenerator')
     
     def sortedSamples(self):
         #TODO if method indicates randomisation and blanks, now is when we would do it
@@ -484,7 +485,8 @@ class RunSample(models.Model):
     sample = models.ForeignKey(Sample, null=True, blank=True)
     filename = models.CharField(max_length=255, null=True, blank=True)
     complete = models.BooleanField(default=False, db_index=True)
-    type = models.PositiveIntegerField(choices=RUNSAMPLE_TYPES, default=0)
+    #type = models.PositiveIntegerField(choices=RUNSAMPLE_TYPES, default=0)
+    component = models.ForeignKey("Component", default=0)
     sequence = models.PositiveIntegerField(null=False, default=0)
     vial_number = models.PositiveIntegerField(null=True)
 
@@ -538,4 +540,66 @@ class InstrumentSOP(models.Model):
     split_size = models.PositiveIntegerField(default=10)
     vials_per_tray = models.PositiveIntegerField(default=98)
     trays_max = models.PositiveIntegerField(default=1)
+  
+class ComponentGroup(models.Model):
+    name = models.CharField(max_length=50) 
+
+class Component(models.Model):
+    sample_type = models.CharField(max_length=255)
+    sample_code = models.CharField(max_length=255)
+    component_group = models.ForeignKey(ComponentGroup)
+    filename_prefix = models.CharField(max_length=50)
+
+class RuleGenerator(models.Model):
+    STATES = (
+        (1, 'In Design'),
+        (2, 'Enabled'),
+        (3, 'Disabled')
+    )
+
+    ACCESSIBILITY = (
+        (1, 'Only Myself'),
+        (2, 'Everyone in my Node'),
+        (3, 'Everyone')
+    )
+
+    name = models.CharField(max_length=255)
+    description = models.CharField(max_length=1000)
+    state = models.PositiveIntegerField(default=1, choices=STATES)
+    accessibility = models.PositiveIntegerField(default=1, choices=ACCESSIBILITY)
+    created_by = models.ForeignKey(User)
+    created_on = models.DateTimeField(auto_now_add=True)
+
+class RunRuleGenerator(models.Model):
+    METHOD_ORDERS = (
+        (1, 'resampled vial'),
+        (2, 'individual vial')
+    )   
+    rule_generator = models.ForeignKey(RuleGenerator)
+    number_of_methods = models.IntegerField(default=1)
+    order_of_methods = models.IntegerField(choices=METHOD_ORDERS, null=True, blank=True)
     
+class RuleGeneratorStartBlock(models.Model):
+    rule_generator = models.ForeignKey(RuleGenerator)
+    index = models.PositiveIntegerField()
+    count = models.PositiveIntegerField()
+    component = models.ForeignKey(Component)
+
+class RuleGeneratorSampleBlock(models.Model):
+    ORDER_CHOICES = (
+        (1, 'random'),
+        (2, 'position')
+    )
+    rule_generator = models.ForeignKey(RuleGenerator)
+    index = models.PositiveIntegerField()
+    sample_count = models.PositiveIntegerField()
+    count = models.PositiveIntegerField()
+    component = models.ForeignKey(Component)
+    order = models.PositiveIntegerField(choices=ORDER_CHOICES)
+
+class RuleGeneratorEndBlock(models.Model):
+    rule_generator = models.ForeignKey(RuleGenerator)
+    index = models.PositiveIntegerField()
+    count = models.PositiveIntegerField()
+    component = models.ForeignKey(Component)
+ 

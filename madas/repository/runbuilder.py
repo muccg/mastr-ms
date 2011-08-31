@@ -63,17 +63,7 @@ class RunBuilder(object):
         response = HttpResponse(content=mytemplate.render(**render_vars), content_type='text/html; charset=utf-8')
 
         return response
-        
-class TrayLayoutDelegate(object):
-    def __init__(self):
-        self.vials = 98
-        self.trays = 1
-        self.sample_positions = range(1,84)
-        self.reagent_positions = [98]
-        self.solvent_positions = [97]
-        self.tms_positions = range(89,95)
-        self.sweep_positions = [85,86]
-        
+       
 class RunGroup(object):
     def __init__(self, instrumentSOP):
         self.samples = []
