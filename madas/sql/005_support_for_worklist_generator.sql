@@ -95,6 +95,9 @@ CREATE TABLE "repository_rulegeneratorendblock" (
     "component_id" integer NOT NULL REFERENCES "repository_component" ("id") DEFERRABLE INITIALLY DEFERRED
 );
 
+-- Standards class functionality replaced by Standard Component
+ALTER TABLE "repository_sampleclass" DROP COLUMN is_standards_class;
+
 COMMIT;
 
 BEGIN;
