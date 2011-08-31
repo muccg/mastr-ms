@@ -289,13 +289,9 @@ class SampleClass(models.Model):
     timeline = models.ForeignKey(SampleTimeline,null=True, blank=True)
     organ = models.ForeignKey(Organ, null=True, blank=True)
     enabled = models.BooleanField(default=True)
-    is_standards_class = models.BooleanField(default=False)
 
     def __unicode__(self):
         val = ''
-        if self.is_standards_class:
-            return 'standards'
-        
         if self.biological_source is not None:
             if self.biological_source.abbreviation is not None:
                 val = val + self.biological_source.abbreviation
@@ -390,9 +386,6 @@ class Run(models.Model):
         for s in queryset:
             if s.is_valid_for_run():
                 rs, created = RunSample.objects.get_or_create(run=self, sample=s, sequence=self.samples.count())
-                if s.sample_class.is_standards_class:
-                    rs.type = 1
-                    rs.save()
                 
     def remove_samples(self, queryset):
         assert self.id, 'Run must have an id before samples can be added'
