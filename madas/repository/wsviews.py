@@ -1752,18 +1752,32 @@ def sample_class_enable(request, id):
 
 
 @mastr_users_only
-def generate_worklist(request,run_id):
-    
+def generate_worklist(request, run_id):
     run = Run.objects.get(id=run_id)
-    
-    from runbuilder import RunBuilder
-    
-    rb = RunBuilder(run)
-    
-    #render
-    # TODO set attribute on HttpResponse of content_type='application/download'
-    return HttpResponse(rb.generate(request), content_type="text/plain")
+    from runbuilder import RunBuilder, RunBuilderException
 
+    rb = RunBuilder(run)
+    try:
+        rb.generate()
+    except RunBuilderException, e:
+        # Shortcut on Error!
+        return HttpResponse(str(e), content_type="text/plain")
+
+    # TODO
+    # I don't think the template for this should be in the DB
+    # Change it later ...
+    from mako.template import Template 
+    mytemplate = Template(run.method.template) 
+    mytemplate.output_encoding = "utf-8" 
+
+    #create the variables to insert 
+    render_vars = {
+        'username': request.user.username,
+        'run': run,
+        'runsamples': run.runsample_set.all().order_by('sequence')} 
+         
+    #render 
+    return HttpResponse(content=mytemplate.render(**render_vars), content_type='text/plain; charset=utf-8')
 
 @mastr_users_only
 @transaction.commit_on_success

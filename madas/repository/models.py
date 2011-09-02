@@ -322,7 +322,6 @@ class Sample(models.Model):
 
     def run_filename(self, run):
         if self.sample_class is None:
-            print 'sample not in class'
             raise SampleNotInClassException
         else:
             result = u"%s-%s" % (self.sample_class.class_id, self.sample_class_sequence)
@@ -465,24 +464,24 @@ class UserExperiment(models.Model):
         return "%s-%s" % (self.user, self.experiment)
 
 class RunSample(models.Model):
-    RUNSAMPLE_TYPES = (
-        (0, u'Sample'),
-        (1, u'Standard'),
-        (2, u'Pooled Biological QC'),
-        (3, u'Instrument QC'),
-        (4, u'Solvent Blank'),
-        (5, u'Reagent Blank'),
-        (6, u'Sweep')
-    )
+    # TODO 
+    SWEEP_ID = 6
     run = models.ForeignKey(Run)
     sample = models.ForeignKey(Sample, null=True, blank=True)
     filename = models.CharField(max_length=255, null=True, blank=True)
     complete = models.BooleanField(default=False, db_index=True)
-    #type = models.PositiveIntegerField(choices=RUNSAMPLE_TYPES, default=0)
     component = models.ForeignKey("Component", default=0)
     sequence = models.PositiveIntegerField(null=False, default=0)
     vial_number = models.PositiveIntegerField(null=True)
 
+    @classmethod 
+    def create_sweep(self, run):
+        return RunSample.objects.create(run=run, component_id=RunSample.SWEEP_ID)
+
+    @classmethod 
+    def create(self, run, component):
+        return RunSample.objects.create(run=run, component=component)
+ 
     class Meta:
         db_table = u'repository_run_samples'
 
@@ -499,26 +498,32 @@ class RunSample(models.Model):
         self.run.update_sample_counts()
         
     def filepaths(self):
-        if self.type == 0:
+        if self.is_sample():
             return self.sample.experiment.ensure_dir()
         else:
             return self.run.ensure_dir()
             
-    def run_filename(self):
-        if self.type == 0:
+    def generate_filename(self):
+        if self.is_sample():
             return self.sample.run_filename(self.run)
         else:
-            return self.filename
+            return "%s_%s-%s.d"  % (self.component.filename_prefix, self.run.id, self.id)
             
     def get_sample_name(self):
         #for now, just return the filename without the .d suffix
         #this is a poor implementation
         #TODO better implementation
-        return self.run_filename()[0:(len(self.run_filename()) - 2)]
+        return self.filename[:-2]
         
     sample_name = property(get_sample_name, None)
-            
         
+    def is_sample(self):
+        return self.component_id == 0
+
+    def is_blank(self):
+        return self.component.component_group.name == 'Blank'
+
+       
 class ClientFile(models.Model):
     experiment = models.ForeignKey(Experiment)
     filepath = models.TextField()
@@ -571,7 +576,19 @@ class RunRuleGenerator(models.Model):
     rule_generator = models.ForeignKey(RuleGenerator)
     number_of_methods = models.IntegerField(default=1)
     order_of_methods = models.IntegerField(choices=METHOD_ORDERS, null=True, blank=True)
-    
+   
+    @property
+    def start_block_rules(self):
+        return list(self.rule_generator.rulegeneratorstartblock_set.all())
+
+    @property
+    def sample_block_rules(self):
+        return list(self.rule_generator.rulegeneratorsampleblock_set.all())
+
+    @property
+    def end_block_rules(self):
+        return list(self.rule_generator.rulegeneratorendblock_set.all())
+ 
 class RuleGeneratorStartBlock(models.Model):
     rule_generator = models.ForeignKey(RuleGenerator)
     index = models.PositiveIntegerField()
@@ -589,6 +606,14 @@ class RuleGeneratorSampleBlock(models.Model):
     count = models.PositiveIntegerField()
     component = models.ForeignKey(Component)
     order = models.PositiveIntegerField(choices=ORDER_CHOICES)
+
+    @property
+    def in_position(self):
+        return self.order == 2
+
+    @property
+    def in_random_position(self):
+        return self.order == 1
 
 class RuleGeneratorEndBlock(models.Model):
     rule_generator = models.ForeignKey(RuleGenerator)
