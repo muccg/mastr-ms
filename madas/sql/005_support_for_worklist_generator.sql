@@ -21,12 +21,12 @@ CREATE TABLE "repository_component" (
 );
 INSERT INTO repository_component(id, sample_type, sample_code, filename_prefix, component_group_id)
 VALUES 
-    (0, 'Sample', 'Sample', 'sample', 1),
-    (1, 'Pure Standard', 'Pure Standard', 'standard', 2),
-    (2, 'Pooled Biological QC', 'PBQC', 'pbqc', 1),
-    (3, 'Instrument QC', 'IQC', 'iqc', 1),
-    (4, 'Solvent Blank', 'Solvent', 'solvent', 3),
-    (5, 'Reagent Blank', 'Reagent', 'reagent', 3),
+    (0, 'Sample', 'Smp', 'sample', 1),
+    (1, 'Pure Standard', 'Std', 'standard', 2),
+    (2, 'Pooled Biological QC', 'pbqc', 'pbqc', 1),
+    (3, 'Instrument QC', 'iqc', 'iqc', 1),
+    (4, 'Solvent Blank', 'SB', 'solvent', 3),
+    (5, 'Reagent Blank', 'RB', 'reagent', 3),
     (6, 'Sweep', 'Sweep', 'sweep', 3)
 ;
 ALTER SEQUENCE repository_component_id_seq RESTART WITH 7;
