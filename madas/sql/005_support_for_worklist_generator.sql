@@ -46,9 +46,13 @@ CREATE TABLE "repository_rulegenerator" (
     "description" varchar(1000) NOT NULL,
     "state" integer CHECK ("state" >= 0) NOT NULL,
     "accessibility" integer CHECK ("accessibility" >= 0) NOT NULL,
+    "version" integer CHECK ("version" >= 0),
+    "previous_version_id" integer,
     "created_by_id" integer NOT NULL REFERENCES "auth_user" ("id") DEFERRABLE INITIALLY DEFERRED,
     "created_on" timestamp with time zone NOT NULL
 );
+ALTER TABLE "repository_rulegenerator" ADD CONSTRAINT "previous_version_id_refs_id_dcab1275" FOREIGN KEY ("previous_version_id") REFERENCES "repository_rulegenerator" ("id") DEFERRABLE INITIALLY DEFERRED;
+
 CREATE TABLE "repository_runrulegenerator" (
     "id" serial NOT NULL PRIMARY KEY,
     "rule_generator_id" integer NOT NULL REFERENCES "repository_rulegenerator" ("id") DEFERRABLE INITIALLY DEFERRED,
@@ -76,6 +80,15 @@ CREATE TABLE "repository_rulegeneratorstartblock" (
     "count" integer CHECK ("count" >= 0) NOT NULL,
     "component_id" integer NOT NULL REFERENCES "repository_component" ("id") DEFERRABLE INITIALLY DEFERRED
 );
+INSERT INTO "repository_rulegeneratorstartblock" (id, rule_generator_id, index, count, component_id)
+VALUES 
+    (1, 1, 1, 1, 4), -- add 1 Solvent
+    (2, 1, 2, 1, 5), -- add 1 Reagent Blank
+    (3, 1, 3, 1, 3), -- add 1 IQC
+    (4, 1, 4, 1, 2)  -- add 1 PBQC
+;
+ALTER SEQUENCE "repository_rulegeneratorstartblock_id_seq" RESTART WITH 5;
+
 
 CREATE TABLE "repository_rulegeneratorsampleblock" (
     "id" serial NOT NULL PRIMARY KEY,
@@ -86,6 +99,13 @@ CREATE TABLE "repository_rulegeneratorsampleblock" (
     "component_id" integer NOT NULL REFERENCES "repository_component" ("id") DEFERRABLE INITIALLY DEFERRED,
     "order" integer CHECK ("order" >= 0) NOT NULL
 );
+INSERT INTO "repository_rulegeneratorsampleblock" (id, rule_generator_id, index, sample_count, count, component_id, "order")
+VALUES 
+    (1, 1, 1, 20, 1, 2, 1), -- add 1 PQBC for every 20 samples in random order
+    (2, 1, 1, 20, 1, 4, 2)  -- add 1 Solvent for every 20 samples in position
+;
+ALTER SEQUENCE "repository_rulegeneratorsampleblock_id_seq" RESTART WITH 4;
+
 
 CREATE TABLE "repository_rulegeneratorendblock" (
     "id" serial NOT NULL PRIMARY KEY,
@@ -95,8 +115,22 @@ CREATE TABLE "repository_rulegeneratorendblock" (
     "component_id" integer NOT NULL REFERENCES "repository_component" ("id") DEFERRABLE INITIALLY DEFERRED
 );
 
+INSERT INTO "repository_rulegeneratorendblock" (id, rule_generator_id, index, count, component_id)
+VALUES 
+    (1, 1, 1, 1, 2), -- add 1 PQBC
+    (2, 1, 2, 1, 3), -- add 1 IQC
+    (3, 1, 3, 2, 4)  -- add 2 Solvent
+;
+ALTER SEQUENCE "repository_rulegeneratorendblock_id_seq" RESTART WITH 4;
+
 -- Standards class functionality replaced by Standard Component
 ALTER TABLE "repository_sampleclass" DROP COLUMN is_standards_class;
+
+-- The Mako template is currently stored in the DB on Instrument Method
+-- We have to change it, because it should refer to run_sample.filename not run_sample.run_filename() as before
+UPDATE repository_instrumentmethod
+SET template = E'## -*- coding: utf-8 -*-\n% for a in runsamples:\n${username},${run.machine.default_data_path},${a.filename},${run.method.method_path},${run.method.method_name},${a.sample_name}\n% endfor'
+WHERE title = 'Default Method'; 
 
 COMMIT;
 
