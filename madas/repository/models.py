@@ -289,13 +289,9 @@ class SampleClass(models.Model):
     timeline = models.ForeignKey(SampleTimeline,null=True, blank=True)
     organ = models.ForeignKey(Organ, null=True, blank=True)
     enabled = models.BooleanField(default=True)
-    is_standards_class = models.BooleanField(default=False)
 
     def __unicode__(self):
         val = ''
-        if self.is_standards_class:
-            return 'standards'
-        
         if self.biological_source is not None:
             if self.biological_source.abbreviation is not None:
                 val = val + self.biological_source.abbreviation
@@ -326,7 +322,6 @@ class Sample(models.Model):
 
     def run_filename(self, run):
         if self.sample_class is None:
-            print 'sample not in class'
             raise SampleNotInClassException
         else:
             result = u"%s-%s" % (self.sample_class.class_id, self.sample_class_sequence)
@@ -375,6 +370,7 @@ class Run(models.Model):
     sample_count = models.IntegerField(default=0)
     incomplete_sample_count = models.IntegerField(default=0)
     complete_sample_count = models.IntegerField(default=0)
+    rule_generator = models.ForeignKey('RunRuleGenerator')
     
     def sortedSamples(self):
         #TODO if method indicates randomisation and blanks, now is when we would do it
@@ -389,9 +385,6 @@ class Run(models.Model):
         for s in queryset:
             if s.is_valid_for_run():
                 rs, created = RunSample.objects.get_or_create(run=self, sample=s, sequence=self.samples.count())
-                if s.sample_class.is_standards_class:
-                    rs.type = 1
-                    rs.save()
                 
     def remove_samples(self, queryset):
         assert self.id, 'Run must have an id before samples can be added'
@@ -471,23 +464,24 @@ class UserExperiment(models.Model):
         return "%s-%s" % (self.user, self.experiment)
 
 class RunSample(models.Model):
-    RUNSAMPLE_TYPES = (
-        (0, u'Sample'),
-        (1, u'Standard'),
-        (2, u'Pooled Biological QC'),
-        (3, u'Instrument QC'),
-        (4, u'Solvent Blank'),
-        (5, u'Reagent Blank'),
-        (6, u'Sweep')
-    )
+    # TODO 
+    SWEEP_ID = 6
     run = models.ForeignKey(Run)
     sample = models.ForeignKey(Sample, null=True, blank=True)
     filename = models.CharField(max_length=255, null=True, blank=True)
     complete = models.BooleanField(default=False, db_index=True)
-    type = models.PositiveIntegerField(choices=RUNSAMPLE_TYPES, default=0)
+    component = models.ForeignKey("Component", default=0)
     sequence = models.PositiveIntegerField(null=False, default=0)
     vial_number = models.PositiveIntegerField(null=True)
 
+    @classmethod 
+    def create_sweep(self, run):
+        return RunSample.objects.create(run=run, component_id=RunSample.SWEEP_ID)
+
+    @classmethod 
+    def create(self, run, component):
+        return RunSample.objects.create(run=run, component=component)
+ 
     class Meta:
         db_table = u'repository_run_samples'
 
@@ -504,26 +498,32 @@ class RunSample(models.Model):
         self.run.update_sample_counts()
         
     def filepaths(self):
-        if self.type == 0:
+        if self.is_sample():
             return self.sample.experiment.ensure_dir()
         else:
             return self.run.ensure_dir()
             
-    def run_filename(self):
-        if self.type == 0:
+    def generate_filename(self):
+        if self.is_sample():
             return self.sample.run_filename(self.run)
         else:
-            return self.filename
+            return "%s_%s-%s.d"  % (self.component.filename_prefix, self.run.id, self.id)
             
     def get_sample_name(self):
         #for now, just return the filename without the .d suffix
         #this is a poor implementation
         #TODO better implementation
-        return self.run_filename()[0:(len(self.run_filename()) - 2)]
+        return self.filename[:-2]
         
     sample_name = property(get_sample_name, None)
-            
         
+    def is_sample(self):
+        return self.component_id == 0
+
+    def is_blank(self):
+        return self.component.component_group.name == 'Blank'
+
+       
 class ClientFile(models.Model):
     experiment = models.ForeignKey(Experiment)
     filepath = models.TextField()
@@ -538,4 +538,98 @@ class InstrumentSOP(models.Model):
     split_size = models.PositiveIntegerField(default=10)
     vials_per_tray = models.PositiveIntegerField(default=98)
     trays_max = models.PositiveIntegerField(default=1)
-    
+  
+class ComponentGroup(models.Model):
+    name = models.CharField(max_length=50) 
+
+class Component(models.Model):
+    sample_type = models.CharField(max_length=255)
+    sample_code = models.CharField(max_length=255)
+    component_group = models.ForeignKey(ComponentGroup)
+    filename_prefix = models.CharField(max_length=50)
+
+class RuleGenerator(models.Model):
+    STATES = (
+        (1, 'In Design'),
+        (2, 'Enabled'),
+        (3, 'Disabled')
+    )
+
+    ACCESSIBILITY = (
+        (1, 'Only Myself'),
+        (2, 'Everyone in my Node'),
+        (3, 'Everyone')
+    )
+
+    name = models.CharField(max_length=255)
+    description = models.CharField(max_length=1000)
+    state = models.PositiveIntegerField(default=1, choices=STATES)
+    accessibility = models.PositiveIntegerField(default=1, choices=ACCESSIBILITY)
+    version = models.PositiveIntegerField(null=True, blank=True)
+    previous_version = models.ForeignKey('RuleGenerator', null=True, blank=True)
+    created_by = models.ForeignKey(User)
+    created_on = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def full_name(self):
+        name = self.name
+        if self.version:
+            name += ' (v. %d)' % self.version
+        return name 
+
+    def __unicode__(self):
+        return self.full_name
+
+class RunRuleGenerator(models.Model):
+    METHOD_ORDERS = (
+        (1, 'resampled vial'),
+        (2, 'individual vial')
+    )   
+    rule_generator = models.ForeignKey(RuleGenerator)
+    number_of_methods = models.IntegerField(default=1)
+    order_of_methods = models.IntegerField(choices=METHOD_ORDERS, null=True, blank=True)
+   
+    @property
+    def start_block_rules(self):
+        return list(self.rule_generator.rulegeneratorstartblock_set.all())
+
+    @property
+    def sample_block_rules(self):
+        return list(self.rule_generator.rulegeneratorsampleblock_set.all())
+
+    @property
+    def end_block_rules(self):
+        return list(self.rule_generator.rulegeneratorendblock_set.all())
+ 
+class RuleGeneratorStartBlock(models.Model):
+    rule_generator = models.ForeignKey(RuleGenerator)
+    index = models.PositiveIntegerField()
+    count = models.PositiveIntegerField()
+    component = models.ForeignKey(Component)
+
+class RuleGeneratorSampleBlock(models.Model):
+    ORDER_CHOICES = (
+        (1, 'random'),
+        (2, 'position')
+    )
+    rule_generator = models.ForeignKey(RuleGenerator)
+    index = models.PositiveIntegerField()
+    sample_count = models.PositiveIntegerField()
+    count = models.PositiveIntegerField()
+    component = models.ForeignKey(Component)
+    order = models.PositiveIntegerField(choices=ORDER_CHOICES)
+
+    @property
+    def in_position(self):
+        return self.order == 2
+
+    @property
+    def in_random_position(self):
+        return self.order == 1
+
+class RuleGeneratorEndBlock(models.Model):
+    rule_generator = models.ForeignKey(RuleGenerator)
+    index = models.PositiveIntegerField()
+    count = models.PositiveIntegerField()
+    component = models.ForeignKey(Component)
+ 

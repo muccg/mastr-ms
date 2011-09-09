@@ -2,7 +2,7 @@ from django.db import transaction
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden, HttpResponseNotAllowed, HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
-from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RUN_STATES, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure, MadasUser
+from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RUN_STATES, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure, MadasUser, RuleGenerator
 from madas.quote.models import Organisation, Formalquote
 from django.utils import webhelpers
 from django.contrib.auth.models import User
@@ -565,6 +565,7 @@ def populate_select(request, model=None, key=None, value=None, field=None, match
                        'sampleclass': ['id', 'class_id', 'experiment__id'],
                        'formalquote': ['id', 'toemail'],
                        'instrumentmethod': ['id','title'],
+                       'rulegenerator': ['id','full_name'],
                        'machine': ['id','station_name'],
                        'experimentstatus':['id','name']
                        }
@@ -609,14 +610,10 @@ def populate_select(request, model=None, key=None, value=None, field=None, match
 
         values = []
 
-        if key and value:
-            for item in rows.values(key, value).distinct():
-                values.append({"key":item[key], "value":item[value]})
-        elif key and not value:
-            for item in rows.values(key).distinct():
-                values.append({"key":item[key], "value":item[key]})
-        else:
+        if not key:
             raise ObjectDoesNotExist()
+        for item in rows.all():
+            values.append({"key":getattr(item, key), "value":getattr(item, value or key)})
         
         output = select_widget_json(authenticated=authenticated,authorized=authorized,main_content_function=main_content_function,success=True,input=values)
         return HttpResponse(output)
@@ -863,18 +860,6 @@ def recreate_sample_classes(request, experiment_id):
 
     #determine what to delete and what to add
     foundclasses = set()
-    standards_classes = SampleClass.objects.filter(experiment__id=experiment_id, is_standards_class=True)
-    if len(standards_classes) > 0:
-        foundclasses.add(standards_classes[0].id)
-        print 'found standards class'
-    else:
-        standards_class = SampleClass()
-        standards_class.experiment_id = experiment_id
-        standards_class.class_id = 'standards class'
-        standards_class.is_standards_class = True
-        standards_class.save()
-        foundclasses.add(standards_class.id)
-        print 'created standards class'
     
     for combo in combos:
         #look for item in currentsamples, if it exists, add it to the foundclasses set
@@ -1075,6 +1060,66 @@ def recordsSamplesForExperiment(request):
     if randomise:
         import random
         random.shuffle(output['rows'])
+
+    output = makeJsonFriendly(output)
+    return HttpResponse(json.dumps(output))
+
+def json_records_template(fields):
+    fields_list = [{'name': f} for f in fields]
+    return {
+        'metaData': { 
+            'totalProperty': 'results',
+            'successProperty': 'success',
+            'root': 'rows',
+            'id': 'id',
+            'fields': fields_list
+        },
+        'results': 0,
+        'authenticated': True,
+        'authorized': True,
+        'success': True,
+        'rows': []
+    }
+
+@mastr_users_only
+def recordsRuns(request):
+    args = request.REQUEST
+       
+    # basic json that we will fill in
+    output = json_records_template([
+        'id', 'machine__unicode', 'sample_count', 'creator', 'method__unicode',
+        'creator__unicode', 'state', 'machine', 'created_on', 'experiment',
+        'complete_sample_count', 'rule_generator', 'number_of_methods', 'order_of_methods',
+        'generated_output', 'title', 'method', 'incomplete_sample_count', 'experiment__unicode' 
+        ])
+
+    rows = Run.objects.all()
+    output['results'] = len(rows)
+
+    # add rows
+    for row in rows:
+        d = {}
+        d['id'] = row.id
+        d['machine__unicode'] = unicode(row.machine) if row.machine else ''
+        d['sample_count'] = row.sample_count
+        d['creator'] = row.creator_id
+        d['method__unicode'] = unicode(row.method) if row.method else ''
+        d['creator__unicode'] = unicode(row.creator)
+        d['state'] = row.state
+        d['machine'] = row.machine_id
+        d['created_on'] = row.created_on
+        d['experiment'] = row.experiment_id
+        d['complete_sample_count'] = row.complete_sample_count
+        d['rule_generator'] = row.rule_generator.rule_generator_id
+        d['number_of_methods'] = row.rule_generator.number_of_methods
+        d['order_of_methods'] = row.rule_generator.order_of_methods
+        d['generated_output'] = row.generated_output
+        d['title'] = row.title
+        d['method'] = row.method_id
+        d['incomplete_sample_count'] = row.incomplete_sample_count
+        d['experiment__unicode'] = unicode(row.experiment) if row.experiment else ''
+
+        output['rows'].append(d)
 
     output = makeJsonFriendly(output)
     return HttpResponse(json.dumps(output))
@@ -1764,18 +1809,32 @@ def sample_class_enable(request, id):
 
 
 @mastr_users_only
-def generate_worklist(request,run_id):
-    
+def generate_worklist(request, run_id):
     run = Run.objects.get(id=run_id)
-    
-    from runbuilder import RunBuilder
-    
-    rb = RunBuilder(run)
-    
-    #render
-    # TODO set attribute on HttpResponse of content_type='application/download'
-    return HttpResponse(rb.generate(request), content_type="text/plain")
+    from runbuilder import RunBuilder, RunBuilderException
 
+    rb = RunBuilder(run)
+    try:
+        rb.generate()
+    except RunBuilderException, e:
+        # Shortcut on Error!
+        return HttpResponse(str(e), content_type="text/plain")
+
+    # TODO
+    # I don't think the template for this should be in the DB
+    # Change it later ...
+    from mako.template import Template 
+    mytemplate = Template(run.method.template) 
+    mytemplate.output_encoding = "utf-8" 
+
+    #create the variables to insert 
+    render_vars = {
+        'username': request.user.username,
+        'run': run,
+        'runsamples': run.runsample_set.all().order_by('sequence')} 
+         
+    #render 
+    return HttpResponse(content=mytemplate.render(**render_vars), content_type='text/plain; charset=utf-8')
 
 @mastr_users_only
 @transaction.commit_on_success
