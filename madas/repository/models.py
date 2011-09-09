@@ -570,6 +570,16 @@ class RuleGenerator(models.Model):
     created_by = models.ForeignKey(User)
     created_on = models.DateTimeField(auto_now_add=True)
 
+    @property
+    def full_name(self):
+        name = self.name
+        if self.version:
+            name += ' (v. %d)' % self.version
+        return name 
+
+    def __unicode__(self):
+        return self.full_name
+
 class RunRuleGenerator(models.Model):
     METHOD_ORDERS = (
         (1, 'resampled vial'),

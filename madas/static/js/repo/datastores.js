@@ -440,7 +440,7 @@ var runStore = new Ext.data.JsonStore(
                         {
                             storeId: 'run',
                             autoLoad: false,
-                            url: adminBaseUrl + "repository/run/ext/json",
+                            url: wsBaseUrl + "recordsRuns",
                             restful: true,
                             listeners: {'load':MA.DSLoaded,
                                         'loadexception':MA.DSLoadIgnoreException
@@ -650,6 +650,14 @@ var methodStore = new Ext.data.JsonStore({
     autoLoad:false,
     storeId:'methodStore',
     url: wsBaseUrl + 'populate_select/instrumentmethod/id/title/',
+    root: 'response.value.items',
+    fields: ['key', 'value']
+});
+
+var ruleGeneratorStore = new Ext.data.JsonStore({
+    autoLoad:false,
+    storeId:'ruleGeneratorStore',
+    url: wsBaseUrl + 'populate_select/rulegenerator/id/full_name/',
     root: 'response.value.items',
     fields: ['key', 'value']
 });
