@@ -157,6 +157,23 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     '</div></tpl>'
                     )
                 }),
+                new Ext.form.ComboBox({
+                    fieldLabel: 'Rule Generator',
+                    itemId: 'rule_generator',
+                    name: 'rule_generator',
+                    editable:false,
+                    forceSelection:true,
+                    displayField:'value',
+                    valueField:'key',
+                    hiddenName:'rule_generator',
+                    lazyRender:true,
+                    allowBlank:false,
+                    typeAhead:false,
+                    triggerAction:'all',
+                    listWidth:230,
+                    width: 200,
+                    store: ruleGeneratorStore
+                }),
                 {
                     fieldLabel:'Samples to Add',
                     itemId:'samplesToAdd',
@@ -409,6 +426,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                             values.title = self.getComponent('title').getValue();
                             values.method_id = self.getComponent('method').getValue();
                             values.machine_id = self.getComponent('machine').getValue();
+                            values.rule_generator_id = self.getComponent('rule_generator').getValue();
 
                             if (self.runId == 0) {
                                 //create new
@@ -435,6 +453,11 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     this.getComponent("method").getValue() == "") {
                     valid = false;
                     this.getComponent("method").markInvalid("Required");
+                }
+                if (this.getComponent("rule_generator").getValue() == "None" ||
+                    this.getComponent("rule_generator").getValue() == "") {
+                    valid = false;
+                    this.getComponent("rule_generator").markInvalid("Required");
                 }
                 
                 return valid;
@@ -490,6 +513,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
 
         this.getComponent("method").clearValue();
         this.getComponent("machine").clearValue();
+        this.getComponent("rule_generator").clearValue();
 
         this.getFooterToolbar().getComponent("generateWorklistButton").disable();
         this.getFooterToolbar().getComponent("markCompleteButton").disable();
@@ -564,6 +588,9 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         this.getComponent("title").setValue(record.data.title);
         this.getComponent("method").setValue(record.data.method);
         this.getComponent("machine").setValue(record.data.machine);
+        this.getComponent("rule_generator").setValue(record.data.rule_generator);
+
+        this.getComponent("rule_generator").setDisabled(record.data.state !== 0); // new Run
 
         this.getFooterToolbar().getComponent("saveButton").enable();
         this.getFooterToolbar().getComponent("generateWorklistButton").enable();
