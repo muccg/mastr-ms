@@ -17,6 +17,7 @@ from madas.repository.permissions import user_passes_test
 from django.db.models import Q
 from datetime import datetime, timedelta
 from django.core.mail import mail_admins
+from madas.users.MAUser import getMadasUser
 
 
 @mastr_users_only
@@ -1093,7 +1094,11 @@ def recordsRuns(request):
         'generated_output', 'title', 'method', 'incomplete_sample_count', 'experiment__unicode' 
         ])
 
-    rows = Run.objects.all()
+    if getMadasUser(request.user.username).IsAdmin:
+        rows = Run.objects.all()
+    else:
+        rows = Run.objects.filter(Q(samples__experiment__project__managers=request.user)|Q(samples__experiment__users=request.user) | Q(creator=request.user))
+    
     output['results'] = len(rows)
 
     # add rows
