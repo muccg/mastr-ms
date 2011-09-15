@@ -327,7 +327,7 @@ class Sample(models.Model):
             result = u"%s-%s" % (self.sample_class.class_id, self.sample_class_sequence)
             if self.label:
                 result += "-%s" % self.label
-            result += "_%s-%s.d" % (run.id, str(self.id))
+            result += "_%s-%s" % (run.id, str(self.id))
             return result
 
     def is_valid_for_run(self):
@@ -374,7 +374,7 @@ class Run(models.Model):
     
     def sortedSamples(self):
         #TODO if method indicates randomisation and blanks, now is when we would do it
-        return self.samples.all()
+        return self.samples.distinct()
     
     def __unicode__(self):
         return "%s (%s v.%s)" % (self.title, self.method.title, self.method.version)
@@ -384,7 +384,7 @@ class Run(models.Model):
         assert self.id, 'Run must have an id before samples can be added'
         for s in queryset:
             if s.is_valid_for_run():
-                rs, created = RunSample.objects.get_or_create(run=self, sample=s, sequence=self.samples.count())
+                rs, created = RunSample.objects.get_or_create(run=self, sample=s, sequence=self.samples.distinct().count())
                 
     def remove_samples(self, queryset):
         assert self.id, 'Run must have an id before samples can be added'
@@ -473,6 +473,7 @@ class RunSample(models.Model):
     component = models.ForeignKey("Component", default=0)
     sequence = models.PositiveIntegerField(null=False, default=0)
     vial_number = models.PositiveIntegerField(null=True)
+    method_number = models.PositiveIntegerField(null=True, blank=True)
 
     @classmethod 
     def create_sweep(self, run):
@@ -481,6 +482,10 @@ class RunSample(models.Model):
     @classmethod 
     def create(self, run, component):
         return RunSample.objects.create(run=run, component=component)
+
+    @classmethod 
+    def create_copy(self, source, method_number=None):
+        return RunSample.objects.create(run=source.run, component=source.component, sample=source.sample, method_number=method_number)
  
     class Meta:
         db_table = u'repository_run_samples'
@@ -502,10 +507,17 @@ class RunSample(models.Model):
             return self.sample.experiment.ensure_dir()
         else:
             return self.run.ensure_dir()
+
+    def run_filename(self):
+        filename = self.sample.run_filename(self.run)
+        if self.method_number:
+            filename += '_m%d' % self.method_number
+        filename += '.d'
+        return filename
             
     def generate_filename(self):
         if self.is_sample():
-            return self.sample.run_filename(self.run)
+            return self.run_filename()
         else:
             return "%s_%s-%s.d"  % (self.component.filename_prefix, self.run.id, self.id)
             
@@ -600,6 +612,9 @@ class RunRuleGenerator(models.Model):
     @property
     def end_block_rules(self):
         return list(self.rule_generator.rulegeneratorendblock_set.all())
+
+    def is_method_type_individual_vial(self):
+        return (self.order_of_methods == 2)
  
 class RuleGeneratorStartBlock(models.Model):
     rule_generator = models.ForeignKey(RuleGenerator)
