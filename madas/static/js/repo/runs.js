@@ -173,8 +173,57 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     listWidth:230,
                     width: 200,
                     store: ruleGeneratorStore
-                }),
-                {
+                }),{
+                    //xtype: 'compositefield', // breaks getComponent() !
+                    xtype: 'container',
+                    itemId: 'methods',
+                    layout: 'hbox',
+                    fieldLabel: 'Number/Order of Methods',
+                    items: [                
+                        new Ext.form.ComboBox({
+                            fieldLabel: 'Number of Methods',
+                            itemId: 'number_of_methods',
+                            name: 'number_of_methods',
+                            editable:false,
+                            forceSelection:true,
+                            displayField:'value',
+                            valueField:'key',
+                            hiddenName:'number_of_methods',
+                            lazyRender:true,
+                            typeAhead:false,
+                            triggerAction:'all',
+                            mode: 'local',
+                            listWidth:50,
+                            width: 50,
+                            store: new Ext.data.ArrayStore({
+                                id: 0,
+                                fields: [ 'key', 'value'],
+                                data: [ ["", "--"], [2, "2"], [3, "3"], [4, "4"], [5, "5"] ]
+                           })
+                        }),
+                        new Ext.form.ComboBox({
+                            fieldLabel: 'Order of Methods',
+                            itemId: 'order_of_methods',
+                            name: 'order_of_methods',
+                            editable:false,
+                            forceSelection:true,
+                            displayField:'value',
+                            valueField:'key',
+                            hiddenName:'order_of_methods',
+                            lazyRender:true,
+                            typeAhead:false,
+                            triggerAction:'all',
+                            mode: 'local',
+                            listWidth:150,
+                            width: 150,
+                            store: new Ext.data.ArrayStore({
+                                id: 0,
+                                fields: [ 'key', 'value'],
+                                data: [ [1, 'resampled vial'], [2, 'individual vial'] ]
+                            })
+                        })
+                    ]
+                },{
                     fieldLabel:'Samples to Add',
                     itemId:'samplesToAdd',
                     xtype:'grid',
@@ -427,6 +476,8 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                             values.method_id = self.getComponent('method').getValue();
                             values.machine_id = self.getComponent('machine').getValue();
                             values.rule_generator_id = self.getComponent('rule_generator').getValue();
+                            values.number_of_methods = self.getComponente('methods').getComponent('number_of_methods').getValue();
+                            values.order_of_methods = self.getComponente('methods').getComponent('order_of_methods').getValue();
 
                             if (self.runId == 0) {
                                 //create new
@@ -444,6 +495,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
             ],
             isValid: function() {
                 var valid = true;
+                var methodsCmp = this.getComponent("methods");
                 if (this.getComponent("machine").getValue() == "None" ||
                     this.getComponent("machine").getValue() == "") {
                     valid = false;
@@ -458,6 +510,15 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     this.getComponent("rule_generator").getValue() == "") {
                     valid = false;
                     this.getComponent("rule_generator").markInvalid("Required");
+                }
+                
+                if (methodsCmp.getComponent("number_of_methods").getValue() !== "") {
+                    if (methodsCmp.getComponent("order_of_methods").getValue() === "") {
+                        valid = false;
+                        methodsCmp.getComponent("order_of_methods").markInvalid("Required if Number Of Methods is set");
+                    }
+                } else {
+                    methodsCmp.getComponent("order_of_methods").clearInvalid();
                 }
                 
                 return valid;
@@ -514,6 +575,8 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         this.getComponent("method").clearValue();
         this.getComponent("machine").clearValue();
         this.getComponent("rule_generator").clearValue();
+        this.getComponent("methods").getComponent("number_of_methods").clearValue();
+        this.getComponent("methods").getComponent("order_of_methods").clearValue();
 
         this.getFooterToolbar().getComponent("generateWorklistButton").disable();
         this.getFooterToolbar().getComponent("markCompleteButton").disable();
@@ -580,6 +643,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         }
     },
     selectRun: function (record) {
+        var isNewRun = (record.data.state === 0);
         this.runId = record.data.id;
         //this.pendingSampleStore.removeAll();
 
@@ -589,8 +653,13 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         this.getComponent("method").setValue(record.data.method);
         this.getComponent("machine").setValue(record.data.machine);
         this.getComponent("rule_generator").setValue(record.data.rule_generator);
+        this.getComponent("methods").getComponent("number_of_methods").setValue(record.data.number_of_methods);
+        this.getComponent("methods").getComponent("order_of_methods").setValue(record.data.order_of_methods);
 
-        this.getComponent("rule_generator").setDisabled(record.data.state !== 0); // new Run
+        
+        this.getComponent("rule_generator").setDisabled(!isNewRun);
+        this.getComponent("methods").getComponent("number_of_methods").setDisabled(!isNewRun);
+        this.getComponent("methods").getComponent("order_of_methods").setDisabled(!isNewRun);
 
         this.getFooterToolbar().getComponent("saveButton").enable();
         this.getFooterToolbar().getComponent("generateWorklistButton").enable();
