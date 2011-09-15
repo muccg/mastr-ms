@@ -31,7 +31,6 @@ class RunBuilder(object):
    
         if self.run.state == RUN_STATES.NEW[0]:
             self.layout()
-        self.layout()
         
         #write filenames into DB
         for rs in RunSample.objects.filter(run=self.run):
