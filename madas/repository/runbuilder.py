@@ -10,7 +10,7 @@ class RunBuilder(object):
         self.run = run
 
     def validate(self):
-        for sample in self.run.samples.all():
+        for sample in self.run.samples.distinct():
             sample.run_filename(self.run)
 
     def layout(self):
@@ -63,6 +63,10 @@ class RunLayout(object):
     def delete_nonsample_run_samples(self):
         # Deletes all the RunSamples that aren't Samples (ie. Standards, Blanks etc.)
         RunSample.objects.filter(run=self.run, component__id__gt=0).delete()
+        # TODO another reason the generator should generate a clean worklist in a different DB table
+        # We have to ensure that only method 1 Samples are kept and method_number is resetted to None
+        RunSample.objects.filter(run=self.run, method_number__gt=1).delete()
+        RunSample.objects.filter(run=self.run, method_number=1).update(method_number=None)
        
     def create_start_block(self):
         start_block = []
@@ -80,8 +84,15 @@ class RunLayout(object):
 
     def create_sample_block(self):
         samples = list(self.run.runsample_set.filter(component__id=0))
-        insert_after = {}
-        for rule in self.run.rule_generator.sample_block_rules:
+        insertion_map = self.create_insertion_map(samples, self.run.rule_generator.sample_block_rules)
+        sample_block = self.combine(samples, insertion_map)
+        sample_block = self.apply_method_rules(sample_block)
+        return sample_block
+
+    def create_insertion_map(self, samples, rules):
+        '''Returns a dict: keys are positions in the sample_list, values an array of items to insert at that position'''
+        insertion_map = {}
+        for rule in rules:
             sample_count = rule.sample_count
             start_idxs = range(0, len(samples), sample_count)
             end_idxs = range(sample_count, len(samples), sample_count) + [len(samples)]
@@ -89,18 +100,43 @@ class RunLayout(object):
                 position = end
                 if rule.in_random_position:
                     position = random.randint(start+1, end)
-                arr = insert_after.setdefault(position, [])
+                arr = insertion_map.setdefault(position, [])
                 for i in range(rule.count):
                     arr.append(RunSample.create(self.run, rule.component)) 
+        return insertion_map
 
+    def combine(self, samples, insertion_map):
         sample_block = []
         for i, sample in enumerate(samples):
             sample_block.append(sample)
-            items = insert_after.get(i+1)
+            items = insertion_map.get(i+1)
             if items:
+                # if anything to insert at position i+1 insert it
                 sample_block.extend(items)
-                
         return sample_block
+
+    def apply_method_rules(self, sample_block):
+        number_of_methods = self.run.rule_generator.number_of_methods or 1
+        if number_of_methods <= 1:
+            return sample_block
+
+        for sample in sample_block:
+            sample.method_number = 1
+            sample.save()
+
+        extended_sample_block = []
+        if self.run.rule_generator.is_method_type_individual_vial():
+            extended_sample_block = sample_block[:]
+            for method_number in range(2, number_of_methods+1):
+                for sample in sample_block:
+                    extended_sample_block.append(RunSample.create_copy(sample, method_number))
+        else:
+            for sample in sample_block:
+                extended_sample_block.append(sample)
+                for method_number in range(2, number_of_methods+1):
+                    extended_sample_block.append(RunSample.create_copy(sample, method_number))
+
+        return extended_sample_block
 
     def add_sweeps(self, items):
         items_with_sweeps = []
