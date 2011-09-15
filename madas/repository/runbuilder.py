@@ -29,9 +29,8 @@ class RunBuilder(object):
         except SampleNotInClassException, e:
             raise RunBuilderException('Samples in the run need to be in sample classes before they can be used in a run')
    
-        # TODO - put re-enable this!!!
-        #if self.run.state == RUN_STATES.NEW[0]:
-        #    self.layout()
+        if self.run.state == RUN_STATES.NEW[0]:
+            self.layout()
         self.layout()
         
         #write filenames into DB
