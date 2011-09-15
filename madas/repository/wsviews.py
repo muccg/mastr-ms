@@ -1115,9 +1115,9 @@ def recordsRuns(request):
         d['created_on'] = row.created_on
         d['experiment'] = row.experiment_id
         d['complete_sample_count'] = row.complete_sample_count
-        d['rule_generator'] = row.rule_generator.rule_generator_id
-        d['number_of_methods'] = row.rule_generator.number_of_methods
-        d['order_of_methods'] = row.rule_generator.order_of_methods
+        d['rule_generator'] = row.rule_generator_id
+        d['number_of_methods'] = row.number_of_methods
+        d['order_of_methods'] = row.order_of_methods
         d['generated_output'] = row.generated_output
         d['title'] = row.title
         d['method'] = row.method_id

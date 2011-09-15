@@ -116,7 +116,7 @@ class RunLayout(object):
         return sample_block
 
     def apply_method_rules(self, sample_block):
-        number_of_methods = self.run.rule_generator.number_of_methods or 1
+        number_of_methods = self.run.number_of_methods or 1
         if number_of_methods <= 1:
             return sample_block
 
@@ -125,7 +125,7 @@ class RunLayout(object):
             sample.save()
 
         extended_sample_block = []
-        if self.run.rule_generator.is_method_type_individual_vial():
+        if self.run.is_method_type_individual_vial():
             extended_sample_block = sample_block[:]
             for method_number in range(2, number_of_methods+1):
                 for sample in sample_block:

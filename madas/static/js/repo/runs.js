@@ -476,8 +476,8 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                             values.method_id = self.getComponent('method').getValue();
                             values.machine_id = self.getComponent('machine').getValue();
                             values.rule_generator_id = self.getComponent('rule_generator').getValue();
-                            values.number_of_methods = self.getComponente('methods').getComponent('number_of_methods').getValue();
-                            values.order_of_methods = self.getComponente('methods').getComponent('order_of_methods').getValue();
+                            values.number_of_methods = self.getComponent('methods').getComponent('number_of_methods').getValue();
+                            values.order_of_methods = self.getComponent('methods').getComponent('order_of_methods').getValue();
 
                             if (self.runId == 0) {
                                 //create new
@@ -646,6 +646,8 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         var isNewRun = (record.data.state === 0);
         this.runId = record.data.id;
         //this.pendingSampleStore.removeAll();
+        var numberOfMethods = record.data.number_of_methods;
+        var orderOfMethods = record.data.order_of_methods;
 
         this.getComponent("state").setText(renderRunState(record.data.state));
         this.getComponent("progress").setText(renderRunProgress(undefined, undefined, record), false);
@@ -653,8 +655,16 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         this.getComponent("method").setValue(record.data.method);
         this.getComponent("machine").setValue(record.data.machine);
         this.getComponent("rule_generator").setValue(record.data.rule_generator);
-        this.getComponent("methods").getComponent("number_of_methods").setValue(record.data.number_of_methods);
-        this.getComponent("methods").getComponent("order_of_methods").setValue(record.data.order_of_methods);
+        if (isNaN(numberOfMethods)) {
+            this.getComponent("methods").getComponent("number_of_methods").clearValue();
+        } else {
+            this.getComponent("methods").getComponent("number_of_methods").setValue(numberOfMethods);
+        }
+        if (isNaN(orderOfMethods)) {
+            this.getComponent("methods").getComponent("order_of_methods").clearValue();
+        } else {
+            this.getComponent("methods").getComponent("order_of_methods").setValue(orderOfMethods);
+        }
 
         
         this.getComponent("rule_generator").setDisabled(!isNewRun);
