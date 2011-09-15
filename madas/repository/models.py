@@ -357,6 +357,11 @@ class Run(models.Model):
         RUN_STATES.IN_PROGRESS,
         RUN_STATES.COMPLETE)
 
+    METHOD_ORDERS = (
+        (1, 'resampled vial'),
+        (2, 'individual vial')
+    )   
+
     experiment = models.ForeignKey(Experiment, null=True)
 
     method = models.ForeignKey(InstrumentMethod)
@@ -370,7 +375,10 @@ class Run(models.Model):
     sample_count = models.IntegerField(default=0)
     incomplete_sample_count = models.IntegerField(default=0)
     complete_sample_count = models.IntegerField(default=0)
-    rule_generator = models.ForeignKey('RunRuleGenerator')
+    rule_generator = models.ForeignKey('RuleGenerator')
+    number_of_methods = models.IntegerField(null=True, blank=True)
+    order_of_methods = models.IntegerField(choices=METHOD_ORDERS, null=True, blank=True)
+
     
     def sortedSamples(self):
         #TODO if method indicates randomisation and blanks, now is when we would do it
@@ -429,7 +437,9 @@ class Run(models.Model):
     
         return (abspath, runpath)
     
-
+    def is_method_type_individual_vial(self):
+        return (self.order_of_methods == 2)
+ 
 class SampleLog(models.Model):
     LOG_TYPES = (
             (0, u'Received'),
@@ -589,33 +599,21 @@ class RuleGenerator(models.Model):
             name += ' (v. %d)' % self.version
         return name 
 
-    def __unicode__(self):
-        return self.full_name
-
-class RunRuleGenerator(models.Model):
-    METHOD_ORDERS = (
-        (1, 'resampled vial'),
-        (2, 'individual vial')
-    )   
-    rule_generator = models.ForeignKey(RuleGenerator)
-    number_of_methods = models.IntegerField(default=1)
-    order_of_methods = models.IntegerField(choices=METHOD_ORDERS, null=True, blank=True)
-   
     @property
     def start_block_rules(self):
-        return list(self.rule_generator.rulegeneratorstartblock_set.all())
+        return list(self.rulegeneratorstartblock_set.all())
 
     @property
     def sample_block_rules(self):
-        return list(self.rule_generator.rulegeneratorsampleblock_set.all())
+        return list(self.rulegeneratorsampleblock_set.all())
 
     @property
     def end_block_rules(self):
-        return list(self.rule_generator.rulegeneratorendblock_set.all())
+        return list(self.rulegeneratorendblock_set.all())
 
-    def is_method_type_individual_vial(self):
-        return (self.order_of_methods == 2)
- 
+    def __unicode__(self):
+        return self.full_name
+
 class RuleGeneratorStartBlock(models.Model):
     rule_generator = models.ForeignKey(RuleGenerator)
     index = models.PositiveIntegerField()
