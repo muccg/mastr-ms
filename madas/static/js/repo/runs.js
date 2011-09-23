@@ -32,7 +32,12 @@ MA.RunCmpRowSelect = function(view, nodes) {
 };
 
 MA.RunSaveCallback = function(id) {
-    Ext.getCmp('currentRunTitle').update(newRunsStore.getById(id).data.title);
+    var record = newRunsStore.getById(id);
+    var title = "New Untitled Run";
+    if (record) {
+        title = record.data.title;
+    }
+    Ext.getCmp('currentRunTitle').update(title);
 };
 
 MA.RunDeleteCallback = function() {
@@ -180,26 +185,15 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     layout: 'hbox',
                     fieldLabel: 'Number/Order of Methods',
                     items: [                
-                        new Ext.form.ComboBox({
+                        new Ext.form.NumberField({
                             fieldLabel: 'Number of Methods',
                             itemId: 'number_of_methods',
                             name: 'number_of_methods',
-                            editable:false,
-                            forceSelection:true,
-                            displayField:'value',
-                            valueField:'key',
-                            hiddenName:'number_of_methods',
-                            lazyRender:true,
-                            typeAhead:false,
-                            triggerAction:'all',
-                            mode: 'local',
-                            listWidth:50,
+                            allowDecimals: false,
+                            allowNegative: false,
+                            maxValue: 100,
+                            minValue: 1,
                             width: 50,
-                            store: new Ext.data.ArrayStore({
-                                id: 0,
-                                fields: [ 'key', 'value'],
-                                data: [ ["", "--"], [2, "2"], [3, "3"], [4, "4"], [5, "5"] ]
-                           })
                         }),
                         new Ext.form.ComboBox({
                             fieldLabel: 'Order of Methods',
@@ -343,7 +337,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     }
                 },
                 {
-                    fieldLabel: 'Files - PBQCs, QCs and Sweeps',
+                   fieldLabel: 'Files - PBQCs, QCs and Sweeps',
                    xtype:'treepanel',
                    border: true,
                    autoScroll: true,
@@ -433,7 +427,24 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                         if (self.runId == 0) {
                             Ext.Msg.alert('Save Required', 'Before you can generate a worklist, this Run must be Saved');
                         } else {
-                            window.open(wsBaseUrl + 'generate_worklist/' + self.runId, 'worklist');
+                            // TODO this doesn't seem right
+                            // we should do it based on the Run's state that we display
+                            if (this.getText() === 'Display Worklist') {
+                                window.open(wsBaseUrl + 'display_worklist/' + self.runId, 'worklist');
+                            } else {
+                                Ext.Ajax.request({
+                                    url: wsBaseUrl + "generate_worklist/" + self.runId,
+                                    success: function () {
+                                        self.onStateChangedToInProgress();
+                                         
+                                        window.open(wsBaseUrl + 'display_worklist/' + self.runId, 'worklist');
+                                        self.fireEvent("save", self);
+                                    },
+                                    failure: function () {
+                                        Ext.Msg.alert('Error', "An error occured and your worklist couldn't be generated");
+                                    }
+                                });
+                            }
                         }
                     }
                 },
@@ -478,18 +489,32 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                             values.rule_generator_id = self.getComponent('rule_generator').getValue();
                             values.number_of_methods = self.getComponent('methods').getComponent('number_of_methods').getValue();
                             values.order_of_methods = self.getComponent('methods').getComponent('order_of_methods').getValue();
-
-                            if (self.runId == 0) {
-                                //create new
-                                values.experiment_id = MA.ExperimentController.currentId();
-                                MA.CRUDSomething('create/run/', values, runSaveCallback);
+                            var restOfSaveFn = function() {
+                                if (self.runId == 0) {
+                                    //create new
+                                    values.experiment_id = MA.ExperimentController.currentId();
+                                    MA.CRUDSomething('create/run/', values, runSaveCallback);
+                                } else {
+                                    //update
+                                    values.id = self.runId;
+                                   
+                                    MA.CRUDSomething('update/run/'+values.id+'/', values, runSaveCallback);
+                                }
+                            };
+                            if (self.runId == 0 && values.number_of_methods > 5) {
+                                Ext.Msg.confirm('Large Number of Methods', 'The Number of Methods you entered (' + 
+                                    values.number_of_methods + ') is unusually high. This could cause the generation of a very long Worklist. Are you sure you want to proceed?', 
+                                    function(button) {
+                                        if (button == 'yes') {
+                                            restOfSaveFn();
+                                        } else {
+                                            self.getComponent('methods').getComponent('number_of_methods').focus();
+                                        }
+                                    });
                             } else {
-                                //update
-                                values.id = self.runId;
-                                
-                                MA.CRUDSomething('update/run/'+values.id+'/', values, runSaveCallback);
+                                restOfSaveFn();
                             }
-                        }
+                       }
                     }
                 }
             ],
@@ -512,8 +537,8 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     this.getComponent("rule_generator").markInvalid("Required");
                 }
                 
-                if (methodsCmp.getComponent("number_of_methods").getValue() !== "") {
-                    if (methodsCmp.getComponent("order_of_methods").getValue() === "") {
+                if (methodsCmp.getComponent("number_of_methods").getValue() > 1) {
+                    if (!methodsCmp.getComponent("order_of_methods").getValue()) {
                         valid = false;
                         methodsCmp.getComponent("order_of_methods").markInvalid("Required if Number Of Methods is set");
                     }
@@ -575,10 +600,11 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         this.getComponent("method").clearValue();
         this.getComponent("machine").clearValue();
         this.getComponent("rule_generator").clearValue();
-        this.getComponent("methods").getComponent("number_of_methods").clearValue();
+        this.getComponent("methods").getComponent("number_of_methods").setValue('');
         this.getComponent("methods").getComponent("order_of_methods").clearValue();
 
         this.getFooterToolbar().getComponent("generateWorklistButton").disable();
+        this.getFooterToolbar().getComponent("generateWorklistButton").setText('Generate Workflow');
         this.getFooterToolbar().getComponent("markCompleteButton").disable();
         this.getFooterToolbar().getComponent("deleteButton").disable();
         
@@ -642,6 +668,12 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
             }
         }
     },
+    onStateChangedToInProgress: function () {
+        this.getComponent("rule_generator").disable();
+        this.getComponent("methods").getComponent("number_of_methods").disable();
+        this.getComponent("methods").getComponent("order_of_methods").disable();
+        this.getFooterToolbar().getComponent("generateWorklistButton").setText('Display Worklist');
+    },
     selectRun: function (record) {
         var isNewRun = (record.data.state === 0);
         this.runId = record.data.id;
@@ -656,7 +688,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         this.getComponent("machine").setValue(record.data.machine);
         this.getComponent("rule_generator").setValue(record.data.rule_generator);
         if (isNaN(numberOfMethods)) {
-            this.getComponent("methods").getComponent("number_of_methods").clearValue();
+            this.getComponent("methods").getComponent("number_of_methods").setValue('');
         } else {
             this.getComponent("methods").getComponent("number_of_methods").setValue(numberOfMethods);
         }
@@ -676,9 +708,15 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         this.getFooterToolbar().getComponent("markCompleteButton").enable();
         this.getFooterToolbar().getComponent("deleteButton").enable();
 
+        if (isNewRun) {
+            this.getFooterToolbar().getComponent("generateWorklistButton").setText('Generate Worklist');
+        } else {
+            this.getFooterToolbar().getComponent("generateWorklistButton").setText('Display Worklist');
+        }
+
 
         if (record.data.state == 2) {
-            this.getFooterToolbar().getComponent("generateWorklistButton").disable();
+            //this.getFooterToolbar().getComponent("generateWorklistButton").disable();
             this.getFooterToolbar().getComponent("markCompleteButton").disable();
             this.getFooterToolbar().getComponent("deleteButton").disable();
         }
