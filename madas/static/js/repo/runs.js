@@ -192,7 +192,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                             allowDecimals: false,
                             allowNegative: false,
                             maxValue: 100,
-                            minValue: 1,
+                            minValue: 2,
                             width: 50,
                         }),
                         new Ext.form.ComboBox({
@@ -536,16 +536,19 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     valid = false;
                     this.getComponent("rule_generator").markInvalid("Required");
                 }
-                
-                if (methodsCmp.getComponent("number_of_methods").getValue() > 1) {
-                    if (!methodsCmp.getComponent("order_of_methods").getValue()) {
-                        valid = false;
-                        methodsCmp.getComponent("order_of_methods").markInvalid("Required if Number Of Methods is set");
-                    }
+
+                if (!methodsCmp.getComponent("number_of_methods").validate()) {
+                    valid = false;
                 } else {
-                    methodsCmp.getComponent("order_of_methods").clearInvalid();
+                    if (methodsCmp.getComponent("number_of_methods").getValue() > 1) {
+                        if (!methodsCmp.getComponent("order_of_methods").getValue()) {
+                            valid = false;
+                            methodsCmp.getComponent("order_of_methods").markInvalid("Required if Number Of Methods is set");
+                        }
+                    } else {
+                        methodsCmp.getComponent("order_of_methods").clearInvalid();
+                    }
                 }
-                
                 return valid;
             }
         };

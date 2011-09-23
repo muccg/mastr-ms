@@ -42,11 +42,10 @@ def create_object(request, model):
 
     if model == 'run':
         obj.creator = User.objects.get(username=request.user.username)
-        if obj.number_of_methods == '':
+        if obj.number_of_methods in ('', 'null'):
             obj.number_of_methods = None
-        if obj.order_of_methods == '':
+        if obj.order_of_methods in ('', 'null'):
             obj.order_of_methods = None
-
 
     obj.save()
 
@@ -153,6 +152,13 @@ def update_object(request, model, id):
     for row in rows:
         for key in args:
             row.__setattr__(key, args[key])
+
+        #TODO clean this stuff up!
+        if model == 'run':
+            if row.number_of_methods in ('', 'null'):
+                row.number_of_methods = None
+            if row.order_of_methods in ('', 'null'):
+                row.order_of_methods = None
         row.save()
     return records(request, model, 'id', id)
     
