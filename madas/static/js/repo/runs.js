@@ -602,6 +602,9 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         this.getComponent("rule_generator").clearValue();
         this.getComponent("methods").getComponent("number_of_methods").setValue('');
         this.getComponent("methods").getComponent("order_of_methods").clearValue();
+        this.getComponent("rule_generator").enable();
+        this.getComponent("methods").getComponent("number_of_methods").enable();
+        this.getComponent("methods").getComponent("order_of_methods").enable();
 
         this.getFooterToolbar().getComponent("generateWorklistButton").disable();
         this.getFooterToolbar().getComponent("generateWorklistButton").setText('Generate Workflow');
