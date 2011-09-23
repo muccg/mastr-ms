@@ -501,7 +501,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                                     MA.CRUDSomething('update/run/'+values.id+'/', values, runSaveCallback);
                                 }
                             };
-                            if (self.runId == 0 && values.number_of_methods > 5) {
+                            if (values.number_of_methods > 5) {
                                 Ext.Msg.confirm('Large Number of Methods', 'The Number of Methods you entered (' + 
                                     values.number_of_methods + ') is unusually high. This could cause the generation of a very long Worklist. Are you sure you want to proceed?', 
                                     function(button) {
