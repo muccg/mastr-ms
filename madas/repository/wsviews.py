@@ -42,6 +42,11 @@ def create_object(request, model):
 
     if model == 'run':
         obj.creator = User.objects.get(username=request.user.username)
+        if obj.number_of_methods == '':
+            obj.number_of_methods = None
+        if obj.order_of_methods == '':
+            obj.order_of_methods = None
+
 
     obj.save()
 
@@ -1115,9 +1120,9 @@ def recordsRuns(request):
         d['created_on'] = row.created_on
         d['experiment'] = row.experiment_id
         d['complete_sample_count'] = row.complete_sample_count
-        d['rule_generator'] = row.rule_generator.rule_generator_id
-        d['number_of_methods'] = row.rule_generator.number_of_methods
-        d['order_of_methods'] = row.rule_generator.order_of_methods
+        d['rule_generator'] = row.rule_generator_id
+        d['number_of_methods'] = row.number_of_methods
+        d['order_of_methods'] = row.order_of_methods
         d['generated_output'] = row.generated_output
         d['title'] = row.title
         d['method'] = row.method_id
@@ -1824,6 +1829,15 @@ def generate_worklist(request, run_id):
     except RunBuilderException, e:
         # Shortcut on Error!
         return HttpResponse(str(e), content_type="text/plain")
+        output = {'success': False, 'msg': str(e)}
+    else:
+        output = {'success': True}    
+    
+    return HttpResponse(json.dumps(output))
+
+@mastr_users_only
+def display_worklist(request, run_id):
+    run = Run.objects.get(id=run_id)
 
     # TODO
     # I don't think the template for this should be in the DB
@@ -1840,6 +1854,7 @@ def generate_worklist(request, run_id):
          
     #render 
     return HttpResponse(content=mytemplate.render(**render_vars), content_type='text/plain; charset=utf-8')
+
 
 @mastr_users_only
 @transaction.commit_on_success
