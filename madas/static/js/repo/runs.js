@@ -192,7 +192,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                             allowDecimals: false,
                             allowNegative: false,
                             maxValue: 100,
-                            minValue: 1,
+                            minValue: 2,
                             width: 50,
                         }),
                         new Ext.form.ComboBox({
@@ -501,7 +501,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                                     MA.CRUDSomething('update/run/'+values.id+'/', values, runSaveCallback);
                                 }
                             };
-                            if (self.runId == 0 && values.number_of_methods > 5) {
+                            if (values.number_of_methods > 5) {
                                 Ext.Msg.confirm('Large Number of Methods', 'The Number of Methods you entered (' + 
                                     values.number_of_methods + ') is unusually high. This could cause the generation of a very long Worklist. Are you sure you want to proceed?', 
                                     function(button) {
@@ -536,16 +536,19 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     valid = false;
                     this.getComponent("rule_generator").markInvalid("Required");
                 }
-                
-                if (methodsCmp.getComponent("number_of_methods").getValue() > 1) {
-                    if (!methodsCmp.getComponent("order_of_methods").getValue()) {
-                        valid = false;
-                        methodsCmp.getComponent("order_of_methods").markInvalid("Required if Number Of Methods is set");
-                    }
+
+                if (!methodsCmp.getComponent("number_of_methods").validate()) {
+                    valid = false;
                 } else {
-                    methodsCmp.getComponent("order_of_methods").clearInvalid();
+                    if (methodsCmp.getComponent("number_of_methods").getValue() > 1) {
+                        if (!methodsCmp.getComponent("order_of_methods").getValue()) {
+                            valid = false;
+                            methodsCmp.getComponent("order_of_methods").markInvalid("Required if Number Of Methods is set");
+                        }
+                    } else {
+                        methodsCmp.getComponent("order_of_methods").clearInvalid();
+                    }
                 }
-                
                 return valid;
             }
         };
@@ -602,6 +605,9 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         this.getComponent("rule_generator").clearValue();
         this.getComponent("methods").getComponent("number_of_methods").setValue('');
         this.getComponent("methods").getComponent("order_of_methods").clearValue();
+        this.getComponent("rule_generator").enable();
+        this.getComponent("methods").getComponent("number_of_methods").enable();
+        this.getComponent("methods").getComponent("order_of_methods").enable();
 
         this.getFooterToolbar().getComponent("generateWorklistButton").disable();
         this.getFooterToolbar().getComponent("generateWorklistButton").setText('Generate Workflow');
