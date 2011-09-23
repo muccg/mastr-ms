@@ -345,14 +345,14 @@ class RunAdmin(ExtJsonInterface, admin.ModelAdmin):
 
     def experiments_link(self, obj):
         change_url = urlresolvers.reverse('admin:repository_experiment_changelist')
-        exp_ids = ','.join([str(x.experiment.id) for x in obj.samples.all()])
+        exp_ids = ','.join([str(x.experiment.id) for x in obj.samples.distinct()])
         return '<a href="%s?id__in=%s">Experiments</a>' % (change_url, exp_ids)
     experiments_link.short_description = 'Experiments'
     experiments_link.allow_tags = True
 
     def samples_link(self, obj):
         change_url = urlresolvers.reverse('admin:repository_sample_changelist')
-        sample_ids = ','.join([str(x.id) for x in obj.samples.all()])
+        sample_ids = ','.join([str(x.id) for x in obj.samples.distinct()])
         return '<a href="%s?id__in=%s">Samples</a>' % (change_url, sample_ids)
     samples_link.short_description = 'Samples'
     samples_link.allow_tags = True

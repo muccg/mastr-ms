@@ -327,7 +327,7 @@ class Sample(models.Model):
             result = u"%s-%s" % (self.sample_class.class_id, self.sample_class_sequence)
             if self.label:
                 result += "-%s" % self.label
-            result += "_%s-%s.d" % (run.id, str(self.id))
+            result += "_%s-%s" % (run.id, str(self.id))
             return result
 
     def is_valid_for_run(self):
@@ -357,6 +357,11 @@ class Run(models.Model):
         RUN_STATES.IN_PROGRESS,
         RUN_STATES.COMPLETE)
 
+    METHOD_ORDERS = (
+        (1, 'resampled vial'),
+        (2, 'individual vial')
+    )   
+
     experiment = models.ForeignKey(Experiment, null=True)
 
     method = models.ForeignKey(InstrumentMethod)
@@ -370,11 +375,14 @@ class Run(models.Model):
     sample_count = models.IntegerField(default=0)
     incomplete_sample_count = models.IntegerField(default=0)
     complete_sample_count = models.IntegerField(default=0)
-    rule_generator = models.ForeignKey('RunRuleGenerator')
+    rule_generator = models.ForeignKey('RuleGenerator')
+    number_of_methods = models.IntegerField(null=True, blank=True)
+    order_of_methods = models.IntegerField(choices=METHOD_ORDERS, null=True, blank=True)
+
     
     def sortedSamples(self):
         #TODO if method indicates randomisation and blanks, now is when we would do it
-        return self.samples.all()
+        return self.samples.distinct()
     
     def __unicode__(self):
         return "%s (%s v.%s)" % (self.title, self.method.title, self.method.version)
@@ -384,7 +392,7 @@ class Run(models.Model):
         assert self.id, 'Run must have an id before samples can be added'
         for s in queryset:
             if s.is_valid_for_run():
-                rs, created = RunSample.objects.get_or_create(run=self, sample=s, sequence=self.samples.count())
+                rs, created = RunSample.objects.get_or_create(run=self, sample=s, sequence=self.samples.distinct().count())
                 
     def remove_samples(self, queryset):
         assert self.id, 'Run must have an id before samples can be added'
@@ -429,7 +437,9 @@ class Run(models.Model):
     
         return (abspath, runpath)
     
-
+    def is_method_type_individual_vial(self):
+        return (self.order_of_methods == 2)
+ 
 class SampleLog(models.Model):
     LOG_TYPES = (
             (0, u'Received'),
@@ -473,6 +483,7 @@ class RunSample(models.Model):
     component = models.ForeignKey("Component", default=0)
     sequence = models.PositiveIntegerField(null=False, default=0)
     vial_number = models.PositiveIntegerField(null=True)
+    method_number = models.PositiveIntegerField(null=True, blank=True)
 
     @classmethod 
     def create_sweep(self, run):
@@ -481,6 +492,10 @@ class RunSample(models.Model):
     @classmethod 
     def create(self, run, component):
         return RunSample.objects.create(run=run, component=component)
+
+    @classmethod 
+    def create_copy(self, source, method_number=None):
+        return RunSample.objects.create(run=source.run, component=source.component, sample=source.sample, method_number=method_number)
  
     class Meta:
         db_table = u'repository_run_samples'
@@ -502,10 +517,17 @@ class RunSample(models.Model):
             return self.sample.experiment.ensure_dir()
         else:
             return self.run.ensure_dir()
+
+    def run_filename(self):
+        filename = self.sample.run_filename(self.run)
+        if self.method_number:
+            filename += '_m%d' % self.method_number
+        filename += '.d'
+        return filename
             
     def generate_filename(self):
         if self.is_sample():
-            return self.sample.run_filename(self.run)
+            return self.run_filename()
         else:
             return "%s_%s-%s.d"  % (self.component.filename_prefix, self.run.id, self.id)
             
@@ -577,30 +599,21 @@ class RuleGenerator(models.Model):
             name += ' (v. %d)' % self.version
         return name 
 
-    def __unicode__(self):
-        return self.full_name
-
-class RunRuleGenerator(models.Model):
-    METHOD_ORDERS = (
-        (1, 'resampled vial'),
-        (2, 'individual vial')
-    )   
-    rule_generator = models.ForeignKey(RuleGenerator)
-    number_of_methods = models.IntegerField(default=1)
-    order_of_methods = models.IntegerField(choices=METHOD_ORDERS, null=True, blank=True)
-   
     @property
     def start_block_rules(self):
-        return list(self.rule_generator.rulegeneratorstartblock_set.all())
+        return list(self.rulegeneratorstartblock_set.all())
 
     @property
     def sample_block_rules(self):
-        return list(self.rule_generator.rulegeneratorsampleblock_set.all())
+        return list(self.rulegeneratorsampleblock_set.all())
 
     @property
     def end_block_rules(self):
-        return list(self.rule_generator.rulegeneratorendblock_set.all())
- 
+        return list(self.rulegeneratorendblock_set.all())
+
+    def __unicode__(self):
+        return self.full_name
+
 class RuleGeneratorStartBlock(models.Model):
     rule_generator = models.ForeignKey(RuleGenerator)
     index = models.PositiveIntegerField()
