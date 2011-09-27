@@ -32,8 +32,9 @@ MA.RequestQuoteInit = function () {
 	var reqQuoCmp = Ext.getCmp('requestquote-panel');   
 
     //fetch user details
-    if (MA.CurrentUser.IsLoggedIn)
+    if (MA.CurrentUser.IsLoggedIn){
         reqQuoCmp.load({url: MA.BaseUrl + 'user/userload', waitMsg:'Loading'});
+    }
     reqQuoCmp.doLayout();
     
     return;
@@ -137,7 +138,7 @@ MA.RequestQuoteCmp =
                         emptyText: 'Attach a file',
                         fieldLabel: 'File',
                         name: 'attachfile',
-                        buttonText: '...',
+                        buttonText: '...'
                 }
             ],
             buttons: [

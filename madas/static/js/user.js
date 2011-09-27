@@ -225,7 +225,7 @@ MA.UserEditCmp = {id:'useredit-container-panel',
                                             
                                             //display a success alert that auto-closes in 5 seconds
                                             Ext.Msg.alert("User details saved successfully", "(this message will auto-close in 5 seconds)");
-                                            setTimeout("Ext.Msg.hide()", 5000);
+                                            setTimeout(Ext.Msg.hide, 5000);
                                             
                                             //load up the menu and next content area as declared in response
                                             MA.ChangeMainContent(action.result.mainContentFunction);
