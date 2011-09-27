@@ -34,85 +34,85 @@ Ext.extend(Ext.ux.grid.Search, Ext.util.Observable, {
     /**
      * @cfg {String} searchText Text to display on menu button
      */
-     searchText:'Search'
+    searchText:'Search',
 
     /**
      * @cfg {String} searchTipText Text to display as input tooltip. Set to '' for no tooltip
      */ 
-    ,searchTipText:'Type text to search for and press Enter'
+    searchTipText:'Type text to search for and press Enter',
 
     /**
      * @cfg {String} selectAllText Text to display on menu item that selects all fields
      */
-    ,selectAllText:'Select All'
+    selectAllText:'Select All',
 
     /**
      * @cfg {String} position Where to display the search controls. Valid values are top and bottom (defaults to bottom)
      * Corresponding toolbar has to exist at least with mimimum configuration tbar:[] for position:top or bbar:[]
      * for position bottom. Plugin does NOT create any toolbar.
      */
-    ,position:'bottom'
+    position:'bottom',
 
     /**
      * @cfg {String} iconCls Icon class for menu button (defaults to icon-magnifier)
      */
-    ,iconCls:'icon-magnifier'
+    iconCls:'icon-magnifier',
 
     /**
      * @cfg {String/Array} checkIndexes Which indexes to check by default. Can be either 'all' for all indexes
      * or array of dataIndex names, e.g. ['persFirstName', 'persLastName']
      */
-    ,checkIndexes:'all'
+    checkIndexes:'all',
 
     /**
      * @cfg {Array} disableIndexes Array of index names to disable (not show in the menu), e.g. ['persTitle', 'persTitle2']
      */
-    ,disableIndexes:[]
+    disableIndexes:[],
 
     /**
      * @cfg {String} dateFormat how to format date values. If undefined (the default) 
      * date is formatted as configured in colummn model
      */
-    ,dateFormat:undefined
+    dateFormat:undefined,
 
     /**
      * @cfg {Boolean} showSelectAll Select All item is shown in menu if true (defaults to true)
      */
-    ,showSelectAll:true
+    showSelectAll:true,
 
     /**
      * @cfg {String} mode Use 'remote' for remote stores or 'local' for local stores. If mode is local
      * no data requests are sent to server the grid's store is filtered instead (defaults to 'remote')
      */
-    ,mode:'remote'
+    mode:'remote',
 
     /**
      * @cfg {Number} width Width of input field in pixels (defaults to 100)
      */
-    ,width:100
+    width:100,
 
     /**
      * @cfg {String} xtype xtype is usually not used to instantiate this plugin but you have a chance to identify it
      */
-    ,xtype:'gridsearch'
+    xtype:'gridsearch',
 
     /**
      * @cfg {Object} paramNames Params name map (defaults to {fields:'fields', query:'query'}
      */
-    ,paramNames: {
-         fields:'fields'
-        ,query:'query'
-    }
+    paramNames: {
+        fields:'fields',
+        query:'query'
+    },
 
     /**
      * @cfg {String} shortcutKey Key to fucus the input field (defaults to r = Sea_r_ch). Empty string disables shortcut
      */
-    ,shortcutKey:'r'
+    shortcutKey:'r',
 
     /**
      * @cfg {String} shortcutModifier Modifier for shortcutKey. Valid values: alt, ctrl, shift (defaults to alt)
      */
-    ,shortcutModifier:'alt'
+    shortcutModifier:'alt',
 
     /**
      * @cfg {String} align 'left' or 'right' (defaults to 'left')
@@ -132,7 +132,7 @@ Ext.extend(Ext.ux.grid.Search, Ext.util.Observable, {
      * private
      * @param {Ext.grid.GridPanel/Ext.grid.EditorGrid} grid reference to grid this plugin is used for
      */
-    ,init:function(grid) {
+    init:function(grid) {
         this.grid = grid;
 
         // setup toolbar container if id was given
@@ -143,13 +143,13 @@ Ext.extend(Ext.ux.grid.Search, Ext.util.Observable, {
         // do our processing after grid render and reconfigure
         grid.onRender = grid.onRender.createSequence(this.onRender, this);
         grid.reconfigure = grid.reconfigure.createSequence(this.reconfigure, this);
-    } // eo function init
+    }, // eo function init
     // }}}
     // {{{
     /**
      * private add plugin controls to <b>existing</b> toolbar and calls reconfigure
      */
-    ,onRender:function() {
+    onRender:function() {
         var panel = this.toolbarContainer || this.grid;
         var tb = 'bottom' === this.position ? panel.bottomToolbar : panel.topToolbar;
 
@@ -220,23 +220,23 @@ Ext.extend(Ext.ux.grid.Search, Ext.util.Observable, {
             shortcutCfg[0][this.shortcutModifier] = true;
             this.keymap = new Ext.KeyMap(shortcutEl, shortcutCfg);
         }
-    } // eo function onRender
+    }, // eo function onRender
     // }}}
     // {{{
     /**
      * private Clear Trigger click handler
      */
-    ,onTriggerClear:function() {
+    onTriggerClear:function() {
         this.field.setValue('');
         this.field.focus();
         this.onTriggerSearch();
-    } // eo function onTriggerClear
+    }, // eo function onTriggerClear
     // }}}
     // {{{
     /**
      * private Search Trigger click handler (executes the search, local or remote)
      */
-    ,onTriggerSearch:function() {
+    onTriggerSearch:function() {
         if(!this.field.isValid()) {
             return;
         }
@@ -298,37 +298,37 @@ Ext.extend(Ext.ux.grid.Search, Ext.util.Observable, {
             store.reload();
         }
 
-    } // eo function onTriggerSearch
+    }, // eo function onTriggerSearch
     // }}}
     // {{{
     /**
      * @param {Boolean} true to disable search (TwinTriggerField), false to enable
      */
-    ,setDisabled:function() {
+    setDisabled:function() {
         this.field.setDisabled.apply(this.field, arguments);
-    } // eo function setDisabled
+    }, // eo function setDisabled
     // }}}
     // {{{
     /**
      * Enable search (TwinTriggerField)
      */
-    ,enable:function() {
+    enable:function() {
         this.setDisabled(false);
-    } // eo function enable
+    }, // eo function enable
     // }}}
     // {{{
     /**
      * Enable search (TwinTriggerField)
      */
-    ,disable:function() {
+    disable:function() {
         this.setDisabled(true);
-    } // eo function disable
+    }, // eo function disable
     // }}}
     // {{{
     /**
      * private (re)configures the plugin, creates menu items from column model
      */
-    ,reconfigure:function() {
+    reconfigure:function() {
 
         // {{{
         // remove old items
