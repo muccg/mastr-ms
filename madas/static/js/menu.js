@@ -79,10 +79,12 @@ MA.MenuRender = function(username) {
 };
 
 MA.MenuEnsure = function() {
-    if (MA.CurrentUser.IsLoggedIn) 
+    if (MA.CurrentUser.IsLoggedIn) {
         MA.MenuShow();
-    else 
+    }
+    else {
         MA.MenuHide();
+    }
 };
 
 MA.MenuShow = function() {
@@ -105,8 +107,8 @@ MA.MenuShow = function() {
     Ext.getCmp('admin:rejectedUsersearch').setDisabled(!(MA.CurrentUser.IsAdmin || MA.CurrentUser.IsNodeRep));
     Ext.getCmp('admin:deletedUsersearch').setDisabled(!(MA.CurrentUser.IsAdmin || MA.CurrentUser.IsNodeRep));
 
-    Ext.getCmp('repo:admin').setDisabled(!(MA.CurrentUser.IsAdmin || MA.CurrentUser.IsMastrAdmin))
-    Ext.getCmp('client:list').setDisabled(!(MA.CurrentUser.IsAdmin || MA.CurrentUser.IsMastrAdmin || MA.CurrentUser.IsProjectLeader))
+    Ext.getCmp('repo:admin').setDisabled(!(MA.CurrentUser.IsAdmin || MA.CurrentUser.IsMastrAdmin));
+    Ext.getCmp('client:list').setDisabled(!(MA.CurrentUser.IsAdmin || MA.CurrentUser.IsMastrAdmin || MA.CurrentUser.IsProjectLeader));
 
     Ext.get('login').hide();
     Ext.get('dashboard').show();
