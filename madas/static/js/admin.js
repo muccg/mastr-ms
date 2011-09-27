@@ -75,12 +75,12 @@ MA.AdminRequestsInit = function(){
                                       tbar           : topToolbar,
                                       trackMouseOver : false,
                                       plugins:[new Ext.ux.grid.Search({
-                                                                      mode:'local'
-                                                                      ,iconCls:false
-                                                                      ,dateFormat:'m/d/Y'
-                                                                      ,minLength:0
-                                                                      ,width:150
-                                                                      ,position:'top'
+                                                                      mode:'local',
+                                                                      iconCls:false,
+                                                                      dateFormat:'m/d/Y',
+                                                                      minLength:0,
+                                                                      width:150,
+                                                                      position:'top'
                                                                       })]
                                       });
     selectionModel.on('selectionchange', function() { var editBtn = Ext.getCmp('adminrequestsEditBtn'); if (selectionModel.hasSelection()) { editBtn.enable(); } else { editBtn.disable(); } } );
@@ -155,12 +155,12 @@ MA.UserSearchInit = function(){
                                       tbar           : topToolbar,
                                       trackMouseOver : false,
                                       plugins:[new Ext.ux.grid.Search({
-                                                                      mode:'local'
-                                                                      ,iconCls:false
-                                                                      ,dateFormat:'m/d/Y'
-                                                                      ,minLength:0
-                                                                      ,width:150
-                                                                      ,position:'top'
+                                                                      mode:'local',
+                                                                      iconCls:false,
+                                                                      dateFormat:'m/d/Y',
+                                                                      minLength:0,
+                                                                      width:150,
+                                                                      position:'top'
                                                                       })]
                                       });
     selectionModel.on('selectionchange', function() { var editBtn = Ext.getCmp('usersearchEditBtn'); if (selectionModel.hasSelection()) { editBtn.enable(); } else { editBtn.disable(); } } );
@@ -233,12 +233,12 @@ MA.RejectedUserSearchInit = function(){
                                       tbar           : topToolbar,
                                       trackMouseOver : false,
                                       plugins:[new Ext.ux.grid.Search({
-                                                                      mode:'local'
-                                                                      ,iconCls:false
-                                                                      ,dateFormat:'m/d/Y'
-                                                                      ,minLength:0
-                                                                      ,width:150
-                                                                      ,position:'top'
+                                                                      mode:'local',
+                                                                      iconCls:false,
+                                                                      dateFormat:'m/d/Y',
+                                                                      minLength:0,
+                                                                      width:150,
+                                                                      position:'top'
                                                                       })]
                                       });
     selectionModel.on('selectionchange', function() { var editBtn = Ext.getCmp('rejectedusersearchEditBtn'); if (selectionModel.hasSelection()) { editBtn.enable(); } else { editBtn.disable(); } } );
@@ -311,12 +311,12 @@ MA.DeletedUserSearchInit = function(){
                                       tbar           : topToolbar,
                                       trackMouseOver : false,
                                       plugins:[new Ext.ux.grid.Search({
-                                                                      mode:'local'
-                                                                      ,iconCls:false
-                                                                      ,dateFormat:'m/d/Y'
-                                                                      ,minLength:0
-                                                                      ,width:150
-                                                                      ,position:'top'
+                                                                      mode:'local',
+                                                                      iconCls:false,
+                                                                      dateFormat:'m/d/Y',
+                                                                      minLength:0,
+                                                                      width:150,
+                                                                      position:'top'
                                                                       })]
                                       });
     selectionModel.on('selectionchange', function() { var editBtn = Ext.getCmp('deletedusersearchEditBtn'); if (selectionModel.hasSelection()) { editBtn.enable(); } else { editBtn.disable(); } } );
@@ -381,7 +381,7 @@ MA.AdminUserEditValidatePassword = function (textfield, event) {
         confirmEl.markInvalid('Password and Confirm Password must match');
         submitEl.disable();
         return false;
-    };
+    }
 };
 
 MA.AdminUserEditCmp = {id:'adminuseredit-container-panel', 
@@ -626,8 +626,8 @@ MA.AdminUserEditCmp = {id:'adminuseredit-container-panel',
        buttons: [{
                  text: 'Cancel',
                  handler: function(){
-                 Ext.getCmp('adminuseredit-panel').getForm().reset(); 
-                 MA.ChangeMainContent(MA.CancelBackTarget)
+                    Ext.getCmp('adminuseredit-panel').getForm().reset(); 
+                    MA.ChangeMainContent(MA.CancelBackTarget);
                  }
                  },{
                  text: 'Save',
@@ -637,14 +637,14 @@ MA.AdminUserEditCmp = {id:'adminuseredit-container-panel',
                                                                     {   successProperty: 'success',        
                                                                     success: function (form, action) {
                                                                     if (action.result.success === true) {
-                                                                    form.reset(); 
+                                                                        form.reset(); 
                                                                     
-                                                                    //display a success alert that auto-closes in 5 seconds
-                                                                    Ext.Msg.alert("User details saved successfully", "(this message will auto-close in 5 seconds)");
-                                                                    setTimeout("Ext.Msg.hide()", 5000);
+                                                                        //display a success alert that auto-closes in 5 seconds
+                                                                        Ext.Msg.alert("User details saved successfully", "(this message will auto-close in 5 seconds)");
+                                                                        setTimeout(Ext.Msg.hide, 5000);
                                                                     
-                                                                    //MA.ChangeMainContent(action.result.mainContentFunction);
-                                                                    MA.ChangeMainContent(MA.CancelBackTarget)
+                                                                        //MA.ChangeMainContent(action.result.mainContentFunction);
+                                                                        MA.ChangeMainContent(MA.CancelBackTarget);
                                                                     } 
                                                                     },
                                                                     failure: function (form, action) {
@@ -717,7 +717,7 @@ MA.NodeManagementDeleteTool = function(event, toolEl, panel) {
                     success: function (form, action) {
                     //display a success alert that auto-closes in 5 seconds
                     Ext.Msg.alert("Node deleted successfully", "(this message will auto-close in 5 seconds)");
-                    setTimeout("Ext.Msg.hide()", 5000);
+                    setTimeout(Ext.Msg.hide, 5000);
                     
                     //load up the menu and next content area as declared in response
                     MA.ChangeMainContent(action.result.mainContentFunction);
@@ -783,7 +783,7 @@ buttons: [
                              if (action.result.success === true) {
                              //display a success alert that auto-closes in 5 seconds
                              Ext.Msg.alert("Node details saved successfully", "(this message will auto-close in 5 seconds)");
-                             setTimeout("Ext.Msg.hide()", 5000);
+                             setTimeout(Ext.Msg.hide, 5000);
                              
                              //load up the menu and next content area as declared in response
                              MA.ChangeMainContent(action.result.mainContentFunction);
@@ -830,11 +830,11 @@ items: [
         lazyRender:true,
         bbar:[{xtype:'tbspacer'}],
         plugins:[new Ext.ux.grid.Search({
-                                        mode:'local'
-                                        ,iconCls:false
-                                        ,dateFormat:'m/d/Y'
-                                        ,minLength:0
-                                        ,width:150
+                                        mode:'local',
+                                        iconCls:false,
+                                        dateFormat:'m/d/Y',
+                                        minLength:0,
+                                        width:150
                                         })]
         },
         MA.NodeDetailsCmp
@@ -906,7 +906,7 @@ MA.OrgManagementDeleteTool = function(event, toolEl, panel) {
                     //display a success alert that auto-closes in 5 seconds
                     Ext.getCmp('orgListGrid').getStore().reload();
                     Ext.Msg.alert("Organisation deleted successfully", "(this message will auto-close in 5 seconds)");
-                    setTimeout("Ext.Msg.hide()", 5000);
+                    setTimeout(Ext.Msg.hide, 5000);
                     
                     //load up the menu and next content area as declared in response
                     MA.ChangeMainContent(action.result.mainContentFunction);
@@ -978,7 +978,7 @@ MA.OrgDetailsCmp = {
                                         //display a success alert that auto-closes in 5 seconds
                                         Ext.getCmp('orgListGrid').getStore().reload();
                                         Ext.Msg.alert("Organisation details saved successfully", "(this message will auto-close in 5 seconds)");
-                                        setTimeout("Ext.Msg.hide()", 5000);
+                                        setTimeout(Ext.Msg.hide, 5000);
                                         
                                         //load up the menu and next content area as declared in response
                                         MA.ChangeMainContent(action.result.mainContentFunction);
@@ -1024,11 +1024,11 @@ MA.OrgManagementCmp = {
         lazyRender:true,
         bbar:[{xtype:'tbspacer'}],
         plugins:[new Ext.ux.grid.Search({
-                                        mode:'local'
-                                        ,iconCls:false
-                                        ,dateFormat:'m/d/Y'
-                                        ,minLength:0
-                                        ,width:150
+                                        mode:'local',
+                                        iconCls:false,
+                                        dateFormat:'m/d/Y',
+                                        minLength:0,
+                                        width:150
                                         })]
         },
         MA.OrgDetailsCmp

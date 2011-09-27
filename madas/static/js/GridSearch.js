@@ -166,22 +166,22 @@ Ext.extend(Ext.ux.grid.Search, Ext.util.Observable, {
 
         // add menu button
         tb.add({
-             text:this.searchText
-            ,menu:this.menu
-            ,iconCls:this.iconCls
+            text:this.searchText,
+            menu:this.menu,
+            iconCls:this.iconCls
         });
 
         // add input field (TwinTriggerField in fact)
         //ntt 2008/06/23 changed to a normal triggerfield due to rendering issues, and hiding trigger
         this.field = new Ext.form.TwinTriggerField({
-             width:this.width
-            ,selectOnFocus:undefined === this.selectOnFocus ? true : this.selectOnFocus
-            ,trigger1Class:'x-form-clear-trigger'
-            ,trigger2Class:'x-form-search-trigger'
-            ,onTrigger1Click:this.onTriggerClear.createDelegate(this)
-            ,onTrigger2Click:this.onTriggerSearch.createDelegate(this)
-            ,minLength:this.minLength
-            ,hideTrigger:true
+             width:this.width,
+             selectOnFocus:undefined === this.selectOnFocus ? true : this.selectOnFocus,
+             trigger1Class:'x-form-clear-trigger',
+             trigger2Class:'x-form-search-trigger',
+             onTrigger1Click:this.onTriggerClear.createDelegate(this),
+             onTrigger2Click:this.onTriggerSearch.createDelegate(this),
+             minLength:this.minLength,
+             hideTrigger:true
         });
 
         // install event handlers on input field
@@ -190,13 +190,13 @@ Ext.extend(Ext.ux.grid.Search, Ext.util.Observable, {
 
             // install key map
             var map = new Ext.KeyMap(this.field.el, [{
-                 key:Ext.EventObject.ENTER
-                ,scope:this
-                ,fn:this.onTriggerSearch
+                 key:Ext.EventObject.ENTER,
+                 scope:this,
+                 fn:this.onTriggerSearch
             },{
-                 key:Ext.EventObject.ESC
-                ,scope:this
-                ,fn:this.onTriggerClear
+                 key:Ext.EventObject.ESC,
+                 scope:this,
+                 fn:this.onTriggerClear
             }]);
             map.stopEvent = true;
         }, this, {single:true});
@@ -210,10 +210,10 @@ Ext.extend(Ext.ux.grid.Search, Ext.util.Observable, {
         if(this.shortcutKey && this.shortcutModifier) {
             var shortcutEl = this.grid.getEl();
             var shortcutCfg = [{
-                 key:this.shortcutKey
-                ,scope:this
-                ,stopEvent:true
-                ,fn:function() {
+                 key:this.shortcutKey,
+                 scope:this,
+                 stopEvent:true,
+                 fn:function() {
                     this.field.focus();
                 }
             }];
@@ -338,10 +338,10 @@ Ext.extend(Ext.ux.grid.Search, Ext.util.Observable, {
         // add Select All item plus separator
         if(this.showSelectAll) {
             menu.add(new Ext.menu.CheckItem({
-                 text:this.selectAllText
-                ,checked:!(this.checkIndexes instanceof Array)
-                ,hideOnClick:false
-                ,handler:function(item) {
+                 text:this.selectAllText,
+                 checked:!(this.checkIndexes instanceof Array),
+                 hideOnClick:false,
+                 handler:function(item) {
                     var checked = ! item.checked;
                     item.parentMenu.items.each(function(i) {
                         if(item !== i && i.setChecked) {
@@ -364,10 +364,10 @@ Ext.extend(Ext.ux.grid.Search, Ext.util.Observable, {
                 });
                 if(!disable) {
                     menu.add(new Ext.menu.CheckItem({
-                         text:config.header
-                        ,hideOnClick:false
-                        ,checked:'all' === this.checkIndexes
-                        ,dataIndex:config.dataIndex
+                         text:config.header,
+                         hideOnClick:false,
+                         checked:'all' === this.checkIndexes,
+                         dataIndex:config.dataIndex
                     }));
                 }
             }

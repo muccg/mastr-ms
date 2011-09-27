@@ -49,8 +49,7 @@ Ext.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
              * @param {Ext.form.FileUploadField} this
              * @param {String} value The file value returned by the underlying file input field
              */
-            'fileselected'
-        );
+            'fileselected');
     },
     
     // private
