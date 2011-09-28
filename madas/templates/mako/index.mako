@@ -40,11 +40,11 @@
 <!--<script src="${wh.url('/static/ext-3.4.0/ext-all.js')}"></script>-->
 <script type="text/javascript" src="${wh.url('/static/js/repo/DisplayField.js')}"></script>
 
-
 <!-- setup variable -->
 <script>
 Ext.ns('MA', 'MA.Dashboard', 'MA.Utils');
 MA.BaseUrl = '${ APP_SECURE_URL }';
+if(Ext.isIE6 || Ext.isIE7 || Ext.isAir){ Ext.BLANK_IMAGE_URL = "${wh.url('/static/images/default/s.gif')}"; }
 </script>
 
 <!-- Madas scripts -->
