@@ -5830,7 +5830,9 @@ Form.EventObserver = Class.create(Abstract.EventObserver, {
   function pollDoScroll() {
     try { document.documentElement.doScroll('left'); }
     catch(e) {
-      timer = pollDoScroll.defer();
+      //bpower: with no arg, defer runs too fast and causes an infinite loop on IE6/7
+      //See:http://www.sencha.com/forum/showthread.php?78935-DEFER-717-2.x-3.x-Stack-overflow-in-IE6-7-using-prototype-1.6.1_rc3/page4
+      timer = pollDoScroll.defer( 0.001 );
       return;
     }
     fireContentLoadedEvent();

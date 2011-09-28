@@ -34,10 +34,10 @@
 -->
 <script type="text/javascript" src="${wh.url('/static/js/repo/prototype.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/repo/scriptaculous/scriptaculous.js')}"></script>
-<!--<script src="${wh.url('/static/ext-3.4.0/adapter/ext/ext-base-debug.js')}" type="text/javascript"></script>-->
-<script src="${wh.url('/static/ext-3.4.0/adapter/ext/ext-base.js')}" type="text/javascript"></script>
-<!--<script src="${wh.url('/static/ext-3.4.0/ext-all-debug.js')}"></script>-->
-<script src="${wh.url('/static/ext-3.4.0/ext-all.js')}"></script>
+<script src="${wh.url('/static/ext-3.4.0/adapter/ext/ext-base-debug.js')}" type="text/javascript"></script>
+<!--<script src="${wh.url('/static/ext-3.4.0/adapter/ext/ext-base.js')}" type="text/javascript"></script>-->
+<script src="${wh.url('/static/ext-3.4.0/ext-all-debug.js')}"></script>
+<!--<script src="${wh.url('/static/ext-3.4.0/ext-all.js')}"></script>-->
 <script type="text/javascript" src="${wh.url('/static/js/repo/DisplayField.js')}"></script>
 
 
