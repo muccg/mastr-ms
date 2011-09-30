@@ -451,6 +451,22 @@ var runStore = new Ext.data.JsonStore(
                             }
                         }
                     );
+
+var ruleGeneratorListStore = new Ext.data.JsonStore(
+                        {
+                            storeId: 'rulegeneratorlist',
+                            autoLoad: false,
+                            url: wsBaseUrl + "recordsRuleGenerators",
+                            restful: true,
+                            listeners: {'load':MA.DSLoaded,
+                                        'loadexception':MA.DSLoadIgnoreException
+                            },
+                            sortInfo: {
+                                field: 'id',
+                                direction: 'DESC'
+                            }
+                        }
+                    );
                     
 var runSampleStore = new Ext.data.JsonStore(
                         {
