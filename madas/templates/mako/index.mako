@@ -68,6 +68,7 @@ MA.BaseUrl = '${ APP_SECURE_URL }';
 <script type="text/javascript" src="${wh.url('/static/js/repo/files.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/repo/runs.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/repo/runlist.js')}"></script>
+<script type="text/javascript" src="${wh.url('/static/js/repo/rulegenerators.js')}"></script>
 
 <script type="text/javascript" src="${wh.url('/static/js/repo/projects.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/repo/clients.js')}"></script>

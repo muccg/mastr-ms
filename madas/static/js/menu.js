@@ -35,6 +35,7 @@ MA.MenuRender = function(username) {
                         {text:'Projects', id:'project:list', handler: MA.MenuHandler},
                         {text:'Clients', id:'client:list', handler: MA.MenuHandler},
                         {text:'Runs', id:'run:list', handler: MA.MenuHandler},
+                        {text:'Rule Generators', id:'rulegenerator:list', handler: MA.MenuHandler},
                         new Ext.menu.Separator(),
                         {text:'Admin', id:'repo:admin', handler: MA.MenuHandler}
                     ]

@@ -1141,6 +1141,49 @@ def recordsRuns(request):
     return HttpResponse(json.dumps(output))
 
 @mastr_users_only
+def recordsRuleGenerators(request):
+    args = request.REQUEST
+       
+    # basic json that we will fill in
+    output = json_records_template([
+        'id', 'name', 'version', 'full_name', 'description', 'state_id', 'state', 'accessibility_id', 'accessibility', 'created_by', 'node', 'startblock', 'sampleblock', 'endblock'
+        ])
+
+    # TODO filter them out 
+    rows = RuleGenerator.objects.all()
+    #if getMadasUser(request.user.username).IsAdmin: mastradmin part of node etc.
+    output['results'] = len(rows)
+
+    # add rows
+    for row in rows:
+        d = {}
+        d['id'] = row.id
+        d['name'] = row.name
+        d['version'] = row.version
+        d['full_name'] = row.full_name
+        d['description'] = row.description
+        d['state_id'] = row.state
+        d['state'] = row.state_name
+        d['accessibility_id'] = row.accessibility
+        d['accessibility'] = row.accessibility_name
+        d['created_by'] = unicode(row.created_by)
+        d['node'] = row.node if row.node else ''
+        d['startblock'] = [{'count': r.count, 'component': r.component.sample_type} for r in row.start_block_rules]
+        d['sampleblock'] = [
+            {
+                'count': r.count, 
+                'component': r.component.sample_type, 
+                'sample_count': r.sample_count,
+                'order': r.order_name,
+            } for r in row.sample_block_rules]
+        d['endblock'] = [{'count': r.count, 'component': r.component.sample_type} for r in row.end_block_rules]
+
+        output['rows'].append(d)
+
+    output = makeJsonFriendly(output)
+    return HttpResponse(json.dumps(output))
+
+@mastr_users_only
 def recordsExperimentsForProject(request, project_id):
     if request.GET:
         args = request.GET
