@@ -77,14 +77,16 @@ MA.MenuRender = function(username) {
     );
     tb.render('toolbar');
 
-}
+};
 
 MA.MenuEnsure = function() {
-    if (MA.CurrentUser.IsLoggedIn) 
+    if (MA.CurrentUser.IsLoggedIn) {
         MA.MenuShow();
-    else 
+    }
+    else {
         MA.MenuHide();
-}
+    }
+};
 
 MA.MenuShow = function() {
     var isPrivileged = (MA.CurrentUser.IsAdmin || MA.CurrentUser.IsMastrAdmin || MA.CurrentUser.IsNodeRep || MA.CurrentUser.IsProjectLeader);
@@ -106,8 +108,8 @@ MA.MenuShow = function() {
     Ext.getCmp('admin:rejectedUsersearch').setDisabled(!(MA.CurrentUser.IsAdmin || MA.CurrentUser.IsNodeRep));
     Ext.getCmp('admin:deletedUsersearch').setDisabled(!(MA.CurrentUser.IsAdmin || MA.CurrentUser.IsNodeRep));
 
-    Ext.getCmp('repo:admin').setDisabled(!(MA.CurrentUser.IsAdmin || MA.CurrentUser.IsMastrAdmin))
-    Ext.getCmp('client:list').setDisabled(!(MA.CurrentUser.IsAdmin || MA.CurrentUser.IsMastrAdmin || MA.CurrentUser.IsProjectLeader))
+    Ext.getCmp('repo:admin').setDisabled(!(MA.CurrentUser.IsAdmin || MA.CurrentUser.IsMastrAdmin));
+    Ext.getCmp('client:list').setDisabled(!(MA.CurrentUser.IsAdmin || MA.CurrentUser.IsMastrAdmin || MA.CurrentUser.IsProjectLeader));
 
     Ext.get('login').hide();
     Ext.get('dashboard').show();
@@ -122,7 +124,7 @@ MA.MenuShow = function() {
         Ext.get('repo').hide();
     }
 
-}
+};
 
 MA.MenuHandler = function(item) {
     //we authorize every access to check for session timeout and authorization to specific pages
@@ -131,11 +133,11 @@ MA.MenuHandler = function(item) {
     //} else {
     //    MA.Authorize(item.id);
     //}
-}
+};
 
 MA.LogoutHandler = function() {
     window.location = "login/processLogout";
-}
+};
 
 MA.MenuHide = function() {
 
@@ -148,5 +150,5 @@ MA.MenuHide = function() {
     Ext.getCmp('quote:listFormal').hide();
     Ext.get('repo').hide();
     Ext.getCmp('helpadmin:screencasts').disable();
-}
+};
 

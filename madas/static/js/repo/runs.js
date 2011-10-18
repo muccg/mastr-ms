@@ -193,7 +193,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                             allowNegative: false,
                             maxValue: 100,
                             minValue: 2,
-                            width: 50,
+                            width: 50
                         }),
                         new Ext.form.ComboBox({
                             fieldLabel: 'Order of Methods',
