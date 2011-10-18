@@ -29,7 +29,7 @@ MA.ResetUser = function()
         IsProjectLeader: false, 
         IsMastrStaff: false
     };
-}
+};
 
 MA.LoginExecute = function(paramArray){
                             Ext.getCmp('login-panel').getForm().submit(
@@ -184,7 +184,7 @@ MA.GetUserInfo = function(callback) {
             },
             failure: function() {
                    MA.ResetUser();
-            },
+            }
     });
 };
 

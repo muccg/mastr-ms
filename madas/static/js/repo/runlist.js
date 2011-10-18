@@ -94,8 +94,7 @@ MA.RunList = Ext.extend(Ext.Panel, {
     }
 });
 
-
-MA.RunListCmp = {
+MA.RunListCmp  = {
     title: "Runs",
     region: "center",
     cmargins: "0 0 0 0",
@@ -107,8 +106,7 @@ MA.RunListCmp = {
     defaults: {
         split: true
     },
-    items: [
-        new MA.RunList({
+    items: [ new MA.RunList({
             border: false,
             id: "runs",
             region: "center",
@@ -125,6 +123,7 @@ MA.RunListCmp = {
                 }
             }
         }),
+
         new Ext.Panel({
             region: "east",
             width: 520,
@@ -144,10 +143,9 @@ MA.RunListCmp = {
                 })
             ]
         })
-    ]
+    ] 
 };
-
-
+   
 MA.ExperimentRunsInit = function() {
     Ext.getCmp('center-panel').layout.setActiveItem('experiment-runs-list');
     //Ext.getCmp('experiment-run-list-detail').clearRun();
