@@ -1866,6 +1866,11 @@ def sample_class_enable(request, id):
         
     return recordsSampleClasses(request, sc.experiment.id)
 
+@mastr_users_only
+def create_rule_generator(request):
+    print 'create rule generator'
+    print request.POST
+    return HttpResponse(json.dumps({'success':True}))
 
 @mastr_users_only
 def generate_worklist(request, run_id):

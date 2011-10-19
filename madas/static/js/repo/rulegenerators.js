@@ -1,3 +1,4 @@
+var wsBaseUrl = MA.BaseUrl + "ws/";
 
 MA.RuleGeneratorDetailsCmp = {
     id: 'rule-generator-details',
@@ -135,6 +136,15 @@ MA.RuleGeneratorListCmp = {
         ]
 };
 
+
+var startblock_store = new Ext.data.ArrayStore({
+                    fields: [
+                        {name: 'count'},
+                        {name: 'component', type:'integer'}
+                    ]//,
+                    //data: [ [1,1],[1,2],[1,3], [1,4], [1,5]]
+                }); 
+
 MA.RuleGeneratorCreateCmp = new Ext.Window({
     id:'ruleGeneratorCreateCmp',
     title: 'Create new Rule Generator',
@@ -145,7 +155,9 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
     modal:true,
     items: [{
         bodyStyle: 'padding: 5px',
+        id: 'ruleGeneratorCreateForm',
         xtype: 'form',
+        url: wsBaseUrl + 'create_rule_generator',
         defaultType: 'textfield',
         buttonAlign: 'center',
         defaults: {width: 230, labelWidth: 120},
@@ -170,29 +182,63 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
                 fieldLabel: 'Start Block',
                 itemId: 'startblock',
                 xtype: 'grid',
+                //height: 120,
+                autoWidth: true,
+                autoHeight: true,
                 plugins: [new Ext.ux.grid.MARowEditor({saveText: 'Update'})],
-                store: new Ext.data.ArrayStore({
-                    fields: [
-                        {name: 'count'},
-                        {name: 'component', type:'integer'}
-                    ]
-                }),
+                sm: new Ext.grid.RowSelectionModel(),
+                store: startblock_store,
                 columns: [
-                    { header: 'Add', dataIndex: 'count', sortable: false },
-                    { header: 'Components', dataIndex: 'component', sortable: false },
-                ],
+                    { header: 'Add', dataIndex: 'count', sortable: false, editor: new Ext.form.NumberField({editable:true, maxValue:99}) },
+                    { header: 'Components', dataIndex: 'component', sortable: false, editor: new Ext.form.ComboBox({ 
+     editable: true,
+     forceSelection: false,
+     displayField: 'value',
+     lazyRender: true,
+     allowBlank: true,
+     typeAhead: false,
+     triggerAction: 'all',
+     mode: 'local',
+     store: new Ext.data.ArrayStore({storeId:'aaa', fields:['key', 'value'], data:[{key:1, value:"Thing1"},{key:2,value:"thing2"},{key:3,value:"thing3"},{key:4,value:2},{key:5,value:"thing5"}] })
+                    }),
+     renderer:renderClass                
+                    }
+                ], //end columns
+                viewConfig:{
+                        forceFit:true,
+                        autoFill:true
+                    },
+                autoScroll:true,
+                reserveScrollOffset:true,
                 bbar: [{
-                        text: 'Add rule',
+                        text: 'Add rule row',
                         handler: function(btn, ev) {
-                            
+                            startblock_store.add( new startblock_store.recordType({ count: 1,
+                                component: 2}));
+
                         }
                     }
                 ]
             }
         ],
         buttons: [{
-                text: 'Save'
-            },{
+                text: 'Save',
+                
+                formBind: true,
+                disabled: false,
+                handler: function(){
+                    Ext.getCmp('ruleGeneratorCreateForm').getForm().submit({
+                        successProperty: 'success',
+                        success: function(form, action){
+                            console.log('Create rule gen succeeded');
+                        },
+                        failure: function(form, action){
+                            console.log('Create rule gen failed');
+                        }
+                    });}
+                
+                },
+            {
                 text: 'Cancel',
                 handler: function(btn, ev) {
                     Ext.getCmp('ruleGeneratorCreateCmp').hide();
