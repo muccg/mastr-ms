@@ -2,7 +2,7 @@ from django.db import transaction
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden, HttpResponseNotAllowed, HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
-from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RUN_STATES, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure, MadasUser, RuleGenerator
+from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RUN_STATES, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure, MadasUser, RuleGenerator, Component
 from madas.quote.models import Organisation, Formalquote
 from django.utils import webhelpers
 from django.contrib.auth.models import User
@@ -1247,6 +1247,35 @@ def recordsExperimentsForProject(request, project_id):
     output = makeJsonFriendly(output)
     return HttpResponse(json.dumps(output))
     
+@mastr_users_only
+def recordsComponents(request):
+    # basic json that we will fill in
+    output = {'metaData': { 'totalProperty': 'results',
+                            'successProperty': 'success',
+                            'root': 'rows',
+                            'id': 'id',
+                            'fields': [{'name':'id'}, {'name':'component'}]
+                            },
+              'results': 0,
+              'authenticated': True,
+              'authorized': True,
+              'success': True,
+              'rows': [],
+              }
+    # TODO do we need this with decorator? ABM
+    authenticated = request.user.is_authenticated()
+    authorized = True # need to change this
+    if not authenticated or not authorized:
+        return HttpResponse(json.dumps(output), status=401)
+
+    rows = Component.objects.all()
+    output['results'] = len(rows);
+
+    for row in rows:
+        output['rows'].append({'id':row.id, 'component' : row.component_group.name})
+    output = makeJsonFriendly(output)
+    return HttpResponse(json.dumps(output))
+       
 
 @mastr_users_only
 def recordsClients(request, *args):

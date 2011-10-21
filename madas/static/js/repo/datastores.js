@@ -467,7 +467,27 @@ var ruleGeneratorListStore = new Ext.data.JsonStore(
                             }
                         }
                     );
-                    
+
+var ruleComponentStore = new Ext.data.JsonStore(
+                        {
+                            storeId: 'rulecomponents',
+                            autoLoad: false,
+                            url: wsBaseUrl + "recordsComponents",
+                            restful: true,
+                            listeners: {'load' : MA.DSLoaded,
+                                        'loadexception' : MA.DSLoadIgnoreException
+                            },
+                            sortInfo: {
+                                field: 'id',
+                                direction: 'DESC'
+                            }
+                            //fields: ['id','component'],
+                            //reader:new Ext.data.JsonReader({}),
+                            //root: 'items'
+                        }
+                    );
+
+
 var runSampleStore = new Ext.data.JsonStore(
                         {
                             storeId: 'runsamples',
