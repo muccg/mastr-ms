@@ -198,12 +198,12 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
      allowBlank: true,
      typeAhead: false,
      triggerAction: 'all',
-     mode: 'local',
-     store: new Ext.data.ArrayStore({storeId:'aaa', fields:['key', 'value'], data:[{key:1, value:"Thing1"},{key:2,value:"thing2"},{key:3,value:"thing3"},{key:4,value:2},{key:5,value:"thing5"}] })
-                    }),
+     mode: 'remote',
+     //store: new Ext.data.ArrayStore({storeId:'aaa', fields:['key', 'value'], data:[{key:1, value:"Thing1"},{key:2,value:"thing2"},{key:3,value:"thing3"},{key:4,value:2},{key:5,value:"thing5"}] })
+     store: ruleComponentStore
+                    }), //end combobox part of header
      renderer:renderClass                
-                    }
-                ], //end columns
+     } ], //end columns
                 viewConfig:{
                         forceFit:true,
                         autoFill:true
