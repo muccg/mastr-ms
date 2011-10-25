@@ -1905,8 +1905,6 @@ def select_widget_json(authenticated=False, authorized=False, main_content_funct
 def add_samples_to_run(request):
     '''Takes a run_id and a list of sample_ids and adds samples to the run after checking permissions etc.'''
 
-    print 'Sample ids received by add_samples_to_run were:', request.POST.get('sample_ids', None)
-
     if request.method == 'GET':
         return HttpResponseNotAllowed(['POST'])
 
@@ -1924,9 +1922,11 @@ def add_samples_to_run(request):
         return HttpResponseBadRequest("No sample_ids provided.\n")
 
     sample_ids = [int(X) for X in sample_id_str.split(',')]
-    print 'Sample ids were: ', sample_ids
+    #The following generated queryset will be in databaseid order, not
+    #in the order specified by the sample_ids list. We will need to
+    #reorder it before we send it to the run for processing. 
+    #we do this later (see below)
     queryset = Sample.objects.filter(id__in=sample_ids)
-    print 'Queryset samples were: ',
     for samp in queryset:
         print "%d, " % (samp.id) ,
     if len(queryset) != len(sample_ids):
@@ -1950,6 +1950,8 @@ def add_samples_to_run(request):
     sampleslist = []
     for id in sample_ids:
         try:
+            #any sample not found in the qs is ignored by
+            #this try catch
             sampleslist.append(queryset.get(id=id) )
         except Exception, e:
             pass
