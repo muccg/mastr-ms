@@ -392,6 +392,7 @@ class Run(models.Model):
         assert self.id, 'Run must have an id before samples can be added'
         for s in queryset:
             if s.is_valid_for_run():
+                print 'add_samples adding ', s.id
                 rs, created = RunSample.objects.get_or_create(run=self, sample=s, sequence=self.samples.distinct().count())
                 
     def remove_samples(self, queryset):
