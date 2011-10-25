@@ -387,11 +387,12 @@ class Run(models.Model):
     def __unicode__(self):
         return "%s (%s v.%s)" % (self.title, self.method.title, self.method.version)
 
-    def add_samples(self, queryset):
-        '''Takes a queryset of samples'''
+    def add_samples(self, sampleslist):
+        '''Takes a list of samples'''
         assert self.id, 'Run must have an id before samples can be added'
-        for s in queryset:
+        for s in sampleslist:
             if s.is_valid_for_run():
+                print 'add_samples adding ', s.id
                 rs, created = RunSample.objects.get_or_create(run=self, sample=s, sequence=self.samples.distinct().count())
                 
     def remove_samples(self, queryset):

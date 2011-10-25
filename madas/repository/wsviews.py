@@ -1999,8 +1999,13 @@ def add_samples_to_run(request):
         return HttpResponseBadRequest("No sample_ids provided.\n")
 
     sample_ids = [int(X) for X in sample_id_str.split(',')]
+    #The following generated queryset will be in databaseid order, not
+    #in the order specified by the sample_ids list. We will need to
+    #reorder it before we send it to the run for processing. 
+    #we do this later (see below)
     queryset = Sample.objects.filter(id__in=sample_ids)
-
+    for samp in queryset:
+        print "%d, " % (samp.id) ,
     if len(queryset) != len(sample_ids):
         return HttpResponseNotFound("At least one of the samples can not be found.\n")
 
@@ -2017,7 +2022,17 @@ def add_samples_to_run(request):
             return HttpResponseNotFound("Run NOT created as sample (%s, %s) does not have sample class or its class is not enabled.\n" % (s.label, s.experiment))
 
     # by the time you we get here we should have a valid run and valid samples
-    run.add_samples(queryset)
+    #the samples aren't necessarily in the correct order though, because of the call to filter (they are returned in order of database id, not the sequence given in the passed in id list)
+    #so we will make a list that is in the correct order
+    sampleslist = []
+    for id in sample_ids:
+        try:
+            #any sample not found in the qs is ignored by
+            #this try catch
+            sampleslist.append(queryset.get(id=id) )
+        except Exception, e:
+            pass
+    run.add_samples(sampleslist)
 
     return HttpResponse()
     
