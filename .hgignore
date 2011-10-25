@@ -4,4 +4,3 @@
 ^madas/scratch/*
 ^madas/log/*
 ^madas/virtualenv*
-^madas/settings.py$
