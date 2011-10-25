@@ -386,8 +386,20 @@ def retrievePathsForFiles(request, *args):
     logger.debug('making filelist obj')
     #So. Make a FileList object out of pfiles.
     fl = FileList(pfiles)
+    
+    import json
+    
+    print "pfiles is:"
+    print json.dumps(pfiles, indent=4)
+    
+    print "FileList result from pfiles is:"
+    print json.dumps(fl.runsamplesdict, indent=4)
+
     logger.debug('checking files')
-    wantedfiles = fl.checkFiles(filesdict)
+    wantedfiles = json.dumps(fl.checkFiles(filesdict), indent=4)
+
+    print "Wantedfiles (from fl.checkfiles) is: "
+    print wantedfiles
 
     #set the default host
     if host is None or len(host) == 0:
