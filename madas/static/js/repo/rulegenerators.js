@@ -193,7 +193,7 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
                     { header: 'Components', dataIndex: 'component', sortable: false, editor: new Ext.form.ComboBox({ 
      editable: true,
      forceSelection: false,
-     displayField: 'value',
+     displayField: 'component',
      lazyRender: true,
      allowBlank: true,
      typeAhead: false,
