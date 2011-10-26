@@ -1272,7 +1272,7 @@ def recordsComponents(request):
     output['results'] = len(rows);
 
     for row in rows:
-        output['rows'].append({'id':row.id, 'component' : row.component_group.name})
+        output['rows'].append({'id':row.id, 'component' : row.sample_type})
     output = makeJsonFriendly(output)
     return HttpResponse(json.dumps(output))
        

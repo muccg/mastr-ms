@@ -120,6 +120,13 @@ LOGGING_FORMATTER = logging.Formatter('[%(name)s:' + install_name + ':%(levelnam
 LOGS = ['mdatasync_server_log', 'madas_log']
 import ccglogging
 
+#try an import of some local dev settings
+try:
+    from flat_settings_localdb import *
+except ImportError, e:
+    pass
+
+
 # Override defaults with your local instance settings.
 # They will be loaded from appsettings.ivecallocation, which can exist anywhere
 # in the instance's pythonpath. This is a CCG convention designed to support
