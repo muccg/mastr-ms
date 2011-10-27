@@ -194,7 +194,24 @@ class MSDataSyncAPI(object):
         self.callingWindow.setState(APPSTATE.CHECKING_FILES)
         self.callingWindow.SetProgress(0)
         #if something goes wrong, bail out by calling the return function
-        #otherwiese return the local file list
+        #otherwise return the local file list
+        localfilesdict = self.getFiles(self.config.getValue('localdir'), ignoredirs=[self.config.getLocalIndexPath()] )
+
+        print
+        print "localfilesdict ", localfilesdict
+        print
+        print "wantedfilesdictkeys: ", wantedfiles.keys()
+
+        #see if we can resolve all wanted files:
+        for wantedfile in wantedfiles.keys():
+            result = self.find_local_file_or_directory(localfilesdict, wantedfile)
+            print wantedfile,
+            if result is not None:
+                print " FOUND! at ", result
+            else:
+                print " NOT FOUND!"
+
+
         return None
 
 
@@ -291,7 +308,8 @@ class MSDataSyncAPI(object):
         self.log('Server expects sync of %d files' % (len(wantedfiles.keys())) )
         self.log('Server expects sync of %d runsamples' % (len(runsamples.keys())) )
 
-        outlog.debug( "remote files dict: %s" % ( unicode(remotefilesdict).encode('utf-8') ) )
+        #outlog.debug( "remote files dict: %s" % ( unicode(json.dumps(remotefilesdict, indent=4)).encode('utf-8') ) )
+        outlog.debug(  "remote files dict: %s" % (simplejson.dumps(remotefilesdict, indent=4)) )
         outlog.debug( "remote runsamples dict: %s" % (unicode(remoterunsamplesdict).encode('utf-8') ) )
         copydict = {} #this is our list of files to copy
 
@@ -352,11 +370,9 @@ class MSDataSyncAPI(object):
         retfiles['/'] = dir
         retfiles['.'] = {}
         for root, dirs, files in os.walk(dir):
-            #print files
             shouldignore = False
             for ignoredir in ignoredirs:
                 if root.startswith(ignoredir):
-                    #print 'ignoring ', root.encode('utf-8')
                     shouldignore = True
                     break
 
@@ -385,6 +401,43 @@ class MSDataSyncAPI(object):
         
         #print 'retfiles is: ', unicode(retfiles).encode('utf-8')
         return retfiles
+
+    def find_local_file_or_directory(self, localfiledict, filename):
+        ''' does a depth first search of the localfiledict.
+            will return the local path to the file/directory if found, or None.
+            The filename comparison is non case sensitive '''
+
+        def checkfilesatnode(node, filename):
+            #print "Node:", node
+            #print 
+            
+            #check against files.
+            if node.has_key('.'):
+                for fname in node['.']:
+                    #print "Checking file ", fname
+                    if fname.upper() == filename.upper():
+                        return os.path.join(node['/'], fname)
+
+            #check against dirs
+            for dname in node.keys():
+                if dname not in ['.', '/']:
+                    #print 'checking dir ', dname
+                    if dname.upper() == filename.upper():
+                        #for dirs, their correct path will be in their node:
+                        return node[dname]['/']
+                    else:
+                        #descend into the dir
+                        found =  checkfilesatnode(node[dname], filename)
+                        if found is not None:
+                            return found
+                        
+
+            #no directories to descend into?
+            #and you got this far?
+            #then return None.
+            return None
+        
+        return checkfilesatnode(localfiledict, filename)
     
     #------- WORKER CLASS-----------------------
     import threading
@@ -556,3 +609,6 @@ class MSDSImpl(object):
             self.log('getFileTree: Exception: %s' % (str(e)), self.log.LOG_ERROR, thread = self.controller.useThreading)
         #print 'Done with getFileTree'
         return allfiles
+
+    
+        

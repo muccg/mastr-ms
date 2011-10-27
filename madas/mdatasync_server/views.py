@@ -123,6 +123,7 @@ def getNodeFromRequest(request, organisation=None, sitename=None, station=None):
     return retval
 
 def checkClientVersion(versionstr):
+    print "Checking client version: %s" % (versionstr)
     return True
 
 
@@ -148,7 +149,8 @@ def requestSync(request, organisation=None, sitename=None, station=None):
     '''
     node = getNodeFromRequest(request, organisation, sitename, station)
     resp = {"success": False, "message": "", "files": {}, "details":{}, "runsamples":{}}
-    
+    syncold = request.GET.get("sync_completed", False)
+
     if node is not None:
         ncerror, nodeclient_details = get_nodeclient_details(organisation, sitename, station)
         resp["details"] = nodeclient_details
@@ -156,6 +158,20 @@ def requestSync(request, organisation=None, sitename=None, station=None):
             resp["message"] = "Client version %s is not supported. Please update."
         else:
             resp["success"] = True
+            #now get the runs for that nodeclient
+            expectedFiles = getExpectedFilesForNode(node, include_completed=syncold)
+            expectedincomplete = expectedFiles['incomplete']
+            expectedcomplete = expectedFiles['complete']
+
+            for runid in expectedincomplete.keys():
+                resp["files"].update(expectedincomplete[runid])
+
+            if syncold:
+                for runid in expectedcomplete.keys():
+                    resp["files"].update(expectedcomplete[runid])
+        
+        #not sure why we need this yet
+        #fl = FileList(pfiles)
     else:
         resp["message"] = "Could not find node %s-%s-%s" % (organisation, sitename, station)
 
