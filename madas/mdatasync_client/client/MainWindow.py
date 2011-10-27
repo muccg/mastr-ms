@@ -17,6 +17,9 @@ from urllib import urlencode
 
 class APPSTATE:  
 
+    INITIING_SYNC = "Initiating sync with server"
+    CHECKING_FILES = "Checking for files locally"
+    GATHERING_FILES = "Gathering files for transfer"
     CHECKING_SYNCHUB = 'Negotiating with server'
     UPLOADING_DATA   = 'Uploading data'
     IDLE             = 'Idle'
