@@ -100,6 +100,67 @@ def save_client_state(clientstate):
     except Exception, e:
         logger.warning("Could not save clientstate. %s" % (str(e)))
 
+def getNodeFromRequest(request, organisation=None, sitename=None, station=None):
+    retval = None
+    
+    if organisation is None:
+        organisation = request.REQUEST('organisation', None)
+    if sitename is None:
+        sitename = request.REQUEST('sitename', None)
+    if station is None:
+        station = request.REQUEST('station', None)
+
+    logger.debug("Searching for node org=%s, sitename=%s, station=%s" % (organisation, sitename, station))
+    try:
+        nodeclient = NodeClient.objects.get(organisation_name = organisation, site_name=sitename, station_name = station) 
+        if nodeclient is None:
+            logger.warning("No nodeclient existed with organisation=%s, sitename=%s, station=%s" % (organisation, sitename, station))
+        else:
+            retval = nodeclient
+    except:
+        pass
+
+    return retval
+
+def checkClientVersion(versionstr):
+    return True
+
+
+def requestSync(request, organisation=None, sitename=None, station=None):
+    '''This is the initial request the client makes of the server.
+       The client will have sent (via URL or post fields) its
+       organisation, sitename, and station, what verstion it is, and whether
+       it wants to re-sync already completed files.
+
+       The server should, after verifying that the node exists and that the 
+       version is acceptable, then go through the experiments which the node
+       is involved in, and send back a list of files it wants.
+
+       The return format is:
+       {
+            files: {},
+            runsamples: {},
+            details{},
+            success: T/F (set to False if no node or version check fails)
+            message: "" (a message to explain problems if success is false)
+
+       }
+    '''
+    node = getNodeFromRequest(request, organisation, sitename, station)
+    resp = {"success": False, "message": "", "files": {}, "details":{}, "runsamples":{}}
+    
+    if node is not None:
+        ncerror, nodeclient_details = get_nodeclient_details(organisation, sitename, station)
+        resp["details"] = nodeclient_details
+        if not checkClientVersion(request.POST.get('version', None)):
+            resp["message"] = "Client version %s is not supported. Please update."
+        else:
+            resp["success"] = True
+    else:
+        resp["message"] = "Could not find node %s-%s-%s" % (organisation, sitename, station)
+
+    return HttpResponse(simplejson.dumps(resp))
+    
 
 class FileList(object):
     def __init__(self, heirarchy):
@@ -220,10 +281,9 @@ def getNodeClients(request, *args):
     return jsonResponse(result)
 
 @login_required
-def nodeinfo(request, organisation="", sitename="", station=""):
-    logger.debug("Searching for node org=%s, sitename=%s, station=%s" % (organisation, sitename, station))
+def nodeinfo(request, organisation=None, sitename=None, station=None):
     try:
-        nodeclient = NodeClient.objects.get(organisation_name = organisation, site_name=sitename, station_name = station) 
+        nodeclient = get_node_from_request(request, organisation=organisation, sitename=sitename, station=station)
         if nodeclient is None:
             raise Exception("No nodeclient existed with organisation=%s, sitename=%s, station=%s" % (organisation, sitename, station))
         clientstate = get_saved_client_state(organisation, sitename, station)
@@ -275,7 +335,39 @@ def getExpectedFilesForNode(nodeclient, include_completed = False):
                 target_dict[run.id][fname] = [run.id, rs.id, relpath, os.path.exists(os.path.join(abspath, rs.filename))]
 
     return {'complete': complete, 'incomplete': incomplete}
-    
+
+
+def get_nodeclient_details(organisation_name, site_name, station_name):
+    nodeclient_details = {}
+    error = None
+    try:
+        nodeclient = NodeClient.objects.get(organisation_name = organisation_name, site_name=site_name, station_name = station_name)
+        logger.debug( 'Nodeclient found.')
+        
+        nchost = nodeclient.hostname
+        if nchost is not None and len(nchost) > 0:
+            nodeclient_details['host'] = str(nchost)
+        ncflags = nodeclient.flags
+        if ncflags is not None and len(ncflags) > 0:
+            nodeclient_details['flags'] = str(ncflags)
+        ncuname = nodeclient.username
+        if ncuname is not None and len(ncuname) > 0:
+            nodeclient_details['username'] = str(ncuname)
+
+        logger.debug('Checking for rules')
+        try:
+            rulesset = NodeRules.objects.filter(parent_node = nodeclient)
+            nodeclient_details['rules'] = [x.__unicode__() for x in rulesset]
+        except Exception, e:
+            #status = 1
+            error = '%s, %s' % (error, 'Unable to resolve ruleset: %s' % (str(e)))
+    except Exception, e:
+        #status = 1
+        logger.debug("exception encountered: %s" % (e))
+        error = "%s, %s" % (error, 'Unable to resolve end machine to stored NodeClient: %s' % str(e) )
+
+    return error, nodeclient_details
+
 
 def retrievePathsForFiles(request, *args):
     '''This function is called as a webservice by the datasync client.
@@ -320,30 +412,12 @@ def retrievePathsForFiles(request, *args):
     #get a list of filenames in the repository run samples table
     #to compare against.
     #for each filename that matches, you use the experiment's ensurepath 
-    try:
-        nodeclient = NodeClient.objects.get(organisation_name = porganisation, site_name=psitename, station_name = pstation)
-        logger.debug( 'Nodeclient found.')
-        
-        nchost = nodeclient.hostname
-        if nchost is not None and len(nchost) > 0:
-            host = str(nchost)
-        ncflags = nodeclient.flags
-        if ncflags is not None and len(ncflags) > 0:
-            flags = str(ncflags)
-        ncuname = nodeclient.username
-        if ncuname is not None and len(ncuname) > 0:
-            username = str(ncuname)
-
-        logger.debug('Checking for rules')
-        try:
-            rulesset = NodeRules.objects.filter(parent_node = nodeclient)
-            rules = [x.__unicode__() for x in rulesset]
-        except Exception, e:
-            status = 1
-            error = '%s, %s' % (error, 'Unable to resolve ruleset: %s' % (str(e)))
-        
-        logger.debug('Finding runs for this nodeclient')
-        
+    
+    ncerror, nodeclient_details = get_nodeclient_details(porganisation, psitename, pstation)
+    if ncerror is not None:
+        status = 1
+        error = ncerror
+    else:
         #now get the runs for that nodeclient
         expectedFiles = getExpectedFilesForNode(nodeclient, include_completed=syncold)
         #merge complete and incomplete
@@ -353,35 +427,6 @@ def retrievePathsForFiles(request, *args):
         for runid in expectedFiles['complete'].keys():
             logger.debug("COMPLETE: adding files for run %d" % (runid ))
             filesdict.update(expectedFiles['complete'][runid])
-        '''
-        runs = Run.objects.filter(machine = nodeclient) 
-        for run in runs:
-            logger.debug('Finding runsamples for run')
-            
-            if (not syncold) and run.state == RUN_STATES.COMPLETE[0]:
-                logger.info('Run was already complete')
-                
-            else:
-                runsamples = RunSample.objects.filter(run = run)
-                #Build a filesdict of all the files for these runsamples
-                for rs in runsamples:
-                    logger.debug('Getting files for runsamples');
-                    fname = rs.filename.upper() #Use uppercase filenames as keys.
-                    abspath, relpath = rs.filepaths()
-                    logger.debug( 'Filename: %s belongs in path %s' % ( fname.encode('utf-8'), abspath.encode('utf-8') ) )
-                    if filesdict.has_key(fname):
-                        logger.debug( 'Duplicate path detected!!!' )
-                        error = "%s, %s" % (error, "Duplicate filename detected for %s" % (fname.encode('utf-8')))
-                        status = 2
-                    #we use the relative path    
-                    filesdict[fname] = [run.id, rs.id, relpath]
-        '''
-    except Exception, e:
-        status = 1
-        logger.debug("exception encountered: %s" % (e))
-        error = "%s, %s" % (error, 'Unable to resolve end machine to stored NodeClient: %s' % str(e) )
-        
-   
 
     logger.debug('making filelist obj')
     #So. Make a FileList object out of pfiles.

@@ -17,6 +17,7 @@ import urllib
 import os
 import os.path
 from identifiers import *
+from MainWindow import APPSTATE
 import plogging
 outlog = plogging.getLogger('client')
 
@@ -28,6 +29,36 @@ def nullFn(*args, **kwargs):
 MSDSCheckFn = nullFn 
 
 from config import CONFIG
+
+class RemoteSyncParams(object):
+    def __init__(self, configdict = {}, username="!"):
+        self.host = ""
+        self.rootdir = ""
+        self.flags = [] 
+        self.username = ""
+        self.rules = ""
+        self.filesdict = {}
+
+        #pull the configdict into our local class members
+        #but only the values we have defined
+        try:
+            for key in self.__dict__:
+                if configdict.has_key(key):
+                    setattr(self, key, configdict[key])
+        except Exception, e:
+            pass
+
+        #Flags are config authoritative
+        if self.flags in ['', '!', [] ]: #The config didn't specify anything
+            self.flags = ['-rvz']
+        else:
+            self.flags = self.flags.split(' ') #space separated string from config
+
+        #Username is client authoritative
+        if username not in ['', '!']:
+            #use passed in value, not json value
+            self.username = username
+
 class MSDataSyncAPI(object):
     def __init__(self, log=None):
         import Queue
@@ -107,134 +138,171 @@ class MSDataSyncAPI(object):
             returnFn(retcode=False, retstring="Error: %s\nUnexpected response from server was: %s" % (e, jsonret))
             return
 
-    
+   
         #I want to do an rsync -n
-        rsyncconfig = {}
+        rsyncconfig = RemoteSyncParams(username=self.config.getValue('user'))
         #Lets get any of the remote params
-        rsyncconfig['host'] = d['host']
+        rsyncconfig.host = d['host']
         #rootdir
-        rsyncconfig['rootdir'] = ''
+        rsyncconfig.rootdir = ''
         #flags, server is authoratative
-        rsyncconfig['flags'] = ['-n'] #n = dry run
-        #User, client is authoratative
-        if self.config.getValue('user') in ['!', '']:
-            rsyncconfig['user'] = d['username'] #use the server value
-        else:
-            rsyncconfig['user'] = self.config.getValue('user')
+        rsyncconfig.flags = ['-n'] #n = dry run
         
         outlog.info( 'Handshaking' )
         #now rsync the whole thing over
         self._appendTask(self.handshakeReturn, self._impl.perform_rsync, "%s" % (localindexdir) , rsyncconfig)
 
-    #Actual API methods that DO something
-    def checkRsync(self, callingWindow, statuschange, notused, returnFn = None):
-        if returnFn is None:
-            returnFn = self.defaultReturn
-        c = self.config.getConfig()
-
-        #get the local file list
+    
+    
+    def ask_server_for_wanted_files(self, returnFn):
+        self.callingWindow.setState(APPSTATE.INITIING_SYNC)
+        self.callingWindow.SetProgress(100)
         organisation = self.config.getValue('organisation')
         station = self.config.getValue('stationname')
         sitename = self.config.getValue('sitename')
-       
-        #grab all files in our local dir:
-        localdir = self.config.getValue('localdir')
-        localindexdir = self.config.getLocalIndexPath() 
-        filesdict = self.getFiles(localdir, ignoredirs=[localindexdir])
-        syncold = self.config.getValue('syncold') 
-        self.log("Syncing with server %s" % (self.config.getValue('synchub')), type=self.log.LOG_NORMAL, thread=self.useThreading)
-        postvars = {'files' : simplejson.dumps(filesdict), 'organisation' : simplejson.dumps(organisation), 'sitename' : simplejson.dumps(sitename), 'stationname': simplejson.dumps(station), 'syncold': simplejson.dumps(syncold)}
-        outlog.debug("Sync request to server. Postvars: %s" % (str(postvars)) )
+        syncvars = {"version": VERSION , "sync_completed": self.config.getValue("syncold") }
+        
+        details = {}
+        files = {}
+        runsamples = {}
+        
+        #PART 1
+        #first, tell the server who we are, and get a response
         try:
-            f = urllib.urlopen(self.config.getValue('synchub'), urllib.urlencode(postvars))
-            jsonret = f.read()
+            sync_baseurl = self.config.getValue('synchub')
+            if not sync_baseurl.endswith('/'):
+                sync_baseurl = "%s/" % (sync_baseurl)
+            f = urllib.urlopen("%srequestsync/%s/%s/%s/" % (self.config.getValue('synchub'), organisation, sitename, station), urllib.urlencode(syncvars))
+            jsonresp = f.read()
+            print jsonresp
+            jsonret = simplejson.loads( jsonresp )
+            #if there is an error, bail out by calling the return function
+            if not jsonret["success"]:
+                returnFn(retcode = False, retstring = "Sync Initiation failed: %s" % (jsonret["message"]))   
+            else:
+                details = jsonret["details"]
+                files = jsonret["files"]
+                runsamples = jsonret["runsamples"]
         except Exception, e:
-            returnFn(retcode = False, retstring = "Could not connect %s" % (str(e)) )
-            return
-
-        #now, if something goes wrong interpreting the result, don't panic.
-        try:
-            #self.log('Synchub config: %s' % jsonret)
-            d = simplejson.loads(jsonret)
-            self.log('Synchub config loaded object is: %s' % simplejson.dumps(d, sort_keys=True, indent=2), type=self.log.LOG_NORMAL, thread=self.useThreading)
-
-
-            #print 'Returned Json Obj: ', d
-        except Exception, e:
-            returnFn(retcode=False, retstring="Error: %s\nUnexpected response from server was: %s" % (e, jsonret))
-            return
-
-        rsyncconfig = {}
-        #Lets get any of the remote params
-        rsyncconfig['host'] = d['host']
-        #rootdir
-        rsyncconfig['rootdir'] = d['rootdir']
-        #flags, server is authoratative
-        if d['flags'] not in ['', '!'] :
-            rsyncconfig['flags'] = d['flags'].split(' ') #split on space
-        else:
-            rsyncconfig['flags'] = ['-rvz'] #r=recursive v=verbose,z=zip #a=archive (preserves times)
-        #User, client is authoratative
-        if self.config.getValue('user') in ['!', '']:
-            rsyncconfig['user'] = d['username'] #use the server value
-        else:
-            rsyncconfig['user'] = self.config.getValue('user')
-        #rules
-        rsyncconfig['rules'] = [d['rules']]
-
-        #Other variables for local analysis before syncing
-        remotefilesdict = d['filesdict']
-        remoterunsamplesdict = d['runsamplesdict']
-
-        outlog.debug( "remote files dict: %s" % ( unicode(remotefilesdict).encode('utf-8') ) )
-        outlog.debug( "remote runsamples dict: %s" % (unicode(remoterunsamplesdict).encode('utf-8') ) )
-
-        callingWindow.setState(statuschange)
-        self.callingWindow = callingWindow
-
-        copydict = {} #this is our list of files to copy
-
-        #now we explore the returned heirarchy recursively, and flatten it into a 
-        #dict of source:dest's
-
-        def extract_file_target(node, resultdict):
-            '''method to recursively extract valid file targets from a nested dict structure
-               relies on external scope to contain 'localindexdir' string
-            '''
-            for filename in node['.'].keys():
-                outlog.debug("Checking for %s" % (filename))
-                #any keys in . should be valid targets.
-                #their full source path will be ['/'] joined with the 'key'.
-                #theif full dest path will be the 'value'
-                if node['.'][filename] is not None:
-                    outlog.debug("Client: adding file")
-                    fulllocalpath = os.path.join(node['/'], filename)
-                    fullremotepath = os.path.join(node['.'][filename], filename)
-                    resultdict[fulllocalpath] = "%s" %(os.path.join(localindexdir, fullremotepath) )
+            returnFn(retcode = False, retstring = "Could not initiate Sync %s" % (str(e)) )
+        
             
+        #otherwise return the files
+        return details, files, runsamples
+
+    def find_wanted_files(self, wantedfiles, returnFn):
+        self.callingWindow.setState(APPSTATE.CHECKING_FILES)
+        self.callingWindow.SetProgress(0)
+        #if something goes wrong, bail out by calling the return function
+        #otherwiese return the local file list
+        return None
+
+
+    def extract_file_target(self, node, resultdict, localindexdir):
+        '''method to recursively extract valid file targets from a nested dict structure
+           relies on external scope to contain 'localindexdir' string
+        '''
+        if isinstance(node, dict):
+            if node.has_key('.') and isinstance(node['.'], dict):
+                for filename in node['.'].keys():
+                    outlog.debug("Checking for %s" % (filename))
+                    #any keys in . should be valid targets.
+                    #their full source path will be ['/'] joined with the 'key'.
+                    #theif full dest path will be the 'value'
+                    if node['.'][filename] is not None:
+                        outlog.debug("Client: adding file")
+                        fulllocalpath = os.path.join(node['/'], filename)
+                        fullremotepath = os.path.join(node['.'][filename], filename)
+                        resultdict[fulllocalpath] = "%s" %(os.path.join(localindexdir, fullremotepath) )
+                
             #now for the directories
             for dirname in node.keys():
                 if dirname not in ['.', '/']:
                     #if the value is a dict, then this dir needs to be more thouroughly explored
                     if isinstance(node[dirname], dict):
                         outlog.debug("Checking dir %s" % (dirname))
-                        extract_file_target(node[dirname], resultdict)
+                        resultdict = self.extract_file_target(node[dirname], resultdict, localindexdir)
                     else:
                         outlog.debug("Client: adding dir")
                         fulllocalpath = os.path.join(node['/'], dirname)
                         fullremotepath = os.path.join(node[dirname], dirname)
                         resultdict[fulllocalpath] = "%s" %(os.path.join(localindexdir, fullremotepath) )
+        return resultdict
+    
+    
+    def delete_localindexdir(self, localindexdir):
+        self.log("Clearing local index directory")
+        try:
+            from shutil import rmtree
+            rmtree(localindexdir)
+        except Exception, e:
+            self.log('Could not clear local index dir: %s' % (str(e)), type=self.log.LOG_WARNING, thread=self.useThreading)
 
-        extract_file_target(remotefilesdict, copydict)
+
+    
+    #Actual API methods that DO something
+    def checkRsync(self, callingWindow, statuschange, notused, returnFn = None):
+        if returnFn is None:
+            returnFn = self.defaultReturn
+        c = self.config.getConfig()
+        #get the local file list
+        organisation = self.config.getValue('organisation')
+        station = self.config.getValue('stationname')
+        sitename = self.config.getValue('sitename')
+        
+        self.callingWindow = callingWindow
+        
+        remote_params, wantedfiles, runsamples = self.ask_server_for_wanted_files(returnFn)
+        localfilelist = self.find_wanted_files(wantedfiles, returnFn) 
+
+
+        #grab all files in our local dir:
+        #localdir = self.config.getValue('localdir')
+        #filesdict = self.getFiles(localdir, ignoredirs=[localindexdir])
+        #syncold = self.config.getValue('syncold') 
+        #self.log("Syncing with server %s" % (self.config.getValue('synchub')), type=self.log.LOG_NORMAL, thread=self.useThreading)
+        #postvars = {'files' : simplejson.dumps(filesdict), 'organisation' : simplejson.dumps(organisation), 'sitename' : simplejson.dumps(sitename), 'stationname': simplejson.dumps(station), 'syncold': simplejson.dumps(syncold)}
+        #outlog.debug("Sync request to server. Postvars: %s" % (str(postvars)) )
+        #try:
+        #    f = urllib.urlopen(self.config.getValue('synchub'), urllib.urlencode(postvars))
+        #    jsonret = f.read()
+        #except Exception, e:
+        #    returnFn(retcode = False, retstring = "Could not connect %s" % (str(e)) )
+        #    return
+        #
+        #now, if something goes wrong interpreting the result, don't panic.
+        #try:
+        #    #self.log('Synchub config: %s' % jsonret)
+        #    d = simplejson.loads(jsonret)
+        #    self.log('Synchub config loaded object is: %s' % simplejson.dumps(d, sort_keys=True, indent=2), type=self.log.LOG_NORMAL, thread=self.useThreading)
+
+
+        #    #print 'Returned Json Obj: ', d
+        #except Exception, e:
+        #    returnFn(retcode=False, retstring="Error: %s\nUnexpected response from server was: %s" % (e, jsonret))
+        #    return
+        
+        rsyncconfig = RemoteSyncParams(configdict = remote_params, username=self.config.getValue('user'))
+
+        #Other variables for local analysis before syncing
+        remotefilesdict = wantedfiles 
+        remoterunsamplesdict = runsamples
+        
+        self.log('Server expects sync of %d files' % (len(wantedfiles.keys())) )
+        self.log('Server expects sync of %d runsamples' % (len(runsamples.keys())) )
+
+        outlog.debug( "remote files dict: %s" % ( unicode(remotefilesdict).encode('utf-8') ) )
+        outlog.debug( "remote runsamples dict: %s" % (unicode(remoterunsamplesdict).encode('utf-8') ) )
+        copydict = {} #this is our list of files to copy
+
+        #now we explore the returned heirarchy recursively, and flatten it into a 
+        #dict of source:dest's
+
+        localindexdir = self.config.getLocalIndexPath() 
+        copydict = self.extract_file_target(remotefilesdict, copydict, localindexdir)
 
         if len(copydict.keys()):
-        
-            self.log("Clearing local index directory")
-            try:
-                from shutil import rmtree
-                rmtree(localindexdir)
-            except Exception, e:
-                self.log('Could not clear local index dir: %s' % (str(e)), type=self.log.LOG_WARNING, thread=self.useThreading)
+            self.delete_localindexdir(localindexdir)
 
             callingWindow.SetProgress(20)
             self.log("Initiating file copy to local index (%d files)" % (len(copydict.keys())) )
@@ -399,14 +467,14 @@ class MSDSImpl(object):
         
         #cmdhead = ['rsync', '-tavz'] #t, i=itemize-changes,a=archive,v=verbose,z=zip
         cmdhead = ['rsync']
-        cmdhead.extend(rsyncconfig['flags']) 
-        cmdtail = ['--log-file=%s' % (logfile), str(sourcedir), '%s@%s:%s' % (str(rsyncconfig['user']), str(rsyncconfig['host']), str(rsyncconfig['rootdir']) )]
+        cmdhead.extend(rsyncconfig.flags) 
+        cmdtail = ['--log-file=%s' % (logfile), str(sourcedir), '%s@%s:%s' % ((rsyncconfig.username), str(rsyncconfig.host), str(rsyncconfig.rootdir) )]
 
         cmd = []
         cmd.extend(cmdhead)
     
         #self.log('Rules is %s' %(str(rules)) )
-        rules = rsyncconfig.get('rules', None) 
+        rules = rsyncconfig.rules 
         if rules is not None and len(rules) > 0:
             for r in rules:
                 if r is not None:
