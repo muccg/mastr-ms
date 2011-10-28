@@ -136,7 +136,6 @@ try:
     #from appsettings.mastrms import *
     from appsettings.default_dev import *
     from appsettings.mastrms.dev import *
-    
 except ImportError, e:
     print "Could not import appsettings.mastrms"
-
+print "Exited settings.py"
