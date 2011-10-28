@@ -21,6 +21,8 @@ class APPSTATE:
     CHECKING_FILES = "Checking for files locally"
     GATHERING_FILES = "Gathering files for transfer"
     CHECKING_SYNCHUB = 'Negotiating with server'
+    CONTACTING_RSYNC = 'Contacting Rsync server'
+    CONFIRMING_TRANSFER = 'Confirming transfer'
     UPLOADING_DATA   = 'Uploading data'
     IDLE             = 'Idle'
 
@@ -202,6 +204,12 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
         self.log('Finished loading application')
 
+    def is_using_threading(self):
+        if hasattr(self, 'msds'):
+            return self.msds.useThreading #see main.py for how msds got set
+        else:
+            return False
+
     def ToggleLogWrap(self, evt):
         self.logTextCtrl.SetWindowStyle(self.logTextCtrl.GetWindowStyle() ^ wx.HSCROLL)
         self.logTextCtrl.Refresh()
@@ -240,16 +248,23 @@ class MainWindow(wx.Frame):
             self.syncFreq = f
             self.secondsUntilNextSync = 60 * f
 
+    def _set_state(self, state):
+        self.state = state
+        self.StatusBar.SetStatusText(state)
+        if state != APPSTATE.IDLE:
+            self.menuBar.Enable(ID_CHECK_NOW, False)
+        else:
+            self.menuBar.Enable(ID_CHECK_NOW, True)
+
     def setState(self, state):
         '''setState needs to set the statusbar text, and enable/disable the menu item for 'check now' '''
         #The menu on the system tray icon is created every time it is clicked:
         #We don't need to do anything here, as long as the state is set.
-        self.state = state
-        self.StatusBar.SetStatusText(state)
-        if state == APPSTATE.UPLOADING_DATA:
-            self.menuBar.Enable(ID_CHECK_NOW, False)
+        thread = self.is_using_threading()
+        if (thread):
+            wx.CallAfter(self._set_state, state)
         else:
-            self.menuBar.Enable(ID_CHECK_NOW, True)
+            self._set_state(state)
 
     def OnSpin(self, event):
         self.config.setValue('syncfreq', self.freqspin.GetValue())
@@ -306,7 +321,7 @@ class MainWindow(wx.Frame):
         if self.IsShown():
             self.Show(False)
         self.Lower()
-        self.log('Minimising App', type=self.log.LOG_DEBUG)
+        #self.log('Minimising App', type=self.log.LOG_DEBUG)
 
     def OnMenuQuit(self, evt):
         '''Close (quit) the parent app.'''
@@ -356,11 +371,15 @@ class MainWindow(wx.Frame):
         #MSDSCheckFn is defined by the main app - MDataSyncApp. It just sets the method in a hacky way :(
         self.SetProgress(0) #set progress to 0 
         self.setState(APPSTATE.CHECKING_SYNCHUB)
-        self.MSDSCheckFn(self, APPSTATE.UPLOADING_DATA, 'notused', self.CheckReturnFn)
+        try:
+            self.MSDSCheckFn(self, APPSTATE.UPLOADING_DATA, 'notused', self.CheckReturnFn)
+        except Exception, e:
+            self.log("Exception encountered: %s" % (str(e)), type=self.log.LOG_ERROR)
+
 
     def SetProgress(self, prognum, add=False):
         #may be being called from a thread
-        thread = self.msds.useThreading #see main.py for how msds got set
+        thread = self.is_using_threading()
         if (thread):
             wx.CallAfter(self._SetProgress, prognum, add=add)
         else:
@@ -375,7 +394,7 @@ class MainWindow(wx.Frame):
 
     def CheckReturnFn(self, retcode = True, retstring = "", *args):
         #we may have come back from a thread here.
-        thread = self.msds.useThreading #see main.py for how msds got set
+        thread = self.is_using_threading()
         if thread:
             wx.CallAfter(self.setState, APPSTATE.IDLE)
             wx.CallAfter(self.SetProgress, 100)

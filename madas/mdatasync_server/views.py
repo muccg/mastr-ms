@@ -172,6 +172,10 @@ def requestSync(request, organisation=None, sitename=None, station=None):
         
         #not sure why we need this yet
         #fl = FileList(pfiles)
+        #clientstate.files = pfiles 
+        #clientstate.lastSyncAttempt = datetime.now()
+        ##save the client state
+        #save_client_state(clientstate)
     else:
         resp["message"] = "Could not find node %s-%s-%s" % (organisation, sitename, station)
 
@@ -510,22 +514,30 @@ def checkRunSampleFiles(request):
         logger.debug('Checking run samples against: %s' % ( runsamplefilesdict) )
         # We iterate through each run, get the samples referred to, and ensure their file exists on disk.
         ret['description'] = ""
+        totalruns = 0
+        totalsamples = 0
+        totalfound = 0
+        
+        ret['success'] = True 
+        ret['description'] = 'Success'
         for runid in runsamplefilesdict.keys():
+            totalruns += 1
             logger.debug('Checking files from run %s' % str(runid) )
             runsamples = runsamplefilesdict[runid]
-            ret['success'] = True 
-            ret['description'] = 'Success'
             for runsample in runsamples:
+                totalsamples +=1
                 runsample = int(runsample)
                 try:
                     rs = RunSample.objects.get(id = runsample)
                     rs.complete = checkRunSampleFileExists(runsample) 
+                    if rs.complete:
+                        totalfound += 1
                     rs.save()
                 except Exception, e:
                     logger.debug('Error: %s' % (e) )
                     ret['success'] = False
                     ret['description'] = "%s, %s" % (ret['description'], str(e)) 
-                
+        ret['description'] = "%s - %d/%d samples marked complete, from %d run(s)" % (ret['description'], totalfound, totalsamples, totalruns)         
     else:
         ret['description'] = "No files given"
    
