@@ -19,6 +19,7 @@ ROOT_URLCONF = 'madas.urls'
 
 INSTALLED_APPS.extend( [
     'madas.mdatasync_server',
+    'madas.mdatasync_server.admin',
     'madas.dashboard',
     'madas.login',
     'madas.quote',
