@@ -100,7 +100,7 @@ def save_client_state(clientstate):
     except Exception, e:
         logger.warning("Could not save clientstate. %s" % (str(e)))
 
-def getNodeFromRequest(request, organisation=None, sitename=None, station=None):
+def get_node_from_request(request, organisation=None, sitename=None, station=None):
     retval = None
     
     if organisation is None:
@@ -147,7 +147,7 @@ def requestSync(request, organisation=None, sitename=None, station=None):
 
        }
     '''
-    node = getNodeFromRequest(request, organisation, sitename, station)
+    node = get_node_from_request(request, organisation, sitename, station)
     resp = {"success": False, "message": "", "files": {}, "details":{}, "runsamples":{}}
     syncold = request.GET.get("sync_completed", False)
 
@@ -173,9 +173,10 @@ def requestSync(request, organisation=None, sitename=None, station=None):
         #not sure why we need this yet
         #fl = FileList(pfiles)
         #clientstate.files = pfiles 
-        #clientstate.lastSyncAttempt = datetime.now()
+        clientstate = get_saved_client_state(organisation, sitename, station)
+        clientstate.lastSyncAttempt = datetime.now()
         ##save the client state
-        #save_client_state(clientstate)
+        save_client_state(clientstate)
     else:
         resp["message"] = "Could not find node %s-%s-%s" % (organisation, sitename, station)
 
