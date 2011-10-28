@@ -132,7 +132,11 @@ except ImportError, e:
 # in the instance's pythonpath. This is a CCG convention designed to support
 # global shared settings among multiple Django projects.
 try:
-    from appsettings.mastrms import *
+    #not quite ready for this first one yet
+    #from appsettings.mastrms import *
+    from appsettings.default_dev import *
+    from appsettings.mastrms.dev import *
+    
 except ImportError, e:
-    pass
+    print "Could not import appsettings.mastrms"
 
