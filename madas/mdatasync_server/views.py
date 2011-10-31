@@ -341,19 +341,18 @@ def getExpectedFilesForNode(nodeclient, include_completed = False):
                 if rs.filename is None or rs.filename == "":
                     continue #move to the next record - this one has no filename
                 
-                fname = rs.filename.upper() #Use uppercase filenames as keys.
                 abspath, relpath = rs.filepaths()
-                logger.debug( 'Filename: %s belongs in path %s' % ( fname.encode('utf-8'), abspath.encode('utf-8') ) )
-                if target_dict.has_key(fname):
+                logger.debug( 'Filename: %s belongs in path %s' % ( rs.filename.encode('utf-8'), abspath.encode('utf-8') ) )
+                if target_dict.has_key(rs.filename):
                     logger.debug( 'Duplicate path detected!!!' )
-                    error = "%s, %s" % (error, "Duplicate filename detected for %s" % (fname.encode('utf-8')))
+                    error = "%s, %s" % (error, "Duplicate filename detected for %s" % (rs.filename.encode('utf-8')))
                     status = 2
                 #we use the relative path
                 if not(target_dict.has_key(run.id)):
                     target_dict[run.id] = {}
 
-                logger.debug("Adding %s to target_dict" % (fname) )
-                target_dict[run.id][fname] = [run.id, rs.id, relpath, os.path.exists(os.path.join(abspath, rs.filename))]
+                logger.debug("Adding %s to target_dict" % (rs.filename) )
+                target_dict[run.id][rs.filename] = [run.id, rs.id, relpath, os.path.exists(os.path.join(abspath, rs.filename))]
 
     return {'complete': complete, 'incomplete': incomplete}
 
