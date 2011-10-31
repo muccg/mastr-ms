@@ -168,7 +168,7 @@ class MSDataSyncAPI(object):
         station = self.config.getValue('stationname')
         sitename = self.config.getValue('sitename')
         syncvars = {"version": VERSION , "sync_completed": self.config.getValue("syncold") }
-        
+        print syncvars 
         details = {}
         files = {}
         
