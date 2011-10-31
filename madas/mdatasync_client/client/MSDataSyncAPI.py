@@ -212,6 +212,7 @@ class MSDataSyncAPI(object):
                 sample_id = wantedrecord[1]
                 relpath = wantedrecord[2]
                 foundfiles[result] = os.path.join(localindexdir, relpath, wantedfile)
+                print "Foundfiles[%s] = %s" % (result, foundfiles[result])
                 if not runsamplesdict.has_key(run_id):
                     runsamplesdict[run_id] = []
                 runsamplesdict[run_id].append(sample_id)
