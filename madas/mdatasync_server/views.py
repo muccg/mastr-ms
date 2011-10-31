@@ -351,7 +351,7 @@ def getExpectedFilesForNode(nodeclient, include_completed = False):
                 if rs.filename is None or rs.filename == "":
                     continue #move to the next record - this one has no filename
                 
-                if (! checkRunSampleFileExists(rs.id)):
+                if not checkRunSampleFileExists(rs.id):
                     abspath, relpath = rs.filepaths()
                     logger.debug( 'Filename: %s belongs in path %s' % ( rs.filename.encode('utf-8'), abspath.encode('utf-8') ) )
                     if target_dict.has_key(rs.filename):
