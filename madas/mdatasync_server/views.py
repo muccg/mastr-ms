@@ -375,6 +375,8 @@ def get_nodeclient_details(organisation_name, site_name, station_name):
         if ncuname is not None and len(ncuname) > 0:
             nodeclient_details['username'] = str(ncuname)
 
+        nodeclient_details['rootdir'] = settings.REPO_FILES_ROOT
+
         logger.debug('Checking for rules')
         try:
             rulesset = NodeRules.objects.filter(parent_node = nodeclient)
