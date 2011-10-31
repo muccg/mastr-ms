@@ -299,12 +299,13 @@ class MSDataSyncAPI(object):
             #now rsync the whole thing over
             self._appendTask(self.rsyncReturn, self._impl.perform_rsync, "%s" % (localindexdir) , rsyncconfig)
 
-            #now tell the server to check the files off
-            baseurl =  self.config.getValue('synchub')
-            self._appendTask(returnFn, self._impl.serverCheckRunSampleFiles, runsamplesdict, baseurl)
         else:
             self.log("No files to sync.", thread = self.useThreading)
             self.set_progress_state(100, APPSTATE.IDLE)
+        
+        #now tell the server to check the files off
+        baseurl =  self.config.getValue('synchub')
+        self._appendTask(returnFn, self._impl.serverCheckRunSampleFiles, runsamplesdict, baseurl)
 
     def defaultReturn(self, *args, **kwargs):
         #print 'rsync returned: ', retval
@@ -523,7 +524,11 @@ class MSDSImpl(object):
     
     def serverCheckRunSampleFiles(self, runsampledict, baseurl):
         self.log('Informing the server of transfer: %s' % (runsampledict), thread = self.controller.useThreading)
-        postvars = {'runsamplefiles' : simplejson.dumps(runsampledict), 'lastError': self.lastError, 'organisation': self.controller.config.getValue('organisation'), 'sitename': self.controller.config.getValue('sitename'), 'stationname': self.controller.config.getValue('stationname') }
+        
+        #get our local files dict, to send to the server also (useful for debugging)
+        clientfiles = self.controller.getFiles(self.controller.config.getValue('localdir'), ignoredirs=[self.controller.config.getLocalIndexPath()] )
+        
+        postvars = {'runsamplefiles' : simplejson.dumps(runsampledict), 'lastError': self.lastError, 'organisation': self.controller.config.getValue('organisation'), 'sitename': self.controller.config.getValue('sitename'), 'stationname': self.controller.config.getValue('stationname'), 'clientfiles' : simplejson.dumps(clientfiles) }
         self.log("Postvars: %s " % (str(postvars)) )
         url = "%s%s/" % (baseurl, "checksamplefiles")
         try:
