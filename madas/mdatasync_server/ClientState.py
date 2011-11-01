@@ -58,12 +58,11 @@ def get_node_from_request(request, organisation=None, sitename=None, station=Non
     logger.debug("Searching for node org=%s, sitename=%s, station=%s" % (organisation, sitename, station))
     try:
         nodeclient = NodeClient.objects.get(organisation_name = organisation, site_name=sitename, station_name = station) 
-        if nodeclient is None:
-            logger.warning("No nodeclient existed with organisation=%s, sitename=%s, station=%s" % (organisation, sitename, station))
-        else:
-            retval = nodeclient
+        retval = nodeclient
     except:
-        pass
+        retval = None
+        logger.warning("No nodeclient existed with organisation=%s, sitename=%s, station=%s" % (organisation, sitename, station))
+
 
     return retval
 
