@@ -70,7 +70,6 @@ if(Ext.isIE6 || Ext.isIE7 || Ext.isAir){ Ext.BLANK_IMAGE_URL = "${wh.url('/stati
 <script type="text/javascript" src="${wh.url('/static/js/repo/files.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/repo/runs.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/repo/runlist.js')}"></script>
-<script type="text/javascript" src="${wh.url('/static/js/repo/rulegenerators.js')}"></script>
 
 <script type="text/javascript" src="${wh.url('/static/js/repo/projects.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/repo/clients.js')}"></script>
