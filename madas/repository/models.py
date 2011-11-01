@@ -580,7 +580,7 @@ class RuleGenerator(models.Model):
 
     ACCESSIBILITY = (
         (1, 'Only Myself'),
-        (2, 'Everyone in my Node'),
+        (2, 'Everyone in Node'),
         (3, 'Everyone')
     )
 
@@ -592,6 +592,7 @@ class RuleGenerator(models.Model):
     previous_version = models.ForeignKey('RuleGenerator', null=True, blank=True)
     created_by = models.ForeignKey(User)
     created_on = models.DateTimeField(auto_now_add=True)
+    node = models.CharField(max_length=255, null=True)
 
     @property
     def full_name(self):
@@ -599,6 +600,21 @@ class RuleGenerator(models.Model):
         if self.version:
             name += ' (v. %d)' % self.version
         return name 
+
+    @property
+    def state_name(self):
+        return dict(RuleGenerator.STATES).get(self.state)
+
+    @property
+    def is_accessible_by_node(self):
+        return self.accessibility == 2
+
+    @property
+    def accessibility_name(self):
+        name = dict(RuleGenerator.ACCESSIBILITY).get(self.accessibility)
+        if self.is_accessible_by_node:
+            name += ' ' + self.node
+        return name
 
     @property
     def start_block_rules(self):
@@ -641,6 +657,13 @@ class RuleGeneratorSampleBlock(models.Model):
     def in_random_position(self):
         return self.order == 1
 
+    @property
+    def order_name(self):
+        if self.in_random_position:
+            return 'random order'
+        else:
+            return 'position'
+ 
 class RuleGeneratorEndBlock(models.Model):
     rule_generator = models.ForeignKey(RuleGenerator)
     index = models.PositiveIntegerField()

@@ -19,6 +19,7 @@ ROOT_URLCONF = 'madas.urls'
 
 INSTALLED_APPS.extend( [
     'madas.mdatasync_server',
+    #'madas.mdatasync_server.admin',
     'madas.dashboard',
     'madas.login',
     'madas.quote',
@@ -78,3 +79,23 @@ LOGS = ['mdatasync_server_log', 'madas_log']
 
 print 'importing ccglogging'
 import ccglogging
+
+#try an import of some local dev settings
+try:
+    from flat_settings_localdb import *
+except ImportError, e:
+    pass
+
+
+# Override defaults with your local instance settings.
+# They will be loaded from appsettings.ivecallocation, which can exist anywhere
+# in the instance's pythonpath. This is a CCG convention designed to support
+# global shared settings among multiple Django projects.
+try:
+    #not quite ready for this first one yet
+    #from appsettings.mastrms import *
+    from appsettings.default_dev import *
+    from appsettings.mastrms.dev import *
+except ImportError, e:
+    print "Could not import appsettings.mastrms"
+print "Exited settings.py"
