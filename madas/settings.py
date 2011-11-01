@@ -3,33 +3,78 @@
 import os
 from django.utils.webhelpers import url
 
+# SCRIPT_NAME isnt set when not under wsgi
+if not os.environ.has_key('SCRIPT_NAME'):
+    os.environ['SCRIPT_NAME']=''
+
 # PROJECT_DIRECTORY isnt set when not under wsgi
 if not os.environ.has_key('PROJECT_DIRECTORY'):
     os.environ['PROJECT_DIRECTORY']=os.path.dirname(__file__).split("/appsettings/")[0]
 
-from appsettings.default_dev import *
-from appsettings.mastrms.dev import *
+SCRIPT_NAME =   os.environ['SCRIPT_NAME']
+PROJECT_DIRECTORY = os.environ['PROJECT_DIRECTORY']
 
-# Defaults
-#LOGIN_URL
-#LOGIN_REDIRECT_URL
-#LOGOUT_URL
+
+DEBUG = True
+DEV_SERVER = True
+SITE_ID = 1
+
+# https
+if SCRIPT_NAME:
+    SSL_ENABLED = True
+else:
+    SSL_ENABLED = False
+
+# Locale
+TIME_ZONE = 'Australia/Perth'
+LANGUAGE_CODE = 'en-us'
+USE_I18N = True
+
+LOG_DIRECTORY = os.path.join(PROJECT_DIRECTORY, 'logs')
+TEMPLATE_DEBUG = DEBUG
 
 ROOT_URLCONF = 'madas.urls'
 
-INSTALLED_APPS.extend( [
+INSTALLED_APPS = [
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.sites',
+    'django.contrib.admin',
     'madas.mdatasync_server',
+    #'madas.mdatasync_server.admin',
     'madas.dashboard',
     'madas.login',
     'madas.quote',
     'madas.users',
     'madas.admin',
     'madas.repository'
-] )
+]
+
+##
+## Django Core stuff
+##
+TEMPLATE_LOADERS = [
+    'django.template.loaders.makoloader.filesystem.Loader',
+    'django.template.loaders.filesystem.Loader',
+    'django.template.loaders.app_directories.Loader',
+]
+
+MIDDLEWARE_CLASSES = [
+    'django.middleware.email.EmailExceptionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.middleware.doc.XViewMiddleware',
+    'django.middleware.ssl.SSLRedirect'
+]
+TEMPLATE_DIRS = [
+    os.path.join(PROJECT_DIRECTORY,"templates","mako"), 
+    os.path.join(PROJECT_DIRECTORY,"templates"),
+]
+
 
 MEMCACHE_KEYSPACE = "dev-madas-"
-
-
 
 AUTHENTICATION_BACKENDS = [
  'madas.repository.backend.MadasBackend',
@@ -70,11 +115,28 @@ MEDIA_URL = '/static/'
 ## LOGGING
 ##
 import logging, logging.handlers
-LOG_DIRECTORY = os.path.join(PROJECT_DIRECTORY,"logs")
 LOGGING_LEVEL = logging.DEBUG
 install_name = PROJECT_DIRECTORY.split('/')[-2]
 LOGGING_FORMATTER = logging.Formatter('[%(name)s:' + install_name + ':%(levelname)s:%(filename)s:%(lineno)s:%(funcName)s] %(message)s')
 LOGS = ['mdatasync_server_log', 'madas_log']
-
-print 'importing ccglogging'
 import ccglogging
+
+#try an import of some local dev settings
+try:
+    from flat_settings_localdb import *
+except ImportError, e:
+    pass
+
+
+# Override defaults with your local instance settings.
+# They will be loaded from appsettings.ivecallocation, which can exist anywhere
+# in the instance's pythonpath. This is a CCG convention designed to support
+# global shared settings among multiple Django projects.
+try:
+    #not quite ready for this first one yet
+    #from appsettings.mastrms import *
+    from appsettings.default_dev import *
+    from appsettings.mastrms.dev import *
+except ImportError, e:
+    print "Could not import appsettings.mastrms"
+

@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <link rel="stylesheet" type="text/css" href="${wh.url('/static/css/main.css')}"/>
-<link rel="stylesheet" type="text/css" href="${wh.url('/static/css/jquery/jquery.treeview.css')}"/>
+<link rel="stylesheet" type="text/css" href="${wh.url('/static/css/jquery.treeview.css')}"/>
 <script type="text/javascript" src="${wh.url('/static/js/json2.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/jquery/jquery-1.5.1.min.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/jquery/jquery-ui-1.8.14.custom.min.js')}"></script>
@@ -171,7 +171,7 @@ $(document).ready(function(){
                 retstr += gendir(dirdict[elem])
             
             elif isinstance(dirdict[elem], dict):
-                retstr += '<li id=\"%s\" class="closed" onclick="updatelines();"><span class=\"folder\">%s</span>' % (str(elem).upper().replace('-', '_').replace('.', '_'), str(elem).upper())
+                retstr += '<li id=\"%s\" class="closed" onclick="updatelines();"><span class=\"folder\">%s</span>' % (str(elem).upper().replace('-', '_').replace('.', '_'), str(elem))
                 retstr += gendir(dirdict[elem])
                 retstr += '</li>'
             else:
@@ -181,7 +181,7 @@ $(document).ready(function(){
                 else:
                     statusclass = "missing"
                     img = wh.url('/static/images/delete.png')
-                retstr += '<li id=\"%s\"><span class=\"file %s\" rel="%s"><img src=\"%s\"></img>%s' % (elem+"dd", statusclass, elem.replace('-', '_').replace('.', '_'), img, elem)
+                retstr += '<li id=\"%s\"><span class=\"file %s\" rel="%s"><img src=\"%s\"></img>%s' % (elem+"dd", statusclass, elem.upper().replace('-', '_').replace('.', '_'), img, elem)
                 retstr += '</span></li>'
         retstr += '</ul>'
         return retstr
