@@ -20,7 +20,7 @@ urlpatterns = patterns('',
     (r'^checksamplefiles/', 'madas.mdatasync_server.views.check_run_sample_files'),
     (r'files/(?P<path>.*)$', 'madas.mdatasync_server.views.serve_file'),
     (r'^taillog/(?P<filename>.*)/(?P<linesback>\d*)/(?P<since>\d*)/$', 'madas.mdatasync_server.views.tail_log'),
-    (r'^(.*)', 'madas.mdatasync_server.views.retrievePathsForFiles'),
+    (r'^(.*)', 'madas.mdatasync_server.views.get_node_clients'),
     #(r'^(.*)', 'madas.mdatasync_server.views.defaultpage'),
     # madas
 )
