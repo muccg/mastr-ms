@@ -2,7 +2,7 @@ from django.db import transaction
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden, HttpResponseNotAllowed, HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
-from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RUN_STATES, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure, MadasUser, RuleGenerator, Component
+from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RUN_STATES, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure, MadasUser, RuleGenerator
 from madas.quote.models import Organisation, Formalquote
 from django.utils import webhelpers
 from django.contrib.auth.models import User
@@ -1141,49 +1141,6 @@ def recordsRuns(request):
     return HttpResponse(json.dumps(output))
 
 @mastr_users_only
-def recordsRuleGenerators(request):
-    args = request.REQUEST
-       
-    # basic json that we will fill in
-    output = json_records_template([
-        'id', 'name', 'version', 'full_name', 'description', 'state_id', 'state', 'accessibility_id', 'accessibility', 'created_by', 'node', 'startblock', 'sampleblock', 'endblock'
-        ])
-
-    # TODO filter them out 
-    rows = RuleGenerator.objects.all()
-    #if getMadasUser(request.user.username).IsAdmin: mastradmin part of node etc.
-    output['results'] = len(rows)
-
-    # add rows
-    for row in rows:
-        d = {}
-        d['id'] = row.id
-        d['name'] = row.name
-        d['version'] = row.version
-        d['full_name'] = row.full_name
-        d['description'] = row.description
-        d['state_id'] = row.state
-        d['state'] = row.state_name
-        d['accessibility_id'] = row.accessibility
-        d['accessibility'] = row.accessibility_name
-        d['created_by'] = unicode(row.created_by)
-        d['node'] = row.node if row.node else ''
-        d['startblock'] = [{'count': r.count, 'component': r.component.sample_type} for r in row.start_block_rules]
-        d['sampleblock'] = [
-            {
-                'count': r.count, 
-                'component': r.component.sample_type, 
-                'sample_count': r.sample_count,
-                'order': r.order_name,
-            } for r in row.sample_block_rules]
-        d['endblock'] = [{'count': r.count, 'component': r.component.sample_type} for r in row.end_block_rules]
-
-        output['rows'].append(d)
-
-    output = makeJsonFriendly(output)
-    return HttpResponse(json.dumps(output))
-
-@mastr_users_only
 def recordsExperimentsForProject(request, project_id):
     if request.GET:
         args = request.GET
@@ -1247,35 +1204,6 @@ def recordsExperimentsForProject(request, project_id):
     output = makeJsonFriendly(output)
     return HttpResponse(json.dumps(output))
     
-@mastr_users_only
-def recordsComponents(request):
-    # basic json that we will fill in
-    output = {'metaData': { 'totalProperty': 'results',
-                            'successProperty': 'success',
-                            'root': 'rows',
-                            'id': 'id',
-                            'fields': [{'name':'id'}, {'name':'component'}]
-                            },
-              'results': 0,
-              'authenticated': True,
-              'authorized': True,
-              'success': True,
-              'rows': [],
-              }
-    # TODO do we need this with decorator? ABM
-    authenticated = request.user.is_authenticated()
-    authorized = True # need to change this
-    if not authenticated or not authorized:
-        return HttpResponse(json.dumps(output), status=401)
-
-    rows = Component.objects.all()
-    output['results'] = len(rows);
-
-    for row in rows:
-        output['rows'].append({'id':row.id, 'component' : row.sample_type})
-    output = makeJsonFriendly(output)
-    return HttpResponse(json.dumps(output))
-       
 
 @mastr_users_only
 def recordsClients(request, *args):
@@ -1895,11 +1823,6 @@ def sample_class_enable(request, id):
         
     return recordsSampleClasses(request, sc.experiment.id)
 
-@mastr_users_only
-def create_rule_generator(request):
-    print 'create rule generator'
-    print request.POST
-    return HttpResponse(json.dumps({'success':True}))
 
 @mastr_users_only
 def generate_worklist(request, run_id):
