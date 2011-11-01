@@ -5,8 +5,8 @@ from django.contrib import admin
 admin.autodiscover()
 
 from madas.repository import admin as repoadmin
-
 from madas.quote import admin as madasadmin
+from madas.mdatasync_server import admin as mdatasync_admin
 
 urlpatterns = patterns('',
 
