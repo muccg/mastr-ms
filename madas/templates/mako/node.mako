@@ -171,7 +171,7 @@ $(document).ready(function(){
                 retstr += gendir(dirdict[elem])
             
             elif isinstance(dirdict[elem], dict):
-                retstr += '<li id=\"%s\" class="closed" onclick="updatelines();"><span class=\"folder\">%s</span>' % (str(elem).upper().replace('-', '_').replace('.', '_'), str(elem).upper())
+                retstr += '<li id=\"%s\" class="closed" onclick="updatelines();"><span class=\"folder\">%s</span>' % (str(elem).upper().replace('-', '_').replace('.', '_'), str(elem))
                 retstr += gendir(dirdict[elem])
                 retstr += '</li>'
             else:
@@ -181,7 +181,7 @@ $(document).ready(function(){
                 else:
                     statusclass = "missing"
                     img = wh.url('/static/images/delete.png')
-                retstr += '<li id=\"%s\"><span class=\"file %s\" rel="%s"><img src=\"%s\"></img>%s' % (elem+"dd", statusclass, elem.replace('-', '_').replace('.', '_'), img, elem)
+                retstr += '<li id=\"%s\"><span class=\"file %s\" rel="%s"><img src=\"%s\"></img>%s' % (elem+"dd", statusclass, elem.upper().replace('-', '_').replace('.', '_'), img, elem)
                 retstr += '</span></li>'
         retstr += '</ul>'
         return retstr
