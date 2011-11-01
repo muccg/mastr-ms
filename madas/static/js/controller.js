@@ -204,6 +204,11 @@ MA.ChangeMainContent = function(contentName, paramArray){
             MA.ExperimentController.createExperiment();
             break;
 
+        case "rulegenerator:list":
+            ruleGeneratorListStore.load();
+            Ext.getCmp("center-panel").layout.setActiveItem("ruleGeneratorListCmp");
+            break;
+
         case "run:list":
             methodStore.load();
             machineStore.load();
@@ -338,6 +343,7 @@ MA.InitApplication = function(appSecureUrl, username, mainContentFunction, param
                         MA.ProjectListCmp, MA.ProjectCmp, 
                         MA.ClientsListCmp,
                         MA.RunListCmp,
+                        MA.RuleGeneratorListCmp,
                         MA.ScreencastsCmp]
             }
             ]

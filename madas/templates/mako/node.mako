@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <link rel="stylesheet" type="text/css" href="${wh.url('/static/css/main.css')}"/>
-<link rel="stylesheet" type="text/css" href="${wh.url('/static/css/jquery/jquery.treeview.css')}"/>
+<link rel="stylesheet" type="text/css" href="${wh.url('/static/css/jquery.treeview.css')}"/>
 <script type="text/javascript" src="${wh.url('/static/js/json2.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/jquery/jquery-1.5.1.min.js')}"></script>
 <script type="text/javascript" src="${wh.url('/static/js/jquery/jquery-ui-1.8.14.custom.min.js')}"></script>
