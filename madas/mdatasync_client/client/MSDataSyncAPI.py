@@ -529,7 +529,7 @@ class MSDSImpl(object):
         clientfiles = self.controller.getFiles(self.controller.config.getValue('localdir'), ignoredirs=[self.controller.config.getLocalIndexPath()] )
         
         postvars = {'runsamplefiles' : simplejson.dumps(runsampledict), 'lastError': self.lastError, 'organisation': self.controller.config.getValue('organisation'), 'sitename': self.controller.config.getValue('sitename'), 'stationname': self.controller.config.getValue('stationname'), 'clientfiles' : simplejson.dumps(clientfiles) }
-        self.log("Postvars: %s " % (str(postvars)) )
+        outlog.debug("Postvars: %s " % (str(postvars)) )
         url = "%s%s/" % (baseurl, "checksamplefiles")
         try:
             f = urllib.urlopen(url, urllib.urlencode(postvars))
