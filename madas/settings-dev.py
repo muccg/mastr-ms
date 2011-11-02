@@ -25,7 +25,6 @@ INSTALLED_APPS.extend( [
     'madas.admin',
     'madas.repository',
     'madas.mdatasync_server',
-    #'madas.mdatasync_server.admin'
 ] )
 
 MEMCACHE_KEYSPACE = "dev-madas-"
