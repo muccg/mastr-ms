@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.admin',
     'madas.mdatasync_server',
-    #'madas.mdatasync_server.admin',
     'madas.dashboard',
     'madas.login',
     'madas.quote',
