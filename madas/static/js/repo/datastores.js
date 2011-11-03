@@ -471,17 +471,17 @@ var ruleGeneratorListStore = new Ext.data.JsonStore(
 var ruleComponentStore = new Ext.data.JsonStore(
                         {
                             storeId: 'rulecomponents',
-                            autoLoad: false,
+                            autoLoad: true,
                             url: wsBaseUrl + "recordsComponents",
                             restful: true,
                             listeners: {'load' : MA.DSLoaded,
                                         'loadexception' : MA.DSLoadIgnoreException
                             },
+                            //fields: ['id','component'],
                             sortInfo: {
                                 field: 'id',
                                 direction: 'DESC'
                             }
-                            //fields: ['id','component'],
                             //reader:new Ext.data.JsonReader({}),
                             //root: 'items'
                         }

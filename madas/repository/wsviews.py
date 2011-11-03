@@ -2,7 +2,7 @@ from django.db import transaction
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden, HttpResponseNotAllowed, HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
-from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RUN_STATES, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure, MadasUser, RuleGenerator, Component
+from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RUN_STATES, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure, MadasUser, RuleGenerator, RuleGeneratorStartBlock, RuleGeneratorSampleBlock, RuleGeneratorEndBlock, Component
 from madas.quote.models import Organisation, Formalquote
 from django.utils import webhelpers
 from django.contrib.auth.models import User
@@ -1899,6 +1899,55 @@ def sample_class_enable(request, id):
 def create_rule_generator(request):
     print 'create rule generator'
     print request.POST
+
+    #create the RG:
+
+    newRG = RuleGenerator()
+    newRG.name = request.POST.get('name', "Unnamed")
+    newRG.description = request.POST.get('description', "This rule generator was not given a description")
+    #newRG.state = 
+    newRG.accessibility = request.POST.get('accessibility') 
+    #newRG.version = 
+    #newRG.previous_version = 
+    newRG.created_by = request.user
+    #newRG.node = 
+    newRG.save()
+
+    index = 0
+    startblockvars = json.loads(request.POST.get('startblock', []))
+    sampleblockvars = json.loads(request.POST.get('sampleblock', []))
+    endblockvars = json.loads(request.POST.get('endblock', []))
+
+    for stb in startblockvars:
+        #create the start block
+        newStartBlock = RuleGeneratorStartBlock()
+        newStartBlock.rule_generator = newRG
+        newStartBlock.index = index
+        newStartBlock.count = stb['count']
+        newStartBlock.component = Component.objects.get(id=stb['component'])
+        newStartBlock.save()
+
+    index = 0
+    for sab in sampleblockvars:
+        #create sample block
+        newSampleBlock = RuleGeneratorSampleBlock()
+        newSampleBlock.rule_generator = newRG
+        newSampleBlock.index = index
+        newSampleBlock.sample_count = 1 #todo - sample count passed through?
+        newSampleBlock.count = sab['count']
+        newSampleBlock.component = Component.objects.get(id=sab['component'])
+        newSampleBlock.order = 0 #todo = no order passed through?
+        newSampleBlock.save()
+
+    index = 0
+    for seb in endblockvars:
+        newEndBlock = RuleGeneratorEndBlock()
+        newEndBlock.rule_generator = newRG
+        newEndBlock.index = index
+        newEndBlock.count = seb['count']
+        newEndBlock.component = Component.objects.get(id=seb['component'])
+        newEndBlock.save()
+
     return HttpResponse(json.dumps({'success':True}))
 
 @mastr_users_only
