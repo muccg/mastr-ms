@@ -1268,7 +1268,7 @@ def recordsComponents(request):
     if not authenticated or not authorized:
         return HttpResponse(json.dumps(output), status=401)
 
-    rows = Component.objects.all()
+    rows = Component.objects.filter(id__gte=1) #only get components with id >= 1, which excludes samples
     output['results'] = len(rows);
 
     for row in rows:
@@ -1910,7 +1910,8 @@ def create_rule_generator(request):
     #newRG.version = 
     #newRG.previous_version = 
     newRG.created_by = request.user
-    #newRG.node = 
+    newRG.node = getMadasUser(request.user.username).Nodes[0] 
+    
     newRG.save()
 
     index = 0
