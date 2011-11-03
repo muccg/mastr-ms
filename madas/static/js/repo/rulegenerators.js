@@ -79,13 +79,11 @@ MA.RuleGeneratorDetailsCmp = {
         }
     ],
     buttons: [{
-            text:'Disable Rule Generator'
-        },
-        {
-            text:'Delete this Rule Generator',
-            cls: 'x-btn-text-icon',
-            id: 'deleterulegeneratorbutton',
-            icon: 'static/images/delete.png'
+            text:'Disable Rule Generator',
+            handler: function(){
+
+                
+            }
         }
     ]
 };
@@ -159,7 +157,7 @@ var createRuleBlockComponent = function(idbasename, blockname){
     
     var blockStore = create_block_store();
 
-    return {
+    var blockgrid = {
                 id: idbasename,
                 fieldLabel: blockname,
                 title: blockname,
@@ -211,16 +209,28 @@ var createRuleBlockComponent = function(idbasename, blockname){
                         cls: 'x-btn-text-icon',
                         id: idbasename + '-removerulebutton',
                         icon: 'static/images/delete.png',
-
                         handler: function(btn, evt){
-                            alert("Todo!");
+                            var thisgrid = Ext.getCmp(idbasename);
+                            var selections = thisgrid.getSelectionModel().getSelections();
+                            if (!Ext.isArray(selections)){
+                                selections = [selections];
+                            }
+
+                            for (var index=0; index<selections.length; index++){
+                                if (!Ext.isObject(selections[index])) {
+                                    continue;
+                                }
+                                thisgrid.getStore().remove(selections[index]);
+                            }
                         }
                        }
                 ]
             }
 
         
+        return blockgrid;
     };
+
 
 MA.RuleGeneratorCreateCmp = new Ext.Window({
     id:'ruleGeneratorCreateCmp',
