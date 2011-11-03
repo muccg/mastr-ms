@@ -80,6 +80,12 @@ MA.RuleGeneratorDetailsCmp = {
     ],
     buttons: [{
             text:'Disable Rule Generator'
+        },
+        {
+            text:'Delete this Rule Generator',
+            cls: 'x-btn-text-icon',
+            id: 'deleterulegeneratorbutton',
+            icon: 'static/images/delete.png'
         }
     ]
 };
@@ -108,6 +114,8 @@ MA.RuleGeneratorListCmp = {
             store: ruleGeneratorListStore, 
             tbar: [{
                     text: 'Create New',
+                    cls: 'x-btn-text-icon',
+                    icon: 'static/images/add.png',
                     handler: function(b, ev) {
                         Ext.getCmp('ruleGeneratorCreateCmp').show();
                     }
@@ -295,6 +303,7 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
                                  },
                         success:function(form, action){
                             console.log('Create rule gen succeeded');
+                            Ext.getCmp('rulegeneratorGrid').store.reload();
                             Ext.getCmp('ruleGeneratorCreateCmp').hide();
                         },
                         failure: function(form, action){
