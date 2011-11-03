@@ -613,7 +613,7 @@ class RuleGenerator(models.Model):
     def accessibility_name(self):
         name = dict(RuleGenerator.ACCESSIBILITY).get(self.accessibility)
         if self.is_accessible_by_node:
-            name += ' ' + self.node
+            name += '%s%s' % (name, str(self.node))
         return name
 
     @property

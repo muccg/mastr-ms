@@ -152,27 +152,31 @@ var createRuleBlockComponent = function(idbasename, blockname){
     var blockStore = create_block_store();
 
     return {
-                fieldLabel: 'Start Block',
+                id: idbasename,
+                fieldLabel: blockname,
+                title: blockname,
                 itemId: idbasename,
+                name: idbasename,
+                hiddenName: idbasename,
                 xtype: 'grid',
-                //height: 120,
                 autoWidth: true,
-                autoHeight: true,
+                height: 300,
+                //autoHeight: true,
                 plugins: [new Ext.ux.grid.MARowEditor({saveText: 'Update'})],
                 sm: new Ext.grid.RowSelectionModel(),
                 store: blockStore,
                 columns: [
-                    { header: 'Add', dataIndex: 'count', sortable: false, editor: new Ext.form.NumberField({editable:true, maxValue:99}) },
+                    { header: 'Add', dataIndex: 'count', sortable: false, editor: new Ext.form.NumberField({editable:true, maxValue:99, minValue: 1, allowBlank:false}) },
                     { header: 'Components', dataIndex: 'component', sortable: false, editor: new Ext.form.ComboBox({ 
-     editable: true,
-     forceSelection: false,
+     editable: false,
+     forceSelection: true,
      displayField: 'component',
+     valueField: 'id',
      lazyRender: true,
-     allowBlank: true,
+     allowBlank: false,
      typeAhead: false,
      triggerAction: 'all',
      mode: 'remote',
-     //store: new Ext.data.ArrayStore({storeId:'aaa', fields:['key', 'value'], data:[{key:1, value:"Thing1"},{key:2,value:"thing2"},{key:3,value:"thing3"},{key:4,value:2},{key:5,value:"thing5"}] })
      store: ruleComponentStore
                     }), //end combobox part of header
      renderer:renderClass                
@@ -185,18 +189,30 @@ var createRuleBlockComponent = function(idbasename, blockname){
                 reserveScrollOffset:true,
                 bbar: [{
                         text: 'Add rule row',
+                        cls: 'x-btn-text-icon',
+                        id: idbasename + '-addrulebutton',
+                        icon: 'static/images/add.png',
                         handler: function(btn, ev) {
                             blockStore.add( new blockStore.recordType({ count: 1,
                                 component: 2}));
 
                         }
-                    }
+                       },
+                       {
+                        text: 'Remove rule row',
+                        cls: 'x-btn-text-icon',
+                        id: idbasename + '-removerulebutton',
+                        icon: 'static/images/delete.png',
+
+                        handler: function(btn, evt){
+                            alert("Todo!");
+                        }
+                       }
                 ]
             }
 
         
     };
-}
 
 MA.RuleGeneratorCreateCmp = new Ext.Window({
     id:'ruleGeneratorCreateCmp',
@@ -213,8 +229,9 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
         url: wsBaseUrl + 'create_rule_generator',
         defaultType: 'textfield',
         buttonAlign: 'center',
-        defaults: {width: 230, labelWidth: 120},
-        items: [{
+        defaults: {labelWidth: 120, autoWidth:true, autoHeight:true},
+        items: [
+            {
                 fieldLabel: 'Name',
                 name: 'name'
             },{
@@ -225,76 +242,67 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
                 fieldLabel: 'Accessible by',
                 xtype: 'radiogroup',
                 itemCls: 'x-check-group-alt',
-                columns: 1,
+                columns: 3,
                 items: [
                     { boxLabel: 'Just Myself', name: 'accessibility', inputValue: 1, checked: true },
                     { boxLabel: 'Everyone in my Node', name: 'accessibility', inputValue: 2 },
                     { boxLabel: 'Everyone', name: 'accessibility', inputValue: 3 }
                 ]
-            }, 
-               createRuleBlockComponent('startblock', 'Start Block'),
-               createRuleBlockComponent('sampleblock', 'Sample Block'),
-               createRuleBlockComponent('endblock', 'End Block'),
+            },{
+                xtype:'tabpanel',
+                //activeItem:0,
+                border:true,
+                frame: true,
+                anchor: '100%, 100%', //so anchoring works at lower level containers, and full height tabs
+                deferredRender: false, //submit fields from all tabs, not just active one.
+                defaults: { layout: 'form', labelWidth: 80, hideMode: 'offsets'},
+                items: [
+                    createRuleBlockComponent('startblock', 'Start Block'),
+                    createRuleBlockComponent('sampleblock', 'Sample Block'),
+                    createRuleBlockComponent('endblock', 'End Block')]
 
-            
-            /*{
-                fieldLabel: 'Start Block',
-                itemId: 'startblock',
-                xtype: 'grid',
-                //height: 120,
-                autoWidth: true,
-                autoHeight: true,
-                plugins: [new Ext.ux.grid.MARowEditor({saveText: 'Update'})],
-                sm: new Ext.grid.RowSelectionModel(),
-                store: startblock_store,
-                columns: [
-                    { header: 'Add', dataIndex: 'count', sortable: false, editor: new Ext.form.NumberField({editable:true, maxValue:99}) },
-                    { header: 'Components', dataIndex: 'component', sortable: false, editor: new Ext.form.ComboBox({ 
-     editable: true,
-     forceSelection: false,
-     displayField: 'component',
-     lazyRender: true,
-     allowBlank: true,
-     typeAhead: false,
-     triggerAction: 'all',
-     mode: 'remote',
-     //store: new Ext.data.ArrayStore({storeId:'aaa', fields:['key', 'value'], data:[{key:1, value:"Thing1"},{key:2,value:"thing2"},{key:3,value:"thing3"},{key:4,value:2},{key:5,value:"thing5"}] })
-     store: ruleComponentStore
-                    }), //end combobox part of header
-     renderer:renderClass                
-     } ], //end columns
-                viewConfig:{
-                        forceFit:true,
-                        autoFill:true
-                    },
-                autoScroll:true,
-                reserveScrollOffset:true,
-                bbar: [{
-                        text: 'Add rule row',
-                        handler: function(btn, ev) {
-                            startblock_store.add( new startblock_store.recordType({ count: 1,
-                                component: 2}));
-
-                        }
-                    }
-                ]
-            }*/
-        ],
+            } ],
         buttons: [{
                 text: 'Save',
                 
                 formBind: true,
                 disabled: false,
                 handler: function(){
-                    Ext.getCmp('ruleGeneratorCreateForm').getForm().submit({
-                        successProperty: 'success',
-                        success: function(form, action){
+                    var theform = Ext.getCmp('ruleGeneratorCreateForm').getForm()
+
+                    var get_grid_keyvals = function(gridid){
+                        var retval = [];
+                        var gridcmp = Ext.getCmp(gridid);
+                        gridcmp.getSelectionModel().selectAll()
+                        var sels = gridcmp.getSelectionModel().getSelections();
+                        for (i=0; i < sels.length; i++){
+                            retval.push({count:sels[i].get('count'), component: sels[i].get('component')});
+                        }
+                        return retval;
+                    };
+
+                    var formvalues = theform.getValues()
+
+                    Ext.Ajax.request({
+                        url: wsBaseUrl + 'create_rule_generator',
+                        method: 'POST',
+                        params: {'name': formvalues.name, 
+                                 'description': formvalues.description, 
+                                 'accessibility': formvalues.accessibility, 
+                                 'startblock':Ext.encode(get_grid_keyvals('startblock')), 
+                                 'sampleblock': Ext.encode(get_grid_keyvals('sampleblock')), 
+                                 'endblock':Ext.encode(get_grid_keyvals('endblock')), 
+                                 },
+                        success:function(form, action){
                             console.log('Create rule gen succeeded');
+                            Ext.getCmp('ruleGeneratorCreateCmp').hide();
                         },
                         failure: function(form, action){
                             console.log('Create rule gen failed');
-                        }
-                    });}
+                            Ext.getCmp('ruleGeneratorCreateCmp').hide();
+                        } });
+                        
+                    }
                 
                 },
             {
