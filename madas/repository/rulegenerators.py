@@ -48,7 +48,7 @@ def create_rule_generator(name, description, accessibility, user, node, startblo
         newEndBlock.component = Component.objects.get(id=seb['component'])
         newEndBlock.save()
     
-def edit_rule_generator(id, user, **kwargs)
+def edit_rule_generator(id, user, **kwargs):
     ret = True
     try:
         candidateRG = RuleGenerator.objects.get(id=id)

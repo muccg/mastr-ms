@@ -1917,18 +1917,18 @@ def create_rule_generator(request):
 
     return HttpResponse(json.dumps({'success':True}))
 
+def json_error(msg='Unknown error'):
+    return HttpResponse(json.dump({'success': false, 'msg': msg}))
+
 @mastr_users_only
 def edit_rule_generator(request):
-    id = request.POST.get('id', None)
+    rg_id = request.POST.get('id')
+    if rg_id is None:
+       return json_error('Rule Generator id not submitted')
 
-    success = False
-
-    if id is not None:
-        success = rulegenerators.edit_rule_generator(id, request.user, request.POST)
+    success = rulegenerators.edit_rule_generator(rg_id, request.user, request.POST)
     
-    return HttpResponse(json.dumps({'success':success})
-    
-
+    return HttpResponse(json.dumps({'success':success}))
 
 @mastr_users_only
 def generate_worklist(request, run_id):
@@ -1941,7 +1941,6 @@ def generate_worklist(request, run_id):
     except RunBuilderException, e:
         # Shortcut on Error!
         return HttpResponse(str(e), content_type="text/plain")
-        output = {'success': False, 'msg': str(e)}
     else:
         output = {'success': True}    
     
