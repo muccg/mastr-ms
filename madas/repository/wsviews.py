@@ -1157,29 +1157,7 @@ def recordsRuleGenerators(request):
 
     # add rows
     for row in rows:
-        d = {}
-        d['id'] = row.id
-        d['name'] = row.name
-        d['version'] = row.version
-        d['full_name'] = row.full_name
-        d['description'] = row.description
-        d['state_id'] = row.state
-        d['state'] = row.state_name
-        d['accessibility_id'] = row.accessibility
-        d['accessibility'] = row.accessibility_name
-        d['created_by'] = unicode(row.created_by)
-        d['node'] = row.node if row.node else ''
-        d['startblock'] = [{'count': r.count, 'component': r.component.sample_type} for r in row.start_block_rules]
-        d['sampleblock'] = [
-            {
-                'count': r.count, 
-                'component': r.component.sample_type, 
-                'sample_count': r.sample_count,
-                'order': r.order_name,
-            } for r in row.sample_block_rules]
-        d['endblock'] = [{'count': r.count, 'component': r.component.sample_type} for r in row.end_block_rules]
-
-        output['rows'].append(d)
+        output['rows'].append(rulegenerators.convert_to_dict(row))
 
     output = makeJsonFriendly(output)
     return HttpResponse(json.dumps(output))
@@ -1896,6 +1874,19 @@ def sample_class_enable(request, id):
         
     return recordsSampleClasses(request, sc.experiment.id)
 
+def json_error(msg='Unknown error'):
+    return HttpResponse(json.dump({'success': false, 'msg': msg}))
+
+@mastr_users_only
+def get_rule_generator(request):
+    rulegen_id = request.REQUEST.get('id')
+    try:
+        rg = RuleGenerator.objects.get(pk=rulegen_id)
+    except ObjectDoesNotExist:
+        return json_error("Rulegenerator with id %s doesn't exist" % rulegen_id)
+
+    return HttpResponse(json.dumps({'success':True, 'rulegenerator': rulegenerators.convert_to_dict(rg)}))
+
 @mastr_users_only
 def create_rule_generator(request):
 
@@ -1916,9 +1907,6 @@ def create_rule_generator(request):
                                          endblockvars)
 
     return HttpResponse(json.dumps({'success':True}))
-
-def json_error(msg='Unknown error'):
-    return HttpResponse(json.dump({'success': false, 'msg': msg}))
 
 @mastr_users_only
 def edit_rule_generator(request):

@@ -61,3 +61,29 @@ def edit_rule_generator(id, user, **kwargs):
 
     return ret
 
+
+def convert_to_dict(rulegenerator):
+    d = {}
+    d['id'] = rulegenerator.id
+    d['name'] = rulegenerator.name
+    d['version'] = rulegenerator.version
+    d['full_name'] = rulegenerator.full_name
+    d['description'] = rulegenerator.description
+    d['state_id'] = rulegenerator.state
+    d['state'] = rulegenerator.state_name
+    d['accessibility_id'] = rulegenerator.accessibility
+    d['accessibility'] = rulegenerator.accessibility_name
+    d['created_by'] = unicode(rulegenerator.created_by)
+    d['node'] = rulegenerator.node if rulegenerator.node else ''
+    d['startblock'] = [{'count': r.count, 'component_id': r.component_id, 'component': r.component.sample_type} for r in rulegenerator.start_block_rules]
+    d['sampleblock'] = [
+        {
+            'count': r.count, 
+            'component_id': r.component_id,
+            'component': r.component.sample_type, 
+            'sample_count': r.sample_count,
+            'order': r.order_name,
+        } for r in rulegenerator.sample_block_rules]
+    d['endblock'] = [{'count': r.count, 'component_id': r.component_id, 'component': r.component.sample_type} for r in rulegenerator.end_block_rules]
+
+    return d

@@ -471,7 +471,7 @@ var ruleGeneratorListStore = new Ext.data.JsonStore(
 var ruleComponentStore = new Ext.data.JsonStore(
                         {
                             storeId: 'rulecomponents',
-                            autoLoad: true,
+                            autoLoad: false,
                             url: wsBaseUrl + "recordsComponents",
                             restful: true,
                             listeners: {'load' : MA.DSLoaded,

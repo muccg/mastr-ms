@@ -205,6 +205,7 @@ MA.ChangeMainContent = function(contentName, paramArray){
             break;
 
         case "rulegenerator:list":
+            ruleComponentStore.load();
             ruleGeneratorListStore.load();
             Ext.getCmp("center-panel").layout.setActiveItem("ruleGeneratorListCmp");
             break;

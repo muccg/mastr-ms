@@ -115,7 +115,23 @@ MA.RuleGeneratorListCmp = {
                     cls: 'x-btn-text-icon',
                     icon: 'static/images/add.png',
                     handler: function(b, ev) {
-                        Ext.getCmp('ruleGeneratorCreateCmp').show();
+                        Ext.getCmp('ruleGeneratorCreateCmp').create();
+                    }
+                },{
+                    text: 'Edit',
+                    handler: function(b, ev) {
+                        var selModel = Ext.getCmp('rulegeneratorGrid').getSelectionModel();
+                        var record;
+                        if (!selModel.hasSelection()) {
+                            Ext.Msg.alert('Nothing selected', 'Please select the Rule Generator to edit first.');
+                            return;
+                        }
+                        record = selModel.getSelected();
+                        if (record.get('state') !== 'In Design') {
+                            Ext.Msg.alert('Not Editable', 'Rule Generators are editable only while they are In Design. For changing Rule Generators that have been Enabled please consider using Create New Version.');
+                            return;
+                        }
+                        Ext.getCmp('ruleGeneratorCreateCmp').edit(record.get('id'));
                     }
                 }
 
@@ -232,6 +248,15 @@ var createRuleBlockComponent = function(idbasename, blockname){
     };
 
 
+// No map() in ExtJS? :(
+function map(arr, map_fn) {
+    var mapped_arr = []
+    for (var i = 0; i < arr.length; i++) {
+        mapped_arr.push(map_fn(arr[i]));
+    }
+    return mapped_arr;
+}
+
 MA.RuleGeneratorCreateCmp = new Ext.Window({
     id:'ruleGeneratorCreateCmp',
     title: 'Create new Rule Generator',
@@ -240,6 +265,40 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
     width: 680,
     height: 530,
     modal:true,
+    clearValues: function() {
+        var theform = Ext.getCmp('ruleGeneratorCreateForm').getForm();
+        theform.clearFields();
+        Ext.getCmp('startblock').getStore().removeAll();
+        Ext.getCmp('sampleblock').getStore().removeAll();
+        Ext.getCmp('endblock').getStore().removeAll();
+    },
+    create: function() {
+        this.clearValues();
+        this.setTitle('Create new Rule Generator');
+        MA.RuleGeneratorCreateCmp.show(); 
+    },
+    edit: function(rulegen_id) {
+        this.clearValues();
+        this.setTitle('Edit Rule Generator');
+        Ext.Ajax.request({
+            url: wsBaseUrl + 'get_rule_generator',
+            method: 'GET',
+            params: {'id': rulegen_id},
+            success:function(response, opts){
+                var rulegen = Ext.decode(response.responseText).rulegenerator;
+                var theform = Ext.getCmp('ruleGeneratorCreateForm').getForm();
+                var mapper_fn = function(rule) {return [rule.count, rule.component_id]; };
+                theform.setValues(rulegen);
+                Ext.getCmp('startblock').getStore().loadData(map(rulegen.startblock, mapper_fn));
+                Ext.getCmp('sampleblock').getStore().loadData(map(rulegen.sampleblock, mapper_fn));
+                Ext.getCmp('endblock').getStore().loadData(map(rulegen.endblock, mapper_fn));
+                MA.RuleGeneratorCreateCmp.show(); 
+            },
+            failure: function(form, action){
+                Ext.Msg.alert("Error", "Couldn't load details of Rule Generator");
+            }
+        });
+    },
     items: [{
         bodyStyle: 'padding: 5px',
         id: 'ruleGeneratorCreateForm',
@@ -248,6 +307,12 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
         defaultType: 'textfield',
         buttonAlign: 'center',
         defaults: {labelWidth: 120, autoWidth:true, autoHeight:true},
+        clearFields: function() {
+            this.items.each(function(field) {
+                    field.setRawValue('');
+                });
+            this.findField('accessibility_id').setValue(1);
+        },
         items: [
             {
                 fieldLabel: 'Name',
@@ -258,21 +323,21 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
                 name: 'description'
             },{
                 fieldLabel: 'Accessible by',
+                name: 'accessibility_id',
                 xtype: 'radiogroup',
                 itemCls: 'x-check-group-alt',
                 columns: 3,
                 items: [
-                    { boxLabel: 'Just Myself', name: 'accessibility', inputValue: 1, checked: true },
-                    { boxLabel: 'Everyone in my Node', name: 'accessibility', inputValue: 2 },
-                    { boxLabel: 'Everyone', name: 'accessibility', inputValue: 3 }
+                    { boxLabel: 'Just Myself', name: 'accessibility_id', itemId: 'justMyself', inputValue: 1, checked: true },
+                    { boxLabel: 'Everyone in my Node', name: 'accessibility_id', inputValue: 2 },
+                    { boxLabel: 'Everyone', name: 'accessibility_id', inputValue: 3 }
                 ]
             },{
                 xtype:'tabpanel',
-                //activeItem:0,
+                activeItem:0,
                 border:true,
                 frame: true,
                 anchor: '100%, 100%', //so anchoring works at lower level containers, and full height tabs
-                deferredRender: false, //submit fields from all tabs, not just active one.
                 defaults: { layout: 'form', labelWidth: 80, hideMode: 'offsets'},
                 items: [
                     createRuleBlockComponent('startblock', 'Start Block'),
@@ -291,11 +356,10 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
                     var get_grid_keyvals = function(gridid){
                         var retval = [];
                         var gridcmp = Ext.getCmp(gridid);
-                        gridcmp.getSelectionModel().selectAll()
-                        var sels = gridcmp.getSelectionModel().getSelections();
-                        for (i=0; i < sels.length; i++){
-                            retval.push({count:sels[i].get('count'), component: sels[i].get('component')});
-                        }
+                        var store = gridcmp.getStore();
+                        store.each(function(record) {
+                                retval.push({count:record.get('count'), component: record.get('component')});
+                            }, this);
                         return retval;
                     };
 
@@ -306,7 +370,7 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
                         method: 'POST',
                         params: {'name': formvalues.name, 
                                  'description': formvalues.description, 
-                                 'accessibility': formvalues.accessibility, 
+                                 'accessibility': formvalues.accessibility_id, 
                                  'startblock':Ext.encode(get_grid_keyvals('startblock')), 
                                  'sampleblock': Ext.encode(get_grid_keyvals('sampleblock')), 
                                  'endblock':Ext.encode(get_grid_keyvals('endblock')), 
