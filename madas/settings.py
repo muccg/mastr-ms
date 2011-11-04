@@ -74,15 +74,15 @@ ADMINS = [
 MANAGERS = ADMINS
 
 ## Ldap
-AUTH_LDAP_SERVER = 'ldaps://fdsdev.localdomain'
-DEFAULT_GROUP = 'madas'  #this needs to exist in the database.
-AUTH_LDAP_BASE = 'ou=People,dc=ccg,dc=murdoch,dc=edu,dc=au'
-AUTH_LDAP_GROUP_BASE = 'ou=NEMA,ou=Web Groups,dc=ccg,dc=murdoch,dc=edu,dc=au'
-AUTH_LDAP_ADMIN_BASE = 'dc=ccg,dc=murdoch,dc=edu,dc=au'
+AUTH_LDAP_SERVER = '<your ldap server here>'
+AUTH_LDAP_BASE = '<ldap base path>'
+AUTH_LDAP_GROUP_BASE = '<ldap path to group base>'
+AUTH_LDAP_ADMIN_BASE = '<ldap path to admin base>'
 AUTH_LDAP_USER_BASE = 'ou=NEMA,ou=People,' + AUTH_LDAP_ADMIN_BASE
-LDAPADMINUSERNAME = 'uid=nemaapp,ou=Application Accounts'
-LDAPADMINPASSWORD = 'nr2WovGfkWR'
+LDAPADMINUSERNAME = '<ldap admin path>'
+LDAPADMINPASSWORD = '<your ldap server password here>'
 AUTH_LDAP_GROUP = 'User'
+DEFAULT_GROUP = 'madas'  #this needs to exist in the database.
 # dont require HTTPS for dev ldap
 LDAP_DONT_REQUIRE_CERT = True
 
