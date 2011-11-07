@@ -1896,7 +1896,9 @@ def create_rule_generator(request):
     startblockvars = json.loads(request.POST.get('startblock', []))
     sampleblockvars = json.loads(request.POST.get('sampleblock', []))
     endblockvars = json.loads(request.POST.get('endblock', []))
-    
+   
+    print request.POST
+
     rulegenerators.create_rule_generator(name, 
                                          description, 
                                          accessibility, 

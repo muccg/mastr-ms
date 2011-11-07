@@ -159,19 +159,65 @@ MA.RuleGeneratorListCmp = {
 };
 
 
-var create_block_store = function(){
+
+var createRuleBlockComponent = function(idbasename, blockname, issampleblock){
+
+    var create_block_store = function(){
+
+    var fields = [{name: 'count'},
+                  {name: 'component', type:'integer'}
+                 ];
+
+    if (issampleblock){
+        fields.push({name: 'every', type: 'integer'});
+        fields.push({name: 'order', type: 'integer'});
+    }
+
     return new Ext.data.ArrayStore({
-                    fields: [
-                        {name: 'count'},
-                        {name: 'component', type:'integer'}
-                    ]//,
-                    //data: [ [1,1],[1,2],[1,3], [1,4], [1,5]]
+                    fields: fields
                 }) 
     }
 
-var createRuleBlockComponent = function(idbasename, blockname){
-    
+
     var blockStore = create_block_store();
+
+    var columns = [
+                    { header: 'Add', dataIndex: 'count', sortable: false, editor: new Ext.form.NumberField({editable:true, maxValue:99, minValue: 1, allowBlank:false}) },
+                    { header: 'Components', dataIndex: 'component', sortable: false, editor: new Ext.form.ComboBox({ 
+     editable: false,
+     forceSelection: true,
+     displayField: 'component',
+     valueField: 'id',
+     lazyRender: true,
+     allowBlank: false,
+     typeAhead: false,
+     triggerAction: 'all',
+     mode: 'remote',
+     store: ruleComponentStore
+                    }), //end combobox part of header
+     renderer:renderClass                
+     } ];
+
+     if (issampleblock){
+        columns.push({header: 'Every', dataIndex: 'every', sortable: false, editor: new Ext.form.NumberField({editable:true, maxValue:99, minValue: 1, allowBlank:false})})
+        columns.push({ header: 'Order', dataIndex: 'order', sortable: false, editor: new Ext.form.ComboBox({ 
+     editable: false,
+     forceSelection: true,
+     displayField: 'order',
+     valueField: 'id',
+     lazyRender: true,
+     allowBlank: false,
+     typeAhead: false,
+     triggerAction: 'all',
+     mode: 'local',
+     store: new Ext.data.ArrayStore({fields: ['id', 'order'], 
+                                     data: [[1,'random'],[2, 'position']]}) //data comes from models.py 
+                                                                            //(RuleGeneratorSampleBlock)
+                    }), //end combobox part of header
+     renderer:renderClass                
+     });
+     }
+
 
     var blockgrid = {
                 id: idbasename,
@@ -187,22 +233,7 @@ var createRuleBlockComponent = function(idbasename, blockname){
                 plugins: [new Ext.ux.grid.MARowEditor({saveText: 'Update'})],
                 sm: new Ext.grid.RowSelectionModel(),
                 store: blockStore,
-                columns: [
-                    { header: 'Add', dataIndex: 'count', sortable: false, editor: new Ext.form.NumberField({editable:true, maxValue:99, minValue: 1, allowBlank:false}) },
-                    { header: 'Components', dataIndex: 'component', sortable: false, editor: new Ext.form.ComboBox({ 
-     editable: false,
-     forceSelection: true,
-     displayField: 'component',
-     valueField: 'id',
-     lazyRender: true,
-     allowBlank: false,
-     typeAhead: false,
-     triggerAction: 'all',
-     mode: 'remote',
-     store: ruleComponentStore
-                    }), //end combobox part of header
-     renderer:renderClass                
-     } ], //end columns
+                columns: columns, //end columns
                 viewConfig:{
                         forceFit:true,
                         autoFill:true
@@ -216,7 +247,7 @@ var createRuleBlockComponent = function(idbasename, blockname){
                         icon: 'static/images/add.png',
                         handler: function(btn, ev) {
                             blockStore.add( new blockStore.recordType({ count: 1,
-                                component: 2}));
+                                component: 2, every: 1, order:1}));
 
                         }
                        },
@@ -288,9 +319,10 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
                 var rulegen = Ext.decode(response.responseText).rulegenerator;
                 var theform = Ext.getCmp('ruleGeneratorCreateForm').getForm();
                 var mapper_fn = function(rule) {return [rule.count, rule.component_id]; };
+                var samplemapper_fn = function(rule) {return [rule.count, rule.component_id, rule.sample_count, rule.order]};
                 theform.setValues(rulegen);
                 Ext.getCmp('startblock').getStore().loadData(map(rulegen.startblock, mapper_fn));
-                Ext.getCmp('sampleblock').getStore().loadData(map(rulegen.sampleblock, mapper_fn));
+                Ext.getCmp('sampleblock').getStore().loadData(map(rulegen.sampleblock, samplemapper_fn));
                 Ext.getCmp('endblock').getStore().loadData(map(rulegen.endblock, mapper_fn));
                 MA.RuleGeneratorCreateCmp.show(); 
             },
@@ -340,9 +372,9 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
                 anchor: '100%, 100%', //so anchoring works at lower level containers, and full height tabs
                 defaults: { layout: 'form', labelWidth: 80, hideMode: 'offsets'},
                 items: [
-                    createRuleBlockComponent('startblock', 'Start Block'),
-                    createRuleBlockComponent('sampleblock', 'Sample Block'),
-                    createRuleBlockComponent('endblock', 'End Block')]
+                    createRuleBlockComponent('startblock', 'Start Block', false),
+                    createRuleBlockComponent('sampleblock', 'Sample Block', true),
+                    createRuleBlockComponent('endblock', 'End Block', false)]
 
             } ],
         buttons: [{
@@ -358,7 +390,12 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
                         var gridcmp = Ext.getCmp(gridid);
                         var store = gridcmp.getStore();
                         store.each(function(record) {
-                                retval.push({count:record.get('count'), component: record.get('component')});
+                                recobj = {};
+                                for (var key in record.data){
+                                    console.log("Key in record is : " + key)
+                                    recobj[key] = record.get(key);
+                                }
+                                retval.push(recobj);
                             }, this);
                         return retval;
                     };

@@ -28,15 +28,16 @@ def create_rule_generator(name, description, accessibility, user, node, startblo
         newStartBlock.save()
 
     index = 0
+    print sampleblockvars
     for sab in sampleblockvars:
         #create sample block
         newSampleBlock = RuleGeneratorSampleBlock()
         newSampleBlock.rule_generator = newRG
         newSampleBlock.index = index
-        newSampleBlock.sample_count = 1 #todo - sample count passed through?
+        newSampleBlock.sample_count = sab['every'] 
         newSampleBlock.count = sab['count']
         newSampleBlock.component = Component.objects.get(id=sab['component'])
-        newSampleBlock.order = 0 #todo = no order passed through?
+        newSampleBlock.order = sab['order'] 
         newSampleBlock.save()
 
     index = 0
