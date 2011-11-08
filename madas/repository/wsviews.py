@@ -1875,7 +1875,7 @@ def sample_class_enable(request, id):
     return recordsSampleClasses(request, sc.experiment.id)
 
 def json_error(msg='Unknown error'):
-    return HttpResponse(json.dump({'success': False, 'msg': msg}))
+    return HttpResponse(json.dumps({'success': False, 'msg': msg}))
 
 @mastr_users_only
 def get_rule_generator(request):
@@ -1897,8 +1897,6 @@ def create_rule_generator(request):
     sampleblockvars = json.loads(request.POST.get('sampleblock', []))
     endblockvars = json.loads(request.POST.get('endblock', []))
    
-    print request.POST
-
     success = rulegenerators.create_rule_generator(name, 
                                          description, 
                                          accessibility, 
@@ -1934,7 +1932,6 @@ def edit_rule_generator(request):
                                                     sampleblock=sampleblockvars,
                                                     endblock=endblockvars,
                                                     state=state)
-    
     if success:
         return HttpResponse(json.dumps({'success':success}))
     else:

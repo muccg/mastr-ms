@@ -79,7 +79,8 @@ def recreate_end_block(RG, endblockvars):
 
 
 def create_rule_generator(name, description, accessibility, user, node, startblockvars, sampleblockvars, endblockvars, state=None, version=None, previous_version=None, **kwargs):
-
+    '''Creates a new rule generator record and sets basic attributes.
+       Then uses edit_rule_generator to set the blocks and state attributes'''
     success = False
     try:
         newRG = RuleGenerator()
@@ -88,32 +89,33 @@ def create_rule_generator(name, description, accessibility, user, node, startblo
         newRG.created_by = user
         newRG.node = getMadasUser(user.username).Nodes[0] 
         newRG.accessibility = accessibility 
-        if state is not None:
-            newRG.state = state
-        if version is not None:
-            newRG.version = version
-        if previous_version is not None:
-            newRG.previous_version = previous_version
-        
+        #default state
         newRG.save()
 
-        recreate_start_block(newRG, startblockvars)
-        recreate_sample_block(newRG, sampleblockvars)
-        recreate_end_block(newRG, endblockvars)
-        success = True
+
+        success = edit_rule_generator(newRG.id, user,
+                                        startblock = startblockvars,
+                                        sampleblock = sampleblockvars,
+                                        endblock = endblockvars,
+                                        state = state)
     except Exception, e:
         print "Exception in create rule generator: %s" % ( e )
     
     return success
 
-
-    
     
 def edit_rule_generator(id, user, **kwargs):
-    print "Edit rule generator: kwargs = ", kwargs
+    '''Edits an existing rule generator. The
+       functions which set the blocks (start, sample, end)
+       will drop all current records and recreate with the
+       newly submitted ones
+       
+       Any parameters coming through as None are ignored.
+       '''
     ret = True
     try:
         candidateRG = RuleGenerator.objects.get(id=id)
+        #TODO: Test for accessibility here
         if kwargs.get('state', None) is not None:
             candidateRG.state = kwargs.get('state')
         if kwargs.get('accessibility', None) is not None:
@@ -126,7 +128,6 @@ def edit_rule_generator(id, user, **kwargs):
             candidateRG.name = kwargs.get('name')
         if kwargs.get('description', None) is not None:
             candidateRG.description = kwargs.get('description')
-        print 'saving'
         candidateRG.save()
    
         if kwargs.get('startblock', None) is not None:

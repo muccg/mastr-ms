@@ -21,6 +21,24 @@ MA.RuleGeneratorDetailsCmp = {
         this.displayStartBlock(rec.data.startblock);
         this.displaySampleBlock(rec.data.sampleblock);
         this.displayEndBlock(rec.data.endblock);
+        this.alterButton(rec);
+    },
+    alterButton: function(rec) {
+        var but = Ext.getCmp('rulegenerator_state_button');
+        console.log("Alter button. State = " + rec.get('state'));
+        var state = rec.get('state') 
+        if ( (state == 'In Design') || (state == 'Disabled' ) )
+        {
+            but.setText('Enable Rule Generator');
+            but.rulegen_state = 2; //enabled 
+            but.rulegen_id = rec.get('id');
+        }
+        else if (state == 'Enabled')
+        {
+            but.setText('Disable Rule Generator');
+            but.rulegen_state = 3; //disabled 
+            but.rulegen_id = rec.get('id');
+        }
     },
     displayStartBlock: function(startBlock) {
         var list= '<ol>';
@@ -79,12 +97,38 @@ MA.RuleGeneratorDetailsCmp = {
         }
     ],
     buttons: [{
-            text:'Disable Rule Generator',
+            text:'Not Loaded',
+            id: 'rulegenerator_state_button',
             handler: function(){
-
-                
+                console.log(this.rulegen_state);
+                console.log(this.rulegen_id);
+                if ( (typeof(this.rulegen_id) != 'undefined') &&
+                     (typeof(this.rulegen_state) != 'undefined'))
+                {
+                    Ext.Ajax.request({
+                        url: wsBaseUrl + 'edit_rule_generator',
+                        method: 'POST',
+                        params: {rulegen_id: this.rulegen_id, state: this.rulegen_state}, 
+                        success:function(result, request){
+                            Ext.getCmp('ruleGeneratorCreateCmp').hide();
+                            Ext.getCmp('rulegeneratorGrid').store.reload();
+                            Ext.getCmp('rulegeneratorGrid').getView().refresh();
+                            var jsonData = Ext.util.JSON.decode(result.responseText)
+                            if (jsonData.success){
+                                console.log('Create/edit rule gen succeeded');
+                            }
+                            else{
+                                Ext.Msg.alert("Error", jsonData.msg);
+                            }
+                        },
+                        failure: function(result, request){
+                            console.log('Create rule gen failed');
+                            Ext.getCmp('ruleGeneratorCreateCmp').hide();
+                        } });
+                        
+                }
             }
-        }
+            } 
     ]
 };
 
@@ -112,12 +156,6 @@ MA.RuleGeneratorListCmp = {
             height: 300,
             border: true,
             xtype:'grid',
-            /*
-            tools: [
-                { id: 'plus', qtip: 'Add a new node', handler: MA.NodeManagementAddTool },
-                { id: 'minus', qtip: 'Delete currently selected node', handler: MA.NodeManagementDeleteTool }
-            ],
-            */
             store: ruleGeneratorListStore,
             
             tbar: [{
