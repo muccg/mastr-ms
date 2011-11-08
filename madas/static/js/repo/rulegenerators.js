@@ -94,6 +94,15 @@ MA.RuleGeneratorListCmp = {
     xtype:'form',
     frame: 'true',
     bodyStyle: 'padding: 5px',
+    onStoreLoad: function(){
+                console.log("On store load executed");
+                //refresh the details component
+                var selModel = Ext.getCmp('rulegeneratorGrid').getSelectionModel();
+                if (selModel.hasSelection()) {
+                    var record = selModel.getSelected();
+                    Ext.getCmp("rule-generator-details").displayRecord(record);
+                } 
+            },
     items: [
         {
             title:'Rule Generators',
@@ -109,7 +118,8 @@ MA.RuleGeneratorListCmp = {
                 { id: 'minus', qtip: 'Delete currently selected node', handler: MA.NodeManagementDeleteTool }
             ],
             */
-            store: ruleGeneratorListStore, 
+            store: ruleGeneratorListStore,
+            
             tbar: [{
                     text: 'Create New',
                     cls: 'x-btn-text-icon',
@@ -158,6 +168,14 @@ MA.RuleGeneratorListCmp = {
         ]
 };
 
+ruleGeneratorListStore.on({
+                    'load':{
+                        fn: function(store, records, options){
+                            MA.RuleGeneratorListCmp.onStoreLoad();
+                        },
+                        scope: this 
+                    }});
+
 
 
 var createRuleBlockComponent = function(idbasename, blockname, issampleblock){
@@ -170,7 +188,7 @@ var createRuleBlockComponent = function(idbasename, blockname, issampleblock){
 
     if (issampleblock){
         fields.push({name: 'every', type: 'integer'});
-        fields.push({name: 'order', type: 'integer'});
+        fields.push({name: 'order'});
     }
 
     return new Ext.data.ArrayStore({
@@ -247,7 +265,7 @@ var createRuleBlockComponent = function(idbasename, blockname, issampleblock){
                         icon: 'static/images/add.png',
                         handler: function(btn, ev) {
                             blockStore.add( new blockStore.recordType({ count: 1,
-                                component: 2, every: 1, order:1}));
+                                component: 2, every: 1, order: 1}));
 
                         }
                        },
@@ -302,6 +320,7 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
         Ext.getCmp('startblock').getStore().removeAll();
         Ext.getCmp('sampleblock').getStore().removeAll();
         Ext.getCmp('endblock').getStore().removeAll();
+        theform.rulegen_id = null;
     },
     create: function() {
         this.clearValues();
@@ -319,8 +338,9 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
                 var rulegen = Ext.decode(response.responseText).rulegenerator;
                 var theform = Ext.getCmp('ruleGeneratorCreateForm').getForm();
                 var mapper_fn = function(rule) {return [rule.count, rule.component_id]; };
-                var samplemapper_fn = function(rule) {return [rule.count, rule.component_id, rule.sample_count, rule.order]};
+                var samplemapper_fn = function(rule) {return [rule.count, rule.component_id, rule.sample_count, rule.order_id]};
                 theform.setValues(rulegen);
+                theform.rulegen_id = rulegen_id; //set an id on the form so we know it is an edit
                 Ext.getCmp('startblock').getStore().loadData(map(rulegen.startblock, mapper_fn));
                 Ext.getCmp('sampleblock').getStore().loadData(map(rulegen.sampleblock, samplemapper_fn));
                 Ext.getCmp('endblock').getStore().loadData(map(rulegen.endblock, mapper_fn));
@@ -402,19 +422,32 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
 
                     var formvalues = theform.getValues()
 
-                    Ext.Ajax.request({
-                        url: wsBaseUrl + 'create_rule_generator',
-                        method: 'POST',
-                        params: {'name': formvalues.name, 
+                    var formparams = {'name': formvalues.name, 
                                  'description': formvalues.description, 
                                  'accessibility': formvalues.accessibility_id, 
                                  'startblock':Ext.encode(get_grid_keyvals('startblock')), 
                                  'sampleblock': Ext.encode(get_grid_keyvals('sampleblock')), 
                                  'endblock':Ext.encode(get_grid_keyvals('endblock')), 
-                                 },
+                                 };
+
+                    var submiturl = 'create_rule_generator';
+                    if ( (typeof(theform.rulegen_id)!='undefined') && (theform.rulegen_id != null) )
+                    {
+                        console.log("Edit submit detected");
+                        submiturl = 'edit_rule_generator';
+                        formparams.rulegen_id = theform.rulegen_id;
+
+                    }
+
+                    Ext.Ajax.request({
+                        url: wsBaseUrl + submiturl,
+                        method: 'POST',
+                        params: formparams, 
                         success:function(form, action){
-                            console.log('Create rule gen succeeded');
+                            console.log('Create/edit rule gen succeeded');
                             Ext.getCmp('rulegeneratorGrid').store.reload();
+                            Ext.getCmp('rulegeneratorGrid').getView().refresh();
+
                             Ext.getCmp('ruleGeneratorCreateCmp').hide();
                         },
                         failure: function(form, action){
