@@ -1875,7 +1875,7 @@ def sample_class_enable(request, id):
     return recordsSampleClasses(request, sc.experiment.id)
 
 def json_error(msg='Unknown error'):
-    return HttpResponse(json.dump({'success': false, 'msg': msg}))
+    return HttpResponse(json.dump({'success': False, 'msg': msg}))
 
 @mastr_users_only
 def get_rule_generator(request):
@@ -1899,7 +1899,7 @@ def create_rule_generator(request):
    
     print request.POST
 
-    rulegenerators.create_rule_generator(name, 
+    success = rulegenerators.create_rule_generator(name, 
                                          description, 
                                          accessibility, 
                                          request.user, 
@@ -1908,17 +1908,37 @@ def create_rule_generator(request):
                                          sampleblockvars,
                                          endblockvars)
 
-    return HttpResponse(json.dumps({'success':True}))
-
+    if success:
+        return HttpResponse(json.dumps({'success':True}))
+    else:
+        return json_error("Could not create rule generator")
 @mastr_users_only
 def edit_rule_generator(request):
-    rg_id = request.POST.get('id')
+    rg_id = request.POST.get('rulegen_id')
     if rg_id is None:
        return json_error('Rule Generator id not submitted')
 
-    success = rulegenerators.edit_rule_generator(rg_id, request.user, request.POST)
+    description = request.POST.get('description', None)
+    name = request.POST.get('name', None)
+    accessibility = request.POST.get('accessibility', None) 
+    startblockvars = json.loads(request.POST.get('startblock', 'null'))
+    sampleblockvars = json.loads(request.POST.get('sampleblock', 'null'))
+    endblockvars = json.loads(request.POST.get('endblock', 'null'))
+    state = json.loads(request.POST.get('state', 'null'))
+
+    success = rulegenerators.edit_rule_generator(rg_id, request.user, 
+                                                    name=name,
+                                                    description=description,
+                                                    accessibility=accessibility,
+                                                    startblock=startblockvars,
+                                                    sampleblock=sampleblockvars,
+                                                    endblock=endblockvars,
+                                                    state=state)
     
-    return HttpResponse(json.dumps({'success':success}))
+    if success:
+        return HttpResponse(json.dumps({'success':success}))
+    else:
+        return json_error('Error during edit')
 
 @mastr_users_only
 def generate_worklist(request, run_id):
