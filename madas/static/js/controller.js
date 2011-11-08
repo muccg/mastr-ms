@@ -192,7 +192,7 @@ MA.ChangeMainContent = function(contentName, paramArray){
             expStatusComboStore.load();
             methodStore.load();
             machineStore.load();
-            ruleGeneratorStore.load();
+            enabledRuleGeneratorStore.load();
             sopLookupStore.load();
             userComboStore.load();
             involvementComboStore.load();
@@ -213,7 +213,7 @@ MA.ChangeMainContent = function(contentName, paramArray){
         case "run:list":
             methodStore.load();
             machineStore.load();
-            ruleGeneratorStore.load();
+            enabledRuleGeneratorStore.load();
             runListStore.load({callback: function() {
                 runListStore.sort([
                     {

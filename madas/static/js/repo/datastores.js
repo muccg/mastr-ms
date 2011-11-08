@@ -690,10 +690,28 @@ var methodStore = new Ext.data.JsonStore({
     fields: ['key', 'value']
 });
 
-var ruleGeneratorStore = new Ext.data.JsonStore({
-    autoLoad:false,
-    storeId:'ruleGeneratorStore',
-    url: wsBaseUrl + 'populate_select/rulegenerator/id/full_name/',
-    root: 'response.value.items',
-    fields: ['key', 'value']
-});
+var enabledRuleGeneratorStore = new Ext.data.JsonStore(
+                        {
+                            storeId: 'rulegeneratorlist',
+                            autoLoad: false,
+                            url: wsBaseUrl + "recordsRuleGenerators",
+                            restful: true,
+                            listeners: {'load':MA.DSLoaded,
+                                        'loadexception':MA.DSLoadIgnoreException
+                            },
+                            sortInfo: {
+                                field: 'id',
+                                direction: 'DESC'
+                            }
+                        }
+                    );
+
+
+enabledRuleGeneratorStore.on({
+    'load':{
+        fn: function(store, records, options){
+            console.log('running filter');
+            store.filterBy(function(record, id){ return record.get('state_id') == 2;});
+        },
+        scope: this
+    }});
