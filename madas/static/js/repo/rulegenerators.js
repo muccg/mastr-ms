@@ -1,5 +1,35 @@
 var wsBaseUrl = MA.BaseUrl + "ws/";
 
+MA.ComboRendererBackend = function(options) {
+    var value = options.value;
+    var combo = options.combo;
+
+    var returnValue = value;
+    var valueField = combo.valueField;
+        
+    var idx = combo.store.findBy(function(record) {
+        if(record.get(valueField) == value) {
+            returnValue = record.get(combo.displayField);
+            return true;
+        }
+    });
+    
+    // This is our application specific and might need to be removed for your apps
+    if(idx < 0 && value == 0) {
+        returnValue = '';
+    }
+    
+    return returnValue;
+};
+
+MA.ComboRenderer = function(combo) {
+    return function(value, meta, record) {
+        return MA.ComboRendererBackend({value: value, meta: meta, record: record, combo: combo});
+    };
+}
+
+
+
 MA.RuleGeneratorDetailsCmp = {
     id: 'rule-generator-details',
     xtype: 'fieldset',
@@ -221,13 +251,13 @@ var createRuleBlockComponent = function(idbasename, blockname, issampleblock){
 
     var create_block_store = function(){
 
-    var fields = [{name: 'count'},
-                  {name: 'component', type:'integer'}
+    var fields = [{name: 'count', type: 'integer'},
+                  {name: 'component', type: 'string'}
                  ];
 
     if (issampleblock){
         fields.push({name: 'every', type: 'integer'});
-        fields.push({name: 'order'});
+        fields.push({name: 'order', type: 'string'});
     }
 
     return new Ext.data.ArrayStore({
@@ -237,42 +267,41 @@ var createRuleBlockComponent = function(idbasename, blockname, issampleblock){
 
 
     var blockStore = create_block_store();
+    var componentCombo = new Ext.form.ComboBox({ 
+             editable: false,
+             forceSelection: true,
+             displayField: 'component',
+             valueField: 'id',
+             lazyRender: true,
+             allowBlank: false,
+             typeAhead: false,
+             triggerAction: 'all',
+             mode: 'local',
+             store: ruleComponentStore
+                            });
+
+    var orderCombo = new Ext.form.ComboBox({ 
+                 editable: false,
+                 forceSelection: true,
+                 displayField: 'order',
+                 valueField: 'id',
+                 lazyRender: true,
+                 allowBlank: false,
+                 typeAhead: false,
+                 triggerAction: 'all',
+                 mode: 'local',
+                 store: new Ext.data.ArrayStore({fields: ['id', 'order'], 
+                                                 data: [[1,'random'],[2, 'position']]}) //data comes from models.py 
+                                                                                        //(RuleGeneratorSampleBlock)
+                                });
 
     var columns = [
                     { header: 'Add', dataIndex: 'count', sortable: false, editor: new Ext.form.NumberField({editable:true, maxValue:99, minValue: 1, allowBlank:false}) },
-                    { header: 'Components', dataIndex: 'component', sortable: false, editor: new Ext.form.ComboBox({ 
-     editable: false,
-     forceSelection: true,
-     displayField: 'component',
-     valueField: 'id',
-     lazyRender: true,
-     allowBlank: false,
-     typeAhead: false,
-     triggerAction: 'all',
-     mode: 'remote',
-     store: ruleComponentStore
-                    }), //end combobox part of header
-     renderer:renderClass                
-     } ];
+                    { header: 'Components', dataIndex: 'component', sortable: false, editor: componentCombo, renderer:MA.ComboRenderer(componentCombo)} ];
 
      if (issampleblock){
         columns.push({header: 'Every', dataIndex: 'every', sortable: false, editor: new Ext.form.NumberField({editable:true, maxValue:99, minValue: 1, allowBlank:false})})
-        columns.push({ header: 'Order', dataIndex: 'order', sortable: false, editor: new Ext.form.ComboBox({ 
-     editable: false,
-     forceSelection: true,
-     displayField: 'order',
-     valueField: 'id',
-     lazyRender: true,
-     allowBlank: false,
-     typeAhead: false,
-     triggerAction: 'all',
-     mode: 'local',
-     store: new Ext.data.ArrayStore({fields: ['id', 'order'], 
-                                     data: [[1,'random'],[2, 'position']]}) //data comes from models.py 
-                                                                            //(RuleGeneratorSampleBlock)
-                    }), //end combobox part of header
-     renderer:renderClass                
-     });
+        columns.push({ header: 'Order', dataIndex: 'order', sortable: false, editor: orderCombo, renderer:MA.ComboRenderer(orderCombo)});
      }
 
 
@@ -287,7 +316,7 @@ var createRuleBlockComponent = function(idbasename, blockname, issampleblock){
                 autoWidth: true,
                 height: 300,
                 //autoHeight: true,
-                plugins: [new Ext.ux.grid.MARowEditor({saveText: 'Update'})],
+                plugins: [new Ext.ux.grid.MARowEditor({saveText: 'Update', errorSummary:false})],
                 sm: new Ext.grid.RowSelectionModel(),
                 store: blockStore,
                 columns: columns, //end columns
