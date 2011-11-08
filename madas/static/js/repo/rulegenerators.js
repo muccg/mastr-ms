@@ -124,6 +124,7 @@ MA.RuleGeneratorDetailsCmp = {
                         failure: function(result, request){
                             console.log('Create rule gen failed');
                             Ext.getCmp('ruleGeneratorCreateCmp').hide();
+                            Ext.Msg.alert("Could not contact server");
                         } });
                         
                 }
@@ -481,16 +482,24 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
                         url: wsBaseUrl + submiturl,
                         method: 'POST',
                         params: formparams, 
-                        success:function(form, action){
+                        success:function(result, request){
                             console.log('Create/edit rule gen succeeded');
                             Ext.getCmp('rulegeneratorGrid').store.reload();
                             Ext.getCmp('rulegeneratorGrid').getView().refresh();
-
                             Ext.getCmp('ruleGeneratorCreateCmp').hide();
+                            var jsonData = Ext.util.JSON.decode(result.responseText)
+                            if (jsonData.success){
+                                console.log('Create/edit rule gen succeeded');
+                            }
+                            else{
+                                Ext.Msg.alert("Error", jsonData.msg);
+                            }
+
                         },
                         failure: function(form, action){
                             console.log('Create rule gen failed');
                             Ext.getCmp('ruleGeneratorCreateCmp').hide();
+                            Ext.Msg.alert("Could not contact server");
                         } });
                         
                     }
