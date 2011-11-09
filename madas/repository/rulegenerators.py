@@ -147,13 +147,8 @@ def edit_rule_generator(id, user, **kwargs):
 
     try:
         candidateRG = RuleGenerator.objects.get(id=id)
-        #TODO: Test for accessibility here
-        mauser = getMadasUser(user.username)
-        usernode = mauser.Nodes[0]
-
-        if mauser.IsAdmin or mauser.IsMastrAdmin or \
-            (candidateRG.is_accessible_by_node and usernode==candidateRG.node) or \
-            (candidateRG.is_accessible_by_user and candidateRG.created_by == user):
+        print "In edit, user = ", type(user)
+        if candidateRG.is_accessible_by(user):
         
             if kwargs.get('state', None) is not None:
                 candidateRG.state = kwargs.get('state')
