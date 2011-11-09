@@ -5,6 +5,7 @@ from datetime import datetime, date, time
 from quote.models import Organisation, Formalquote
 from mdatasync_server.models import NodeClient
 import grp
+from madas.users.MAUser import getMadasUser
 
 class SampleNotInClassException(Exception):
     pass
@@ -615,13 +616,18 @@ class RuleGenerator(models.Model):
     def state_name(self):
         return dict(RuleGenerator.STATES).get(self.state)
 
+   
+    @property
+    def is_accessible_by_user(self):
+        return self.accessibility == 1
+
     @property
     def is_accessible_by_node(self):
         return self.accessibility == 2
 
     @property
-    def is_accessible_by_user(self):
-        return self.accessibility == 1
+    def is_accessible_by_all(self):
+        return self.accessibility == 3
 
     @property
     def accessibility_name(self):
@@ -641,6 +647,17 @@ class RuleGenerator(models.Model):
     @property
     def end_block_rules(self):
         return list(self.rulegeneratorendblock_set.all())
+
+    def is_accessible_by(self, user):
+        mauser = getMadasUser(user.username)
+
+        if mauser.IsAdmin or mauser.IsMastrStaff or \
+           (self.accessibility == self.is_accessible_by_user and user.id == self.created_by.id) or \
+           (self.accessibility == self.is_accessible_by_node and mauser.Nodes[0] == self.node) or \
+           (self.accessibility == RuleGenerator.ACCESSIBILITY_ALL):
+           return True
+        else:
+            return False
 
     def __unicode__(self):
         return self.full_name

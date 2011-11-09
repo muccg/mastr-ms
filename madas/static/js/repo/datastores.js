@@ -706,13 +706,3 @@ var enabledRuleGeneratorStore = new Ext.data.JsonStore(
                         }
                     );
 
-/*
-enabledRuleGeneratorStore.on({
-    'load':{
-        fn: function(store, records, options){
-            console.log('running filter');
-            store.filterBy(function(record, id){ return record.get('state_id') == 2;});
-        },
-        scope: this
-    }});
-*/
