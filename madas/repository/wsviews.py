@@ -1912,6 +1912,7 @@ def get_rule_generator(request):
     return HttpResponse(json.dumps({'success':True, 'rulegenerator': rulegenerators.convert_to_dict(rg)}))
 
 @mastr_users_only
+@transaction.commit_on_success
 def create_rule_generator(request):
 
     name = request.POST.get('name', "Unnamed")
@@ -1939,6 +1940,7 @@ def create_rule_generator(request):
             return HttpResponseForbidden('Improper rule generator access')
 
 @mastr_users_only
+@transaction.commit_on_success
 def edit_rule_generator(request):
     rg_id = request.POST.get('rulegen_id')
     if rg_id is None:
