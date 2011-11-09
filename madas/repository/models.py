@@ -572,17 +572,27 @@ class Component(models.Model):
     filename_prefix = models.CharField(max_length=50)
 
 class RuleGenerator(models.Model):
+    
+    STATE_INDESIGN = 1
+    STATE_ENABLED = 2
+    STATE_DISABLED = 3
+    
     STATES = (
-        (1, 'In Design'),
-        (2, 'Enabled'),
-        (3, 'Disabled')
+        (STATE_INDESIGN, 'In Design'),
+        (STATE_ENABLED, 'Enabled'),
+        (STATE_DISABLED, 'Disabled')
     )
 
+    ACCESSIBILITY_USER = 1
+    ACCESSIBILITY_NODE = 2
+    ACCESSIBILITY_ALL = 3
+    
     ACCESSIBILITY = (
-        (1, 'Only Myself'),
-        (2, 'Everyone in Node'),
-        (3, 'Everyone')
+        (ACCESSIBILITY_USER, 'Only Myself'),
+        (ACCESSIBILITY_NODE, 'Everyone in Node'),
+        (ACCESSIBILITY_ALL, 'Everyone')
     )
+
 
     name = models.CharField(max_length=255)
     description = models.CharField(max_length=1000)
@@ -608,6 +618,10 @@ class RuleGenerator(models.Model):
     @property
     def is_accessible_by_node(self):
         return self.accessibility == 2
+
+    @property
+    def is_accessible_by_user(self):
+        return self.accessibility == 1
 
     @property
     def accessibility_name(self):
