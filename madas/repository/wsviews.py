@@ -1141,18 +1141,12 @@ def recordsRuns(request):
     output = makeJsonFriendly(output)
     return HttpResponse(json.dumps(output))
 
-@mastr_users_only
-def recordsRuleGenerators(request):
-    args = request.REQUEST
-       
-    # basic json that we will fill in
+def formatRuleGenResults(rows):
+# basic json that we will fill in
     output = json_records_template([
         'id', 'name', 'version', 'full_name', 'description', 'state_id', 'state', 'accessibility_id', 'accessibility', 'created_by', 'node', 'startblock', 'sampleblock', 'endblock'
         ])
 
-    # TODO filter them out 
-    rows = RuleGenerator.objects.all()
-    #if getMadasUser(request.user.username).IsAdmin: mastradmin part of node etc.
     output['results'] = len(rows)
 
     # add rows
@@ -1160,7 +1154,37 @@ def recordsRuleGenerators(request):
         output['rows'].append(rulegenerators.convert_to_dict(row))
 
     output = makeJsonFriendly(output)
+    return output
+
+@mastr_users_only
+def recordsRuleGenerators(request):
+    args = request.REQUEST
+    rows = rulegenerators.listRuleGenerators(request.user, accessibility=False, showEnabledOnly=False)
+    output = formatRuleGenResults(rows)
     return HttpResponse(json.dumps(output))
+
+@mastr_users_only
+def recordsRuleGeneratorsAccessibility(request):
+    args = request.REQUEST
+    rows = rulegenerators.listRuleGenerators(request.user, accessibility=True, showEnabledOnly=False)
+    output = formatRuleGenResults(rows)
+    return HttpResponse(json.dumps(output))
+
+@mastr_users_only
+def recordsRuleGeneratorsAccessibilityEnabled(request):
+    args = request.REQUEST
+    rows = rulegenerators.listRuleGenerators(request.user, accessibility=True, showEnabledOnly=True)
+    output = formatRuleGenResults(rows)
+    return HttpResponse(json.dumps(output))
+
+
+@mastr_users_only
+def recordsRuleGenerators(request):
+    args = request.REQUEST
+    rows = RuleGenerator.objects.all()
+    output = formatRuleGenResults(rows)
+    return HttpResponse(json.dumps(output))
+
 
 @mastr_users_only
 def recordsExperimentsForProject(request, project_id):

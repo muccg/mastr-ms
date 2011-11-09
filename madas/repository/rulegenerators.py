@@ -1,6 +1,34 @@
 from madas.repository.models import RuleGenerator, RuleGeneratorStartBlock, RuleGeneratorSampleBlock, RuleGeneratorEndBlock, Component
+from madas.users.MAUser import MAUser
 
 from madas.users.MAUser import getMadasUser
+from django.db.models import Q
+def listRuleGenerators(user=None, accessibility=False, showEnabledOnly=False):
+    usernode = None
+    mauser = None
+    if user is not None:
+        usernode = getMadasUser(user.username).Nodes[0]
+        mauser = MAUser(user.username)
+        mauser.refresh()
+    
+    rows = RuleGenerator.objects.all()
+
+    apply_accessibility_node = Q(accessibility=2) & Q(node=usernode)
+    apply_accessibility_user = Q(created_by = user) & Q(accessibility=1)
+    apply_accessibility_everyone = Q(accessibility=3)
+    apply_showonlyenabled = Q(state=2)
+
+
+    #only bother doing accessibility if you arent an Admin or MA admin, and accessibility is true.
+    if accessibility and (mauser is not None) and not mauser.IsAdmin and not mauser.IsMastrAdmin:
+        rows = rows.filter(apply_accessibility_node | apply_accessibility_user | apply_accessibility_everyone)
+
+    if showEnabledOnly:
+        rows = rows.filter(apply_showonlyenabled)
+
+    return rows 
+
+
 
 def recreate_start_block(RG, startblockvars):
     # We will recreate the block by deleting the existing

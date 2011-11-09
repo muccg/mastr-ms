@@ -456,7 +456,7 @@ var ruleGeneratorListStore = new Ext.data.JsonStore(
                         {
                             storeId: 'rulegeneratorlist',
                             autoLoad: false,
-                            url: wsBaseUrl + "recordsRuleGenerators",
+                            url: wsBaseUrl + "recordsRuleGeneratorsAccessibility",
                             restful: true,
                             listeners: {'load':MA.DSLoaded,
                                         'loadexception':MA.DSLoadIgnoreException
@@ -694,7 +694,7 @@ var enabledRuleGeneratorStore = new Ext.data.JsonStore(
                         {
                             storeId: 'rulegeneratorlist',
                             autoLoad: false,
-                            url: wsBaseUrl + "recordsRuleGenerators",
+                            url: wsBaseUrl + "recordsRuleGeneratorsAccessibilityEnabled",
                             restful: true,
                             listeners: {'load':MA.DSLoaded,
                                         'loadexception':MA.DSLoadIgnoreException
@@ -706,7 +706,7 @@ var enabledRuleGeneratorStore = new Ext.data.JsonStore(
                         }
                     );
 
-
+/*
 enabledRuleGeneratorStore.on({
     'load':{
         fn: function(store, records, options){
@@ -715,3 +715,4 @@ enabledRuleGeneratorStore.on({
         },
         scope: this
     }});
+*/
