@@ -1921,7 +1921,7 @@ def create_rule_generator(request):
     sampleblockvars = json.loads(request.POST.get('sampleblock', []))
     endblockvars = json.loads(request.POST.get('endblock', []))
    
-    success = rulegenerators.create_rule_generator(name, 
+    success, access, message = rulegenerators.create_rule_generator(name, 
                                          description, 
                                          accessibility, 
                                          request.user, 
@@ -1933,7 +1933,11 @@ def create_rule_generator(request):
     if success:
         return HttpResponse(json.dumps({'success':True}))
     else:
-        return json_error("Could not create rule generator")
+        if access:
+            return json_error("Could not create rule generator: %s" % (message))
+        else:
+            return HttpResponseForbidden('Improper rule generator access')
+
 @mastr_users_only
 def edit_rule_generator(request):
     rg_id = request.POST.get('rulegen_id')
@@ -1948,7 +1952,7 @@ def edit_rule_generator(request):
     endblockvars = json.loads(request.POST.get('endblock', 'null'))
     state = json.loads(request.POST.get('state', 'null'))
 
-    success = rulegenerators.edit_rule_generator(rg_id, request.user, 
+    success, access, message = rulegenerators.edit_rule_generator(rg_id, request.user, 
                                                     name=name,
                                                     description=description,
                                                     accessibility=accessibility,
@@ -1959,7 +1963,10 @@ def edit_rule_generator(request):
     if success:
         return HttpResponse(json.dumps({'success':success}))
     else:
-        return json_error('Error during edit')
+        if access:
+            return json_error('Error during edit: %s' % (message))
+        else:
+            return HttpResponseForbidden('Improper rule generator access')
 
 @mastr_users_only
 def generate_worklist(request, run_id):

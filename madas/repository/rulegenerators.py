@@ -7,16 +7,15 @@ def listRuleGenerators(user=None, accessibility=False, showEnabledOnly=False):
     usernode = None
     mauser = None
     if user is not None:
-        usernode = getMadasUser(user.username).Nodes[0]
-        mauser = MAUser(user.username)
-        mauser.refresh()
+        mauser = getMadasUser(user.username)
+        usernode = mauser.Nodes[0]
     
     rows = RuleGenerator.objects.all()
 
-    apply_accessibility_node = Q(accessibility=2) & Q(node=usernode)
-    apply_accessibility_user = Q(created_by = user) & Q(accessibility=1)
-    apply_accessibility_everyone = Q(accessibility=3)
-    apply_showonlyenabled = Q(state=2)
+    apply_accessibility_node = Q(accessibility=RuleGenerator.ACCESSIBILITY_NODE) & Q(node=usernode)
+    apply_accessibility_user = Q(created_by = user) & Q(accessibility=RuleGenerator.ACCESSIBILITY_USER)
+    apply_accessibility_everyone = Q(accessibility=RuleGenerator.ACCESSIBILITY_ALL)
+    apply_showonlyenabled = Q(state=RuleGenerator.STATE_ENABLED)
 
 
     #only bother doing accessibility if you arent an Admin or MA admin, and accessibility is true.
@@ -110,6 +109,8 @@ def create_rule_generator(name, description, accessibility, user, node, startblo
     '''Creates a new rule generator record and sets basic attributes.
        Then uses edit_rule_generator to set the blocks and state attributes'''
     success = False
+    access = True
+    message = ""
     try:
         newRG = RuleGenerator()
         newRG.name = name
@@ -121,15 +122,15 @@ def create_rule_generator(name, description, accessibility, user, node, startblo
         newRG.save()
 
 
-        success = edit_rule_generator(newRG.id, user,
+        success, access, message = edit_rule_generator(newRG.id, user,
                                         startblock = startblockvars,
                                         sampleblock = sampleblockvars,
                                         endblock = endblockvars,
                                         state = state)
-    except Exception, e:
+    except Exception, e: 
         print "Exception in create rule generator: %s" % ( e )
     
-    return success
+    return success, access, message
 
     
 def edit_rule_generator(id, user, **kwargs):
@@ -140,37 +141,53 @@ def edit_rule_generator(id, user, **kwargs):
        
        Any parameters coming through as None are ignored.
        '''
-    ret = True
+    success = False
+    access = True
+    message = ""
+
     try:
         candidateRG = RuleGenerator.objects.get(id=id)
         #TODO: Test for accessibility here
-        if kwargs.get('state', None) is not None:
-            candidateRG.state = kwargs.get('state')
-        if kwargs.get('accessibility', None) is not None:
-            candidateRG.accessibility = kwargs.get('accessibility')
-        if kwargs.get('version', None) is not None:
-            candidateRG.version = kwargs.get('version')
-        if kwargs.get('previous_version', None) is not None:
-            candidateRG.version = kwargs.get('previous_version')
-        if kwargs.get('name', None) is not None:
-            candidateRG.name = kwargs.get('name')
-        if kwargs.get('description', None) is not None:
-            candidateRG.description = kwargs.get('description')
-        candidateRG.save()
-   
-        if kwargs.get('startblock', None) is not None:
-            recreate_start_block(candidateRG, kwargs.get('startblock'))
-        if kwargs.get('sampleblock', None) is not None:
-            recreate_sample_block(candidateRG, kwargs.get('sampleblock'))
-        if kwargs.get('endblock', None) is not None:
-            recreate_end_block(candidateRG, kwargs.get('endblock'))
+        mauser = getMadasUser(user.username)
+        usernode = mauser.Nodes[0]
+
+        if mauser.IsAdmin or mauser.IsMastrAdmin or \
+            (candidateRG.is_accessible_by_node and usernode==candidateRG.node) or \
+            (candidateRG.is_accessible_by_user and candidateRG.created_by == user):
+        
+            if kwargs.get('state', None) is not None:
+                candidateRG.state = kwargs.get('state')
+            if kwargs.get('accessibility', None) is not None:
+                candidateRG.accessibility = kwargs.get('accessibility')
+            if kwargs.get('version', None) is not None:
+                candidateRG.version = kwargs.get('version')
+            if kwargs.get('previous_version', None) is not None:
+                candidateRG.version = kwargs.get('previous_version')
+            if kwargs.get('name', None) is not None:
+                candidateRG.name = kwargs.get('name')
+            if kwargs.get('description', None) is not None:
+                candidateRG.description = kwargs.get('description')
+            candidateRG.save()
+       
+            if kwargs.get('startblock', None) is not None:
+                recreate_start_block(candidateRG, kwargs.get('startblock'))
+            if kwargs.get('sampleblock', None) is not None:
+                recreate_sample_block(candidateRG, kwargs.get('sampleblock'))
+            if kwargs.get('endblock', None) is not None:
+                recreate_end_block(candidateRG, kwargs.get('endblock'))
+
+            success = True
+        else:
+            success = False
+            access = False
     
     except Exception, e:
         print 'Exception: %s' % (e)
         #couldnt find rulegen, or some other error.
-        ret = False
+        success = False
+        message = "Error editing rule generator details"
 
-    return ret
+    return success, access, message
 
 
 def convert_to_dict(rulegenerator):

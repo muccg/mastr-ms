@@ -55,7 +55,6 @@ MA.RuleGeneratorDetailsCmp = {
     },
     alterButton: function(rec) {
         var but = Ext.getCmp('rulegenerator_state_button');
-        console.log("Alter button. State = " + rec.get('state'));
         var state = rec.get('state') 
         but.rulegen_prevstate = state;
         if ( (state == 'In Design') || (state == 'Disabled' ) )
@@ -141,22 +140,18 @@ MA.RuleGeneratorDetailsCmp = {
                             Ext.getCmp('rulegeneratorGrid').getView().refresh();
                             var jsonData = Ext.util.JSON.decode(result.responseText)
                             if (jsonData.success){
-                                console.log('Create/edit rule gen succeeded');
                             }
                             else{
                                 Ext.Msg.alert("Error", jsonData.msg);
                             }
                         },
                         failure: function(result, request){
-                            console.log('Create rule gen failed');
                             Ext.getCmp('ruleGeneratorCreateCmp').hide();
-                            Ext.Msg.alert("Could not contact server");
+                            Ext.Msg.alert("Operation failed");
                         } 
                 });
             },
             handler: function(){
-                console.log(this.rulegen_state);
-                console.log(this.rulegen_id);
                 if ( (typeof(this.rulegen_id) != 'undefined') &&
                      (typeof(this.rulegen_state) != 'undefined'))
                 {
@@ -184,7 +179,6 @@ MA.RuleGeneratorListCmp = {
     frame: 'true',
     bodyStyle: 'padding: 5px',
     onStoreLoad: function(){
-                console.log("On store load executed");
                 //refresh the details component
                 var selModel = Ext.getCmp('rulegeneratorGrid').getSelectionModel();
                 if (selModel.hasSelection()) {
@@ -494,7 +488,6 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
                         store.each(function(record) {
                                 recobj = {};
                                 for (var key in record.data){
-                                    console.log("Key in record is : " + key)
                                     recobj[key] = record.get(key);
                                 }
                                 retval.push(recobj);
@@ -515,7 +508,6 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
                     var submiturl = 'create_rule_generator';
                     if ( (typeof(theform.rulegen_id)!='undefined') && (theform.rulegen_id != null) )
                     {
-                        console.log("Edit submit detected");
                         submiturl = 'edit_rule_generator';
                         formparams.rulegen_id = theform.rulegen_id;
 
@@ -526,13 +518,11 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
                         method: 'POST',
                         params: formparams, 
                         success:function(result, request){
-                            console.log('Create/edit rule gen succeeded');
                             Ext.getCmp('rulegeneratorGrid').store.reload();
                             Ext.getCmp('rulegeneratorGrid').getView().refresh();
                             Ext.getCmp('ruleGeneratorCreateCmp').hide();
                             var jsonData = Ext.util.JSON.decode(result.responseText)
                             if (jsonData.success){
-                                console.log('Create/edit rule gen succeeded');
                             }
                             else{
                                 Ext.Msg.alert("Error", jsonData.msg);
@@ -540,9 +530,8 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
 
                         },
                         failure: function(form, action){
-                            console.log('Create rule gen failed');
                             Ext.getCmp('ruleGeneratorCreateCmp').hide();
-                            Ext.Msg.alert("Could not contact server");
+                            Ext.Msg.alert("Operation failed");
                         } });
                         
                     }
