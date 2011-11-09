@@ -57,6 +57,7 @@ MA.RuleGeneratorDetailsCmp = {
         var but = Ext.getCmp('rulegenerator_state_button');
         console.log("Alter button. State = " + rec.get('state'));
         var state = rec.get('state') 
+        but.rulegen_prevstate = state;
         if ( (state == 'In Design') || (state == 'Disabled' ) )
         {
             but.setText('Enable Rule Generator');
@@ -129,13 +130,8 @@ MA.RuleGeneratorDetailsCmp = {
     buttons: [{
             text:'Not Loaded',
             id: 'rulegenerator_state_button',
-            handler: function(){
-                console.log(this.rulegen_state);
-                console.log(this.rulegen_id);
-                if ( (typeof(this.rulegen_id) != 'undefined') &&
-                     (typeof(this.rulegen_state) != 'undefined'))
-                {
-                    Ext.Ajax.request({
+            sendUpdateRequest: function() {
+                Ext.Ajax.request({
                         url: wsBaseUrl + 'edit_rule_generator',
                         method: 'POST',
                         params: {rulegen_id: this.rulegen_id, state: this.rulegen_state}, 
@@ -155,8 +151,26 @@ MA.RuleGeneratorDetailsCmp = {
                             console.log('Create rule gen failed');
                             Ext.getCmp('ruleGeneratorCreateCmp').hide();
                             Ext.Msg.alert("Could not contact server");
-                        } });
-                        
+                        } 
+                });
+            },
+            handler: function(){
+                console.log(this.rulegen_state);
+                console.log(this.rulegen_id);
+                if ( (typeof(this.rulegen_id) != 'undefined') &&
+                     (typeof(this.rulegen_state) != 'undefined'))
+                {
+                    if (this.rulegen_prevstate === 'In Design') {
+                        Ext.Msg.confirm("Are you sure?", 
+                            "Once the Rule Generator has been enabled you won't be able to edit it anymore. Are you sure you want to enable the Rule Generator?", 
+                            function(button) {
+                                if (button === 'yes') {
+                                    this.sendUpdateRequest();
+                                }
+                            }, this);               
+                    } else {
+                        this.sendUpdateRequest();
+                    }
                 }
             }
             } 
