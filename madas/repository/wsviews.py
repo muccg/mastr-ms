@@ -2,7 +2,7 @@ from django.db import transaction
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden, HttpResponseNotAllowed, HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
-from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RUN_STATES, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure, MadasUser, RuleGenerator
+from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RUN_STATES, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure, MadasUser, RuleGenerator, Component
 from madas.quote.models import Organisation, Formalquote
 from django.utils import webhelpers
 from django.contrib.auth.models import User
@@ -18,6 +18,7 @@ from django.db.models import Q
 from datetime import datetime, timedelta
 from django.core.mail import mail_admins
 from madas.users.MAUser import getMadasUser
+from madas.repository import rulegenerators
 
 
 @mastr_users_only
@@ -42,6 +43,8 @@ def create_object(request, model):
 
     if model == 'run':
         obj.creator = User.objects.get(username=request.user.username)
+        if not obj.rule_generator.is_accessible_by(request.user):
+            return HttpResponseForbidden("Invalid rule generator for run");
         if obj.number_of_methods in ('', 'null'):
             obj.number_of_methods = None
         if obj.order_of_methods in ('', 'null'):
@@ -155,6 +158,9 @@ def update_object(request, model, id):
 
         #TODO clean this stuff up!
         if model == 'run':
+            if not row.rule_generator.is_accessible_by(request.user):
+                return HttpResponseForbidden("Invalid rule generator for run");
+
             if row.number_of_methods in ('', 'null'):
                 row.number_of_methods = None
             if row.order_of_methods in ('', 'null'):
@@ -1140,6 +1146,51 @@ def recordsRuns(request):
     output = makeJsonFriendly(output)
     return HttpResponse(json.dumps(output))
 
+def formatRuleGenResults(rows):
+# basic json that we will fill in
+    output = json_records_template([
+        'id', 'name', 'version', 'full_name', 'description', 'state_id', 'state', 'accessibility_id', 'accessibility', 'created_by', 'node', 'startblock', 'sampleblock', 'endblock'
+        ])
+
+    output['results'] = len(rows)
+
+    # add rows
+    for row in rows:
+        output['rows'].append(rulegenerators.convert_to_dict(row))
+
+    output = makeJsonFriendly(output)
+    return output
+
+@mastr_users_only
+def recordsRuleGenerators(request):
+    args = request.REQUEST
+    rows = rulegenerators.listRuleGenerators(request.user, accessibility=False, showEnabledOnly=False)
+    output = formatRuleGenResults(rows)
+    return HttpResponse(json.dumps(output))
+
+@mastr_users_only
+def recordsRuleGeneratorsAccessibility(request):
+    args = request.REQUEST
+    rows = rulegenerators.listRuleGenerators(request.user, accessibility=True, showEnabledOnly=False)
+    output = formatRuleGenResults(rows)
+    return HttpResponse(json.dumps(output))
+
+@mastr_users_only
+def recordsRuleGeneratorsAccessibilityEnabled(request):
+    args = request.REQUEST
+    rows = rulegenerators.listRuleGenerators(request.user, accessibility=True, showEnabledOnly=True)
+    output = formatRuleGenResults(rows)
+    return HttpResponse(json.dumps(output))
+
+
+@mastr_users_only
+def recordsRuleGenerators(request):
+    args = request.REQUEST
+    rows = RuleGenerator.objects.all()
+    output = formatRuleGenResults(rows)
+    return HttpResponse(json.dumps(output))
+
+
 @mastr_users_only
 def recordsExperimentsForProject(request, project_id):
     if request.GET:
@@ -1204,6 +1255,35 @@ def recordsExperimentsForProject(request, project_id):
     output = makeJsonFriendly(output)
     return HttpResponse(json.dumps(output))
     
+@mastr_users_only
+def recordsComponents(request):
+    # basic json that we will fill in
+    output = {'metaData': { 'totalProperty': 'results',
+                            'successProperty': 'success',
+                            'root': 'rows',
+                            'id': 'id',
+                            'fields': [{'name':'id'}, {'name':'component'}]
+                            },
+              'results': 0,
+              'authenticated': True,
+              'authorized': True,
+              'success': True,
+              'rows': [],
+              }
+    # TODO do we need this with decorator? ABM
+    authenticated = request.user.is_authenticated()
+    authorized = True # need to change this
+    if not authenticated or not authorized:
+        return HttpResponse(json.dumps(output), status=401)
+
+    rows = Component.objects.filter(id__gte=1) #only get components with id >= 1, which excludes samples
+    output['results'] = len(rows);
+
+    for row in rows:
+        output['rows'].append({'id':row.id, 'component' : row.sample_type})
+    output = makeJsonFriendly(output)
+    return HttpResponse(json.dumps(output))
+       
 
 @mastr_users_only
 def recordsClients(request, *args):
@@ -1823,6 +1903,77 @@ def sample_class_enable(request, id):
         
     return recordsSampleClasses(request, sc.experiment.id)
 
+def json_error(msg='Unknown error'):
+    return HttpResponse(json.dumps({'success': False, 'msg': msg}))
+
+@mastr_users_only
+def get_rule_generator(request):
+    rulegen_id = request.REQUEST.get('id')
+    try:
+        rg = RuleGenerator.objects.get(pk=rulegen_id)
+    except ObjectDoesNotExist:
+        return json_error("Rulegenerator with id %s doesn't exist" % rulegen_id)
+
+    return HttpResponse(json.dumps({'success':True, 'rulegenerator': rulegenerators.convert_to_dict(rg)}))
+
+@mastr_users_only
+@transaction.commit_on_success
+def create_rule_generator(request):
+
+    name = request.POST.get('name', "Unnamed")
+    description = request.POST.get('description', "This rule generator was not given a description")
+    accessibility = request.POST.get('accessibility') 
+    startblockvars = json.loads(request.POST.get('startblock', []))
+    sampleblockvars = json.loads(request.POST.get('sampleblock', []))
+    endblockvars = json.loads(request.POST.get('endblock', []))
+   
+    success, access, message = rulegenerators.create_rule_generator(name, 
+                                         description, 
+                                         accessibility, 
+                                         request.user, 
+                                         getMadasUser(request.user.username).Nodes[0],
+                                         startblockvars,
+                                         sampleblockvars,
+                                         endblockvars)
+
+    if success:
+        return HttpResponse(json.dumps({'success':True}))
+    else:
+        if access:
+            return json_error("Could not create rule generator: %s" % (message))
+        else:
+            return HttpResponseForbidden('Improper rule generator access')
+
+@mastr_users_only
+@transaction.commit_on_success
+def edit_rule_generator(request):
+    rg_id = request.POST.get('rulegen_id')
+    if rg_id is None:
+       return json_error('Rule Generator id not submitted')
+
+    description = request.POST.get('description', None)
+    name = request.POST.get('name', None)
+    accessibility = request.POST.get('accessibility', None) 
+    startblockvars = json.loads(request.POST.get('startblock', 'null'))
+    sampleblockvars = json.loads(request.POST.get('sampleblock', 'null'))
+    endblockvars = json.loads(request.POST.get('endblock', 'null'))
+    state = json.loads(request.POST.get('state', 'null'))
+
+    success, access, message = rulegenerators.edit_rule_generator(rg_id, request.user, 
+                                                    name=name,
+                                                    description=description,
+                                                    accessibility=accessibility,
+                                                    startblock=startblockvars,
+                                                    sampleblock=sampleblockvars,
+                                                    endblock=endblockvars,
+                                                    state=state)
+    if success:
+        return HttpResponse(json.dumps({'success':success}))
+    else:
+        if access:
+            return json_error('Error during edit: %s' % (message))
+        else:
+            return HttpResponseForbidden('Improper rule generator access')
 
 @mastr_users_only
 def generate_worklist(request, run_id):
@@ -1835,7 +1986,6 @@ def generate_worklist(request, run_id):
     except RunBuilderException, e:
         # Shortcut on Error!
         return HttpResponse(str(e), content_type="text/plain")
-        output = {'success': False, 'msg': str(e)}
     else:
         output = {'success': True}    
     

@@ -168,8 +168,8 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     name: 'rule_generator',
                     editable:false,
                     forceSelection:true,
-                    displayField:'value',
-                    valueField:'key',
+                    displayField:'full_name',
+                    valueField:'id',
                     hiddenName:'rule_generator',
                     lazyRender:true,
                     allowBlank:false,
@@ -177,7 +177,10 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     triggerAction:'all',
                     listWidth:230,
                     width: 200,
-                    store: ruleGeneratorStore
+                    queryaction: 'all',
+                    lastQuery: '',
+                    store: enabledRuleGeneratorStore, 
+                    mode: 'local'
                 }),{
                     //xtype: 'compositefield', // breaks getComponent() !
                     xtype: 'container',

@@ -192,7 +192,7 @@ MA.ChangeMainContent = function(contentName, paramArray){
             expStatusComboStore.load();
             methodStore.load();
             machineStore.load();
-            ruleGeneratorStore.load();
+            enabledRuleGeneratorStore.load();
             sopLookupStore.load();
             userComboStore.load();
             involvementComboStore.load();
@@ -204,10 +204,16 @@ MA.ChangeMainContent = function(contentName, paramArray){
             MA.ExperimentController.createExperiment();
             break;
 
+        case "rulegenerator:list":
+            ruleComponentStore.load();
+            ruleGeneratorListStore.load();
+            Ext.getCmp("center-panel").layout.setActiveItem("ruleGeneratorListCmp");
+            break;
+
         case "run:list":
             methodStore.load();
             machineStore.load();
-            ruleGeneratorStore.load();
+            enabledRuleGeneratorStore.load();
             runListStore.load({callback: function() {
                 runListStore.sort([
                     {
@@ -338,6 +344,7 @@ MA.InitApplication = function(appSecureUrl, username, mainContentFunction, param
                         MA.ProjectListCmp, MA.ProjectCmp, 
                         MA.ClientsListCmp,
                         MA.RunListCmp,
+                        MA.RuleGeneratorListCmp,
                         MA.ScreencastsCmp]
             }
             ]
