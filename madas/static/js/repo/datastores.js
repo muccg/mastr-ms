@@ -456,7 +456,7 @@ var ruleGeneratorListStore = new Ext.data.JsonStore(
                         {
                             storeId: 'rulegeneratorlist',
                             autoLoad: false,
-                            url: wsBaseUrl + "recordsRuleGenerators",
+                            url: wsBaseUrl + "recordsRuleGeneratorsAccessibility",
                             restful: true,
                             listeners: {'load':MA.DSLoaded,
                                         'loadexception':MA.DSLoadIgnoreException
@@ -477,11 +477,11 @@ var ruleComponentStore = new Ext.data.JsonStore(
                             listeners: {'load' : MA.DSLoaded,
                                         'loadexception' : MA.DSLoadIgnoreException
                             },
+                            //fields: ['id','component'],
                             sortInfo: {
                                 field: 'id',
                                 direction: 'DESC'
                             }
-                            //fields: ['id','component'],
                             //reader:new Ext.data.JsonReader({}),
                             //root: 'items'
                         }
@@ -690,10 +690,19 @@ var methodStore = new Ext.data.JsonStore({
     fields: ['key', 'value']
 });
 
-var ruleGeneratorStore = new Ext.data.JsonStore({
-    autoLoad:false,
-    storeId:'ruleGeneratorStore',
-    url: wsBaseUrl + 'populate_select/rulegenerator/id/full_name/',
-    root: 'response.value.items',
-    fields: ['key', 'value']
-});
+var enabledRuleGeneratorStore = new Ext.data.JsonStore(
+                        {
+                            storeId: 'rulegeneratorlist',
+                            autoLoad: false,
+                            url: wsBaseUrl + "recordsRuleGeneratorsAccessibilityEnabled",
+                            restful: true,
+                            listeners: {'load':MA.DSLoaded,
+                                        'loadexception':MA.DSLoadIgnoreException
+                            },
+                            sortInfo: {
+                                field: 'id',
+                                direction: 'DESC'
+                            }
+                        }
+                    );
+

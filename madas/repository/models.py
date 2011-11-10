@@ -5,6 +5,7 @@ from datetime import datetime, date, time
 from quote.models import Organisation, Formalquote
 from mdatasync_server.models import NodeClient
 import grp
+from madas.users.MAUser import getMadasUser
 
 class SampleNotInClassException(Exception):
     pass
@@ -572,17 +573,27 @@ class Component(models.Model):
     filename_prefix = models.CharField(max_length=50)
 
 class RuleGenerator(models.Model):
+    
+    STATE_INDESIGN = 1
+    STATE_ENABLED = 2
+    STATE_DISABLED = 3
+    
     STATES = (
-        (1, 'In Design'),
-        (2, 'Enabled'),
-        (3, 'Disabled')
+        (STATE_INDESIGN, 'In Design'),
+        (STATE_ENABLED, 'Enabled'),
+        (STATE_DISABLED, 'Disabled')
     )
 
+    ACCESSIBILITY_USER = 1
+    ACCESSIBILITY_NODE = 2
+    ACCESSIBILITY_ALL = 3
+    
     ACCESSIBILITY = (
-        (1, 'Only Myself'),
-        (2, 'Everyone in my Node'),
-        (3, 'Everyone')
+        (ACCESSIBILITY_USER, 'Only Myself'),
+        (ACCESSIBILITY_NODE, 'Everyone in Node'),
+        (ACCESSIBILITY_ALL, 'Everyone')
     )
+
 
     name = models.CharField(max_length=255)
     description = models.CharField(max_length=1000)
@@ -592,6 +603,7 @@ class RuleGenerator(models.Model):
     previous_version = models.ForeignKey('RuleGenerator', null=True, blank=True)
     created_by = models.ForeignKey(User)
     created_on = models.DateTimeField(auto_now_add=True)
+    node = models.CharField(max_length=255, null=True)
 
     @property
     def full_name(self):
@@ -599,6 +611,30 @@ class RuleGenerator(models.Model):
         if self.version:
             name += ' (v. %d)' % self.version
         return name 
+
+    @property
+    def state_name(self):
+        return dict(RuleGenerator.STATES).get(self.state)
+
+   
+    @property
+    def is_accessible_by_user(self):
+        return self.accessibility == 1
+
+    @property
+    def is_accessible_by_node(self):
+        return self.accessibility == 2
+
+    @property
+    def is_accessible_by_all(self):
+        return self.accessibility == 3
+
+    @property
+    def accessibility_name(self):
+        name = dict(RuleGenerator.ACCESSIBILITY).get(self.accessibility)
+        if self.is_accessible_by_node:
+            name = '%s %s' % (name, str(self.node))
+        return name
 
     @property
     def start_block_rules(self):
@@ -611,6 +647,17 @@ class RuleGenerator(models.Model):
     @property
     def end_block_rules(self):
         return list(self.rulegeneratorendblock_set.all())
+
+    def is_accessible_by(self, user):
+        mauser = getMadasUser(user.username)
+
+        if mauser.IsAdmin or mauser.IsMastrStaff or \
+           (self.accessibility == self.is_accessible_by_user and user.id == self.created_by.id) or \
+           (self.accessibility == self.is_accessible_by_node and mauser.Nodes[0] == self.node) or \
+           (self.accessibility == RuleGenerator.ACCESSIBILITY_ALL):
+           return True
+        else:
+            return False
 
     def __unicode__(self):
         return self.full_name
@@ -641,6 +688,13 @@ class RuleGeneratorSampleBlock(models.Model):
     def in_random_position(self):
         return self.order == 1
 
+    @property
+    def order_name(self):
+        if self.in_random_position:
+            return 'random order'
+        else:
+            return 'position'
+ 
 class RuleGeneratorEndBlock(models.Model):
     rule_generator = models.ForeignKey(RuleGenerator)
     index = models.PositiveIntegerField()
