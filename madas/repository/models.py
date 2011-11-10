@@ -598,7 +598,7 @@ class RuleGenerator(models.Model):
     name = models.CharField(max_length=255)
     description = models.CharField(max_length=1000)
     state = models.PositiveIntegerField(default=1, choices=STATES)
-    accessibility = models.PositiveIntegerField(default=1, choices=ACCESSIBILITY)
+    accessibility = models.PositiveIntegerField(default=ACCESSIBILITY_USER, choices=ACCESSIBILITY)
     version = models.PositiveIntegerField(null=True, blank=True)
     previous_version = models.ForeignKey('RuleGenerator', null=True, blank=True)
     created_by = models.ForeignKey(User)
@@ -619,15 +619,15 @@ class RuleGenerator(models.Model):
    
     @property
     def is_accessible_by_user(self):
-        return self.accessibility == 1
+        return self.accessibility == RuleGenerator.ACCESSIBILITY_USER
 
     @property
     def is_accessible_by_node(self):
-        return self.accessibility == 2
+        return self.accessibility == RuleGenerator.ACCESSIBILITY_NODE
 
     @property
     def is_accessible_by_all(self):
-        return self.accessibility == 3
+        return self.accessibility == RuleGenerator.ACCESSIBILITY_ALL
 
     @property
     def accessibility_name(self):
@@ -650,11 +650,10 @@ class RuleGenerator(models.Model):
 
     def is_accessible_by(self, user):
         mauser = getMadasUser(user.username)
-
-        if mauser.IsAdmin or mauser.IsMastrStaff or \
-           (self.accessibility == self.is_accessible_by_user and user.id == self.created_by.id) or \
-           (self.accessibility == self.is_accessible_by_node and mauser.Nodes[0] == self.node) or \
-           (self.accessibility == RuleGenerator.ACCESSIBILITY_ALL):
+        if mauser.IsAdmin or mauser.IsMastrAdmin or \
+           (self.is_accessible_by_user and user.id == self.created_by.id) or \
+           (self.is_accessible_by_node and mauser.Nodes[0] == self.node) or \
+           (self.is_accessible_by_all):
            return True
         else:
             return False
