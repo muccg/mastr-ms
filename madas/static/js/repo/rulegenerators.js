@@ -519,6 +519,11 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
                 var samplemapper_fn = function(rule) {return [rule.count, rule.component_id, rule.sample_count, rule.order_id]};
                 theform.setValues(rulegen);
                 theform.rulegen_id = rulegen_id; //set an id on the form so we know it is an edit
+                if (rulegen.version) {
+                    theform.findField('name').disable();
+                } else {
+                    theform.findField('name').enable();
+                }
                 Ext.getCmp('startblock').getStore().loadData(map(rulegen.startblock, mapper_fn));
                 Ext.getCmp('sampleblock').getStore().loadData(map(rulegen.sampleblock, samplemapper_fn));
                 Ext.getCmp('endblock').getStore().loadData(map(rulegen.endblock, mapper_fn));
@@ -547,6 +552,10 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
             {
                 fieldLabel: 'Name',
                 name: 'name'
+            },{
+                fieldLabel: 'Version',
+                name: 'version',
+                xtype: 'displayfield'
             },{
                 fieldLabel: 'Description',
                 xtype: 'textarea',
