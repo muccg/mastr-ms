@@ -494,7 +494,7 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
     closeAction: 'hide',
     bodyStyle: 'padding: 5px',
     width: 680,
-    height: 530,
+    height: 550,
     modal:true,
     clearValues: function() {
         var theform = Ext.getCmp('ruleGeneratorCreateForm').getForm();
