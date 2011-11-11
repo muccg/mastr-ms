@@ -199,11 +199,11 @@ MA.RuleGeneratorListCmp = {
             
             tbar: [{
                     text: 'Create New',
-                    cls: 'x-btn-text-icon',
-                    icon: 'static/images/add.png',
                     handler: function(b, ev) {
                         Ext.getCmp('ruleGeneratorCreateCmp').create();
                     }
+                },{
+                    xtype: 'tbseparator'
                 },{
                     text: 'Create new Version',
                     handler: function(b, ev) {
@@ -236,6 +236,8 @@ MA.RuleGeneratorListCmp = {
 
                     }
                 },{
+                    xtype: 'tbseparator'
+                },{
                     text: 'Clone',
                     handler: function(b, ev) {
                         var selModel = Ext.getCmp('rulegeneratorGrid').getSelectionModel();
@@ -266,6 +268,8 @@ MA.RuleGeneratorListCmp = {
                         });
 
                     }
+                },{
+                    xtype: 'tbseparator'
                 },{
                     text: 'Edit',
                     handler: function(b, ev) {
