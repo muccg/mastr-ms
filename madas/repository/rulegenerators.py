@@ -217,6 +217,25 @@ def clone_rule_generator(rg_id, user):
     copy_rules(rg, newRG)
     return newRG.pk
 
+def create_new_version_of_rule_generator(rg_id, user):
+    rg = RuleGenerator.objects.get(pk=rg_id)
+    if rg.version is None:
+        rg.version = 1
+        rg.save()
+    
+    newRG = RuleGenerator.objects.create(
+            name = rg.name,
+            version = rg.version+1,
+            description = rg.description,
+            accessibility = rg.accessibility,
+            created_by = user,
+            node = getMadasUser(user.username).Nodes[0]
+        )
+
+    copy_rules(rg, newRG)
+    return newRG.pk
+
+
 def convert_to_dict(rulegenerator):
     d = {}
     d['id'] = rulegenerator.id

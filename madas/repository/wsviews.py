@@ -1977,6 +1977,16 @@ def edit_rule_generator(request):
 
 @mastr_users_only
 @transaction.commit_on_success
+def create_new_version_of_rule_generator(request):
+    rg_id = request.REQUEST['id']
+    try:
+        new_id = rulegenerators.create_new_version_of_rule_generator(rg_id, request.user)
+    except Exception, e:
+        return json_error("Couldn't create new version of rule generator: %s" % e)
+    return HttpResponse(json.dumps({'success':True, 'new_id': new_id}))
+
+@mastr_users_only
+@transaction.commit_on_success
 def clone_rule_generator(request):
     rg_id = request.REQUEST['id']
     try:
