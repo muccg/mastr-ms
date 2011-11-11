@@ -205,6 +205,37 @@ MA.RuleGeneratorListCmp = {
                         Ext.getCmp('ruleGeneratorCreateCmp').create();
                     }
                 },{
+                    text: 'Create new Version',
+                    handler: function(b, ev) {
+                        var selModel = Ext.getCmp('rulegeneratorGrid').getSelectionModel();
+                        var record;
+                        if (!selModel.hasSelection()) {
+                            Ext.Msg.alert('Nothing selected', 'Please select a Rule Generator first.');
+                            return;
+                        }
+                        record = selModel.getSelected();
+                        Ext.Ajax.request({
+                            url: wsBaseUrl + 'create_new_version_of_rule_generator',
+                            method: 'POST',
+                            params: {'id': record.get('id')},
+                            success:function(response, opts){
+                                var newId = Ext.decode(response.responseText).new_id;
+
+                                var store = Ext.getCmp('rulegeneratorGrid').getStore();
+                                var selectFn = function() {
+                                    selModel.selectRow(store.indexOfId(newId));
+                                    Ext.getCmp('ruleGeneratorCreateCmp').edit(newId);
+                                };
+                                store.addListener('load', selectFn, this, {single:true});
+                                store.reload();
+                            },
+                            failure: function(form, action){
+                                Ext.Msg.alert("Error", "Couldn't create new version of Rule Generator");
+                            }
+                        });
+
+                    }
+                },{
                     text: 'Clone',
                     handler: function(b, ev) {
                         var selModel = Ext.getCmp('rulegeneratorGrid').getSelectionModel();
@@ -216,11 +247,10 @@ MA.RuleGeneratorListCmp = {
                         record = selModel.getSelected();
                         Ext.Ajax.request({
                             url: wsBaseUrl + 'clone_rule_generator',
-                            method: 'GET',
+                            method: 'POST',
                             params: {'id': record.get('id')},
                             success:function(response, opts){
                                 var newId = Ext.decode(response.responseText).new_id;
-                                var theform = Ext.getCmp('ruleGeneratorCreateForm').getForm();
 
                                 var store = Ext.getCmp('rulegeneratorGrid').getStore();
                                 var selectFn = function() {
