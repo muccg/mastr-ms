@@ -184,6 +184,38 @@ def edit_rule_generator(id, user, **kwargs):
 
     return success, access, message
 
+def copy_rules(sourceRG, destRG):
+    for rule in sourceRG.start_block_rules:
+        destRG.rulegeneratorstartblock_set.create(
+                index = rule.index,
+                count = rule.count,
+                component = rule.component)
+    for rule in sourceRG.sample_block_rules:
+        destRG.rulegeneratorsampleblock_set.create(
+                index = rule.index,
+                sample_count = rule.sample_count,
+                count = rule.count,
+                component = rule.component,
+                order = rule.order)
+    for rule in sourceRG.end_block_rules:
+        destRG.rulegeneratorendblock_set.create(
+                index = rule.index,
+                count = rule.count,
+                component = rule.component)
+        
+
+def clone_rule_generator(rg_id, user):
+    rg = RuleGenerator.objects.get(pk=rg_id)
+    newRG = RuleGenerator.objects.create(
+            name = 'CLONED - %s' % rg.name if not rg.name.startswith('CLONED') else rg.name,
+            description = rg.description,
+            accessibility = rg.accessibility,
+            created_by = user,
+            node = getMadasUser(user.username).Nodes[0]
+        )
+
+    copy_rules(rg, newRG)
+    return newRG.pk
 
 def convert_to_dict(rulegenerator):
     d = {}
