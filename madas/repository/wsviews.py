@@ -1976,6 +1976,16 @@ def edit_rule_generator(request):
             return HttpResponseForbidden('Improper rule generator access')
 
 @mastr_users_only
+@transaction.commit_on_success
+def clone_rule_generator(request):
+    rg_id = request.REQUEST['id']
+    try:
+        new_id = rulegenerators.clone_rule_generator(rg_id, request.user)
+    except Exception, e:
+        return json_error("Couldn't clone rule generator: %s" % e)
+    return HttpResponse(json.dumps({'success':True, 'new_id': new_id}))
+
+@mastr_users_only
 def generate_worklist(request, run_id):
     run = Run.objects.get(id=run_id)
     from runbuilder import RunBuilder, RunBuilderException

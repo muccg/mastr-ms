@@ -51,5 +51,6 @@ urlpatterns = patterns('madas.repository.wsviews',
     url(r'^get_rule_generator[/]*$', 'get_rule_generator', {'SSL':True}, name='get_rule_generator'),
     url(r'^create_rule_generator[/]*$', 'create_rule_generator', {'SSL':True}, name='create_rule_generator'),
     url(r'^edit_rule_generator[/]*$', 'edit_rule_generator', {'SSL':True}, name='edit_rule_generator'),
+    url(r'^clone_rule_generator[/]*$', 'clone_rule_generator', {'SSL':True}, name='clone_rule_generator'),
 
 )
