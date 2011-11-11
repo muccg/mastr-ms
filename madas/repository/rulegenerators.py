@@ -154,12 +154,10 @@ def edit_rule_generator(id, user, **kwargs):
                 candidateRG.state = kwargs.get('state')
             if kwargs.get('accessibility', None) is not None:
                 candidateRG.accessibility = kwargs.get('accessibility')
-            if kwargs.get('version', None) is not None:
-                candidateRG.version = kwargs.get('version')
-            if kwargs.get('previous_version', None) is not None:
-                candidateRG.version = kwargs.get('previous_version')
-            if kwargs.get('name', None) is not None:
-                candidateRG.name = kwargs.get('name')
+            if candidateRG.version is None:
+                # Don't allow changing the name of a versioned RG
+                if kwargs.get('name', None) is not None:
+                    candidateRG.name = kwargs.get('name')
             if kwargs.get('description', None) is not None:
                 candidateRG.description = kwargs.get('description')
             candidateRG.save()
@@ -228,6 +226,7 @@ def create_new_version_of_rule_generator(rg_id, user):
             version = rg.version+1,
             description = rg.description,
             accessibility = rg.accessibility,
+            previous_version = rg,
             created_by = user,
             node = getMadasUser(user.username).Nodes[0]
         )
