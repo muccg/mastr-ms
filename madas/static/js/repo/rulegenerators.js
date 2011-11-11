@@ -396,6 +396,27 @@ var createRuleBlockComponent = function(idbasename, blockname, issampleblock){
                     },
                 autoScroll:true,
                 reserveScrollOffset:true,
+                moveSelectedRow: function(grid, direction) {
+                    var record = grid.getSelectionModel().getSelected();
+                    if (!record) {
+                        return;
+                    }
+                    var index = grid.getStore().indexOf(record);
+                    if (direction < 0) {
+                        index--;
+                        if (index < 0) {
+                            return;
+                        }
+                    } else {
+                        index++;
+                        if (index >= grid.getStore().getCount()) {
+                            return;
+                        }
+                    }
+                    grid.getStore().remove(record);
+                    grid.getStore().insert(index, record);
+                    grid.getSelectionModel().selectRow(index, true);
+                },
                 bbar: [{
                         text: 'Add rule row',
                         cls: 'x-btn-text-icon',
@@ -426,7 +447,26 @@ var createRuleBlockComponent = function(idbasename, blockname, issampleblock){
                                 thisgrid.getStore().remove(selections[index]);
                             }
                         }
+                       },{                       
+                        text: 'Move rule up',
+                        cls: 'x-btn-text-icon',
+                        id: idbasename + '-moveuprulebutton',
+                        icon: 'static/images/arrow-up.png',
+                        handler: function(btn, evt){
+                            var grid = Ext.getCmp(idbasename);
+                            grid.moveSelectedRow(grid, -1);
+                        }
+                        },{                       
+                        text: 'Move rule down',
+                        cls: 'x-btn-text-icon',
+                        id: idbasename + '-movedownrulebutton',
+                        icon: 'static/images/arrow-down.png',
+                        handler: function(btn, evt){
+                            var grid = Ext.getCmp(idbasename);
+                            grid.moveSelectedRow(grid, 1);
+                        }
                        }
+
                 ]
             }
 
