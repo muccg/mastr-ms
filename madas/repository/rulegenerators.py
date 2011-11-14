@@ -154,12 +154,10 @@ def edit_rule_generator(id, user, **kwargs):
                 candidateRG.state = kwargs.get('state')
             if kwargs.get('accessibility', None) is not None:
                 candidateRG.accessibility = kwargs.get('accessibility')
-            if kwargs.get('version', None) is not None:
-                candidateRG.version = kwargs.get('version')
-            if kwargs.get('previous_version', None) is not None:
-                candidateRG.version = kwargs.get('previous_version')
-            if kwargs.get('name', None) is not None:
-                candidateRG.name = kwargs.get('name')
+            if candidateRG.version is None:
+                # Don't allow changing the name of a versioned RG
+                if kwargs.get('name', None) is not None:
+                    candidateRG.name = kwargs.get('name')
             if kwargs.get('description', None) is not None:
                 candidateRG.description = kwargs.get('description')
             candidateRG.save()
@@ -183,6 +181,58 @@ def edit_rule_generator(id, user, **kwargs):
         message = "Error editing rule generator details"
 
     return success, access, message
+
+def copy_rules(sourceRG, destRG):
+    for rule in sourceRG.start_block_rules:
+        destRG.rulegeneratorstartblock_set.create(
+                index = rule.index,
+                count = rule.count,
+                component = rule.component)
+    for rule in sourceRG.sample_block_rules:
+        destRG.rulegeneratorsampleblock_set.create(
+                index = rule.index,
+                sample_count = rule.sample_count,
+                count = rule.count,
+                component = rule.component,
+                order = rule.order)
+    for rule in sourceRG.end_block_rules:
+        destRG.rulegeneratorendblock_set.create(
+                index = rule.index,
+                count = rule.count,
+                component = rule.component)
+        
+
+def clone_rule_generator(rg_id, user):
+    rg = RuleGenerator.objects.get(pk=rg_id)
+    newRG = RuleGenerator.objects.create(
+            name = 'CLONED - %s' % rg.name if not rg.name.startswith('CLONED') else rg.name,
+            description = rg.description,
+            accessibility = rg.accessibility,
+            created_by = user,
+            node = getMadasUser(user.username).Nodes[0]
+        )
+
+    copy_rules(rg, newRG)
+    return newRG.pk
+
+def create_new_version_of_rule_generator(rg_id, user):
+    rg = RuleGenerator.objects.get(pk=rg_id)
+    if rg.version is None:
+        rg.version = 1
+        rg.save()
+    
+    newRG = RuleGenerator.objects.create(
+            name = rg.name,
+            version = rg.version+1,
+            description = rg.description,
+            accessibility = rg.accessibility,
+            previous_version = rg,
+            created_by = user,
+            node = getMadasUser(user.username).Nodes[0]
+        )
+
+    copy_rules(rg, newRG)
+    return newRG.pk
 
 
 def convert_to_dict(rulegenerator):

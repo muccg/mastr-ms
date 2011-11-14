@@ -199,11 +199,77 @@ MA.RuleGeneratorListCmp = {
             
             tbar: [{
                     text: 'Create New',
-                    cls: 'x-btn-text-icon',
-                    icon: 'static/images/add.png',
                     handler: function(b, ev) {
                         Ext.getCmp('ruleGeneratorCreateCmp').create();
                     }
+                },{
+                    xtype: 'tbseparator'
+                },{
+                    text: 'Create new Version',
+                    handler: function(b, ev) {
+                        var selModel = Ext.getCmp('rulegeneratorGrid').getSelectionModel();
+                        var record;
+                        if (!selModel.hasSelection()) {
+                            Ext.Msg.alert('Nothing selected', 'Please select a Rule Generator first.');
+                            return;
+                        }
+                        record = selModel.getSelected();
+                        Ext.Ajax.request({
+                            url: wsBaseUrl + 'create_new_version_of_rule_generator',
+                            method: 'POST',
+                            params: {'id': record.get('id')},
+                            success:function(response, opts){
+                                var newId = Ext.decode(response.responseText).new_id;
+
+                                var store = Ext.getCmp('rulegeneratorGrid').getStore();
+                                var selectFn = function() {
+                                    selModel.selectRow(store.indexOfId(newId));
+                                    Ext.getCmp('ruleGeneratorCreateCmp').edit(newId);
+                                };
+                                store.addListener('load', selectFn, this, {single:true});
+                                store.reload();
+                            },
+                            failure: function(form, action){
+                                Ext.Msg.alert("Error", "Couldn't create new version of Rule Generator");
+                            }
+                        });
+
+                    }
+                },{
+                    xtype: 'tbseparator'
+                },{
+                    text: 'Clone',
+                    handler: function(b, ev) {
+                        var selModel = Ext.getCmp('rulegeneratorGrid').getSelectionModel();
+                        var record;
+                        if (!selModel.hasSelection()) {
+                            Ext.Msg.alert('Nothing selected', 'Please select a Rule Generator first.');
+                            return;
+                        }
+                        record = selModel.getSelected();
+                        Ext.Ajax.request({
+                            url: wsBaseUrl + 'clone_rule_generator',
+                            method: 'POST',
+                            params: {'id': record.get('id')},
+                            success:function(response, opts){
+                                var newId = Ext.decode(response.responseText).new_id;
+
+                                var store = Ext.getCmp('rulegeneratorGrid').getStore();
+                                var selectFn = function() {
+                                    selModel.selectRow(store.indexOfId(newId));
+                                    Ext.getCmp('ruleGeneratorCreateCmp').edit(newId);
+                                };
+                                store.addListener('load', selectFn, this, {single:true});
+                                store.reload();
+                            },
+                            failure: function(form, action){
+                                Ext.Msg.alert("Error", "Couldn't clone Rule Generator");
+                            }
+                        });
+
+                    }
+                },{
+                    xtype: 'tbseparator'
                 },{
                     text: 'Edit',
                     handler: function(b, ev) {
@@ -334,6 +400,27 @@ var createRuleBlockComponent = function(idbasename, blockname, issampleblock){
                     },
                 autoScroll:true,
                 reserveScrollOffset:true,
+                moveSelectedRow: function(grid, direction) {
+                    var record = grid.getSelectionModel().getSelected();
+                    if (!record) {
+                        return;
+                    }
+                    var index = grid.getStore().indexOf(record);
+                    if (direction < 0) {
+                        index--;
+                        if (index < 0) {
+                            return;
+                        }
+                    } else {
+                        index++;
+                        if (index >= grid.getStore().getCount()) {
+                            return;
+                        }
+                    }
+                    grid.getStore().remove(record);
+                    grid.getStore().insert(index, record);
+                    grid.getSelectionModel().selectRow(index, true);
+                },
                 bbar: [{
                         text: 'Add rule row',
                         cls: 'x-btn-text-icon',
@@ -364,7 +451,26 @@ var createRuleBlockComponent = function(idbasename, blockname, issampleblock){
                                 thisgrid.getStore().remove(selections[index]);
                             }
                         }
+                       },{                       
+                        text: 'Move rule up',
+                        cls: 'x-btn-text-icon',
+                        id: idbasename + '-moveuprulebutton',
+                        icon: 'static/images/arrow-up.png',
+                        handler: function(btn, evt){
+                            var grid = Ext.getCmp(idbasename);
+                            grid.moveSelectedRow(grid, -1);
+                        }
+                        },{                       
+                        text: 'Move rule down',
+                        cls: 'x-btn-text-icon',
+                        id: idbasename + '-movedownrulebutton',
+                        icon: 'static/images/arrow-down.png',
+                        handler: function(btn, evt){
+                            var grid = Ext.getCmp(idbasename);
+                            grid.moveSelectedRow(grid, 1);
+                        }
                        }
+
                 ]
             }
 
@@ -388,7 +494,7 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
     closeAction: 'hide',
     bodyStyle: 'padding: 5px',
     width: 680,
-    height: 530,
+    height: 550,
     modal:true,
     clearValues: function() {
         var theform = Ext.getCmp('ruleGeneratorCreateForm').getForm();
@@ -417,6 +523,11 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
                 var samplemapper_fn = function(rule) {return [rule.count, rule.component_id, rule.sample_count, rule.order_id]};
                 theform.setValues(rulegen);
                 theform.rulegen_id = rulegen_id; //set an id on the form so we know it is an edit
+                if (rulegen.version) {
+                    theform.findField('name').disable();
+                } else {
+                    theform.findField('name').enable();
+                }
                 Ext.getCmp('startblock').getStore().loadData(map(rulegen.startblock, mapper_fn));
                 Ext.getCmp('sampleblock').getStore().loadData(map(rulegen.sampleblock, samplemapper_fn));
                 Ext.getCmp('endblock').getStore().loadData(map(rulegen.endblock, mapper_fn));
@@ -445,6 +556,10 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
             {
                 fieldLabel: 'Name',
                 name: 'name'
+            },{
+                fieldLabel: 'Version',
+                name: 'version',
+                xtype: 'displayfield'
             },{
                 fieldLabel: 'Description',
                 xtype: 'textarea',
