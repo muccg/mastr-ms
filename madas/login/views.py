@@ -24,7 +24,6 @@ def processLoginView(request, *args):
 
 
 def processLogin(request, *args):
-    print "PROCESS LOGIN"
     logger.debug('***processLogin : enter ***' )
 
     success = False
