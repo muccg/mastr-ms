@@ -8,7 +8,7 @@ def listRuleGenerators(user=None, accessibility=False, showEnabledOnly=False):
     mauser = None
     if user is not None:
         mauser = getMadasUser(user.username)
-        usernode = mauser.Nodes[0]
+        usernode = mauser.PrimaryNode
     
     rows = RuleGenerator.objects.all()
 
@@ -116,7 +116,7 @@ def create_rule_generator(name, description, accessibility, user, node, startblo
         newRG.name = name
         newRG.description = description
         newRG.created_by = user
-        newRG.node = getMadasUser(user.username).Nodes[0] 
+        newRG.node = getMadasUser(user.username).PrimaryNode 
         newRG.accessibility = accessibility 
         #default state
         newRG.save()
@@ -209,7 +209,7 @@ def clone_rule_generator(rg_id, user):
             description = rg.description,
             accessibility = rg.accessibility,
             created_by = user,
-            node = getMadasUser(user.username).Nodes[0]
+            node = getMadasUser(user.username).PrimaryNode
         )
 
     copy_rules(rg, newRG)
@@ -228,7 +228,7 @@ def create_new_version_of_rule_generator(rg_id, user):
             accessibility = rg.accessibility,
             previous_version = rg,
             created_by = user,
-            node = getMadasUser(user.username).Nodes[0]
+            node = getMadasUser(user.username).PrimaryNode
         )
 
     copy_rules(rg, newRG)

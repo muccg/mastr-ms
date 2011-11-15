@@ -4,12 +4,11 @@ import md5, time
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import logging
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.ldap_helper import LDAPHandler
-from django.shortcuts import render_to_response, render_mako
+from ccg.auth.ldap_helper import LDAPHandler
+from django.shortcuts import render_to_response
 from django.utils import simplejson
-import django.utils.webhelpers
-from django.utils.webhelpers import siteurl, wsgibase
-
+from ccg.utils import webhelpers
+from ccg.utils.webhelpers import siteurl, wsgibase
 from madas import settings #for LDAP details only, can remove when LDAP is removed
 from madas.settings import MADAS_SESSION_TIMEOUT
 from madas.utils.data_utils import jsonResponse, jsonErrorResponse
@@ -223,11 +222,11 @@ def serveIndex(request, *args, **kwargs):
 
     jsonparams = simplejson.dumps(sendparams)
 
-    return render_mako('index.mako', 
-                        APP_SECURE_URL = siteurl(request),
-                        username = request.user.username,
-                        mainContentFunction = mcf,
-                        wh = django.utils.webhelpers,
-                        params = jsonparams 
-                      )
+    return render_to_response('index.mako', { 
+                        'APP_SECURE_URL': siteurl(request),
+                        'username': request.user.username,
+                        'mainContentFunction': mcf,
+                        'wh': webhelpers,
+                        'params': jsonparams,
+                        })
 

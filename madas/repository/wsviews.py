@@ -1931,7 +1931,7 @@ def create_rule_generator(request):
                                          description, 
                                          accessibility, 
                                          request.user, 
-                                         getMadasUser(request.user.username).Nodes[0],
+                                         getMadasUser(request.user.username).PrimaryNode,
                                          startblockvars,
                                          sampleblockvars,
                                          endblockvars)

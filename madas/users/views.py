@@ -1,5 +1,5 @@
 # Create your views here.
-from django.contrib.auth.ldap_helper import LDAPHandler
+from ccg.auth.ldap_helper import LDAPHandler
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect

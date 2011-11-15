@@ -652,7 +652,7 @@ class RuleGenerator(models.Model):
         mauser = getMadasUser(user.username)
         if mauser.IsAdmin or mauser.IsMastrAdmin or \
            (self.is_accessible_by_user and user.id == self.created_by.id) or \
-           (self.is_accessible_by_node and mauser.Nodes[0] == self.node) or \
+           (self.is_accessible_by_node and mauser.PrimaryNode == self.node) or \
            (self.is_accessible_by_all):
            return True
         else:

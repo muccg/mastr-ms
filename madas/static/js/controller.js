@@ -301,7 +301,7 @@ MA.ChangeMainContent = function(contentName, paramArray){
  */
 MA.InitApplication = function(appSecureUrl, username, mainContentFunction, params) {
    //various global settings for Ext
-   Ext.BLANK_IMAGE_URL = appSecureUrl + 'static/ext-3.3.0/resources/images/default/s.gif';
+   Ext.BLANK_IMAGE_URL = appSecureUrl + 'static/ext-3.4.0/resources/images/default/s.gif';
    Ext.QuickTips.init();
    MA.BaseUrl = appSecureUrl;
    

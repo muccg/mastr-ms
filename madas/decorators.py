@@ -1,4 +1,5 @@
-from django.http import HttpResponse, HttpResponseForbidden, HttpResponseUnauthorized
+from django.http import HttpResponse, HttpResponseForbidden
+from ccg.http import HttpResponseUnauthorized
 from madas.users.MAUser import MAUser
 
 def restricted_view(f, restriction):
