@@ -58,7 +58,7 @@ INSTALLED_APPS = [
 AUTHENTICATION_BACKENDS = [
  'madas.repository.backend.MadasBackend',
  #'django.contrib.auth.backends.LDAPBackend',
- 'django.contrib.auth.backends.NoAuthModelBackend',
+ 'ccg.auth.backends.NoAuthModelBackend',
 ]
 
 #email
