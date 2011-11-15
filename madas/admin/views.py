@@ -3,7 +3,7 @@ from django.conf import settings
 from django.db import models
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseNotFound
-from django.contrib.auth.ldap_helper import LDAPHandler
+from ccg.auth.ldap_helper import LDAPHandler
 from django.contrib.auth.models import User
 from django.utils import simplejson as json
 from django.contrib.auth.decorators import login_required
