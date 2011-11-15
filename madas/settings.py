@@ -33,7 +33,7 @@ USE_I18N = True
 ## Django Core stuff
 ##
 TEMPLATE_LOADERS = [
-    'django.template.loaders.makoloader.filesystem.Loader',
+    'ccg.template.loaders.makoloader.filesystem.Loader',
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
 ]
@@ -79,6 +79,13 @@ AUTH_LDAP_BASE = '<ldap base path>'
 AUTH_LDAP_GROUP_BASE = '<ldap path to group base>'
 AUTH_LDAP_ADMIN_BASE = '<ldap path to admin base>'
 AUTH_LDAP_USER_BASE = 'ou=NEMA,ou=People,' + AUTH_LDAP_ADMIN_BASE
+
+AUTH_LDAP_GROUPOC = 'groupofuniquenames'
+AUTH_LDAP_USEROC = 'inetorgperson'
+AUTH_LDAP_MEMBERATTR = 'uniqueMember'
+AUTH_LDAP_USERDN = 'ou=People'
+
+
 LDAPADMINUSERNAME = '<ldap admin path>'
 LDAPADMINPASSWORD = '<your ldap server password here>'
 AUTH_LDAP_GROUP = 'User'
@@ -98,7 +105,6 @@ STATIC_SERVER_PATH = os.path.join(PROJECT_DIRECTORY,"static")
 # a directory that will be writable by the webserver, for storing various files...
 WRITABLE_DIRECTORY = os.path.join(PROJECT_DIRECTORY,"scratch")
 TEMPLATE_DIRS = [
-    os.path.join(PROJECT_DIRECTORY,"templates","mako"), 
     os.path.join(PROJECT_DIRECTORY,"templates"),
 ]
 # mako compiled templates directory

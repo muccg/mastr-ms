@@ -11,7 +11,7 @@ from madas.mdatasync_server import admin as mdatasync_admin
 urlpatterns = patterns('',
 
     (r'^userinfo', 'madas.users.views.userinfo'),
-    (r'^status/', status_view),
+    #(r'^status/', status_view),
     (r'^sync/', include('madas.mdatasync_server.urls')),
 
     # madasrepo

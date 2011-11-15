@@ -1,5 +1,5 @@
 from django.utils import simplejson
-from django.contrib.auth.ldap_helper import LDAPHandler
+from ccg.auth.ldap_helper import LDAPHandler
 from django.contrib import logging
 from madas.utils.data_utils import translate_dict, makeJsonFriendly
 from madas import settings #for ldap admin username/password
