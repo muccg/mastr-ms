@@ -23,7 +23,7 @@
 <link rel="shortcut icon" href="/favicon.ico" />
 <link rel="stylesheet" href="${wh.url('/static/ext-3.4.0/resources/css/ext-all.css')}"/>
 <link rel="stylesheet" type="text/css" href="${wh.url('/static/css/main.css')}"/>
-<link rel="stylesheet" href="${wh.url('/static/ext-3.4.0/examples/ux/css/RowEditor.css')}"/>
+<link rel="stylesheet" href="${wh.url('/static/css/RowEditor.css')}"/>
 <link rel="stylesheet" type="text/css" href="${wh.url('/static/css/file-upload.css')}"/>
 <!--
 <script type="text/javascript" src="${wh.url('/static/js/repo/scriptaculous/scriptaculous.js')}"></script>
