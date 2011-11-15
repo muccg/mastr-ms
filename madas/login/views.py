@@ -222,7 +222,6 @@ def serveIndex(request, *args, **kwargs):
 
     jsonparams = simplejson.dumps(sendparams)
 
-    print 'rendering to response'
     return render_to_response('index.mako', { 
                         'APP_SECURE_URL': siteurl(request),
                         'username': request.user.username,

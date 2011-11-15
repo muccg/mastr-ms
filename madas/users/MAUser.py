@@ -122,6 +122,13 @@ class MAUser(object):
     @Nodes.setter
     def Nodes(self, value):
         self._dict['Nodes'] = value
+
+    @property
+    def PrimaryNode(self):
+        if len(self.Nodes) >=1:
+            return self.Nodes[0]
+        else:
+            return 'Unknown'
     
     @property 
     def CachedDetails(self):
@@ -315,7 +322,7 @@ def loadMadasUser(username):
     #groups
     nodes = user.Nodes
     if len(nodes) > 0:
-        details['node'] = user.Nodes[0]
+        details['node'] = user.PrimaryNode
     else:
         details['node'] = []
     details['isAdmin'] = user.IsAdmin
