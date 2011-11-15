@@ -7,7 +7,9 @@ class MadasBackend(LDAPBackend):
     Returns a MadasUser that has group info etc instead of the plain Django User.
     This will result in request.user being an instance of MadasUser instead of User.
     '''
-
+    supports_object_permissions = False
+    supports_anonymous_user = False
+    
     def get_ldap_groups(self, user):
         # Could cache here or at LDAPHandler level if necessary
         ld = LDAPHandler()
