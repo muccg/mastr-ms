@@ -1,5 +1,5 @@
-from django.contrib.auth.ldap_helper import LDAPHandler
-from django.contrib.auth.backends import LDAPBackend
+from ccg.auth.ldap_helper import LDAPHandler
+from ccg.auth.backends import LDAPBackend
 from madas.repository.models import MadasUser
 
 class MadasBackend(LDAPBackend):

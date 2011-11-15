@@ -15,7 +15,7 @@ from django.utils.translation import force_unicode
 from django.utils.encoding import smart_unicode
 from django.core.serializers.json import DjangoJSONEncoder
 
-from django.contrib.auth.ldap_helper import LDAPHandler
+from ccg.auth.ldap_helper import LDAPHandler
 
 
 def makeJsonFriendly(data):

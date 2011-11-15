@@ -19,10 +19,13 @@ from blueprint import VirtualConfig
 baseconfig = VirtualConfig('baseconfig')  #Begin a new config, call it baseconfig
 baseconfig.deps_root = 'eggs'             #Set the root deps dir, for self and all derivatives
 baseconfig.deps_dir = ''                  #Deps dir relative to root - empty has no effect
-baseconfig.add_local('mango',             'mango-1.2.3-r207.tar.gz')      #add dep
+baseconfig.add_local('mango',             'Mango-py-1.3.1-ccg-195.tar.gz')      #add dep
 baseconfig.add_local('psycopg2',          'psycopg2-2.0.8.tar.gz')        #add dep
 baseconfig.add_local('ldap',              'python-ldap-2.3.5.tar.gz')     #add dep
 baseconfig.add_local('ccg_python_build',  'ccg-python-build_v1_3.tar.gz')     #add dep
+baseconfig.add_local('ccg_django_auth',   'ccg-django-auth-0.3.tar.gz')     #add dep
+baseconfig.add_local('ccg_django_extras', 'ccg-django-extras-0.1.1.tar.gz')     #add dep
+baseconfig.add_local('ccg_django_makoloader', 'ccg-django-makoloader-0.2.2.tar.gz')     #add dep
 
 
 devconfig = VirtualConfig('devconfig', base=baseconfig)
