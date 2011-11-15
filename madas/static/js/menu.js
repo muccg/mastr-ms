@@ -90,7 +90,7 @@ MA.MenuEnsure = function() {
 
 MA.MenuShow = function() {
     var isPrivileged = (MA.CurrentUser.IsAdmin || MA.CurrentUser.IsMastrAdmin || MA.CurrentUser.IsNodeRep || MA.CurrentUser.IsProjectLeader);
-    Ext.BLANK_IMAGE_URL = MA.BaseUrl + 'static/ext-3.3.0/resources/images/default/s.gif';
+    Ext.BLANK_IMAGE_URL = MA.BaseUrl + 'static/ext-3.4.0/resources/images/default/s.gif';
 
     //disable certain menu items if the user is not an admin
     if (isPrivileged) {
