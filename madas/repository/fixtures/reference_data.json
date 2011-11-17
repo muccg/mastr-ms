@@ -199,7 +199,6 @@
         "fields": {
             "obsolescence_date": null, 
             "blank_position": "VT1,98", 
-            "creator": 8, 
             "method_path": "d:\\test\\", 
             "title": "Default Method", 
             "blank_at_end": false, 
@@ -210,14 +209,5 @@
             "template": "## -*- coding: utf-8 -*-\n% for a in runsamples:\n${username},${run.machine.default_data_path},${a.filename},${run.method.method_path},${run.method.method_name},${a.sample_name}\n% endfor", 
             "randomisation": false
         }
-    },
-    
-    (*^*&^fsafdajk
-    glkjgdslkjgds,
-    ,
-    ,
-    ,
-    ,,
-    dfhhdf
-
+    }
 ]
