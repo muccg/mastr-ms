@@ -181,7 +181,7 @@ class InstrumentMethod(models.Model):
     method_name = models.CharField(max_length=255)
     version = models.CharField(max_length=255)
     created_on = models.DateField(null=False, default=date.today)
-    creator = models.ForeignKey(User)
+    creator = models.ForeignKey(User, null=True)
     template = models.TextField()
     randomisation = models.BooleanField(default=False)
     blank_at_start = models.BooleanField(default=False)
