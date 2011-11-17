@@ -1,0 +1,223 @@
+[
+    {
+        "pk": 1, 
+        "model": "repository.organismtype", 
+        "fields": {
+            "name": "Microbial"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "repository.organismtype", 
+        "fields": {
+            "name": "Plant"
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "repository.organismtype", 
+        "fields": {
+            "name": "Animal"
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "repository.organismtype", 
+        "fields": {
+            "name": "Human"
+        }
+    },
+    {
+        "pk": 5, 
+        "model": "repository.organismtype", 
+        "fields": {
+            "name": "Synthetic"
+        }
+    },
+    {
+        "pk": 6, 
+        "model": "repository.organismtype", 
+        "fields": {
+            "name": "Other"
+        }
+    },
+    {
+        "pk": 1, 
+        "model": "repository.experimentstatus", 
+        "fields": {
+            "name": "New", 
+            "description": "New"
+        }
+    },
+    {
+        "pk": 2, 
+        "model": "repository.experimentstatus", 
+        "fields": {
+            "name": "In Design", 
+            "description": "In Design"
+        }
+    }, 
+     {
+        "pk": 3, 
+        "model": "repository.experimentstatus", 
+        "fields": {
+            "name": "Designed", 
+            "description": "Designed"
+        }
+    },
+    {
+        "pk": 4, 
+        "model": "repository.experimentstatus", 
+        "fields": {
+            "name": "Processing", 
+            "description": "Processing"
+        }
+    },
+    {
+        "pk": 5, 
+        "model": "repository.experimentstatus", 
+        "fields": {
+            "name": "Processing", 
+            "description": "Processing"
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "repository.userinvolvementtype", 
+        "fields": {
+            "name": "Principal Investigator"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "repository.userinvolvementtype", 
+        "fields": {
+            "name": "Involved User"
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "repository.userinvolvementtype", 
+        "fields": {
+            "name": "Client"
+        }
+    },
+    {
+        "pk": 1, 
+        "model": "repository.componentgroup", 
+        "fields": {
+            "name": "Sample"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "repository.componentgroup", 
+        "fields": {
+            "name": "Standard"
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "repository.componentgroup", 
+        "fields": {
+            "name": "Blank"
+        }
+    },
+    {
+        "pk": 0, 
+        "model": "repository.component", 
+        "fields": {
+            "sample_code": "Smp", 
+            "component_group": 1, 
+            "sample_type": "Sample", 
+            "filename_prefix": "sample"
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "repository.component", 
+        "fields": {
+            "sample_code": "Std", 
+            "component_group": 2, 
+            "sample_type": "Pure Standard", 
+            "filename_prefix": "standard"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "repository.component", 
+        "fields": {
+            "sample_code": "pbqc", 
+            "component_group": 1, 
+            "sample_type": "Pooled Biological QC", 
+            "filename_prefix": "pbqc"
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "repository.component", 
+        "fields": {
+            "sample_code": "iqc", 
+            "component_group": 1, 
+            "sample_type": "Instrument QC", 
+            "filename_prefix": "iqc"
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "repository.component", 
+        "fields": {
+            "sample_code": "SB", 
+            "component_group": 3, 
+            "sample_type": "Solvent Blank", 
+            "filename_prefix": "solvent"
+        }
+    }, 
+    {
+        "pk": 5, 
+        "model": "repository.component", 
+        "fields": {
+            "sample_code": "RB", 
+            "component_group": 3, 
+            "sample_type": "Reagent Blank", 
+            "filename_prefix": "reagent"
+        }
+    }, 
+    {
+        "pk": 6, 
+        "model": "repository.component", 
+        "fields": {
+            "sample_code": "Sweep", 
+            "component_group": 3, 
+            "sample_type": "Sweep", 
+            "filename_prefix": "sweep"
+        }
+    },
+    {
+        "pk": 5, 
+        "model": "repository.instrumentmethod", 
+        "fields": {
+            "obsolescence_date": null, 
+            "blank_position": "VT1,98", 
+            "creator": 8, 
+            "method_path": "d:\\test\\", 
+            "title": "Default Method", 
+            "blank_at_end": false, 
+            "obsolete": false, 
+            "method_name": "a.m", 
+            "version": "1.0", 
+            "blank_at_start": false, 
+            "template": "## -*- coding: utf-8 -*-\n% for a in runsamples:\n${username},${run.machine.default_data_path},${a.filename},${run.method.method_path},${run.method.method_name},${a.sample_name}\n% endfor", 
+            "randomisation": false
+        }
+    },
+    
+    (*^*&^fsafdajk
+    glkjgdslkjgds,
+    ,
+    ,
+    ,
+    ,,
+    dfhhdf
+
+]
