@@ -4,7 +4,7 @@ import pickle
 from django.conf import settings
 
 from mdatasync_server.models import *
-from django.contrib import logging
+import logging
 LOGNAME = 'mdatasync_server_log'
 logger = logging.getLogger(LOGNAME)
 
