@@ -25,19 +25,19 @@ def snapshot(auto_confirm_purge=False):
     env.auto_confirm_purge=auto_confirm_purge
     _ccg_deploy_snapshot()
 
-def release(auto_confirm_purge=False):
+def release(auto_confirm_purge=False, migration=True):
     """
     Make a release deployment
     """
     env.auto_confirm=auto_confirm_purge
-    _ccg_deploy_release()
+    _ccg_deploy_release(migration)
 
-def testrelease(auto_confirm_purge=False):
+def testrelease(auto_confirm_purge=False, migration=True):
     """
     Make a release deployment using the dev settings file
     """
     env.auto_confirm=auto_confirm_purge
-    _ccg_deploy_release(devrelease=True)
+    _ccg_deploy_release(devrelease=True, migration)
 
 def purge(auto_confirm_purge=False):
     """
