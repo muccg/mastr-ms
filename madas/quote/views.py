@@ -10,7 +10,7 @@ from django.utils.webhelpers import siteurl, wsgibase
 from django.core.servers.basehttp import FileWrapper
 from django.utils import simplejson
 from django.core.mail import send_mail
-from django.contrib import logging
+import logging
 
 from madas.decorators import *
 from madas.utils.data_utils import jsonResponse, jsonErrorResponse, json_encode, uniqueList
