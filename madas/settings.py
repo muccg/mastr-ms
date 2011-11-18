@@ -39,7 +39,6 @@ TEMPLATE_LOADERS = [
 ]
 
 MIDDLEWARE_CLASSES = [
-    'django.middleware.email.EmailExceptionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -178,12 +177,102 @@ KEYS_TO_EMAIL = "<email address to receive datasync key upload notifications>"
 ##
 ## LOGGING
 ##
-import logging, logging.handlers
-LOGGING_LEVEL = logging.DEBUG
-install_name = PROJECT_DIRECTORY.split('/')[-2]
-LOGGING_FORMATTER = logging.Formatter('[%(name)s:' + install_name + ':%(levelname)s:%(filename)s:%(lineno)s:%(funcName)s] %(message)s')
-LOGS = ['mdatasync_server_log', 'madas_log']
-import ccglogging
+#import logging, logging.handlers
+#LOGGING_LEVEL = logging.DEBUG
+#install_name = PROJECT_DIRECTORY.split('/')[-2]
+#LOGGING_FORMATTER = logging.Formatter('[%(name)s:' + install_name + ':%(levelname)s:%(filename)s:%(lineno)s:%(funcName)s] %(message)s')
+#LOGS = ['mdatasync_server_log', 'madas_log']
+
+LOG_DIRECTORY = os.path.join(PROJECT_DIRECTORY, "logs")
+try:
+    if not os.path.exists(LOG_DIRECTORY):
+        os.mkdir(LOG_DIRECTORY)
+except:
+    pass
+os.path.exists(LOG_DIRECTORY), "No logs directory, please create one: %s" % LOG_DIRECTORY
+INSTALL_NAME = PROJECT_DIRECTORY.split('/')[-2]
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'verbose': {
+            'format': 'MADAS [%(name)s:' + INSTALL_NAME + ':%(levelname)s:%(asctime)s:%(filename)s:%(lineno)s:%(funcName)s] %(message)s'
+        },
+        'db': {
+            'format': 'MADAS [%(name)s:' + INSTALL_NAME + ':%(duration)s:%(sql)s:%(params)s] %(message)s'
+        },
+        'simple': {
+            'format': 'MADAS ' + INSTALL_NAME + ' %(levelname)s %(message)s'
+        },
+    },
+    'filters': {
+    },
+    'handlers': {
+        'null': {
+            'level':'DEBUG',
+            'class':'django.utils.log.NullHandler',
+        },
+        'console':{
+            'level':'DEBUG',
+            'class':'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
+        'errorfile':{
+            'level':'ERROR',
+            'class':'logging.handlers.TimedRotatingFileHandler',
+            'filename': os.path.join(LOG_DIRECTORY, 'error.log'),
+            'when':'midnight',
+            'formatter': 'verbose'
+        },
+        'madasfile':{
+            'class':'logging.handlers.TimedRotatingFileHandler',
+            'filename': os.path.join(LOG_DIRECTORY, 'madas.log'),
+            'when':'midnight',
+            'formatter': 'verbose'
+        },
+        'mdatasyncfile':{
+            'class':'logging.handlers.TimedRotatingFileHandler',
+            'filename': os.path.join(LOG_DIRECTORY, 'mdatasync_server.log'),
+            'when':'midnight',
+            'formatter': 'verbose'
+        },
+        'db_logfile':{
+            'level':'DEBUG',
+            'class':'logging.handlers.TimedRotatingFileHandler',
+            'filename': os.path.join(LOG_DIRECTORY, 'madas_db.log'),
+            'when':'midnight',
+            'formatter': 'db'
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+            'formatter':'verbose',
+            'include_html':True
+        }
+    },
+    'root': {
+            'handlers':['console', 'errorfile', 'mail_admins'],
+            'level':'ERROR',
+    },
+    'loggers': {
+        'django': {
+            'handlers':['null'],
+            'propagate': False,
+            'level':'INFO',
+        },
+        'madas_log': {
+            'handlers': ['madasfile'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'mdatasync_server_log': {
+            'handlers': ['mdatasyncfile'],
+            'level': 'INFO',
+            'propagate': True,
+        }
+    }
+}
 
 # Override defaults with your local instance settings.
 # They will be loaded from appsettings.<projectname>, which can exist anywhere
