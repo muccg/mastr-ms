@@ -153,7 +153,8 @@ INSTALLED_APPS.extend([
     'madas.quote',
     'madas.users',
     'madas.admin',
-    'madas.repository'])
+    'madas.repository',
+    'south'])
 
 DATABASES = {
     'default': {
