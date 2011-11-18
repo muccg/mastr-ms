@@ -16,7 +16,7 @@ from mdatasync_server.rules import *
 from ClientState import * #All the functions for dealing with clientstates
 from django.conf import settings
 
-from django.contrib import logging
+import logging
 LOGNAME = 'mdatasync_server_log'
 logger = logging.getLogger(LOGNAME)
 logger.setLevel(logging.WARNING) #default is warning

@@ -1,7 +1,7 @@
 from madas.utils.data_utils import jsonResponse, jsonErrorResponse
 from madas.users.MAUser import *
 from madas.utils.mail_functions import sendRegistrationToAdminEmail
-from django.contrib import logging
+import logging
 
 logger = logging.getLogger('madas_log')
 

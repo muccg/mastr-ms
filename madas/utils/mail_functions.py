@@ -2,7 +2,7 @@ from django.core.mail import send_mail
 from settings import RETURN_EMAIL
 from django.utils.webhelpers import siteurl
 from django.core.mail import EmailMessage
-from django.contrib import logging
+import logging
 from madas.users.MAUser import MADAS_USER_GROUP
 
 logger = logging.getLogger('madas_log')

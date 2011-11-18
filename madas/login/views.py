@@ -2,7 +2,7 @@
 import md5, time
 
 from django.http import HttpResponse, HttpResponseRedirect
-from django.contrib import logging
+import logging
 from django.contrib.auth import authenticate, login, logout
 from ccg.auth.ldap_helper import LDAPHandler
 from django.shortcuts import render_to_response

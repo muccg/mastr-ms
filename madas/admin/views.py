@@ -7,7 +7,7 @@ from ccg.auth.ldap_helper import LDAPHandler
 from django.contrib.auth.models import User
 from django.utils import simplejson as json
 from django.contrib.auth.decorators import login_required
-from django.contrib import logging
+import logging
 
 from madas.utils.data_utils import jsonResponse, jsonErrorResponse, translate_dict
 from madas.quote.models import Quoterequest, Formalquote, Organisation, UserOrganisation
