@@ -3,7 +3,7 @@
 Django settings import defaults for development server
 """
 import os
-from django.utils.webhelpers import url
+from ccg.utils.webhelpers import url
 
 # SCRIPT_NAME isnt set when not under wsgi
 if not os.environ.has_key('SCRIPT_NAME'):

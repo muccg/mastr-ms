@@ -6,7 +6,7 @@ from django.db import models
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
-from django.utils.webhelpers import siteurl, wsgibase
+from ccg.utils.webhelpers import siteurl, wsgibase
 from django.core.servers.basehttp import FileWrapper
 from django.utils import simplejson
 from django.core.mail import send_mail

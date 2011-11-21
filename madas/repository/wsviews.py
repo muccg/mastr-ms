@@ -4,7 +4,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RUN_STATES, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure, MadasUser, RuleGenerator, Component
 from madas.quote.models import Organisation, Formalquote
-from django.utils import webhelpers
+from ccg.utils import webhelpers
 from django.contrib.auth.models import User
 from django.utils import simplejson as json
 from madas.decorators import mastr_users_only
