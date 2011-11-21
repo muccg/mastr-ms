@@ -127,6 +127,10 @@ SESSION_COOKIE_PATH = url('/')
 SESSION_SAVE_EVERY_REQUEST = True
 CSRF_COOKIE_NAME = "csrftoken_madas_repoadmin"
 SESSION_COOKIE_AGE = 60*60
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = True
+if "LOCALDEV" in os.environ:
+    SESSION_COOKIE_SECURE = False    
 
 #functions to evaluate for status checking
 from status_checks import *
