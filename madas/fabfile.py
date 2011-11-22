@@ -29,6 +29,7 @@ def release(auto_confirm_purge=False, migration=True):
     """
     Make a release deployment
     """
+    env.ccg_virtualenv = "/usr/local/python/cleanpython/bin/python virt_madas/bin/virtualenv"
     env.auto_confirm=auto_confirm_purge
     _ccg_deploy_release(migration=migration)
 
