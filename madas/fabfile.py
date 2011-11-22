@@ -11,6 +11,7 @@ env.content_excludes.extend([]) # add quoted patterns here for extra rsync exclu
 env.content_includes.extend([]) # add quoted patterns here for extra rsync includes
 env.auto_confirm_purge = False #controls whether the confirmation prompt for purge is used
 
+env.ccg_virtualenv = "/usr/local/python/cleanpython/bin/python virt_madas/bin/virtualenv"
 def deploy(auto_confirm_purge = False, migration=True):
     """
     Make a user deployment
@@ -29,7 +30,6 @@ def release(auto_confirm_purge=False, migration=True):
     """
     Make a release deployment
     """
-    env.ccg_virtualenv = "/usr/local/python/cleanpython/bin/python virt_madas/bin/virtualenv"
     env.auto_confirm=auto_confirm_purge
     _ccg_deploy_release(migration=migration)
 
