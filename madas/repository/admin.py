@@ -4,7 +4,7 @@ from quote.models import Organisation, Formalquote
 from mdatasync_server.models import NodeClient
 from django.contrib import admin
 from django.http import HttpResponseRedirect
-from django.utils.webhelpers import url
+from ccg.utils.webhelpers import url
 from django.core import urlresolvers
 from django.db.models import Q
 
