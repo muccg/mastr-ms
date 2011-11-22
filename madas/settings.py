@@ -17,12 +17,7 @@ DEBUG = True
 DEV_SERVER = True
 SITE_ID = 1
 APPEND_SLASH = True
-
-# https
-if SCRIPT_NAME:
-    SSL_ENABLED = True
-else:
-    SSL_ENABLED = False
+SSL_ENABLED = True
 
 # Locale
 TIME_ZONE = 'Australia/Perth'
@@ -94,9 +89,6 @@ LDAP_DONT_REQUIRE_CERT = True
 
 #Server side directories
 PERSISTENT_FILESTORE = os.path.normpath(os.path.join(PROJECT_DIRECTORY, '..', '..', 'files'))
-if "LOCALDEV" in os.environ:
-    SSL_ENABLED = False
-    PERSISTENT_FILESTORE = os.path.normpath('/tmp/madas/filedata')
 #Ensure the persistent storage dir exits. If it doesn't, exit noisily.
 assert os.path.exists(PERSISTENT_FILESTORE), "This application cannot start: It expects a writeable directory at %s to use as a persistent filestore" % (PERSISTENT_FILESTORE) 
 # for local development, this is set to the static serving directory. For deployment use Apache Alias
@@ -115,7 +107,6 @@ MEDIA_ROOT = os.path.join(PROJECT_DIRECTORY,"static")
 MEDIA_URL = '/static/'
 ADMIN_MEDIA_PREFIX = url('/static/admin-media/')
 
-LOG_DIRECTORY = os.path.join(PROJECT_DIRECTORY, 'logs')
 TEMPLATE_DEBUG = DEBUG
 LOGIN_URL = url('/accounts/login/')
 LOGOUT_URL = url('/accounts/logout/')
@@ -129,8 +120,6 @@ CSRF_COOKIE_NAME = "csrftoken_madas_repoadmin"
 SESSION_COOKIE_AGE = 60*60
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = True
-if "LOCALDEV" in os.environ:
-    SESSION_COOKIE_SECURE = False    
 
 #functions to evaluate for status checking
 from status_checks import *
@@ -181,11 +170,6 @@ KEYS_TO_EMAIL = "<email address to receive datasync key upload notifications>"
 ##
 ## LOGGING
 ##
-#import logging, logging.handlers
-#LOGGING_LEVEL = logging.DEBUG
-#install_name = PROJECT_DIRECTORY.split('/')[-2]
-#LOGGING_FORMATTER = logging.Formatter('[%(name)s:' + install_name + ':%(levelname)s:%(filename)s:%(lineno)s:%(funcName)s] %(message)s')
-#LOGS = ['mdatasync_server_log', 'madas_log']
 
 LOG_DIRECTORY = os.path.join(PROJECT_DIRECTORY, "logs")
 try:
