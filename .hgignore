@@ -1,6 +1,7 @@
 .*\.pyc$
 ^madas/virt_madas/*
 ^madas/tmp/*
+^madas/fab-tmp/*
 ^madas/scratch/*
 ^madas/log/*
 ^madas/virtualenv*
