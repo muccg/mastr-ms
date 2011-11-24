@@ -6,6 +6,9 @@ from quote.models import Organisation, Formalquote
 from mdatasync_server.models import NodeClient
 import grp
 from madas.users.MAUser import getMadasUser
+from django.core.files.storage import FileSystemStorage
+import os
+from madas import settings
 
 class SampleNotInClassException(Exception):
     pass
@@ -215,7 +218,7 @@ class Experiment(models.Model):
                 abspath is the absolute path
                 relpath is the path, relative to the settings.REPO_FILES_ROOT
         '''
-        import settings, os, stat
+        import stat
         
         yearpath = os.path.join('experiments', str(self.created_on.year) )
         monthpath = os.path.join(yearpath, str(self.created_on.month) )
@@ -239,6 +242,9 @@ class Experiment(models.Model):
     def __unicode__(self):
         return self.title
 
+
+sopfs = FileSystemStorage(location=os.path.join(settings.REPO_FILES_ROOT, 'sops'))
+
 class StandardOperationProcedure(models.Model):
     responsible = models.CharField(max_length=255, null=True, blank=True)
     label = models.CharField(max_length=255, null=True, blank=True)
@@ -251,10 +257,10 @@ class StandardOperationProcedure(models.Model):
     content = models.CharField(max_length=255, null=True, blank=True)
 
     def _filepath(self, filename):
-        import settings, os
-        return os.path.join(settings.REPO_FILES_ROOT, 'sops', self.version, filename)
+        return os.path.join(sopfs.location, self.version, filename)
 
-    attached_pdf = models.FileField(upload_to=_filepath, null=True, blank=True)
+
+    attached_pdf = models.FileField(storage=sopfs, upload_to=_filepath, null=True, blank=True)
     experiments = models.ManyToManyField(Experiment, null=True, blank=True)
     
     def __unicode__(self):
@@ -420,7 +426,7 @@ class Run(models.Model):
                 abspath is the absolute path
                 relpath is the path, relative to the settings.REPO_FILES_ROOT
         '''
-        import settings, os, stat
+        import stat
         
         yearpath = os.path.join('runs', str(self.created_on.year) )
         monthpath = os.path.join(yearpath, str(self.created_on.month) )
