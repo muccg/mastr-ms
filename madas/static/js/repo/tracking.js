@@ -154,7 +154,7 @@ MA.SampleTracking = {
                       { header: "Class", sortable:true, menuDisabled:true, dataIndex:'sample_class', renderer:renderClass },
                       { header: "Last Status", sortable:true, menuDisabled:true, width:300, dataIndex:'last_status' }
                       ],
-            store: sampleStore
+            store: randomisableSampleStore
             },
             {
             xtype:'grid',
