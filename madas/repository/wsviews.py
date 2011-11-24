@@ -316,29 +316,30 @@ def records(request, model, field, value):
     output = makeJsonFriendly(output)
     return HttpResponse(json.dumps(output))
 
+@mastr_users_only
+def recent_projects(request):
+    output = json_records_template(['id', 'title', 'client'])
+    user = request.user
+    ninety_days_ago = datetime.now() - timedelta(90)
+    projects = Project.objects.filter(
+        Q(client=user) | 
+        Q(managers=user) 
+        ).filter(created_on__gt=ninety_days_ago) 
+    for project in projects:
+        output['rows'].append({
+            'id': project.id,
+            'title': project.title,
+            'client': project.client.username
+        })
+
+    output['results'] = len(output['rows'])
+            
+    output = makeJsonFriendly(output)
+    return HttpResponse(json.dumps(output))
+
+@mastr_users_only
 def recent_experiments(request):
-     ### TODO why do we need this, we'll get a 403 from decorator now if not logged in and not in group - ABM
-    authenticated = request.user.is_authenticated()
-    if not authenticated == True:
-        return jsonResponse()
-    ### End Authorisation Check ###
-    
-    # basic json that we will fill in
-    output = {'metaData': { 'totalProperty': 'results',
-        'root': 'rows',
-            'id': 'id',
-                'successProperty': 'success',
-                    'fields': []
-                        },
-                            'results': 0,
-                                'authenticated': True,
-                                    'authorized': True,
-                                        'success': True,
-                                            'rows': []
-                                            }
-    output['metaData']['fields'].append({'name':'id'})
-    output['metaData']['fields'].append({'name':'title'})
-    output['metaData']['fields'].append({'name':'status'})
+    output = json_records_template(['id', 'title', 'status'])
     user = request.user
     ninety_days_ago = datetime.now() - timedelta(90)
     experiments = Experiment.objects.filter(
@@ -358,31 +359,9 @@ def recent_experiments(request):
     output = makeJsonFriendly(output)
     return HttpResponse(json.dumps(output))
 
+@mastr_users_only
 def recent_runs(request):
-     ### TODO why do we need this, we'll get a 403 from decorator now if not logged in and not in group - ABM
-    authenticated = request.user.is_authenticated()
-    if not authenticated == True:
-        return jsonResponse()
-    ### End Authorisation Check ###
-    
-    # basic json that we will fill in
-    output = {'metaData': { 'totalProperty': 'results',
-        'root': 'rows',
-            'id': 'id',
-                'successProperty': 'success',
-                    'fields': []
-                        },
-                            'results': 0,
-                                'authenticated': True,
-                                    'authorized': True,
-                                        'success': True,
-                                            'rows': []
-                                            }
-    output['metaData']['fields'].append({'name':'id'})
-    output['metaData']['fields'].append({'name':'title'})
-    output['metaData']['fields'].append({'name':'method'})
-    output['metaData']['fields'].append({'name':'machine'})
-    output['metaData']['fields'].append({'name':'state'})
+    output = json_records_template(['id', 'title', 'method', 'machine', 'state'])
     user = request.user
     ninety_days_ago = datetime.now() - timedelta(90)
     runs = Run.objects.filter(creator=user, created_on__gt=ninety_days_ago) 

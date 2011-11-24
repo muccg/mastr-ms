@@ -215,6 +215,84 @@ MA.Dashboard.CreateQuotesRequiringAttention = function() {
     });
    };
 
+MA.Dashboard.CreateRecentProjects = function() {
+    var selectionModel = new Ext.grid.RowSelectionModel({ 
+        singleSelect: true
+    });
+    var madasReader = new Ext.data.JsonReader({
+        root            : 'response.value.items',
+        versionProperty : 'response.value.version',
+        totalProperty   : 'response.value.total_count'
+        }, [
+            { name: 'id', sortType: Ext.data.SortTypes.asInt },
+            { name: 'title', sortType: Ext.data.SortTypes.asText },
+            { name: 'client', sortType: Ext.data.SortTypes.asText }
+        ]);
+
+    var dataurl = MA.BaseUrl + "ws/recent_projects";
+    var editProject = function(project_id) {
+        MA.LoadProject(project_id);
+    };
+    var projectEditHandler = function(el, ev) {
+        if (selectionModel.hasSelection()) {
+            editProject(selectionModel.getSelected().data.id);
+        }
+    };
+
+    var toolbar = new Ext.Toolbar({
+        items   : [
+            { id: 'projectEditBtn', text: 'Edit', handler: projectEditHandler }
+        ]
+    });
+
+    return new Ext.Panel({
+        title:'Recent Projects',
+        style:'padding:20px 20px 0px 20px',
+        id:'dashboard-recent-projects',
+        tbar: toolbar,
+        init: function() {
+            this.items.items[0].store.load();
+        },
+        items:[{
+            xtype:'grid',
+            border: false,
+            autoScroll: true,
+            stripeRows: true,
+            height: 150,
+            ds: new Ext.data.Store({
+                id         : 'bSId',
+                reader     : madasReader,
+                url        : dataurl
+            }),
+            sm: selectionModel, 
+            listeners: {
+                rowdblclick: function(grid, rowIndex, evt) {
+                    var record = grid.store.getAt(rowIndex);
+                    editProject(record.get('id'));
+                }
+            },
+            columns: [{
+                    header: 'ID',
+                    sortable: true,
+                    width: 40,
+                    dataIndex: 'id'
+                },{
+                    header: 'Title',
+                    width: 300,
+                    dataIndex: 'title'
+                },{
+                    header: 'Client',
+                    sortable: true,
+                    width: 400,
+                    dataIndex: 'client'
+                }
+            ]}
+       ]
+    });
+   };
+
+
+
 MA.Dashboard.CreateRecentExperiments = function() {
     var selectionModel = new Ext.grid.RowSelectionModel({ 
         singleSelect: true
@@ -453,6 +531,7 @@ MA.Dashboard.CreateAdminDashboard = function() {
             MA.Dashboard.CreateToolbar(),
             MA.Dashboard.CreatePendingUserRequests(),
             MA.Dashboard.CreateQuotesRequiringAttention(),
+            MA.Dashboard.CreateRecentProjects(),
             MA.Dashboard.CreateRecentExperiments()
         ]
     });
@@ -488,6 +567,7 @@ MA.Dashboard.CreateStaffDashboard = function() {
         },
         items: [
             MA.Dashboard.CreateToolbar(),
+            MA.Dashboard.CreateRecentProjects(),
             MA.Dashboard.CreateRecentExperiments(),
             MA.Dashboard.CreateRecentRuns()
         ]
