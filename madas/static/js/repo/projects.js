@@ -538,15 +538,15 @@ items:[
                                                                fields: ["nav", "init", "blur", "enabled"],
                                                                data: [ 
                                                                       [ "Experiment Details", MA.ExperimentController.init, MA.ExperimentController.blur, true ],
+                                                                      [ "Access", MA.AccessInit, MA.Blur, false ],
                                                                       [ "Source", MA.BioSourceInit, MA.BioSourceBlur, false ],
                                                                       [ "Treatment", MA.TreatmentInit, MA.Blur, false ],
                                                                       [ "Sample Preparation", MA.SamplePrepInit, MA.Blur, false ],
                                                                       [ "Sample Classes", MA.ExperimentSamplesInit, MA.Blur, false ],
                                                                       [ "Samples", MA.ExperimentSamplesOnlyInit, MA.Blur, false ],
                                                                       [ "Sample Tracking", MA.SampleTrackingInit, MA.Blur, false ],
-                                                                      [ "Files", MA.FilesInit, MA.Blur, false ],
-                                                                      [ "Access", MA.AccessInit, MA.Blur, false ],
-                                                                      [ "Runs", MA.ExperimentRunsInit, MA.Blur, false]
+                                                                      [ "Runs", MA.ExperimentRunsInit, MA.Blur, false],
+                                                                      [ "Files", MA.FilesInit, MA.Blur, false ]
                                                                       ]
                                                                }
                                                                )  
@@ -601,15 +601,15 @@ items:[
                },
                items:[
                       MA.ExperimentDetails,
+                      MA.Access,
                       MA.BioSource,
                       MA.Treatment,
                       MA.SamplePrep,
                       MA.ExperimentSamples,
                       MA.ExperimentSamplesOnly,
                       MA.SampleTracking,
-                      MA.Files,
-                      MA.Access,
-                      MA.ExperimentRunListCmp
+                      MA.ExperimentRunListCmp,
+                      MA.Files
                       ]
                }]
        }
