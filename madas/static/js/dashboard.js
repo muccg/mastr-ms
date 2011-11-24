@@ -309,7 +309,7 @@ MA.Dashboard.CreateRecentExperiments = function() {
 
     var dataurl = MA.BaseUrl + "ws/recent_experiments";
     var editExperiment = function(experiment_id) {
-        document.location = 'repo/experiment/view?id=' + experiment_id;
+        MA.ExperimentController.loadExperiment(experiment_id);
     };
     var experimentEditHandler = function(el, ev) {
         if (selectionModel.hasSelection()) {
@@ -327,6 +327,7 @@ MA.Dashboard.CreateRecentExperiments = function() {
         title:'Recent Experiments',
         style:'padding:20px 20px 0px 20px',
         id:'dashboard-recent-experiments',
+        tbar: toolbar,
         init: function() {
             this.items.items[0].store.load();
         },
@@ -342,6 +343,12 @@ MA.Dashboard.CreateRecentExperiments = function() {
                 url        : dataurl
             }),
             sm: selectionModel, 
+            listeners: {
+                rowdblclick: function(grid, rowIndex, evt) {
+                    var record = grid.store.getAt(rowIndex);
+                    editExperiment(record.get('id'));
+                }
+            },
             columns: [{
                     header: 'ID',
                     sortable: true,
