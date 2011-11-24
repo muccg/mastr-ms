@@ -572,11 +572,17 @@ class InstrumentSOP(models.Model):
 class ComponentGroup(models.Model):
     name = models.CharField(max_length=50) 
 
+    def __unicode__(self):
+        return self.name
+
 class Component(models.Model):
     sample_type = models.CharField(max_length=255)
     sample_code = models.CharField(max_length=255)
     component_group = models.ForeignKey(ComponentGroup)
     filename_prefix = models.CharField(max_length=50)
+
+    def __unicode__(self):
+        return "%s (%s)" % (self.sample_type, self.sample_code)
 
 class RuleGenerator(models.Model):
     

@@ -370,6 +370,9 @@ class ClientFileAdmin(ExtJsonInterface, admin.ModelAdmin):
 class InstrumentSOPAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ['title','enabled']
 
+class ComponentAdmin(ExtJsonInterface, admin.ModelAdmin):
+    list_display = ('sample_type', 'sample_code', 'component_group')
+
 admin.site.register(OrganismType, OrganismTypeAdmin)
 admin.site.register(UserInvolvementType, UserInvolvementTypeAdmin)
 admin.site.register(Organ, OrganAdmin)
@@ -390,3 +393,4 @@ admin.site.register(SampleLog, SampleLogAdmin)
 admin.site.register(Run, RunAdmin)
 admin.site.register(ClientFile, ClientFileAdmin)
 admin.site.register(InstrumentSOP, InstrumentSOPAdmin)
+admin.site.register(Component, ComponentAdmin)
