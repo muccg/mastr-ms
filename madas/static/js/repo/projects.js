@@ -552,38 +552,8 @@ items:[
                                                                )  
                                }
                                ]
-                       },
-                       {
-                       title: 'Current Run',
-                       frame: true,
-                       style:'background:white;margin-top:20px;',
-                       items: [
-                               {
-                               xtype:'panel',
-                               bodyStyle:'padding:4px;',
-                               id:'runPanel',
-                               items:[
-                                      {
-                                      xtype:'panel',
-                                      html:'Selected samples will be added to:'
-                                      },
-                                      {
-                                      xtype:'panel',
-                                      html:'New Untitled Run',
-                                      id:'currentRunTitle',
-                                      style:'font-weight:bold;padding:6px;'
-                                      },
-                                      {
-                                      xtype:'button',
-                                      text:'View',
-                                      handler:function(){MA.RunCmp.show();},
-                                      style: "margin-left: auto; margin-right: auto"
-                                      }
-                                      ]
-                               }
-                               ]
                        }
-                       ]
+                      ]
                },{
                id: 'expContent',
                collapsible: false,

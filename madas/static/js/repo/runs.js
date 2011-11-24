@@ -6,7 +6,6 @@
 MA.CreateNewRun = function() {
     Ext.getCmp('runlistview').clearSelections();
     Ext.getCmp("runDetails").createRun();
-    Ext.getCmp('currentRunTitle').update("New Untitled Run");
 };
 
 
@@ -27,17 +26,7 @@ MA.RunCmpRowSelect = function(view, nodes) {
         var r = view.getSelectedRecords()[0];
 
         Ext.getCmp("runDetails").selectRun(r);
-        Ext.getCmp('currentRunTitle').update(r.data.title);
     }
-};
-
-MA.RunSaveCallback = function(id) {
-    var record = newRunsStore.getById(id);
-    var title = "New Untitled Run";
-    if (record) {
-        title = record.data.title;
-    }
-    Ext.getCmp('currentRunTitle').update(title);
 };
 
 MA.RunDeleteCallback = function() {
@@ -47,7 +36,6 @@ MA.RunDeleteCallback = function() {
 
 MA.ClearCurrentRun = function() {
     Ext.getCmp("runDetails").clearRun();
-    Ext.getCmp('currentRunTitle').update("New Untitled Run");
 };
 
 // Create a component we can use both here and from the run list.
@@ -824,10 +812,7 @@ MA.RunCmp = new Ext.Window({
             listeners: {
                 "delete": MA.RunDeleteCallback,
                 "save": function (id) {
-                    MA.ReloadRunStores({callback: function() {
-                            MA.RunSaveCallback(id);
-                        }
-                    });
+                    MA.ReloadRunStores();
                 }
             }
         }, {allowCreatingNewRun: true, allowAddingSamples: true})
