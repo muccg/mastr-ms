@@ -1090,10 +1090,23 @@ def recordsRuns(request):
         'generated_output', 'title', 'method', 'incomplete_sample_count', 'experiment__unicode' 
         ])
 
-    if getMadasUser(request.user.username).IsAdmin:
-        rows = Run.objects.all()
+    condition = None
+
+    experiment_id = request.REQUEST.get('experiment__id')
+    if experiment_id:
+        condition = Q(experiment__id = experiment_id)
+
+    if not getMadasUser(request.user.username).IsAdmin:
+        extra_condition = Q(samples__experiment__project__managers=request.user)|Q(samples__experiment__users=request.user) | Q(creator=request.user)
+        if condition:
+            condition = condition & extra_condition
+        else:
+            condition = extra_condition
+
+    if condition:
+        rows = Run.objects.filter(condition)
     else:
-        rows = Run.objects.filter(Q(samples__experiment__project__managers=request.user)|Q(samples__experiment__users=request.user) | Q(creator=request.user))
+        rows = Run.objects.all()
     
     output['results'] = len(rows)
 
