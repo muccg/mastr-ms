@@ -136,6 +136,26 @@ function ExperimentController() {
         MA.ExperimentDeferredInvocation = {'index':-1, 'init':MA.Null};
     };
 
+    this.updateSamplePreparationNotes = function(notes) {
+        var expId = self.currentId();
+        if (expId === 0) {
+            return;
+        }
+        Ext.Ajax.request({
+            url: wsBaseUrl + 'update/experiment/' + expId,
+            params: {'sample_preparation_notes': notes },
+            success: function(resp, opts) {
+                self.mask.hide();
+            },
+            failure: function(resp, opts) {
+                self.mask.hide();
+                Ext.Msg.alert('Unexpected Error!', 'Unexpected error while trying to save Sample Preparation Notes');
+            }
+        });
+        self.mask.show();
+
+    };
+
     this.showFieldsets = function(organismType) {
         Ext.getCmp('organismFieldset').hide();
         Ext.getCmp('plantFieldset').hide();
@@ -210,6 +230,10 @@ function ExperimentController() {
                                                  var tcomment = Ext.getCmp('trackingExperimentComment');
                                                  var tformalQuote = Ext.getCmp('trackingFormalQuote');
                                                  var tjobNumber = Ext.getCmp('trackingJobNumber');
+
+                                                 // and the ones on sample preparation page
+                                                 var spnotes = Ext.getCmp('samplePreparationNotes');
+
                                                  
                                                  if (!namefield || !desc || !comment || !formalQuote || !jobNumber) {
                                                      return;
@@ -227,6 +251,8 @@ function ExperimentController() {
                                                  tcomment.setValue('');
                                                  tformalQuote.setValue('');
                                                  tjobNumber.setValue('');
+
+                                                 spnotes.setValue('');
     
                                                  var rs = response.responseJSON.rows;
                                                  
@@ -244,6 +270,8 @@ function ExperimentController() {
                                                      tcomment.setValue(rs[0].comment);
                                                      tformalQuote.setValue(rs[0].formal_quote);
                                                      tjobNumber.setValue(rs[0].job_number);
+
+                                                     spnotes.setValue(rs[0].sample_preparation_notes);
                                                  }
                                          
                                                  self.updateNav();
