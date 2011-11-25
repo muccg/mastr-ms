@@ -209,6 +209,7 @@ class Experiment(models.Model):
     job_number = models.CharField(max_length=30)
     project = models.ForeignKey(Project)
     instrument_method = models.ForeignKey(InstrumentMethod, null=True, blank=True)
+    sample_preparation_notes = models.TextField(null=True, blank=True)
     # ? files
   
     def ensure_dir(self):
@@ -260,7 +261,7 @@ class StandardOperationProcedure(models.Model):
         return os.path.join(sopfs.location, self.version, filename)
 
 
-    attached_pdf = models.FileField(storage=sopfs, upload_to=_filepath, null=True, blank=True)
+    attached_pdf = models.FileField(storage=sopfs, upload_to=_filepath, null=True, blank=True, max_length=500)
     experiments = models.ManyToManyField(Experiment, null=True, blank=True)
     
     def __unicode__(self):

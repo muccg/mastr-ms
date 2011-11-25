@@ -41,6 +41,7 @@ MA.SamplePrep = {
             collapsible: false,
             autoScroll:true,
             layout:'form',
+            labelAlign: 'top',
             minSize: 75,
             items: [ 
                 { xtype:'editorgrid', 
@@ -99,7 +100,24 @@ MA.SamplePrep = {
                     ],
                     listeners: {'afteredit':function(e) { MA.SaveSOPRow(e); }},
                     store: sopStore
+                },{
+                    id: 'samplePreparationNotes',
+                    xtype: 'textarea',
+                    fieldLabel: 'Notes',
+                    autoScroll: true,
+                    maxLength: 2000,
+                    width: 500,
+                    height: 200,
+                    listeners: {
+                        'change': function(field, newValue, oldValue) {
+                            if (field.isValid()) {
+                                MA.ExperimentController.updateSamplePreparationNotes(newValue);
+                            }
+                         } 
+                    }
                 }
+                
+
 //                },
 //                { xtype: 'textfield', fieldLabel: 'Weight' },
 //                { xtype: 'checkbox', fieldLabel: 'Dry weight?' }
