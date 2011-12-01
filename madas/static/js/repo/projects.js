@@ -642,7 +642,8 @@ MA.ProjectList = Ext.extend(Ext.Panel, {
                                         icon: "static/images/add.png",
                                         handler: function (b, e) {
                                             if (MA.CurrentUser.IsAdmin || MA.CurrentUser.IsMastrAdmin || MA.CurrentUser.IsProjectLeader) {
-                                                MA.MenuHandler({ "id": "project:new" });
+                                                // Toolbar.grid.ProjectList Panel
+                                                this.ownerCt.ownerCt.ownerCt.createNewProject();
                                             } else {
                                                 b.disable();
                                             }
@@ -703,6 +704,9 @@ MA.ProjectList = Ext.extend(Ext.Panel, {
     select: function (id) {
         var record = this.getStore().getById(id);
         this.getComponent("grid").getSelectionModel().selectRecords([record], false);
+    }, 
+    createNewProject: function () {
+        MA.ChangeMainContent("project:new");
     }
 });
 
