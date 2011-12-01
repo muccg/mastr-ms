@@ -69,9 +69,11 @@ def create_object(request, model):
         organ.save() 
     
     if model == 'project':
-        user = User.objects.get(username=request.user.username)
-        obj.managers.add(user)
-        obj.save()
+        if not args.get('projectManagers'):
+            user = User.objects.get(username=request.user.username)
+            obj.managers.add(user)
+        else:
+            save_project_managers(obj, args.get('projectManagers'))
     
     if model == 'biologicalsource':
         return records(request, 'organism', 'id', obj.organism.id)
@@ -166,6 +168,10 @@ def update_object(request, model, id):
             if row.order_of_methods in ('', 'null'):
                 row.order_of_methods = None
         row.save()
+        if model == 'project':
+            save_project_managers(row, args.get('projectManagers'))
+
+
     return records(request, model, 'id', id)
     
     
@@ -315,6 +321,16 @@ def records(request, model, field, value):
 
     output = makeJsonFriendly(output)
     return HttpResponse(json.dumps(output))
+
+def save_project_managers(project, project_manager_ids):
+    requested_proj_managers = set([int(id) for id in project_manager_ids.split(',')])
+    current_proj_managers = set([row['id'] for row in project.managers.values('id')])
+    to_remove = current_proj_managers - requested_proj_managers
+    to_add = requested_proj_managers - current_proj_managers
+    if to_add:
+        project.managers.add(*to_add)
+    if to_remove:
+        project.managers.remove(*to_remove)
 
 @mastr_users_only
 def recent_projects(request):

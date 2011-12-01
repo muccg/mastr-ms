@@ -735,7 +735,7 @@ MA.ProjectCmp = {
     items: [
         {
             region:'north',
-            height:250,
+            height:230,
             layout:'border',
             items: [
                 {
@@ -745,7 +745,7 @@ MA.ProjectCmp = {
                     collapsible: false,
                     id:'project-form',
                     bodyStyle: 'padding:8px;background-color:transparent',
-                    width:850,
+                    width:720,
                     title:'Project details',
                     items: [ 
                         { xtype:'textfield', fieldLabel:'Project title', width:700, id:'projectTitle', name:'title', allowBlank:false},
@@ -772,45 +772,15 @@ MA.ProjectCmp = {
                                 '{username}<br /><span style="color:#666;">{organisation_name}</span>',
                                 '</div></tpl>'
                                 )
-                            })
-                    ],
-                    buttons: [
-                        {
-                             text: 'Save',
-                             id:'projectSubmit',
-                             handler: function(){
-                                Ext.getCmp('project-form').getForm().submit(
-                                    {   
-                                        url: wsBaseUrl + 'update/project/' + MA.currentProjectId,
-                                        successProperty: 'success',
-                                        success: function (form, action) {
-                                            if (action.result.success === true) {
-                                                MA.currentProjectId = action.result.rows[0].id;
-                                            
-                                                //display a success alert that auto-closes in 1 second
-                                                Ext.Msg.alert("Project saved", "(this message will auto-close in 1 second)");
-                                                window.setTimeout(function () {
-                                                    Ext.Msg.hide();
-                                                }, 1000);
-            
-                                                Ext.getCmp('project-experiment-list').enable();
-            
-                                                //load up the menu and next content area as declared in response
-                                                MA.ChangeMainContent(action.result.mainContentFunction);
-                                            }
-                                        },
-                                        failure: function (form, action) {
-                                            //do nothing special. this gets called on validation failures and server errors
-                                        }
-                                    });
-                                }
-                            }
+                            }),
+                        // this will hold the ',' joined ids of project managers on the project
+                        { xtype:'hidden', name: 'projectManagers' }
                     ]
                 },
                 {
                     region:'east',
                     title:'Project managers',
-                    width:200,
+                    width:300,
                     border:false,
                     tbar:[
                         {
@@ -867,17 +837,11 @@ MA.ProjectCmp = {
                                 
                                 addWindow.buttons[0].on('click', function() { addWindow.close(); } );
                                 addWindow.buttons[1].on('click', function() { 
+                                    var id = addWindow.getComponent('projManagerCombo').getValue();
+                                    var value = addWindow.getComponent('projManagerCombo').getRawValue();
                                     if (addWindow.getComponent('projManagerCombo').isValid()) {
-                                        MA.CRUDSomething('associate/project/manager/'+MA.currentProjectId+'/'+addWindow.getComponent('projManagerCombo').getValue()
-                                        , {}, function (store, records) { 
-                                            Ext.getCmp('projManagerList').getStore().removeAll();
-                                            
-                                            realRecords = records[0].data.managers;
-                                            for (i = 0; i < realRecords.length; i++) {
-                                                Ext.getCmp('projManagerList').getStore().add(new Ext.data.Record({'id':realRecords[i].id, 'username':realRecords[i].username})); 
-                                            }
-                                            Ext.getCmp('projManagerList').refresh();
-                                            });
+                                        Ext.getCmp('projManagerList').getStore().add(new Ext.data.Record({'id':id, 'username':value})); 
+                                        Ext.getCmp('projManagerList').refresh();
                                         addWindow.close(); 
                                     }
                                 } );
@@ -893,9 +857,8 @@ MA.ProjectCmp = {
                                    var recs = Ext.getCmp('projManagerList').getSelectedRecords();
                                    for (i = 0; i < recs.length; i++) {
                                        var rec = recs[i];
-                                       MA.CRUDSomething('dissociate/project/manager/'+MA.currentProjectId+'/'+rec.data.id, {}, function () { Ext.getCmp('projManagerList').getStore().remove(rec); });
+                                       Ext.getCmp('projManagerList').getStore().remove(rec);
                                    }
-                                   
                             }
                                
                         }
@@ -923,6 +886,46 @@ MA.ProjectCmp = {
                             autoScroll:true,
                             reserveScrollOffset:true
                         }
+                    ]
+                }, {
+                    region: 'south',
+                    border: false,
+                    buttonAlign: 'center',
+                    buttons: [{
+                             text: 'Save',
+                             id:'projectSubmit',
+                             handler: function(){
+                                // collect the Project Manager ids and set them into a hidden field
+                                // so they get submitted on form.submit()
+                                var projManagerIds = Ext.getCmp('projManagerList').getStore().collect('id').join(',');
+                                Ext.getCmp('project-form').getForm().findField('projectManagers').setValue(projManagerIds);
+ 
+                                Ext.getCmp('project-form').getForm().submit(
+                                    { 
+                                        url: wsBaseUrl + 'update/project/' + MA.currentProjectId,
+                                        successProperty: 'success',
+                                        success: function (form, action) {
+                                            if (action.result.success === true) {
+                                                MA.currentProjectId = action.result.rows[0].id;
+
+                                                //display a success alert that auto-closes in 1 second
+                                                Ext.Msg.alert("Project saved", "(this message will auto-close in 1 second)");
+                                                window.setTimeout(function () {
+                                                    Ext.Msg.hide();
+                                                }, 1000);
+
+                                                Ext.getCmp('project-experiment-list').enable();
+
+                                                //load up the menu and next content area as declared in response
+                                                MA.ChangeMainContent(action.result.mainContentFunction);
+                                            }
+                                        },
+                                        failure: function (form, action) {
+                                            //do nothing special. this gets called on validation failures and server errors
+                                        }
+                                    });
+                                }
+                            }
                     ]
                 }
             ]

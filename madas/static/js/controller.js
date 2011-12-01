@@ -179,9 +179,13 @@ MA.ChangeMainContent = function(contentName, paramArray){
             MA.currentProjectId = 0;
             var titlefield = Ext.getCmp('projectTitle');
             var desc = Ext.getCmp('projectDescription');
+            var client = Ext.getCmp('projectClientCombo');
+            var projManagers = Ext.getCmp('projManagerList');
 
             titlefield.setValue('');
             desc.setValue('');
+            client.clearValue();
+            projManagers.getStore().removeAll();
 
             experimentListStore.removeAll();
             Ext.getCmp('project-experiment-list').disable();
