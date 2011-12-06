@@ -67,6 +67,7 @@ function renderCompleteRunProgress() {
 }
 
 function renderRunProgressBar(percent) {
+    var percent = Math.floor(percent);
     var text = percent.toString() + "%";
 
     return "<div class='x-progress-wrap'>"

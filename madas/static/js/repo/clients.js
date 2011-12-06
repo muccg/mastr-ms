@@ -101,6 +101,14 @@ MA.ClientsListCmp = {
                         dblclick: function (id) {
                             MA.LoadProject(id);
                         }
+                    },
+                    createNewProject: function() {
+                        var selModel = Ext.getCmp('clients').getSelectionModel();
+                        if (selModel.hasSelection()) {
+                            MA.ChangeMainContent("project:new", [selModel.getSelected().get('id')]);
+                        } else {
+                            MA.ChangeMainContent("project:new");
+                        }
                     }
                 }),
                 {

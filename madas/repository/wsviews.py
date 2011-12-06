@@ -69,9 +69,11 @@ def create_object(request, model):
         organ.save() 
     
     if model == 'project':
-        user = User.objects.get(username=request.user.username)
-        obj.managers.add(user)
-        obj.save()
+        if not args.get('projectManagers'):
+            user = User.objects.get(username=request.user.username)
+            obj.managers.add(user)
+        else:
+            save_project_managers(obj, args.get('projectManagers'))
     
     if model == 'biologicalsource':
         return records(request, 'organism', 'id', obj.organism.id)
@@ -166,6 +168,10 @@ def update_object(request, model, id):
             if row.order_of_methods in ('', 'null'):
                 row.order_of_methods = None
         row.save()
+        if model == 'project':
+            save_project_managers(row, args.get('projectManagers'))
+
+
     return records(request, model, 'id', id)
     
     
@@ -316,29 +322,40 @@ def records(request, model, field, value):
     output = makeJsonFriendly(output)
     return HttpResponse(json.dumps(output))
 
+def save_project_managers(project, project_manager_ids):
+    requested_proj_managers = set([int(id) for id in project_manager_ids.split(',')])
+    current_proj_managers = set([row['id'] for row in project.managers.values('id')])
+    to_remove = current_proj_managers - requested_proj_managers
+    to_add = requested_proj_managers - current_proj_managers
+    if to_add:
+        project.managers.add(*to_add)
+    if to_remove:
+        project.managers.remove(*to_remove)
+
+@mastr_users_only
+def recent_projects(request):
+    output = json_records_template(['id', 'title', 'client'])
+    user = request.user
+    ninety_days_ago = datetime.now() - timedelta(90)
+    projects = Project.objects.filter(
+        Q(client=user) | 
+        Q(managers=user) 
+        ).filter(created_on__gt=ninety_days_ago) 
+    for project in projects:
+        output['rows'].append({
+            'id': project.id,
+            'title': project.title,
+            'client': project.client.username
+        })
+
+    output['results'] = len(output['rows'])
+            
+    output = makeJsonFriendly(output)
+    return HttpResponse(json.dumps(output))
+
+@mastr_users_only
 def recent_experiments(request):
-     ### TODO why do we need this, we'll get a 403 from decorator now if not logged in and not in group - ABM
-    authenticated = request.user.is_authenticated()
-    if not authenticated == True:
-        return jsonResponse()
-    ### End Authorisation Check ###
-    
-    # basic json that we will fill in
-    output = {'metaData': { 'totalProperty': 'results',
-        'root': 'rows',
-            'id': 'id',
-                'successProperty': 'success',
-                    'fields': []
-                        },
-                            'results': 0,
-                                'authenticated': True,
-                                    'authorized': True,
-                                        'success': True,
-                                            'rows': []
-                                            }
-    output['metaData']['fields'].append({'name':'id'})
-    output['metaData']['fields'].append({'name':'title'})
-    output['metaData']['fields'].append({'name':'status'})
+    output = json_records_template(['id', 'title', 'status'])
     user = request.user
     ninety_days_ago = datetime.now() - timedelta(90)
     experiments = Experiment.objects.filter(
@@ -358,31 +375,9 @@ def recent_experiments(request):
     output = makeJsonFriendly(output)
     return HttpResponse(json.dumps(output))
 
+@mastr_users_only
 def recent_runs(request):
-     ### TODO why do we need this, we'll get a 403 from decorator now if not logged in and not in group - ABM
-    authenticated = request.user.is_authenticated()
-    if not authenticated == True:
-        return jsonResponse()
-    ### End Authorisation Check ###
-    
-    # basic json that we will fill in
-    output = {'metaData': { 'totalProperty': 'results',
-        'root': 'rows',
-            'id': 'id',
-                'successProperty': 'success',
-                    'fields': []
-                        },
-                            'results': 0,
-                                'authenticated': True,
-                                    'authorized': True,
-                                        'success': True,
-                                            'rows': []
-                                            }
-    output['metaData']['fields'].append({'name':'id'})
-    output['metaData']['fields'].append({'name':'title'})
-    output['metaData']['fields'].append({'name':'method'})
-    output['metaData']['fields'].append({'name':'machine'})
-    output['metaData']['fields'].append({'name':'state'})
+    output = json_records_template(['id', 'title', 'method', 'machine', 'state'])
     user = request.user
     ninety_days_ago = datetime.now() - timedelta(90)
     runs = Run.objects.filter(creator=user, created_on__gt=ninety_days_ago) 
@@ -1111,10 +1106,23 @@ def recordsRuns(request):
         'generated_output', 'title', 'method', 'incomplete_sample_count', 'experiment__unicode' 
         ])
 
-    if getMadasUser(request.user.username).IsAdmin:
-        rows = Run.objects.all()
+    condition = None
+
+    experiment_id = request.REQUEST.get('experiment__id')
+    if experiment_id:
+        condition = Q(experiment__id = experiment_id)
+
+    if not getMadasUser(request.user.username).IsAdmin:
+        extra_condition = Q(samples__experiment__project__managers=request.user)|Q(samples__experiment__users=request.user) | Q(creator=request.user)
+        if condition:
+            condition = condition & extra_condition
+        else:
+            condition = extra_condition
+
+    if condition:
+        rows = Run.objects.filter(condition)
     else:
-        rows = Run.objects.filter(Q(samples__experiment__project__managers=request.user)|Q(samples__experiment__users=request.user) | Q(creator=request.user))
+        rows = Run.objects.all()
     
     output['results'] = len(rows)
 

@@ -176,12 +176,25 @@ MA.ChangeMainContent = function(contentName, paramArray){
             break;
 
         case 'project:new':
+            var clientId = -1;
             MA.currentProjectId = 0;
             var titlefield = Ext.getCmp('projectTitle');
             var desc = Ext.getCmp('projectDescription');
+            var client = Ext.getCmp('projectClientCombo');
+            var projManagers = Ext.getCmp('projManagerList');
+
+            if (paramArray && paramArray.length === 1) {
+                clientId = paramArray[0];
+            }
 
             titlefield.setValue('');
             desc.setValue('');
+            if (clientId === -1) {
+                client.clearValue();
+            } else {
+                client.setValue(clientId);
+            }
+            projManagers.getStore().removeAll();
 
             experimentListStore.removeAll();
             Ext.getCmp('project-experiment-list').disable();

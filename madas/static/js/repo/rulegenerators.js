@@ -198,6 +198,22 @@ MA.RuleGeneratorListCmp = {
             store: ruleGeneratorListStore,
             
             tbar: [{
+                    text: 'Hide disabled',
+                    handler: function(b, ev) {
+                        var store = Ext.getCmp('rulegeneratorGrid').getStore();
+                        if (store.isFiltered()) {
+                            store.clearFilter();
+                            this.setText('Hide Disabled');
+                        } else {
+                            store.filterBy(function(record) {
+                                return record.get('state') !== 'Disabled';
+                            });
+                            this.setText('Show Disabled');
+                        }
+                    }
+                },{
+                    xtype: 'tbseparator'
+                },{
                     text: 'Create New',
                     handler: function(b, ev) {
                         Ext.getCmp('ruleGeneratorCreateCmp').create();
