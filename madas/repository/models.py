@@ -6,6 +6,9 @@ from quote.models import Organisation, Formalquote
 from mdatasync_server.models import NodeClient
 import grp
 from madas.users.MAUser import getMadasUser
+from django.core.files.storage import FileSystemStorage
+import os
+from madas import settings
 
 class SampleNotInClassException(Exception):
     pass
@@ -206,6 +209,7 @@ class Experiment(models.Model):
     job_number = models.CharField(max_length=30)
     project = models.ForeignKey(Project)
     instrument_method = models.ForeignKey(InstrumentMethod, null=True, blank=True)
+    sample_preparation_notes = models.TextField(null=True, blank=True)
     # ? files
   
     def ensure_dir(self):
@@ -215,7 +219,7 @@ class Experiment(models.Model):
                 abspath is the absolute path
                 relpath is the path, relative to the settings.REPO_FILES_ROOT
         '''
-        import settings, os, stat
+        import stat
         
         yearpath = os.path.join('experiments', str(self.created_on.year) )
         monthpath = os.path.join(yearpath, str(self.created_on.month) )
@@ -239,6 +243,9 @@ class Experiment(models.Model):
     def __unicode__(self):
         return self.title
 
+
+sopfs = FileSystemStorage(location=os.path.join(settings.REPO_FILES_ROOT, 'sops'))
+
 class StandardOperationProcedure(models.Model):
     responsible = models.CharField(max_length=255, null=True, blank=True)
     label = models.CharField(max_length=255, null=True, blank=True)
@@ -251,10 +258,10 @@ class StandardOperationProcedure(models.Model):
     content = models.CharField(max_length=255, null=True, blank=True)
 
     def _filepath(self, filename):
-        import settings, os
-        return os.path.join(settings.REPO_FILES_ROOT, 'sops', self.version, filename)
+        return os.path.join(sopfs.location, self.version, filename)
 
-    attached_pdf = models.FileField(upload_to=_filepath, null=True, blank=True)
+
+    attached_pdf = models.FileField(storage=sopfs, upload_to=_filepath, null=True, blank=True, max_length=500)
     experiments = models.ManyToManyField(Experiment, null=True, blank=True)
     
     def __unicode__(self):
@@ -420,7 +427,7 @@ class Run(models.Model):
                 abspath is the absolute path
                 relpath is the path, relative to the settings.REPO_FILES_ROOT
         '''
-        import settings, os, stat
+        import stat
         
         yearpath = os.path.join('runs', str(self.created_on.year) )
         monthpath = os.path.join(yearpath, str(self.created_on.month) )
@@ -566,11 +573,17 @@ class InstrumentSOP(models.Model):
 class ComponentGroup(models.Model):
     name = models.CharField(max_length=50) 
 
+    def __unicode__(self):
+        return self.name
+
 class Component(models.Model):
     sample_type = models.CharField(max_length=255)
     sample_code = models.CharField(max_length=255)
     component_group = models.ForeignKey(ComponentGroup)
     filename_prefix = models.CharField(max_length=50)
+
+    def __unicode__(self):
+        return "%s (%s)" % (self.sample_type, self.sample_code)
 
 class RuleGenerator(models.Model):
     
