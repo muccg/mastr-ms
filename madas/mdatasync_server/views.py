@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 import copy
 from django.shortcuts import render_to_response, get_object_or_404
 from django.contrib.auth.decorators import login_required
-import django.utils.webhelpers as webhelpers
+import ccg.utils.webhelpers as webhelpers
 from django.http import HttpResponse, Http404
 from django.utils import simplejson
 from mdatasync_server.models import *
