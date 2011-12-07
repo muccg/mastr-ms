@@ -271,9 +271,3 @@ try:
 except ImportError, e:
     pass
 
-#If you have a local settings file which overrides these, try importing it here
-try:
-    from settings_local import *
-except ImportError, e:
-    pass
-
