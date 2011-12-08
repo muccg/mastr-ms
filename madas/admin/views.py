@@ -4,7 +4,7 @@ from django.conf import settings
 from django.db import models
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseNotFound
-from madas.users.user_manager import DBUserManager
+from madas.users.user_manager import get_user_manager
 from django.contrib.auth.models import User
 from django.utils import simplejson as json
 from django.contrib.auth.decorators import login_required
@@ -188,7 +188,7 @@ def node_save(request, *args):
     returnval = False 
     if oldname!=newname and newname !='':
         #Group creation/renaming requires an admin auth to ldap.
-        user_manager = DBUserManager()
+        user_manager = get_user_manager()
         if oldname == '':
             returnval = user_manager.add_group(newname)
             err_msg = "Couldn't add new node: " + newname
@@ -223,7 +223,7 @@ def node_delete(request, *args):
         pass
     else:
         #Group creation/renaming requires an admin auth to ldap.
-        user_manager = DBUserManager()
+        user_manager = get_user_manager() 
         ret = user_manager.delete_group(delname)
 
     logger.debug( '*** node_delete : enter ***' )
