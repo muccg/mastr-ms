@@ -1,6 +1,6 @@
 from django.utils import simplejson
 from ccg.auth.ldap_helper import LDAPHandler
-from madas.users.user_manager import DBUserManager
+from madas.users.user_manager import get_user_manager
 import logging
 from madas.utils.data_utils import translate_dict, makeJsonFriendly
 from madas import settings #for ldap admin username/password
@@ -242,7 +242,7 @@ def getMadasUsersFromGroups(grouplist, method='and') :
     return users
 
 def getMadasGroups():
-    user_manager = DBUserManager()
+    user_manager = get_user_manager()
     groups = user_manager.list_groups()
     return groups
 
@@ -255,7 +255,7 @@ def getMadasNodeMemberships(groups):
     return i
 
 def getMadasUserDetails(username):
-    user_manager = DBUserManager()
+    user_manager = get_user_manager()
     d = user_manager.get_user_details(username)
     #this is a function to un-listify values in the dict, since 
     #ldap often returns them that way

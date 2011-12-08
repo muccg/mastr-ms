@@ -9,6 +9,9 @@ import logging
 
 logger = logging.getLogger('madas_log')
 
+def get_user_manager():
+    return DBUserManager()
+
 class DBUserManager(object):
     def get_user_details(self, username):
         django_user = None
@@ -64,3 +67,6 @@ class DBUserManager(object):
             return False
         return True
 
+    def get_user_groups(self, username):
+        return [g.name for g in models.Group.objects.filter(user__username=username)]
+        

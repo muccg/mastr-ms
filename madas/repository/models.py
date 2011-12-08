@@ -22,26 +22,26 @@ class MadasUser(User):
 
     def __init__(self, *args, **kwargs):
         User.__init__(self, *args, **kwargs)
-        self.ldap_groups = None
+        self.magroups = None
 
-    def set_ldap_groups(self, ldap_groups):
-        if ldap_groups is None: ldap_groups = tuple()
-        self.ldap_groups = ldap_groups
+    def set_magroups(self, groups):
+        if groups is None: groups = tuple()
+        self.magroups = groups
         
     @property
     def is_admin(self):
-        assert self.ldap_groups is not None, "Ldap groups not set"
-        return ('Administrators' in self.ldap_groups)
+        assert self.magroups is not None, "Groups not set"
+        return ('Administrators' in self.magroups)
 
     @property
     def is_noderep(self):
-        assert self.ldap_groups is not None, "Ldap groups not set"
-        return ('Node Reps' in self.ldap_groups)
+        assert self.magroups is not None, "Groups not set"
+        return ('Node Reps' in self.magroups)
 
     @property
     def is_client(self):
-        assert self.ldap_groups is not None, "Ldap groups not set"
-        return len(self.ldap_groups) == 0
+        assert self.magroups is not None, "Groups not set"
+        return len(self.magroups) == 0
 
     def is_project_manager_of(self, project):
         return self.pk in [m.pk for m in project.managers.all()]
