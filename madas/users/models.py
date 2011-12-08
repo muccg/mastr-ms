@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class UserDetail(models.Model):
-    user = models.ForeignKey(User)
+    user = models.OneToOneField(User)
     commonName = models.CharField(max_length=255, null=True, blank=True)
     givenName = models.CharField(max_length=255, null=True, blank=True)
     sn = models.CharField(max_length=255, null=True, blank=True)
@@ -43,5 +43,5 @@ class UserDetail(models.Model):
 
 class Group(models.Model):
     user = models.ManyToManyField(User)
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
 

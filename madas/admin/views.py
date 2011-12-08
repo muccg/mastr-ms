@@ -1,9 +1,10 @@
 # Create your views here.
+from django.db import transaction
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseNotFound
-from ccg.auth.ldap_helper import LDAPHandler
+from madas.users.user_manager import DBUserManager
 from django.contrib.auth.models import User
 from django.utils import simplejson as json
 from django.contrib.auth.decorators import login_required
@@ -174,6 +175,7 @@ def user_save(request, *args):
     return jsonResponse(mainContentFunction=nextview) 
 
 @admins_or_nodereps
+@transaction.commit_on_success
 def node_save(request, *args):
     '''This is called when saving node details in the Node Management.
        Madas Dashboard->Admin->Node Management
@@ -186,13 +188,13 @@ def node_save(request, *args):
     returnval = False 
     if oldname!=newname and newname !='':
         #Group creation/renaming requires an admin auth to ldap.
-        ld = LDAPHandler(userdn=settings.LDAPADMINUSERNAME, password=settings.LDAPADMINPASSWORD)
+        user_manager = DBUserManager()
         if oldname == '':
-            returnval = ld.ldap_add_group(newname)
+            returnval = user_manager.add_group(newname)
             err_msg = "Couldn't add new node: " + newname
         else:
-            returnval = ld.ldap_rename_group(oldname, newname)
-            err_msg = "Couldn't rename node %s to %s" + (oldname, newname)
+            returnval = user_manager.rename_group(oldname, newname)
+            err_msg = "Couldn't rename node %s to %s" % (oldname, newname)
     else:
         #make no changes.
         logger.warning("Node save: oldname was newname, or newname was empty. Aborting")
@@ -203,6 +205,7 @@ def node_save(request, *args):
     if returnval:
         return jsonResponse(mainContentFunction='admin:nodelist')
     else:
+        transaction.rollback()
         return jsonErrorResponse(err_msg)
 
 @admins_or_nodereps
@@ -220,8 +223,8 @@ def node_delete(request, *args):
         pass
     else:
         #Group creation/renaming requires an admin auth to ldap.
-        ld = LDAPHandler(userdn=settings.LDAPADMINUSERNAME, password=settings.LDAPADMINPASSWORD)
-        ret = ld.ldap_delete_group(delname)
+        user_manager = DBUserManager()
+        ret = user_manager.delete_group(delname)
 
     logger.debug( '*** node_delete : enter ***' )
     return jsonResponse(mainContentFunction='admin:nodelist') 

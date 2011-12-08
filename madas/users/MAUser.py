@@ -242,9 +242,9 @@ def getMadasUsersFromGroups(grouplist, method='and') :
     return users
 
 def getMadasGroups():
-    ldaphandler = LDAPHandler()
-    ldapgroups = ldaphandler.ldap_list_groups()
-    return ldapgroups
+    user_manager = DBUserManager()
+    groups = user_manager.list_groups()
+    return groups
 
 def getMadasNodeMemberships(groups):
     if groups is None:
