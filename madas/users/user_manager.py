@@ -149,15 +149,18 @@ class DBUserManager(object):
             logger.warning('User with username %s does not exist' % username)
             return False
 
+        user_detail = models.UserDetail.objects.get(user=django_user)
+
         if username != newusername:
             django_user.username = newusername
             django_user.save()
 
         if newpassword is not None and newpassword != '':
             django_user.set_password(newpassword) 
+            user_detail.passwordResetKey = None
             django_user.save()
+            user_detail.save()
 
-        user_detail = models.UserDetail.objects.get(user=django_user)
         user_detail.set_from_dict(detailsDict)
         user_detail.save()
 

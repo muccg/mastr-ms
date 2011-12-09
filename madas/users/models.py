@@ -17,6 +17,7 @@ class UserDetail(models.Model):
     businessCategory = models.CharField(max_length=255, null=True, blank=True)
     registeredAddress = models.CharField(max_length=255, null=True, blank=True)
     carLicense = models.CharField(max_length=255, null=True, blank=True)
+    passwordResetKey = models.CharField(max_length=255, null=True, blank=True)
 
     @property
     def uid(self):
@@ -37,14 +38,15 @@ class UserDetail(models.Model):
             'postalAddress': [self.postalAddress],
             'businessCategory': [self.businessCategory],
             'registeredAddress': [self.registeredAddress],
-            'carLicense': [self.carLicense]
+            'carLicense': [self.carLicense],
+            'passwordResetKey': [self.passwordResetKey]
         }
         return d
 
     def set_from_dict(self, d):
         for attr in ('givenName','sn','mail','telephoneNumber', 'homePhone', 'physicalDeliveryOfficeName', 'title',
                      'destinationIndicator', 'description', 'postalAddress', 'businessCategory', 'registeredAddress',
-                     'carLicense'):
+                     'carLicense', 'passwordResetKey'):
             if d.get(attr):
                 setattr(self, attr, d.get(attr))
 
