@@ -41,6 +41,14 @@ class UserDetail(models.Model):
         }
         return d
 
+    def set_from_dict(self, d):
+        for attr in ('givenName','sn','mail','telephoneNumber', 'homePhone', 'physicalDeliveryOfficeName', 'title',
+                     'destinationIndicator', 'description', 'postalAddress', 'businessCategory', 'registeredAddress',
+                     'carLicense'):
+            if d.get(attr):
+                setattr(self, attr, d.get(attr))
+
+
 class Group(models.Model):
     user = models.ManyToManyField(User)
     name = models.CharField(max_length=255, unique=True)
