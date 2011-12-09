@@ -1,5 +1,4 @@
 from django.utils import simplejson
-from ccg.auth.ldap_helper import LDAPHandler
 from madas.users.user_manager import get_user_manager
 import logging
 from madas.utils.data_utils import translate_dict, makeJsonFriendly
@@ -217,8 +216,8 @@ def getMadasUser(username):
 
 #Utility methods
 def getMadasUserGroups(username, include_status_groups = False):
-    ld = LDAPHandler()
-    a = ld.ldap_get_user_groups(username)
+    user_manager = get_user_manager()
+    a = user_manager.get_user_groups(username)
     groups = []
     status = []
     
@@ -237,8 +236,8 @@ def getMadasUsersFromGroups(grouplist, method='and') :
     '''Returns users who are a member of the groups given in grouplist
     The default 'method' is 'and', which will return only users who are a member
     of all groups. Passing 'or' will return users who are a member of any of the groups''' 
-    ld = LDAPHandler()
-    users = ld.ldap_list_users(grouplist, method)
+    user_manager = get_user_manager()
+    users = user_manager.list_users(grouplist, method)
     return users
 
 def getMadasGroups():
@@ -350,20 +349,16 @@ def loadMadasUser(username):
     return details  
 
 def addMadasUser(username, detailsdict):
-    ld = LDAPHandler(userdn=settings.LDAPADMINUSERNAME, password=settings.LDAPADMINPASSWORD) #need an admin connection
+    user_manager = get_user_manager()
 
     #create an empty dict with the ldap format
     emptydetails = _translate_madas_to_ldap({}, createEmpty=True)
     #combine in the details dict
     new_details = dict(emptydetails, **detailsdict)
 
-    objectclasses = 'inetorgperson'
-    usercontainer = 'ou=NEMA'
-    userdn = 'ou=People'
-    basedn = 'dc=ccg,dc=murdoch,dc=edu,dc=au'
-    success = ld.ldap_add_user(username, detailsdict, objectclasses=objectclasses, usercontainer=usercontainer, userdn=userdn, basedn=basedn)
+    success = user_manager.add_user(username, detailsdict)
     if success:
-        success = ld.ldap_add_user_to_group(username, MADAS_PENDING_GROUP)
+        success = user_manager.add_user_to_group(username, MADAS_PENDING_GROUP)
         if not success:
             raise Exception, 'Could not add user %s to group %s' % (username, MADAS_PENDING_GROUP) 
     else:
@@ -375,9 +370,9 @@ def updateMadasUserDetails(currentUser, username, password, detailsdict):
     #The only people who can edit a record is an admin, or the actual user
     if currentUser.IsAdmin or currentUser.IsMastrAdmin or currentUser.Username == username:
         try:
-            ld = LDAPHandler(userdn=settings.LDAPADMINUSERNAME, password=settings.LDAPADMINPASSWORD)
+            user_manager = get_user_manager()
             #pass username twice, as the old and new username (so we don't allow changing username
-            ld.ldap_update_user(username, username, password, detailsdict, pwencoding='md5')
+            user_manager.update_user(username, username, password, detailsdict)
         except Exception, e:
             logger.warning("Could not update user %s: %s" % (username, str(e)) )
             return False
@@ -386,24 +381,16 @@ def updateMadasUserDetails(currentUser, username, password, detailsdict):
     return True
 
 def addMadasUserToGroup(user, groupname):
-    ld = LDAPHandler(userdn=settings.LDAPADMINUSERNAME, password=settings.LDAPADMINPASSWORD)
+    user_manager = get_user_manager()
     #add them to the group as long as they arent already in it
     if groupname not in user.CachedGroups:
-        ld.ldap_add_user_to_group(user.Username, groupname)
+        user_manager.add_user_to_group(user.Username, groupname)
 
 def removeMadasUserFromGroup(user, groupname):
-    ld = LDAPHandler(userdn=settings.LDAPADMINUSERNAME, password=settings.LDAPADMINPASSWORD)
+    user_manager = get_user_manager()
     #remove them from the group as long as they are in it.
     if groupname in user.CachedGroups:
-        ld.ldap_remove_user_from_group(user.Username, groupname)
-
-def ensureDjangoUserExists(username):
-    try:
-        django_user = User.objects.get(username=username)
-    except User.DoesNotExist:
-        django_user = User.objects.create_user(username, username)
-        django_user.set_unusable_password()
-        django_user.save()
+        user_manager.remove_user_from_group(user.Username, groupname)
 
 def set_superuser(user, superuser=False):
     django_user = User.objects.get(username=user.Username)
@@ -427,8 +414,6 @@ def saveMadasUser(currentUser, username, changeddetails, changedstatus, password
             return False
     existingUser = getMadasUser(username)
 
-    ensureDjangoUserExists(username)
-    
     #translate their details to ldap
     existing_details = _translate_madas_to_ldap(existingUser.CachedDetails)
     #combine the dictionaries, overriding existing_details with changeddetails
