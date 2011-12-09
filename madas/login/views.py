@@ -4,7 +4,7 @@ import md5, time
 from django.http import HttpResponse, HttpResponseRedirect
 import logging
 from django.contrib.auth import authenticate, login, logout
-from ccg.auth.ldap_helper import LDAPHandler
+from madas.users.user_manager import get_user_manager
 from django.shortcuts import render_to_response
 from django.utils import simplejson
 from ccg.utils import webhelpers
@@ -110,12 +110,12 @@ def processForgotPassword(request, *args):
     sets a validaton key in the user's ldap entry which is used to validate the user when they click the link in email
     '''
     emailaddress = request.REQUEST['username'].strip()
-    ld = LDAPHandler(userdn=settings.LDAPADMINUSERNAME, password=settings.LDAPADMINPASSWORD)
-    u = ld.ldap_get_user_details(emailaddress)
+    user_manager = get_user_manager()
+    u = user_manager.get_user_details(emailaddress)
     m = md5.new()
     m.update('madas' + str(time.time()) + 'resetPasswordToken123')
     vk = m.hexdigest()
-    u['pager'] = [vk]
+    u['passwordResetKey'] = vk
     #remove groups info
     try:
         del u['groups']
@@ -123,7 +123,7 @@ def processForgotPassword(request, *args):
         pass
 
     logger.debug( '\tUpdating user record with verification key')
-    ld.ldap_update_user(emailaddress, None, None, u) 
+    user_manager.update_user(emailaddress, None, None, u) 
     logger.debug('\tDone updating user with verification key')
 
     #Email the user
@@ -163,15 +163,15 @@ def processResetPassword(request, *args):
     if username is not '' and vk is not '' and passw is not '':
 
         #get existing details
-        ld = LDAPHandler(userdn=settings.LDAPADMINUSERNAME, password=settings.LDAPADMINPASSWORD)
-        userdetails = ld.ldap_get_user_details(request.REQUEST['email'])
+        user_manager = get_user_manager()
+        userdetails = user_manager.get_user_details(request.REQUEST['email'])
         if userdetails.has_key('groups'):
             del userdetails['groups'] #remove 'groups' - they don't belong in an update.
-        if userdetails.has_key('pager') and len(userdetails['pager']) == 1 and userdetails['pager'][0] == vk:
+        if userdetails.has_key('passwordResetKey') and len(userdetails['passwordResetKey']) == 1 and userdetails['passwordResetKey'][0] == vk:
             #clear out the pager vk
-            del userdetails['pager']
+            del userdetails['passwordResetKey']
             #update the password
-            ld.ldap_update_user(username, username, passw, userdetails, pwencoding='md5')
+            user_manager.update_user(username, username, passw, userdetails)
             sendPasswordChangedEmail(request, username)
                 
         else:
