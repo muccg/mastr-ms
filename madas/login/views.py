@@ -37,7 +37,7 @@ def processLogin(request, *args):
         except Exception,e:
             username = ''
             password = ''
-
+        print 'username is:', username
         user = None
         try: 
             user = authenticate(username = username, password = password)
@@ -53,6 +53,7 @@ def processLogin(request, *args):
                     a = login(request, user)
                 except Exception, e:
                     logger.warning("Login error: %s" % ( str(e) ) )
+                print 'successful login'
                 success = True
                 authenticated = True
                 authorized = True
@@ -60,11 +61,13 @@ def processLogin(request, *args):
                 request.session.set_expiry(MADAS_SESSION_TIMEOUT)
             else:
                 #Inactive user
+                print 'inactive login'
                 success = False
                 authenticated = False 
                 authorized = False
         else:
             #invalid user
+            print 'invalid login'
             success = False
             authenticated = False
             authorized = False

@@ -54,7 +54,7 @@ INSTALLED_APPS = [
 
 AUTHENTICATION_BACKENDS = [
  'madas.repository.backend.MadasBackend',
- 'ccg.auth.backends.NoAuthModelBackend',
+ #'ccg.auth.backends.NoAuthModelBackend',
 ]
 
 #email
@@ -141,6 +141,7 @@ REPO_FILES_ROOT = PERSISTENT_FILESTORE
 QUOTE_FILES_ROOT = os.path.join(PERSISTENT_FILESTORE, 'quotes')
 
 INSTALLED_APPS.extend([
+    'django_extensions',
     'madas.mdatasync_server',
     'madas.dashboard',
     'madas.login',

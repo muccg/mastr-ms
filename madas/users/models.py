@@ -48,7 +48,10 @@ class UserDetail(models.Model):
                      'destinationIndicator', 'description', 'postalAddress', 'businessCategory', 'registeredAddress',
                      'carLicense', 'passwordResetKey'):
             if d.get(attr):
-                setattr(self, attr, d.get(attr))
+                val = d.get(attr)
+                if isinstance(val, list):
+                    val = val[0]
+                setattr(self, attr, val)
 
 
 class Group(models.Model):
