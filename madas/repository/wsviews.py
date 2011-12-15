@@ -119,7 +119,6 @@ def create_sample_log(request, sample_id, type, description):
 
 
 @mastr_users_only
-@transaction.commit_on_success
 def batch_create_sample_logs(request):
     #get args and remove the id from it if it exists
     if request.GET:
@@ -259,12 +258,6 @@ def records(request, model, field, value):
     else:
         args = request.POST
 
-    ### TODO why do we need this, we'll get a 403 from decorator now if not logged in and not in group - ABM
-    authenticated = request.user.is_authenticated()
-    if not authenticated == True:
-        return jsonResponse()
-    ### End Authorisation Check ###
-
     # basic json that we will fill in
     output = {'metaData': { 'totalProperty': 'results',
                             'root': 'rows',
@@ -278,13 +271,6 @@ def records(request, model, field, value):
               'success': True,
               'rows': []
               }
-
-    # TODO as above - do we need this now - ABM
-    authenticated = request.user.is_authenticated()
-    authorized = True # need to change this
-    if not authenticated or not authorized:
-        return HttpResponse(json.dumps(output), status=401)
-
 
     model_obj = get_model('repository', model) # try to get app name dynamically at some point
     params = {str(field):str(value)}
@@ -468,20 +454,8 @@ def recordsClientFiles(request):
     else:
         args = request.POST
 
-    ### TODO why do we need this, we'll get a 403 from decorator now if not logged in and not in group - ABM
-    authenticated = request.user.is_authenticated()
-    if not authenticated == True:
-        return jsonResponse()
-    ### End Authorisation Check ###
-
     # basic json that we will fill in
     output = []
-
-    # TODO as above - do we need this now - ABM
-    authenticated = request.user.is_authenticated()
-    authorized = True # need to change this
-    if not authenticated or not authorized:
-        return HttpResponse(json.dumps(output), status=401)
 
     import os
 
@@ -1278,11 +1252,6 @@ def recordsComponents(request):
               'success': True,
               'rows': [],
               }
-    # TODO do we need this with decorator? ABM
-    authenticated = request.user.is_authenticated()
-    authorized = True # need to change this
-    if not authenticated or not authorized:
-        return HttpResponse(json.dumps(output), status=401)
 
     rows = Component.objects.filter(id__gte=1) #only get components with id >= 1, which excludes samples
     output['results'] = len(rows);
@@ -1308,12 +1277,6 @@ def recordsClients(request, *args):
               'success': True,
               'rows': []
               }
-
-    # TODO do we need this with decorator? ABM
-    authenticated = request.user.is_authenticated()
-    authorized = True # need to change this
-    if not authenticated or not authorized:
-        return HttpResponse(json.dumps(output), status=401)
 
     rows = User.objects.extra(where=["id IN (SELECT DISTINCT client_id FROM repository_project ORDER BY client_id)"])
 
@@ -1353,12 +1316,6 @@ def recordsSamples(request, experiment_id):
               'success': True,
               'rows': []
               }
-    # TODO do we need this ABM
-    authenticated = request.user.is_authenticated()
-    authorized = True # need to change this
-    if not authenticated or not authorized:
-        return HttpResponse(json.dumps(output), status=401)
-
 
     rows = Experiment.objects.get(id=experiment_id).sample_set.all()
 
@@ -1408,13 +1365,6 @@ def recordsSamplesForClient(request, client):
               'success': True,
               'rows': []
               }
-
-    # TODO do we need this? ABM
-    authenticated = request.user.is_authenticated()
-    authorized = True # need to change this
-    if not authenticated or not authorized:
-        return HttpResponse(json.dumps(output), status=401)
-
 
     rows = Sample.objects.filter(experiment__users__username=client)
 
@@ -1804,7 +1754,7 @@ def uploadFile(request):
         else:
             print '\tNo file attached.'
     except Exception, e:
-        print '\tException: ', str(e)
+        logger.exception('Exception uploading file')
         output = { 'success': False }
         
     return HttpResponse(json.dumps(output))
@@ -1840,7 +1790,7 @@ def _handle_uploaded_file(f, name, experiment_id):
         retval = True
     except Exception, e:
         retval = False
-        print '\tException in file upload: ', str(e)
+        logger.exception('Exception uploading file')
     print '*** _handle_uploaded_file: exit ***'
     return retval
     
@@ -1885,7 +1835,7 @@ def uploadCSVFile(request):
         else:
             print '\tNo file attached.'
     except Exception, e:
-        print '\tException: ', str(e)
+        logger.exception('Exception uploading file')
         output = { 'success': False }
         
     return HttpResponse(json.dumps(output))
@@ -1925,7 +1875,6 @@ def get_rule_generator(request):
     return HttpResponse(json.dumps({'success':True, 'rulegenerator': rulegenerators.convert_to_dict(rg)}))
 
 @mastr_users_only
-@transaction.commit_on_success
 def create_rule_generator(request):
 
     name = request.POST.get('name', "Unnamed")
@@ -1948,12 +1897,11 @@ def create_rule_generator(request):
         return HttpResponse(json.dumps({'success':True}))
     else:
         if access:
-            return json_error("Could not create rule generator: %s" % (message))
+            raise Exception("Could not create rule generator")
         else:
             return HttpResponseForbidden('Improper rule generator access')
 
 @mastr_users_only
-@transaction.commit_on_success
 def edit_rule_generator(request):
     rg_id = request.POST.get('rulegen_id')
     if rg_id is None:
@@ -1979,28 +1927,26 @@ def edit_rule_generator(request):
         return HttpResponse(json.dumps({'success':success}))
     else:
         if access:
-            return json_error('Error during edit: %s' % (message))
+            raise Exception('Exception during editing rule generator')
         else:
             return HttpResponseForbidden('Improper rule generator access')
 
 @mastr_users_only
-@transaction.commit_on_success
 def create_new_version_of_rule_generator(request):
     rg_id = request.REQUEST['id']
     try:
         new_id = rulegenerators.create_new_version_of_rule_generator(rg_id, request.user)
     except Exception, e:
-        return json_error("Couldn't create new version of rule generator: %s" % e)
+        raise Exception("Couldn't create new version of rule generator")
     return HttpResponse(json.dumps({'success':True, 'new_id': new_id}))
 
 @mastr_users_only
-@transaction.commit_on_success
 def clone_rule_generator(request):
     rg_id = request.REQUEST['id']
     try:
         new_id = rulegenerators.clone_rule_generator(rg_id, request.user)
     except Exception, e:
-        return json_error("Couldn't clone rule generator: %s" % e)
+        raise Exception("Couldn't clone rule generator")
     return HttpResponse(json.dumps({'success':True, 'new_id': new_id}))
 
 @mastr_users_only
@@ -2041,7 +1987,6 @@ def display_worklist(request, run_id):
 
 
 @mastr_users_only
-@transaction.commit_on_success
 def mark_run_complete(request, run_id):
     samples = RunSample.objects.filter(run__id=run_id)
     

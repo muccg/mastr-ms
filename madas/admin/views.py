@@ -114,7 +114,6 @@ def user_load(request, *args):
             logger.debug('user in org %d' % (orgs[0].organisation.id))
     except Exception, e:
         logger.debug('Exception loading organisation %s' % (str(e)) )
-        pass
 
     logger.debug('***admin/user_load : exit ***' )
     return jsonResponse(data=d)
@@ -175,7 +174,6 @@ def user_save(request, *args):
     return jsonResponse(mainContentFunction=nextview) 
 
 @admins_or_nodereps
-@transaction.commit_on_success
 def node_save(request, *args):
     '''This is called when saving node details in the Node Management.
        Madas Dashboard->Admin->Node Management
@@ -187,26 +185,19 @@ def node_save(request, *args):
    
     returnval = False 
     if oldname!=newname and newname !='':
-        #Group creation/renaming requires an admin auth to ldap.
         user_manager = get_user_manager()
         if oldname == '':
-            returnval = user_manager.add_group(newname)
-            err_msg = "Couldn't add new node: " + newname
+            if not user_manager.add_group(newname):
+                raise Exception("Couldn't add new node: " + newname)
         else:
-            returnval = user_manager.rename_group(oldname, newname)
-            err_msg = "Couldn't rename node %s to %s" % (oldname, newname)
+            if not user_manager.rename_group(oldname, newname):
+                raise Exception("Couldn't rename node %s to %s" % (oldname, newname))
     else:
         #make no changes.
         logger.warning("Node save: oldname was newname, or newname was empty. Aborting")
     
-    logger.debug('\tnode_save: returnval was %s' % (str(returnval )))     
-    #TODO: the javascript doesnt do anything if returnval is false...it just looks like nothing happens.
     logger.debug( '*** node_save : exit ***' )
-    if returnval:
-        return jsonResponse(mainContentFunction='admin:nodelist')
-    else:
-        transaction.rollback()
-        return jsonErrorResponse(err_msg)
+    return jsonResponse(mainContentFunction='admin:nodelist')
 
 @admins_or_nodereps
 def node_delete(request, *args):
@@ -222,7 +213,6 @@ def node_delete(request, *args):
         #Don't delete these sorts of groups.
         pass
     else:
-        #Group creation/renaming requires an admin auth to ldap.
         user_manager = get_user_manager() 
         ret = user_manager.delete_group(delname)
 
@@ -280,12 +270,6 @@ def list_organisations(request):
               'success': True,
               'rows': []
               }
-
-    authenticated = request.user.is_authenticated()
-    authorized = True # need to change this
-    if not authenticated or not authorized:
-        return HttpResponse(json.dumps(output), status=401)
-
 
     rows = Organisation.objects.all() 
 

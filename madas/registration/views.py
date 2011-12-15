@@ -26,5 +26,5 @@ def submit(request, *args):
         return jsonResponse()
     else:
         logger.warning("User %s already existed, aborting registration" % (detailsDict['username'])) 
-        return jsonErrorResponse('User already exists')
+        raise Exception('User already exists')
 

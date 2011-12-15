@@ -70,6 +70,8 @@ def _findAdminOrNodeRepEmailTarget(groupname = 'Administrators'): #TODO use MADA
     return retval 
 
 def sendRequest(request, *args):
+    print 'WWHAAAAT??'
+    print Quoterequest.objects.all().count()
     logger.debug('***quote: sendRequest***')
     email = request.REQUEST.get('email', None)
     firstname = request.REQUEST.get('firstname', None)
@@ -82,12 +84,15 @@ def sendRequest(request, *args):
 
     try:
         #add the new quote to the DB
+        print Quoterequest.objects.all().count()
         qr = _addQuoteRequest(email, firstname, lastname, officePhone, toNode, country, details)
+        print qr.id
+        print Quoterequest.objects.all().count()
     except Exception, e:
-        logger.warning('Exception adding quote request: %s' % (str(e) ))
+        logger.exception('Exception adding quote request.')
+        raise Exception('Exception adding quote request.')
   
-    #TODO: if there is an exception here, we should really abort.
-
+    print Quoterequest.objects.all().count()
     try:
         if request.FILES.has_key('attachfile'):
             f = request.FILES['attachfile']
@@ -97,22 +102,28 @@ def sendRequest(request, *args):
         qr.save()
 
     except Exception, e:
-        logger.warning('\tException: %s' % (str(e) ))
+        logger.exception('Exception saving attached file.')
+        raise Exception('Exception saving attached file.')
 
+    print 'I simply refuse to believe this!'
+    print Quoterequest.objects.all().count()
     try: 
         sendQuoteRequestConfirmationEmail(request, qr.id, email) 
         #email the administrator(s) for the node 
         logger.debug('Argument to _findAdminOrNodeRepEmailTarget is: %s' % (str(toNode)) )
+        print Quoterequest.objects.all().count()
         if toNode == '': #if the node was 'Dont Know'
             searchgroups = MADAS_ADMIN_GROUP
         else:
             searchgroups = toNode
         targetUsers = _findAdminOrNodeRepEmailTarget(groupname = searchgroups)
+        print Quoterequest.objects.all().count()
         for targetUser in targetUsers:
             sendQuoteRequestToAdminEmail(request, qr.id, firstname, lastname, targetUser['uid'][0]) #toemail should be a string, but ldap returns are all lists
     except Exception, e:
-        logger.warning('Error sending mail in SendRequest: %s' % ( str(e) ) )
+        logger.exception('Error sending mail in SendRequest: %s' % ( str(e) ) )
 
+    print Quoterequest.objects.all().count()
     logger.debug( '*** quote:sendRequest: exit ***' )
     return jsonResponse( mainContentFunction='quote:request')       
 
@@ -201,7 +212,8 @@ def listAll(request, *args):
             
             results.append(ql)
     except Exception, e:
-        logger.debug('\texception getting quotes: %s' % ( (str(e)) ) )
+        logger.exception('Exception getting quotes.')
+        raise Exception('Exception getting quotes.')
 
     if MADAS_ADMIN_GROUP in g:
         adminlist = Quoterequest.objects.filter(tonode='Administrators').values('id', 'completed', 'unread', 'tonode', 'firstname', 'lastname', 'officephone', 'details', 'requesttime', 'emailaddressid__emailaddress' )
@@ -220,7 +232,8 @@ def listAll(request, *args):
     try:
         resultsset = uniqueList(results) #these may not be unique. need to uniquify them.
     except Exception, e:
-        logger.warning('\tException making results set unique %s' % ( str(e) ) )
+        logger.exception('Exception making results set unique')
+        raise Exception('Exception making results set unique')
     logger.debug('\tfinished generating quoteslist')
 
     logger.debug('*** quote/listAll - exit ***')
@@ -326,12 +339,8 @@ def _getEmailMapping(email):
         #we need to create a new entry.
         logger.debug( '\tCreating new email mapping' )
         newEmail = Emailmap(emailaddress = email)
-        try:
-            newEmail.save()
-            retval = newEmail
-        except Exception, e:
-            logger.warning('\tEmailMapping exception: %s' % (str(e)) )
-            retval = None
+        newEmail.save()
+        retval = newEmail
     logger.debug('*** _getEmailMapping: exit ***')
     return retval
 
@@ -352,12 +361,14 @@ def _addQuoteHistory(qr, emailaddress, newnode, oldnode, comment, newcompleted, 
         q.save()
         retval = q
     except Exception, e:
-        logger.warning('\tThere was an error adding a Quotehistory entry: %s' % (str(e)) )
+        logger.exception('There was an error adding a Quotehistory entry')
+        raise Exception('There was an error adding a Quotehistory entry')
 
     logger.debug('*** _addQuoteHistory: exit***')
     return retval
 
 def _addQuoteRequest(emailaddress, firstname, lastname, officephone, tonode, country, details):
+    print 'Called only once'
     retval = None
     emailobj = _getEmailMapping(emailaddress)
     if emailobj is not None:
@@ -391,12 +402,12 @@ def save(request, *args):
                 targetemail = targetuser['uid'][0]
                 sendQuoteRequestToAdminEmail(request, id, email, '', targetemail) 
     except Exception, e:
-        logger.warning('Exception emailing change to quote request: %s' % (str(e)) ) 
+        logger.exception('Exception emailing change to quote request') 
 
     _updateQuoteRequestStatus(qr, toNode, completed=completed, unread=0);       
 
     #add the comment to the history
-    retval = _addQuoteHistory(qr, email, toNode, qr.tonode, comment, completed, qr.completed)
+    _addQuoteHistory(qr, email, toNode, qr.tonode, comment, completed, qr.completed)
 
     logger.debug('*** quote: save : exit ***')
     return jsonResponse( mainContentFunction='quote:list') 
@@ -454,7 +465,8 @@ def formalLoad(request, *args, **kwargs):
                 retvals = retdata 
                 rows = 0
         except Exception, e:
-            logger.warning('Exception (Retvals was %s): %s' % (str(retvals), str(e)) )
+            logger.exception('Exception loading quote') 
+            raise Exception('Exception loading quote')
     else:
         logger.warning('\tNo qid or fqid passed')
         
@@ -524,7 +536,8 @@ def formalSave(request, *args):
         for key in qr.keys():
             logger.debug('\t\t',key, qr[key])
     except Exception, e:
-        logger.warning('\tException getting old details: %s' % (str(e)) )
+        logger.exception('Exception getting old details')
+        raise Exception('Exception getting old details')
 
     # File upload
     try:
@@ -539,7 +552,8 @@ def formalSave(request, *args):
         else:
             logger.debug('\tNo file attached.')
     except Exception, e:
-       logger.warning('\tException: %s' % ( str(e) ) )
+       logger.exception('Exception handling uploaded file')
+       raise Exception('Exception handling uploaded file')
     
 
     ################# ADD FORMAL QUOTE ################
@@ -550,7 +564,8 @@ def formalSave(request, *args):
         _addQuoteHistory(qr_obj, qr['emailaddressid__emailaddress'], qr['tonode'], qr['tonode'], 'Formal quote created/modified', qr['completed'], qr['completed'])
         logger.debug('\tFinished adding history')
     except Exception, e:
-        logger.warning('\tException: %s' % (str(e)) )
+        logger.exception('Exception adding formal quote')
+        raise Exception('Exception adding formal quote')
     
     toemail = qr['emailaddressid__emailaddress']
     fromemail = email
@@ -600,41 +615,32 @@ def formalAccept(request, *args):
         qr = Quoterequest.objects.filter(id = qid)[0]
         qrvalues = _loadQuoteRequest(qid)
     except Exception, e:
-        logger.warning('\tException: Error getting initial quote: %s' % (str(e)) )
-        failed = True
+        logger.exception('Error getting initial quote')
+        raise Exception('Error getting initial quote ' + qid)
 
-    if not failed:
-        #try:
-        #here we want to store the user details
-        #TODO: this section needs some help - can edit arbitrary user details via this form...
-        u = request.REQUEST.get('email')
+    #try:
+    #here we want to store the user details
+    #TODO: this section needs some help - can edit arbitrary user details via this form...
+    u = request.REQUEST.get('email')
         
-        #TODO: REFACTOR when removing authorize, this part has now been commented out
-        #if auth_result is not True:  #allow node reps to accept quotes but not edit the user details
-        #    from madas.users.views import _usersave
-        #    _usersave(request, u)
-
-        #and then...
-        #mark the formal quote as accepted:
-        fq = setFormalQuoteStatus(qr, QUOTE_STATE_ACCEPTED)
+    #mark the formal quote as accepted:
+    fq = setFormalQuoteStatus(qr, QUOTE_STATE_ACCEPTED)
         
-        #add optional purchase_order_number to the qr
-        po = request.REQUEST.get('purchase_order_number')
-        fq.purchase_order_number = po
-        fq.save()
+    #add optional purchase_order_number to the qr
+    po = request.REQUEST.get('purchase_order_number')
+    fq.purchase_order_number = po
+    fq.save()
 
-        #leave acceptance in the quote history
-        _addQuoteHistory(qr, qrvalues['email'], qr.tonode, qr.tonode, 'Formal quote accepted', qr.completed, qr.completed)
+    #leave acceptance in the quote history
+    _addQuoteHistory(qr, qrvalues['email'], qr.tonode, qr.tonode, 'Formal quote accepted', qr.completed, qr.completed)
 
-        #email the node rep
-        targetusers = _findAdminOrNodeRepEmailTarget(groupname = qr.tonode)
-        for targetuser in targetusers:
-            toemail = targetuser['uid'][0]
-            sendFormalStatusEmail(request, qid, 'accepted', toemail, fromemail = qrvalues['email'])
+    #email the node rep
+    targetusers = _findAdminOrNodeRepEmailTarget(groupname = qr.tonode)
+    for targetuser in targetusers:
+        toemail = targetuser['uid'][0]
+        sendFormalStatusEmail(request, qid, 'accepted', toemail, fromemail = qrvalues['email'])
 
     logger.debug('*** formalAccept: exit ***')
-    if failed:
-        return jsonErrorResponse("Couldn't load initial quote " + qid)
     return jsonResponse(mainContentFunction='dashboard')
 
 def formalReject(request, *args):
@@ -645,25 +651,23 @@ def formalReject(request, *args):
         qr = qrq[0]
         qrvalues = qrq.values('id', 'emailaddressid__emailaddress', 'tonode', 'details', 'requesttime', 'unread', 'completed', 'firstname', 'lastname', 'officephone', 'country', 'attachment' )[0]
     except Exception, e:
-        logger.warning('\tError getting initial quote: %s' % (str(e)) )
-        qr = None
+        logger.exception('Error getting initial quote')
+        raise Exception('Error getting initial quote ' + qid)
 
-    if qr is not None:
-        try:
-            fq = setFormalQuoteStatus(qr, QUOTE_STATE_REJECTED) 
-            #leave rejection in the quote history
-            _addQuoteHistory(qr, qrvalues['emailaddressid__emailaddress'], qr.tonode, qr.tonode, 'Formal quote rejected', qr.completed, qr.completed)
-            #email the node rep
-            targetusers = _findAdminOrNodeRepEmailTarget(groupname = qr.tonode)
-            for targetuser in targetusers:
-                toemail = targetuser['uid'][0]
-                sendFormalStatusEmail(request, qid, 'rejected', toemail, fromemail = qrvalues['emailaddressid__emailaddress'])
-        except Exception, e:
-            logger.debug( 'DEBUG Exception: %s' % (str(e)) )
+    try:
+        fq = setFormalQuoteStatus(qr, QUOTE_STATE_REJECTED) 
+        #leave rejection in the quote history
+        _addQuoteHistory(qr, qrvalues['emailaddressid__emailaddress'], qr.tonode, qr.tonode, 'Formal quote rejected', qr.completed, qr.completed)
+        #email the node rep
+        targetusers = _findAdminOrNodeRepEmailTarget(groupname = qr.tonode)
+        for targetuser in targetusers:
+            toemail = targetuser['uid'][0]
+            sendFormalStatusEmail(request, qid, 'rejected', toemail, fromemail = qrvalues['emailaddressid__emailaddress'])
+    except Exception, e:
+        logger.exception('Exception in rejecting formal quote')
+        raise Exception('Exception in rejecting formal quote')
     logger.debug('***formalReject : exit ***')
     return jsonResponse( mainContentFunction='dashboard') 
-
-
 
 def downloadPDF(request, *args):
     logger.debug('*** downloadPDF: Enter ***')
