@@ -272,6 +272,8 @@ function ExperimentController() {
                                                      tjobNumber.setValue(rs[0].job_number);
 
                                                      spnotes.setValue(rs[0].sample_preparation_notes);
+                                                     //Set the project id so that the 'back to project' button works.
+                                                     MA.currentProjectId = rs[0].project;
                                                  }
                                          
                                                  self.updateNav();
@@ -1015,6 +1017,7 @@ MA.ProjectCmp = {
 };
 
 MA.LoadProject = function (projId) {
+    projectsListStore.load();
     MA.currentProjectId = projId;
     
     Ext.getCmp('projectCmpTitle').setTitle('Loading project...');
