@@ -37,6 +37,9 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+# TODO add these when ready to go over and ensure all views are compatible
+#    'django.middleware.transaction.TransactionMiddleware',
+#    'madas.utils.json_exception_handler_middleware.JSONExceptionHandlerMiddleware',
     'django.middleware.doc.XViewMiddleware',
     'django.middleware.ssl.SSLRedirect'
 ]
@@ -51,8 +54,7 @@ INSTALLED_APPS = [
 
 AUTHENTICATION_BACKENDS = [
  'madas.repository.backend.MadasBackend',
- #'django.contrib.auth.backends.LDAPBackend',
- 'ccg.auth.backends.NoAuthModelBackend',
+ #'ccg.auth.backends.NoAuthModelBackend',
 ]
 
 #email
@@ -139,6 +141,7 @@ REPO_FILES_ROOT = PERSISTENT_FILESTORE
 QUOTE_FILES_ROOT = os.path.join(PERSISTENT_FILESTORE, 'quotes')
 
 INSTALLED_APPS.extend([
+    'django_extensions',
     'madas.mdatasync_server',
     'madas.dashboard',
     'madas.login',
@@ -268,12 +271,6 @@ LOGGING = {
 # global shared settings among multiple Django projects.
 try:
     from appsettings.mastrms import *
-except ImportError, e:
-    pass
-
-#If you have a local settings file which overrides these, try importing it here
-try:
-    from settings_local import *
 except ImportError, e:
     pass
 
