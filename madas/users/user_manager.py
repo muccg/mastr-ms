@@ -13,6 +13,7 @@ logger = logging.getLogger('madas_log')
 def get_user_manager():
     return DBUserManager()
 
+from users.MAUser import getMadasUser
 class DBUserManager(object):
     def get_user_details(self, username):
         django_user = None
@@ -90,6 +91,18 @@ class DBUserManager(object):
         return [u.to_dict() for u in users_qs]
  
 
+    def update_staff_status(self, user):
+        #if the user belongs to more than one users.models.Group, they should be django staff. 
+        #Else, they shouldnt.
+        mauser = getMadasUser(user.username)
+        if not mauser.IsClient:
+            user.is_staff=True
+            user.save()
+        else:
+            user.is_staff=False
+            user.save()
+
+
     def add_user_to_group(self, username, groupname):
         try: 
             user = User.objects.get(username=username)
@@ -105,6 +118,9 @@ class DBUserManager(object):
             logger.warning('User %s already in group %s' % (username, groupname))
             return False
         group.user.add(user)
+        
+        self.update_staff_status(user)
+
         return True
 
     def remove_user_from_group(self, username, groupname):
@@ -122,6 +138,9 @@ class DBUserManager(object):
             logger.warning('User %s not in group %s' % (username, groupname))
             return False
         group.user.remove(user)
+
+        self.update_staff_status(user)
+        
         return True
 
     def add_user(self, username, detailsDict):

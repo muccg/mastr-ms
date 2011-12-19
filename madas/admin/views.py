@@ -230,8 +230,8 @@ def org_save(request):
         else:
             org = Organisation.objects.get(id=org_id)
         
-    org.name = args['name']
-    org.abn = args['abn']
+    org.name = request.REQUEST.get('name', 'No Name')
+    org.abn = request.REQUEST.get('abn', 'No ABN')
     
     org.save()
         
