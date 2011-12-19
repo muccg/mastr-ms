@@ -37,8 +37,8 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-#    'django.middleware.transaction.TransactionMiddleware',
-#    'madas.utils.json_exception_handler_middleware.JSONExceptionHandlerMiddleware',
+    'django.middleware.transaction.TransactionMiddleware',
+    'madas.utils.json_exception_handler_middleware.JSONExceptionHandlerMiddleware',
     'django.middleware.doc.XViewMiddleware',
     'django.middleware.ssl.SSLRedirect'
 ]
