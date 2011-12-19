@@ -70,8 +70,6 @@ def _findAdminOrNodeRepEmailTarget(groupname = 'Administrators'): #TODO use MADA
     return retval 
 
 def sendRequest(request, *args):
-    print 'WWHAAAAT??'
-    print Quoterequest.objects.all().count()
     logger.debug('***quote: sendRequest***')
     email = request.REQUEST.get('email', None)
     firstname = request.REQUEST.get('firstname', None)
@@ -84,15 +82,11 @@ def sendRequest(request, *args):
 
     try:
         #add the new quote to the DB
-        print Quoterequest.objects.all().count()
         qr = _addQuoteRequest(email, firstname, lastname, officePhone, toNode, country, details)
-        print qr.id
-        print Quoterequest.objects.all().count()
     except Exception, e:
         logger.exception('Exception adding quote request.')
         raise Exception('Exception adding quote request.')
   
-    print Quoterequest.objects.all().count()
     try:
         if request.FILES.has_key('attachfile'):
             f = request.FILES['attachfile']
@@ -105,25 +99,20 @@ def sendRequest(request, *args):
         logger.exception('Exception saving attached file.')
         raise Exception('Exception saving attached file.')
 
-    print 'I simply refuse to believe this!'
-    print Quoterequest.objects.all().count()
     try: 
         sendQuoteRequestConfirmationEmail(request, qr.id, email) 
         #email the administrator(s) for the node 
         logger.debug('Argument to _findAdminOrNodeRepEmailTarget is: %s' % (str(toNode)) )
-        print Quoterequest.objects.all().count()
         if toNode == '': #if the node was 'Dont Know'
             searchgroups = MADAS_ADMIN_GROUP
         else:
             searchgroups = toNode
         targetUsers = _findAdminOrNodeRepEmailTarget(groupname = searchgroups)
-        print Quoterequest.objects.all().count()
         for targetUser in targetUsers:
             sendQuoteRequestToAdminEmail(request, qr.id, firstname, lastname, targetUser['uid'][0]) #toemail should be a string, but ldap returns are all lists
     except Exception, e:
         logger.exception('Error sending mail in SendRequest: %s' % ( str(e) ) )
 
-    print Quoterequest.objects.all().count()
     logger.debug( '*** quote:sendRequest: exit ***' )
     return jsonResponse( mainContentFunction='quote:request')       
 
@@ -368,7 +357,6 @@ def _addQuoteHistory(qr, emailaddress, newnode, oldnode, comment, newcompleted, 
     return retval
 
 def _addQuoteRequest(emailaddress, firstname, lastname, officephone, tonode, country, details):
-    print 'Called only once'
     retval = None
     emailobj = _getEmailMapping(emailaddress)
     if emailobj is not None:
