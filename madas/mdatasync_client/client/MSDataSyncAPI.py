@@ -183,7 +183,7 @@ class MSDataSyncAPI(object):
             jsonret = simplejson.loads( jsonresp )
             #if there is an error, bail out by calling the return function
             if not jsonret["success"]:
-                returnFn(retcode = False, retstring = "Sync Initiation failed: %s" % (jsonret["message"]))   
+                returnFn(retcode = False, retstring = "Sync Initiation failed: %s" % (jsonret["msg"]))   
             else:
                 details = jsonret["details"]
                 files = jsonret["files"]
