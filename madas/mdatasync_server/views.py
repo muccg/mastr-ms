@@ -135,7 +135,7 @@ def request_sync(request, organisation=None, sitename=None, station=None):
         ##save the client state
         save_client_state(clientstate)
     else:
-        resp["message"] = "Could not find node %s-%s-%s" % (organisation, sitename, station)
+        raise("Could not find node %s-%s-%s" % (organisation, sitename, station) )
 
     return HttpResponse(simplejson.dumps(resp))
     
@@ -322,6 +322,7 @@ def check_run_sample_files(request):
 
 def log_upload(request, *args):
     logger.debug('LOGUPLOAD')
+    status = 'ok'
     fname_prefix = 'UNKNOWN_'
     if request.POST.has_key('nodename'):
         fname_prefix = request.POST['nodename'] + '_'
@@ -331,12 +332,12 @@ def log_upload(request, *args):
         logger.debug( 'Uploaded file name: %s' % ( f._get_name() ) )
         written_logfile_name = str(os.path.join('synclogs', "%s%s" % (fname_prefix,f._get_name()) ) ) 
         write_success = _handle_uploaded_file(f, written_logfile_name )#dont allow them to replace arbitrary files
-
         try:
             if write_success:
                 body ="An MS Datasync logfile has been uploaded: %s\r\n" % (written_logfile_name)
             else:
                 body = "MS Datasync logfile upload failed: %s\r\n" % (written_logfile_name)
+                status = 'Log upload failed'
             e = FixedEmailMessage(subject="MS Datasync Log Upload (%s)" % (fname_prefix.strip('_')), body=body, from_email = RETURN_EMAIL, to = [LOGS_TO_EMAIL])
             e.send()
         except Exception, e:
@@ -344,11 +345,13 @@ def log_upload(request, *args):
 
     else:
         logger.warning( 'logupload: No file in the post' )
+        status = 'No log posted'
 
-    return jsonResponse('ok')
+    return jsonResponse(status)
 
 def key_upload(request, *args):
     fname_prefix = 'UNKNOWN_'
+    status = 'ok'
     if request.POST.has_key('nodename'):
         fname_prefix = request.POST['nodename'] + '_'
     
@@ -364,6 +367,7 @@ def key_upload(request, *args):
                 body ="An MS Datasync keyfile has been uploaded: %s\r\n" % (written_logfile_name)
             else:
                 body = "MS Datasync keyfile upload failed: %s\r\n" % (written_logfile_name)
+                status= 'key upload failed'
             e = FixedEmailMessage(subject="MS Datasync Public Key upload (%s)" % (fname_prefix), body=body, from_email = RETURN_EMAIL, to = [KEYS_TO_EMAIL])
             e.send()
         except Exception, e:
@@ -371,8 +375,9 @@ def key_upload(request, *args):
          
     else:
         logger.warning('Keyupload: No file in the post')
+        status = 'No key posted'
 
-    return jsonResponse('ok')
+    return jsonResponse(status)
 
 
 
