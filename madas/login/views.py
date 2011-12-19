@@ -185,7 +185,7 @@ def processResetPassword(request, *args):
         success = False
         request.session.flush() #if we don't flush here, we are leaving the redirect function the same.
     if not success:
-        return jsonErrorResponse("Coulnd't reset password")
+        raise Exception("Couldn't reset password")
     return jsonResponse(mainContentFunction='login') 
 
 #TODO not sure this function is even needed

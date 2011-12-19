@@ -76,7 +76,8 @@ def userSave(request, *args):
     if success:
         sendAccountModificationEmail(request, parsedform['username'])
     else:
-        logger.warning('Error saving user: %s' % (parsedform['username']))
+        logger.error('Error saving user: %s' % (parsedform['username']))
+        raise Exception('Error saving user.')
 
     logger.debug('***users/userSave : exit ***') 
     return jsonResponse(mainContentFunction='user:myaccount')
