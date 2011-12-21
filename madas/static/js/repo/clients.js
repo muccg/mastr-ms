@@ -24,8 +24,10 @@ MA.ClientsListCmp = {
                 autoFill:true
             },
             columns: [
-                      { header: "ID", menuDisabled:true, dataIndex:'id', width:50 },
-                      { header: "Client", menuDisabled:true, dataIndex:'username' }
+                      { header: "ID", menuDisabled:true, dataIndex:'id', width:20 },
+                      { header: "Name", dataIndex:'name', width:50 },
+                      { header: "Email", dataIndex:'email', width:50 },
+                      { header: "Organisation", dataIndex:'organisation_name', width:50 }
             ],
             plugins:[new Ext.ux.grid.Search({
                 disableSeparator:true,

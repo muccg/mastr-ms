@@ -17,7 +17,7 @@ from madas.repository.permissions import user_passes_test
 from django.db.models import Q
 from datetime import datetime, timedelta
 from django.core.mail import mail_admins
-from madas.users.MAUser import getMadasUser
+from madas.users.MAUser import getMadasUser, loadMadasUser
 from madas.repository import rulegenerators
 
 
@@ -384,68 +384,28 @@ def recent_runs(request):
 
 @mastr_users_only
 def recordsClientList(request):
-    from quote.models import UserOrganisation
-    
-    if request.GET:
-        args = request.GET
+    args = request.REQUEST
+    output = json_records_template(['id', 'name', 'email', 'organisation_name'])
+
+    if args.get('allUsers'):
+        rows = User.objects.all()
     else:
-        args = request.POST
-    
-    ### TODO why do we need this, we'll get a 403 from decorator now if not logged in and not in group - ABM
-    authenticated = request.user.is_authenticated()
-    if not authenticated == True:
-        return jsonResponse()
-    ### End Authorisation Check ###
-    
-    # basic json that we will fill in
-    output = {'metaData': { 'totalProperty': 'results',
-        'root': 'rows',
-            'id': 'id',
-                'successProperty': 'success',
-                    'fields': []
-                        },
-                            'results': 0,
-                                'authenticated': True,
-                                    'authorized': True,
-                                        'success': True,
-                                            'rows': []
-                                            }
+        rows = User.objects.extra(where=["id IN (SELECT DISTINCT client_id FROM repository_project ORDER BY client_id)"])
 
-    # TODO as above - do we need this now - ABM
-    authenticated = request.user.is_authenticated()
-    authorized = True # need to change this
-    if not authenticated or not authorized:
-        return HttpResponse(json.dumps(output), status=401)
-        
-        
-    rows = MadasUser.objects.order_by('username') 
-    
-    # add fields to meta data
-    output['metaData']['fields'].append({'name':'username'})
-    output['metaData']['fields'].append({'name':'id'})
-    output['metaData']['fields'].append({'name':'organisation_name'})
-    
-    # add rows
     for row in rows:
-        d = {}
-        d['username'] = row.username
-        d['id'] = row.id
-    
-        #add organisation name if it exists
-        userorgs = UserOrganisation.objects.filter(user=row)
-        userorgname = ''
-        if len(userorgs) > 0:
-            userorgname = userorgs[0].organisation.name
-        d['organisation_name'] = userorgname
+        mauser = loadMadasUser(row.username)
+        if not mauser: continue
+        output["rows"].append({
+            "id": row.id,
+            "name": mauser['name'],
+            "email": mauser['email'],
+            "organisation_name": row.organisation_set.all()[0].name if row.organisation_set.exists() else ''
+        })
 
-        output['rows'].append(d)
-
-    # add row count
     output['results'] = len(output['rows'])
-            
+
     output = makeJsonFriendly(output)
     return HttpResponse(json.dumps(output))
-
 
 def recordsClientFiles(request):
 
@@ -1261,39 +1221,6 @@ def recordsComponents(request):
     output = makeJsonFriendly(output)
     return HttpResponse(json.dumps(output))
        
-
-@mastr_users_only
-def recordsClients(request, *args):
-    # basic json that we will fill in
-    output = {'metaData': { 'totalProperty': 'results',
-                            'successProperty': 'success',
-                            'root': 'rows',
-                            'id': 'id',
-                            'fields': [{'name':'id'}, {'name':'client'}]
-                            },
-              'results': 0,
-              'authenticated': True,
-              'authorized': True,
-              'success': True,
-              'rows': []
-              }
-
-    rows = User.objects.extra(where=["id IN (SELECT DISTINCT client_id FROM repository_project ORDER BY client_id)"])
-
-    # add row count
-    output['results'] = len(rows);
-
-    # add rows
-    for row in rows:
-        output["rows"].append({
-            "id": row.id,
-            "client": row.username,
-        })
-
-    output = makeJsonFriendly(output)
-
-    return HttpResponse(json.dumps(output))
-
 
 @mastr_users_only
 def recordsSamples(request, experiment_id):
