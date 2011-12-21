@@ -1,6 +1,8 @@
 from django.utils import simplejson as json
 from django.http import HttpResponse
+import logging
 
+logger = logging.getLogger('madas_log')
 
 class JSONExceptionHandlerMiddleware(object):
 
@@ -12,6 +14,8 @@ class JSONExceptionHandlerMiddleware(object):
             'success': False,
             'msg': str(exception)
         }
+
+        logger.exception(exception)
 
         return HttpResponse(json.dumps(err_response), mimetype='application/json')
 
