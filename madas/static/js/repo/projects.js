@@ -763,19 +763,19 @@ MA.ProjectCmp = {
                                 width:700,
                                 editable:false,
                                 forceSelection:true,
-                                displayField:'username',
+                                displayField:'displayValue',
                                 valueField:'id',
                                 hiddenName:'client_id',
                                 lazyRender:true,
                                 allowBlank:false,
                                 typeAhead:false,
                                 triggerAction:'all',
-                                listWidth:230,
+                                listWidth:400,
                                 store: clientsListStore,
                                 itemSelector: 'div.search-item',
                                 tpl:new Ext.XTemplate(
                                 '<tpl for="."><div style="padding:8px;padding-top:5px;padding-bottom:5px;border-bottom:1px solid #ccc;" class="search-item">',
-                                '{username}<br /><span style="color:#666;">{organisation_name}</span>',
+                                '{displayValue}<br /><span style="color:#666;">{organisationName}</span>',
                                 '</div></tpl>'
                                 )
                             }),
@@ -798,7 +798,7 @@ MA.ProjectCmp = {
                                 //POP UP A WINDOW TO ASK WHICH USER TO ADD
                                 var addWindow = new Ext.Window({
                                     title:'Add a Project Manager',
-                                    width:280,
+                                    width:380,
                                     height:130,
                                     minHeight:130,
                                     border:false,
@@ -813,7 +813,7 @@ MA.ProjectCmp = {
                                                 labelWidth:50,
                                                 itemId:'projManagerCombo',
                                                 name:'projManager',
-                                                width:200,
+                                                width:300,
                                                 editable:false,
                                                 forceSelection:true,
                                                 displayField:'value',
@@ -823,8 +823,8 @@ MA.ProjectCmp = {
                                                 allowBlank:false,
                                                 typeAhead:false,
                                                 triggerAction:'all',
-                                                listWidth:200,
-                                                store: userComboStore
+                                                listWidth:300,
+                                                store: maStaffComboStore
                                             })
                                     ],
                                     buttons:[
@@ -1022,7 +1022,7 @@ MA.LoadProject = function (projId) {
     
     Ext.getCmp('projectCmpTitle').setTitle('Loading project...');
     
-    var projLoader = new Ajax.Request(wsBaseUrl + "records/project/id/" + projId, 
+    var projLoader = new Ajax.Request(wsBaseUrl + "recordsProject/" + projId, 
                                          { 
                                          asynchronous:true, 
                                          evalJSON:'force',

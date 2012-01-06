@@ -107,7 +107,7 @@ function renderTreatmentType(val) {
 }
 
 function renderUser(val) {
-    return renderValueOnly(userComboStore, val);   
+    return renderValueOnly(maStaffComboStore, val);   
 }
 
 function renderClass(val) {
