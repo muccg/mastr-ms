@@ -27,7 +27,7 @@ MA.ClientsListCmp = {
                       { header: "ID", menuDisabled:true, sortable: true, dataIndex:'id', width:20 },
                       { header: "Name", dataIndex:'name',sortable: true, width:50 },
                       { header: "Email", dataIndex:'email', sortable: true, width:50 },
-                      { header: "Organisation", dataIndex:'organisation_name', sortable: true, width:50 }
+                      { header: "Organisation", dataIndex:'organisationName', sortable: true, width:50 }
             ],
             plugins:[new Ext.ux.grid.Search({
                 disableSeparator:true,

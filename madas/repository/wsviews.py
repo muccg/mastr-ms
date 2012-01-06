@@ -319,6 +319,29 @@ def save_project_managers(project, project_manager_ids):
         project.managers.remove(*to_remove)
 
 @mastr_users_only
+def recordsProject(request, project_id):
+    output = json_records_template(['id', 'title', 'client', 'managers'])
+    project = Project.objects.get(pk=project_id)
+    def manager_details(manager):
+        maUser = loadMadasUser(manager.username)
+        if not maUser: return None
+        return {"id": manager.id, "username": "%s (%s)" % (maUser['name'], maUser['email'])}
+    managers = map(manager_details, project.managers.all())
+    managers = filter(lambda x: x is not None, managers)
+    output['rows'].append({
+            'id': project.id,
+            'title': project.title,
+            'description': project.description,
+            'client': project.client_id,
+            'managers': managers
+        })
+
+    output['results'] = len(output['rows'])
+            
+    output = makeJsonFriendly(output)
+    return HttpResponse(json.dumps(output))
+
+@mastr_users_only
 def recent_projects(request):
     output = json_records_template(['id', 'title', 'client'])
     user = request.user
@@ -381,11 +404,34 @@ def recent_runs(request):
     output = makeJsonFriendly(output)
     return HttpResponse(json.dumps(output))
 
+@mastr_users_only
+def recordsMAStaff(request):
+    args = request.REQUEST
+    output = json_records_template(['key', 'value'])
+
+    rows = User.objects.all()
+
+    for row in rows:
+        mauser = loadMadasUser(row.username)
+        if not mauser: continue
+        if not mauser.get('isClient'):
+            output["rows"].append({
+                "key": row.id,
+                "value": "%s (%s)" % (mauser['name'],mauser['email'])
+            })
+
+    output["rows"].sort(key=lambda r: r["value"])
+
+    output['results'] = len(output['rows'])
+
+    output = makeJsonFriendly(output)
+    return HttpResponse(json.dumps(output))
+
 
 @mastr_users_only
 def recordsClientList(request):
     args = request.REQUEST
-    output = json_records_template(['id', 'name', 'email', 'organisation_name'])
+    output = json_records_template(['id', 'name', 'email', 'organisationName', 'displayValue'])
 
     if args.get('allUsers'):
         rows = User.objects.all()
@@ -399,8 +445,11 @@ def recordsClientList(request):
             "id": row.id,
             "name": mauser['name'],
             "email": mauser['email'],
-            "organisation_name": row.organisation_set.all()[0].name if row.organisation_set.exists() else ''
+            "displayValue": "%s (%s)" % (mauser['name'], mauser['email']),
+            "organisationName": row.organisation_set.all()[0].name if row.organisation_set.exists() else ''
         })
+
+    output['rows'].sort(key=lambda r: r['displayValue'])
 
     output['results'] = len(output['rows'])
 

@@ -207,7 +207,7 @@ MA.ChangeMainContent = function(contentName, paramArray){
             machineStore.load();
             enabledRuleGeneratorStore.load();
             sopLookupStore.load();
-            userComboStore.load();
+            maStaffComboStore.load();
             involvementComboStore.load();
             Ext.getCmp('center-panel').layout.setActiveItem('projectCmpTitle');
             Ext.getCmp('project-experiment-list').enable();
