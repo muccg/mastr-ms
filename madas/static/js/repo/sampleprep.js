@@ -19,7 +19,7 @@ MA.RemoveSOPRow = function(rec) {
 };
 
 MA.DownloadSOPFile = function(sopID) {
-    window.location = wsBaseUrl + "downloadSOPFile/" + sopID;
+    window.open(wsBaseUrl + "downloadSOPFileById/" + sopID);
 };
 
 function sopFileActionRenderer(val) {
