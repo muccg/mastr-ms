@@ -19,6 +19,8 @@ from datetime import datetime, timedelta
 from django.core.mail import mail_admins
 from madas.users.MAUser import getMadasUser, loadMadasUser
 from madas.repository import rulegenerators
+import os, stat
+import settings
 
 
 @mastr_users_only
@@ -465,8 +467,6 @@ def recordsClientFiles(request):
 
     # basic json that we will fill in
     output = []
-
-    import os
 
     if args.get('node','dashboardFilesRoot') == 'dashboardFilesRoot':
         print 'node is dashboardFilesRoot'
@@ -1387,8 +1387,6 @@ def moveFile(request):
     exp = Experiment.objects.get(id=args['experiment_id'])
     exp.ensure_dir()
         
-    import settings, os
-    
     exppath = settings.REPO_FILES_ROOT + os.sep + 'experiments' + os.sep + str(exp.created_on.year) + os.sep + str(exp.created_on.month) + os.sep + str(exp.id) + os.sep
     pendingPath = settings.REPO_FILES_ROOT + os.sep + 'pending' + os.sep + file
 
@@ -1429,8 +1427,6 @@ def experimentFilesList(request):
     exp = Experiment.objects.get(id=args['experiment'])
     exp.ensure_dir()
         
-    import settings, os
-    
     exppath = settings.REPO_FILES_ROOT + os.sep + 'experiments' + os.sep + str(exp.created_on.year) + os.sep + str(exp.created_on.month) + os.sep + str(exp.id) + os.sep
     
     sharedList = ClientFile.objects.filter(experiment=exp)
@@ -1458,7 +1454,6 @@ def runFilesList(request):
     run = Run.objects.get(id=args['run'])
     (abspath, relpath) = run.ensure_dir()
         
-    import os
     runpath = abspath + os.sep
     
     print 'outputting file listing for ' + runpath + ' ' + path
@@ -1479,8 +1474,6 @@ def pendingFilesList(request):
     if path == 'pendingRoot':
         path = ''
 
-    import settings, os
-    
     basepath = settings.REPO_FILES_ROOT + os.sep + 'pending' + os.sep
     
     return _fileList(request, basepath, path, False, [])
@@ -1488,7 +1481,6 @@ def pendingFilesList(request):
     
 @mastr_users_only
 def _fileList(request, basepath, path, withChecks, sharedList, replacementBasepath = None):
-    import os
 
     output = []
 
@@ -1580,7 +1572,6 @@ def downloadFile(request, *args):
     exp = Experiment.objects.get(id=args['experiment_id'])
     exp.ensure_dir()
     
-    import os, settings
     filename = os.path.join(settings.REPO_FILES_ROOT, 'experiments', str(exp.created_on.year), str(exp.created_on.month), str(exp.id), file)
     from django.core.servers.basehttp import FileWrapper
     from django.http import HttpResponse
@@ -1602,19 +1593,24 @@ def downloadFile(request, *args):
     response['Content-Disposition'] = content_disposition
     response['Content-Length'] = os.path.getsize(filename)
     return response 
-    
+
 @mastr_users_only
-def downloadSOPFile(request, sop_id):
-    print 'downloadSOPFile:', str('')
-    
+def downloadSOPFileById(request, sop_id):
+    from django.core.urlresolvers import reverse
     sop = StandardOperationProcedure.objects.get(id=sop_id)
-    
-    import os
+    return HttpResponseRedirect(reverse('downloadSOPFile', 
+                kwargs={'sop_id': sop.id, 
+                        'filename': os.path.basename(sop.attached_pdf.name)}))
+   
+@mastr_users_only
+def downloadSOPFile(request, sop_id, filename):
+    sop = StandardOperationProcedure.objects.get(id=sop_id)
+    if filename != os.path.basename(sop.attached_pdf.name):
+        return HttpResponseForbidden()
     
     wrapper = sop.attached_pdf.open()
-    content_disposition = 'attachment;  filename=\"%s\"' % sop.attached_pdf.name.split(os.sep)[-1]
     response = HttpResponse(wrapper, content_type='application/download')
-    response['Content-Disposition'] = content_disposition
+    response['Content-Disposition'] = 'attachment;'
     response['Content-Length'] = os.path.getsize(sop.attached_pdf.name)
     return response 
 
@@ -1632,8 +1628,6 @@ def downloadClientFile(request, filepath):
     
     exp = cf.experiment
     exp.ensure_dir()
-
-    import os, settings
 
 
     (abspath, exppath) = cf.experiment.ensure_dir()
@@ -1683,7 +1677,6 @@ def downloadRunFile(request):
     run = Run.objects.get(id=args['run_id'])
     (abspath, relpath) = run.ensure_dir()
     
-    import os, settings
     filename = os.path.join(abspath, file)
     
     print 'download run file: ' + filename
@@ -1742,8 +1735,6 @@ def _handle_uploaded_file(f, name, experiment_id):
     print '*** _handle_uploaded_file: enter ***'
     retval = False
     try:
-        import os, settings, stat
-        
         print 'exp is ' + experiment_id
         
         exp = Experiment.objects.get(id=experiment_id)
