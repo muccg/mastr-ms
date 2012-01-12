@@ -1029,6 +1029,8 @@ def recordsSamplesForExperiment(request):
     randomise = args.get('randomise', False)
     if not randomise:
         sort_by = args.get('sort', 'id')
+        if sort_by == 'sample_class':
+            sort_by = 'sample_class__class_id'
         sort_dir = args.get('dir', 'ASC')
         if sort_dir == 'DESC':
             sort = '-' + sort_by
