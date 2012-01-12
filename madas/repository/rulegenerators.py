@@ -3,6 +3,7 @@ from madas.users.MAUser import MAUser
 
 from madas.users.MAUser import getMadasUser
 from django.db.models import Q
+
 def listRuleGenerators(user=None, accessibility=False, showEnabledOnly=False):
     usernode = None
     mauser = None
@@ -26,8 +27,6 @@ def listRuleGenerators(user=None, accessibility=False, showEnabledOnly=False):
         rows = rows.filter(apply_showonlyenabled)
 
     return rows 
-
-
 
 def recreate_start_block(RG, startblockvars):
     # We will recreate the block by deleting the existing
@@ -104,8 +103,7 @@ def recreate_end_block(RG, endblockvars):
     for obj in newelements:
         obj.save()
 
-
-def create_rule_generator(name, description, accessibility, user, node, startblockvars, sampleblockvars, endblockvars, state=None, version=None, previous_version=None, **kwargs):
+def create_rule_generator(name, description, accessibility, user, apply_sweep_rule, node, startblockvars, sampleblockvars, endblockvars, state=None, version=None, previous_version=None, **kwargs):
     '''Creates a new rule generator record and sets basic attributes.
        Then uses edit_rule_generator to set the blocks and state attributes'''
     success = False
@@ -123,6 +121,7 @@ def create_rule_generator(name, description, accessibility, user, node, startblo
 
 
         success, access, message = edit_rule_generator(newRG.id, user,
+                                        apply_sweep_rule = apply_sweep_rule,
                                         startblock = startblockvars,
                                         sampleblock = sampleblockvars,
                                         endblock = endblockvars,
@@ -150,15 +149,17 @@ def edit_rule_generator(id, user, **kwargs):
         print "In edit, user = ", type(user)
         if candidateRG.is_accessible_by(user):
         
-            if kwargs.get('state', None) is not None:
+            if kwargs.get('apply_sweep_rule') is not None:
+                candidateRG.apply_sweep_rule = kwargs.get('apply_sweep_rule')
+            if kwargs.get('state') is not None:
                 candidateRG.state = kwargs.get('state')
-            if kwargs.get('accessibility', None) is not None:
+            if kwargs.get('accessibility') is not None:
                 candidateRG.accessibility = kwargs.get('accessibility')
             if candidateRG.version is None:
                 # Don't allow changing the name of a versioned RG
-                if kwargs.get('name', None) is not None:
+                if kwargs.get('name') is not None:
                     candidateRG.name = kwargs.get('name')
-            if kwargs.get('description', None) is not None:
+            if kwargs.get('description') is not None:
                 candidateRG.description = kwargs.get('description')
             candidateRG.save()
        
@@ -209,6 +210,7 @@ def clone_rule_generator(rg_id, user):
             description = rg.description,
             accessibility = rg.accessibility,
             created_by = user,
+            apply_sweep_rule = rg.apply_sweep_rule,
             node = getMadasUser(user.username).PrimaryNode
         )
 
@@ -228,6 +230,7 @@ def create_new_version_of_rule_generator(rg_id, user):
             accessibility = rg.accessibility,
             previous_version = rg,
             created_by = user,
+            apply_sweep_rule = rg.apply_sweep_rule,
             node = getMadasUser(user.username).PrimaryNode
         )
 
@@ -247,6 +250,8 @@ def convert_to_dict(rulegenerator):
     d['accessibility_id'] = rulegenerator.accessibility
     d['accessibility'] = rulegenerator.accessibility_name
     d['created_by'] = unicode(rulegenerator.created_by)
+    d['apply_sweep_rule_display'] = 'Yes' if rulegenerator.apply_sweep_rule else 'No'
+    d['apply_sweep_rule'] = rulegenerator.apply_sweep_rule
     d['node'] = rulegenerator.node if rulegenerator.node else ''
     d['startblock'] = [{'count': r.count, 'component_id': r.component_id, 'component': r.component.sample_type} for r in rulegenerator.start_block_rules]
     d['sampleblock'] = [
@@ -259,5 +264,4 @@ def convert_to_dict(rulegenerator):
             'order_id' : r.order
         } for r in rulegenerator.sample_block_rules]
     d['endblock'] = [{'count': r.count, 'component_id': r.component_id, 'component': r.component.sample_type} for r in rulegenerator.end_block_rules]
-
     return d

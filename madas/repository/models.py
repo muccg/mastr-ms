@@ -612,6 +612,7 @@ class RuleGenerator(models.Model):
     description = models.CharField(max_length=1000)
     state = models.PositiveIntegerField(default=1, choices=STATES)
     accessibility = models.PositiveIntegerField(default=ACCESSIBILITY_USER, choices=ACCESSIBILITY)
+    apply_sweep_rule = models.BooleanField(default=True)
     version = models.PositiveIntegerField(null=True, blank=True)
     previous_version = models.ForeignKey('RuleGenerator', null=True, blank=True)
     created_by = models.ForeignKey(User)

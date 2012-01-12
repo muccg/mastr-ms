@@ -54,7 +54,8 @@ class RunLayout(object):
         end_block = self.create_end_block()
 
         items = start_block + sample_block + end_block
-        items = self.add_sweeps(items)
+        if self.run.rule_generator.apply_sweep_rule:
+            items = self.add_sweeps(items)
 
         self.save_items(items)
 

@@ -1140,7 +1140,7 @@ def recordsRuns(request):
 def formatRuleGenResults(rows):
 # basic json that we will fill in
     output = json_records_template([
-        'id', 'name', 'version', 'full_name', 'description', 'state_id', 'state', 'accessibility_id', 'accessibility', 'created_by', 'node', 'startblock', 'sampleblock', 'endblock'
+        'id', 'name', 'version', 'full_name', 'description', 'state_id', 'state', 'accessibility_id', 'accessibility', 'created_by', 'apply_sweep_rule', 'apply_sweep_rule_display', 'node', 'startblock', 'sampleblock', 'endblock'
         ])
 
     output['results'] = len(rows)
@@ -1847,6 +1847,9 @@ def create_rule_generator(request):
     name = request.POST.get('name', "Unnamed")
     description = request.POST.get('description', "This rule generator was not given a description")
     accessibility = request.POST.get('accessibility') 
+    apply_sweep_rule = request.POST.get('apply_sweep_rule') 
+    if apply_sweep_rule is not None:
+        apply_sweep_rule = True if apply_sweep_rule == 'true' else False
     startblockvars = json.loads(request.POST.get('startblock', []))
     sampleblockvars = json.loads(request.POST.get('sampleblock', []))
     endblockvars = json.loads(request.POST.get('endblock', []))
@@ -1855,6 +1858,7 @@ def create_rule_generator(request):
                                          description, 
                                          accessibility, 
                                          request.user, 
+                                         apply_sweep_rule,
                                          getMadasUser(request.user.username).PrimaryNode,
                                          startblockvars,
                                          sampleblockvars,
@@ -1875,6 +1879,9 @@ def edit_rule_generator(request):
        return json_error('Rule Generator id not submitted')
 
     description = request.POST.get('description', None)
+    apply_sweep_rule = request.POST.get('apply_sweep_rule')
+    if apply_sweep_rule is not None:
+        apply_sweep_rule = True if apply_sweep_rule == 'true' else False
     name = request.POST.get('name', None)
     accessibility = request.POST.get('accessibility', None) 
     startblockvars = json.loads(request.POST.get('startblock', 'null'))
@@ -1886,6 +1893,7 @@ def edit_rule_generator(request):
                                                     name=name,
                                                     description=description,
                                                     accessibility=accessibility,
+                                                    apply_sweep_rule=apply_sweep_rule,
                                                     startblock=startblockvars,
                                                     sampleblock=sampleblockvars,
                                                     endblock=endblockvars,
