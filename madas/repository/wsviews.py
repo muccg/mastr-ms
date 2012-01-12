@@ -433,7 +433,7 @@ def recordsMAStaff(request):
 @mastr_users_only
 def recordsClientList(request):
     args = request.REQUEST
-    output = json_records_template(['id', 'name', 'email', 'organisationName', 'displayValue'])
+    output = json_records_template(['id', 'is_client', 'name', 'email', 'organisationName', 'displayValue'])
 
     if args.get('allUsers'):
         rows = User.objects.all()
@@ -445,6 +445,7 @@ def recordsClientList(request):
         if not mauser: continue
         output["rows"].append({
             "id": row.id,
+            "is_client": "Yes" if mauser['isClient'] else "No",
             "name": mauser['name'],
             "email": mauser['email'],
             "displayValue": "%s (%s)" % (mauser['name'], mauser['email']),
