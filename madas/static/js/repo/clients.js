@@ -24,7 +24,8 @@ MA.ClientsListCmp = {
                 autoFill:true
             },
             columns: [
-                      { header: "ID", menuDisabled:true, sortable: true, dataIndex:'id', width:20 },
+                      { header: "Client?", sortable: true, dataIndex:'is_client', width:20 },
+                      { header: "ID", sortable: true, dataIndex:'id', width:20 },
                       { header: "Name", dataIndex:'name',sortable: true, width:50 },
                       { header: "Email", dataIndex:'email', sortable: true, width:50 },
                       { header: "Organisation", dataIndex:'organisationName', sortable: true, width:50 }
