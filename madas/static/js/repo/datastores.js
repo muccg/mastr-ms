@@ -634,11 +634,11 @@ var sopComboStore = new Ext.data.JsonStore(
                         }
                     );
                     
-var userComboStore = new Ext.data.JsonStore(
+var maStaffComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'userCombo',
                             autoLoad: false,
-                            url: wsBaseUrl + 'populate_select/user/id/username',
+                            url: wsBaseUrl + 'recordsMAStaff',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
                             listeners: {'load':MA.DSLoaded,
