@@ -35,7 +35,7 @@ MA.RuleGeneratorDetailsCmp = {
     xtype: 'fieldset',
     columnWidth: 0.6,
     title: 'Rule generator details',
-    labelWidth: 90,
+    labelWidth: 120,
     defaults: {border:false},
     defaultType: 'displayfield',
     autoHeight: true,
@@ -109,6 +109,9 @@ MA.RuleGeneratorDetailsCmp = {
         },{
             fieldLabel: 'Accessible By',
             name: 'accessibility'
+        },{
+            fieldLabel: 'Applies Sweep Rule',
+            name: 'apply_sweep_rule_display'
         },{
             fieldLabel: 'Start Block',
             itemId: 'startblock',
@@ -510,7 +513,7 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
     closeAction: 'hide',
     bodyStyle: 'padding: 5px',
     width: 680,
-    height: 550,
+    height: 580,
     modal:true,
     clearValues: function() {
         var theform = Ext.getCmp('ruleGeneratorCreateForm').getForm();
@@ -561,17 +564,19 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
         url: wsBaseUrl + 'create_rule_generator',
         defaultType: 'textfield',
         buttonAlign: 'center',
-        defaults: {labelWidth: 120, autoWidth:true, autoHeight:true},
+        //defaults: {autoWidth:true, autoHeight:true},
         clearFields: function() {
             this.items.each(function(field) {
                     field.setRawValue('');
                 });
             this.findField('accessibility_id').setValue(1);
         },
+        labelWidth: 150,
         items: [
             {
                 fieldLabel: 'Name',
-                name: 'name'
+                name: 'name',
+                width: 300
             },{
                 fieldLabel: 'Version',
                 name: 'version',
@@ -579,7 +584,8 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
             },{
                 fieldLabel: 'Description',
                 xtype: 'textarea',
-                name: 'description'
+                name: 'description',
+                width: 400
             },{
                 fieldLabel: 'Accessible by',
                 name: 'accessibility_id',
@@ -592,12 +598,18 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
                     { boxLabel: 'Everyone', name: 'accessibility_id', inputValue: 3 }
                 ]
             },{
+                fieldLabel: 'Apply Sweep Rule',
+                xtype: 'checkbox',
+                name: 'apply_sweep_rule',
+                inputValue: 1
+            },{
                 xtype:'tabpanel',
                 activeItem:0,
                 border:true,
                 frame: true,
                 anchor: '100%, 100%', //so anchoring works at lower level containers, and full height tabs
                 defaults: { layout: 'form', labelWidth: 80, hideMode: 'offsets'},
+                autoHeight: true,
                 items: [
                     createRuleBlockComponent('startblock', 'Start Block', false),
                     createRuleBlockComponent('sampleblock', 'Sample Block', true),
@@ -626,11 +638,13 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
                         return retval;
                     };
 
-                    var formvalues = theform.getValues()
+                    var formvalues = theform.getValues();
+                    var apply_sweep_rule = typeof(formvalues.apply_sweep_rule) === 'undefined' ? false: true;
 
                     var formparams = {'name': formvalues.name, 
                                  'description': formvalues.description, 
                                  'accessibility': formvalues.accessibility_id, 
+                                 'apply_sweep_rule': apply_sweep_rule, 
                                  'startblock':Ext.encode(get_grid_keyvals('startblock')), 
                                  'sampleblock': Ext.encode(get_grid_keyvals('sampleblock')), 
                                  'endblock':Ext.encode(get_grid_keyvals('endblock')), 

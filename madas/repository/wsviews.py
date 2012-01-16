@@ -17,8 +17,10 @@ from madas.repository.permissions import user_passes_test
 from django.db.models import Q
 from datetime import datetime, timedelta
 from django.core.mail import mail_admins
-from madas.users.MAUser import getMadasUser
+from madas.users.MAUser import getMadasUser, loadMadasUser
 from madas.repository import rulegenerators
+import os, stat
+import settings
 
 
 @mastr_users_only
@@ -319,6 +321,29 @@ def save_project_managers(project, project_manager_ids):
         project.managers.remove(*to_remove)
 
 @mastr_users_only
+def recordsProject(request, project_id):
+    output = json_records_template(['id', 'title', 'client', 'managers'])
+    project = Project.objects.get(pk=project_id)
+    def manager_details(manager):
+        maUser = loadMadasUser(manager.username)
+        if not maUser: return None
+        return {"id": manager.id, "username": "%s (%s)" % (maUser['name'], maUser['email'])}
+    managers = map(manager_details, project.managers.all())
+    managers = filter(lambda x: x is not None, managers)
+    output['rows'].append({
+            'id': project.id,
+            'title': project.title,
+            'description': project.description,
+            'client': project.client_id,
+            'managers': managers
+        })
+
+    output['results'] = len(output['rows'])
+            
+    output = makeJsonFriendly(output)
+    return HttpResponse(json.dumps(output))
+
+@mastr_users_only
 def recent_projects(request):
     output = json_records_template(['id', 'title', 'client'])
     user = request.user
@@ -381,71 +406,58 @@ def recent_runs(request):
     output = makeJsonFriendly(output)
     return HttpResponse(json.dumps(output))
 
-
 @mastr_users_only
-def recordsClientList(request):
-    from quote.models import UserOrganisation
-    
-    if request.GET:
-        args = request.GET
-    else:
-        args = request.POST
-    
-    ### TODO why do we need this, we'll get a 403 from decorator now if not logged in and not in group - ABM
-    authenticated = request.user.is_authenticated()
-    if not authenticated == True:
-        return jsonResponse()
-    ### End Authorisation Check ###
-    
-    # basic json that we will fill in
-    output = {'metaData': { 'totalProperty': 'results',
-        'root': 'rows',
-            'id': 'id',
-                'successProperty': 'success',
-                    'fields': []
-                        },
-                            'results': 0,
-                                'authenticated': True,
-                                    'authorized': True,
-                                        'success': True,
-                                            'rows': []
-                                            }
+def recordsMAStaff(request):
+    args = request.REQUEST
+    output = json_records_template(['key', 'value'])
 
-    # TODO as above - do we need this now - ABM
-    authenticated = request.user.is_authenticated()
-    authorized = True # need to change this
-    if not authenticated or not authorized:
-        return HttpResponse(json.dumps(output), status=401)
-        
-        
-    rows = MadasUser.objects.order_by('username') 
-    
-    # add fields to meta data
-    output['metaData']['fields'].append({'name':'username'})
-    output['metaData']['fields'].append({'name':'id'})
-    output['metaData']['fields'].append({'name':'organisation_name'})
-    
-    # add rows
+    rows = User.objects.all()
+
     for row in rows:
-        d = {}
-        d['username'] = row.username
-        d['id'] = row.id
-    
-        #add organisation name if it exists
-        userorgs = UserOrganisation.objects.filter(user=row)
-        userorgname = ''
-        if len(userorgs) > 0:
-            userorgname = userorgs[0].organisation.name
-        d['organisation_name'] = userorgname
+        mauser = loadMadasUser(row.username)
+        if not mauser: continue
+        if not mauser.get('isClient'):
+            output["rows"].append({
+                "key": row.id,
+                "value": "%s (%s)" % (mauser['name'],mauser['email'])
+            })
 
-        output['rows'].append(d)
+    output["rows"].sort(key=lambda r: r["value"])
 
-    # add row count
     output['results'] = len(output['rows'])
-            
+
     output = makeJsonFriendly(output)
     return HttpResponse(json.dumps(output))
 
+
+@mastr_users_only
+def recordsClientList(request):
+    args = request.REQUEST
+    output = json_records_template(['id', 'is_client', 'name', 'email', 'organisationName', 'displayValue'])
+
+    if args.get('allUsers'):
+        rows = User.objects.all()
+    else:
+        rows = User.objects.extra(where=["id IN (SELECT DISTINCT client_id FROM repository_project ORDER BY client_id)"])
+
+    for row in rows:
+        mauser = loadMadasUser(row.username)
+        if not mauser: continue
+        output["rows"].append({
+            "id": row.id,
+            "is_client": "Yes" if mauser['isClient'] else "No",
+            "name": mauser['name'],
+            "email": mauser['email'],
+            "displayValue": "%s (%s)" % (mauser['name'], mauser['email']),
+            "organisationName": row.organisation_set.all()[0].name if row.organisation_set.exists() else ''
+        })
+
+    output['rows'].sort(key=lambda r: r['displayValue'])
+
+    output['results'] = len(output['rows'])
+
+    output = makeJsonFriendly(output)
+    return HttpResponse(json.dumps(output))
 
 def recordsClientFiles(request):
 
@@ -456,8 +468,6 @@ def recordsClientFiles(request):
 
     # basic json that we will fill in
     output = []
-
-    import os
 
     if args.get('node','dashboardFilesRoot') == 'dashboardFilesRoot':
         print 'node is dashboardFilesRoot'
@@ -1020,6 +1030,8 @@ def recordsSamplesForExperiment(request):
     randomise = args.get('randomise', False)
     if not randomise:
         sort_by = args.get('sort', 'id')
+        if sort_by == 'sample_class':
+            sort_by = 'sample_class__class_id'
         sort_dir = args.get('dir', 'ASC')
         if sort_dir == 'DESC':
             sort = '-' + sort_by
@@ -1131,7 +1143,7 @@ def recordsRuns(request):
 def formatRuleGenResults(rows):
 # basic json that we will fill in
     output = json_records_template([
-        'id', 'name', 'version', 'full_name', 'description', 'state_id', 'state', 'accessibility_id', 'accessibility', 'created_by', 'node', 'startblock', 'sampleblock', 'endblock'
+        'id', 'name', 'version', 'full_name', 'description', 'state_id', 'state', 'accessibility_id', 'accessibility', 'created_by', 'apply_sweep_rule', 'apply_sweep_rule_display', 'node', 'startblock', 'sampleblock', 'endblock'
         ])
 
     output['results'] = len(rows)
@@ -1263,39 +1275,6 @@ def recordsComponents(request):
        
 
 @mastr_users_only
-def recordsClients(request, *args):
-    # basic json that we will fill in
-    output = {'metaData': { 'totalProperty': 'results',
-                            'successProperty': 'success',
-                            'root': 'rows',
-                            'id': 'id',
-                            'fields': [{'name':'id'}, {'name':'client'}]
-                            },
-              'results': 0,
-              'authenticated': True,
-              'authorized': True,
-              'success': True,
-              'rows': []
-              }
-
-    rows = User.objects.extra(where=["id IN (SELECT DISTINCT client_id FROM repository_project ORDER BY client_id)"])
-
-    # add row count
-    output['results'] = len(rows);
-
-    # add rows
-    for row in rows:
-        output["rows"].append({
-            "id": row.id,
-            "client": row.username,
-        })
-
-    output = makeJsonFriendly(output)
-
-    return HttpResponse(json.dumps(output))
-
-
-@mastr_users_only
 def recordsSamples(request, experiment_id):
     if request.GET:
         args = request.GET
@@ -1411,8 +1390,6 @@ def moveFile(request):
     exp = Experiment.objects.get(id=args['experiment_id'])
     exp.ensure_dir()
         
-    import settings, os
-    
     exppath = settings.REPO_FILES_ROOT + os.sep + 'experiments' + os.sep + str(exp.created_on.year) + os.sep + str(exp.created_on.month) + os.sep + str(exp.id) + os.sep
     pendingPath = settings.REPO_FILES_ROOT + os.sep + 'pending' + os.sep + file
 
@@ -1453,8 +1430,6 @@ def experimentFilesList(request):
     exp = Experiment.objects.get(id=args['experiment'])
     exp.ensure_dir()
         
-    import settings, os
-    
     exppath = settings.REPO_FILES_ROOT + os.sep + 'experiments' + os.sep + str(exp.created_on.year) + os.sep + str(exp.created_on.month) + os.sep + str(exp.id) + os.sep
     
     sharedList = ClientFile.objects.filter(experiment=exp)
@@ -1482,7 +1457,6 @@ def runFilesList(request):
     run = Run.objects.get(id=args['run'])
     (abspath, relpath) = run.ensure_dir()
         
-    import os
     runpath = abspath + os.sep
     
     print 'outputting file listing for ' + runpath + ' ' + path
@@ -1503,8 +1477,6 @@ def pendingFilesList(request):
     if path == 'pendingRoot':
         path = ''
 
-    import settings, os
-    
     basepath = settings.REPO_FILES_ROOT + os.sep + 'pending' + os.sep
     
     return _fileList(request, basepath, path, False, [])
@@ -1512,7 +1484,6 @@ def pendingFilesList(request):
     
 @mastr_users_only
 def _fileList(request, basepath, path, withChecks, sharedList, replacementBasepath = None):
-    import os
 
     output = []
 
@@ -1604,7 +1575,6 @@ def downloadFile(request, *args):
     exp = Experiment.objects.get(id=args['experiment_id'])
     exp.ensure_dir()
     
-    import os, settings
     filename = os.path.join(settings.REPO_FILES_ROOT, 'experiments', str(exp.created_on.year), str(exp.created_on.month), str(exp.id), file)
     from django.core.servers.basehttp import FileWrapper
     from django.http import HttpResponse
@@ -1626,19 +1596,24 @@ def downloadFile(request, *args):
     response['Content-Disposition'] = content_disposition
     response['Content-Length'] = os.path.getsize(filename)
     return response 
-    
+
 @mastr_users_only
-def downloadSOPFile(request, sop_id):
-    print 'downloadSOPFile:', str('')
-    
+def downloadSOPFileById(request, sop_id):
+    from django.core.urlresolvers import reverse
     sop = StandardOperationProcedure.objects.get(id=sop_id)
-    
-    import os
+    return HttpResponseRedirect(reverse('downloadSOPFile', 
+                kwargs={'sop_id': sop.id, 
+                        'filename': os.path.basename(sop.attached_pdf.name)}))
+   
+@mastr_users_only
+def downloadSOPFile(request, sop_id, filename):
+    sop = StandardOperationProcedure.objects.get(id=sop_id)
+    if filename != os.path.basename(sop.attached_pdf.name):
+        return HttpResponseForbidden()
     
     wrapper = sop.attached_pdf.open()
-    content_disposition = 'attachment;  filename=\"%s\"' % sop.attached_pdf.name.split(os.sep)[-1]
     response = HttpResponse(wrapper, content_type='application/download')
-    response['Content-Disposition'] = content_disposition
+    response['Content-Disposition'] = 'attachment;'
     response['Content-Length'] = os.path.getsize(sop.attached_pdf.name)
     return response 
 
@@ -1656,8 +1631,6 @@ def downloadClientFile(request, filepath):
     
     exp = cf.experiment
     exp.ensure_dir()
-
-    import os, settings
 
 
     (abspath, exppath) = cf.experiment.ensure_dir()
@@ -1707,7 +1680,6 @@ def downloadRunFile(request):
     run = Run.objects.get(id=args['run_id'])
     (abspath, relpath) = run.ensure_dir()
     
-    import os, settings
     filename = os.path.join(abspath, file)
     
     print 'download run file: ' + filename
@@ -1766,8 +1738,6 @@ def _handle_uploaded_file(f, name, experiment_id):
     print '*** _handle_uploaded_file: enter ***'
     retval = False
     try:
-        import os, settings, stat
-        
         print 'exp is ' + experiment_id
         
         exp = Experiment.objects.get(id=experiment_id)
@@ -1880,6 +1850,9 @@ def create_rule_generator(request):
     name = request.POST.get('name', "Unnamed")
     description = request.POST.get('description', "This rule generator was not given a description")
     accessibility = request.POST.get('accessibility') 
+    apply_sweep_rule = request.POST.get('apply_sweep_rule') 
+    if apply_sweep_rule is not None:
+        apply_sweep_rule = True if apply_sweep_rule == 'true' else False
     startblockvars = json.loads(request.POST.get('startblock', []))
     sampleblockvars = json.loads(request.POST.get('sampleblock', []))
     endblockvars = json.loads(request.POST.get('endblock', []))
@@ -1888,6 +1861,7 @@ def create_rule_generator(request):
                                          description, 
                                          accessibility, 
                                          request.user, 
+                                         apply_sweep_rule,
                                          getMadasUser(request.user.username).PrimaryNode,
                                          startblockvars,
                                          sampleblockvars,
@@ -1908,6 +1882,9 @@ def edit_rule_generator(request):
        return json_error('Rule Generator id not submitted')
 
     description = request.POST.get('description', None)
+    apply_sweep_rule = request.POST.get('apply_sweep_rule')
+    if apply_sweep_rule is not None:
+        apply_sweep_rule = True if apply_sweep_rule == 'true' else False
     name = request.POST.get('name', None)
     accessibility = request.POST.get('accessibility', None) 
     startblockvars = json.loads(request.POST.get('startblock', 'null'))
@@ -1919,6 +1896,7 @@ def edit_rule_generator(request):
                                                     name=name,
                                                     description=description,
                                                     accessibility=accessibility,
+                                                    apply_sweep_rule=apply_sweep_rule,
                                                     startblock=startblockvars,
                                                     sampleblock=sampleblockvars,
                                                     endblock=endblockvars,

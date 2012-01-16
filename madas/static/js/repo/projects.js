@@ -738,67 +738,56 @@ MA.ProjectCmp = {
         collapsible: false,
         bodyStyle: 'padding:15px;background-color:transparent;'
     },
-    items: [
-        {
-            region:'north',
-            height:230,
-            layout:'border',
-            items: [
+    items: [{
+        xtype: 'form',
+        id:'project-form',
+        border: false,
+        region: 'north',
+        width:720,
+        autoHeight: true,
+        title:'Project details',
+        items: [ 
+                { xtype:'textfield', fieldLabel:'Project title', width:700, id:'projectTitle', name:'title', allowBlank:false},
+                { xtype:'textarea', fieldLabel:'Description', id:'projectDescription', width:700, height:100, name:'description' },
+                new Ext.form.ComboBox({
+                        fieldLabel:'Client',
+                        id:'projectClientCombo',
+                        name:'client',
+                        width:700,
+                        editable:false,
+                        forceSelection:true,
+                        displayField:'displayValue',
+                        valueField:'id',
+                        hiddenName:'client_id',
+                        lazyRender:true,
+                        allowBlank:false,
+                        typeAhead:false,
+                        triggerAction:'all',
+                        listWidth:400,
+                        store: clientsListStore,
+                        itemSelector: 'div.search-item',
+                        tpl:new Ext.XTemplate(
+                        '<tpl for="."><div style="padding:8px;padding-top:5px;padding-bottom:5px;border-bottom:1px solid #ccc;" class="search-item">',
+                        '{displayValue}<br /><span style="color:#666;">{organisationName}</span>',
+                        '</div></tpl>'
+                        )
+                }),
+                // this will hold the ',' joined ids of project managers on the project
+                { xtype:'hidden', name: 'projectManagers' },
                 {
-                    border:false,
-                    region:'center',
-                    xtype: 'form',
-                    collapsible: false,
-                    id:'project-form',
-                    bodyStyle: 'padding:8px;background-color:transparent',
-                    width:720,
-                    title:'Project details',
-                    items: [ 
-                        { xtype:'textfield', fieldLabel:'Project title', width:700, id:'projectTitle', name:'title', allowBlank:false},
-                        { xtype:'textarea', fieldLabel:'Description', id:'projectDescription', width:700, height:100, name:'description' },
-                        new Ext.form.ComboBox({
-                                fieldLabel:'Client',
-                                id:'projectClientCombo',
-                                name:'client',
-                                width:700,
-                                editable:false,
-                                forceSelection:true,
-                                displayField:'username',
-                                valueField:'id',
-                                hiddenName:'client_id',
-                                lazyRender:true,
-                                allowBlank:false,
-                                typeAhead:false,
-                                triggerAction:'all',
-                                listWidth:230,
-                                store: clientsListStore,
-                                itemSelector: 'div.search-item',
-                                tpl:new Ext.XTemplate(
-                                '<tpl for="."><div style="padding:8px;padding-top:5px;padding-bottom:5px;border-bottom:1px solid #ccc;" class="search-item">',
-                                '{username}<br /><span style="color:#666;">{organisation_name}</span>',
-                                '</div></tpl>'
-                                )
-                            }),
-                        // this will hold the ',' joined ids of project managers on the project
-                        { xtype:'hidden', name: 'projectManagers' }
-                    ]
-                },
-                {
-                    region:'east',
-                    title:'Project managers',
-                    width:300,
-                    border:false,
-                    tbar:[
-                        {
-                            text: 'Add',
-                            cls: 'x-btn-text-icon',
-                            icon:'static/images/add.png',
-                            id:'projManagersAddButton',
-                            handler : function(){
+                    fieldLabel:'Project managers',
+                    width:525,
+                    autoHeight:true,
+                    bbar:[{
+                        text: 'Add',
+                        cls: 'x-btn-text-icon',
+                        icon:'static/images/add.png',
+                        id:'projManagersAddButton',
+                        handler : function() {
                                 //POP UP A WINDOW TO ASK WHICH USER TO ADD
                                 var addWindow = new Ext.Window({
                                     title:'Add a Project Manager',
-                                    width:280,
+                                    width:380,
                                     height:130,
                                     minHeight:130,
                                     border:false,
@@ -813,7 +802,7 @@ MA.ProjectCmp = {
                                                 labelWidth:50,
                                                 itemId:'projManagerCombo',
                                                 name:'projManager',
-                                                width:200,
+                                                width:300,
                                                 editable:false,
                                                 forceSelection:true,
                                                 displayField:'value',
@@ -823,8 +812,8 @@ MA.ProjectCmp = {
                                                 allowBlank:false,
                                                 typeAhead:false,
                                                 triggerAction:'all',
-                                                listWidth:200,
-                                                store: userComboStore
+                                                listWidth:300,
+                                                store: maStaffComboStore
                                             })
                                     ],
                                     buttons:[
@@ -866,77 +855,61 @@ MA.ProjectCmp = {
                                        Ext.getCmp('projManagerList').getStore().remove(rec);
                                    }
                             }
-                               
                         }
                     ],
-                    items:[
-                        {
-                            xtype:'listview',
-                            id:'projManagerList',
-                            store:new Ext.data.ArrayStore({}),
-                            loadingText:'Loading...',
-                            columnSort:false,
-                            columns: [
-                                {header: "username", dataIndex: 'username', 
-                                    tpl: '<div style="padding:4px">{username}</div>'}
-                            ],
-                            listeners:{
-                            },
-                            viewConfig:{
-                                forceFit:true
-                            },
-                            singleSelect:true,
-                            multiSelect:false,
-                            hideHeaders:true,
-                            style:'background:white;',
-                            autoScroll:true,
-                            reserveScrollOffset:true
-                        }
-                    ]
-                }, {
-                    region: 'south',
-                    border: false,
-                    buttonAlign: 'center',
-                    buttons: [{
-                             text: 'Save',
-                             id:'projectSubmit',
-                             handler: function(){
-                                // collect the Project Manager ids and set them into a hidden field
-                                // so they get submitted on form.submit()
-                                var projManagerIds = Ext.getCmp('projManagerList').getStore().collect('id').join(',');
-                                Ext.getCmp('project-form').getForm().findField('projectManagers').setValue(projManagerIds);
- 
-                                Ext.getCmp('project-form').getForm().submit(
-                                    { 
-                                        url: wsBaseUrl + 'update/project/' + MA.currentProjectId,
-                                        successProperty: 'success',
-                                        success: function (form, action) {
-                                            if (action.result.success === true) {
-                                                MA.currentProjectId = action.result.rows[0].id;
-
-                                                //display a success alert that auto-closes in 1 second
-                                                Ext.Msg.alert("Project saved", "(this message will auto-close in 1 second)");
-                                                window.setTimeout(function () {
-                                                    Ext.Msg.hide();
-                                                }, 1000);
-
-                                                Ext.getCmp('project-experiment-list').enable();
-
-                                                //load up the menu and next content area as declared in response
-                                                MA.ChangeMainContent(action.result.mainContentFunction);
-                                            }
-                                        },
-                                        failure: function (form, action) {
-                                            //do nothing special. this gets called on validation failures and server errors
-                                        }
-                                    });
-                                }
-                            }
-                    ]
+                    items:[{
+                        xtype:'listview',
+                        id:'projManagerList',
+                        store: new Ext.data.ArrayStore({}),
+                        height: 80,
+                        loadingText:'Loading...',
+                        columnSort:false,
+                        columns: [{
+                            header: "username", 
+                            dataIndex: 'username', 
+                            tpl: '<div style="padding:4px">{username}</div>'
+                        }],
+                        viewConfig:{
+                            forceFit:true
+                        },
+                        singleSelect:true,
+                        multiSelect:false,
+                        hideHeaders:true,
+                        style:'background:white;',
+                        autoScroll:true,
+                        reserveScrollOffset:true
+                    }]
                 }
-            ]
-        },
-        {
+        ],
+        buttonAlign: 'left',
+        buttons: [{
+            text: 'Save',
+            id:'projectSubmit',
+            handler: function() {
+                // collect the Project Manager ids and set them into a hidden field
+                // so they get submitted on form.submit()
+                var projManagerIds = Ext.getCmp('projManagerList').getStore().collect('id').join(',');
+                Ext.getCmp('project-form').getForm().findField('projectManagers').setValue(projManagerIds);
+                Ext.getCmp('project-form').getForm().submit({ 
+                    url: wsBaseUrl + 'update/project/' + MA.currentProjectId,
+                    successProperty: 'success',
+                    success: function (form, action) {
+                        if (action.result.success === true) {
+                            MA.currentProjectId = action.result.rows[0].id;
+                            Ext.Msg.alert("Project saved", "(this message will auto-close in 1 second)");
+                            window.setTimeout(function() {Ext.Msg.hide();}, 1000);
+                            Ext.getCmp('project-experiment-list').enable();
+                            //load up the menu and next content area as declared in response
+                            MA.ChangeMainContent(action.result.mainContentFunction);
+                        }
+                    },
+                    failure: function (form, action) {
+                        //do nothing special. this gets called on validation failures and server errors
+                    }
+                });
+            }
+        }]
+    },{
             title: 'Experiments',
             region: 'center',
             cmargins: '0 0 0 0',
@@ -944,7 +917,6 @@ MA.ProjectCmp = {
             id:'project-experiment-list',
             bodyStyle: 'padding:0px;',
             layout:'fit',
-//            disabled:true,
             tbar: [{
                 text: 'New Experiment',
                 cls: 'x-btn-text-icon',
@@ -1022,7 +994,7 @@ MA.LoadProject = function (projId) {
     
     Ext.getCmp('projectCmpTitle').setTitle('Loading project...');
     
-    var projLoader = new Ajax.Request(wsBaseUrl + "records/project/id/" + projId, 
+    var projLoader = new Ajax.Request(wsBaseUrl + "recordsProject/" + projId, 
                                          { 
                                          asynchronous:true, 
                                          evalJSON:'force',
