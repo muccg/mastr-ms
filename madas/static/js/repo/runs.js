@@ -71,15 +71,11 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
 
         this.PendingSampleRecord = Ext.data.Record.create(this.pendingSampleFields);
 
-        this.sampleStore = new Ext.data.JsonStore({
+        this.runSampleStore = new Ext.data.JsonStore({
             autoLoad: false,
             remoteSort: true,
             restful: true,
-            url: adminBaseUrl + "repository/sample/ext/json",
-            sortInfo: {
-                field: 'id',
-                direction: 'DESC'
-            }
+            url: wsBaseUrl + "recordsSamplesForRun"
         });
 
         var defaultConfig = {
@@ -264,14 +260,14 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     width:310,
                     itemId:'samples',
                     height:120,
-                    store:this.sampleStore,
+                    store:this.runSampleStore,
                     loadMask:true,
                     columns: [
                         self.sampleSelModel,
-                        {header: "ID", dataIndex: 'id', sortable: true},
-                        {header: "Label", dataIndex: 'label', sortable: true},
-                        {header: "Class", dataIndex: 'sample_class__unicode', sortable: true},
-                       { header: "Seq", sortable:true, dataIndex:'sample_class_sequence' }
+                        {header: "ID", dataIndex: 'id', sortable: false, menuDisabled: true},
+                        {header: "Label", dataIndex: 'label', sortable: false, menuDisabled: true},
+                        {header: "Class", dataIndex: 'sample_class__unicode', sortable: false, menuDisabled: true},
+                       { header: "Seq", sortable:false, dataIndex:'sample_class_sequence', menuDisabled: true}
                     ],
                     viewConfig:{
                         forceFit:true
@@ -316,7 +312,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                                                     asynchronous:true, 
                                                     evalJSON:'force',
                                                     onSuccess: function () {
-                                                        self.sampleStore.load({ params: { run__id__exact: self.runId } });
+                                                        self.runSampleStore.load({ params: { run_id: self.runId } });
                                                     }
                                                 }
                                             );
@@ -609,7 +605,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
 
         runRelatedExperimentStore.removeAll();
 
-        this.sampleStore.load({ params: { run__id__exact: this.runId } });
+        this.runSampleStore.load({ params: { run_id: this.runId } });
     },
     deleteRun: function () {
         var self = this;
@@ -646,7 +642,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     },
                     success: function () {
                         self.pendingSampleStore.removeAll();
-                        self.sampleStore.load({ params: { run__id__exact: self.runId } });
+                        self.runSampleStore.load({ params: { run_id: self.runId } });
                         self.fireEvent("save-samples");
                     },
                     failure: function (response, options) {
@@ -724,7 +720,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
             this.getComponent('samples').getBottomToolbar().getComponent('removeBtn').disable();
         }
        
-        this.sampleStore.load({ params: { run__id__exact: this.runId } });
+        this.runSampleStore.load({ params: { run_id: this.runId } });
         
         if (this.getComponent('runTree')) {
             this.getComponent('runTree').getLoader().clearOnLoad = true;
