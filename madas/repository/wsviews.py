@@ -1140,6 +1140,49 @@ def recordsRuns(request):
     output = makeJsonFriendly(output)
     return HttpResponse(json.dumps(output))
 
+@mastr_users_only
+def recordsSamplesForRun(request):
+    args = request.REQUEST
+       
+    # basic json that we will fill in
+    output = json_records_template([
+                "id", "sample_id", "sample_class", "sample_class__unicode",
+                "experiment", "experiment__unicode", "label", "comment",
+                "weight", "sample_class_sequence"])
+
+    run_id = args['run_id']
+    rows = Sample.objects.filter(run__id=run_id)
+
+    sort_by = args.get('sort', 'runsample__sequence')
+    sort_dir = args.get('dir', 'ASC')
+    if sort_dir == 'DESC':
+        sort = '-' + sort_by
+    else:
+        sort = sort_by
+
+    rows = rows.order_by(sort)
+    
+    # add rows
+    for row in rows:
+        d = {}
+        d['id'] = row.id
+        d['sample_id'] = row.sample_id
+        d['sample_class'] = row.sample_class_id
+        d['sample_class__unicode'] = unicode(row.sample_class)
+        d['experiment'] = row.experiment.id
+        d['experiment__unicode'] = unicode(row.experiment)
+        d['label'] = row.label
+        d['comment'] = row.comment
+        d['weight'] = row.weight
+        d['sample_class_sequence'] = row.sample_class_sequence
+
+        output['rows'].append(d)
+
+    output = makeJsonFriendly(output)
+    return HttpResponse(json.dumps(output))
+
+
+
 def formatRuleGenResults(rows):
 # basic json that we will fill in
     output = json_records_template([

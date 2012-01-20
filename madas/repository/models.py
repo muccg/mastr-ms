@@ -395,18 +395,27 @@ class Run(models.Model):
     def __unicode__(self):
         return "%s (%s v.%s)" % (self.title, self.method.title, self.method.version)
 
+    def resequence_samples(self):
+        sequence = 1
+        for rs in RunSample.objects.all().order_by("id"):
+            rs.sequence = sequence
+            sequence += 1
+            rs.save()
+
     def add_samples(self, sampleslist):
         '''Takes a list of samples'''
         assert self.id, 'Run must have an id before samples can be added'
         for s in sampleslist:
             if s.is_valid_for_run():
                 print 'add_samples adding ', s.id
-                rs, created = RunSample.objects.get_or_create(run=self, sample=s, sequence=self.samples.distinct().count())
+                rs, created = RunSample.objects.get_or_create(run=self, sample=s)
+        self.resequence_samples()
                 
     def remove_samples(self, queryset):
         assert self.id, 'Run must have an id before samples can be added'
         for s in queryset:
             RunSample.objects.filter(run=self, sample=s).delete()
+        self.resequence_samples()
 
     def update_sample_counts(self):
         qs = RunSample.objects.filter(run=self)
