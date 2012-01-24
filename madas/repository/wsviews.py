@@ -307,6 +307,7 @@ def records(request, model, field, value):
 
         output['rows'].append(d)
 
+    print output
     output = makeJsonFriendly(output)
     return HttpResponse(json.dumps(output))
 
