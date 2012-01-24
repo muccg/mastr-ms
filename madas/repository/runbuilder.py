@@ -82,7 +82,7 @@ class RunLayout(object):
         return end_block
 
     def create_sample_block(self):
-        samples = list(self.run.runsample_set.filter(component__id=0))
+        samples = list(self.run.runsample_set.filter(component__id=0).order_by('sequence'))
         insertion_map = self.create_insertion_map(samples, self.run.rule_generator.sample_block_rules)
         sample_block = self.combine(samples, insertion_map)
         sample_block = self.apply_method_rules(sample_block)
