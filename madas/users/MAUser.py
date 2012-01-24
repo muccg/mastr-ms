@@ -142,14 +142,14 @@ class MAUser(object):
         self._dict['CachedDetails'] = value
 
     def refreshCachedGroups(self):
-        logger.debug('\tNo cached groups for %s. Fetching.' % (self.Username) )
+        logger.debug('\tRefreshing groups for %s. Fetching.' % (self.Username) )
         groupsdict = getMadasUserGroups(self.Username)
         self.CachedGroups = groupsdict['groups'] + groupsdict['status']
         self.StatusGroup = groupsdict['status']
         return self.CachedGroups
 
     def refreshCachedDetails(self):
-        logger.debug('\tRetrieving user details for %s.' % (self.Username) )
+        logger.debug('\tRefreshing user details for %s.' % (self.Username) )
         detailsdict = getMadasUserDetails(self.Username)
         self.CachedDetails = dict(detailsdict)
         return self.CachedDetails
