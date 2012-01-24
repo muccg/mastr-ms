@@ -76,6 +76,14 @@ def user_search(request, *args):
     '''
     currentuser = getCurrentUser(request)
     newlist = _filter_users([MADAS_USER_GROUP], currentuser)
+    #for each user in newlist, set the client flag if applicable.
+    #This is potentially pretty inefficient, because we are loading every user.
+    for user_n in newlist:
+        u = getMadasUser(user_n['username'][0])
+        if u.IsClient:
+            user_n['isClient'] = True
+        else:
+            user_n['isClient'] = False
     return jsonResponse(items=newlist) 
 
 @admins_or_nodereps
