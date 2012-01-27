@@ -11,6 +11,7 @@ if not os.environ.has_key('SCRIPT_NAME'):
 
 SCRIPT_NAME =   os.environ['SCRIPT_NAME']
 PROJECT_DIRECTORY = os.environ['PROJECT_DIRECTORY']
+TMP_DIRECTORY = os.path.join(PROJECT_DIRECTORY, 'tmp')
 
 #general site config
 DEBUG = True
