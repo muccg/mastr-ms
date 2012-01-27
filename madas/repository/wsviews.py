@@ -1710,7 +1710,8 @@ def downloadSOPFile(request, sop_id, filename):
     if filename != os.path.basename(sop.attached_pdf.name):
         return HttpResponseForbidden()
     
-    wrapper = sop.attached_pdf.open()
+    from django.core.servers.basehttp import FileWrapper
+    wrapper = FileWrapper(file(sop.attached_pdf.name))
     response = HttpResponse(wrapper, content_type='application/download')
     response['Content-Disposition'] = 'attachment;'
     response['Content-Length'] = os.path.getsize(sop.attached_pdf.name)
