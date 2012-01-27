@@ -202,6 +202,68 @@ def jsonResponse(data={}, items=None, mainContentFunction=None, params=None):
     retdata = json.dumps(retval)
     return HttpResponse(retdata)
 
+class ZipPacker(object):
+
+    def pack(self, files, drop_prefix, filename):
+        import zipfile
+        zipf = zipfile.ZipFile(filename, 'w', compression=zipfile.ZIP_DEFLATED)
+        for f in files:
+            if os.path.isfile(f):
+                zipf.write(f, f[len(drop_prefix)+1:])
+            elif os.path.isdir(f):
+                for (archiveDirPath, dirNames, fileNames) in os.walk(f):
+                    for fileName in fileNames:
+                        filePath = os.path.join(archiveDirPath, fileName)
+                        zipf.write(filePath, filePath[len(drop_prefix)+1:])
+
+        zipf.close()
+        return filename
+        
+class TarPacker(object):
+    def __init__(self, compression=None):
+        assert compression is None or compression in ('gz','bz2'), "Invalid compression type"
+        self.compression = compression
+
+    def pack(self, files, drop_prefix, filename):
+        import tarfile
+        mode = 'w'
+        if self.compression is not None:
+            mode = "%s:%s" % (mode, self.compression)
+        tar = tarfile.open(filename, mode)
+        for f in files:
+            print f
+            print f[len(drop_prefix)+1:]
+            tar.add(f, f[len(drop_prefix):])
+        tar.close()
+        return filename
+        
+def guess_package_type(filename):
+    def endswithany(s, sa):
+        for end in sa:
+            if s.endswith(end):
+                return True
+        return False
+    packer = None
+    if filename.endswith('.tar'):
+        packer = TarPacker()
+    elif endswithany(filename, ('.tgz', '.tar.gz')):
+        packer = TarPacker(compression='gz')
+    elif endswithany(filename, ('.tbz2', '.tar.bz2')):
+        packer = TarPacker(compression='bz2')
+    elif filename.endswith('zip'):
+        packer = ZipPacker()
+
+    return packer 
+
+def pack_files(files, drop_prefix, package_name):
+    import tempfile
+    packer = guess_package_type(package_name)
+    assert packer is not None, 'Invalid package type for ' + package_name
+    dummy, filename = tempfile.mkstemp()
+    print "FILENAME: " + filename
+    package_path = packer.pack(files, drop_prefix, filename)
+
+    return package_path
 
 def zipdir(dirPath=None, zipFilePath=None, includeDirInZip=True):
 

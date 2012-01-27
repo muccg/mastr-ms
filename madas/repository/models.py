@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -* -coding: utf-8 -*-
 from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime, date, time
@@ -211,7 +211,18 @@ class Experiment(models.Model):
     instrument_method = models.ForeignKey(InstrumentMethod, null=True, blank=True)
     sample_preparation_notes = models.TextField(null=True, blank=True)
     # ? files
-  
+ 
+    @property
+    def experiment_dir(self):
+        return os.path.join(settings.REPO_FILES_ROOT, self.experiment_reldir)
+
+    @property
+    def experiment_reldir(self):
+        yearpath = os.path.join('experiments', str(self.created_on.year) )
+        monthpath = os.path.join(yearpath, str(self.created_on.month) )
+        exppath = os.path.join(monthpath, str(self.id) )
+        return exppath
+ 
     def ensure_dir(self):
         ''' This function calculates where the storage area should be for the experiment data.
             It create the directory if it does not exist.
@@ -220,12 +231,7 @@ class Experiment(models.Model):
                 relpath is the path, relative to the settings.REPO_FILES_ROOT
         '''
         import stat
-        
-        yearpath = os.path.join('experiments', str(self.created_on.year) )
-        monthpath = os.path.join(yearpath, str(self.created_on.month) )
-        exppath = os.path.join(monthpath, str(self.id) )
-       
-        abspath = os.path.join(settings.REPO_FILES_ROOT, exppath)
+        abspath = self.experiment_dir
 
         if not os.path.exists(abspath):
             os.makedirs(abspath)
@@ -237,7 +243,7 @@ class Experiment(models.Model):
         
         os.chown(abspath, os.getuid(), gid)
             
-        return (abspath, exppath)
+        return (self.experiment_dir, self.experiment_reldir)
 
 
     def __unicode__(self):
