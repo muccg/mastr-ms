@@ -1241,7 +1241,7 @@ def recordsExperimentsForProject(request, project_id):
                             'successProperty': 'success',
                             'root': 'rows',
                             'id': 'id',
-                            'fields': [{'name':'id'}, {'name':'status'}, {'name':'title'}, {'name':'job_number'}, {'name':'client'},  {'name':'principal'}, {'name':'description'}]
+                            'fields': [{'name':'id'}, {'name':'status'}, {'name': 'status_text'}, {'name':'title'}, {'name':'job_number'}, {'name':'client'},  {'name':'principal'}, {'name':'description'}]
                             },
               'results': 0,
               'authenticated': True,
@@ -1260,9 +1260,9 @@ def recordsExperimentsForProject(request, project_id):
     # than writing a custom serialiser for the Experiment model to fill in the
     # principal and client.
     if request.user.is_superuser:
-        rows = Experiment.objects.all()
+        rows = Experiment.objects.all().order_by('status__id','id')
     else:
-        rows = Experiment.objects.filter(Q(project__managers=request.user.id)|Q(users__id=request.user.id))
+        rows = Experiment.objects.filter(Q(project__managers=request.user.id)|Q(users__id=request.user.id)).order_by('status__id','id')
     
     if project_id is not None:
         rows = rows.filter(project__id=project_id)
@@ -1275,6 +1275,7 @@ def recordsExperimentsForProject(request, project_id):
         d = {}
         d['id'] = row.id
         d['status'] = row.status.id if row.status else None
+        d['status_text'] = row.status.name if row.status else None
         d['title'] = row.title
         d['description'] = row.description
         d['job_number'] = row.job_number

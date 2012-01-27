@@ -191,14 +191,15 @@ var experimentListStore = new Ext.data.GroupingStore(
                             storeId: 'experimentList',
                             autoLoad: false,
                             url: wsBaseUrl + 'recordsExperiments',
-                            listeners: {'load':MA.DSLoaded
-                                        },
+                            listeners: {'load':MA.DSLoaded },
+                            remoteGroup: true,
+                            remoteSort: true,
                             sortInfo: {
                                 field: 'id',
                                 direction: 'DESC'
                             },
                             reader:new Ext.data.JsonReader({}),
-                            groupField:'status'      
+                            groupField:'status_text'      
                         }
                     );
 
