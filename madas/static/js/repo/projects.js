@@ -972,7 +972,7 @@ MA.ProjectCmp = {
                         { header: "Principal", sortable:false, menuDisabled:true, dataIndex:'principal' },
                         { header: "Client", sortable:false, menuDisabled:true, dataIndex:'client' },
                         { header: "Description", sortable:false, menuDisabled:true, width:300, dataIndex:'description' },
-                        { header: "Status", sortable:false, menuDisabled:true, renderer:renderStatus, dataIndex:'status' }
+                        { header: "Status", sortable:false, menuDisabled:true, dataIndex:'status_text' }
                     ],
                     store: experimentListStore,
                     listeners: {
