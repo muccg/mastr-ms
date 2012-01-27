@@ -309,15 +309,15 @@ class SampleClass(models.Model):
         if self.biological_source is not None:
             if self.biological_source.abbreviation is not None:
                 val = val + self.biological_source.abbreviation
-        if self.treatments is not None:
-            if self.treatments.abbreviation is not None:
-                val = val + self.treatments.abbreviation
-        if self.timeline is not None:
-            if self.timeline.abbreviation is not None:
-                val = val + self.timeline.abbreviation
         if self.organ is not None:
             if self.organ.abbreviation is not None:
                 val = val + self.organ.abbreviation
+        if self.timeline is not None:
+            if self.timeline.abbreviation is not None:
+                val = val + self.timeline.abbreviation
+        if self.treatments is not None:
+            if self.treatments.abbreviation is not None:
+                val = val + self.treatments.abbreviation
         if val == '':
             val = 'class_' + str(self.id)
         return val
