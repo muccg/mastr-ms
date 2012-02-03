@@ -59,7 +59,7 @@ MA.RunList = Ext.extend(Ext.Panel, {
                                             self.getStore().reload();
                                             self.fireEvent("delete", id);
                                             
-                                            runStore.reload();
+                                            //runStore.reload(); //BP:fixtimeouts
                                         });
                                     }
                                 }
@@ -137,8 +137,8 @@ MA.RunListCmp  = {
                     flex: 0,
                     id: "run-list-detail",
                     listeners: {
-                        "delete": function () { runListStore.reload(); runStore.reload(); },
-                        "save": function () { runListStore.reload(); runStore.reload(); }
+                        "delete": function () { runListStore.reload(); /*runStore.reload();*/ },
+                        "save": function () { runListStore.reload(); /*runStore.reload();*/ }
                     }
                 })
             ]
@@ -197,10 +197,10 @@ items: [
                                                listeners: {
                                                "delete": function () { 
         //runListStore.proxy.conn.url = adminBaseUrl + "repository/run/ext/json?samples__experiment="+MA.ExperimentController.currentId();
-runListStore.reload(); runStore.reload(); },
+runListStore.reload(); /*runStore.reload();*/ },
                                                "save": function () { 
         //runListStore.proxy.conn.url = adminBaseUrl + "repository/run/ext/json?samples__experiment="+MA.ExperimentController.currentId();
-runListStore.reload(); runStore.reload(); }
+runListStore.reload(); /*runStore.reload();*/ }
                                                }
                                                }, {allowCreatingNewRun: true})
                               ]
