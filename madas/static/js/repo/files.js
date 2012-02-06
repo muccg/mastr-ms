@@ -8,14 +8,10 @@ MA.FilesInit = function() {
 };
 
 MA.Files = {
-baseCls: 'x-plain',
-border:'false',
-layout:'fit',
-defaults: {
-    //bodyStyle:'padding:15px;background:transparent;'
-},
-items:[
-       {
+    baseCls: 'x-plain',
+    border:'false',
+    layout:'fit',
+    items: [{
        title: 'Files',
        //       bodyStyle:'padding:0px;background:transparent;',
        collapsible: false,
@@ -26,8 +22,7 @@ items:[
            ]
        },
        bbar: {
-           items: [
-           {
+           items: [{
                xtype:'form',
                id:'pendingFileUpload',
                fileUpload:true,
@@ -37,11 +32,11 @@ items:[
                border:false,
                bodyStyle:'background:transparent;padding:4px;',
                url:wsBaseUrl + 'uploadFile',
+               labelWidth: 120,
                items: [
                {
                    hideLabel:true,
                    xtype: 'fileuploadfield',
-                   id: 'quo-attach',
                    emptyText: '',
                    fieldLabel: 'File',
                    name: 'attachfile'
@@ -52,8 +47,7 @@ items:[
                    name:'experimentId'
                }
                ]
-           }, 
-           {
+           },{
                text: 'Upload',
                id:'upload file',
                handler: function(){
@@ -75,9 +69,62 @@ items:[
                        }
                    });
                }
-           }
-
-           ]
+           }, { xtype: "tbseparator" },{
+               text: 'Download ',
+               handler: function(){
+                    var tree = Ext.getCmp('filesTree');
+                    var selModel = tree.getSelectionModel();
+                    var selectedNodes = selModel.getSelectedNodes();
+                    var node;
+                    var filesToDownload;
+                    if (selectedNodes.length === 1 && !selectedNodes[0].attributes.metafile) {
+                        node = selectedNodes[0];
+                        window.location = wsBaseUrl + 'downloadFile?file=' + node.id + '&experiment_id=' + MA.ExperimentController.currentId();
+                    } else {
+                        filesToDownload = []
+                        for (var i = 0; i < selectedNodes.length; i++) {
+                            node = selectedNodes[i];
+                            filesToDownload.push(node.attributes.id);
+                        }    
+                        Ext.Ajax.request({
+                            url: wsBaseUrl + 'packageFilesForDownload', 
+                            method: 'POST',
+                            params: {
+                                'experiment_id': MA.ExperimentController.currentId(),
+                                'files': filesToDownload.join(","),
+                                'package_type': Ext.getCmp('downloadPackageTypeCmb').getValue()
+                            },
+                            success: function(response, opts) {
+                                var jsonData = Ext.util.JSON.decode(response.responseText);
+                                var packageName = jsonData.package_name;
+                                window.location = wsBaseUrl + 'downloadPackage?packageName=' + packageName;
+                            }
+                        });
+                    }
+               }
+           }, {
+                xtype: 'combo',
+                id: 'downloadPackageTypeCmb',
+                fieldLabel: 'Package type',
+                store: new Ext.data.ArrayStore({
+                    fields: ['ext', 'description'],
+                    data : [
+                        ['tgz', '.tgz'],
+                        ['tbz2', '.tbz2'],
+                        ['zip', '.zip'],
+                        ['tar', '.tar']
+                    ] 
+                }),
+                displayField:'description',
+                valueField:'ext',
+                lazyRender:true,
+                triggerAction:'all',
+                editable: false,
+                width: 80,
+                listWidth: 80,
+                mode: 'local',
+                forceSelection: true
+           }]
        },
        items: [
                {
@@ -99,16 +146,7 @@ items:[
                    id: 'experimentRoot',
                    'metafile': true
                },
-               selModel: new Ext.tree.DefaultSelectionModel(
-                   { listeners:
-                       {
-                           selectionchange: function(sm, node) {
-                               if (node != null && !node.attributes.metafile) {
-                                   window.location = wsBaseUrl + 'downloadFile?file=' + node.id + '&experiment_id=' + MA.ExperimentController.currentId();
-                               }
-                           }
-                       }
-                   }),
+               selModel: new Ext.tree.MultiSelectionModel(),
                listeners:{
                     render: function() {
                         Ext.getCmp('filesTree').getLoader().on("beforeload", function(treeLoader, node) {

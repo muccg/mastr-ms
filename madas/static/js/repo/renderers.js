@@ -5,18 +5,6 @@ function renderSampleClass(value, p, record){
             value.text);
 }
 
-function renderStatus(v, p, record) {
-	var numeric = v;
-    var value = "";
-    if (numeric == "1") {
-        value = "New";
-    } else if (numeric == "2") {
-        value = "Designed";
-    }
-
-	return value;
-}
-
 function renderSampleLogType(val) {
     switch (val) {
         case 0:
