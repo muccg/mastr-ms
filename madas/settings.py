@@ -40,7 +40,8 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.transaction.TransactionMiddleware',
     'madas.utils.json_exception_handler_middleware.JSONExceptionHandlerMiddleware',
     'django.middleware.doc.XViewMiddleware',
-    'django.middleware.ssl.SSLRedirect'
+    'ccg.middleware.ssl.SSLRedirect',
+    'ccg.middleware.StatsMiddleware.StatsMiddleware'
 ]
 
 INSTALLED_APPS = [
@@ -265,6 +266,7 @@ LOGGING = {
     }
 }
 
+
 # Override defaults with your local instance settings.
 # They will be loaded from appsettings.<projectname>, which can exist anywhere
 # in the instance's pythonpath. This is a CCG convention designed to support
@@ -274,3 +276,4 @@ try:
 except ImportError, e:
     pass
 
+STATS_MIDDLEWARE_LOGGER = 'madas_log'
