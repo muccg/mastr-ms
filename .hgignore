@@ -1,8 +1,8 @@
 .*\.pyc$
-^madas/virt_madas/*
-^madas/tmp/*
-^madas/fab-tmp/*
-^madas/scratch/*
-^madas/log/*
-^madas/virtualenv*
+^mastrms/virt_mastrms/*
+^mastrms/tmp/*
+^mastrms/fab-tmp/*
+^mastrms/scratch/*
+^mastrms/log/*
+^mastrms/virtualenv*
 ^.*appsettings*
