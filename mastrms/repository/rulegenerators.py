@@ -1,7 +1,7 @@
-from madas.repository.models import RuleGenerator, RuleGeneratorStartBlock, RuleGeneratorSampleBlock, RuleGeneratorEndBlock, Component
-from madas.users.MAUser import MAUser
+from mastrms.repository.models import RuleGenerator, RuleGeneratorStartBlock, RuleGeneratorSampleBlock, RuleGeneratorEndBlock, Component
+from mastrms.users.MAUser import MAUser
 
-from madas.users.MAUser import getMadasUser
+from mastrms.users.MAUser import getMadasUser
 from django.db.models import Q
 
 def listRuleGenerators(user=None, accessibility=False, showEnabledOnly=False):

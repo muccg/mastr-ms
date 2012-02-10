@@ -1,6 +1,6 @@
 from mdatasync_server.models import *
 from django.contrib import admin
-from madas.admin.ext import ExtJsonInterface
+from mastrms.admin.ext import ExtJsonInterface
 
 
 class NodeClientAdmin(ExtJsonInterface, admin.ModelAdmin):

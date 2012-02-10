@@ -1,5 +1,5 @@
-from madas.admin.ext import ExtJsonInterface
-from madas.repository.models import *
+from mastrms.admin.ext import ExtJsonInterface
+from mastrms.repository.models import *
 from quote.models import Organisation, Formalquote
 from mdatasync_server.models import NodeClient
 from django.contrib import admin
@@ -8,7 +8,7 @@ from ccg.utils.webhelpers import url
 from django.core import urlresolvers
 from django.db.models import Q
 
-from madas.users.MAUser import getCurrentUser
+from mastrms.users.MAUser import getCurrentUser
 
 ##
 ## Most of the Admin classes here override queryset to restrict access, ie row level permissions.

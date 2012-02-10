@@ -1,4 +1,4 @@
-from madas.repository.models import RunSample, RUN_STATES, SampleNotInClassException, InstrumentSOP
+from mastrms.repository.models import RunSample, RUN_STATES, SampleNotInClassException, InstrumentSOP
 from django.http import HttpResponse
 import random
 

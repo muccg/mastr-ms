@@ -1,6 +1,6 @@
 from django.http import HttpResponse, HttpResponseForbidden
 from ccg.http import HttpResponseUnauthorized
-from madas.users.MAUser import MAUser
+from mastrms.users.MAUser import MAUser
 
 def restricted_view(f, restriction):
     def new_function(*args, **kwargs):
