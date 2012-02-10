@@ -5,7 +5,7 @@ from django.contrib import admin
 admin.autodiscover()
 
 from mastrms.repository import admin as repoadmin
-from mastrms.quote import admin as mastrms.dmin
+from mastrms.quote import admin as mastrmsadmin
 from mastrms.mdatasync_server import admin as mdatasync_admin
 
 urlpatterns = patterns('',
