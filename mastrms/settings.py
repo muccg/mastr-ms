@@ -39,7 +39,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.transaction.TransactionMiddleware',
-    'madas.utils.json_exception_handler_middleware.JSONExceptionHandlerMiddleware',
+    'mastrms.utils.json_exception_handler_middleware.JSONExceptionHandlerMiddleware',
     'django.middleware.doc.XViewMiddleware',
     'ccg.middleware.ssl.SSLRedirect',
     #'ccg.middleware.StatsMiddleware.StatsMiddleware'
@@ -145,7 +145,6 @@ QUOTE_FILES_ROOT = os.path.join(PERSISTENT_FILESTORE, 'quotes')
 INSTALLED_APPS.extend([
     'django_extensions',
     'mastrms.mdatasync_server',
-    'mastrms.dashboard',
     'mastrms.login',
     'mastrms.quote',
     'mastrms.users',
