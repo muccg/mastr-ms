@@ -3,7 +3,7 @@ from settings import RETURN_EMAIL
 from ccg.utils.webhelpers import siteurl
 from django.core.mail import EmailMessage
 import logging
-from madas.users.MAUser import MADAS_USER_GROUP
+from mastrms.users.MAUser import MADAS_USER_GROUP
 
 logger = logging.getLogger('madas_log')
 

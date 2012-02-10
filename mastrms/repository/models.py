@@ -5,10 +5,10 @@ from datetime import datetime, date, time
 from quote.models import Organisation, Formalquote
 from mdatasync_server.models import NodeClient
 import grp
-from madas.users.MAUser import getMadasUser
+from mastrms.users.MAUser import getMadasUser
 from django.core.files.storage import FileSystemStorage
 import os
-from madas import settings
+from mastrms import settings
 
 class SampleNotInClassException(Exception):
     pass

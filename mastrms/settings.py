@@ -42,7 +42,7 @@ MIDDLEWARE_CLASSES = [
     'madas.utils.json_exception_handler_middleware.JSONExceptionHandlerMiddleware',
     'django.middleware.doc.XViewMiddleware',
     'ccg.middleware.ssl.SSLRedirect',
-    'ccg.middleware.StatsMiddleware.StatsMiddleware'
+    #'ccg.middleware.StatsMiddleware.StatsMiddleware'
 ]
 
 INSTALLED_APPS = [
@@ -55,7 +55,7 @@ INSTALLED_APPS = [
 ]
 
 AUTHENTICATION_BACKENDS = [
- 'madas.repository.backend.MadasBackend',
+ 'mastrms.repository.backend.MadasBackend',
  #'ccg.auth.backends.NoAuthModelBackend',
 ]
 
@@ -135,7 +135,7 @@ MEMCACHE_KEYSPACE = "mastrms-dev"
 
 
 #APPLICATION SPECIFIC SETTINGS
-ROOT_URLCONF = 'madas.urls'
+ROOT_URLCONF = 'mastrms.urls'
 SITE_NAME = 'madas'
 SECRET_KEY = 'qj#tl@9@7((%^)$i#iyw0gcfzf&#a*pobgb8yr#1%65+*6!@g$'
 EMAIL_APP_NAME = "MastrMS "
@@ -144,13 +144,13 @@ QUOTE_FILES_ROOT = os.path.join(PERSISTENT_FILESTORE, 'quotes')
 
 INSTALLED_APPS.extend([
     'django_extensions',
-    'madas.mdatasync_server',
-    'madas.dashboard',
-    'madas.login',
-    'madas.quote',
-    'madas.users',
-    'madas.admin',
-    'madas.repository',
+    'mastrms.mdatasync_server',
+    'mastrms.dashboard',
+    'mastrms.login',
+    'mastrms.quote',
+    'mastrms.users',
+    'mastrms.admin',
+    'mastrms.repository',
     'south'])
 
 DATABASES = {
@@ -190,13 +190,13 @@ LOGGING = {
     'disable_existing_loggers': True,
     'formatters': {
         'verbose': {
-            'format': 'MADAS [%(name)s:' + INSTALL_NAME + ':%(levelname)s:%(asctime)s:%(filename)s:%(lineno)s:%(funcName)s] %(message)s'
+            'format': 'MASTRMS [%(name)s:' + INSTALL_NAME + ':%(levelname)s:%(asctime)s:%(filename)s:%(lineno)s:%(funcName)s] %(message)s'
         },
         'db': {
-            'format': 'MADAS [%(name)s:' + INSTALL_NAME + ':%(duration)s:%(sql)s:%(params)s] %(message)s'
+            'format': 'MASTRMS [%(name)s:' + INSTALL_NAME + ':%(duration)s:%(sql)s:%(params)s] %(message)s'
         },
         'simple': {
-            'format': 'MADAS ' + INSTALL_NAME + ' %(levelname)s %(message)s'
+            'format': 'MASTRMS ' + INSTALL_NAME + ' %(levelname)s %(message)s'
         },
     },
     'filters': {
@@ -220,7 +220,7 @@ LOGGING = {
         },
         'madasfile':{
             'class':'logging.handlers.TimedRotatingFileHandler',
-            'filename': os.path.join(LOG_DIRECTORY, 'madas.log'),
+            'filename': os.path.join(LOG_DIRECTORY, 'mastrms.log'),
             'when':'midnight',
             'formatter': 'verbose'
         },
@@ -233,7 +233,7 @@ LOGGING = {
         'db_logfile':{
             'level':'DEBUG',
             'class':'logging.handlers.TimedRotatingFileHandler',
-            'filename': os.path.join(LOG_DIRECTORY, 'madas_db.log'),
+            'filename': os.path.join(LOG_DIRECTORY, 'mastrms_db.log'),
             'when':'midnight',
             'formatter': 'db'
         },
@@ -277,4 +277,4 @@ try:
 except ImportError, e:
     pass
 
-STATS_MIDDLEWARE_LOGGER = 'madas_log'
+#STATS_MIDDLEWARE_LOGGER = 'mastrms_log'

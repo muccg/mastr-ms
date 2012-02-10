@@ -2,27 +2,28 @@ from django.db import transaction
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden, HttpResponseNotAllowed, HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
-from madas.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RUN_STATES, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure, MadasUser, RuleGenerator, Component
-from madas.quote.models import Organisation, Formalquote
+from mastrms.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RUN_STATES, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure, MadasUser, RuleGenerator, Component
+from mastrms.quote.models import Organisation, Formalquote
 from ccg.utils import webhelpers
 from django.contrib.auth.models import User
 from django.utils import simplejson as json
-from madas.decorators import mastr_users_only
+from mastrms.decorators import mastr_users_only
 from django.contrib.auth.decorators import login_required
 from django.core import urlresolvers
 from django.db.models import get_model
 from json_util import makeJsonFriendly
-from madas.utils.data_utils import jsonResponse, zipdir, pack_files
-from madas.repository.permissions import user_passes_test
+from mastrms.utils.data_utils import jsonResponse, zipdir, pack_files
+from mastrms.repository.permissions import user_passes_test
 from django.db.models import Q
 from datetime import datetime, timedelta
 from django.core.mail import mail_admins
-from madas.users.MAUser import getMadasUser, loadMadasUser
-from madas.repository import rulegenerators
+from mastrms.users.MAUser import getMadasUser, loadMadasUser
+from mastrms.repository import rulegenerators
+from mastrms.utils.mail_functions import FixedEmailMessage
 import os, stat
 import settings
 import copy
-
+from settings import RETURN_EMAIL
 
 @mastr_users_only
 def create_object(request, model):
@@ -2077,8 +2078,6 @@ def mark_run_complete(request, run_id):
     run.state = RUN_STATES.COMPLETE[0]
     run.save()
     
-    from madas.utils.mail_functions import FixedEmailMessage
-    from appsettings.mastrms.prod import RETURN_EMAIL
     
     try:
         e = FixedEmailMessage(subject='MASTR-MS Run ('+run.title+') Complete', body='Run ('+run.title+') has been marked as complete', from_email = RETURN_EMAIL, to = [run.creator.username])

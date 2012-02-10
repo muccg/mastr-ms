@@ -4,18 +4,18 @@ from django.conf import settings
 from django.db import models
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseNotFound
-from madas.users.user_manager import get_user_manager
+from mastrms.users.user_manager import get_user_manager
 from django.contrib.auth.models import User
 from django.utils import simplejson as json
 from django.contrib.auth.decorators import login_required
 import logging
 
-from madas.utils.data_utils import jsonResponse, jsonErrorResponse, translate_dict
-from madas.quote.models import Quoterequest, Formalquote, Organisation, UserOrganisation
-from madas.repository.json_util import makeJsonFriendly
-from madas.decorators import admins_only, admins_or_nodereps, privileged_only, authentication_required
-from madas.users.MAUser import * #All the MAUser functions, plus the groups information 
-from madas.utils.mail_functions import sendApprovedRejectedEmail, sendAccountModificationEmail
+from mastrms.utils.data_utils import jsonResponse, jsonErrorResponse, translate_dict
+from mastrms.quote.models import Quoterequest, Formalquote, Organisation, UserOrganisation
+from mastrms.repository.json_util import makeJsonFriendly
+from mastrms.decorators import admins_only, admins_or_nodereps, privileged_only, authentication_required
+from mastrms.users.MAUser import * #All the MAUser functions, plus the groups information 
+from mastrms.utils.mail_functions import sendApprovedRejectedEmail, sendAccountModificationEmail
 
 logger = logging.getLogger('madas_log')
 

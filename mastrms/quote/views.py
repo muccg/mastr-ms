@@ -12,13 +12,13 @@ from django.utils import simplejson
 from django.core.mail import send_mail
 import logging
 
-from madas.decorators import *
-from madas.utils.data_utils import jsonResponse, jsonErrorResponse, json_encode, uniqueList
-from madas.quote.models import Quoterequest, Formalquote, Quotehistory, Emailmap
-from madas.users.MAUser import *
-from madas.login.URLState import getCurrentURLState
+from mastrms.decorators import *
+from mastrms.utils.data_utils import jsonResponse, jsonErrorResponse, json_encode, uniqueList
+from mastrms.quote.models import Quoterequest, Formalquote, Quotehistory, Emailmap
+from mastrms.users.MAUser import *
+from mastrms.login.URLState import getCurrentURLState
 #from string import *
-from madas.utils.mail_functions import sendQuoteRequestConfirmationEmail, sendQuoteRequestToAdminEmail, sendFormalQuoteEmail, sendFormalStatusEmail
+from mastrms.utils.mail_functions import sendQuoteRequestConfirmationEmail, sendQuoteRequestToAdminEmail, sendFormalQuoteEmail, sendFormalStatusEmail
 
 logger = logging.getLogger('madas_log')
 

@@ -1,8 +1,8 @@
 from django.utils import simplejson
-from madas.users.user_manager import get_user_manager
+from mastrms.users.user_manager import get_user_manager
 import logging
-from madas.utils.data_utils import translate_dict, makeJsonFriendly
-from madas import settings #for ldap admin username/password
+from mastrms.utils.data_utils import translate_dict, makeJsonFriendly
+from mastrms import settings #for ldap admin username/password
 from django.contrib.auth.models import User
 
 MADAS_USER_GROUP = 'User'

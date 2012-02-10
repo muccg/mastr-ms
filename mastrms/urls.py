@@ -4,32 +4,32 @@ from django.conf import settings
 from django.contrib import admin
 admin.autodiscover()
 
-from madas.repository import admin as repoadmin
-from madas.quote import admin as madasadmin
-from madas.mdatasync_server import admin as mdatasync_admin
+from mastrms.repository import admin as repoadmin
+from mastrms.quote import admin as mastrms.dmin
+from mastrms.mdatasync_server import admin as mdatasync_admin
 
 urlpatterns = patterns('',
 
-    (r'^userinfo', 'madas.users.views.userinfo'),
+    (r'^userinfo', 'mastrms.users.views.userinfo'),
     #(r'^status/', status_view),
-    (r'^sync/', include('madas.mdatasync_server.urls')),
+    (r'^sync/', include('mastrms.mdatasync_server.urls')),
 
-    # madasrepo
-    (r'^ws/', include('madas.repository.wsurls')),
+    # mastrms.epo
+    (r'^ws/', include('mastrms.repository.wsurls')),
 
     # repoadmin
     (r'^repoadmin/', include(admin.site.urls)),
 
-    # madas admin
-    (r'^admin/', include('madas.admin.urls')),
-    # madas quotes
-    (r'^quote/', include('madas.quote.urls')),
-    # madas registration
-    (r'^registration/', include('madas.registration.urls')),
-    # madas login
-    (r'^login/', include('madas.login.urls')),
-    # madas users 
-    (r'^user/', include('madas.users.urls')),
+    # mastrms.admin
+    (r'^admin/', include('mastrms.admin.urls')),
+    # mastrms.quotes
+    (r'^quote/', include('mastrms.quote.urls')),
+    # mastrms.registration
+    (r'^registration/', include('mastrms.registration.urls')),
+    # mastrms.login
+    (r'^login/', include('mastrms.login.urls')),
+    # mastrms.users 
+    (r'^user/', include('mastrms.users.urls')),
 )
 
 # static
@@ -40,5 +40,5 @@ if settings.DEBUG:
     )
     #default view
 urlpatterns += patterns('', 
-    (r'^', 'madas.login.views.serveIndex', {'SSL':True}),
+    (r'^', 'mastrms.login.views.serveIndex', {'SSL':True}),
     )

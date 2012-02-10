@@ -4,17 +4,17 @@ import md5, time
 from django.http import HttpResponse, HttpResponseRedirect
 import logging
 from django.contrib.auth import authenticate, login, logout
-from madas.users.user_manager import get_user_manager
+from mastrms.users.user_manager import get_user_manager
 from django.shortcuts import render_to_response
 from django.utils import simplejson
 from ccg.utils import webhelpers
 from ccg.utils.webhelpers import siteurl, wsgibase
-from madas import settings #for LDAP details only, can remove when LDAP is removed
-from madas.settings import MADAS_SESSION_TIMEOUT
-from madas.utils.data_utils import jsonResponse, jsonErrorResponse
-from madas.users.MAUser import *
-from madas.login.URLState import getCurrentURLState
-from madas.utils.mail_functions import sendForgotPasswordEmail, sendPasswordChangedEmail
+from mastrms import settings #for LDAP details only, can remove when LDAP is removed
+from mastrms.settings import MADAS_SESSION_TIMEOUT
+from mastrms.utils.data_utils import jsonResponse, jsonErrorResponse
+from mastrms.users.MAUser import *
+from mastrms.login.URLState import getCurrentURLState
+from mastrms.utils.mail_functions import sendForgotPasswordEmail, sendPasswordChangedEmail
 
 logger = logging.getLogger('madas_log')
 

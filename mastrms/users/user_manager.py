@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.db.models import Q
-from madas.users import models
+from mastrms.users import models
 import logging
 
 # This class has been created when dependency on LDAP has been removed from application

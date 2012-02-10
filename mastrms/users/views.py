@@ -3,10 +3,10 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import simplejson
-from madas.users.MAUser import *
-from madas.users.MAUser import _translate_ldap_to_madas, _translate_madas_to_ldap 
-from madas.utils.data_utils import jsonResponse, makeJsonFriendly
-from madas.utils.mail_functions import sendAccountModificationEmail
+from mastrms.users.MAUser import *
+from mastrms.users.MAUser import _translate_ldap_to_madas, _translate_madas_to_ldap 
+from mastrms.utils.data_utils import jsonResponse, makeJsonFriendly
+from mastrms.utils.mail_functions import sendAccountModificationEmail
 
 ##The user info view, which sends the state of the logged in
 ##user to the frontend.
