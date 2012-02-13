@@ -1,6 +1,6 @@
 from mastrms.users.user_manager import get_user_manager
 from django.contrib.auth.backends import ModelBackend
-from ccg.auth.backends import LDAPBackend
+#from ccg.auth.backends import LDAPBackend
 from mastrms.repository.models import MadasUser
 print 'Madas Backend loaded'
 class MadasBackend(ModelBackend):
