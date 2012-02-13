@@ -2,8 +2,8 @@ from fabric.api import env
 from ccgfab.base import *
 
 env.app_root = '/usr/local/python/ccgapps/'
-env.app_name = 'madas'
-env.app_install_names = ['madas'] # use app_name or list of names for each install
+env.app_name = 'mastrms'
+env.app_install_names = ['mastrms'] # use app_name or list of names for each install
 env.vc = 'mercurial'
 
 env.writeable_dirs.extend([]) # add directories you wish to have created and made writeable
@@ -25,12 +25,16 @@ def snapshot(auto_confirm_purge=False, migration=True):
     env.auto_confirm_purge=auto_confirm_purge
     _ccg_deploy_snapshot(migration=migration)
 
-def release(auto_confirm_purge=False, migration=True):
+def release(*args, **kwargs):
     """
     Make a release deployment
     """
-    env.auto_confirm=auto_confirm_purge
-    _ccg_deploy_release(migration=migration)
+    migration = kwargs.get("migration", True)
+    requirements = kwargs.get("requirements", "requirements.txt")
+    tag = kwargs.get("tag", None)
+    env.ccg_requirements = requirements
+    env.auto_confirm=False
+    _ccg_deploy_release(tag=tag,migration=migration)
 
 def testrelease(auto_confirm_purge=False, migration=True):
     """
