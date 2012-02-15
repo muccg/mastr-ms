@@ -147,9 +147,9 @@ INSTALLED_APPS.extend([
     'mastrms.mdatasync_server',
     'mastrms.login',
     'mastrms.quote',
-    'mastrms.users',
     'mastrms.admin',
     'mastrms.repository',
+    'mastrms.users',
     'south'])
 
 DATABASES = {
