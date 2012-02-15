@@ -346,7 +346,7 @@ def loadMadasUser(username):
     else:
         details['groups'] = details['node']
 
-    details['name'] = ", ".join((details.get('firstname', ''), details.get('lastname')))
+    details['name'] = ", ".join((details.get('firstname', ''), details.get('lastname', '')))
 
     return details  
 
