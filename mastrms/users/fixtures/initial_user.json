@@ -17,6 +17,27 @@
     },
     {
         "pk": 1, 
+        "model": "auth.user", 
+        "fields": {
+            "username": "admin@example.com", 
+            "first_name": "", 
+            "last_name": "", 
+            "is_active": true, 
+            "is_superuser": true, 
+            "is_staff": true, 
+            "last_login": "2012-02-15 15:02:41", 
+            "groups": [
+                1, 
+                2
+            ], 
+            "user_permissions": [], 
+            "password": "sha1$a8a68$18c83f486556e36c747bb6f39f6210e260ca21ce", 
+            "email": "", 
+            "date_joined": "2012-02-14 16:08:20"
+        }
+    },
+    {
+        "pk": 1, 
         "model": "users.group", 
         "fields": {
             "name": "User", 
@@ -101,27 +122,6 @@
             ]
         }
     }, 
-    {
-        "pk": 1, 
-        "model": "auth.user", 
-        "fields": {
-            "username": "admin@example.com", 
-            "first_name": "", 
-            "last_name": "", 
-            "is_active": true, 
-            "is_superuser": true, 
-            "is_staff": true, 
-            "last_login": "2012-02-15 15:02:41", 
-            "groups": [
-                1, 
-                2
-            ], 
-            "user_permissions": [], 
-            "password": "sha1$a8a68$18c83f486556e36c747bb6f39f6210e260ca21ce", 
-            "email": "", 
-            "date_joined": "2012-02-14 16:08:20"
-        }
-    },
     {
         "pk": 1, 
         "model": "users.userdetail", 
