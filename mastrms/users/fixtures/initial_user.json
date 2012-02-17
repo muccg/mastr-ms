@@ -108,18 +108,24 @@
         "pk": 9, 
         "model": "users.group", 
         "fields": {
-            "name": "Example Node", 
-            "user": []
+            "name": "Node Reps", 
+            "user": [1]
         }
     }, 
     {
         "pk": 10, 
         "model": "users.group", 
         "fields": {
+            "name": "Example Node", 
+            "user": [1]
+        }
+    }, 
+    {
+        "pk": 11, 
+        "model": "users.group", 
+        "fields": {
             "name": "Another Example Node", 
-            "user": [
-                1
-            ]
+            "user": [ ]
         }
     }, 
     {
