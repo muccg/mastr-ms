@@ -12,7 +12,7 @@
 Name "MSDataSync"
 
 ; The file to write
-OutFile "MSDataSync_Install.exe"
+OutFile "$%USERPROFILE%\Desktop\MSDataSync_Install.exe"
 
 ; The default installation directory
 InstallDir $DESKTOP\MSDataSync
