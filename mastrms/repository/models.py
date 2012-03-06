@@ -211,7 +211,19 @@ class Experiment(models.Model):
     instrument_method = models.ForeignKey(InstrumentMethod, null=True, blank=True)
     sample_preparation_notes = models.TextField(null=True, blank=True)
     # ? files
-  
+
+    @property
+    def experiment_dir(self):
+        return os.path.join(settings.REPO_FILES_ROOT, self.experiment_reldir)
+
+    @property
+    def experiment_reldir(self):
+        yearpath = os.path.join('experiments', str(self.created_on.year) )
+        monthpath = os.path.join(yearpath, str(self.created_on.month) )
+        exppath = os.path.join(monthpath, str(self.id) )
+        return exppath
+
+
     def ensure_dir(self):
         ''' This function calculates where the storage area should be for the experiment data.
             It create the directory if it does not exist.
@@ -303,12 +315,12 @@ class SampleClass(models.Model):
         if self.biological_source is not None:
             if self.biological_source.abbreviation is not None:
                 val = val + self.biological_source.abbreviation
-        if self.timeline is not None:
-            if self.timeline.abbreviation is not None:
-                val = val + self.timeline.abbreviation
         if self.organ is not None:
             if self.organ.abbreviation is not None:
                 val = val + self.organ.abbreviation
+        if self.timeline is not None:
+            if self.timeline.abbreviation is not None:
+                val = val + self.timeline.abbreviation
         if self.treatments is not None:
             if self.treatments.abbreviation is not None:
                 val = val + self.treatments.abbreviation
