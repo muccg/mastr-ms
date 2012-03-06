@@ -6,7 +6,7 @@
 # if any subscript fails, fail the entire script so we immediately know
 set -e
 
-VERSION='2.3.2'
+VERSION='2.3.5'
 PROJECT_DIR=`pwd`
 CACHE='/tmp'
 PIP_DOWNLOAD_CACHE=${CACHE}
@@ -53,8 +53,9 @@ fi
 
 if [ $VIRTUAL_ENV ]
 then
-    echo "Run bootstrap.sh from outside of a virtualpython environment";
-    exit 1;
+    echo "*************************************************************";
+    echo "WARNING: Runing bootstrap.sh from a virtualpython environment";
+    echo "*************************************************************";
 fi
 
 if [ -d $VPYTHON_DIR ]
@@ -102,9 +103,10 @@ $TARGET_PYTHON ${CACHE}/$VIRTUALENV/build/lib*/virtualenv.py --no-site-packages 
 
 export PATH=$PWD/$VPYTHON_DIR/bin:$PATH
 
+# AH If you *need* this, then make it a command line option which defaults to not installed
 # make mercurial a standard build requirement so we can use hg+http URLs
 # in the build-requirements file
-${PIP} install ${PIP_OPTS} 'Mercurial==2.0.1'
+#${PIP} install ${PIP_OPTS} 'Mercurial==2.0.1'
 
 ${PIP} install ${PIP_OPTS} -r ${BUILD_REQUIREMENTS}
 if [ -f "${REQUIREMENTS}" ]
