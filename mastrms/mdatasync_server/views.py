@@ -15,6 +15,7 @@ from repository.models import *
 from mdatasync_server.rules import *
 from ClientState import * #All the functions for dealing with clientstates
 from django.conf import settings
+from mastrms.utils.file_utils import ensure_repo_filestore_dir_with_owner, set_repo_file_ownerships
 
 import logging
 LOGNAME = 'mdatasync_server_log'
@@ -388,15 +389,15 @@ def _handle_uploaded_file(f, name):
     retval = False
     try:
         import os
+        reldir = os.path.dirname(name)
         dest_fname = str(os.path.join(settings.REPO_FILES_ROOT, name))
-        if not os.path.exists(os.path.dirname(dest_fname)):
-            logger.debug('creating directory: %s' % ( os.path.dirname(dest_fname) ) )
-            os.makedirs(os.path.dirname(dest_fname))
-
+        ensure_repo_filestore_dir_with_owner(reldir)
+        
         destination = open(dest_fname, 'wb+')
         for chunk in f.chunks():
             destination.write(chunk)
         destination.close()
+        set_repo_file_ownerships(dest_fname)
         retval = True
     except Exception, e:
         retval = False

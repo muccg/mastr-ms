@@ -2,6 +2,7 @@ import os
 import os.path
 import pickle
 from django.conf import settings
+from mastrms.utils.file_utils import ensure_repo_filestore_dir_with_owner, set_repo_file_ownerships
 
 from mdatasync_server.models import *
 import logging
@@ -39,12 +40,14 @@ def get_saved_client_state(org, site, station):
 
 def save_client_state(clientstate):
     clientstatedir = os.path.join(settings.REPO_FILES_ROOT , 'synclogs')
+    ensure_repo_filestore_dir_with_owner('synclogs')
     clientstatefname = os.path.join(clientstatedir, "STATE_%s_%s_%s.dat" % (clientstate.organisation, clientstate.sitename, clientstate.station))
     try:
         with open(clientstatefname, "wb") as f:
             pickle.dump(clientstate, f)
     except Exception, e:
         logger.warning("Could not save clientstate. %s" % (str(e)))
+    set_repo_file_ownerships(clientstatefname)
 
 def get_node_from_request(request, organisation=None, sitename=None, station=None):
     retval = None
