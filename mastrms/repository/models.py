@@ -9,6 +9,7 @@ from mastrms.users.MAUser import getMadasUser
 from django.core.files.storage import FileSystemStorage
 import os
 from mastrms import settings
+from utils.file_utils import ensure_repo_filestore_dir_with_owner, set_repo_file_ownerships
 
 class SampleNotInClassException(Exception):
     pass
@@ -237,17 +238,7 @@ class Experiment(models.Model):
         monthpath = os.path.join(yearpath, str(self.created_on.month) )
         exppath = os.path.join(monthpath, str(self.id) )
        
-        abspath = os.path.join(settings.REPO_FILES_ROOT, exppath)
-
-        if not os.path.exists(abspath):
-            os.makedirs(abspath)
-            os.chmod(abspath, stat.S_IRWXU|stat.S_IRWXG)
-        
-        import grp
-        groupinfo = grp.getgrnam(settings.CHMOD_GROUP)
-        gid = groupinfo.gr_gid
-        
-        os.chown(abspath, os.getuid(), gid)
+        ensure_repo_filestore_dir_with_owner(exppath)
             
         return (abspath, exppath)
 
@@ -255,8 +246,8 @@ class Experiment(models.Model):
     def __unicode__(self):
         return self.title
 
-
-sopfs = FileSystemStorage(location=os.path.join(settings.REPO_FILES_ROOT, 'sops'))
+sopdir = 'sops'
+sopfs = FileSystemStorage(location=os.path.join(settings.REPO_FILES_ROOT, sopdir))
 
 class StandardOperationProcedure(models.Model):
     responsible = models.CharField(max_length=255, null=True, blank=True)
@@ -270,6 +261,7 @@ class StandardOperationProcedure(models.Model):
     content = models.CharField(max_length=255, null=True, blank=True)
 
     def _filepath(self, filename):
+        ensure_repo_filestore_dir_with_owner(sopdir)
         return os.path.join(sopfs.location, self.version, filename)
 
 
@@ -454,17 +446,8 @@ class Run(models.Model):
         monthpath = os.path.join(yearpath, str(self.created_on.month) )
         runpath = os.path.join(monthpath, str(self.id) )
        
-        abspath = os.path.join(settings.REPO_FILES_ROOT, runpath)
+        ensure_repo_filestore_dir_with_owner(runpath)
 
-        if not os.path.exists(abspath):
-            os.makedirs(abspath)
-            os.chmod(abspath, stat.S_IRWXU|stat.S_IRWXG)
-            
-        groupinfo = grp.getgrnam(settings.CHMOD_GROUP)
-        gid = groupinfo.gr_gid
-        
-        os.chown(abspath, os.getuid(), gid)
-    
         return (abspath, runpath)
     
     def is_method_type_individual_vial(self):

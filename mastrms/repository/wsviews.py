@@ -1432,27 +1432,27 @@ def moveFile(request):
         args = request.POST
        
     target = args['target']
-    file = args['file']
+    fname = args['file']
     
     exp = Experiment.objects.get(id=args['experiment_id'])
     exp.ensure_dir()
         
-    exppath = settings.REPO_FILES_ROOT + os.sep + 'experiments' + os.sep + str(exp.created_on.year) + os.sep + str(exp.created_on.month) + os.sep + str(exp.id) + os.sep
-    pendingPath = settings.REPO_FILES_ROOT + os.sep + 'pending' + os.sep + file
+    exppath = exp.experiment_dir 
+    pendingPath = os.path.join(settings.REPO_FILES_ROOT, 'pending', fname)
 
     (path, filename) = os.path.split(pendingPath)
     
     destpath = exppath
     if not target == '':
         if not target == 'experimentRoot':
-            destpath = destpath + target + os.sep
+            destpath = os.path.join(destpath, target)
     
     #see if pendingpath exists
     if os.path.exists(pendingPath):
-        os.rename(pendingPath, destpath + filename)
+        os.rename(pendingPath, os.path.join(destpath, filename) )
     
     output['success'] = True
-    output['newlocation'] = exppath + filename
+    output['newlocation'] = os.path.join(exppath, filename)
     
     return HttpResponse(json.dumps(output))
 
@@ -1477,7 +1477,7 @@ def experimentFilesList(request):
     exp = Experiment.objects.get(id=args['experiment'])
     exp.ensure_dir()
         
-    exppath = settings.REPO_FILES_ROOT + os.sep + 'experiments' + os.sep + str(exp.created_on.year) + os.sep + str(exp.created_on.month) + os.sep + str(exp.id) + os.sep
+    exppath = exp.experiment_dir 
     
     sharedList = ClientFile.objects.filter(experiment=exp)
     print sharedList
@@ -1519,14 +1519,15 @@ def pendingFilesList(request):
     else:
         args = request.POST
         
-    path = args['node']
+    nodepath = args['node']
     
-    if path == 'pendingRoot':
-        path = ''
+    if nodepath == 'pendingRoot':
+        nodepath = ''
 
-    basepath = settings.REPO_FILES_ROOT + os.sep + 'pending' + os.sep
-    
-    return _fileList(request, basepath, path, False, [])
+    pendingpath = os.path.join(settings.REPO_FILES_ROOT, 'pending')
+    ensure_repo_filestore_dir_with_owner(os.path.join('pending', nodepath))
+
+    return _fileList(request, pendingpath, nodepath, False, [])
     
     
 @mastr_users_only
@@ -1538,16 +1539,16 @@ def _fileList(request, basepath, path, withChecks, sharedList, replacementBasepa
     if len(os.path.abspath(basepath)) > len(os.path.commonprefix((basepath, os.path.abspath(basepath + path)))):
         return HttpResponse(json.dumps(output))
 
-    if not os.path.exists(basepath + path):
+    if not os.path.exists(os.path.join(basepath, path)):
         return HttpResponse('[]')
 
-    files = os.listdir(basepath + path)
+    files = os.listdir(os.path.join(basepath,path))
     files.sort()
     
     for filename in files:
-        filepath = basepath + filename
+        filepath = os.path.join(basepath, filename)
         if not path == '':
-            filepath = basepath + path + os.sep + filename
+            filepath = os.path.join(basepath, path, filename)
             
         if os.access(filepath, os.R_OK):
             file = {}
@@ -1559,9 +1560,9 @@ def _fileList(request, basepath, path, withChecks, sharedList, replacementBasepa
             file['id'] = filename
 
             if not path == '':
-                file['id'] = path + os.sep + filename
+                file['id'] = os.path.join(path, filename)
                 if replacementBasepath is not None:
-                    file['id'] = replacementBasepath + os.sep + filename
+                    file['id'] = os.path.join(replacementBasepath, filename)
             if withChecks:
                 file['checked'] = False
                 

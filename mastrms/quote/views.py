@@ -14,6 +14,7 @@ import logging
 
 from mastrms.decorators import *
 from mastrms.utils.data_utils import jsonResponse, jsonErrorResponse, json_encode, uniqueList
+from mastrms.utils.file_utils import ensure_repo_filestore_dir_with_owner, set_repo_file_ownerships
 from mastrms.quote.models import Quoterequest, Formalquote, Quotehistory, Emailmap
 from mastrms.users.MAUser import *
 from mastrms.login.URLState import getCurrentURLState
@@ -33,16 +34,13 @@ def _handle_uploaded_file(f, name):
     logger.debug('*** _handle_uploaded_file: enter ***')
     retval = False
     try:
-        destination = open(os.path.join(settings.QUOTE_FILES_ROOT, name ), 'wb+')
+        destfname = os.path.join(settings.QUOTE_FILES_ROOT, name ) 
+        destination = open(destfname, 'wb+')
         for chunk in f.chunks():
             destination.write(chunk)
-        
-        groupinfo = grp.getgrnam(settings.CHMOD_GROUP)
-        gid = groupinfo.gr_gid
-        
-        os.fchown(destination.fileno(), os.getuid(), gid)
-        
         destination.close()
+        
+        set_repo_file_ownerships(destfname)
         retval = True
     except Exception, e:
         retval = False
