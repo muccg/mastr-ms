@@ -238,8 +238,10 @@ class Experiment(models.Model):
         monthpath = os.path.join(yearpath, str(self.created_on.month) )
         exppath = os.path.join(monthpath, str(self.id) )
        
-        ensure_repo_filestore_dir_with_owner(exppath)
-            
+        try:
+            ensure_repo_filestore_dir_with_owner(exppath)
+        except Exception, e:
+            print "ensure dir exception: ", e
         return (abspath, exppath)
 
 
