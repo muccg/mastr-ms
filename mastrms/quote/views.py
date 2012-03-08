@@ -34,6 +34,7 @@ def _handle_uploaded_file(f, name):
     logger.debug('*** _handle_uploaded_file: enter ***')
     retval = False
     try:
+        ensure_repo_filestore_dir_with_owner(settings.QUOTE_FILES_ROOT)
         destfname = os.path.join(settings.QUOTE_FILES_ROOT, name ) 
         destination = open(destfname, 'wb+')
         for chunk in f.chunks():
