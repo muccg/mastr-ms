@@ -140,7 +140,8 @@ SITE_NAME = 'madas'
 SECRET_KEY = 'qj#tl@9@7((%^)$i#iyw0gcfzf&#a*pobgb8yr#1%65+*6!@g$'
 EMAIL_APP_NAME = "MastrMS "
 REPO_FILES_ROOT = PERSISTENT_FILESTORE
-QUOTE_FILES_ROOT = os.path.join(PERSISTENT_FILESTORE, 'quotes')
+#quote files root should be within the repo files root
+QUOTE_FILES_ROOT = os.path.join(REPO_FILES_ROOT, 'quotes')
 
 INSTALLED_APPS.extend([
     'django_extensions',

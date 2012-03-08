@@ -232,7 +232,6 @@ class Experiment(models.Model):
                 abspath is the absolute path
                 relpath is the path, relative to the settings.REPO_FILES_ROOT
         '''
-        import stat
         
         yearpath = os.path.join('experiments', str(self.created_on.year) )
         monthpath = os.path.join(yearpath, str(self.created_on.month) )
@@ -242,7 +241,7 @@ class Experiment(models.Model):
             ensure_repo_filestore_dir_with_owner(exppath)
         except Exception, e:
             print "ensure dir exception: ", e
-        return (abspath, exppath)
+        return (os.path.join(settings.REPO_FILES_ROOT, exppath), exppath)
 
 
     def __unicode__(self):
@@ -450,7 +449,7 @@ class Run(models.Model):
        
         ensure_repo_filestore_dir_with_owner(runpath)
 
-        return (abspath, runpath)
+        return (os.path.join(settings.REPO_FILES_ROOT, runpath), runpath)
     
     def is_method_type_individual_vial(self):
         return (self.order_of_methods == 2)
