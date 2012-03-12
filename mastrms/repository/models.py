@@ -11,6 +11,10 @@ import os
 from mastrms import settings
 from utils.file_utils import ensure_repo_filestore_dir_with_owner, set_repo_file_ownerships
 
+import logging
+logger = logging.getLogger('madas_log')
+
+
 class SampleNotInClassException(Exception):
     pass
 
@@ -401,21 +405,25 @@ class Run(models.Model):
         return "%s (%s v.%s)" % (self.title, self.method.title, self.method.version)
 
     def resequence_samples(self):
+        logger.debug('resequencing samples')
         sequence = 1
-        for rs in RunSample.objects.all().order_by("id"):
+        for rs in RunSample.objects.filter(run=self).order_by("id"):
             rs.sequence = sequence
             sequence += 1
             rs.save()
+        logger.debug('finished resequencing samples')
 
     def add_samples(self, sampleslist):
         '''Takes a list of samples'''
+        logger.debug('add_samples started')
         assert self.id, 'Run must have an id before samples can be added'
         for s in sampleslist:
             if s.is_valid_for_run():
-                print 'add_samples adding ', s.id
+                logger.debug( 'add_samples adding %d' % (s.id) )
                 rs, created = RunSample.objects.get_or_create(run=self, sample=s)
         self.resequence_samples()
-                
+        logger.debug("add_samples complete")
+
     def remove_samples(self, queryset):
         assert self.id, 'Run must have an id before samples can be added'
         for s in queryset:
