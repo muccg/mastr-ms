@@ -4,5 +4,6 @@
 ^mastrms/fab-tmp/*
 ^mastrms/scratch/*
 ^mastrms/log/*
-^mastrms/virtualenv*
+^mastrms/mdatasync_client/client/build/*
+^mastrms/mdatasync_client/client/dist/*
 ^.*appsettings*
