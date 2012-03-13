@@ -4,7 +4,11 @@ from mastrms.users.MAUser import MAUser
 from mastrms.users.MAUser import getMadasUser
 from django.db.models import Q
 
+import logging
+logger = logging.getLogger('madas_log')
+
 def listRuleGenerators(user=None, accessibility=False, showEnabledOnly=False):
+    logger.debug('Listing rule generators')
     usernode = None
     mauser = None
     if user is not None:
