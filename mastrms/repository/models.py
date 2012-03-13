@@ -405,6 +405,12 @@ class Run(models.Model):
         return "%s (%s v.%s)" % (self.title, self.method.title, self.method.version)
 
     def resequence_samples(self):
+        #Just a note to explain that this method assigns sequence numbers to
+        #the runsamples belonging to this run, maintaining 'id' order, strictly linearly 
+        #increasing (i.e. 1,2,3,4,5,6,7,8, no gaps).
+        #This just means that we are preserving the order in which the runsamples were created for
+        #this run - it still means that samples could have been added in randomised or arbitrary order,
+        #and that will be maintained (because runsamples are created to reflect that order).
         logger.debug('resequencing samples')
         sequence = 1
         for rs in RunSample.objects.filter(run=self).order_by("id"):
