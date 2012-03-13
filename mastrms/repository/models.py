@@ -510,7 +510,7 @@ class RunSample(models.Model):
     complete = models.BooleanField(default=False, db_index=True)
     component = models.ForeignKey("Component", default=0)
     sequence = models.PositiveIntegerField(null=False, default=0)
-    vial_number = models.PositiveIntegerField(null=True)
+    vial_number = models.PositiveIntegerField(null=True, blank=True)
     method_number = models.PositiveIntegerField(null=True, blank=True)
 
     @classmethod 
