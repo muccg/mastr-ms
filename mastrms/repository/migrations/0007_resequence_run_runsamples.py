@@ -7,7 +7,28 @@ from django.db import models
 class Migration(DataMigration):
 
     def forwards(self, orm):
-        "Write your forwards methods here."
+        #Take each run, and resequence it.
+        runs = orm['repository.run'].objects.all()
+        resequenced = 0
+        errors = 0
+        totalruns = len(runs)
+        errortext = []
+        print 'Resequencing %d runs: [' % (totalruns), 
+        for run in runs:
+            try:
+                run.resequence_samples()
+                resequenced += 1
+            except Exception, e:
+                errors += 1
+                errortext.append('Run %d : %s' % (run.id, e))
+            print '.',
+        print ']'
+        print '%d successful resequences, %d errors' % (resequenced, errors)
+        if errors > 0:
+            print 'Error summary: '
+            for errorsummary in errortext:
+                print errorsummary
+        print 'Resequencing complete'
 
 
     def backwards(self, orm):
