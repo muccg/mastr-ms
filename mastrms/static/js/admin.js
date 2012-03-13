@@ -448,7 +448,7 @@ MA.AdminUserEditCmp = {id:'adminuseredit-container-panel',
                name: 'email',
                vtype: 'email',
                allowBlank:false,
-               disabled:true,
+               readOnly:true,
                maskRe: /[^,=]/
                },{
                fieldLabel: 'First name',
