@@ -24,6 +24,8 @@ import os, stat
 import settings
 import copy
 from settings import RETURN_EMAIL
+import logging
+logger = logging.getLogger('madas_log')
 
 @mastr_users_only
 def create_object(request, model):
@@ -163,6 +165,7 @@ def update_object(request, model, id):
 
         #TODO clean this stuff up!
         if model == 'run':
+            logger.debug('updating run.')
             if not row.rule_generator.is_accessible_by(request.user):
                 return HttpResponseForbidden("Invalid rule generator for run");
 
@@ -2106,7 +2109,7 @@ def select_widget_json(authenticated=False, authorized=False, main_content_funct
 @mastr_users_only
 def add_samples_to_run(request):
     '''Takes a run_id and a list of sample_ids and adds samples to the run after checking permissions etc.'''
-
+    logger.debug("add_samples_to_run is entered")
     if request.method == 'GET':
         return HttpResponseNotAllowed(['POST'])
 
@@ -2129,8 +2132,7 @@ def add_samples_to_run(request):
     #reorder it before we send it to the run for processing. 
     #we do this later (see below)
     queryset = Sample.objects.filter(id__in=sample_ids)
-    for samp in queryset:
-        print "%d, " % (samp.id) ,
+    logger.debug("Samples to add to run: %s" % (str(sample_ids) ) )
     if len(queryset) != len(sample_ids):
         return HttpResponseNotFound("At least one of the samples can not be found.\n")
 
@@ -2144,7 +2146,10 @@ def add_samples_to_run(request):
     # check that each sample is valid
     for s in queryset:
         if not s.is_valid_for_run():
+            logger.debug('Sample %d not valid for run' % (s.id))
             return HttpResponseNotFound("Run NOT created as sample (%s, %s) does not have sample class or its class is not enabled.\n" % (s.label, s.experiment))
+        else:
+            logger.debug('Sample %d valid for run' % (s.id))
 
     # by the time you we get here we should have a valid run and valid samples
     #the samples aren't necessarily in the correct order though, because of the call to filter (they are returned in order of database id, not the sequence given in the passed in id list)
@@ -2156,8 +2161,10 @@ def add_samples_to_run(request):
             #this try catch
             sampleslist.append(queryset.get(id=id) )
         except Exception, e:
-            pass
+            logger.debug("Adding sample %d to list failed: %s" % (id, e))
+    logger.debug("Actually adding the samples to the samplelist")
     run.add_samples(sampleslist)
+    logger.debug("Finished adding the samples to the samplelist")
 
     return HttpResponse()
     

@@ -11,6 +11,10 @@ import os
 from mastrms import settings
 from utils.file_utils import ensure_repo_filestore_dir_with_owner, set_repo_file_ownerships
 
+import logging
+logger = logging.getLogger('madas_log')
+
+
 class SampleNotInClassException(Exception):
     pass
 
@@ -401,21 +405,31 @@ class Run(models.Model):
         return "%s (%s v.%s)" % (self.title, self.method.title, self.method.version)
 
     def resequence_samples(self):
+        #Just a note to explain that this method assigns sequence numbers to
+        #the runsamples belonging to this run, maintaining 'id' order, strictly linearly 
+        #increasing (i.e. 1,2,3,4,5,6,7,8, no gaps).
+        #This just means that we are preserving the order in which the runsamples were created for
+        #this run - it still means that samples could have been added in randomised or arbitrary order,
+        #and that will be maintained (because runsamples are created to reflect that order).
+        logger.debug('resequencing samples')
         sequence = 1
-        for rs in RunSample.objects.all().order_by("id"):
+        for rs in RunSample.objects.filter(run=self).order_by("id"):
             rs.sequence = sequence
             sequence += 1
             rs.save()
+        logger.debug('finished resequencing samples')
 
     def add_samples(self, sampleslist):
         '''Takes a list of samples'''
+        logger.debug('add_samples started')
         assert self.id, 'Run must have an id before samples can be added'
         for s in sampleslist:
             if s.is_valid_for_run():
-                print 'add_samples adding ', s.id
+                logger.debug( 'add_samples adding %d' % (s.id) )
                 rs, created = RunSample.objects.get_or_create(run=self, sample=s)
         self.resequence_samples()
-                
+        logger.debug("add_samples complete")
+
     def remove_samples(self, queryset):
         assert self.id, 'Run must have an id before samples can be added'
         for s in queryset:
@@ -496,7 +510,7 @@ class RunSample(models.Model):
     complete = models.BooleanField(default=False, db_index=True)
     component = models.ForeignKey("Component", default=0)
     sequence = models.PositiveIntegerField(null=False, default=0)
-    vial_number = models.PositiveIntegerField(null=True)
+    vial_number = models.PositiveIntegerField(null=True, blank=True)
     method_number = models.PositiveIntegerField(null=True, blank=True)
 
     @classmethod 
