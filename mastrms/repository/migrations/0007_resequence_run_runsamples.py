@@ -3,12 +3,13 @@ import datetime
 from south.db import db
 from south.v2 import DataMigration
 from django.db import models
-
+from repository.models import Run
+import sys
 class Migration(DataMigration):
 
     def forwards(self, orm):
         #Take each run, and resequence it.
-        runs = orm['repository.run'].objects.all()
+        runs = Run.objects.all()
         resequenced = 0
         errors = 0
         totalruns = len(runs)
@@ -21,7 +22,8 @@ class Migration(DataMigration):
             except Exception, e:
                 errors += 1
                 errortext.append('Run %d : %s' % (run.id, e))
-            print '.',
+            sys.stdout.write('.') #output dots, no trailing spaces (cant use print)
+            sys.stdout.flush()
         print ']'
         print '%d successful resequences, %d errors' % (resequenced, errors)
         if errors > 0:
