@@ -15,6 +15,18 @@
  * along with Madas.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+MA.LoadMachineAndRuleGeneratorDatastores = function(){
+    //These datastores are only loadable by admins, so this function
+    //should only be called when initialising components that can only
+    //have been created because the logged in user is an admin.
+    //For instance, being able to click on certain admin menu items,
+    //or the 'recent experiments' component, which only shows if you are 
+    //an admin.
+    machineStore.load();
+    enabledRuleGeneratorStore.load();
+
+};
+
 
 /**
  * madasChangeMainContent 
@@ -204,8 +216,7 @@ MA.ChangeMainContent = function(contentName, paramArray){
         case 'project:view':
             expStatusComboStore.load();
             methodStore.load();
-            machineStore.load();
-            enabledRuleGeneratorStore.load();
+            MA.LoadMachineAndRuleGeneratorDatastores();
             sopLookupStore.load();
             maStaffComboStore.load();
             involvementComboStore.load();
@@ -225,8 +236,7 @@ MA.ChangeMainContent = function(contentName, paramArray){
 
         case "run:list":
             methodStore.load();
-            machineStore.load();
-            enabledRuleGeneratorStore.load();
+            MA.LoadMachineAndRuleGeneratorDatastores();
             runListStore.load({callback: function() {
                 runListStore.sort([
                     {

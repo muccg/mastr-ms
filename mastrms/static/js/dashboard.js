@@ -316,6 +316,8 @@ MA.Dashboard.CreateRecentExperiments = function() {
             editExperiment(selectionModel.getSelected().data.id);
         }
     };
+    
+    MA.LoadMachineAndRuleGeneratorDatastores();
 
     var toolbar = new Ext.Toolbar({
         items   : [
