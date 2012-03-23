@@ -18,7 +18,7 @@
  * along with Madas.  If not, see <http://www.gnu.org/licenses/>.
  *
  -->
-    <title>Metabolomics Australia User and Quote Management System</title>
+    <title>MA LIMS</title>
 
 <link rel="shortcut icon" href="/favicon.ico" />
 <link rel="stylesheet" href="${wh.url('/static/ext-3.4.0/resources/css/ext-all.css')}"/>
@@ -107,7 +107,7 @@ function callbacker(){
 </head>
 <body onLoad="callbacker();">
 
-<div id="north"><div id="appTitle">Metabolomics Australia User and Quote Management System</div><div id="toolbar"></div></div>
+<div id="north"><div id="appTitle">MA LIMS</div><div id="toolbar"></div></div>
 
 <div id="south">(c) CCG 2009-2012</div>
 
