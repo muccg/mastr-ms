@@ -506,6 +506,9 @@ MA.ExperimentSamplesOnly = {
             cls: 'x-btn-text-icon',
             icon: 'static/images/refresh.png',
             handler: function() {
+                var grid = Ext.getCmp('samplesOnly');
+                var sm = grid.getSelectionModel();
+                sm.clearSelections();
                 MA.SampleLoadByExperiment(true);
             }
         }
