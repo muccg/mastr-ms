@@ -423,6 +423,7 @@ def recordsMAStaff(request):
         mauser = loadMadasUser(row.username)
         if not mauser: continue
         if not mauser.get('isClient'):
+            print 'name: ', mauser['name']
             output["rows"].append({
                 "key": row.id,
                 "value": "%s (%s)" % (mauser['name'],mauser['email'])
@@ -468,9 +469,9 @@ def recordsClientList(request):
         record = {
             "id": row.id,
             "is_client": "Yes" if mauserobj.IsClient else "No",
-            "name": mauserobj.name,
+            "name": mauserobj.Name,
             "email": mauserdetails.get('email', '<None>'),
-            "displayValue": "%s (%s)" % (mauserobj.name, mauserdetails.get('email', '<None>')),
+            "displayValue": "%s (%s)" % (mauserobj.Name, mauserdetails.get('email', '<None>')),
             "organisationName": row.organisation_set.all()[0].name if row.organisation_set.exists() else ''
         }
 

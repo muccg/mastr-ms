@@ -142,8 +142,8 @@ class MAUser(object):
         self._dict['CachedDetails'] = value
 
     @property
-    def name(self):
-        return " ".join((self._dict.get('firstname', ''), self._dict.get('lastname', '')))
+    def Name(self):
+        return " ".join((self.CachedDetails.get('firstname', ''), self.CachedDetails.get('lastname', '')))
 
 
     def refreshCachedGroups(self):
@@ -315,7 +315,6 @@ def loadMadasUser(username):
     'returns empty dict if the user doesnt exist'
     
     user = getMadasUser(username)
-    user.refresh()
     details = user.CachedDetails
 
     if len(details) == 0:
@@ -351,7 +350,7 @@ def loadMadasUser(username):
     else:
         details['groups'] = details['node']
 
-    details['name'] = user.name
+    details['name'] = user.Name
 
     return details  
 
