@@ -764,7 +764,9 @@ MA.ProjectCmp = {
                         typeAhead:false,
                         triggerAction:'all',
                         listWidth:400,
-                        store: clientsListStore,
+                        store: sorteduserListStore,
+                        //store: userListStore,
+                        //store: clientsListStore,
                         itemSelector: 'div.search-item',
                         tpl:new Ext.XTemplate(
                         '<tpl for="."><div style="padding:8px;padding-top:5px;padding-bottom:5px;border-bottom:1px solid #ccc;" class="search-item">',

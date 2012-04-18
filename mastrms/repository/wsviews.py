@@ -17,7 +17,7 @@ from mastrms.repository.permissions import user_passes_test
 from django.db.models import Q
 from datetime import datetime, timedelta
 from django.core.mail import mail_admins
-from mastrms.users.MAUser import getMadasUser, loadMadasUser
+from mastrms.users.MAUser import getMadasUser, loadMadasUser, getCurrentUser
 from mastrms.repository import rulegenerators
 from mastrms.utils.mail_functions import FixedEmailMessage
 import os, stat
@@ -443,22 +443,56 @@ def recordsClientList(request):
 
     if args.get('allUsers'):
         rows = User.objects.all()
+        print 'getting all users'
     else:
         rows = User.objects.extra(where=["id IN (SELECT DISTINCT client_id FROM repository_project ORDER BY client_id)"])
+        print 'getting only some users'
+
+    nodemembers = []
+    mastaff = []
+    nodereps = []
+    clients = []
+
+    currentuser = getMadasUser(request.user.username)
 
     for row in rows:
-        mauser = loadMadasUser(row.username)
-        if not mauser: continue
-        output["rows"].append({
+        print 'Getting ', row.username
+        mauserobj = getMadasUser(row.username)
+        #mauserobj.refresh()
+        mauserdetails = mauserobj.CachedDetails
+        #print mauserdetails
+        if mauserdetails == {}: 
+            print 'bad user: ', row.username
+            continue
+        
+        record = {
             "id": row.id,
-            "is_client": "Yes" if mauser['isClient'] else "No",
-            "name": mauser['name'],
-            "email": mauser['email'],
-            "displayValue": "%s (%s)" % (mauser['name'], mauser['email']),
+            "is_client": "Yes" if mauserobj.IsClient else "No",
+            "name": mauserobj.name,
+            "email": mauserdetails.get('email', '<None>'),
+            "displayValue": "%s (%s)" % (mauserobj.name, mauserdetails.get('email', '<None>')),
             "organisationName": row.organisation_set.all()[0].name if row.organisation_set.exists() else ''
-        })
+        }
 
-    output['rows'].sort(key=lambda r: r['displayValue'])
+        if args.get('sortUsers') and currentuser:
+            if mauserobj.PrimaryNode == currentuser.PrimaryNode:
+                nodemembers.append(record)
+            elif mauserobj.IsStaff or mauserobj.IsMastrStaff or mauserobj.IsMastrAdmin:
+                mastaff.append(record)
+            elif not mauserobj.IsClient:
+                nodereps.append(record)
+            else:
+                clients.append(record)
+             
+        else:
+            clients.append(record)
+
+    #sort each list if there are members
+    for l in [nodemembers, mastaff, nodereps, clients]:
+        if len(l) > 1:
+            l.sort(key=lambda r: r['displayValue'])
+
+    output["rows"] = nodemembers + mastaff + nodereps + clients
 
     output['results'] = len(output['rows'])
 
@@ -2137,7 +2171,13 @@ def add_samples_to_run(request):
         return HttpResponseNotFound("At least one of the samples can not be found.\n")
 
     # check that each sample is permitted
-    samples = Sample.objects.filter(experiment__users=request.user)
+    # user could be in experiment OR be a project manager
+    # I have done this with two Q objects OR'ed together.
+    # The alternative approach would be to do it as a nested if:
+    # only check that the user is in the experiment access list IF the user 
+    # isn't already a PM. 
+
+    samples = Sample.objects.filter(Q(experiment__users=request.user)|Q(experiment__project__managers=request.user))
     allowed_set = set(list(samples))
     qs_set = set(list(queryset))
     if not qs_set.issubset(allowed_set):

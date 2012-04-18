@@ -141,15 +141,20 @@ class MAUser(object):
     def CachedDetails(self, value):
         self._dict['CachedDetails'] = value
 
+    @property
+    def name(self):
+        return " ".join((self._dict.get('firstname', ''), self._dict.get('lastname', '')))
+
+
     def refreshCachedGroups(self):
-        logger.debug('\tRefreshing groups for %s. Fetching.' % (self.Username) )
+        #logger.debug('\tRefreshing groups for %s. Fetching.' % (self.Username) )
         groupsdict = getMadasUserGroups(self.Username)
         self.CachedGroups = groupsdict['groups'] + groupsdict['status']
         self.StatusGroup = groupsdict['status']
         return self.CachedGroups
 
     def refreshCachedDetails(self):
-        logger.debug('\tRefreshing user details for %s.' % (self.Username) )
+        #logger.debug('\tRefreshing user details for %s.' % (self.Username) )
         detailsdict = getMadasUserDetails(self.Username)
         self.CachedDetails = dict(detailsdict)
         return self.CachedDetails
@@ -346,7 +351,7 @@ def loadMadasUser(username):
     else:
         details['groups'] = details['node']
 
-    details['name'] = ", ".join((details.get('firstname', ''), details.get('lastname', '')))
+    details['name'] = user.name
 
     return details  
 
