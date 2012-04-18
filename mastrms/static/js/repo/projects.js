@@ -755,18 +755,31 @@ MA.ProjectCmp = {
                         name:'client',
                         width:700,
                         editable:false,
+                        enableKeyEvents:true,
                         forceSelection:true,
                         displayField:'displayValue',
                         valueField:'id',
                         hiddenName:'client_id',
-                        lazyRender:true,
+                        lazyRender:false,
                         allowBlank:false,
-                        typeAhead:false,
+                        typeAhead:true,
                         triggerAction:'all',
                         listWidth:400,
+                        listeners: {
+                            'keyup': function(component, e) {
+                                var k = e.getCharCode()
+                                if ( (k == e.ESC) || (k == e.DELETE))
+                                {
+                                    component.store.clearFilter();
+                                }
+                                else
+                                { 
+                                    component.store.filter('name', String.fromCharCode(e.getCharCode()), true, true);
+                                }
+                            }
+                        },
+                
                         store: sorteduserListStore,
-                        //store: userListStore,
-                        //store: clientsListStore,
                         itemSelector: 'div.search-item',
                         tpl:new Ext.XTemplate(
                         '<tpl for="."><div style="padding:8px;padding-top:5px;padding-bottom:5px;border-bottom:1px solid #ccc;" class="search-item">',
@@ -807,6 +820,7 @@ MA.ProjectCmp = {
                                                 width:300,
                                                 editable:false,
                                                 forceSelection:true,
+                                                enableKeyEvents:true,
                                                 displayField:'value',
                                                 valueField:'key',
                                                 hiddenName:'projManagerId',
@@ -815,7 +829,21 @@ MA.ProjectCmp = {
                                                 typeAhead:false,
                                                 triggerAction:'all',
                                                 listWidth:300,
-                                                store: maStaffComboStore
+                                                store: maStaffComboStore,
+                                                listeners: {
+                                                    'keyup': function(component, e) {
+                                                        var k = e.getCharCode()
+                                                        if ( (k == e.ESC) || (k == e.DELETE))
+                                                        {
+                                                            component.store.clearFilter();
+                                                        }
+                                                        else
+                                                        { 
+                                                            component.store.filter('value', String.fromCharCode(e.getCharCode()), true, true);
+                                                        }
+                                                        
+                                                    }
+                                                }
                                             })
                                     ],
                                     buttons:[
