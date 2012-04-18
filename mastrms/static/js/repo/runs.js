@@ -200,7 +200,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                             store: new Ext.data.ArrayStore({
                                 id: 0,
                                 fields: [ 'key', 'value'],
-                                data: [ [1, 'resampled vial'], [2, 'individual vial'] ]
+                                data: [ ['', 'None'], [1, 'resampled vial'], [2, 'individual vial'] ]
                             })
                         })
                     ]
