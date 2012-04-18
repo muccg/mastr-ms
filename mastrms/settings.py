@@ -10,6 +10,7 @@ if not os.environ.has_key('SCRIPT_NAME'):
     os.environ['SCRIPT_NAME']=''
 
 SCRIPT_NAME =   os.environ['SCRIPT_NAME']
+print 'Evaluating os.environ[PROJECT_DIRECTORY] as ', os.environ['PROJECT_DIRECTORY']
 PROJECT_DIRECTORY = os.environ['PROJECT_DIRECTORY']
 TMP_DIRECTORY = os.path.join(PROJECT_DIRECTORY, 'tmp')
 
@@ -20,7 +21,7 @@ SITE_ID = 1
 APPEND_SLASH = True
 SSL_ENABLED = True
 
-# Locale
+# Locals ma
 TIME_ZONE = 'Australia/Perth'
 LANGUAGE_CODE = 'en-us'
 USE_I18N = True
