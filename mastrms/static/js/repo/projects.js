@@ -767,15 +767,7 @@ MA.ProjectCmp = {
                         listWidth:400,
                         listeners: {
                             'keyup': function(component, e) {
-                                var k = e.getCharCode()
-                                if ( (k == e.ESC) || (k == e.DELETE))
-                                {
-                                    component.store.clearFilter();
-                                }
-                                else
-                                { 
-                                    component.store.filter('name', String.fromCharCode(e.getCharCode()), true, true);
-                                }
+                                MA.StoreFilter(component, e, 'name');
                             }
                         },
                 
@@ -832,16 +824,7 @@ MA.ProjectCmp = {
                                                 store: maStaffComboStore,
                                                 listeners: {
                                                     'keyup': function(component, e) {
-                                                        var k = e.getCharCode()
-                                                        if ( (k == e.ESC) || (k == e.DELETE))
-                                                        {
-                                                            component.store.clearFilter();
-                                                        }
-                                                        else
-                                                        { 
-                                                            component.store.filter('value', String.fromCharCode(e.getCharCode()), true, true);
-                                                        }
-                                                        
+                                                        MA.StoreFilter(component, e, 'value');
                                                     }
                                                 }
                                             })
