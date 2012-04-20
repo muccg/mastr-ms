@@ -94,13 +94,14 @@ MA.CurrentSampleClassId = function() {
 //of the field in the store that you will be filtering by.
 //ESC, DELETE, or BS will clear the filter.
 MA.StoreFilter = function(component, keyevent, filterparam) {
+    keyevent.stopEvent() //prevent default browser handling
     var k = keyevent.getCharCode()
     if ( (k == keyevent.ESC) || (k == keyevent.DELETE) || (k == keyevent.BACKSPACE))
     {
         component.store.clearFilter();
     }
-    else
-    { 
+    //don't fire on non alpha 
+    else if ((k >= keyevent.A) && (k <= keyevent.Z)) {
         component.store.filter(filterparam, String.fromCharCode(keyevent.getCharCode()), true, true);
     }
 
