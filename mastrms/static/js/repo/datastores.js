@@ -88,6 +88,25 @@ MA.CurrentSampleClassId = function() {
     return 0;
 };
 
+//filters a store based on keypresses.
+//you should bind this to the keyup listener for a store if you want to use it.
+//pass the component and key event (first two args to the listener, and then the name
+//of the field in the store that you will be filtering by.
+//ESC, DELETE, or BS will clear the filter.
+MA.StoreFilter = function(component, keyevent, filterparam) {
+    var k = keyevent.getCharCode()
+    if ( (k == keyevent.ESC) || (k == keyevent.DELETE) || (k == keyevent.BACKSPACE))
+    {
+        component.store.clearFilter();
+    }
+    else
+    { 
+        component.store.filter(filterparam, String.fromCharCode(keyevent.getCharCode()), true, true);
+    }
+
+
+};
+
 // ---------- TABLE STORES ---------- (used for tables, entities)
 var organStore = new Ext.data.JsonStore(
                         {

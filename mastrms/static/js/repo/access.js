@@ -92,6 +92,11 @@ MA.Access = {
                                 triggerAction:'all',
                                 listWidth:230,
                                 store: userListStore,
+                                listeners: {
+                                    'keyup': function(component, e) {
+                                        MA.StoreFilter(component, e, 'name');
+                                    }
+                                },
                                 itemSelector: 'div.search-item',
                                 tpl:new Ext.XTemplate(
                                 '<tpl for="."><div style="padding:8px;padding-top:5px;padding-bottom:5px;border-bottom:1px solid #ccc;" class="search-item">',
