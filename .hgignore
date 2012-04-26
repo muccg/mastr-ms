@@ -1,8 +1,9 @@
 .*\.pyc$
-^madas/virt_madas/*
-^madas/tmp/*
-^madas/fab-tmp/*
-^madas/scratch/*
-^madas/log/*
-^madas/virtualenv*
+^mastrms/virt_mastrms/*
+^mastrms/tmp/*
+^mastrms/fab-tmp/*
+^mastrms/scratch/*
+^mastrms/log/*
+^mastrms/mdatasync_client/client/build/*
+^mastrms/mdatasync_client/client/dist/*
 ^.*appsettings*

@@ -1,0 +1,154 @@
+[
+    {
+        "pk": 1, 
+        "model": "auth.group", 
+        "fields": {
+            "name": "madas", 
+            "permissions": []
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "auth.group", 
+        "fields": {
+            "name": "mastaff", 
+            "permissions": []
+        }
+    },
+    {
+        "pk": 1, 
+        "model": "auth.user", 
+        "fields": {
+            "username": "admin@example.com", 
+            "first_name": "", 
+            "last_name": "", 
+            "is_active": true, 
+            "is_superuser": true, 
+            "is_staff": true, 
+            "last_login": "2012-02-15 15:02:41", 
+            "groups": [
+                1, 
+                2
+            ], 
+            "user_permissions": [], 
+            "password": "sha1$a8a68$18c83f486556e36c747bb6f39f6210e260ca21ce", 
+            "email": "", 
+            "date_joined": "2012-02-14 16:08:20"
+        }
+    },
+    {
+        "pk": 1, 
+        "model": "users.group", 
+        "fields": {
+            "name": "User", 
+            "user": [
+                1
+            ]
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "users.group", 
+        "fields": {
+            "name": "Pending", 
+            "user": []
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "users.group", 
+        "fields": {
+            "name": "Rejected", 
+            "user": []
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "users.group", 
+        "fields": {
+            "name": "Deleted", 
+            "user": []
+        }
+    }, 
+    {
+        "pk": 5, 
+        "model": "users.group", 
+        "fields": {
+            "name": "Administrators", 
+            "user": [
+                1
+            ]
+        }
+    }, 
+    {
+        "pk": 6, 
+        "model": "users.group", 
+        "fields": {
+            "name": "Mastr Administrators", 
+            "user": []
+        }
+    }, 
+    {
+        "pk": 7, 
+        "model": "users.group", 
+        "fields": {
+            "name": "Project Leaders", 
+            "user": []
+        }
+    }, 
+    {
+        "pk": 8, 
+        "model": "users.group", 
+        "fields": {
+            "name": "Mastr Staff", 
+            "user": []
+        }
+    }, 
+    {
+        "pk": 9, 
+        "model": "users.group", 
+        "fields": {
+            "name": "Node Reps", 
+            "user": [1]
+        }
+    }, 
+    {
+        "pk": 10, 
+        "model": "users.group", 
+        "fields": {
+            "name": "Example Node", 
+            "user": [1]
+        }
+    }, 
+    {
+        "pk": 11, 
+        "model": "users.group", 
+        "fields": {
+            "name": "Another Example Node", 
+            "user": [ ]
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "users.userdetail", 
+        "fields": {
+            "telephoneNumber": "09 123456", 
+            "registeredAddress": "Prof Example", 
+            "physicalDeliveryOfficeName": "Example Office", 
+            "description": "Examples", 
+            "businessCategory": "Example Institute", 
+            "title": "Example Position", 
+            "passwordResetKey": null, 
+            "commonName": "User", 
+            "carLicense": "Australia (WA)", 
+            "destinationIndicator": "Example Department", 
+            "user": 1, 
+            "mail": "admin@example.com", 
+            "postalAddress": "123 Example Lane", 
+            "givenName": "Admin", 
+            "homePhone": "09 123465", 
+            "sn": "User"
+        }
+    } 
+]
+
