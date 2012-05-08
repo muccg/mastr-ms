@@ -95,7 +95,10 @@ LDAP_DONT_REQUIRE_CERT = True
 #Server side directories
 PERSISTENT_FILESTORE = os.path.normpath(os.path.join(PROJECT_DIRECTORY, '..', '..', 'files'))
 #Ensure the persistent storage dir exits. If it doesn't, exit noisily.
-assert os.path.exists(PERSISTENT_FILESTORE), "This application cannot start: It expects a writeable directory at %s to use as a persistent filestore" % (PERSISTENT_FILESTORE) 
+assert (os.path.exists(PROJECT_DIRECTORY),
+        "This application cannot start: Cannot find the project directory %s" % PROJECT_DIRECTORY)
+assert (os.path.exists(PERSISTENT_FILESTORE),
+        "This application cannot start: It expects a writeable directory at %s to use as a persistent filestore" % PERSISTENT_FILESTORE)
 # for local development, this is set to the static serving directory. For deployment use Apache Alias
 STATIC_SERVER_PATH = os.path.join(PROJECT_DIRECTORY,"static")
 # a directory that will be writable by the webserver, for storing various files...
