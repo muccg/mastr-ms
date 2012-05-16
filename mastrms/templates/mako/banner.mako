@@ -57,7 +57,7 @@ if(Ext.isIE6 || Ext.isIE7 || Ext.isAir){ Ext.BLANK_IMAGE_URL = "${wh.url('/stati
 <center>
 <div style="margin-top:130px; border:3px solid #003862; width:450px;">
     <div id="appTitle">
-        <h1> Mambo-MS has a new address! </br></br></h1>
+        <h1> Mastr-MS has a new address! </br></br></h1>
     </div>
     <div style="margin: 30px;">
         <h1> <a href=${newurl}>${newurl}</a></br></h1>
