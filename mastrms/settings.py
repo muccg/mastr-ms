@@ -61,16 +61,17 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 #email
-EMAIL_HOST = '<address of your SMTP server>'                           # email server
-SERVER_EMAIL = "<server email address e.g apache@yourdomain.com>"      # from address (server)
-RETURN_EMAIL = "<return address for server emails, can be a noreply@>" # reply address (server)
-EMAIL_SUBJECT_PREFIX = "DEV "                                          # subject prefix
-RETURN_EMAIL = 'bpower@ccg.murdoch.edu.au'                             # from/return address (app)
-# default emails
+EMAIL_HOST = 'example - smtp.yoursite.com'                      # Address of your smtp server
+SERVER_EMAIL = "example - apache@yoursite.com"                  # from address for app emails to users
+RETURN_EMAIL = "example - noreply@yoursite.com"                 # reply address for app emails to users
+EMAIL_SUBJECT_PREFIX = "DEV "                           # email subject prefix
+# default emails in case of server tracebacks, app failures, etc
 ADMINS = [
-    ( 'Tech Alerts', 'alerts@ccg.murdoch.edu.au' )
+    ( 'Tech Alerts', 'example - alerts@yoursite.com' )
 ]
 MANAGERS = ADMINS
+
+REGISTRATION_TO_EMAIL = 'example - someadmin@yoursite.com'        #An admin who will handle site registration emails
 
 ## Ldap
 AUTH_LDAP_SERVER = '<your ldap server here>'
@@ -88,9 +89,8 @@ AUTH_LDAP_USERDN = 'ou=People'
 LDAPADMINUSERNAME = '<ldap admin path>'
 LDAPADMINPASSWORD = '<your ldap server password here>'
 AUTH_LDAP_GROUP = 'User'
-DEFAULT_GROUP = 'madas'  #this needs to exist in the database.
-# dont require HTTPS for dev ldap
-LDAP_DONT_REQUIRE_CERT = True
+DEFAULT_GROUP = 'madas'                 # Base group for users. Needs to exist in the database.
+LDAP_DONT_REQUIRE_CERT = True           # dont require HTTPS for dev ldap
 
 #Server side directories
 PERSISTENT_FILESTORE = os.path.normpath(os.path.join(PROJECT_DIRECTORY, '..', '..', 'files'))
@@ -134,7 +134,7 @@ from status_checks import *
 STATUS_CHECKS = [check_default]
 
 # memcache server list
-MEMCACHE_SERVERS = ['memcache1.localdomain:11211','memcache2.localdomain:11211']
+MEMCACHE_SERVERS = ['yourmemcacheserver.yourdomain:11211','anothermemcacheserver.yourdomain:11211']
 MEMCACHE_KEYSPACE = "mastrms-dev"
 
 
@@ -172,8 +172,8 @@ CHMOD_USER = 'apache'
 CHMOD_GROUP = 'maupload'
 
 #Datasync email settings:
-LOGS_TO_EMAIL = "<email address to receive datasync client log notifications>"
-KEYS_TO_EMAIL = "<email address to receive datasync key upload notifications>"
+LOGS_TO_EMAIL = "log_email@yoursite.com" #email address to receive datasync client log notifications
+KEYS_TO_EMAIL = "key_email@yoursite.com" #email address to receive datasync key upload notifications
 
 
 ##

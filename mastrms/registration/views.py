@@ -2,6 +2,7 @@ from mastrms.utils.data_utils import jsonResponse, jsonErrorResponse
 from mastrms.users.MAUser import *
 from mastrms.utils.mail_functions import sendRegistrationToAdminEmail
 import logging
+import settings
 
 logger = logging.getLogger('madas_log')
 
@@ -21,7 +22,7 @@ def submit(request, *args):
         if not success:
             logger.warning("Could not add new user %s" % (detailsDict['username']))
         else:
-            sendRegistrationToAdminEmail(request, 'trac-nema@ccg.murdoch.edu.au')
+            sendRegistrationToAdminEmail(request, settings.REGISTRATION_TO_EMAIL)
         
         return jsonResponse()
     else:
