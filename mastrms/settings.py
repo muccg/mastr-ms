@@ -61,11 +61,11 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 #email
-EMAIL_HOST = 'ccg.murdoch.edu.au'
-SERVER_EMAIL = "apache@ccg.murdoch.edu.au"                      # from address
-RETURN_EMAIL = "apache@ccg.murdoch.edu.au"                      # from address
-EMAIL_SUBJECT_PREFIX = "DEV "
-RETURN_EMAIL = 'bpower@ccg.murdoch.edu.au'
+EMAIL_HOST = '<address of your SMTP server>'                           # email server
+SERVER_EMAIL = "<server email address e.g apache@yourdomain.com>"      # from address (server)
+RETURN_EMAIL = "<return address for server emails, can be a noreply@>" # reply address (server)
+EMAIL_SUBJECT_PREFIX = "DEV "                                          # subject prefix
+RETURN_EMAIL = 'bpower@ccg.murdoch.edu.au'                             # from/return address (app)
 # default emails
 ADMINS = [
     ( 'Tech Alerts', 'alerts@ccg.murdoch.edu.au' )
