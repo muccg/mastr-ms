@@ -1653,7 +1653,7 @@ def shareFile(request, *args):
 def normalise_files(exp, files):
     files = copy.copy(files)
     
-    print 'files, pre normalise: ', files
+    logger.debug('files, pre normalise: %s' % (str(files)) )
 
     # Replace special value 'experimentDir' with the ''
     if 'experimentRoot' in files:
@@ -1666,7 +1666,7 @@ def normalise_files(exp, files):
     for d in dirs:
         files = filter(lambda f: f == d or not f.startswith(d), files)
 
-    print 'files, post normalise: ', files
+    logger.debug('files, post normalise: %s' % (str(files)) )
     return files
 
 @mastr_users_only
