@@ -73,17 +73,18 @@ MA.Files = {
                text: 'Download ',
                handler: function(){
                     var tree = Ext.getCmp('filesTree');
-                    var selModel = tree.getSelectionModel();
-                    var selectedNodes = selModel.getSelectedNodes();
-                    var node;
+                    //var selModel = tree.getSelectionModel();
+                    //var selectedNodes = selModel.getSelectedNodes();
+                    //var node;
+                    var checkedNodes = tree.getChecked();
                     var filesToDownload;
-                    if (selectedNodes.length === 1 && !selectedNodes[0].attributes.metafile) {
-                        node = selectedNodes[0];
+                    if (checkedNodes.length === 1 && !checkedNodes[0].attributes.metafile) {
+                        node = checkedNodes[0];
                         window.location = wsBaseUrl + 'downloadFile?file=' + node.id + '&experiment_id=' + MA.ExperimentController.currentId();
                     } else {
                         filesToDownload = []
-                        for (var i = 0; i < selectedNodes.length; i++) {
-                            node = selectedNodes[i];
+                        for (var i = 0; i < checkedNodes.length; i++) {
+                            node = checkedNodes[i];
                             filesToDownload.push(node.attributes.id);
                         }    
                         Ext.Ajax.request({
@@ -148,7 +149,7 @@ MA.Files = {
                },
                selModel: new Ext.tree.MultiSelectionModel(),
                listeners:{
-                    render: function() {
+                   render: function() {
                         Ext.getCmp('filesTree').getLoader().on("beforeload", function(treeLoader, node) {
                             treeLoader.baseParams.experiment = MA.ExperimentController.currentId();
                             }, this);
