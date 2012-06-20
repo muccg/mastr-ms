@@ -206,7 +206,7 @@ class ZipPacker(object):
 
     def pack(self, files, drop_prefix, filename):
         import zipfile
-        zipf = zipfile.ZipFile(filename, 'w', compression=zipfile.ZIP_DEFLATED)
+        zipf = zipfile.ZipFile(filename, 'w', compression=zipfile.ZIP_DEFLATED, allowZip64=True)
         for f in files:
             if os.path.isfile(f):
                 zipf.write(f, f[len(drop_prefix)+1:])
