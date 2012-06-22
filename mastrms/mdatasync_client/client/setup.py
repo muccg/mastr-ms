@@ -13,7 +13,7 @@ from identifiers import VERSION
 #        self.copyright = "None"
 #        self.name = "None"
 
-freeze_includes = ['encodings','encodings.*', 'calendar'] 
+freeze_includes = ['encodings','encodings.*', 'calendar', 'tendo'] 
 
 freeze_excludes = [#'_ssl',  # Exclude _ssl
                       'pyreadline', 'difflib', 'doctest',

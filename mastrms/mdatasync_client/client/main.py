@@ -8,12 +8,19 @@ import os
 import os.path
 import plogging
 
+import tendo
+from tendo import singleton
+
+SINGLE_LOCK = None
+
 class MDataSyncApp(wx.PySimpleApp):
     def OnInit(self):
         global MSDSCheckFn
         #w = wx.LogChain(wx.LogStderr() )
         #wx.Log_SetActiveTarget( wx.LogStderr() )
         #wx.Log_SetActiveTarget( wx.LogGui() )
+        
+
         win = MainWindow(None)
         self.win = win
         self.msds = MSDataSyncAPI( win.getLog() )#, False ) #false is no threading  
@@ -54,7 +61,18 @@ if __name__ == "__main__":
             exit()
     plogging.init_logger(name='client', logfile=os.path.join(DATADIR, 'clientlog.log'))
     
-    m = MDataSyncApp()
-    #sys.stdout = m.win.log 
-    m.MainLoop()
-    m.msds.stopThread() #stop the thread if there is one.
+
+    should_exit = False
+    try:
+        SINGLE_LOCK = singleton.SingleInstance()
+        print 'Successfully made single lock'
+    except Exception, e:
+        print 'The exception was: ', e
+        should_exit = True
+
+    if not should_exit:
+        m = MDataSyncApp()
+        #sys.stdout = m.win.log 
+        m.MainLoop()
+        m.msds.stopThread() #stop the thread if there is one
+    
