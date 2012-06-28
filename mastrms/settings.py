@@ -159,11 +159,11 @@ INSTALLED_APPS.extend([
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': '<your database name here>',
-        'USER': '<your database user here>',
-        'PASSWORD': '<your database user password here>',
-        'HOST': '<your database host here>',                      
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'mastrms',
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': '',                      
         'PORT': '',                      
     }
 }
