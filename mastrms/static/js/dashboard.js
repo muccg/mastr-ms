@@ -558,7 +558,7 @@ MA.Dashboard.CreateClientDashboard = function() {
         },
         items: [
             MA.Dashboard.CreateToolbar(),
-            MA.Dashboard.CreateRecentExperiments(),
+            //MA.Dashboard.CreateRecentExperiments(),
             MA.Dashboard.CreateAvailableFiles()
         ]
     });
@@ -592,6 +592,7 @@ MA.Dashboard.Create = function() {
     if (MA.CurrentUser.IsAdmin || MA.CurrentUser.IsNodeRep) {
         return MA.Dashboard.CreateAdminDashboard();
     } else if (MA.CurrentUser.IsClient) {
+        console.log("client detected");
         return MA.Dashboard.CreateClientDashboard();
     } else {
         return MA.Dashboard.CreateStaffDashboard();
