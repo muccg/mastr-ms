@@ -30,6 +30,8 @@ class MSDSConfig(object):
                    'syncfreq' : [30, 'Sync Frequency (Mins)', 'How often the application should push updates to the server'],
                    'localindexdir' : ['.local_index', 'Local Index Directory', 'Temporary storage area for data transfer'],
                    'syncold' : [False, 'Sync Completed', 'When checked, includes already completed run data for transfer'],
+                   'archivesynced' : [False, 'Archive Synced Files', 'When checked, archives a copy of synced files to the specified directory.'],
+                   'archivedfilesdir' : ["Choose a directory", 'Archived Files Dir', 'If archiving is enabled, synced files will be archived to this directory.'],
             }
         self.load()
 
