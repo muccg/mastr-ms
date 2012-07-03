@@ -16,13 +16,14 @@ except ImportError: import simplejson
 import urllib
 import os
 import os.path
+import time
 from identifiers import *
 from MainWindow import APPSTATE
 import plogging
 outlog = plogging.getLogger('client')
 import os.path
 import Queue
-from shutil import rmtree
+from shutil import rmtree, copytree, copy
 from MainWindow import APPSTATE
 
 
@@ -251,16 +252,25 @@ class MSDataSyncAPI(object):
     #    return resultdict
     
     
-    def delete_localindexdir(self):
+    def cleanup_localindexdir(self):
         localindexdir = self.config.getLocalIndexPath()
+        tm = time.localtime()
+        timestamp = "%s_%s_%s__%s_%s_%s" % (tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec)
+        archivefilesdir = os.path.join(self.config.getValue('archivedfilesdir'), timestamp)
+        archivesynced = self.config.getValue('archivesynced')
+        if archivesynced:
+            self.log("Archiving synced files to %s" % archivefilesdir)
+            try:
+                copytree(localindexdir, archivefilesdir)
+            except Exception, e:
+                self.log('Could not archive files from %s to %s: %s' % (localindexdir, archivefilesdir, str(e)) )
+
         self.log("Clearing local index directory: %s" % localindexdir)
         try:
             rmtree(localindexdir)
         except Exception, e:
             self.log('Could not clear local index dir: %s' % (str(e)), type=self.log.LOG_WARNING, thread=self.useThreading)
 
-
-    
     #Actual API methods that DO something
     def checkRsync(self, callingWindow, statuschange, notused, returnFn = None):
         if returnFn is None:
@@ -288,7 +298,7 @@ class MSDataSyncAPI(object):
         localindexdir = self.config.getLocalIndexPath() 
 
         if len(localfilesdict.keys()):
-            self.delete_localindexdir()
+            self.cleanup_localindexdir()
 
             #self.log("Initiating file copy to local index (%d files)" % (len(localfilesdict.keys())) )
             #self.set_progress_state(20, APPSTATE.GATHERING_FILES)
@@ -321,7 +331,7 @@ class MSDataSyncAPI(object):
         self.log('Remote transfer stage complete', thread = self.useThreading)
         self.set_progress_state(90, APPSTATE.CONFIRMING_TRANSFER)
         self.log('Removing temporary file cache', thread=self.useThreading)
-        self.delete_localindexdir()
+        self.cleanup_localindexdir()
 
     def handshakeReturn(self, *args, **kwargs):
         self.log('Handshake complete', thread = self.useThreading)

@@ -1,7 +1,7 @@
 import os
 import os.path
 #This version must be incremented each build
-VERSION = "0.4.2"
+VERSION = "0.4.3"
 
 #We need a strange looking datadir because of esky.
 #Esky has an outer 'bootstrapper' exe, and all contents and
@@ -19,6 +19,9 @@ DATADIR = os.path.join('..', DATADIRNAME) #in parent as a default
 if os.path.exists(os.path.join('..', '..', 'appdata') ):
     DATADIR = os.path.join('..','..', DATADIRNAME)
 
+
+INTERNAL_BORDER_WIDTH = 3
+EXTERNAL_BORDER_WIDTH = 6
 
 #Identifiers used in main window
 ID_TEST_CONNECTION = 101
@@ -40,4 +43,5 @@ ID_GENERATEFILES_BUTTON = 208 #in the simulator application
 ID_CLEARINPUT_BUTTON = 209 #in the simulator application
 #Node config selector window
 ID_SENDSCREENSHOT_BUTTON = 212
+ID_ADVANCED_PREFS_BUTTON = 213
 
