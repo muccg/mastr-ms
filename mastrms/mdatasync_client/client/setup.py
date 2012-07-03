@@ -16,7 +16,7 @@ from identifiers import VERSION
 freeze_includes = ['encodings','encodings.*', 'calendar', 'tendo'] 
 
 freeze_excludes = [#'_ssl',  # Exclude _ssl
-                      'pyreadline', 'difflib', 'doctest',
+                      'pyreadline', 'doctest',
                       'pickle', 'calendar']  # Exclude standard library
 
 
