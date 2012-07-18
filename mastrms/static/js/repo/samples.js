@@ -528,6 +528,7 @@ MA.ExperimentSamplesOnly = {
             autoFill:true
             },
             columns: [
+                      new Ext.grid.RowNumberer(),
                       { header: "ID", sortable:true, dataIndex:'id' },
                       { header: "Label", sortable:true, editor:new Ext.form.TextField(), dataIndex:'label' },
                       { header: "Weight", sortable:true, editor:new Ext.form.NumberField({editable:true, maxValue:9999.99}), dataIndex:'weight' },
