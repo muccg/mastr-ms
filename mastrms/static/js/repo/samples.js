@@ -414,7 +414,91 @@ MA.SampleCSVUploadForm = new Ext.Window({
     ]
 });
 
+
+function getSampleStore() {
+    var cmp = Ext.getCmp('samplesOnly').getStore();
+    console.log('store is: ' + cmp);
+    return cmp;
+};
+
+function getSampleToolbar() {
+    var cmp = Ext.getCmp('samplesOnlyPanel').getTopToolbar();
+    console.log('toolbar is ' + cmp);
+    return cmp;
+};
+
+/**
+* Tells the store to sort itself according to our sort data
+*/
+function doSort() {
+    getSampleStore().multiSort(getSorters(), "ASC");
+};
+
+/**
+* Returns an array of sortData from the sorter buttons
+* @return {Array} Ordered sort data from each of the sorter buttons
+*/
+function getSorters() {
+    var sorters = [];
+    var tbar = getSampleToolbar() 
+    Ext.each(tbar.findByType('button'), function(button) {
+        if (button.hasOwnProperty('sortData')) {
+            console.log('pushing button ' + button.text); 
+            sorters.push(button.sortData);
+        }
+    }, this);
+    
+    return sorters;
+}
+
+
+
+/**
+* Convenience function for creating Toolbar Buttons that are tied to sorters
+* @param {Object} config Optional config object
+* @return {Ext.Button} The new Button object
+*/
+function createSorterButton(config) {
+    config = config || {};
+            
+    Ext.applyIf(config, {
+        listeners: {
+            click: function(button, e) {
+                changeSortDirection(button, true);                    
+            }
+        },
+        iconCls: 'sort-' + config.sortData.direction.toLowerCase(),
+        reorderable: true
+    });
+    
+    return new Ext.Button(config);
+};
+
+/**
+* Callback handler used when a sorter button is clicked or reordered
+* @param {Ext.Button} button The button that was clicked
+* @param {Boolean} changeDirection True to change direction (default). Set to false for reorder
+* operations as we wish to preserve ordering there
+*/
+function changeSortDirection(button, changeDirection) {
+    var sortData = button.sortData,
+        iconCls  = button.iconCls;
+    
+    if (sortData != undefined) {
+        if (changeDirection !== false) {
+            button.sortData.direction = button.sortData.direction.toggle("ASC", "DESC");
+            button.setIconClass(iconCls.toggle("sort-asc", "sort-desc"));
+        }
+        
+        getSampleStore().clearFilter();
+        doSort();
+    }
+};
+
+
+
 MA.ExperimentSamplesOnly = {
+    id: 'samplesOnlyPanel',
     title: 'Samples',
     region: 'center',
     cmargins: '0 0 0 0',
@@ -511,7 +595,24 @@ MA.ExperimentSamplesOnly = {
                 sm.clearSelections();
                 MA.SampleLoadByExperiment(true);
             }
-        }
+        },
+        { xtype: "tbseparator" },
+        createSorterButton({
+            text: 'Class',
+            sortData:{
+                field: 'sample_class',
+                direction: 'DESC'
+            }
+        }),
+        createSorterButton({
+            text: 'Seq',
+            sortData:{
+                field: 'sample_class_sequence',
+                direction: 'DESC'
+            }
+        })
+
+
     ],
     items: [
             {
@@ -529,11 +630,11 @@ MA.ExperimentSamplesOnly = {
             },
             columns: [
                       new Ext.grid.RowNumberer(),
-                      { header: "ID", sortable:true, dataIndex:'id' },
-                      { header: "Label", sortable:true, editor:new Ext.form.TextField(), dataIndex:'label' },
-                      { header: "Weight", sortable:true, editor:new Ext.form.NumberField({editable:true, maxValue:9999.99}), dataIndex:'weight' },
+                      { header: "ID", sortable:false, dataIndex:'id' },
+                      { header: "Label", sortable:false, editor:new Ext.form.TextField(), dataIndex:'label' },
+                      { header: "Weight", sortable:false, editor:new Ext.form.NumberField({editable:true, maxValue:9999.99}), dataIndex:'weight' },
                       { header: "Comment", sortable:false, sortable:true, width:300, editor:new Ext.form.TextField(), dataIndex:'comment' },
-                      { header: "Class", sortable:true, dataIndex:'sample_class', editor:new Ext.form.ComboBox({
+                      { header: "Class", sortable:false, dataIndex:'sample_class', editor:new Ext.form.ComboBox({
                                editable:true,
                                forceSelection:false,
                                displayField:'value',
@@ -546,8 +647,8 @@ MA.ExperimentSamplesOnly = {
                                mode:'local',
                                store: new Ext.data.ArrayStore({storeId:'classCombo', fields: ['key', 'value']})                               }),
                       renderer:renderClass },
-                      { header: "Seq", sortable:true, dataIndex:'sample_class_sequence' },
-                      { header: "Last Status", sortable:true, width:300, dataIndex:'last_status' }
+                      { header: "Seq", sortable:false, dataIndex:'sample_class_sequence' },
+                      { header: "Last Status", sortable:false, width:300, dataIndex:'last_status' }
                       ],
             store: randomisableSampleStore
             }
