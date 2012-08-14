@@ -1069,17 +1069,22 @@ def recordsSamplesForExperiment(request):
     rows = Sample.objects.filter(experiment__id=experiment_id)
 
     randomise = args.get('randomise', False)
+    
+    
     if not randomise:
         sort_by = args.get('sort', 'id')
         if sort_by == 'sample_class':
             sort_by = 'sample_class__class_id'
         sort_dir = args.get('dir', 'ASC')
         if sort_dir == 'DESC':
-            sort = '-' + sort_by
+            sort1 = '-' + sort_by
         else:
-            sort = sort_by
+            sort1 = sort_by
+       
+        #Always sort with sequence second to class.
+        sort2 = 'sample_class_sequence'
 
-        rows = rows.order_by(sort)
+        rows = rows.order_by(sort1, sort2)
     
     # add rows
     for row in rows:
