@@ -14,6 +14,8 @@ import yaphc
 from httplib2 import Http
 from urllib import urlencode
 
+import AdvancedPreferences
+
 
 outlog = plogging.getLogger('client')
 
@@ -24,7 +26,7 @@ class Preferences(wx.Dialog):
         # creation, and then we create the GUI object using the Create
         # method.
 
-        self.preference_keys = ['localdir', 'user', 'updateurl', 'loglevel', 'syncold']
+        self.preference_keys = ['localdir', 'user', 'updateurl', 'loglevel']
 
         pre = wx.PreDialog()
         pre.SetExtraStyle(wx.DIALOG_EX_CONTEXTHELP)
@@ -51,11 +53,11 @@ class Preferences(wx.Dialog):
         self.setNodeConfigLabel()
         #box.Add(label, 1, wx.ALIGN_LEFT|wx.ALL, 2)
         
-        sizer.Add(box, 1, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 2)
+        sizer.Add(box, 1, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, INTERNAL_BORDER_WIDTH)
         self.nodeconfigselector = NodeConfigSelector.NodeConfigSelector(self, ID_NODESELECTOR_DIALOG, self.log, None)
     
         #self.nodeconfigselector.createTree()
-        sizer.Add(self.nodeconfigselector, 6, wx.GROW|wx.ALL, 2)
+        sizer.Add(self.nodeconfigselector, 6, wx.GROW|wx.ALL, EXTERNAL_BORDER_WIDTH)
 
 
         buttonsbox = wx.BoxSizer(wx.HORIZONTAL)
@@ -63,7 +65,7 @@ class Preferences(wx.Dialog):
         keybutton = wx.Button(self, ID_SENDKEY_BUTTON)
         keybutton.SetLabel("Send Key")
         keybutton.Bind(wx.EVT_BUTTON, self.OnSendKey)
-        buttonsbox.Add(keybutton, 1, wx.ALIGN_LEFT | wx.ALL, 2)
+        buttonsbox.Add(keybutton, 1, wx.ALIGN_LEFT | wx.ALL, INTERNAL_BORDER_WIDTH)
 
         self.keybutton = keybutton
 
@@ -71,33 +73,33 @@ class Preferences(wx.Dialog):
         hsbutton = wx.Button(self, ID_HANDSHAKE_BUTTON)
         hsbutton.SetLabel("Handshake")
         hsbutton.Bind(wx.EVT_BUTTON, self.OnHandshake)
-        buttonsbox.Add(hsbutton, 1, wx.ALIGN_LEFT | wx.ALL, 2)
+        buttonsbox.Add(hsbutton, 1, wx.ALIGN_LEFT | wx.ALL, INTERNAL_BORDER_WIDTH)
 
         self.keybutton = keybutton
         self.handshakebutton = hsbutton
 
-        sizer.Add(buttonsbox, 1, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 2)
+        sizer.Add(buttonsbox, 1, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, INTERNAL_BORDER_WIDTH)
 
         self.fields = {}
         for key in self.preference_keys:
             if self.config.getShowVar(key):
                 box = wx.BoxSizer(wx.HORIZONTAL)
-                if key == 'syncold':
-                    ctrl = wx.CheckBox(self, -1, "Sync Completed")
-                    self.Bind(wx.EVT_CHECKBOX, self.toggleSyncChoose, ctrl)
-                    #populate the checkbox with the current value
-                    val = self.config.getValue(key)
-                    if val:
-                        ctrl.SetValue(wx.CHK_CHECKED)
-                    else:
-                        ctrl.SetValue(wx.CHK_UNCHECKED)
-                    ctrl.SetHelpText(self.config.getHelpText(key))    
-                    box.Add(ctrl, 1, wx.ALIGN_RIGHT|wx.ALL, border=0)    
-                elif key == 'localdir':
+                #if key == 'syncold':
+                #    ctrl = wx.CheckBox(self, -1, "Sync Completed")
+                #    self.Bind(wx.EVT_CHECKBOX, self.toggleSyncChoose, ctrl)
+                #    #populate the checkbox with the current value
+                #    val = self.config.getValue(key)
+                #    if val:
+                #        ctrl.SetValue(wx.CHK_CHECKED)
+                #    else:
+                #        ctrl.SetValue(wx.CHK_UNCHECKED)
+                #    ctrl.SetHelpText(self.config.getHelpText(key))    
+                #    box.Add(ctrl, 1, wx.ALIGN_RIGHT|wx.ALL, border=INTERNAL_BORDER_WIDTH)    
+                if key == 'localdir':
                     ctrl = filebrowse.DirBrowseButton(self, -1, size=(450, -1), changeCallback = None, labelText=self.config.getFormalName(key), startDirectory = str(self.config.getValue(key)) )
                     ctrl.SetValue(str(self.config.getValue(key)) )
                     ctrl.SetHelpText(self.config.getHelpText(key))
-                    box.Add(ctrl, 1, wx.ALIGN_RIGHT|wx.ALL, border=0)
+                    box.Add(ctrl, 1, wx.ALIGN_RIGHT|wx.ALL, border=INTERNAL_BORDER_WIDTH)
                 elif key == 'loglevel':
                     levelslist = [
                                     plogging.LoggingLevels.DEBUG.name, 
@@ -132,20 +134,27 @@ class Preferences(wx.Dialog):
                         ctrl.Select(n)
                     label = wx.StaticText(self, -1, self.config.getFormalName(key))
                     ctrl.SetHelpText(self.config.getHelpText(key))
-                    box.Add(label, 0, wx.ALIGN_LEFT| wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=0)
-                    box.Add(ctrl, 1, wx.ALIGN_RIGHT|wx.ALL, border=0 )
+                    box.Add(label, 0, wx.ALIGN_LEFT| wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=INTERNAL_BORDER_WIDTH)
+                    box.Add(ctrl, 1, wx.ALIGN_RIGHT|wx.ALL, border=INTERNAL_BORDER_WIDTH)
                 else: 
                     label = wx.StaticText(self, -1, self.config.getFormalName(key))
                     label.SetHelpText(self.config.getHelpText(key))
-                    box.Add(label, 0, wx.ALIGN_LEFT| wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=0)
+                    box.Add(label, 0, wx.ALIGN_LEFT| wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=INTERNAL_BORDER_WIDTH)
                     #the text entry field
                     ctrl = wx.TextCtrl(self, -1, str(self.config.getValue(key)) ) #, size=(80,-1))
                     ctrl.SetHelpText(self.config.getHelpText(key))
-                    box.Add(ctrl, 1, wx.ALIGN_RIGHT|wx.ALL, border=2)
-                sizer.Add(box, 1, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=0)
+                    box.Add(ctrl, 1, wx.ALIGN_RIGHT|wx.ALL, border=INTERNAL_BORDER_WIDTH)
+                sizer.Add(box, 1, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=INTERNAL_BORDER_WIDTH)
                 
                 #store the field so we can serialise it later
                 self.fields[key] = ctrl
+
+        box = wx.BoxSizer(wx.HORIZONTAL)
+        advbutton = wx.Button(self, ID_ADVANCED_PREFS_BUTTON)
+        advbutton.SetLabel("Advanced")
+        advbutton.Bind(wx.EVT_BUTTON, self.openAdvancedPrefs)
+        box.Add(advbutton, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=0)
+        sizer.Add(box, 1, wx.GROW | wx.ALIGN_CENTER_VERTICAL | wx.ALL, border=INTERNAL_BORDER_WIDTH)
 
         btnsizer = wx.StdDialogButtonSizer()
         
@@ -164,11 +173,18 @@ class Preferences(wx.Dialog):
         btnsizer.AddButton(btn)
         btnsizer.Realize()
         
-        sizer.Add(btnsizer, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=0)
+        sizer.Add(btnsizer, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=6)
 
         self.SetSizer(sizer)
         sizer.Fit(self)
 
+
+    def openAdvancedPrefs(self, event):
+        a = AdvancedPreferences.AdvancedPreferences(self, -1, self.config, self.log)
+        a.Show()
+        val = a.ShowModal()
+        #doesn't return until the dialog is closed
+        a.Destroy()
 
     def toggleSyncChoose(self, event):
         #Set the value of the checkbox to whatever the opposite of the current config value is.

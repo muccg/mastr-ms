@@ -342,6 +342,9 @@ MA.AdminUserEditInit = function (paramArray) {
     Ext.getCmp("adminUserEditConfirmPassword").on('blur', MA.AdminUserEditValidatePassword);
     
     Ext.getCmp('adminUserEditSubmit').enable();
+
+    //Just in case a non admin/noderep has gotten here, disable the form so that changes can't be made.
+    Ext.getCmp('adminuseredit-panel').setDisabled(!(user.IsAdmin || user.IsMastrAdmin || user.IsNodeRep));
     //Load the organisation store
     Ext.getCmp('adminUserEditOrganisation').store.load();
 

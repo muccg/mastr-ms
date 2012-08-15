@@ -111,7 +111,7 @@ def request_sync(request, organisation=None, sitename=None, station=None):
             "details":{}, 
             "runsamples":{}}
     syncold = request.GET.get("sync_completed", False)
-
+    print 'syncold is:', syncold
     if node is not None:
         ncerror, nodeclient_details = get_nodeclient_details(organisation, sitename, station)
         resp["details"] = nodeclient_details

@@ -414,7 +414,54 @@ MA.SampleCSVUploadForm = new Ext.Window({
     ]
 });
 
+var createSampleCSV = function(records){
+    var csvtext = ""
+    var fields = []
+    if (records.length > 0)
+    {
+        var header = "# "
+        //first write the header
+        var r = records[0];
+        for (var propname in r){
+            fields.push(propname);
+            header += propname + ", ";
+        }
+        
+        csvtext += header + "<br>"
+
+        for (var count=0; count < records.length; count++)
+        {
+            line = ""
+            for (var fieldindex=0; fieldindex<fields.length; fieldindex++){
+                line += records[count][fields[fieldindex]];
+                if (fieldindex < fields.length-1){
+                    line += ","
+                }
+            }
+            csvtext += line + "<br>"       
+        }
+    }
+
+    return csvtext;
+};
+
+var exportCSV = function(records){
+    var csvtext = createSampleCSV(records);
+    var expWindow = window.open('', '', 'width=600, height=600');
+    var doc = expWindow.document;
+    doc.open('text/plain', 'replace');
+    doc.charset='utf-8';
+    doc.write(csvtext);
+    doc.close();
+    //var fileName='experiment.csv';
+    //doc.execCommand("SaveAs", null, fileName);
+    
+
+};
+
+
 MA.ExperimentSamplesOnly = {
+    id: 'samplesOnlyPanel',
     title: 'Samples',
     region: 'center',
     cmargins: '0 0 0 0',
@@ -467,6 +514,23 @@ MA.ExperimentSamplesOnly = {
             handler: function () {
                 MA.SampleCSVUploadForm.show();
             }
+        },
+        {
+            text: 'Download CSV file',
+            cls: 'x-btn-text-icon',
+            id: 'downloadsamplesbutton',
+            icon: 'static/images/arrow-down.png',
+            handler: function () {
+                var grid = Ext.getCmp('samplesOnly');
+                var gridstore = grid.getStore();
+                records = []
+                gridstore.each(function(record){
+                    //console.log("Record: " + record.id + "," + record.sample_id + "," + record.sample_class);
+                    records.push(record.data)
+                });
+
+                    exportCSV(records);
+                }
         },
         { xtype: "tbseparator" },
         {
@@ -528,9 +592,10 @@ MA.ExperimentSamplesOnly = {
             autoFill:true
             },
             columns: [
-                      { header: "ID", sortable:true, dataIndex:'id' },
-                      { header: "Label", sortable:true, editor:new Ext.form.TextField(), dataIndex:'label' },
-                      { header: "Weight", sortable:true, editor:new Ext.form.NumberField({editable:true, maxValue:9999.99}), dataIndex:'weight' },
+                      new Ext.grid.RowNumberer(),
+                      { header: "ID", sortable:false, dataIndex:'id' },
+                      { header: "Label", sortable:false, editor:new Ext.form.TextField(), dataIndex:'label' },
+                      { header: "Weight", sortable:false, editor:new Ext.form.NumberField({editable:true, maxValue:9999.99}), dataIndex:'weight' },
                       { header: "Comment", sortable:false, sortable:true, width:300, editor:new Ext.form.TextField(), dataIndex:'comment' },
                       { header: "Class", sortable:true, dataIndex:'sample_class', editor:new Ext.form.ComboBox({
                                editable:true,
@@ -545,8 +610,8 @@ MA.ExperimentSamplesOnly = {
                                mode:'local',
                                store: new Ext.data.ArrayStore({storeId:'classCombo', fields: ['key', 'value']})                               }),
                       renderer:renderClass },
-                      { header: "Seq", sortable:true, dataIndex:'sample_class_sequence' },
-                      { header: "Last Status", sortable:true, width:300, dataIndex:'last_status' }
+                      { header: "Seq", sortable:false, dataIndex:'sample_class_sequence' },
+                      { header: "Last Status", sortable:false, width:300, dataIndex:'last_status' }
                       ],
             store: randomisableSampleStore
             }
