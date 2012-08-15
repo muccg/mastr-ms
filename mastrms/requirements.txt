@@ -27,5 +27,6 @@ python-memcached==1.48
 Mako==0.7.0
 South==0.7.5
 django-extensions==0.8
+https://bitbucket.org/ahunter_ccg/django-userlog/downloads/django_userlog-0.1.tar.gz
 #MySQL-python==1.2.3
 psycopg2==2.0.8
