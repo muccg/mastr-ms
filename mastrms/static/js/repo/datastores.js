@@ -323,11 +323,11 @@ var randomisableSampleStore = new Ext.data.JsonStore(
                                               url: wsBaseUrl + 'recordsSamplesForExperiment',
                                               remoteSort: true,
                                               restful: true,
-                                              listeners: {'load':MA.DSLoaded},
-                                              sortInfo: {
-                                                  field: 'id',
-                                                  direction: 'DESC'
-                                              }
+                                              listeners: {'load':MA.DSLoaded}//,
+                                              //sortInfo: {
+                                              //    field: 'id',
+                                              //    direction: 'DESC'
+                                              //}
                                               }
                                               );
  

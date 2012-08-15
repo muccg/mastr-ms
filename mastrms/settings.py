@@ -36,13 +36,14 @@ TEMPLATE_LOADERS = [
 ]
 
 MIDDLEWARE_CLASSES = [
+    'userlog.middleware.RequestToThreadLocalMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.transaction.TransactionMiddleware',
     'mastrms.utils.json_exception_handler_middleware.JSONExceptionHandlerMiddleware',
     'django.middleware.doc.XViewMiddleware',
-    'ccg.middleware.ssl.SSLRedirect',
+    'ccg.middleware.ssl.SSLRedirect'
     #'ccg.middleware.StatsMiddleware.StatsMiddleware'
 ]
 
@@ -52,12 +53,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.admin',
-    'django_extensions'
+    'django_extensions',
+    'userlog'
 ]
 
 AUTHENTICATION_BACKENDS = [
  'mastrms.repository.backend.MadasBackend',
  #'ccg.auth.backends.NoAuthModelBackend',
+ 'userlog.backend.AuthFailedLoggerBackend'
 ]
 
 #email
