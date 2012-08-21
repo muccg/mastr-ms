@@ -415,8 +415,8 @@ MA.SampleCSVUploadForm = new Ext.Window({
 });
 
 var createSampleCSV = function(records){
-    var csvtext = ""
-    var fields = []
+    var csvtext = "<html><head></head><body>";
+    var fields = [];
     if (records.length > 0)
     {
         var header = "# "
@@ -427,7 +427,7 @@ var createSampleCSV = function(records){
             header += propname + ", ";
         }
         
-        csvtext += header + "<br>"
+        csvtext += header + "</br>";
 
         for (var count=0; count < records.length; count++)
         {
@@ -438,9 +438,11 @@ var createSampleCSV = function(records){
                     line += ","
                 }
             }
-            csvtext += line + "<br>"       
+            csvtext += line + "</br>";       
         }
     }
+
+    csvtext += "</body></html>";
 
     return csvtext;
 };
@@ -449,7 +451,7 @@ var exportCSV = function(records){
     var csvtext = createSampleCSV(records);
     var expWindow = window.open('', '', 'width=600, height=600');
     var doc = expWindow.document;
-    doc.open('text/plain', 'replace');
+    doc.open('text/html', true);
     doc.charset='utf-8';
     doc.write(csvtext);
     doc.close();
