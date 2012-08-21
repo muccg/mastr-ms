@@ -415,8 +415,8 @@ MA.SampleCSVUploadForm = new Ext.Window({
 });
 
 var createSampleCSV = function(records){
-    var csvtext = ""
-    var fields = []
+    var csvtext = "<html><head></head><body>";
+    var fields = [];
     if (records.length > 0)
     {
         var header = "# "
@@ -427,7 +427,7 @@ var createSampleCSV = function(records){
             header += propname + ", ";
         }
         
-        csvtext += header + "<br>"
+        csvtext += header + "</br>";
 
         for (var count=0; count < records.length; count++)
         {
@@ -438,9 +438,11 @@ var createSampleCSV = function(records){
                     line += ","
                 }
             }
-            csvtext += line + "<br>"       
+            csvtext += line + "</br>";       
         }
     }
+
+    csvtext += "</body></html>";
 
     return csvtext;
 };
@@ -449,7 +451,7 @@ var exportCSV = function(records){
     var csvtext = createSampleCSV(records);
     var expWindow = window.open('', '', 'width=600, height=600');
     var doc = expWindow.document;
-    doc.open('text/plain', 'replace');
+    doc.open('text/html', true);
     doc.charset='utf-8';
     doc.write(csvtext);
     doc.close();
@@ -593,10 +595,6 @@ MA.ExperimentSamplesOnly = {
             },
             columns: [
                       new Ext.grid.RowNumberer(),
-                      { header: "ID", sortable:false, dataIndex:'id' },
-                      { header: "Label", sortable:false, editor:new Ext.form.TextField(), dataIndex:'label' },
-                      { header: "Weight", sortable:false, editor:new Ext.form.NumberField({editable:true, maxValue:9999.99}), dataIndex:'weight' },
-                      { header: "Comment", sortable:false, sortable:true, width:300, editor:new Ext.form.TextField(), dataIndex:'comment' },
                       { header: "Class", sortable:true, dataIndex:'sample_class', editor:new Ext.form.ComboBox({
                                editable:true,
                                forceSelection:false,
@@ -611,7 +609,11 @@ MA.ExperimentSamplesOnly = {
                                store: new Ext.data.ArrayStore({storeId:'classCombo', fields: ['key', 'value']})                               }),
                       renderer:renderClass },
                       { header: "Seq", sortable:false, dataIndex:'sample_class_sequence' },
-                      { header: "Last Status", sortable:false, width:300, dataIndex:'last_status' }
+                      { header: "Label", sortable:false, editor:new Ext.form.TextField(), dataIndex:'label' },
+                      { header: "Weight", sortable:false, editor:new Ext.form.NumberField({editable:true, maxValue:9999.99}), dataIndex:'weight' },
+                      { header: "Comment", sortable:false, sortable:true, width:300, editor:new Ext.form.TextField(), dataIndex:'comment' },
+                      { header: "Last Status", sortable:false, width:300, dataIndex:'last_status' },
+                      { header: "ID", sortable:false, dataIndex:'id', hidden:true }
                       ],
             store: randomisableSampleStore
             }
