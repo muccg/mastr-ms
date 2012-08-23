@@ -15,15 +15,18 @@ try: import json as simplejson
 except ImportError: import simplejson
 import urllib
 import os
-import os.path
 import time
+import os.path
+from shutil import rmtree, copytree, copy
+from shutil import copy2, copytree
+
+import Queue
+import threading
+from subprocess import Popen, PIPE, STDOUT
+
 from identifiers import *
-from MainWindow import APPSTATE
 import plogging
 outlog = plogging.getLogger('client')
-import os.path
-import Queue
-from shutil import rmtree, copytree, copy
 from MainWindow import APPSTATE
 
 
@@ -75,6 +78,7 @@ class MSDataSyncAPI(object):
         self._impl = MSDSImpl(self.log, self) 
         self.config = CONFIG 
         self.useThreading = False
+        self.copiedFiles = {} #A dictionary of files, cleared and then repopulated by the copy process
 
     def defaultLogSink(self, *args, **kwargs):
         pass
@@ -250,21 +254,40 @@ class MSDataSyncAPI(object):
     #                    fullremotepath = os.path.join(node[dirname], dirname)
     #                    resultdict[fulllocalpath] = "%s" %(os.path.join(localindexdir, fullremotepath) )
     #    return resultdict
-    
-    
-    def cleanup_localindexdir(self):
-        localindexdir = self.config.getLocalIndexPath()
-        tm = time.localtime()
-        timestamp = "%s_%s_%s__%s_%s_%s" % (tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec)
-        archivefilesdir = os.path.join(self.config.getValue('archivedfilesdir'), timestamp)
+   
+    def archive_synced_files(self):
         archivesynced = self.config.getValue('archivesynced')
+        
         if archivesynced:
+            localindexdir = self.config.getLocalIndexPath()
+            tm = time.localtime()
+            timestamp = "%s_%s_%s__%s_%s_%s" % (tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec)
+            archivefilesdir = os.path.join(self.config.getValue('archivedfilesdir'), timestamp)
             self.log("Archiving synced files to %s" % archivefilesdir)
+            copyfailed = True
             try:
                 copytree(localindexdir, archivefilesdir)
+                copyfailed = False
+                self.confirm_and_remove_sample_files(archivefilesdir)
             except Exception, e:
                 self.log('Could not archive files from %s to %s: %s' % (localindexdir, archivefilesdir, str(e)) )
+            
 
+    def confirm_and_remove_sample_files(self, archivefilesdir):
+        #make sure each entry in copiedfiles exists in archivefiles dir,
+        #then delete them
+        print 'DEST'
+        for key in self.copiedFiles:
+            print 'copiedfiles[%s] = %s' % (key, self.copiedFiles[key])
+
+        print 'SOURCE'
+        for (dirpath, dirname, filenames) in os.walk(archivefilesdir, topdown=True):
+            for filename in filenames:
+                print '%s : %s' % (dirpath, filename)
+
+
+    def cleanup_localindexdir(self):
+        localindexdir = self.config.getLocalIndexPath()
         self.log("Clearing local index directory: %s" % localindexdir)
         try:
             rmtree(localindexdir)
@@ -296,7 +319,7 @@ class MSDataSyncAPI(object):
         self.log('Client found %d/%d files' % (len(localfilesdict.keys()), len(wantedfiles.keys())) )
 
         localindexdir = self.config.getLocalIndexPath() 
-
+        self.copiedFiles = {}
         if len(localfilesdict.keys()):
             self.cleanup_localindexdir()
 
@@ -330,6 +353,8 @@ class MSDataSyncAPI(object):
     def rsyncReturn(self, *args, **kwargs):
         self.log('Remote transfer stage complete', thread = self.useThreading)
         self.set_progress_state(90, APPSTATE.CONFIRMING_TRANSFER)
+        
+        self.archive_synced_files()
         self.log('Removing temporary file cache', thread=self.useThreading)
         self.cleanup_localindexdir()
 
@@ -347,7 +372,6 @@ class MSDataSyncAPI(object):
            }  
         '''
 
-        import os
         retfiles = {}
         retfiles['/'] = dir
         retfiles['.'] = {}
@@ -422,13 +446,11 @@ class MSDataSyncAPI(object):
         return checkfilesatnode(localfiledict, filename)
     
     #------- WORKER CLASS-----------------------
-    import threading
     class Worker( threading.Thread ):
         SLEEP_TIME = 0.1
 
         #-----------------------------------------------------------------------
         def __init__( self, tasks ):
-            import threading
             threading.Thread.__init__( self )
             self._isDying = False
             self._tasks = tasks
@@ -473,8 +495,6 @@ class MSDSImpl(object):
         #we also make sure the path is 'normalised', so that they look like posix paths,
         #since both mac, linux, and cygwin all use it.
         if self.controller.isMSWINDOWS:
-            import os
-            import os.path
             #print 'WINDOWS SOURCE DIR HACK IN PROGRESS'
             #os.path.normpath makes sure slashes are native - on windows this is an escaped backslash \\
             #os.sep gives you the dir sepator for this platform (windows = \\)
@@ -495,7 +515,6 @@ class MSDSImpl(object):
         else:
             sourcedir += '/' #make sure it ends in a slash
 
-        from subprocess import Popen, PIPE, STDOUT
         logfile = CONFIG.getValue('logfile').replace('\\', '/') #if its a windows path, convert it. cwrsync wants posix paths ALWAYS
         #Popen('rsync -t %s %s:%s' % (sourcedir, remotehost, remotedir) )
         print 'flags:', rsyncconfig.flags 
@@ -554,15 +573,21 @@ class MSDSImpl(object):
         '''Takes a dict keyed on source filename, and copies each one to the dest filename (value) '''
         outlog.debug("Entered copy procedure")
 
+        copiedfiles = {}
+
         try:
             for filename in copydict.keys():
                 self.log( '\tCopying %s to %s' % (os.path.normpath(filename), os.path.normpath(copydict[filename] ) ), thread=self.controller.useThreading  )
-                self.copyfile( os.path.normpath(filename), os.path.normpath(copydict[filename]))
+                src = os.path.normpath(filename)
+                dst = os.path.normpath(copydict[filename])
+                self.copyfile( src, dst)
+                copiedfiles[src] = dst
         except Exception, e:
             self.log('Problem copying: %s' % (str(e)), type=self.log.LOG_ERROR,  thread = self.controller.useThreading )
 
+        controller.copiedFiles = copiedfiles
+
     def copyfile(self, src, dst):
-        from shutil import copy2, copytree
         import os.path
         try: 
             if os.path.isdir(src) and not os.path.exists(dst):
@@ -576,11 +601,10 @@ class MSDSImpl(object):
         except Exception, e:
             self.log('Error copying %s to %s : %s' % (src, dst, e), type = self.log.LOG_ERROR,  thread = self.controller.useThreading )
 
-    def getFileTree(self, dir):
-        import os
+    def getFileTree(self, directory):
         allfiles = []
         try:
-            for root, dirs, files in os.walk(dir): #topdown=True, onerror=None, followlinks=False
+            for root, dirs, files in os.walk(directory): #topdown=True, onerror=None, followlinks=False
                 for f in files:
                     allfiles.append(os.path.join(root, f))
                 #self.log('root: %s' % (str(root)) )
