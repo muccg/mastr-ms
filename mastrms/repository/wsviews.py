@@ -97,6 +97,29 @@ def create_object(request, model):
 
 
 @mastr_users_only
+def create_experiment(user, attributes, base_experiment_id = -1):
+    '''Creates an experiment, and associated objects in the DB.
+       If this experiment is based on another experiment, some values from there are
+       brought across.
+       Returns the created experiment object'''
+
+    exp = Experiment()
+    for key in attributes.keys():
+        exp.__setattr__(key, attributes[key])
+
+    #if this has a base experiment, copy over some values.
+    if base_experiment_id > -1:
+        base_exp = Experiment.objects.get(id=base_experiment_id, None)
+        
+    
+
+
+    exp.save()
+
+    return exp
+
+
+@mastr_users_only
 def create_samples(request):
     # get args and remove the id from it if it exists
     if request.GET:
