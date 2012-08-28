@@ -39,83 +39,143 @@ def create_object(request, model):
         args = request.GET
     else:
         args = request.POST
-       
-    #create model object
-    model_obj = get_model('repository', model)
-    obj = model_obj()
-       
-    for key in args.keys():
-        obj.__setattr__(key, args[key])
-
-    if model == 'run':
-        obj.creator = User.objects.get(username=request.user.username)
-        if not obj.rule_generator.is_accessible_by(request.user):
-            return HttpResponseForbidden("Invalid rule generator for run");
-        if obj.number_of_methods in ('', 'null'):
-            obj.number_of_methods = None
-        if obj.order_of_methods in ('', 'null'):
-            obj.order_of_methods = None
-
-    obj.save()
-
+    
+    obj = None 
     if model == 'experiment':
-        uit, created = UserInvolvementType.objects.get_or_create(name='Principal Investigator')
-        user = User.objects.get(username=request.user.username)
-        ue = UserExperiment()
-        ue.experiment=obj
-        ue.type=uit
-        ue.user=user
-        ue.save()   
-        #default source and organ
-        source = BiologicalSource(experiment=obj)
-        source.type_id=1
-        source.save()
-        organ = Organ(experiment=obj)
-        organ.name='Unknown'
-        organ.save() 
-    
-    if model == 'project':
-        if not args.get('projectManagers'):
-            user = User.objects.get(username=request.user.username)
-            obj.managers.add(user)
-        else:
-            save_project_managers(obj, args.get('projectManagers'))
-    
-    if model == 'biologicalsource':
-        return records(request, 'organism', 'id', obj.organism.id)
-        
-    if model == 'animal' or model == 'plant' or model == 'human':
-        o = Organ(source=obj, name='Unknown')
-        o.save()
-        
-    if model == 'samplelog':
-        user = User.objects.get(username=request.user.username)
-        obj.user = user
+        obj = create_experiment(request.user, args, base_experiment_id=args.get('base_experiment_id', None) )
+
+    else:
+        #create model object
+        model_obj = get_model('repository', model)
+        obj = model_obj()
+       
+        for key in args.keys():
+            obj.__setattr__(key, args[key])
+
+        if model == 'run':
+            obj.creator = User.objects.get(username=request.user.username)
+            if not obj.rule_generator.is_accessible_by(request.user):
+                return HttpResponseForbidden("Invalid rule generator for run");
+            if obj.number_of_methods in ('', 'null'):
+                obj.number_of_methods = None
+            if obj.order_of_methods in ('', 'null'):
+                obj.order_of_methods = None
+
         obj.save()
+
+        if model == 'project':
+            if not args.get('projectManagers'):
+                user = User.objects.get(username=request.user.username)
+                obj.managers.add(user)
+            else:
+                save_project_managers(obj, args.get('projectManagers'))
+        
+        if model == 'biologicalsource':
+            return records(request, 'organism', 'id', obj.organism.id)
+            
+        if model == 'animal' or model == 'plant' or model == 'human':
+            o = Organ(source=obj, name='Unknown')
+            o.save()
+            
+        if model == 'samplelog':
+            user = User.objects.get(username=request.user.username)
+            obj.user = user
+            obj.save()
 
     return records(request, model, 'id', obj.id)
 
 
-@mastr_users_only
-def create_experiment(user, attributes, base_experiment_id = -1):
+def create_experiment(user, attributes, base_experiment_id = None):
     '''Creates an experiment, and associated objects in the DB.
        If this experiment is based on another experiment, some values from there are
        brought across.
        Returns the created experiment object'''
+
+    base_exp = None
+    if base_experiment_id is not None:
+        try:
+            base_exp = Experiment.objects.get(id=base_experiment_id)
+        except Exception, e:
+            #unable to find base experiment
+            pass
 
     exp = Experiment()
     for key in attributes.keys():
         exp.__setattr__(key, attributes[key])
 
     #if this has a base experiment, copy over some values.
-    if base_experiment_id > -1:
-        base_exp = Experiment.objects.get(id=base_experiment_id, None)
-        
-    
-
-
+    if base_exp is not None:
+        exp.title = "%s (cloned)" % (base_exp.title)
+        exp.comment = base_exp.comment
+        exp.description = base_exp.description
+        exp.project = base_exp.project
+        exp.instrument_method = base_exp.instrument_method
+        exp.status = base_exp.status
     exp.save()
 
+    #users need to be brought across if this is cloned
+    if base_exp is not None:
+        base_exp_users = UserExperiment.objects.filter(experiment=base_exp)
+        for base_exp_user in base_exp_users:
+            exp_user = UserExperiment(user=base_exp_user.user, 
+                                      experiment=exp, 
+                                      type=base_exp_user.type, 
+                                      additional_info=base_exp_user.additional_info)
+            exp_user.save()
+            #exp.users.add(base_user)
+
+    else:
+        #create a single user
+        uit, created = UserInvolvementType.objects.get_or_create(name='Principal Investigator')
+        exp_user = User.objects.get(username=user.username)
+        ue = UserExperiment()
+        ue.experiment = exp
+        ue.type = uit
+        ue.user = exp_user
+        ue.save()   
+    
+    #Biological Source
+    source = BiologicalSource(experiment=exp)
+    if base_exp is not None:
+        base_source = BiologicalSource.objects.get(experiment=base_exp)
+        source.type = base_source.type
+        #if more information regarding the source needs to be cloned, it
+        #should be done here.
+    else:
+        #default source and organ
+        source.type_id=1
+    source.save()
+   
+    #Organs
+    if base_exp is not None:
+        base_organs = Organ.objects.filter(experiment=base_exp)
+        for base_organ in base_organs:
+            organ = Organ(experiment = exp)
+            organ.name = base_organ.name
+            organ.abbreviation = base_organ.abbreviation
+            organ.detail = base_organ.detail
+            organ.save()
+    else:
+        organ = Organ(experiment=exp)
+        organ.name='Unknown'
+        organ.save()
+
+    if base_exp is not None:
+        #Timelines (cloned only)
+        base_timelines = SampleTimeline.objects.filter(experiment=base_exp)
+        for base_timeline in base_timelines:
+            tl = SampleTimeline(experiment=exp, 
+                                abbreviation=base_timeline.abbreviation,
+                                timeline = base_timeline.timeline)
+            tl.save()
+        #Treatments (cloned only)
+        base_treatments = Treatment.objects.filter(experiment=base_exp)
+        for base_treatment in base_treatments:
+            tr = Treatment(experiment = exp,
+                           abbreviation = base_treatment.abbreviation,
+                           name = base_treatment.name,
+                           description = base_treatment.description)
+            tr.save()
     return exp
 
 
