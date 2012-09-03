@@ -230,7 +230,7 @@ MA.ChangeMainContent = function(contentName, paramArray){
 
         case 'experiment:clone':
             if (paramArray && paramArray.length === 1) {
-                MA.CloneExperiment(paramArray[0]);
+                MA.AttemptCloneExperiment(paramArray[0]);
             }
             else {
                 Ext.Msg.show({

@@ -307,7 +307,7 @@ class SampleClass(models.Model):
     organ = models.ForeignKey(Organ, null=True, blank=True)
     enabled = models.BooleanField(default=True)
 
-    def __unicode__(self):
+    def component_abbreviations(self):
         val = ''
         if self.biological_source is not None:
             if self.biological_source.abbreviation is not None:
@@ -321,6 +321,10 @@ class SampleClass(models.Model):
         if self.treatments is not None:
             if self.treatments.abbreviation is not None:
                 val = val + self.treatments.abbreviation
+        return val
+
+    def __unicode__(self):
+        val = self.component_abbreviations()
         if val == '':
             val = 'class_' + str(self.id)
         return val
