@@ -85,6 +85,104 @@ def create_object(request, model):
     return records(request, model, 'id', obj.id)
 
 
+def check_experiment_cloneable(request, experiment_id):
+    if request.GET:
+        args = request.GET
+    else:
+        args = request.POST
+    print args
+    print 'experiment ID is :', experiment_id
+    success = False
+    message = "No base experiment provided"
+    if experiment_id is not None:
+        success = check_distinct_sample_classes(experiment_id)
+        if not success:
+            message = "Non unique sample classes detected. Ensure timelines, organs, and treatments will generate unique sample classes."
+        else:
+            success = check_non_id_sample_classes(experiment_id)
+            if not success:
+                message = "Some sample classes in the base experiment have no organs/treatment/timelines."
+        #insert more checks here if required
+         
+
+    return HttpResponse( json.dumps({'success': success, 'message':message}) )
+
+
+def check_distinct_sample_classes(experiment):
+    sampleclasses = SampleClass.objects.filter(experiment = experiment)
+    sampleclassnames = [s.__unicode__() for s in sampleclasses]
+    
+    if len(sampleclasses) == len(set(sampleclassnames)):
+        return True
+    else:
+        return False
+
+def check_non_id_sample_classes(experiment):
+    sampleclasses = SampleClass.objects.filter(experiment = experiment)
+    for sampleclass in sampleclasses:
+        if sampleclass.component_abbreviations() == '':
+            return False
+    return True
+
+
+def clone_experiment(base_experiment):
+    ''' Returns the cloned experiment
+        Assumes appropriate checks have been done to ensure experiment is cloneable.
+    '''
+    base_exp = base_experiment
+
+    exp = Experiment()
+    exp.title = "%s (cloned)" % (base_exp.title)
+    exp.comment = base_exp.comment
+    exp.description = base_exp.description
+    exp.project = base_exp.project
+    exp.instrument_method = base_exp.instrument_method
+    exp.status = base_exp.status
+    exp.save()
+
+    #users need to be brought across if this is cloned
+    base_exp_users = UserExperiment.objects.filter(experiment=base_exp)
+    for base_exp_user in base_exp_users:
+        exp_user = UserExperiment(user=base_exp_user.user, 
+                                    experiment=exp, 
+                                    type=base_exp_user.type, 
+                                    additional_info=base_exp_user.additional_info)
+        exp_user.save()
+    
+    #Source
+    source = BiologicalSource(experiment=exp)
+    base_source = BiologicalSource.objects.get(experiment=base_exp)
+    source.type = base_source.type
+    source.save()
+
+    #Organs
+    base_organs = Organ.objects.filter(experiment=base_exp)
+    for base_organ in base_organs:
+        organ = Organ(experiment = exp)
+        organ.name = base_organ.name
+        organ.abbreviation = base_organ.abbreviation
+        organ.detail = base_organ.detail
+        organ.save()
+
+    #Timelines
+    base_timelines = SampleTimeline.objects.filter(experiment=base_exp)
+    for base_timeline in base_timelines:
+        tl = SampleTimeline(experiment=exp, 
+                            abbreviation=base_timeline.abbreviation,
+                            timeline = base_timeline.timeline)
+        tl.save()
+    #Treatments
+    base_treatments = Treatment.objects.filter(experiment=base_exp)
+    for base_treatment in base_treatments:
+        tr = Treatment(experiment = exp,
+                        abbreviation = base_treatment.abbreviation,
+                        name = base_treatment.name,
+                        description = base_treatment.description)
+        tr.save()
+
+    return exp
+
+
 def create_experiment(user, attributes, base_experiment_id = None):
     '''Creates an experiment, and associated objects in the DB.
        If this experiment is based on another experiment, some values from there are
@@ -92,39 +190,21 @@ def create_experiment(user, attributes, base_experiment_id = None):
        Returns the created experiment object'''
 
     base_exp = None
+    exp = None    
+    #Try cloning the experiment if it needs it
     if base_experiment_id is not None:
         try:
             base_exp = Experiment.objects.get(id=base_experiment_id)
+            exp = clone_experiment(base_exp)
         except Exception, e:
             #unable to find base experiment
             pass
-
-    exp = Experiment()
-    for key in attributes.keys():
-        exp.__setattr__(key, attributes[key])
-
-    #if this has a base experiment, copy over some values.
-    if base_exp is not None:
-        exp.title = "%s (cloned)" % (base_exp.title)
-        exp.comment = base_exp.comment
-        exp.description = base_exp.description
-        exp.project = base_exp.project
-        exp.instrument_method = base_exp.instrument_method
-        exp.status = base_exp.status
-    exp.save()
-
-    #users need to be brought across if this is cloned
-    if base_exp is not None:
-        base_exp_users = UserExperiment.objects.filter(experiment=base_exp)
-        for base_exp_user in base_exp_users:
-            exp_user = UserExperiment(user=base_exp_user.user, 
-                                      experiment=exp, 
-                                      type=base_exp_user.type, 
-                                      additional_info=base_exp_user.additional_info)
-            exp_user.save()
-            #exp.users.add(base_user)
-
     else:
+        exp = Experiment()
+        for key in attributes.keys():
+            exp.__setattr__(key, attributes[key])
+        exp.save()
+
         #create a single user
         uit, created = UserInvolvementType.objects.get_or_create(name='Principal Investigator')
         exp_user = User.objects.get(username=user.username)
@@ -133,49 +213,19 @@ def create_experiment(user, attributes, base_experiment_id = None):
         ue.type = uit
         ue.user = exp_user
         ue.save()   
-    
-    #Biological Source
-    source = BiologicalSource(experiment=exp)
-    if base_exp is not None:
-        base_source = BiologicalSource.objects.get(experiment=base_exp)
-        source.type = base_source.type
-        #if more information regarding the source needs to be cloned, it
-        #should be done here.
-    else:
+        
+        #Biological Source
+        source = BiologicalSource(experiment=exp)
         #default source and organ
         source.type_id=1
-    source.save()
-   
-    #Organs
-    if base_exp is not None:
-        base_organs = Organ.objects.filter(experiment=base_exp)
-        for base_organ in base_organs:
-            organ = Organ(experiment = exp)
-            organ.name = base_organ.name
-            organ.abbreviation = base_organ.abbreviation
-            organ.detail = base_organ.detail
-            organ.save()
-    else:
+        source.save()
+    
+        #Organs
         organ = Organ(experiment=exp)
         organ.name='Unknown'
         organ.save()
 
-    if base_exp is not None:
-        #Timelines (cloned only)
-        base_timelines = SampleTimeline.objects.filter(experiment=base_exp)
-        for base_timeline in base_timelines:
-            tl = SampleTimeline(experiment=exp, 
-                                abbreviation=base_timeline.abbreviation,
-                                timeline = base_timeline.timeline)
-            tl.save()
-        #Treatments (cloned only)
-        base_treatments = Treatment.objects.filter(experiment=base_exp)
-        for base_treatment in base_treatments:
-            tr = Treatment(experiment = exp,
-                           abbreviation = base_treatment.abbreviation,
-                           name = base_treatment.name,
-                           description = base_treatment.description)
-            tr.save()
+
     return exp
 
 
