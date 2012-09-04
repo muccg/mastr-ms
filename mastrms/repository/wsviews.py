@@ -142,13 +142,14 @@ def clone_experiment(base_experiment):
 
     #users need to be brought across if this is cloned
     base_exp_users = UserExperiment.objects.filter(experiment=base_exp)
+    print 'setting user'
     for base_exp_user in base_exp_users:
         exp_user = UserExperiment(user=base_exp_user.user, 
                                     experiment=exp, 
                                     type=base_exp_user.type, 
                                     additional_info=base_exp_user.additional_info)
         exp_user.save()
-    
+    print 'finished setting users'
     #Source
     source = BiologicalSource(experiment=exp)
     base_source = BiologicalSource.objects.get(experiment=base_exp)
@@ -180,6 +181,38 @@ def clone_experiment(base_experiment):
                         description = base_treatment.description)
         tr.save()
 
+    #Generate sample classes, and then generate samples
+    regenerate_sample_classes(exp.id)
+    
+    #For each sample class, count all the samples which have that class.
+    base_sampleclasses = SampleClass.objects.filter(experiment=base_exp)
+    exp_sampleclasses = SampleClass.objects.filter(experiment=exp)
+    base_sampleclass_dict = {}
+    exp_sampleclass_dict = {}
+
+    #Build the dicts, keyed on the sample class name
+    #These should be unique, which should have been determined earlier by 
+    #calling check_experiment_cloneable
+    for base_sampleclass in base_sampleclasses:
+        base_sampleclass_dict[base_sampleclass.__unicode__()]=base_sampleclass
+
+    for exp_sampleclass in exp_sampleclasses:
+        exp_sampleclass_dict[exp_sampleclass.__unicode__()] = exp_sampleclass
+
+    #Now generate samples for each:
+    for classname in base_sampleclass_dict.keys():
+        base_sampleclass = base_sampleclass_dict[classname]
+        exp_sampleclass = exp_sampleclass_dict.get(classname, None)
+        if exp_sampleclass is not None:
+            #
+            numsamples = len(Sample.objects.filter(sample_class = base_sampleclass))
+            for num in range(numsamples):
+                s = Sample()
+                s.sample_class = exp_sampleclass
+                s.experiment = exp
+                s.save()
+
+
     return exp
 
 
@@ -198,6 +231,7 @@ def create_experiment(user, attributes, base_experiment_id = None):
             exp = clone_experiment(base_exp)
         except Exception, e:
             #unable to find base experiment
+            print 'Error in clone experiment: ', e
             pass
     else:
         exp = Experiment()
@@ -227,6 +261,47 @@ def create_experiment(user, attributes, base_experiment_id = None):
 
 
     return exp
+
+def clone_run(request, run_id):
+    result = {'success':False, 'message':"None", 'data':None}
+    try:
+        base_run = Run.objects.get(id=run_id) 
+        new_run = Run()
+        new_run.experiment        = base_run.experiment
+        new_run.method            = base_run.method
+        new_run.creator           = base_run.creator
+        new_run.title             = "%s (cloned)" % (base_run.title)
+        new_run.machine           = base_run.machine
+        new_run.generated_output  = base_run.generated_output
+        new_run.state             = RUN_STATES.NEW[0]
+        new_run.rule_generator    = base_run.rule_generator
+        new_run.number_of_methods = base_run.number_of_methods
+        new_run.order_of_methods  = base_run.order_of_methods
+        new_run.save()
+        
+        #samples
+        base_rs = RunSample.objects.filter(run=base_run)
+        for base_runsample in base_rs:
+            new_runsample               = RunSample(run=new_run)
+            new_runsample.sample        = base_runsample.sample
+            new_runsample.component     = base_runsample.component
+            new_runsample.sequence      = base_runsample.sequence
+            new_runsample.vial_number   = base_runsample.vial_number
+            new_runsample.method_number = base_runsample.method_number
+            new_runsample.save()
+
+        #sample count
+        #incomplete sample count
+        #complete sample count
+
+        result['success'] = True
+        result['data'] = {'id':new_run.id}
+
+    except Exception, e:
+        result['success'] = False
+        result['message'] = 'Exception: %s' % (str(e))
+
+    return HttpResponse(json.dumps(result))
 
 
 @mastr_users_only
@@ -985,8 +1060,11 @@ def recreate_sample_classes(request, experiment_id):
         args = request.GET
     else:
         args = request.POST
-       
+    
+    regenerate_sample_classes(experiment_id)
+    return recordsSampleClasses(request, experiment_id)
 
+def regenerate_sample_classes(experiment_id):
     combos = []
 
     for biosource in BiologicalSource.objects.filter(experiment__id=experiment_id):
@@ -1085,7 +1163,6 @@ def recreate_sample_classes(request, experiment_id):
     purgeable = currentsamples.exclude(id__in=foundclasses)
     purgeable.delete()
 
-    return recordsSampleClasses(request, experiment_id)
 
 
 @mastr_users_only
