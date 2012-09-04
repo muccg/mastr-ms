@@ -183,7 +183,8 @@ MA.ExperimentSamples = {
                         { header: "Samples", sortable:true, dataIndex:"count" },
                               { header: "Treatment Variation", sortable:true, dataIndex:"treatment" },
                               { header: "Timeline", sortable:true, dataIndex:"timeline" },
-                              { header: "Organ", sortable:true, dataIndex:"organ" }
+                              { header: "Organ", sortable:true, dataIndex:"organ" },
+                              { header: "Enabled", dataIndex:"enabled" }
                       ],
                     store: sampleClassStore
                 }
