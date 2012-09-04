@@ -419,15 +419,18 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                             if (this.getText() === 'Display Worklist') {
                                 window.open(wsBaseUrl + 'display_worklist/' + self.runId, 'worklist');
                             } else {
+                                var msg = Ext.Msg.wait("Generating Worklist");
                                 Ext.Ajax.request({
                                     url: wsBaseUrl + "generate_worklist/" + self.runId,
                                     success: function () {
+                                        msg.hide();
                                         self.onStateChangedToInProgress();
                                          
                                         window.open(wsBaseUrl + 'display_worklist/' + self.runId, 'worklist');
                                         self.fireEvent("save", self);
                                     },
                                     failure: function () {
+                                        msg.hide();
                                         Ext.Msg.alert('Error', "An error occured and your worklist couldn't be generated");
                                     }
                                 });

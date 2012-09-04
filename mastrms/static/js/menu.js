@@ -126,10 +126,10 @@ MA.MenuShow = function() {
 
 };
 
-MA.MenuHandler = function(item) {
+MA.MenuHandler = function(item, params) {
     //we authorize every access to check for session timeout and authorization to specific pages
     //if (item.id.substr(0,4) == "help") {
-        MA.ChangeMainContent(item.id);
+        MA.ChangeMainContent(item.id, params);
     //} else {
     //    MA.Authorize(item.id);
     //}
