@@ -1282,7 +1282,7 @@ def recordsSamplesForExperiment(request):
     
     
     if not randomise:
-        sort_by = args.get('sort', 'id')
+        sort_by = args.get('sort', 'sample_class') #sort by default on sample class
         if sort_by == 'sample_class':
             sort_by = 'sample_class__class_id'
         sort_dir = args.get('dir', 'ASC')
@@ -1291,7 +1291,7 @@ def recordsSamplesForExperiment(request):
         else:
             sort1 = sort_by
        
-        #Always sort with sequence second to class.
+        #Always sort with sequence second (mostly will be for class).
         sort2 = 'sample_class_sequence'
 
         rows = rows.order_by(sort1, sort2)

@@ -609,11 +609,11 @@ MA.ExperimentSamplesOnly = {
                                store: new Ext.data.ArrayStore({storeId:'classCombo', fields: ['key', 'value']})                               }),
                       renderer:renderClass },
                       { header: "Seq", sortable:false, dataIndex:'sample_class_sequence' },
-                      { header: "Label", sortable:false, editor:new Ext.form.TextField(), dataIndex:'label' },
-                      { header: "Weight", sortable:false, editor:new Ext.form.NumberField({editable:true, maxValue:9999.99}), dataIndex:'weight' },
-                      { header: "Comment", sortable:false, sortable:true, width:300, editor:new Ext.form.TextField(), dataIndex:'comment' },
-                      { header: "Last Status", sortable:false, width:300, dataIndex:'last_status' },
-                      { header: "ID", sortable:false, dataIndex:'id', hidden:true }
+                      { header: "Label", sortable:true, editor:new Ext.form.TextField(), dataIndex:'label' },
+                      { header: "Weight", sortable:true, editor:new Ext.form.NumberField({editable:true, maxValue:9999.99}), dataIndex:'weight' },
+                      { header: "Comment", sortable:true, sortable:true, width:300, editor:new Ext.form.TextField(), dataIndex:'comment' },
+                      { header: "Last Status", sortable:true, width:300, dataIndex:'last_status' },
+                      { header: "ID", sortable:true, dataIndex:'id' }
                       ],
             store: randomisableSampleStore
             }
