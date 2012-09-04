@@ -64,6 +64,43 @@ MA.RunList = Ext.extend(Ext.Panel, {
                                     }
                                 }
                             }
+                        },
+                        {
+                            text: "Clone Run",
+                            cls: "x-btn-text-icon",
+                            icon: "static/images/add-to-run.png",
+                            handler: function () {
+                                var selModel = self.getComponent("grid").getSelectionModel();
+
+                                if (selModel.hasSelection()) {
+                                    var agreed = window.confirm("Are you sure you want to clone the selected run?");
+                                    if (agreed) {
+                                        var id = selModel.getSelected().data.id;
+                                        var msg = Ext.Msg.wait("Cloning Run");
+                                        var req = new Ajax.Request(wsBaseUrl + 'clone_run/' + encodeURIComponent(id),
+                                                {
+                                                    asynchronous:true,
+                                                    evalJSON:'force',
+                                                    onSuccess: function(response){
+                                                        msg.hide();
+                                                        console.log(response.responseJSON);
+                                                        if (response.responseJSON.success !== true){
+                                                            console.log('couldnt clone run');
+                                                            Ext.Msg.alert("Error Cloning Run", response.responseJSON.message);
+                                                        }
+                                                        
+                                                        self.getStore().reload();
+                                                               },
+                                                    onFailure: function(response){
+                                                                
+                                                        msg.hide();
+                                                        Ext.Msg.alert("Communication Error", "Call to clone run failed.");
+                                                        }
+                                                });
+                                        
+                                    }
+                                }
+                            }
                         }
                     ],
                     listeners: {
