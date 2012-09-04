@@ -76,11 +76,13 @@ MA.RunList = Ext.extend(Ext.Panel, {
                                     var agreed = window.confirm("Are you sure you want to clone the selected run?");
                                     if (agreed) {
                                         var id = selModel.getSelected().data.id;
+                                        var msg = Ext.Msg.wait("Cloning Run");
                                         var req = new Ajax.Request(wsBaseUrl + 'clone_run/' + encodeURIComponent(id),
                                                 {
                                                     asynchronous:true,
                                                     evalJSON:'force',
                                                     onSuccess: function(response){
+                                                        msg.hide();
                                                         console.log(response.responseJSON);
                                                         if (response.responseJSON.success !== true){
                                                             console.log('couldnt clone run');
@@ -90,15 +92,12 @@ MA.RunList = Ext.extend(Ext.Panel, {
                                                         self.getStore().reload();
                                                                },
                                                     onFailure: function(response){
+                                                                
+                                                        msg.hide();
                                                         Ext.Msg.alert("Communication Error", "Call to clone run failed.");
-                                                               }
+                                                        }
                                                 });
                                         
-                                        //MA.CRUDSomething("delete/run/"+id+"/", null, function () {
-                                            //self.getStore().reload();
-                                            
-                                            //runStore.reload(); //BP:fixtimeouts
-                                        //});
                                     }
                                 }
                             }
