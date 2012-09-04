@@ -941,7 +941,7 @@ MA.ProjectCmp = {
                 {
                     text: 'Clone Experiment',
                     cls: 'x-btn-text-icon',
-                    icon:'static/images/add.png',
+                    icon:'static/images/add-to-run.png',
                     handler : function(){
                         var gr = Ext.getCmp('project-experiments');
                         var sels = gr.getSelectionModel().getSelections();
