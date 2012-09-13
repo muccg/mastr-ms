@@ -15,15 +15,18 @@ try: import json as simplejson
 except ImportError: import simplejson
 import urllib
 import os
-import os.path
 import time
+import os.path
+from shutil import rmtree, copytree, copy, move
+from shutil import copy2, copytree
+
+import Queue
+import threading
+from subprocess import Popen, PIPE, STDOUT
+
 from identifiers import *
-from MainWindow import APPSTATE
 import plogging
 outlog = plogging.getLogger('client')
-import os.path
-import Queue
-from shutil import rmtree, copytree, copy
 from MainWindow import APPSTATE
 
 
@@ -64,6 +67,51 @@ class RemoteSyncParams(object):
             #use passed in value, not json value
             self.username = username
 
+class TransactionVars(object):
+    _copiedFiles = {}
+    _transferredSamples = {}
+    _sampleFileMap = {}
+    _samplesverified = False
+
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self._copiedFiles = {}
+        self._transferredSamples = {}
+        self._sampleFileMap = {}
+        self._samplesverified = False
+
+    @property
+    def copied_files(self):
+        return self._copiedFiles
+    @copied_files.setter
+    def copied_files(self, copiedfiles):
+        self._copiedFiles = value
+    
+    @property
+    def transferred_samples(self):
+        return self._transferredSamples
+    @transferred_samples.setter
+    def transferred_samples(self, value):
+        self._transferredSamples = value
+
+    @property
+    def sample_file_map(self):
+        return self._sampleFileMap
+    @sample_file_map.setter
+    def sample_file_map(self, value):
+        self._sampleFileMap = value
+    
+    @property
+    def samples_verified(self):
+        return self._samplesverified
+
+    @samples_verified.setter
+    def set_samples_verified(self, value):
+        self._samplesverified = value
+
+
 class MSDataSyncAPI(object):
     def __init__(self, log=None):
         self._tasks = Queue.Queue() 
@@ -75,6 +123,7 @@ class MSDataSyncAPI(object):
         self._impl = MSDSImpl(self.log, self) 
         self.config = CONFIG 
         self.useThreading = False
+        self.transactionvars = TransactionVars()
 
     def defaultLogSink(self, *args, **kwargs):
         pass
@@ -205,6 +254,7 @@ class MSDataSyncAPI(object):
         #see if we can resolve all wanted files:
         foundfiles = {}
         runsamplesdict = {}
+        samplefilemap = {}
         for wantedfile in wantedfiles.keys():
             result = self.find_local_file_or_directory(localfilesdict, wantedfile)
             if result is not None:
@@ -217,7 +267,10 @@ class MSDataSyncAPI(object):
                 if not runsamplesdict.has_key(run_id):
                     runsamplesdict[run_id] = []
                 runsamplesdict[run_id].append(sample_id)
-        return foundfiles, runsamplesdict
+                if not samplefilemap.has_key(run_id):
+                    samplefilemap[run_id] = {}
+                samplefilemap[run_id][sample_id] = result #original file mapped to run:sample
+        return foundfiles, runsamplesdict, samplefilemap
 
 
     #def extract_file_target(self, node, resultdict, localindexdir):
@@ -250,22 +303,64 @@ class MSDataSyncAPI(object):
     #                    fullremotepath = os.path.join(node[dirname], dirname)
     #                    resultdict[fulllocalpath] = "%s" %(os.path.join(localindexdir, fullremotepath) )
     #    return resultdict
-    
-    
-    def cleanup_localindexdir(self):
-        localindexdir = self.config.getLocalIndexPath()
-        tm = time.localtime()
-        timestamp = "%s_%s_%s__%s_%s_%s" % (tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec)
-        archivefilesdir = os.path.join(self.config.getValue('archivedfilesdir'), timestamp)
+  
+
+    def post_sync_step(self, server_reponse):
+        try:
+            self.archive_synced_files(server_reponse['synced_samples'])
+        except Exception, e:
+            self.log("Archive operation failed: %s" % str(e))
+
+        self.log('Removing temporary file cache', thread=self.useThreading)
+        self.cleanup_localindexdir()
+
+    def archive_synced_files(self, synced_samples_dict):
         archivesynced = self.config.getValue('archivesynced')
         if archivesynced:
-            self.log("Archiving synced files to %s" % archivefilesdir)
-            try:
-                copytree(localindexdir, archivefilesdir)
-            except Exception, e:
-                self.log('Could not archive files from %s to %s: %s' % (localindexdir, archivefilesdir, str(e)) )
+            localindexdir = self.config.getLocalIndexPath()
+            #tm = time.localtime()
+            #timestamp = "%s_%s_%s__%s_%s_%s" % (tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec)
+            #archivefilesdir = os.path.join(self.config.getValue('archivedfilesdir'), timestamp)
+            archivedfilesdir = self.config.getValue('archivedfilesdir')
+            if len(synced_samples_dict.keys()) > 0:
 
-        self.log("Clearing local index directory: %s" % localindexdir)
+                self.log("Archiving synced files to %s" % archivedfilesdir, thread=self.useThreading)
+            
+                #filemap = self.transactionvars.sample_file_map
+                #print "Filemap ", filemap
+                #for k in filemap.keys():
+                #    print "%s : %s" % (k, filemap[k])
+                
+                # go through the synced files list and copy the original file to the archive destination,
+                # inside runid directories.
+                for runid in synced_samples_dict.keys():
+                     
+                    if len(synced_samples_dict[runid]) > 0:
+                        dstdir = os.path.join(archivedfilesdir, str(runid))
+                        if not os.path.exists(dstdir):
+                            os.mkdir(dstdir)
+                        for sampleid in synced_samples_dict[runid]:
+                            #synced sample keys (runid, samplid) are strings.
+                            #filemap keys are integers, so we need a cast
+                            sampleid_i = int(sampleid)
+                            runid_i = int(runid)
+                            if filemap.has_key(runid_i) and filemap[runid_i].has_key(sampleid_i):
+                                orgpath = filemap[runid_i][sampleid_i] 
+                                orgfname = os.path.split(orgpath)[1]
+                                dstpath = os.path.join(dstdir, orgfname)
+                                self.log("Moving %s to %s" % (orgpath, dstpath), thread=self.useThreading )
+                                #move using shutil.move
+                                move(orgpath, dstpath)
+                            else:
+                                self.log("Could not find original filename for runsample %d" % (sampleid_i), thread=self.useThreading)
+                        self.log("Finished archive for samples in run %d" % (int(runid)), thread=self.useThreading )
+            else:
+                self.log("Nothing to archive.", thread=self.useThreading)
+            
+
+    def cleanup_localindexdir(self):
+        localindexdir = self.config.getLocalIndexPath()
+        self.log("Clearing local index directory: %s" % localindexdir, thread=self.useThreading)
         try:
             rmtree(localindexdir)
         except Exception, e:
@@ -284,12 +379,13 @@ class MSDataSyncAPI(object):
         self.callingWindow = callingWindow
         
         remote_params, wantedfiles = self.ask_server_for_wanted_files(returnFn)
+        self.transactionvars.reset()
         
         #localfilesdict is our map between local files that were found that the server wants,
         #and the file path that should exist on the remote end (and relative to our localindexdir)
         #runsamplesdict is just the list of found file sampleids, keyed on runid
-        localfilesdict, runsamplesdict = self.find_wanted_files(wantedfiles, returnFn) 
-
+        localfilesdict, runsamplesdict, samplefilemap = self.find_wanted_files(wantedfiles, returnFn) 
+        self.transactionvars.sample_file_map = samplefilemap
         rsyncconfig = RemoteSyncParams(configdict = remote_params, username=self.config.getValue('user'))
 
         self.log('Server expects sync of %d files' % (len(wantedfiles.keys())) )
@@ -330,8 +426,7 @@ class MSDataSyncAPI(object):
     def rsyncReturn(self, *args, **kwargs):
         self.log('Remote transfer stage complete', thread = self.useThreading)
         self.set_progress_state(90, APPSTATE.CONFIRMING_TRANSFER)
-        self.log('Removing temporary file cache', thread=self.useThreading)
-        self.cleanup_localindexdir()
+        
 
     def handshakeReturn(self, *args, **kwargs):
         self.log('Handshake complete', thread = self.useThreading)
@@ -347,7 +442,6 @@ class MSDataSyncAPI(object):
            }  
         '''
 
-        import os
         retfiles = {}
         retfiles['/'] = dir
         retfiles['.'] = {}
@@ -422,13 +516,11 @@ class MSDataSyncAPI(object):
         return checkfilesatnode(localfiledict, filename)
     
     #------- WORKER CLASS-----------------------
-    import threading
     class Worker( threading.Thread ):
         SLEEP_TIME = 0.1
 
         #-----------------------------------------------------------------------
         def __init__( self, tasks ):
-            import threading
             threading.Thread.__init__( self )
             self._isDying = False
             self._tasks = tasks
@@ -473,8 +565,6 @@ class MSDSImpl(object):
         #we also make sure the path is 'normalised', so that they look like posix paths,
         #since both mac, linux, and cygwin all use it.
         if self.controller.isMSWINDOWS:
-            import os
-            import os.path
             #print 'WINDOWS SOURCE DIR HACK IN PROGRESS'
             #os.path.normpath makes sure slashes are native - on windows this is an escaped backslash \\
             #os.sep gives you the dir sepator for this platform (windows = \\)
@@ -495,7 +585,6 @@ class MSDSImpl(object):
         else:
             sourcedir += '/' #make sure it ends in a slash
 
-        from subprocess import Popen, PIPE, STDOUT
         logfile = CONFIG.getValue('logfile').replace('\\', '/') #if its a windows path, convert it. cwrsync wants posix paths ALWAYS
         #Popen('rsync -t %s %s:%s' % (sourcedir, remotehost, remotedir) )
         print 'flags:', rsyncconfig.flags 
@@ -546,6 +635,7 @@ class MSDSImpl(object):
             jsonret = f.read()
             self.log('Server returned %s' % (str(jsonret)), thread = self.controller.useThreading)
             self.log('Finished informing the server of transfer', thread = self.controller.useThreading)
+            self.controller.post_sync_step(simplejson.loads(jsonret))
         except Exception, e:
             self.log('Could not connect to %s: %s' % (url, str(e)), type=self.log.LOG_ERROR, thread = self.controller.useThreading)
         
@@ -554,15 +644,21 @@ class MSDSImpl(object):
         '''Takes a dict keyed on source filename, and copies each one to the dest filename (value) '''
         outlog.debug("Entered copy procedure")
 
+        copiedfiles = {}
+
         try:
             for filename in copydict.keys():
                 self.log( '\tCopying %s to %s' % (os.path.normpath(filename), os.path.normpath(copydict[filename] ) ), thread=self.controller.useThreading  )
-                self.copyfile( os.path.normpath(filename), os.path.normpath(copydict[filename]))
+                src = os.path.normpath(filename)
+                dst = os.path.normpath(copydict[filename])
+                self.copyfile( src, dst)
+                copiedfiles[src] = dst
         except Exception, e:
             self.log('Problem copying: %s' % (str(e)), type=self.log.LOG_ERROR,  thread = self.controller.useThreading )
 
+        self.controller.transactionvars.copied_files = copiedfiles
+
     def copyfile(self, src, dst):
-        from shutil import copy2, copytree
         import os.path
         try: 
             if os.path.isdir(src) and not os.path.exists(dst):
@@ -576,11 +672,10 @@ class MSDSImpl(object):
         except Exception, e:
             self.log('Error copying %s to %s : %s' % (src, dst, e), type = self.log.LOG_ERROR,  thread = self.controller.useThreading )
 
-    def getFileTree(self, dir):
-        import os
+    def getFileTree(self, directory):
         allfiles = []
         try:
-            for root, dirs, files in os.walk(dir): #topdown=True, onerror=None, followlinks=False
+            for root, dirs, files in os.walk(directory): #topdown=True, onerror=None, followlinks=False
                 for f in files:
                     allfiles.append(os.path.join(root, f))
                 #self.log('root: %s' % (str(root)) )
