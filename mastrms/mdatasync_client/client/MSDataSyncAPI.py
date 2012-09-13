@@ -316,7 +316,6 @@ class MSDataSyncAPI(object):
 
     def archive_synced_files(self, synced_samples_dict):
         archivesynced = self.config.getValue('archivesynced')
-        print 'archivesynced was ', archivesynced 
         if archivesynced:
             localindexdir = self.config.getLocalIndexPath()
             #tm = time.localtime()
@@ -327,10 +326,11 @@ class MSDataSyncAPI(object):
 
                 self.log("Archiving synced files to %s" % archivedfilesdir, thread=self.useThreading)
             
-                filemap = self.transactionvars.sample_file_map
-                print "Filemap ", filemap
-                for k in filemap.keys():
-                    print "%s : %s" % (k, filemap[k])
+                #filemap = self.transactionvars.sample_file_map
+                #print "Filemap ", filemap
+                #for k in filemap.keys():
+                #    print "%s : %s" % (k, filemap[k])
+                
                 # go through the synced files list and copy the original file to the archive destination,
                 # inside runid directories.
                 for runid in synced_samples_dict.keys():
@@ -340,6 +340,8 @@ class MSDataSyncAPI(object):
                         if not os.path.exists(dstdir):
                             os.mkdir(dstdir)
                         for sampleid in synced_samples_dict[runid]:
+                            #synced sample keys (runid, samplid) are strings.
+                            #filemap keys are integers, so we need a cast
                             sampleid_i = int(sampleid)
                             runid_i = int(runid)
                             if filemap.has_key(runid_i) and filemap[runid_i].has_key(sampleid_i):
@@ -355,20 +357,6 @@ class MSDataSyncAPI(object):
             else:
                 self.log("Nothing to archive.", thread=self.useThreading)
             
-
-    def confirm_and_remove_sample_files(self, archivefilesdir):
-        #make sure each entry in copiedfiles exists in archivefiles dir,
-        #then delete them
-        print 'DEST'
-        copiedFiles = self.transactionvars.copied_files()
-        for key in copiedFiles:
-            print 'copiedfiles[%s] = %s' % (key, self.copiedFiles[key])
-
-        print 'SOURCE'
-        for (dirpath, dirname, filenames) in os.walk(archivefilesdir, topdown=True):
-            for filename in filenames:
-                print '%s : %s' % (dirpath, filename)
-
 
     def cleanup_localindexdir(self):
         localindexdir = self.config.getLocalIndexPath()
