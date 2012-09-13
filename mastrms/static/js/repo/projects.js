@@ -939,6 +939,25 @@ MA.ProjectCmp = {
                     }
                 },
                 {
+                    text: 'Clone Experiment',
+                    cls: 'x-btn-text-icon',
+                    icon:'static/images/add-to-run.png',
+                    handler : function(){
+                        var gr = Ext.getCmp('project-experiments');
+                        var sels = gr.getSelectionModel().getSelections();
+                        if ( sels.length != 1 ){
+                            Ext.Msg.show({
+                                'title': 'Error',
+                                'msg' : 'Please select exactly one experiment to clone.',
+                                'buttons' : Ext.Msg.OK
+                            });
+                        }
+                        else{
+                            MA.MenuHandler({'id':'experiment:clone'}, [sels[0].data.id]);
+                        }
+                    }
+                },
+                {
                 text: 'Remove Experiment',
                 cls: 'x-btn-text-icon',
                 icon:'static/images/delete.png',
@@ -1000,6 +1019,47 @@ MA.ProjectCmp = {
         }
     ]
 };
+
+MA.AttemptCloneExperiment = function(base_exp_id) {
+    var req = new Ajax.Request(wsBaseUrl + 'check_experiment_cloneable/'+encodeURIComponent(base_exp_id),
+            {
+                asynchronous:true,
+                evalJSON:'force',
+                onSuccess: function(response){
+                    console.log(response.responseJSON);
+                    if (response.responseJSON.success===true){
+                        console.log("cloning");
+                        MA.CloneExperiment(base_exp_id);}
+                    else{
+                        console.log(response.responseJSON);
+                        Ext.Msg.alert("Cloning Error", "Cannot clone experiment: " + response.responseJSON.message);
+                    }
+                },
+                onFailure: function(response){
+                    var reason = 'Unknown';
+                    Ext.Msg("Cannot clone experiment: " + reason);
+                }
+            });
+
+};
+
+MA.CloneExperiment = function(base_exp_id) {
+    //var proj_experiment_grid = Ext.getCmp('project-experiments');
+    //var exp_store = proj_experiment_grid.getStore();
+    //console.log("requesting.");
+    var req = new Ajax.Request(wsBaseUrl + 'create/experiment/?base_experiment_id='+encodeURIComponent(base_exp_id),
+                                                 { 
+                                                 asynchronous:true, 
+                                                 evalJSON:'force',
+                                         onSuccess:    function(){
+                                                                experimentListStore.proxy.conn.url = wsBaseUrl + 'recordsExperiments/' + MA.currentProjectId;
+                                                                experimentListStore.load();    
+                                                                //exp_store.load();
+                                                        },
+                                         onFailure:    MA.DSLoadException
+                                         });
+};
+
 
 MA.LoadProject = function (projId) {
     projectsListStore.load();

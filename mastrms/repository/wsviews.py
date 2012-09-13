@@ -39,61 +39,269 @@ def create_object(request, model):
         args = request.GET
     else:
         args = request.POST
-       
-    #create model object
-    model_obj = get_model('repository', model)
-    obj = model_obj()
-       
-    for key in args.keys():
-        obj.__setattr__(key, args[key])
-
-    if model == 'run':
-        obj.creator = User.objects.get(username=request.user.username)
-        if not obj.rule_generator.is_accessible_by(request.user):
-            return HttpResponseForbidden("Invalid rule generator for run");
-        if obj.number_of_methods in ('', 'null'):
-            obj.number_of_methods = None
-        if obj.order_of_methods in ('', 'null'):
-            obj.order_of_methods = None
-
-    obj.save()
-
+    
+    obj = None 
     if model == 'experiment':
-        uit, created = UserInvolvementType.objects.get_or_create(name='Principal Investigator')
-        user = User.objects.get(username=request.user.username)
-        ue = UserExperiment()
-        ue.experiment=obj
-        ue.type=uit
-        ue.user=user
-        ue.save()   
-        #default source and organ
-        source = BiologicalSource(experiment=obj)
-        source.type_id=1
-        source.save()
-        organ = Organ(experiment=obj)
-        organ.name='Unknown'
-        organ.save() 
-    
-    if model == 'project':
-        if not args.get('projectManagers'):
-            user = User.objects.get(username=request.user.username)
-            obj.managers.add(user)
-        else:
-            save_project_managers(obj, args.get('projectManagers'))
-    
-    if model == 'biologicalsource':
-        return records(request, 'organism', 'id', obj.organism.id)
-        
-    if model == 'animal' or model == 'plant' or model == 'human':
-        o = Organ(source=obj, name='Unknown')
-        o.save()
-        
-    if model == 'samplelog':
-        user = User.objects.get(username=request.user.username)
-        obj.user = user
+        obj = create_experiment(request.user, args, base_experiment_id=args.get('base_experiment_id', None) )
+
+    else:
+        #create model object
+        model_obj = get_model('repository', model)
+        obj = model_obj()
+       
+        for key in args.keys():
+            obj.__setattr__(key, args[key])
+
+        if model == 'run':
+            obj.creator = User.objects.get(username=request.user.username)
+            if not obj.rule_generator.is_accessible_by(request.user):
+                return HttpResponseForbidden("Invalid rule generator for run");
+            if obj.number_of_methods in ('', 'null'):
+                obj.number_of_methods = None
+            if obj.order_of_methods in ('', 'null'):
+                obj.order_of_methods = None
+
         obj.save()
 
+        if model == 'project':
+            if not args.get('projectManagers'):
+                user = User.objects.get(username=request.user.username)
+                obj.managers.add(user)
+            else:
+                save_project_managers(obj, args.get('projectManagers'))
+        
+        if model == 'biologicalsource':
+            return records(request, 'organism', 'id', obj.organism.id)
+            
+        if model == 'animal' or model == 'plant' or model == 'human':
+            o = Organ(source=obj, name='Unknown')
+            o.save()
+            
+        if model == 'samplelog':
+            user = User.objects.get(username=request.user.username)
+            obj.user = user
+            obj.save()
+
     return records(request, model, 'id', obj.id)
+
+
+def check_experiment_cloneable(request, experiment_id):
+    if request.GET:
+        args = request.GET
+    else:
+        args = request.POST
+    print args
+    print 'experiment ID is :', experiment_id
+    success = False
+    message = "No base experiment provided"
+    if experiment_id is not None:
+        success = check_distinct_sample_classes(experiment_id)
+        if not success:
+            message = "Non unique sample classes detected. Ensure timelines, organs, and treatments will generate unique sample classes."
+        else:
+            success = check_non_id_sample_classes(experiment_id)
+            if not success:
+                message = "Some sample classes in the base experiment have no organs/treatment/timelines."
+        #insert more checks here if required
+         
+
+    return HttpResponse( json.dumps({'success': success, 'message':message}) )
+
+
+def check_distinct_sample_classes(experiment):
+    sampleclasses = SampleClass.objects.filter(experiment = experiment)
+    sampleclassnames = [s.__unicode__() for s in sampleclasses]
+    
+    if len(sampleclasses) == len(set(sampleclassnames)):
+        return True
+    else:
+        return False
+
+def check_non_id_sample_classes(experiment):
+    sampleclasses = SampleClass.objects.filter(experiment = experiment)
+    for sampleclass in sampleclasses:
+        if sampleclass.component_abbreviations() == '':
+            return False
+    return True
+
+
+def clone_experiment(base_experiment):
+    ''' Returns the cloned experiment
+        Assumes appropriate checks have been done to ensure experiment is cloneable.
+    '''
+    base_exp = base_experiment
+
+    exp = Experiment()
+    exp.title = "%s (cloned)" % (base_exp.title)
+    exp.comment = base_exp.comment
+    exp.description = base_exp.description
+    exp.project = base_exp.project
+    exp.instrument_method = base_exp.instrument_method
+    exp.status = base_exp.status
+    exp.save()
+
+    #users need to be brought across if this is cloned
+    base_exp_users = UserExperiment.objects.filter(experiment=base_exp)
+    print 'setting user'
+    for base_exp_user in base_exp_users:
+        exp_user = UserExperiment(user=base_exp_user.user, 
+                                    experiment=exp, 
+                                    type=base_exp_user.type, 
+                                    additional_info=base_exp_user.additional_info)
+        exp_user.save()
+    print 'finished setting users'
+    #Source
+    source = BiologicalSource(experiment=exp)
+    base_source = BiologicalSource.objects.get(experiment=base_exp)
+    source.type = base_source.type
+    source.save()
+
+    #Organs
+    base_organs = Organ.objects.filter(experiment=base_exp)
+    for base_organ in base_organs:
+        organ = Organ(experiment = exp)
+        organ.name = base_organ.name
+        organ.abbreviation = base_organ.abbreviation
+        organ.detail = base_organ.detail
+        organ.save()
+
+    #Timelines
+    base_timelines = SampleTimeline.objects.filter(experiment=base_exp)
+    for base_timeline in base_timelines:
+        tl = SampleTimeline(experiment=exp, 
+                            abbreviation=base_timeline.abbreviation,
+                            timeline = base_timeline.timeline)
+        tl.save()
+    #Treatments
+    base_treatments = Treatment.objects.filter(experiment=base_exp)
+    for base_treatment in base_treatments:
+        tr = Treatment(experiment = exp,
+                        abbreviation = base_treatment.abbreviation,
+                        name = base_treatment.name,
+                        description = base_treatment.description)
+        tr.save()
+
+    #Generate sample classes, and then generate samples
+    regenerate_sample_classes(exp.id)
+    
+    #For each sample class, count all the samples which have that class.
+    base_sampleclasses = SampleClass.objects.filter(experiment=base_exp)
+    exp_sampleclasses = SampleClass.objects.filter(experiment=exp)
+    base_sampleclass_dict = {}
+    exp_sampleclass_dict = {}
+
+    #Build the dicts, keyed on the sample class name
+    #These should be unique, which should have been determined earlier by 
+    #calling check_experiment_cloneable
+    for base_sampleclass in base_sampleclasses:
+        base_sampleclass_dict[base_sampleclass.__unicode__()]=base_sampleclass
+
+    for exp_sampleclass in exp_sampleclasses:
+        exp_sampleclass_dict[exp_sampleclass.__unicode__()] = exp_sampleclass
+
+    #Now generate samples for each:
+    for classname in base_sampleclass_dict.keys():
+        base_sampleclass = base_sampleclass_dict[classname]
+        exp_sampleclass = exp_sampleclass_dict.get(classname, None)
+        if exp_sampleclass is not None:
+            #
+            numsamples = len(Sample.objects.filter(sample_class = base_sampleclass))
+            for num in range(numsamples):
+                s = Sample()
+                s.sample_class = exp_sampleclass
+                s.experiment = exp
+                s.save()
+
+
+    return exp
+
+
+def create_experiment(user, attributes, base_experiment_id = None):
+    '''Creates an experiment, and associated objects in the DB.
+       If this experiment is based on another experiment, some values from there are
+       brought across.
+       Returns the created experiment object'''
+
+    base_exp = None
+    exp = None    
+    #Try cloning the experiment if it needs it
+    if base_experiment_id is not None:
+        try:
+            base_exp = Experiment.objects.get(id=base_experiment_id)
+            exp = clone_experiment(base_exp)
+        except Exception, e:
+            #unable to find base experiment
+            print 'Error in clone experiment: ', e
+            pass
+    else:
+        exp = Experiment()
+        for key in attributes.keys():
+            exp.__setattr__(key, attributes[key])
+        exp.save()
+
+        #create a single user
+        uit, created = UserInvolvementType.objects.get_or_create(name='Principal Investigator')
+        exp_user = User.objects.get(username=user.username)
+        ue = UserExperiment()
+        ue.experiment = exp
+        ue.type = uit
+        ue.user = exp_user
+        ue.save()   
+        
+        #Biological Source
+        source = BiologicalSource(experiment=exp)
+        #default source and organ
+        source.type_id=1
+        source.save()
+    
+        #Organs
+        organ = Organ(experiment=exp)
+        organ.name='Unknown'
+        organ.save()
+
+
+    return exp
+
+def clone_run(request, run_id):
+    result = {'success':False, 'message':"None", 'data':None}
+    try:
+        base_run = Run.objects.get(id=run_id) 
+        new_run = Run()
+        new_run.experiment        = base_run.experiment
+        new_run.method            = base_run.method
+        new_run.creator           = base_run.creator
+        new_run.title             = "%s (cloned)" % (base_run.title)
+        new_run.machine           = base_run.machine
+        new_run.generated_output  = base_run.generated_output
+        new_run.state             = RUN_STATES.NEW[0]
+        new_run.rule_generator    = base_run.rule_generator
+        new_run.number_of_methods = base_run.number_of_methods
+        new_run.order_of_methods  = base_run.order_of_methods
+        new_run.save()
+        
+        #samples
+        base_rs = RunSample.objects.filter(run=base_run)
+        for base_runsample in base_rs:
+            new_runsample               = RunSample(run=new_run)
+            new_runsample.sample        = base_runsample.sample
+            new_runsample.component     = base_runsample.component
+            new_runsample.sequence      = base_runsample.sequence
+            new_runsample.vial_number   = base_runsample.vial_number
+            new_runsample.method_number = base_runsample.method_number
+            new_runsample.save()
+
+        #sample count
+        #incomplete sample count
+        #complete sample count
+
+        result['success'] = True
+        result['data'] = {'id':new_run.id}
+
+    except Exception, e:
+        result['success'] = False
+        result['message'] = 'Exception: %s' % (str(e))
+
+    return HttpResponse(json.dumps(result))
 
 
 @mastr_users_only
@@ -852,8 +1060,11 @@ def recreate_sample_classes(request, experiment_id):
         args = request.GET
     else:
         args = request.POST
-       
+    
+    regenerate_sample_classes(experiment_id)
+    return recordsSampleClasses(request, experiment_id)
 
+def regenerate_sample_classes(experiment_id):
     combos = []
 
     for biosource in BiologicalSource.objects.filter(experiment__id=experiment_id):
@@ -952,7 +1163,6 @@ def recreate_sample_classes(request, experiment_id):
     purgeable = currentsamples.exclude(id__in=foundclasses)
     purgeable.delete()
 
-    return recordsSampleClasses(request, experiment_id)
 
 
 @mastr_users_only
@@ -1072,7 +1282,7 @@ def recordsSamplesForExperiment(request):
     
     
     if not randomise:
-        sort_by = args.get('sort', 'id')
+        sort_by = args.get('sort', 'sample_class') #sort by default on sample class
         if sort_by == 'sample_class':
             sort_by = 'sample_class__class_id'
         sort_dir = args.get('dir', 'ASC')
@@ -1081,7 +1291,7 @@ def recordsSamplesForExperiment(request):
         else:
             sort1 = sort_by
        
-        #Always sort with sequence second to class.
+        #Always sort with sequence second (mostly will be for class).
         sort2 = 'sample_class_sequence'
 
         rows = rows.order_by(sort1, sort2)

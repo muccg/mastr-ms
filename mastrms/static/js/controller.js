@@ -228,6 +228,20 @@ MA.ChangeMainContent = function(contentName, paramArray){
             MA.ExperimentController.createExperiment();
             break;
 
+        case 'experiment:clone':
+            if (paramArray && paramArray.length === 1) {
+                MA.AttemptCloneExperiment(paramArray[0]);
+            }
+            else {
+                Ext.Msg.show({
+                    'title': 'Clone Experiment: Error',
+                    'msg' : 'No experiment ID given',
+                    'buttons' : Ext.Msg.OK
+                });
+            }
+            break;
+
+
         case "rulegenerator:list":
             ruleComponentStore.load();
             ruleGeneratorListStore.load();
