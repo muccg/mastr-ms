@@ -122,8 +122,15 @@ class MSDataSyncAPI(object):
         
         self._impl = MSDSImpl(self.log, self) 
         self.config = CONFIG 
-        self.useThreading = False
+        self.useThreading = False #Threading doesn't seem to help at the moment.
+                                 #it needs to be enabled and then debugged - 
+                                 #we are still seeing UI lagging behind worker operations
         self.transactionvars = TransactionVars()
+
+        if self.useThreading:
+            self.log("Threading is enabled")
+        else:
+            self.log("Threading is disabled")
 
     def defaultLogSink(self, *args, **kwargs):
         pass
@@ -326,7 +333,7 @@ class MSDataSyncAPI(object):
 
                 self.log("Archiving synced files to %s" % archivedfilesdir, thread=self.useThreading)
             
-                #filemap = self.transactionvars.sample_file_map
+                filemap = self.transactionvars.sample_file_map
                 #print "Filemap ", filemap
                 #for k in filemap.keys():
                 #    print "%s : %s" % (k, filemap[k])

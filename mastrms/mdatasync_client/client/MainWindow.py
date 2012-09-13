@@ -260,6 +260,7 @@ class MainWindow(wx.Frame):
         '''setState needs to set the statusbar text, and enable/disable the menu item for 'check now' '''
         #The menu on the system tray icon is created every time it is clicked:
         #We don't need to do anything here, as long as the state is set.
+        
         thread = self.is_using_threading()
         if (thread):
             wx.CallAfter(self._set_state, state)
@@ -378,6 +379,7 @@ class MainWindow(wx.Frame):
 
 
     def SetProgress(self, prognum, add=False):
+        
         #may be being called from a thread
         thread = self.is_using_threading()
         if (thread):
