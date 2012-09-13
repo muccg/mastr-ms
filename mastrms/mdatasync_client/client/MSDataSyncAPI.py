@@ -269,7 +269,7 @@ class MSDataSyncAPI(object):
                 runsamplesdict[run_id].append(sample_id)
                 if not samplefilemap.has_key(run_id):
                     samplefilemap[run_id] = {}
-                    samplefilemap[run_id][sample_id] = result #original file mapped to run:sample
+                samplefilemap[run_id][sample_id] = result #original file mapped to run:sample
         return foundfiles, runsamplesdict, samplefilemap
 
 
@@ -316,35 +316,44 @@ class MSDataSyncAPI(object):
 
     def archive_synced_files(self, synced_samples_dict):
         archivesynced = self.config.getValue('archivesynced')
-        
+        print 'archivesynced was ', archivesynced 
         if archivesynced:
             localindexdir = self.config.getLocalIndexPath()
             #tm = time.localtime()
             #timestamp = "%s_%s_%s__%s_%s_%s" % (tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec)
             #archivefilesdir = os.path.join(self.config.getValue('archivedfilesdir'), timestamp)
             archivedfilesdir = self.config.getValue('archivedfilesdir')
-            self.log("Archiving synced files to %s" % archivefilesdir)
-            
-            filemap = self.transactionvars.sample_file_map()
+            if len(synced_samples_dict.keys()) > 0:
 
-            # go through the synced files list and copy the original file to the archive destination,
-            # inside runid directories.
-            for runid in synced_samples_dict.keys():
-                
-                if len(synced_samples_dict[runid]) > 0:
-                    dstdir = os.path.join(archivedfilesdir, str(runid))
-                    os.mkdir(dstdir)
-                    for sampleid in synced_samples_dict[runid]:
-                        if filemap.has_key(sampleid):
-                            orgpath = filemap[sampleid] 
-                            orgfname = os.path.split(orgpath)
-                            dstpath = os.path.join(dstdir, orgfname)
-                            self.log("Moving %s to %s" % (orgpath, dstpath) )
-                            #move using shutil.move
-                            move(orgpath, dstpath)
-                        else:
-                            self.log("Could not find original filename for runsample %d", sampleid)
-                self.log("Archived run %d" % (runid) )
+                self.log("Archiving synced files to %s" % archivedfilesdir, thread=self.useThreading)
+            
+                filemap = self.transactionvars.sample_file_map
+                print "Filemap ", filemap
+                for k in filemap.keys():
+                    print "%s : %s" % (k, filemap[k])
+                # go through the synced files list and copy the original file to the archive destination,
+                # inside runid directories.
+                for runid in synced_samples_dict.keys():
+                     
+                    if len(synced_samples_dict[runid]) > 0:
+                        dstdir = os.path.join(archivedfilesdir, str(runid))
+                        if not os.path.exists(dstdir):
+                            os.mkdir(dstdir)
+                        for sampleid in synced_samples_dict[runid]:
+                            sampleid_i = int(sampleid)
+                            runid_i = int(runid)
+                            if filemap.has_key(runid_i) and filemap[runid_i].has_key(sampleid_i):
+                                orgpath = filemap[runid_i][sampleid_i] 
+                                orgfname = os.path.split(orgpath)[1]
+                                dstpath = os.path.join(dstdir, orgfname)
+                                self.log("Moving %s to %s" % (orgpath, dstpath), thread=self.useThreading )
+                                #move using shutil.move
+                                move(orgpath, dstpath)
+                            else:
+                                self.log("Could not find original filename for runsample %d" % (sampleid_i), thread=self.useThreading)
+                        self.log("Finished archive for samples in run %d" % (int(runid)), thread=self.useThreading )
+            else:
+                self.log("Nothing to archive.", thread=self.useThreading)
             
 
     def confirm_and_remove_sample_files(self, archivefilesdir):
@@ -363,7 +372,7 @@ class MSDataSyncAPI(object):
 
     def cleanup_localindexdir(self):
         localindexdir = self.config.getLocalIndexPath()
-        self.log("Clearing local index directory: %s" % localindexdir)
+        self.log("Clearing local index directory: %s" % localindexdir, thread=self.useThreading)
         try:
             rmtree(localindexdir)
         except Exception, e:
@@ -382,19 +391,19 @@ class MSDataSyncAPI(object):
         self.callingWindow = callingWindow
         
         remote_params, wantedfiles = self.ask_server_for_wanted_files(returnFn)
+        self.transactionvars.reset()
         
         #localfilesdict is our map between local files that were found that the server wants,
         #and the file path that should exist on the remote end (and relative to our localindexdir)
         #runsamplesdict is just the list of found file sampleids, keyed on runid
         localfilesdict, runsamplesdict, samplefilemap = self.find_wanted_files(wantedfiles, returnFn) 
-
+        self.transactionvars.sample_file_map = samplefilemap
         rsyncconfig = RemoteSyncParams(configdict = remote_params, username=self.config.getValue('user'))
 
         self.log('Server expects sync of %d files' % (len(wantedfiles.keys())) )
         self.log('Client found %d/%d files' % (len(localfilesdict.keys()), len(wantedfiles.keys())) )
 
         localindexdir = self.config.getLocalIndexPath() 
-        self.transactionvars.reset()
 
         if len(localfilesdict.keys()):
             self.cleanup_localindexdir()
@@ -638,7 +647,7 @@ class MSDSImpl(object):
             jsonret = f.read()
             self.log('Server returned %s' % (str(jsonret)), thread = self.controller.useThreading)
             self.log('Finished informing the server of transfer', thread = self.controller.useThreading)
-            self.controller.post_sync_step(json.loads(jsonret))
+            self.controller.post_sync_step(simplejson.loads(jsonret))
         except Exception, e:
             self.log('Could not connect to %s: %s' % (url, str(e)), type=self.log.LOG_ERROR, thread = self.controller.useThreading)
         
