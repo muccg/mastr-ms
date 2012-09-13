@@ -29,7 +29,7 @@ class AdvancedPreferences(wx.Dialog):
             if self.config.getShowVar(key):
                 box = wx.BoxSizer(wx.HORIZONTAL)
                 if key == 'syncold':
-                    ctrl = wx.CheckBox(self, -1, "Sync Completed")
+                    ctrl = wx.CheckBox(self, -1, "Re-sync completed experiment files. (If available)")
                     self.Bind(wx.EVT_CHECKBOX, self.toggleSyncChoose, ctrl)
                     #populate the checkbox with the current value
                     val = self.config.getValue(key)
