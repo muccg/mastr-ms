@@ -275,8 +275,11 @@ def check_run_sample_files(request):
         
         ret['success'] = True 
         ret['description'] = 'Success'
+        ret['error'] = 'None'
+        ret['synced_samples'] = {}
         for runid in runsamplefilesdict.keys():
             totalruns += 1
+            ret['synced_samples'][runid] = []
             logger.debug('Checking files from run %s' % str(runid) )
             runsamples = runsamplefilesdict[runid]
             for runsample in runsamples:
@@ -287,11 +290,12 @@ def check_run_sample_files(request):
                     rs.complete = check_run_sample_file_exists(runsample) 
                     if rs.complete:
                         totalfound += 1
+                        ret['synced_samples'][runid].append(rs.id)
                     rs.save()
                 except Exception, e:
                     logger.debug('Error: %s' % (e) )
                     ret['success'] = False
-                    ret['description'] = "%s, %s" % (ret['description'], str(e)) 
+                    ret['error'] = "%s" % (str(e)) 
         ret['description'] = "%s - %d/%d samples marked complete, from %d run(s)" % (ret['description'], totalfound, totalsamples, totalruns)         
     else:
         ret['description'] = "No files given"
