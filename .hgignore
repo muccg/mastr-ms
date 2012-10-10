@@ -1,5 +1,12 @@
 .*\.pyc$
-^mastrms/virt_mastrms/*
+.*\.DS_Store
+.*\.log
+^appsettings*
+^bootstrap*
+^build*
+
+^mastrms/build/*
+^virt_mastrms*
 ^mastrms/tmp/*
 ^mastrms/fab-tmp/*
 ^mastrms/scratch/*
@@ -8,3 +15,4 @@
 ^mastrms/mdatasync_client/client/dist/*
 ^.*appsettings*
 ^docs/build/*
+^mastrms/django_mastrms.egg-info/*
