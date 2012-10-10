@@ -31,7 +31,6 @@ USE_I18N = True
 ##
 TEMPLATE_LOADERS = [
     'ccg.template.loaders.makoloader.filesystem.Loader',
-    'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
 ]
 
@@ -48,6 +47,13 @@ MIDDLEWARE_CLASSES = [
 ]
 
 INSTALLED_APPS = [
+    'mastrms.mdatasync_server',
+    'mastrms.login',
+    'mastrms.quote',
+    'mastrms.admin',
+    'mastrms.repository',
+    'mastrms.users',
+    'mastrms.app',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -55,7 +61,8 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.staticfiles',
     'django_extensions',
-    'userlog'
+    'userlog',
+    'south'
 ]
 
 AUTHENTICATION_BACKENDS = [
@@ -154,17 +161,6 @@ EMAIL_APP_NAME = "MastrMS "
 REPO_FILES_ROOT = PERSISTENT_FILESTORE
 #quote files root should be within the repo files root
 QUOTE_FILES_ROOT = os.path.join(REPO_FILES_ROOT, 'quotes')
-
-INSTALLED_APPS.extend([
-    'django_extensions',
-    'mastrms.mdatasync_server',
-    'mastrms.login',
-    'mastrms.quote',
-    'mastrms.admin',
-    'mastrms.repository',
-    'mastrms.users',
-    'mastrms.app',
-    'south'])
 
 DATABASES = {
     'default': {
