@@ -1,0 +1,24 @@
+TODO:
+
+- Esky
+- [DONE] Move progress bar to status bar
+- Warning on main window if not valid config on startup
+- Proper warning icons on prefs window if cant contact server
+- [DONE] Log text wraps
+- 'Send logs' sends rsync log + logging window contents
+- [DONE] 'Send keys' sends email to techs
+- [DONE] Front window frequency control actually sets frequency
+- front window resize actually causes resize (seems to when bigger, not when smaller?)
+- [DONE, NEEDS TESTING] Handshake 
+- [DONE] Current node selected in preds nodechooser on open
+- Be able to switch all debug off? (is this really needed?)
+- Node name displayed on front window (title bar? although warning icon would go next to...)
+- systray icon better, shows state, also shows error state with warning icon?
+- [DONE] pycrust moved to help menu
+- [DONE] about in help menu, with dev name + ccg logo
+- manual in help menu.
+- Every save resets the time till next sync
+
+-Remote screenshots?
+
+
