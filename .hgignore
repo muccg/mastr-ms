@@ -4,7 +4,7 @@
 ^appsettings*
 ^bootstrap*
 ^build*
-
+^mastrms/dist/*
 ^mastrms/build/*
 ^virt_mastrms*
 ^mastrms/tmp/*
