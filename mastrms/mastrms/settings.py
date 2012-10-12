@@ -11,7 +11,12 @@ if not os.environ.has_key('SCRIPT_NAME'):
 
 SCRIPT_NAME =   os.environ['SCRIPT_NAME']
 #print 'Evaluating os.environ[PROJECT_DIRECTORY] as ', os.environ['PROJECT_DIRECTORY']
-PROJECT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+#PROJECT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+
+WEBAPP_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+PROJECT_DIRECTORY = WEBAPP_ROOT
+
 TMP_DIRECTORY = os.path.join(PROJECT_DIRECTORY, 'tmp')
 
 #general site config
