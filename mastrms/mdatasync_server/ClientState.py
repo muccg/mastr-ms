@@ -47,7 +47,10 @@ def save_client_state(clientstate):
             pickle.dump(clientstate, f)
     except Exception, e:
         logger.warning("Could not save clientstate. %s" % (str(e)))
-    set_repo_file_ownerships(clientstatefname)
+    try:
+        set_repo_file_ownerships(clientstatefname)
+    except Exception, e:
+        logger.warning("Could not set repo file ownerships for clientstate file: %s" % (str(e)) )
 
 def get_node_from_request(request, organisation=None, sitename=None, station=None):
     retval = None

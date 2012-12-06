@@ -201,7 +201,10 @@ def getExpectedFilesForNode(nodeclient, include_completed = False):
                 if rs.filename is None or rs.filename == "":
                     continue #move to the next record - this one has no filename
                 
-                if not check_run_sample_file_exists(rs.id):
+                #As per GC Issue 121, this check used to call 'check_run_sample_file_exists(rs.id)'
+                #but now simply uses the rs.complete value, so that admins have manual control over re-syncing 
+                #individual samples, by setting them to 'incomplete' in the run admin.
+                if not rs.complete:
                     abspath, relpath = rs.filepaths()
                     if target_dict.has_key(rs.filename):
                         logger.warning( 'Duplicate filename detected for %s' % (rs.filename.encode('utf-8')))
