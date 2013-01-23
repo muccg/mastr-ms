@@ -19,11 +19,11 @@ from datetime import datetime, timedelta
 from django.core.mail import mail_admins
 from mastrms.users.MAUser import getMadasUser, loadMadasUser, getCurrentUser
 from mastrms.repository import rulegenerators
-from mastrms.utils.mail_functions import FixedEmailMessage
+from mastrms.app.utils.mail_functions import FixedEmailMessage
 import os, stat
-import settings
+import mastrms.settings
 import copy
-from settings import RETURN_EMAIL
+from mastrms.settings import RETURN_EMAIL
 import logging
 logger = logging.getLogger('madas_log')
 

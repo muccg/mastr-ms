@@ -16,3 +16,4 @@
 ^.*appsettings*
 ^docs/build/*
 ^mastrms/django_mastrms.egg-info/*
+^.ccgplatform*
