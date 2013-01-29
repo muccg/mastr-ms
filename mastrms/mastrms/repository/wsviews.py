@@ -12,7 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.core import urlresolvers
 from django.db.models import get_model
 from json_util import makeJsonFriendly
-from mastrms.utils.data_utils import jsonResponse, zipdir, pack_files
+from mastrms.app.utils.data_utils import jsonResponse, zipdir, pack_files
 from mastrms.repository.permissions import user_passes_test
 from django.db.models import Q
 from datetime import datetime, timedelta
