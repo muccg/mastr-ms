@@ -10,7 +10,7 @@ from django.utils import simplejson as json
 from django.contrib.auth.decorators import login_required
 import logging
 
-from mastrms.utils.data_utils import jsonResponse, jsonErrorResponse, translate_dict
+from mastrms.app.utils.data_utils import jsonResponse, jsonErrorResponse, translate_dict
 from mastrms.quote.models import Quoterequest, Formalquote, Organisation, UserOrganisation
 from mastrms.repository.json_util import makeJsonFriendly
 from mastrms.decorators import admins_only, admins_or_nodereps, privileged_only, authentication_required

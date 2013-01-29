@@ -332,7 +332,8 @@ class MSDataSyncAPI(object):
             if len(synced_samples_dict.keys()) > 0:
 
                 self.log("Archiving synced files to %s" % archivedfilesdir, thread=self.useThreading)
-            
+                '''
+                We dont want files to moved, just copied
                 filemap = self.transactionvars.sample_file_map
                 #print "Filemap ", filemap
                 #for k in filemap.keys():
@@ -361,6 +362,11 @@ class MSDataSyncAPI(object):
                             else:
                                 self.log("Could not find original filename for runsample %d" % (sampleid_i), thread=self.useThreading)
                         self.log("Finished archive for samples in run %d" % (int(runid)), thread=self.useThreading )
+                '''
+                try:		
+                    copytree(localindexdir, archivefilesdir)		
+                except Exception, e:		
+                    self.log('Could not archive files from %s to %s: %s' % (localindexdir, archivefilesdir, str(e)) )                
             else:
                 self.log("Nothing to archive.", thread=self.useThreading)
             
