@@ -263,7 +263,7 @@ class MSDataSyncAPI(object):
         runsamplesdict = {}
         samplefilemap = {}
         for wantedfile in wantedfiles.keys():
-            result = self.find_local_file_or_directory(localfilesdict, wantedfile)
+            result = self.find_local_file_or_directory(localfilesdict, wantedfile, exclude=['TEMP'])
             if result is not None:
                 wantedrecord = wantedfiles[wantedfile]
                 run_id = wantedrecord[0]
@@ -491,11 +491,18 @@ class MSDataSyncAPI(object):
         #print 'retfiles is: ', unicode(retfiles).encode('utf-8')
         return retfiles
 
-    def find_local_file_or_directory(self, localfiledict, filename):
+    def find_local_file_or_directory(self, localfiledict, filename, exclude=[]):
         ''' does a depth first search of the localfiledict.
             will return the local path to the file/directory if found, or None.
             The filename comparison is non case sensitive '''
 
+        def should_exclude(objectname):
+            will_exclude = False
+            for excludestring in exclude:
+                if objectname.upper().startswith(excludestring.upper()):
+                    will_exclude = True
+            return will_exclude
+            
         def checkfilesatnode(node, filename):
             #print "Node:", node
             #print 
@@ -505,7 +512,8 @@ class MSDataSyncAPI(object):
                 for fname in node['.']:
                     #print "Checking file ", fname
                     if fname.upper() == filename.upper():
-                        return os.path.join(node['/'], fname)
+                        if not should_exclude(filename):
+                            return os.path.join(node['/'], fname)
 
             #check against dirs
             for dname in node.keys():
@@ -513,7 +521,12 @@ class MSDataSyncAPI(object):
                     #print 'checking dir ', dname
                     if dname.upper() == filename.upper():
                         #for dirs, their correct path will be in their node:
-                        return node[dname]['/']
+                        found_exclude = False
+                        for fname in node[dname]['.']:
+                            if should_exclude(fname):
+                                found_exclude = True
+                        if not found_exclude:
+                            return node[dname]['/']
                     else:
                         #descend into the dir
                         found =  checkfilesatnode(node[dname], filename)

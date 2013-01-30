@@ -7,8 +7,9 @@ import os
 import os.path
 
 class GeneratePopup(wx.Dialog):
-    def __init__(self, log, parent, fileslist, destdir):
+    def __init__(self, log, parent, fileslist, destdir, generate_temp_files = False):
         self.log = log
+        self.generate_temp_files = generate_temp_files
         wx.Dialog.__init__(self, parent, -1)
         self.destdir = destdir
         self.contentPanel = wx.Panel(self, -1)
@@ -37,9 +38,18 @@ class GeneratePopup(wx.Dialog):
         self.contentPanel.SetSizerAndFit(_p)
         _p.Fit(self)
 
+    def create_file(self, dir_name, file_name):
+        tfname = os.path.join(dir_name, file_name)
+        f = open(tfname, 'w')
+        f.write('Test string for data upload of MS Data Sync Client simiulator')
+        f.close()
+        print 'Created file %s' % (tfname)
+
     def GenerateFiles(self, evt):
+        temp_files = ['TEMPBASE', 'TEMPDAT', 'TEMPDIR']
         selindexes = self.listctrl.GetSelections()
         print self.destdir
+        count = 0
         for selindex in selindexes:
             listitem = self.listctrl.Items[selindex]
             try:
@@ -49,10 +59,18 @@ class GeneratePopup(wx.Dialog):
                         #create a directory instead, and blat a bunch of files there.
                         os.mkdir(fname)
                         self.log("Created dir %d: %s" % (selindex, fname))
-                        for i in range(5):
-                            tfname = os.path.join(fname, str(i))
-                            open(tfname, 'w').close()
-                            print 'Created file %s' % (tfname)
+                        for i in range(5):                            
+                            self.create_file(fname, str(i))
+                        if self.generate_temp_files:
+                            if count == 0:
+                                for temp_file in temp_files:
+                                    self.create_file(fname, temp_file)
+                            if count == 1:
+                                self.create_file(fname, temp_files[0])
+                            if count == 2:
+                                self.create_file(fname, temp_files[1])
+                            if count == 3:
+                                self.create_file(fname, temp_files[2])
                     else:
                         open(fname, 'w').close()
                         self.log("Wrote item %d: %s" % (selindex, fname))
@@ -60,11 +78,13 @@ class GeneratePopup(wx.Dialog):
                     self.log("Item %d already exits: %s" % (selindex, fname) )
             except Exception, e:
                 self.log("Error writing item %d:%s - %s" % (selindex, fname, str(e)), type=self.log.LOG_ERROR)
+            count += 1
         self.EndModal(0)
     
 
 class MainWindow(wx.Frame):
     def __init__(self, parent):
+        self.shouldGenerateTempFiles = False
         wx.Frame.__init__(self, parent, -1, "MS Simulator")
 
         self.contentPanel = wx.Panel(self, -1)
@@ -89,6 +109,8 @@ class MainWindow(wx.Frame):
         self.clearButton.SetLabel("Clear")
         self.clearButton.Bind(wx.EVT_BUTTON, self.OnClear)
 
+        self.tempGenerationCheckBox = wx.CheckBox(_cp, -1, 'Generate temp files')
+        self.tempGenerationCheckBox.Bind(wx.EVT_CHECKBOX, self.toggleTempFiles)
 
         self.filectrl = filebrowse.DirBrowseButton(_cp, -1, size=(450, -1), changeCallback = None, labelText='Choose Dir', startDirectory = str('.') )
         #ctrl.SetValue(str(self.config.getValue(key)) )
@@ -102,21 +124,22 @@ class MainWindow(wx.Frame):
             self.inputText.MacCheckSpelling(False)
             self.outputText.MacCheckSpelling(False)
 
-
-
-
         _p = self.panelSizer
         #tsizer.Add(self.inputText, 1, flag=wx.ALL, border=2)
         _p.Add(self.inputLabel, 0, flag=wx.ALL, border=2) 
         _p.Add(self.inputText, 1, flag=wx.ALL|wx.GROW, border=2) 
         _p.Add(self.clearButton, 0, flag=wx.ALL, border=2)
         _p.Add(self.filectrl, 1, flag=wx.ALL|wx.GROW, border=2)
+        _p.Add(self.tempGenerationCheckBox, 0, flag=wx.ALL, border=2)
         _p.Add(self.genButton, 0, flag=wx.ALL, border=2)
         _p.Add(self.outputLabel, 0, flag=wx.ALL, border=2) 
         _p.Add(self.outputText, 1, flag=wx.ALL|wx.GROW, border=2)
 
         self.contentPanel.SetSizerAndFit(_p)
         self.panelSizer.Fit(self)
+    
+    def toggleTempFiles(self, event):
+        self.shouldGenerateTempFiles = not self.shouldGenerateTempFiles
 
     def OnGenerate(self, event):
         self.log('Generate')
@@ -130,7 +153,7 @@ class MainWindow(wx.Frame):
                 pass
         print fileslist
 
-        dlg = GeneratePopup(self.log, self, fileslist, self.filectrl.GetValue() )  
+        dlg = GeneratePopup(self.log, self, fileslist, self.filectrl.GetValue(), self.shouldGenerateTempFiles)  
         dlg.ShowModal()
         dlg.Destroy()
 
