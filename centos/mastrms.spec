@@ -1,4 +1,4 @@
-%define name wardabdr
+%define name mastrms
 %define version 1.0.0
 %define unmangled_version 1.1.0
 %define unmangled_version 1.1.0
@@ -15,7 +15,7 @@
 # We still byte compile everything by passing in -O paramaters to python
 %global __os_install_post %(echo '%{__os_install_post}' | sed -e 's!/usr/lib[^[:space:]]*/brp-python-bytecompile[[:space:]].*$!!g')
 
-Summary: Masterms
+Summary: Mastrms
 Name: %{name}
 Version: %{version}
 Release: %{release}
@@ -30,7 +30,7 @@ BuildRequires: python-setuptools
 Requires: httpd mod_wsgi mysql-libs
 
 %description
-Master MS
+Mastr MS
 
 %prep
 #%setup -n %{name}-%{unmangled_version} -n %{name}-%{unmangled_version}
@@ -70,7 +70,9 @@ find %{buildinstalldir} -name '*.py' -type f | xargs sed -i 's:^#!/usr/local/bin
 find %{buildinstalldir} -name '*.py' -type f | xargs sed -i 's:^#!/usr/local/python:#!/usr/bin/python:'
 
 %post
-wardabdr collectstatic --noinput > /dev/null
+mastrms collectstatic --noinput > /dev/null
+chown -R apache:apache %{webapps}/%{name}/logs
+sudo service httpd restart
 
 %clean
 rm -rf %{buildroot}
