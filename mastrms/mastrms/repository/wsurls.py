@@ -1,4 +1,5 @@
 from django.conf.urls.defaults import *
+from django.conf import settings
 
 urlpatterns = patterns('mastrms.repository.wsviews',
     (r'^populate_select/(?P<model>\w+)/(?P<key>\w+)[/]*$', 'populate_select', {'SSL':settings.SSL_ENABLED}),
