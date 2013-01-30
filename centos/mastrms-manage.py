@@ -20,7 +20,7 @@ if __name__ == "__main__":
     sys.path.extend(oldpath)
 
     # setup the settings module for the WSGI app
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings.settings')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'appsettings.mastrms')
     os.environ.setdefault('PROJECT_DIRECTORY', webapp_root)
     os.environ.setdefault('WEBAPP_ROOT', webapp_root)
     os.environ.setdefault('PYTHON_EGG_CACHE', '/tmp/.python-eggs')

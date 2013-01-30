@@ -50,5 +50,6 @@ setup(name='django-mastrms',
         'psycopg2==2.0.8',
         'python-ldap==2.3.13',
         'django-userlog==0.1',
+        'MySQL-Python==1.2.3'
     ]
 )

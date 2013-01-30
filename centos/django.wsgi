@@ -17,7 +17,7 @@ site.addsitedir(webapp_root)
 sys.path.extend(oldpath)
 
 # setup the settings module for the WSGI app
-os.environ['DJANGO_SETTINGS_MODULE'] = 'settings.settings'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'appsettings.mastrms'
 os.environ['PROJECT_DIRECTORY'] = webapp_root
 os.environ['WEBAPP_ROOT'] = webapp_root
 os.environ['PYTHON_EGG_CACHE'] = '/tmp/.python-eggs'
@@ -26,7 +26,9 @@ import django.core.handlers.wsgi
 
 # This is the WSGI application booter
 def application(environ, start):
-    os.environ['SCRIPT_NAME']=environ['SCRIPT_NAME']
+    if "HTTP_SCRIPT_NAME" in environ:
+        environ['SCRIPT_NAME']=environ['HTTP_SCRIPT_NAME']
+        os.environ['SCRIPT_NAME']=environ['HTTP_SCRIPT_NAME']
     if 'DJANGODEV' in environ:
        os.environ['DJANGODEV']=environ['DJANGODEV']
     return django.core.handlers.wsgi.WSGIHandler()(environ,start)
