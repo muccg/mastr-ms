@@ -12,18 +12,18 @@ from django.contrib.auth.decorators import login_required
 from django.core import urlresolvers
 from django.db.models import get_model
 from json_util import makeJsonFriendly
-from mastrms.utils.data_utils import jsonResponse, zipdir, pack_files
+from mastrms.app.utils.data_utils import jsonResponse, zipdir, pack_files
 from mastrms.repository.permissions import user_passes_test
 from django.db.models import Q
 from datetime import datetime, timedelta
 from django.core.mail import mail_admins
 from mastrms.users.MAUser import getMadasUser, loadMadasUser, getCurrentUser
 from mastrms.repository import rulegenerators
-from mastrms.utils.mail_functions import FixedEmailMessage
+from mastrms.app.utils.mail_functions import FixedEmailMessage
 import os, stat
-import settings
+import mastrms.settings
 import copy
-from settings import RETURN_EMAIL
+from mastrms.settings import RETURN_EMAIL
 import logging
 logger = logging.getLogger('madas_log')
 

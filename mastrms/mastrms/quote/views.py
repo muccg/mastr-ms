@@ -1,6 +1,6 @@
 # Create your views here.
 import os, grp, stat
-import settings
+import mastrms.settings
 
 from django.db import models
 from django.db.models import Q
@@ -13,13 +13,13 @@ from django.core.mail import send_mail
 import logging
 
 from mastrms.decorators import *
-from mastrms.utils.data_utils import jsonResponse, jsonErrorResponse, json_encode, uniqueList
-from mastrms.utils.file_utils import ensure_repo_filestore_dir_with_owner, set_repo_file_ownerships
+from mastrms.app.utils.data_utils import jsonResponse, jsonErrorResponse, json_encode, uniqueList
+from mastrms.app.utils.file_utils import ensure_repo_filestore_dir_with_owner, set_repo_file_ownerships
 from mastrms.quote.models import Quoterequest, Formalquote, Quotehistory, Emailmap
 from mastrms.users.MAUser import *
 from mastrms.login.URLState import getCurrentURLState
 #from string import *
-from mastrms.utils.mail_functions import sendQuoteRequestConfirmationEmail, sendQuoteRequestToAdminEmail, sendFormalQuoteEmail, sendFormalStatusEmail
+from mastrms.app.utils.mail_functions import sendQuoteRequestConfirmationEmail, sendQuoteRequestToAdminEmail, sendFormalQuoteEmail, sendFormalStatusEmail
 
 logger = logging.getLogger('madas_log')
 

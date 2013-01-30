@@ -1,8 +1,8 @@
-from mastrms.utils.data_utils import jsonResponse, jsonErrorResponse
+from mastrms.app.utils.data_utils import jsonResponse, jsonErrorResponse
 from mastrms.users.MAUser import *
-from mastrms.utils.mail_functions import sendRegistrationToAdminEmail
+from mastrms.app.utils.mail_functions import sendRegistrationToAdminEmail
 import logging
-import settings
+import mastrms.settings
 
 logger = logging.getLogger('madas_log')
 

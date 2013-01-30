@@ -10,19 +10,19 @@ from django.contrib.auth.decorators import login_required
 import ccg.utils.webhelpers as webhelpers
 from django.http import HttpResponse, Http404
 from django.utils import simplejson
-from mdatasync_server.models import *
-from repository.models import *  
-from mdatasync_server.rules import *
+from mastrms.mdatasync_server.models import *
+from mastrms.repository.models import *  
+from mastrms.mdatasync_server.rules import *
 from ClientState import * #All the functions for dealing with clientstates
 from django.conf import settings
-from mastrms.utils.file_utils import ensure_repo_filestore_dir_with_owner, set_repo_file_ownerships
+from mastrms.app.utils.file_utils import ensure_repo_filestore_dir_with_owner, set_repo_file_ownerships
 
 import logging
 LOGNAME = 'mdatasync_server_log'
 logger = logging.getLogger(LOGNAME)
 logger.setLevel(logging.WARNING) #default is warning
 
-from settings import KEYS_TO_EMAIL, LOGS_TO_EMAIL, RETURN_EMAIL
+from mastrms.settings import KEYS_TO_EMAIL, LOGS_TO_EMAIL, RETURN_EMAIL
 
 from django.core.mail import EmailMessage
 

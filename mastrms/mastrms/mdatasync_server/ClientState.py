@@ -2,9 +2,9 @@ import os
 import os.path
 import pickle
 from django.conf import settings
-from mastrms.utils.file_utils import ensure_repo_filestore_dir_with_owner, set_repo_file_ownerships
+from mastrms.app.utils.file_utils import ensure_repo_filestore_dir_with_owner, set_repo_file_ownerships
 
-from mdatasync_server.models import *
+from mastrms.mdatasync_server.models import *
 import logging
 LOGNAME = 'mdatasync_server_log'
 logger = logging.getLogger(LOGNAME)
