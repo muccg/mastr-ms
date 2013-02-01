@@ -150,8 +150,12 @@ SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = False
 
 #functions to evaluate for status checking
-from mastrms.status_checks import *
-STATUS_CHECKS = [check_default]
+# Hardcoded to list with one item of True for now, since that's what
+# check_default() returns anyway and we have a namespace issue which is
+# stopping import masterms.status_checks from working in this way.
+#from mastrms.status_checks import *
+#STATUS_CHECKS = [check_default]
+STATUS_CHECKS = [True]
 
 # memcache server list
 MEMCACHE_SERVERS = ['yourmemcacheserver.yourdomain:11211','anothermemcacheserver.yourdomain:11211']
