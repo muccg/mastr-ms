@@ -8,7 +8,7 @@
 %define buildinstalldir %{buildroot}/%{installdir}
 %define settingsdir %{buildinstalldir}/settings
 %define logsdir %{buildinstalldir}/logs
-%define scratchdir %{buildinstalldir}/scratch
+%define scratchdir %{buildinstalldir}/%{webapps}/writeable/{%name}
 %define staticdir %{buildinstalldir}/static
 
 # Turn off brp-python-bytecompile because it makes it difficult to generate the file list
@@ -26,7 +26,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Prefix: %{_prefix}
 BuildArch: x86_64
 Vendor: Centre for Comparative Genomics <web@ccg.murdoch.edu.au>
-BuildRequires: python-setuptools
+BuildRequires: python-setuptools mysql-devel
 Requires: httpd mod_wsgi mysql-libs
 
 %description
@@ -70,6 +70,7 @@ find %{buildinstalldir} -name '*.py' -type f | xargs sed -i 's:^#!/usr/local/bin
 find %{buildinstalldir} -name '*.py' -type f | xargs sed -i 's:^#!/usr/local/python:#!/usr/bin/python:'
 
 %post
+mkdir -p %{webapps}/writeable/%{name}
 mastrms collectstatic --noinput > /dev/null
 chown -R apache:apache %{webapps}/%{name}/logs
 sudo service httpd restart
