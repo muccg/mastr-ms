@@ -2,6 +2,7 @@
 import md5, time
 
 from django.http import HttpResponse, HttpResponseRedirect
+from django.template import RequestContext
 import logging
 from django.contrib.auth import authenticate, login, logout
 from mastrms.users.user_manager import get_user_manager
@@ -212,7 +213,7 @@ def serveIndex(request, *args, **kwargs):
                 'username': request.user.username,
                 'newurl':'https://mastrms.bio21.unimelb.edu.au/mastrms/',
                 'wh': webhelpers,
-                })
+                }, context_instance=RequestContext(request))
     
     
     currentuser = getCurrentUser(request)
@@ -242,5 +243,5 @@ def serveIndex(request, *args, **kwargs):
                         'mainContentFunction': mcf,
                         'wh': webhelpers,
                         'params': jsonparams,
-                        })
+                        }, context_instance=RequestContext(request))
 
