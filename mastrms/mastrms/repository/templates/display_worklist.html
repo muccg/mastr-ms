@@ -1,0 +1,9 @@
+<html>
+
+<body>
+{% for a in runsamples %}
+{{username}},{{run.machine.default_data_path}},{{a.filename}},{{run.method.method_path}},{{run.method.method_name}},{{a.sample_name}}<br/>
+{% endfor %}
+</body>
+
+</html>

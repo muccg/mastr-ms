@@ -2311,18 +2311,22 @@ def display_worklist(request, run_id):
     # TODO
     # I don't think the template for this should be in the DB
     # Change it later ...
-    from mako.template import Template 
-    mytemplate = Template(run.method.template) 
-    mytemplate.output_encoding = "utf-8" 
+    #from mako.template import Template 
+    #mytemplate = Template(run.method.template) 
+    #mytemplate.output_encoding = "utf-8" 
 
     #create the variables to insert 
+    
+    from django.shortcuts import render_to_response
+    
     render_vars = {
         'username': request.user.username,
         'run': run,
         'runsamples': run.runsample_set.all().order_by('sequence')} 
          
     #render 
-    return HttpResponse(content=mytemplate.render(**render_vars), content_type='text/plain; charset=utf-8')
+    #return HttpResponse(content=mytemplate.render(**render_vars), content_type='text/plain; charset=utf-8')
+    return render_to_response('display_worklist.html', render_vars)
 
 
 @mastr_users_only
