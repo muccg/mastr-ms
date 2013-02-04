@@ -35,7 +35,7 @@ USE_I18N = True
 ## Django Core stuff
 ##
 TEMPLATE_LOADERS = [
-    'ccg.template.loaders.makoloader.filesystem.Loader',
+#    'ccg.template.loaders.makoloader.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
 ]
 
@@ -124,6 +124,16 @@ WRITABLE_DIRECTORY = os.path.join(PROJECT_DIRECTORY,"scratch")
 TEMPLATE_DIRS = [
     os.path.join(PROJECT_DIRECTORY, "app", "templates"),
 ]
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.core.context_processors.debug',
+    'django.core.context_processors.i18n',
+    'django.core.context_processors.media',
+    'django.core.context_processors.static',
+    'django.contrib.auth.context_processors.auth',
+    'django.contrib.messages.context_processors.messages',
+)
+
 # mako compiled templates directory
 MAKO_MODULE_DIR = os.path.join(WRITABLE_DIRECTORY, "app", "templates")
 # mako module name
