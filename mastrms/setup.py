@@ -51,5 +51,8 @@ setup(name='django-mastrms',
         'python-ldap==2.3.13',
         'django-userlog==0.1',
         'MySQL-Python==1.2.3'
-    ]
+    ],
+    dependency_links = [
+        "http://repo.ccgapps.com.au"
+    ],
 )
