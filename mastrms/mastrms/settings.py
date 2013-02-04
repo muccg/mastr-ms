@@ -47,7 +47,8 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.transaction.TransactionMiddleware',
     'mastrms.app.utils.json_exception_handler_middleware.JSONExceptionHandlerMiddleware',
     'django.middleware.doc.XViewMiddleware',
-    'ccg.middleware.ssl.SSLRedirect'
+    'ccg.middleware.ssl.SSLRedirect',
+    'django.contrib.messages.middleware.MessageMiddleware'
     #'ccg.middleware.StatsMiddleware.StatsMiddleware'
 ]
 
