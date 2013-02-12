@@ -1,57 +1,23 @@
 # -*- coding: utf-8 -*-
-"""
-Django settings import defaults for development server
-"""
 import os
-from ccg.utils.webhelpers import url
+import logging
+import logging.handlers
 
-# SCRIPT_NAME isnt set when not under wsgi
-if not os.environ.has_key('SCRIPT_NAME'):
-    os.environ['SCRIPT_NAME']=''
+CCG_INSTALL_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SCRIPT_NAME =   os.environ['SCRIPT_NAME']
-#print 'Evaluating os.environ[PROJECT_DIRECTORY] as ', os.environ['PROJECT_DIRECTORY']
-#PROJECT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+CCG_WRITEABLE_DIRECTORY = os.path.join(CCG_INSTALL_ROOT,"scratch")
 
-WEBAPP_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-PROJECT_DIRECTORY = WEBAPP_ROOT
-
-TMP_DIRECTORY = os.path.join(PROJECT_DIRECTORY, 'tmp')
-
-#general site config
-DEBUG = True
-DEV_SERVER = True
-SITE_ID = 1
-APPEND_SLASH = True
-SSL_ENABLED = False
-
-# Locals ma
-TIME_ZONE = 'Australia/Perth'
-LANGUAGE_CODE = 'en-us'
-USE_I18N = True
-
-##
-## Django Core stuff
-##
-TEMPLATE_LOADERS = [
-#    'ccg.template.loaders.makoloader.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-]
-
+# see: https://docs.djangoproject.com/en/dev/ref/settings/#middleware-classes
 MIDDLEWARE_CLASSES = [
-    'userlog.middleware.RequestToThreadLocalMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.middleware.transaction.TransactionMiddleware',
-    'mastrms.app.utils.json_exception_handler_middleware.JSONExceptionHandlerMiddleware',
-    'django.middleware.doc.XViewMiddleware',
+    #'django.middleware.csrf.CsrfViewMiddleware', !!! NOT USED AT THE MOMENT !!!
     'ccg.middleware.ssl.SSLRedirect',
-    'django.contrib.messages.middleware.MessageMiddleware'
-    #'ccg.middleware.StatsMiddleware.StatsMiddleware'
+    'django.contrib.messages.middleware.MessageMiddleware',
 ]
 
+# see: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = [
     'mastrms.mdatasync_server',
     'mastrms.login',
@@ -71,116 +37,179 @@ INSTALLED_APPS = [
     'south'
 ]
 
+# these determine which authentication method to use
+# apps use modelbackend by default, but can be overridden here
+# see: https://docs.djangoproject.com/en/dev/ref/settings/#authentication-backends
 AUTHENTICATION_BACKENDS = [
- 'mastrms.repository.backend.MadasBackend',
- #'ccg.auth.backends.NoAuthModelBackend',
- 'userlog.backend.AuthFailedLoggerBackend'
+ 'django.contrib.auth.backends.ModelBackend'
 ]
 
-#email
-EMAIL_HOST = 'example - smtp.yoursite.com'                      # Address of your smtp server
-SERVER_EMAIL = "example - apache@yoursite.com"                  # from address for app emails to users
-RETURN_EMAIL = "example - noreply@yoursite.com"                 # reply address for app emails to users
-EMAIL_SUBJECT_PREFIX = "DEV "                           # email subject prefix
-# default emails in case of server tracebacks, app failures, etc
+# We have a puppet function to generate these by hashing appname and a secret
+SECRET_KEY = 'change-it'
+
+# Default SSL on and forced, turn off if necessary
+SSL_ENABLED = False # !!! Changed from default True !!!
+SSL_FORCE = False # !!! Changed from default True !!!
+
+# Debug off by default
+DEBUG = True # !!! Changed from default False !!!
+
+# Default the site ID to 1, even if the sites framework isn't being used
+SITE_ID = 1
+
+# see: https://docs.djangoproject.com/en/1.4/ref/settings/#root-urlconf
+ROOT_URLCONF = 'mastrms.urls'
+
+# This one's a constant, where puppet will have collect static files to
+# see: https://docs.djangoproject.com/en/1.4/ref/settings/#static-root
+STATIC_ROOT=os.path.join(CCG_INSTALL_ROOT, 'static')
+
+# These may be overridden, but it would be nice to stick to this convention
+# see: https://docs.djangoproject.com/en/1.4/ref/settings/#static-url
+STATIC_URL = '{0}/static/'.format(os.environ.get("SCRIPT_NAME", ""))
+
+# Another puppet-enforced content for location of user-uploaded data
+# see: https://docs.djangoproject.com/en/1.4/ref/settings/#media-root
+MEDIA_ROOT = os.path.join(CCG_WRITEABLE_DIRECTORY,"static","media")
+
+# This may be overridden
+# see: https://docs.djangoproject.com/en/1.4/ref/settings/#media-url
+MEDIA_URL = '{0}/static/media/'.format(os.environ.get("SCRIPT_NAME", ""))
+
+# All templates must be loaded from within an app, so these are the only
+# ones that should be enabled.
+# see: https://docs.djangoproject.com/en/1.4/ref/settings/#template-loaders
+TEMPLATE_LOADERS = [
+    'django.template.loaders.app_directories.Loader'
+]
+
+# Default all email to ADMINS and MANAGERS to root@localhost.
+# Puppet redirects this to something appropriate depend on the environment.
+# see: https://docs.djangoproject.com/en/1.4/ref/settings/#admins
+# see: https://docs.djangoproject.com/en/1.4/ref/settings/#managers
 ADMINS = [
-    ( 'Tech Alerts', 'example - alerts@yoursite.com' )
+    ( 'alert', 'root@localhost' )
 ]
 MANAGERS = ADMINS
 
-REGISTRATION_TO_EMAIL = 'example - someadmin@yoursite.com'        #An admin who will handle site registration emails
+# Mail relay settings for those projects that need it
+# Local non-smtp delivery and forwarding is the alternative
+EMAIL_USE_TLS = False
+EMAIL_HOST = '127.0.0.1'
+EMAIL_PORT = 25
+EMAIL_APP_NAME = "mastrms"
+SERVER_EMAIL = "apache@localhost"  # from address
 
-## Ldap
-AUTH_LDAP_SERVER = '<your ldap server here>'
-AUTH_LDAP_BASE = '<ldap base path>'
-AUTH_LDAP_GROUP_BASE = '<ldap path to group base>'
-AUTH_LDAP_ADMIN_BASE = '<ldap path to admin base>'
-AUTH_LDAP_USER_BASE = 'ou=NEMA,ou=People,' + AUTH_LDAP_ADMIN_BASE
-
-AUTH_LDAP_GROUPOC = 'groupofuniquenames'
-AUTH_LDAP_USEROC = 'inetorgperson'
-AUTH_LDAP_MEMBERATTR = 'uniqueMember'
-AUTH_LDAP_USERDN = 'ou=People'
-
-
-LDAPADMINUSERNAME = '<ldap admin path>'
-LDAPADMINPASSWORD = '<your ldap server password here>'
-AUTH_LDAP_GROUP = 'User'
-DEFAULT_GROUP = 'madas'                 # Base group for users. Needs to exist in the database.
-LDAP_DONT_REQUIRE_CERT = True           # dont require HTTPS for dev ldap
-
-#Server side directories
-PERSISTENT_FILESTORE = os.path.normpath(os.path.join(PROJECT_DIRECTORY, '..', '..', 'files'))
-#Ensure the persistent storage dir exits. If it doesn't, exit noisily.
-assert (os.path.exists(PROJECT_DIRECTORY),
-        "This application cannot start: Cannot find the project directory %s" % PROJECT_DIRECTORY)
-assert (os.path.exists(PERSISTENT_FILESTORE),
-        "This application cannot start: It expects a writeable directory at %s to use as a persistent filestore" % PERSISTENT_FILESTORE)
-
-# for local development, this is set to the static serving directory. For deployment use Apache Alias
-STATIC_SERVER_PATH = os.path.join(PROJECT_DIRECTORY, "app", "static")
-
-# a directory that will be writable by the webserver, for storing various files...
-WRITABLE_DIRECTORY = os.path.join(PROJECT_DIRECTORY,"scratch")
-TEMPLATE_DIRS = [
-    os.path.join(PROJECT_DIRECTORY, "app", "templates"),
-]
-
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'django.core.context_processors.debug',
-    'django.core.context_processors.i18n',
-    'django.core.context_processors.media',
-    'django.core.context_processors.static',
-    'django.contrib.auth.context_processors.auth',
-    'django.contrib.messages.context_processors.messages',
-)
-
-# mako compiled templates directory
-MAKO_MODULE_DIR = os.path.join(WRITABLE_DIRECTORY, "app", "templates")
-# mako module name
-MAKO_MODULENAME_CALLABLE = ''
-
-#MEDIA_ROOT = os.path.join(PROJECT_DIRECTORY,"app", "static", "media")
-#MEDIA_URL = url('/static1/')
-ADMIN_MEDIA_PREFIX = url('/static/admin-media/')
-
-TEMPLATE_DEBUG = DEBUG
-LOGIN_URL = url('/accounts/login/')
-LOGOUT_URL = url('/accounts/logout/')
-
-STATIC_URL = url('/static/')
-STATIC_ROOT = os.path.join(PROJECT_DIRECTORY, "static")
-
-#session and cookies
-MADAS_SESSION_TIMEOUT = 1800 #30 minute session timeout 
-SESSION_COOKIE_PATH = url('/')
-SESSION_SAVE_EVERY_REQUEST = True
-CSRF_COOKIE_NAME = "csrftoken_madas_repoadmin"
+# Default cookie settings
+# see: https://docs.djangoproject.com/en/1.4/ref/settings/#session-cookie-age and following
 SESSION_COOKIE_AGE = 60*60
+SESSION_COOKIE_PATH = '/'
+SESSION_COOKIE_NAME = 'mastrms_sessionid'
+SESSION_SAVE_EVERY_REQUEST = True
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = False # !!! CHANGED FORM DEFAULT TRUE !!!
 
-#functions to evaluate for status checking
-# Hardcoded to list with one item of True for now, since that's what
-# check_default() returns anyway and we have a namespace issue which is
-# stopping import masterms.status_checks from working in this way.
-#from mastrms.status_checks import *
-#STATUS_CHECKS = [check_default]
-STATUS_CHECKS = [True]
+# see: https://docs.djangoproject.com/en/1.4/ref/settings/#csrf-cookie-name and following
+CSRF_COOKIE_NAME = "csrftoken_mastrms"
+CSRF_COOKIE_SECURE = False # !!! CHANGED FORM DEFAULT TRUE !!!
 
-# memcache server list
-MEMCACHE_SERVERS = ['yourmemcacheserver.yourdomain:11211','anothermemcacheserver.yourdomain:11211']
-MEMCACHE_KEYSPACE = "mastrms-dev"
+# Default date input formats, may be overridden
+# see: https://docs.djangoproject.com/en/1.4/ref/settings/#date-input-formats
+TIME_ZONE = 'Australia/Perth'
+LANGUAGE_CODE = 'en-us'
+USE_I18N = False
+USE_L10N = False
+DATE_INPUT_FORMATS = ('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y','%d %m %Y','%d %m %y', '%d %b %Y')
+DATE_FORMAT = "d-m-Y"
+SHORT_DATE_FORMAT = "d/m/Y"
 
+# This honours the X-Forwarded-Host header set by our nginx frontend when
+# constructing redirect URLS.
+# see: https://docs.djangoproject.com/en/1.4/ref/settings/#use-x-forwarded-host
+USE_X_FORWARDED_HOST = True
 
-#APPLICATION SPECIFIC SETTINGS
-ROOT_URLCONF = 'mastrms.urls'
-SITE_NAME = 'madas'
-SECRET_KEY = 'qj#tl@9@7((%^)$i#iyw0gcfzf&#a*pobgb8yr#1%65+*6!@g$'
-EMAIL_APP_NAME = "MastrMS "
-REPO_FILES_ROOT = PERSISTENT_FILESTORE
-#quote files root should be within the repo files root
-QUOTE_FILES_ROOT = os.path.join(REPO_FILES_ROOT, 'quotes')
+# Log directory created and enforced by puppet
+CCG_LOG_DIRECTORY = os.path.join(CCG_WRITEABLE_DIRECTORY, "logs")
+
+# Default logging configuration, can be overridden
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'verbose': {
+            'format': 'mastrms [%(name)s:%(levelname)s:%(asctime)s:%(filename)s:%(lineno)s:%(funcName)s] %(message)s'
+        },
+        'db': {
+            'format': 'mastrms [%(name)s:%(duration)s:%(sql)s:%(params)s] %(message)s'
+        },
+        'simple': {
+            'format': 'mastrms %(levelname)s %(message)s'
+        },
+    },
+    'filters': {
+    },
+    'handlers': {
+        'null': {
+            'level':'DEBUG',
+            'class':'django.utils.log.NullHandler',
+        },
+        'console':{
+            'level':'DEBUG',
+            'class':'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
+        'file':{
+            'level':'DEBUG',
+            'class':'logging.handlers.TimedRotatingFileHandler',
+            'filename': os.path.join(CCG_LOG_DIRECTORY, 'mastrms.log'),
+            'when':'midnight',
+            'formatter': 'verbose'
+        },
+        'db_logfile':{
+            'level':'DEBUG',
+            'class':'logging.handlers.TimedRotatingFileHandler',
+            'filename': os.path.join(CCG_LOG_DIRECTORY, 'mastrms_db.log'),
+            'when':'midnight',
+            'formatter': 'db'
+        },
+        'syslog':{
+            'level':'DEBUG',
+            'class':'logging.handlers.SysLogHandler',
+            'address':'/dev/log',
+            'facility':'local4',
+            'formatter': 'verbose'
+        },        
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+            'formatter':'verbose',
+            'include_html':True
+        }
+    },
+    'loggers': {
+        'django': {
+            'handlers':['null'],
+            'propagate': True,
+            'level':'INFO',
+        },
+        'django.request': {
+            'handlers': ['file', 'syslog', 'mail_admins'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'handlers': ['db_logfile', 'mail_admins'],
+            'level': 'CRITICAL',
+            'propagate': False,
+        },
+        'mastrms': {
+            'handlers': ['console', 'file', 'syslog'],
+            'level': 'DEBUG'
+        }
+    }
+}
+
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-#
 
 DATABASES = {
     'default': {
@@ -196,102 +225,11 @@ DATABASES = {
 CHMOD_USER = 'apache'
 CHMOD_GROUP = 'maupload'
 
-#Datasync email settings:
+PERSISTENT_FILESTORE = os.path.normpath(os.path.join(CCG_INSTALL_ROOT, '..', '..', 'files'))
+REPO_FILES_ROOT = PERSISTENT_FILESTORE
+QUOTE_FILES_ROOT = os.path.join(REPO_FILES_ROOT, 'quotes')
+
+RETURN_EMAIL = "example - noreply@yoursite.com"
+
 LOGS_TO_EMAIL = "log_email@yoursite.com" #email address to receive datasync client log notifications
 KEYS_TO_EMAIL = "key_email@yoursite.com" #email address to receive datasync key upload notifications
-
-
-##
-## LOGGING
-##
-
-LOG_DIRECTORY = os.path.join(PROJECT_DIRECTORY, "logs")
-try:
-    if not os.path.exists(LOG_DIRECTORY):
-        os.mkdir(LOG_DIRECTORY)
-except:
-    pass
-os.path.exists(LOG_DIRECTORY), "No logs directory, please create one: %s" % LOG_DIRECTORY
-INSTALL_NAME = PROJECT_DIRECTORY.split('/')[-2]
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': True,
-    'formatters': {
-        'verbose': {
-            'format': 'MASTRMS [%(name)s:' + INSTALL_NAME + ':%(levelname)s:%(asctime)s:%(filename)s:%(lineno)s:%(funcName)s] %(message)s'
-        },
-        'db': {
-            'format': 'MASTRMS [%(name)s:' + INSTALL_NAME + ':%(duration)s:%(sql)s:%(params)s] %(message)s'
-        },
-        'simple': {
-            'format': 'MASTRMS ' + INSTALL_NAME + ' %(levelname)s %(message)s'
-        },
-    },
-    'filters': {
-    },
-    'handlers': {
-        'null': {
-            'level':'DEBUG',
-            'class':'django.utils.log.NullHandler',
-        },
-        'console':{
-            'level':'DEBUG',
-            'class':'logging.StreamHandler',
-            'formatter': 'verbose'
-        },
-        'errorfile':{
-            'level':'ERROR',
-            'class':'logging.handlers.TimedRotatingFileHandler',
-            'filename': os.path.join(LOG_DIRECTORY, 'error.log'),
-            'when':'midnight',
-            'formatter': 'verbose'
-        },
-        'madasfile':{
-            'class':'logging.handlers.TimedRotatingFileHandler',
-            'filename': os.path.join(LOG_DIRECTORY, 'mastrms.log'),
-            'when':'midnight',
-            'formatter': 'verbose'
-        },
-        'mdatasyncfile':{
-            'class':'logging.handlers.TimedRotatingFileHandler',
-            'filename': os.path.join(LOG_DIRECTORY, 'mdatasync_server.log'),
-            'when':'midnight',
-            'formatter': 'verbose'
-        },
-        'db_logfile':{
-            'level':'DEBUG',
-            'class':'logging.handlers.TimedRotatingFileHandler',
-            'filename': os.path.join(LOG_DIRECTORY, 'mastrms_db.log'),
-            'when':'midnight',
-            'formatter': 'db'
-        },
-        'mail_admins': {
-            'level': 'ERROR',
-            'class': 'django.utils.log.AdminEmailHandler',
-            'formatter':'verbose',
-            'include_html':True
-        }
-    },
-    'root': {
-            'handlers':['console', 'errorfile', 'mail_admins'],
-            'level':'ERROR',
-    },
-    'loggers': {
-        'django': {
-            'handlers':['null'],
-            'propagate': False,
-            'level':'INFO',
-        },
-        'madas_log': {
-            'handlers': ['madasfile'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'mdatasync_server_log': {
-            'handlers': ['mdatasyncfile'],
-            'level': 'INFO',
-            'propagate': True,
-        }
-    }
-}
