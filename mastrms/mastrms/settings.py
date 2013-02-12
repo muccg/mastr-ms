@@ -225,9 +225,8 @@ DATABASES = {
 CHMOD_USER = 'apache'
 CHMOD_GROUP = 'maupload'
 
-PERSISTENT_FILESTORE = os.path.normpath(os.path.join(CCG_INSTALL_ROOT, '..', '..', 'files'))
-REPO_FILES_ROOT = PERSISTENT_FILESTORE
-QUOTE_FILES_ROOT = os.path.join(REPO_FILES_ROOT, 'quotes')
+REPO_FILES_ROOT = os.path.join(CCG_WRITEABLE_DIRECTORY, 'files')
+QUOTE_FILES_ROOT = os.path.join(CCG_WRITEABLE_DIRECTORY, 'quotes')
 
 RETURN_EMAIL = "example - noreply@yoursite.com"
 
