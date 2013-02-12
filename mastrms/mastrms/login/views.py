@@ -11,7 +11,7 @@ from django.utils import simplejson
 from ccg.utils import webhelpers
 from ccg.utils.webhelpers import siteurl, wsgibase
 from mastrms import settings #for LDAP details only, can remove when LDAP is removed
-from mastrms.settings import MADAS_SESSION_TIMEOUT
+from mastrms.settings import SESSION_COOKIE_AGE
 from mastrms.app.utils.data_utils import jsonResponse, jsonErrorResponse
 from mastrms.users.MAUser import *
 from mastrms.login.URLState import getCurrentURLState
@@ -59,7 +59,7 @@ def processLogin(request, *args):
                 authenticated = True
                 authorized = True
                 #set the session to expire after
-                request.session.set_expiry(MADAS_SESSION_TIMEOUT)
+                request.session.set_expiry(SESSION_COOKIE_AGE)
             else:
                 #Inactive user
                 print 'inactive login'
