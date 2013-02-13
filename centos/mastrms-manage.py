@@ -15,12 +15,14 @@ if __name__ == "__main__":
     oldpath = sys.path[1:]
     sys.path = sys.path[:1]
     site.addsitedir(webapp_root)
-    site.addsitedir("/usr/local/etc/ccgapps")
     site.addsitedir(os.path.join(webapp_root, "lib"))
+    site.addsitedir("/etc/ccgapps")
+    site.addsitedir("/usr/local/etc/ccgapps")
+    
     sys.path.extend(oldpath)
 
     # setup the settings module for the WSGI app
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'appsettings.mastrms')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'defaultsettings.mastrms')
     os.environ.setdefault('PROJECT_DIRECTORY', webapp_root)
     os.environ.setdefault('WEBAPP_ROOT', webapp_root)
     os.environ.setdefault('PYTHON_EGG_CACHE', '/tmp/.python-eggs')
