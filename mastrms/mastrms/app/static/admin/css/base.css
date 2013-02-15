@@ -715,7 +715,7 @@ table#change-history tbody th {
 /* HEADER */
 
 #header {
-    background: #417690;
+    background: #003862;
     color: #ffc;
     overflow: hidden;
 }
@@ -729,11 +729,14 @@ table#change-history tbody th {
 }
 
 #branding h1 {
-    padding: 0 10px;
-    font-size: 18px;
-    margin: 8px 0;
-    font-weight: normal;
-    color: #f4f379;
+	padding-bottom: 1px;
+	padding-left: 20px;
+	background-color: #003862;
+	padding-top: 4px;
+	font-weight: bold;
+	text-shadow: 2px 2px 1px black;
+	color: white;
+	font-size: 180%;
 }
 
 #branding h2 {
