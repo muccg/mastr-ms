@@ -7,26 +7,46 @@ CCG_INSTALL_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 CCG_WRITEABLE_DIRECTORY = os.path.join(CCG_INSTALL_ROOT,"writeable")
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'mastrms',
+        'USER': 'mastrms',
+        'PASSWORD': 'mastrms',
+        'HOST': '',                      
+        'PORT': '',                      
+    }
+}
+
 # see: https://docs.djangoproject.com/en/dev/ref/settings/#middleware-classes
 MIDDLEWARE_CLASSES = [
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # !!! Disabled in original code !!!
+    #'django.middleware.csrf.CsrfViewMiddleware',
     'ccg.middleware.ssl.SSLRedirect',
     'django.contrib.messages.middleware.MessageMiddleware',
 ]
 
 # see: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = [
+    'mastrms.mdatasync_server',
+    'mastrms.login',
+    'mastrms.quote',
+    'mastrms.admin',
+    'mastrms.repository',
+    'mastrms.users',
+    'mastrms.app',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.admin',
     'django.contrib.staticfiles',
-    'django.contrib.messages',
     'django_extensions',
+    'userlog',
+    'south'
 ]
 
 # these determine which authentication method to use
@@ -40,11 +60,11 @@ AUTHENTICATION_BACKENDS = [
 SECRET_KEY = 'change-it'
 
 # Default SSL on and forced, turn off if necessary
-SSL_ENABLED = True
-SSL_FORCE = True
+SSL_ENABLED = False # Changed from True
+SSL_FORCE = False # Changed from True
 
 # Debug off by default
-DEBUG = False
+DEBUG = True # Changed from False
 
 # Default the site ID to 1, even if the sites framework isn't being used
 SITE_ID = 1
@@ -98,12 +118,12 @@ SESSION_COOKIE_AGE = 60*60
 SESSION_COOKIE_PATH = '{0}/'.format(os.environ.get("SCRIPT_NAME", ""))
 SESSION_COOKIE_NAME = 'mastrms_sessionid'
 SESSION_SAVE_EVERY_REQUEST = True
-SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = False # CHange from True
+SESSION_COOKIE_SECURE = False # Changed from True
 
 # see: https://docs.djangoproject.com/en/1.4/ref/settings/#csrf-cookie-name and following
 CSRF_COOKIE_NAME = "csrftoken_mastrms"
-CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = False # Changed from True
 
 # Default date input formats, may be overridden
 # see: https://docs.djangoproject.com/en/1.4/ref/settings/#date-input-formats
@@ -200,6 +220,19 @@ LOGGING = {
         }
     }
 }
+
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-#
+
+CHMOD_USER = 'apache'
+CHMOD_GROUP = 'maupload'
+
+REPO_FILES_ROOT = os.path.join(CCG_WRITEABLE_DIRECTORY, 'files')
+QUOTE_FILES_ROOT = os.path.join(CCG_WRITEABLE_DIRECTORY, 'quotes')
+
+RETURN_EMAIL = "example - noreply@yoursite.com"
+
+LOGS_TO_EMAIL = "log_email@yoursite.com" #email address to receive datasync client log notifications
+KEYS_TO_EMAIL = "key_email@yoursite.com" #email address to receive datasync key upload notifications
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-#
 
