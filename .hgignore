@@ -1,7 +1,6 @@
 .*\.pyc$
 .*\.DS_Store
 .*\.log
-^appsettings*
 ^bootstrap*
 ^build*
 ^mastrms/dist/*
@@ -13,7 +12,6 @@
 ^mastrms/log/*
 ^mastrms/mdatasync_client/client/build/*
 ^mastrms/mdatasync_client/client/dist/*
-^.*appsettings*
 ^docs/build/*
 ^mastrms/django_mastrms.egg-info/*
 ^.ccgplatform*
