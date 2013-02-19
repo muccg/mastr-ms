@@ -13,7 +13,7 @@ for package in ('app', 'admin', 'dashboard', 'login', 'mdatasync_server', 'quote
     os.chdir(start_dir)
 
 setup(name='django-mastrms',
-    version='1.2.0',
+    version='1.2.1',
     description='Mastr MS',
     long_description='Django Mastr MS web application',
     author='Centre for Comparative Genomics',
