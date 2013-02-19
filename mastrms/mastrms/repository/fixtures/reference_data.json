@@ -192,22 +192,5 @@
             "sample_type": "Sweep", 
             "filename_prefix": "sweep"
         }
-    },
-    {
-        "pk": 5, 
-        "model": "repository.instrumentmethod", 
-        "fields": {
-            "obsolescence_date": null, 
-            "blank_position": "VT1,98", 
-            "method_path": "d:\\test\\", 
-            "title": "Default Method", 
-            "blank_at_end": false, 
-            "obsolete": false, 
-            "method_name": "a.m", 
-            "version": "1.0", 
-            "blank_at_start": false, 
-            "template": "## -*- coding: utf-8 -*-\n% for a in runsamples:\n${username},${run.machine.default_data_path},${a.filename},${run.method.method_path},${run.method.method_name},${a.sample_name}\n% endfor", 
-            "randomisation": false
-        }
     }
 ]

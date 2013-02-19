@@ -9,13 +9,14 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         
         # Adding unique constraint on 'Group', fields ['name']
-        db.create_unique('users_group', ['name'])
+        #db.create_unique('users_group', ['name'])
 
         # Changing field 'UserDetail.user'
-        db.alter_column('users_userdetail', 'user_id', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['auth.User'], unique=True))
+        #db.alter_column('users_userdetail', 'user_id', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['auth.User'], unique=True))
 
         # Adding unique constraint on 'UserDetail', fields ['user']
-        db.create_unique('users_userdetail', ['user_id'])
+        #db.create_unique('users_userdetail', ['user_id'])
+        pass
 
 
     def backwards(self, orm):
