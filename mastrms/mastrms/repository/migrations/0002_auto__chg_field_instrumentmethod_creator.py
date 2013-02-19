@@ -9,7 +9,8 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         
         # Changing field 'InstrumentMethod.creator'
-        db.alter_column('repository_instrumentmethod', 'creator_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'], null=True))
+        #db.alter_column('repository_instrumentmethod', 'creator_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'], null=True))
+        pass
 
 
     def backwards(self, orm):
