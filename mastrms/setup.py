@@ -34,7 +34,7 @@ setup(name='django-mastrms',
     package_data=data_files,
     zip_safe=False,
     install_requires=[
-        'Django==1.4.3',
+        'Django==1.4.5',
         'South==0.7.3',
         'ccg-extras==0.1.5',
         'ccg-auth==0.3.2',
