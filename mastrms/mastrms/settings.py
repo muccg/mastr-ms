@@ -5,7 +5,7 @@ import logging.handlers
 
 CCG_INSTALL_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-CCG_WRITEABLE_DIRECTORY = os.path.join(CCG_INSTALL_ROOT,"writeable")
+CCG_WRITEABLE_DIRECTORY = os.path.join(CCG_INSTALL_ROOT,"scratch")
 
 DATABASES = {
     'default': {
@@ -141,7 +141,7 @@ SHORT_DATE_FORMAT = "d/m/Y"
 USE_X_FORWARDED_HOST = True
 
 # Log directory created and enforced by puppet
-CCG_LOG_DIRECTORY = os.path.join(CCG_WRITEABLE_DIRECTORY, "logs")
+CCG_LOG_DIRECTORY = os.path.join(CCG_INSTALL_ROOT, "logs")
 
 # Default logging configuration, can be overridden
 LOGGING = {
