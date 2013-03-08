@@ -1,6 +1,6 @@
 # Create your views here.
 import os, grp, stat
-import mastrms.settings
+from django.conf import settings
 
 from django.db import models
 from django.db.models import Q
