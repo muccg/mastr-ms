@@ -1,6 +1,6 @@
 %define name mastrms
-%define version 1.2.1
-%define unmangled_version 1.2.1
+%define version 1.2.2
+%define unmangled_version 1.2.2
 %define release 1
 %define webapps /usr/local/webapps
 %define installdir %{webapps}/%{name}
