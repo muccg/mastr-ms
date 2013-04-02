@@ -182,139 +182,137 @@ MA.RuleGeneratorListCmp = {
     frame: 'true',
     bodyStyle: 'padding: 5px',
     onStoreLoad: function(){
-                //refresh the details component
-                var selModel = Ext.getCmp('rulegeneratorGrid').getSelectionModel();
-                if (selModel.hasSelection()) {
-                    var record = selModel.getSelected();
-                    Ext.getCmp("rule-generator-details").displayRecord(record);
-                } 
-            },
-    items: [
-        {
-            title:'Rule Generators',
-            id:'rulegeneratorGrid',
-            columnWidth: 0.4,
-            layout: 'fit',
-            height: 300,
-            border: true,
-            xtype:'grid',
-            store: ruleGeneratorListStore,
-            
-            tbar: [{
-                    text: 'Hide disabled',
-                    handler: function(b, ev) {
-                        var store = Ext.getCmp('rulegeneratorGrid').getStore();
-                        if (store.isFiltered()) {
-                            store.clearFilter();
-                            this.setText('Hide Disabled');
-                        } else {
-                            store.filterBy(function(record) {
-                                return record.get('state') !== 'Disabled';
-                            });
-                            this.setText('Show Disabled');
-                        }
-                    }
-                },{
-                    xtype: 'tbseparator'
-                },{
-                    text: 'Create New',
-                    handler: function(b, ev) {
-                        Ext.getCmp('ruleGeneratorCreateCmp').create();
-                    }
-                },{
-                    xtype: 'tbseparator'
-                },{
-                    text: 'Create new Version',
-                    handler: function(b, ev) {
-                        var selModel = Ext.getCmp('rulegeneratorGrid').getSelectionModel();
-                        var record;
-                        if (!selModel.hasSelection()) {
-                            Ext.Msg.alert('Nothing selected', 'Please select a Rule Generator first.');
-                            return;
-                        }
-                        record = selModel.getSelected();
-                        Ext.Ajax.request({
-                            url: wsBaseUrl + 'create_new_version_of_rule_generator',
-                            method: 'POST',
-                            params: {'id': record.get('id')},
-                            success:function(response, opts){
-                                var newId = Ext.decode(response.responseText).new_id;
-
-                                var store = Ext.getCmp('rulegeneratorGrid').getStore();
-                                var selectFn = function() {
-                                    selModel.selectRow(store.indexOfId(newId));
-                                    Ext.getCmp('ruleGeneratorCreateCmp').edit(newId);
-                                };
-                                store.addListener('load', selectFn, this, {single:true});
-                                store.reload();
-                            },
-                            failure: function(form, action){
-                                Ext.Msg.alert("Error", "Couldn't create new version of Rule Generator");
-                            }
-                        });
-
-                    }
-                },{
-                    xtype: 'tbseparator'
-                },{
-                    text: 'Clone',
-                    handler: function(b, ev) {
-                        var selModel = Ext.getCmp('rulegeneratorGrid').getSelectionModel();
-                        var record;
-                        if (!selModel.hasSelection()) {
-                            Ext.Msg.alert('Nothing selected', 'Please select a Rule Generator first.');
-                            return;
-                        }
-                        record = selModel.getSelected();
-                        Ext.Ajax.request({
-                            url: wsBaseUrl + 'clone_rule_generator',
-                            method: 'POST',
-                            params: {'id': record.get('id')},
-                            success:function(response, opts){
-                                var newId = Ext.decode(response.responseText).new_id;
-
-                                var store = Ext.getCmp('rulegeneratorGrid').getStore();
-                                var selectFn = function() {
-                                    selModel.selectRow(store.indexOfId(newId));
-                                    Ext.getCmp('ruleGeneratorCreateCmp').edit(newId);
-                                };
-                                store.addListener('load', selectFn, this, {single:true});
-                                store.reload();
-                            },
-                            failure: function(form, action){
-                                Ext.Msg.alert("Error", "Couldn't clone Rule Generator");
-                            }
-                        });
-
-                    }
-                },{
-                    xtype: 'tbseparator'
-                },{
-                    text: 'Edit',
-                    handler: function(b, ev) {
-                        var selModel = Ext.getCmp('rulegeneratorGrid').getSelectionModel();
-                        var record;
-                        if (!selModel.hasSelection()) {
-                            Ext.Msg.alert('Nothing selected', 'Please select the Rule Generator to edit first.');
-                            return;
-                        }
-                        record = selModel.getSelected();
-                        if (record.get('state') !== 'In Design') {
-                            Ext.Msg.alert('Not Editable', 'Rule Generators are editable only while they are In Design. For changing Rule Generators that have been Enabled please consider using Create New Version.');
-                            return;
-                        }
-                        Ext.getCmp('ruleGeneratorCreateCmp').edit(record.get('id'));
-                    }
+        //refresh the details component
+        var selModel = Ext.getCmp('rulegeneratorGrid').getSelectionModel();
+        if (selModel.hasSelection()) {
+            var record = selModel.getSelected();
+            Ext.getCmp("rule-generator-details").displayRecord(record);
+        } 
+    },
+    items: [{
+        title:'Rule Generators',
+        id:'rulegeneratorGrid',
+        columnWidth: 0.4,
+        layout: 'fit',
+        height: 300,
+        border: true,
+        xtype:'grid',
+        store: ruleGeneratorListStore,
+        tbar: [{
+            text: 'Hide disabled',
+            handler: function(b, ev) {
+                var store = Ext.getCmp('rulegeneratorGrid').getStore();
+                if (store.isFiltered()) {
+                    store.clearFilter();
+                    this.setText('Hide Disabled');
+                } else {
+                    store.filterBy(function(record) {
+                        return record.get('state') !== 'Disabled';
+                    });
+                    this.setText('Show Disabled');
                 }
+            }
+        },{
+            xtype: 'tbseparator'
+        },{
+            text: 'Create New',
+            handler: function(b, ev) {
+                Ext.getCmp('ruleGeneratorCreateCmp').create();
+            }
+        },{
+            xtype: 'tbseparator'
+        },{
+            text: 'Create new Version',
+            handler: function(b, ev) {
+                var selModel = Ext.getCmp('rulegeneratorGrid').getSelectionModel();
+                var record;
+                if (!selModel.hasSelection()) {
+                    Ext.Msg.alert('Nothing selected', 'Please select a Rule Generator first.');
+                    return;
+                }
+                record = selModel.getSelected();
+                Ext.Ajax.request({
+                    url: wsBaseUrl + 'create_new_version_of_rule_generator',
+                    method: 'POST',
+                    params: {
+                        'id': record.get('id')
+                    },
+                    success:function(response, opts){
+                        var newId = Ext.decode(response.responseText).new_id;
 
-            ], 
-            columns: [
-                  {header: 'Name', sortable:true, dataIndex: 'full_name'},
-                  {header: 'State', sortable:true, dataIndex: 'state'},
-                  {header: 'Accessible by', sortable:true, dataIndex: 'accessibility'},
-                  {header: 'Created By', sortable:true, dataIndex: 'created_by'}
-            ],
-            viewConfig: {forceFit:true},
+                        var store = Ext.getCmp('rulegeneratorGrid').getStore();
+                        var selectFn = function() {
+                            selModel.selectRow(store.indexOfId(newId));
+                            Ext.getCmp('ruleGeneratorCreateCmp').edit(newId);
+                        };
+                        store.addListener('load', selectFn, this, {single:true});
+                        store.reload();
+                    },
+                    failure: function(form, action){
+                        Ext.Msg.alert("Error", "Couldn't create new version of Rule Generator");
+                    }
+                });
+            }
+        },{
+            xtype: 'tbseparator'
+        },{
+            text: 'Clone',
+            handler: function(b, ev) {
+                var selModel = Ext.getCmp('rulegeneratorGrid').getSelectionModel();
+                var record;
+                if (!selModel.hasSelection()) {
+                    Ext.Msg.alert('Nothing selected', 'Please select a Rule Generator first.');
+                    return;
+                }
+                record = selModel.getSelected();
+                Ext.Ajax.request({
+                    url: wsBaseUrl + 'clone_rule_generator',
+                    method: 'POST',
+                    params: {
+                        'id': record.get('id')
+                    },
+                    success:function(response, opts){
+                        var newId = Ext.decode(response.responseText).new_id;
+
+                        var store = Ext.getCmp('rulegeneratorGrid').getStore();
+                        var selectFn = function() {
+                            selModel.selectRow(store.indexOfId(newId));
+                            Ext.getCmp('ruleGeneratorCreateCmp').edit(newId);
+                        };
+                        store.addListener('load', selectFn, this, {single:true});
+                        store.reload();
+                    },
+                    failure: function(form, action){
+                        Ext.Msg.alert("Error", "Couldn't clone Rule Generator");
+                    }
+                });
+            }
+        },{
+            xtype: 'tbseparator'
+        },{
+            text: 'Edit',
+            handler: function(b, ev) {
+                var selModel = Ext.getCmp('rulegeneratorGrid').getSelectionModel();
+                var record;
+                if (!selModel.hasSelection()) {
+                    Ext.Msg.alert('Nothing selected', 'Please select the Rule Generator to edit first.');
+                    return;
+                }
+                record = selModel.getSelected();
+                if (record.get('state') !== 'In Design') {
+                    Ext.Msg.alert('Not Editable', 'Rule Generators are editable only while they are In Design. For changing Rule Generators that have been Enabled please consider using Create New Version.');
+                    return;
+                }
+                Ext.getCmp('ruleGeneratorCreateCmp').edit(record.get('id'));
+            }
+        }], 
+        columns: [
+            {header: 'Name', sortable:true, dataIndex: 'full_name'},
+            {header: 'State', sortable:true, dataIndex: 'state'},
+            {header: 'Accessible by', sortable:true, dataIndex: 'accessibility'},
+            {header: 'Created By', sortable:true, dataIndex: 'created_by'}
+        ],
+        viewConfig: {forceFit:true},
             sm: new Ext.grid.RowSelectionModel({
                     singleSelect: true,
                     listeners: {
@@ -324,10 +322,12 @@ MA.RuleGeneratorListCmp = {
                     }
             }),
             lazyRender:true,
-            bbar:[{xtype:'tbspacer'}],
-            },
-        MA.RuleGeneratorDetailsCmp
-        ]
+            bbar:[{
+                xtype:'tbspacer'
+            }],
+    },
+    MA.RuleGeneratorDetailsCmp
+    ]
 };
 
 ruleGeneratorListStore.on({
@@ -647,7 +647,7 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
                                  'apply_sweep_rule': apply_sweep_rule, 
                                  'startblock':Ext.encode(get_grid_keyvals('startblock')), 
                                  'sampleblock': Ext.encode(get_grid_keyvals('sampleblock')), 
-                                 'endblock':Ext.encode(get_grid_keyvals('endblock')), 
+                                 'endblock':Ext.encode(get_grid_keyvals('endblock')) 
                                  };
 
                     var submiturl = 'create_rule_generator';
