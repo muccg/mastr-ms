@@ -312,19 +312,21 @@ MA.RuleGeneratorListCmp = {
             {header: 'Accessible by', sortable:true, dataIndex: 'accessibility'},
             {header: 'Created By', sortable:true, dataIndex: 'created_by'}
         ],
-        viewConfig: {forceFit:true},
-            sm: new Ext.grid.RowSelectionModel({
-                    singleSelect: true,
-                    listeners: {
-                        rowselect: function(sm, row, rec) {
-                            Ext.getCmp("rule-generator-details").displayRecord(rec);
-                        }
+        viewConfig: {
+            forceFit:true
+        }, 
+        sm: new Ext.grid.RowSelectionModel({
+                singleSelect: true,
+                listeners: {
+                    rowselect: function(sm, row, rec) {
+                        Ext.getCmp("rule-generator-details").displayRecord(rec);
                     }
+                }
             }),
-            lazyRender:true,
-            bbar:[{
-                xtype:'tbspacer'
-            }],
+        lazyRender:true,
+        bbar:[{
+            xtype:'tbspacer'
+        }]
     },
     MA.RuleGeneratorDetailsCmp
     ]
