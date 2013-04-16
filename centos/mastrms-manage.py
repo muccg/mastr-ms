@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 import os
 import sys
+import pwd
+
+(uid, gid) = pwd.getpwnam('apache')[2:4]
+os.setegid(gid)
+os.seteuid(uid)
 
 if __name__ == "__main__":
 
