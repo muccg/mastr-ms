@@ -26,7 +26,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Prefix: %{_prefix}
 BuildArch: x86_64
 Vendor: Centre for Comparative Genomics <web@ccg.murdoch.edu.au>
-BuildRequires: python-setuptools openldap-devel 
+BuildRequires: python-setuptools openldap-devel python-devel openssl-devel
 Requires: python-setuptools openldap-clients httpd mod_wsgi 
 
 %description
