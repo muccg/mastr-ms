@@ -24,19 +24,31 @@ def ensure_repo_filestore_dir_with_owner(relpath, ownerid=os.getuid(), groupname
             logger.debug('creating directory: %s' % ( abspath ) )
             os.makedirs(abspath)
 
-        try:
-            set_repo_file_ownerships(abspath, ownerid=ownerid, groupname=groupname)
-        except Exception, perm_e:
-            logger.critical('Unable to set permissions/ownership for %s: %s' % (abspath, perm_e) )
-            #we don't re-raise
+        set_repo_file_ownerships(abspath, ownerid=ownerid, groupname=groupname)
     except Exception, e:
         logger.critical('Exception in ensure_repo_filestore_dir_with_owner: %s' % (e))
         raise
 
 def set_repo_file_ownerships(filepath, ownerid=os.getuid(), groupname=settings.CHMOD_GROUP):
-    groupinfo = grp.getgrnam(groupname)
+    try:
+        groupinfo = grp.getgrnam(groupname)
+    except KeyError:
+        logger.critical("Group \"%s\" not found. Check settings.py." % groupname)
+        return False
+
     gid = groupinfo.gr_gid
-    os.chmod(filepath, stat.S_IRWXU|stat.S_IRWXG)
-    os.chown(filepath, ownerid, gid)
 
+    try:
+        os.chmod(filepath, stat.S_IRWXU|stat.S_IRWXG)
+    except OSError, e:
+        logger.critical("Unable to set permissions: %s" % str(e))
+        return False
 
+    try:
+        os.chown(filepath, ownerid, gid)
+    except OSError, e:
+        logger.critical("Unable to set ownership to uid %s and "
+                        "gid %s: %s" % (ownerid, gid, str(e)))
+        return False
+
+    return True

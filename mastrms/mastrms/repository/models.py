@@ -9,7 +9,7 @@ from mastrms.users.MAUser import getMadasUser
 from django.core.files.storage import FileSystemStorage
 import os
 from mastrms import settings
-from mastrms.app.utils.file_utils import ensure_repo_filestore_dir_with_owner, set_repo_file_ownerships
+from mastrms.app.utils.file_utils import ensure_repo_filestore_dir_with_owner
 
 import logging
 logger = logging.getLogger('madas_log')
@@ -736,4 +736,3 @@ class RuleGeneratorEndBlock(models.Model):
     index = models.PositiveIntegerField()
     count = models.PositiveIntegerField()
     component = models.ForeignKey(Component)
-
