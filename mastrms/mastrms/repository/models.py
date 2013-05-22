@@ -472,6 +472,13 @@ class Run(models.Model):
     def is_method_type_individual_vial(self):
         return (self.order_of_methods == 2)
 
+    def is_complete(self):
+        """
+        Returns True if state is "complete", False if state is "new"
+        or "in progress".
+        """
+        return self.state == RUN_STATES.COMPLETE[0]
+
 class SampleLog(models.Model):
     LOG_TYPES = (
             (0, u'Received'),
