@@ -111,7 +111,7 @@ def request_sync(request, organisation=None, sitename=None, station=None):
             "details":{},
             "runsamples":{}}
     syncold = request.GET.get("sync_completed", False)
-    print 'syncold is:', syncold
+    logger.debug('syncold is: %s' % syncold)
     if node is not None:
         ncerror, nodeclient_details = get_nodeclient_details(organisation, sitename, station)
         resp["details"] = nodeclient_details
@@ -172,42 +172,44 @@ def nodeinfo(request, organisation=None, sitename=None, station=None):
 
 
 def getExpectedFilesForNode(nodeclient, include_completed = False):
-    '''Based on the experiments that a given nodeclient is involved in,
-       return the files which the server expects.
-       If include_completed is false, this will be every file which
-       the server cannot see on its filesystem from incomplete experiments/runs.
-       If include_complete is true, this will be every file which the
-       server cannot see on its filesystem from incomplete and complete experiments/runs.
+    """
+    Based on the experiments that a given nodeclient is involved in,
+    return the files which the server expects.
 
-       Returns a dictionary with 'complete' and 'incomplete' keys, whose values are
-       dicts keyed on runid.
-    '''
+    If include_completed is false, this will be every file which
+    the server has not marked as complete.
+
+    If include_complete is true, this will be every file from both
+    incomplete and complete experiments/runs which the server has not
+    marked as complete.
+
+    Returns a dictionary with 'complete' and 'incomplete' keys, whose values are
+    dicts keyed on runid.
+    """
     incomplete = {}
     complete = {}
 
     #now get the runs for that nodeclient
     runs = Run.objects.filter(machine = nodeclient)
     for run in runs:
-        target_dict = incomplete
         logger.debug('Finding runsamples for run')
-        if (run.state != RUN_STATES.COMPLETE[0]) or ( (run.state == RUN_STATES.COMPLETE[0]) and include_completed):
-            if run.state == RUN_STATES.COMPLETE[0]:
-                target_dict = complete
+        if not run.is_complete() or include_completed:
+            runsamples = run.runsample_set.exclude(filename="")
+            runsamples = runsamples.exclude(filename__isnull=True) # fixme: fix the model
 
-            runsamples = RunSample.objects.filter(run = run)
             #Build a filesdict of all the files for these runsamples
             for rs in runsamples:
                 logger.debug('Getting files for runsamples');
-                if rs.filename is None or rs.filename == "":
-                    continue #move to the next record - this one has no filename
 
-                if not check_run_sample_file_exists(rs.id):
-                    abspath, relpath = rs.filepaths()
-                    if target_dict.has_key(rs.filename):
-                        logger.warning( 'Duplicate filename detected for %s' % (rs.filename.encode('utf-8')))
-                    if not(target_dict.has_key(run.id)):
-                        target_dict[run.id] = {}
-                    target_dict[run.id][rs.filename] = [run.id, rs.id, relpath, os.path.exists(os.path.join(abspath, rs.filename))]
+                target_dict = complete if rs.complete else incomplete
+
+                abspath, relpath = rs.filepaths()
+                runfiles = target_dict.setdefault(run.id, {})
+
+                if runfiles.has_key(rs.filename):
+                    logger.warning( 'Duplicate filename detected for %s' % (rs.filename.encode('utf-8')))
+
+                runfiles[rs.filename] = [run.id, rs.id, relpath, os.path.exists(os.path.join(abspath, rs.filename))]
 
     return {'complete': complete, 'incomplete': incomplete}
 
