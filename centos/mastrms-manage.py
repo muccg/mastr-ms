@@ -23,7 +23,7 @@ if __name__ == "__main__":
     site.addsitedir(os.path.join(webapp_root, "lib"))
     site.addsitedir("/etc/ccgapps")
     site.addsitedir("/usr/local/etc/ccgapps")
-    
+
     sys.path.extend(oldpath)
 
     # setup the settings module for the WSGI app

@@ -18,14 +18,14 @@ def submit(request, *args):
         adminUser.IsAdmin = True #make them a priveleged user.
         #saveMadasUser will add the user if they do not exist already.
         success = saveMadasUser(adminUser, detailsDict['username'], detailsDict['details'], detailsDict['status'], detailsDict['password'])
-        
+
         if not success:
             logger.warning("Could not add new user %s" % (detailsDict['username']))
         else:
             sendRegistrationToAdminEmail(request, settings.REGISTRATION_TO_EMAIL)
-        
+
         return jsonResponse()
     else:
-        logger.warning("User %s already existed, aborting registration" % (detailsDict['username'])) 
+        logger.warning("User %s already existed, aborting registration" % (detailsDict['username']))
         raise Exception('User already exists')
 

@@ -27,7 +27,7 @@ class CookieParserTest(TestCase, CookieAssert):
         cookie_list = self.parser.parse_header(cookie_header, request_url)
 
         self.assertEqual(len(cookie_list), 1)
-        self.assertCookie(cookie_list[0], name='mycookie', value='myvalue', 
+        self.assertCookie(cookie_list[0], name='mycookie', value='myvalue',
             domain='some.domain.com', path='/some/', secure=False, session=True)
 
     def test_parse_full(self):
@@ -37,8 +37,8 @@ class CookieParserTest(TestCase, CookieAssert):
         cookie_list = self.parser.parse_header(cookie_header, request_url)
 
         self.assertEqual(len(cookie_list), 1)
-        self.assertCookie(cookie_list[0], name='mycookie', value='myvalue', 
-            domain='.some.other.domain.com', path='/some/other/path/', 
+        self.assertCookie(cookie_list[0], name='mycookie', value='myvalue',
+            domain='.some.other.domain.com', path='/some/other/path/',
             secure=True, session=False, expires_on='01-07-2010 12:13:14 GMT')
 
     def test_parse_three_cookies(self):
@@ -87,7 +87,7 @@ class CookieJarTest(TestCase):
     def setUp(self):
         self.jar = self.build_jar()
 
-    def build_jar(self, name='cookie', value='value', 
+    def build_jar(self, name='cookie', value='value',
               domain='some.domain.com', path='/some/', secure=False, expires_on=None):
         return CookieJar([
             Cookie(name, value, domain, path, secure=secure, expires_on=expires_on),
@@ -107,22 +107,22 @@ class CookieJarTest(TestCase):
     def test_cookies_to_send_subdomain_cookie_strict(self):
         cookie_list = self.jar.cookies_to_send('http://subdomain.some.domain.com/some/path')
         self.assertEqual(len(cookie_list), 0)
-   
+
     def test_cookies_to_send_subdomain_cookie_permissive(self):
         jar = self.build_jar(domain='.some.domain.com')
         cookie_list = jar.cookies_to_send('http://subdomain.some.domain.com/some/path')
         self.assertEqual(len(cookie_list), 1)
 
     def test_cookies_to_send_other_path(self):
-        cookie_list = self.jar.cookies_to_send('http://some.domain.com/someother/path')        
+        cookie_list = self.jar.cookies_to_send('http://some.domain.com/someother/path')
         self.assertEqual(len(cookie_list), 0)
 
     def test_cookies_to_send_root_path(self):
-        cookie_list = self.jar.cookies_to_send('http://some.domain.com')        
+        cookie_list = self.jar.cookies_to_send('http://some.domain.com')
         self.assertEqual(len(cookie_list), 0)
 
     def test_cookies_to_send_other_same_level_path(self):
-        cookie_list = self.jar.cookies_to_send('http://some.domain.com/some/otherpath')        
+        cookie_list = self.jar.cookies_to_send('http://some.domain.com/some/otherpath')
         self.assertEqual(len(cookie_list), 1)
 
     def test_cookies_to_send_secure_only_cookie_https(self):
@@ -167,10 +167,10 @@ class CookieJarWith2CookiesTest(TestCase):
     def setUp(self):
         # TODO func
         future_time = time.gmtime(time.time()+60)
-        cookies = [ 
-            Cookie(name='cookie', value='value', domain='some.domain.com', 
+        cookies = [
+            Cookie(name='cookie', value='value', domain='some.domain.com',
                     path='/some/', expires_on=future_time),
-            Cookie(name='othercookie', value='value', domain='some.domain.com', 
+            Cookie(name='othercookie', value='value', domain='some.domain.com',
                     path='/some/path/'),
         ]
         self.jar_file = tempfile.mktemp()
@@ -191,7 +191,7 @@ class CookieJarWith2CookiesTest(TestCase):
     def test_cookies_to_send_header_2_cookies(self):
         headers_map = self.jar.cookies_to_send_header('http://some.domain.com/some/path/something')
         self.assertEqual(len(headers_map), 1)
-        self.assertEqual(headers_map['Cookie'], 
+        self.assertEqual(headers_map['Cookie'],
             'othercookie=value; cookie=value')
 
     def test_persistence(self):

@@ -16,11 +16,11 @@ class RunBuilder(object):
     def layout(self):
         #validate first, this will throw an exception if failed
         self.validate()
-        
+
         layout = RunLayout(self.run)
         layout.perform_layout()
         #end result of a perform_layout is new RunSample entries to represent all other line items
-        
+
     def generate(self):
         try:
             self.validate()
@@ -28,10 +28,10 @@ class RunBuilder(object):
             raise RunBuilderException('Run validation error ' + str(e))
         except SampleNotInClassException, e:
             raise RunBuilderException('Samples in the run need to be in sample classes before they can be used in a run')
-   
+
         if self.run.state == RUN_STATES.NEW[0]:
             self.layout()
-        
+
         #write filenames into DB
         for rs in RunSample.objects.filter(run=self.run):
             rs.filename = rs.generate_filename()
@@ -39,9 +39,9 @@ class RunBuilder(object):
 
         #mark the run as in-progress and save it
         if self.run.state == RUN_STATES.NEW[0]:
-            self.run.state = RUN_STATES.IN_PROGRESS[0] 
+            self.run.state = RUN_STATES.IN_PROGRESS[0]
             self.run.save()
- 
+
 class RunLayout(object):
     def __init__(self, run):
         self.run = run
@@ -66,7 +66,7 @@ class RunLayout(object):
         # We have to ensure that only method 1 Samples are kept and method_number is resetted to None
         RunSample.objects.filter(run=self.run, method_number__gt=1).delete()
         RunSample.objects.filter(run=self.run, method_number=1).update(method_number=None)
-       
+
     def create_start_block(self):
         start_block = []
         for rule in self.run.rule_generator.start_block_rules:
@@ -101,7 +101,7 @@ class RunLayout(object):
                     position = random.randint(start+1, end)
                 arr = insertion_map.setdefault(position, [])
                 for i in range(rule.count):
-                    arr.append(RunSample.create(self.run, rule.component)) 
+                    arr.append(RunSample.create(self.run, rule.component))
         return insertion_map
 
     def combine(self, samples, insertion_map):

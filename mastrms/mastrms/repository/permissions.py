@@ -5,7 +5,7 @@ from django.http import *
 def user_passes_test(test_func, response=None):
     """
     Decorator for views that checks that the user passes the given test,
-    and returns the given response if necessary, HttpResponseForbidden(403) by default. 
+    and returns the given response if necessary, HttpResponseForbidden(403) by default.
     The test should be a callable that takes the user object and returns True if the user passes.
     The response must be a HttpResponse or subclass.
     Adapted from django.contrib.auth.decorators.user_passes_test

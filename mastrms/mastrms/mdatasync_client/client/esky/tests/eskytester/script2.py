@@ -14,7 +14,7 @@ import esky.tests
 
 ESKY_CONTROL_DIR = esky.util.ESKY_CONTROL_DIR
 ESKY_APPDATA_DIR = esky.util.ESKY_APPDATA_DIR
- 
+
 
 platform = esky.util.get_platform()
 if platform == "win32":

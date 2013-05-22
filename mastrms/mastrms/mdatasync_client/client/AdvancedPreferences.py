@@ -15,7 +15,7 @@ class AdvancedPreferences(wx.Dialog):
         pre.width = 400
         #Turn the object into a proper dialog wrapper.
         self.PostCreate(pre)
-        
+
         self.log = log
         self.parentApp = parent
         self.config = config
@@ -37,7 +37,7 @@ class AdvancedPreferences(wx.Dialog):
                         ctrl.SetValue(wx.CHK_CHECKED)
                     else:
                         ctrl.SetValue(wx.CHK_UNCHECKED)
-                    ctrl.SetHelpText(self.config.getHelpText(key))    
+                    ctrl.SetHelpText(self.config.getHelpText(key))
                     box.Add(ctrl, 1, wx.ALIGN_RIGHT|wx.ALL, border=INTERNAL_BORDER_WIDTH)
                 elif key == 'archivedfilesdir':
                     ctrl = filebrowse.DirBrowseButton(self, -1, size=(450, -1), changeCallback = None, labelText=self.config.getFormalName(key), startDirectory = str(self.config.getValue(key)) )
@@ -53,8 +53,8 @@ class AdvancedPreferences(wx.Dialog):
                         ctrl.SetValue(wx.CHK_CHECKED)
                     else:
                         ctrl.SetValue(wx.CHK_UNCHECKED)
-                    ctrl.SetHelpText(self.config.getHelpText(key))    
-                    box.Add(ctrl, 1, wx.ALIGN_RIGHT|wx.ALL, border=INTERNAL_BORDER_WIDTH) 
+                    ctrl.SetHelpText(self.config.getHelpText(key))
+                    box.Add(ctrl, 1, wx.ALIGN_RIGHT|wx.ALL, border=INTERNAL_BORDER_WIDTH)
 
 
             sizer.Add(box, 1, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=EXTERNAL_BORDER_WIDTH)
@@ -63,22 +63,22 @@ class AdvancedPreferences(wx.Dialog):
         self.updateArchivedControls()
 
         btnsizer = wx.StdDialogButtonSizer()
-        
+
         if wx.Platform != "__WXMSW__":
             btn = wx.ContextHelpButton(self)
             btnsizer.AddButton(btn)
-        
+
         btn = wx.Button(self, wx.ID_OK)
         btn.SetHelpText("The OK button completes the dialog")
         btn.SetDefault()
         btnsizer.AddButton(btn)
         btn.Bind(wx.EVT_BUTTON, self.OKPressed)
-        
+
         btn = wx.Button(self, wx.ID_CANCEL)
         btn.SetHelpText("Cancel changes")
         btnsizer.AddButton(btn)
         btnsizer.Realize()
-        
+
         sizer.Add(btnsizer, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=EXTERNAL_BORDER_WIDTH)
 
         self.SetSizer(sizer)
@@ -100,7 +100,7 @@ class AdvancedPreferences(wx.Dialog):
             dirctrl.Enable()
         else:
             dirctrl.Disable()
-    
+
 
     def OKPressed(self, *args):
         self.save(args)
@@ -117,6 +117,6 @@ class AdvancedPreferences(wx.Dialog):
         self.config.save()
 
 
-        
 
-    
+
+

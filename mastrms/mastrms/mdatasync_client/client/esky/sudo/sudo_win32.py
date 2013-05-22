@@ -212,7 +212,7 @@ class FakePopen(KillablePopen):
         kernel32.TerminateProcess(self._handle,-1)
     def _execute_child(self,*args,**kwds):
         pass
-    
+
 
 class SecureStringPipe(base.SecureStringPipe):
     """Two-way pipe for securely communicating strings with a sudo subprocess.

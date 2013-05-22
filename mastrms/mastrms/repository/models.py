@@ -32,7 +32,7 @@ class MadasUser(User):
     def set_magroups(self, groups):
         if groups is None: groups = tuple()
         self.magroups = groups
-        
+
     @property
     def is_admin(self):
         assert self.magroups is not None, "Groups not set"
@@ -50,18 +50,18 @@ class MadasUser(User):
 
     def is_project_manager_of(self, project):
         return self.pk in [m.pk for m in project.managers.all()]
-        
+
     def is_client_of(self, project):
         return (project.client and self.pk == project.client.pk)
 
 class OrganismType(models.Model):
     """Currently, Microorganism, Plant, Animal or Human"""
     name = models.CharField(max_length=50)
-    
+
     def __unicode__(self):
         return self.name
 
-       
+
 class BiologicalSource(models.Model):
     experiment = models.ForeignKey('Experiment')
     abbreviation = models.CharField(max_length=5)
@@ -72,7 +72,7 @@ class BiologicalSource(models.Model):
 
     def __unicode__(self):
         return ("%s %s %s %s" % (self.abbreviation, self.type, self.ncbi_id, self.label)).replace('None', '--')
-    
+
 class AnimalInfo(models.Model):
     class Meta:
         verbose_name_plural = "Animal information"
@@ -174,9 +174,9 @@ class Project(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
     created_on = models.DateField(null=False, default=date.today)
-    client = models.ForeignKey(User, null=True, blank=True)    
+    client = models.ForeignKey(User, null=True, blank=True)
     managers = models.ManyToManyField(User, related_name='managed_projects')
-    
+
     def __unicode__(self):
         client_username = 'No client'
         if self.client:
@@ -197,12 +197,12 @@ class InstrumentMethod(models.Model):
     blank_position = models.CharField(max_length=255,null=True,blank=True)
     obsolete = models.BooleanField(default=False)
     obsolescence_date = models.DateField(null=True,blank=True)
-    
+
     #future: quality control sample locations
 
     def __unicode__(self):
-        return "%s (%s)" % (self.title, self.version) 
-        
+        return "%s (%s)" % (self.title, self.version)
+
 class Experiment(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
@@ -232,15 +232,15 @@ class Experiment(models.Model):
     def ensure_dir(self):
         ''' This function calculates where the storage area should be for the experiment data.
             It create the directory if it does not exist.
-            It returns a tuple in form (abspath, relpath) where 
+            It returns a tuple in form (abspath, relpath) where
                 abspath is the absolute path
                 relpath is the path, relative to the settings.REPO_FILES_ROOT
         '''
-        
+
         yearpath = os.path.join('experiments', str(self.created_on.year) )
         monthpath = os.path.join(yearpath, str(self.created_on.month) )
         exppath = os.path.join(monthpath, str(self.id) )
-       
+
         try:
             ensure_repo_filestore_dir_with_owner(exppath)
         except Exception, e:
@@ -272,7 +272,7 @@ class StandardOperationProcedure(models.Model):
 
     attached_pdf = models.FileField(storage=sopfs, upload_to=_filepath, null=True, blank=True, max_length=500)
     experiments = models.ManyToManyField(Experiment, null=True, blank=True)
-    
+
     def __unicode__(self):
         return self.label
 
@@ -289,7 +289,7 @@ class SampleTimeline(models.Model):
     experiment = models.ForeignKey('Experiment')
     abbreviation = models.CharField(max_length=5)
     timeline = models.CharField(max_length=255, null=True, blank=True)
-    
+
     def __unicode__(self):
         if self.timeline == None:
             return ""
@@ -369,10 +369,10 @@ class RUN_STATES:
             if x[0] == state_id:
                 return x[1]
         return ''
-        
+
 
 class Run(models.Model):
-    
+
     RUN_STATES_TUPLES = (
         RUN_STATES.NEW,
         RUN_STATES.IN_PROGRESS,
@@ -381,7 +381,7 @@ class Run(models.Model):
     METHOD_ORDERS = (
         (1, 'resampled vial'),
         (2, 'individual vial')
-    )   
+    )
 
     experiment = models.ForeignKey(Experiment, null=True)
 
@@ -400,17 +400,17 @@ class Run(models.Model):
     number_of_methods = models.IntegerField(null=True, blank=True)
     order_of_methods = models.IntegerField(choices=METHOD_ORDERS, null=True, blank=True)
 
-    
+
     def sortedSamples(self):
         #TODO if method indicates randomisation and blanks, now is when we would do it
         return self.samples.distinct()
-    
+
     def __unicode__(self):
         return "%s (%s v.%s)" % (self.title, self.method.title, self.method.version)
 
     def resequence_samples(self):
         #Just a note to explain that this method assigns sequence numbers to
-        #the runsamples belonging to this run, maintaining 'id' order, strictly linearly 
+        #the runsamples belonging to this run, maintaining 'id' order, strictly linearly
         #increasing (i.e. 1,2,3,4,5,6,7,8, no gaps).
         #This just means that we are preserving the order in which the runsamples were created for
         #this run - it still means that samples could have been added in randomised or arbitrary order,
@@ -448,30 +448,30 @@ class Run(models.Model):
         self.complete_sample_count = self.sample_count - self.incomplete_sample_count
 
         if self.complete_sample_count == self.sample_count:
-            self.state = RUN_STATES.COMPLETE[0] 
+            self.state = RUN_STATES.COMPLETE[0]
 
         self.save()
-        
+
     def ensure_dir(self):
         ''' This function calculates where the storage area should be for the run data (blanks and QC files)
             It create the directory if it does not exist.
-            It returns a tuple in form (abspath, relpath) where 
+            It returns a tuple in form (abspath, relpath) where
                 abspath is the absolute path
                 relpath is the path, relative to the settings.REPO_FILES_ROOT
         '''
         import stat
-        
+
         yearpath = os.path.join('runs', str(self.created_on.year) )
         monthpath = os.path.join(yearpath, str(self.created_on.month) )
         runpath = os.path.join(monthpath, str(self.id) )
-       
+
         ensure_repo_filestore_dir_with_owner(runpath)
 
         return (os.path.join(settings.REPO_FILES_ROOT, runpath), runpath)
-    
+
     def is_method_type_individual_vial(self):
         return (self.order_of_methods == 2)
- 
+
 class SampleLog(models.Model):
     LOG_TYPES = (
             (0, u'Received'),
@@ -485,7 +485,7 @@ class SampleLog(models.Model):
     description = models.CharField(max_length=255)
     user = models.ForeignKey(User, null=True, blank=True)
     sample = models.ForeignKey(Sample)
-    
+
     def __unicode__(self):
         return "%s: %s" % (self.LOG_TYPES[self.type][1], self.description)
 
@@ -506,7 +506,7 @@ class UserExperiment(models.Model):
         return "%s-%s" % (self.user, self.experiment)
 
 class RunSample(models.Model):
-    # TODO 
+    # TODO
     SWEEP_ID = 6
     run = models.ForeignKey(Run)
     sample = models.ForeignKey(Sample, null=True, blank=True)
@@ -517,18 +517,18 @@ class RunSample(models.Model):
     vial_number = models.PositiveIntegerField(null=True, blank=True)
     method_number = models.PositiveIntegerField(null=True, blank=True)
 
-    @classmethod 
+    @classmethod
     def create_sweep(self, run):
         return RunSample.objects.create(run=run, component_id=RunSample.SWEEP_ID)
 
-    @classmethod 
+    @classmethod
     def create(self, run, component):
         return RunSample.objects.create(run=run, component=component)
 
-    @classmethod 
+    @classmethod
     def create_copy(self, source, method_number=None):
         return RunSample.objects.create(run=source.run, component=source.component, sample=source.sample, method_number=method_number)
- 
+
     class Meta:
         db_table = u'repository_run_samples'
 
@@ -543,7 +543,7 @@ class RunSample(models.Model):
     def save(self, *args, **kwargs):
         super(RunSample, self).save(*args, **kwargs)
         self.run.update_sample_counts()
-        
+
     def filepaths(self):
         if self.is_sample():
             return self.sample.experiment.ensure_dir()
@@ -556,28 +556,28 @@ class RunSample(models.Model):
             filename += '_m%d' % self.method_number
         filename += '.d'
         return filename
-            
+
     def generate_filename(self):
         if self.is_sample():
             return self.run_filename()
         else:
             return "%s_%s-%s.d"  % (self.component.filename_prefix, self.run.id, self.id)
-            
+
     def get_sample_name(self):
         #for now, just return the filename without the .d suffix
         #this is a poor implementation
         #TODO better implementation
         return self.filename[:-2]
-        
+
     sample_name = property(get_sample_name, None)
-        
+
     def is_sample(self):
         return self.component_id == 0
 
     def is_blank(self):
         return self.component.component_group.name == 'Blank'
 
-       
+
 class ClientFile(models.Model):
     experiment = models.ForeignKey(Experiment)
     filepath = models.TextField()
@@ -592,9 +592,9 @@ class InstrumentSOP(models.Model):
     split_size = models.PositiveIntegerField(default=10)
     vials_per_tray = models.PositiveIntegerField(default=98)
     trays_max = models.PositiveIntegerField(default=1)
-  
+
 class ComponentGroup(models.Model):
-    name = models.CharField(max_length=50) 
+    name = models.CharField(max_length=50)
 
     def __unicode__(self):
         return self.name
@@ -609,11 +609,11 @@ class Component(models.Model):
         return "%s (%s)" % (self.sample_type, self.sample_code)
 
 class RuleGenerator(models.Model):
-    
+
     STATE_INDESIGN = 1
     STATE_ENABLED = 2
     STATE_DISABLED = 3
-    
+
     STATES = (
         (STATE_INDESIGN, 'In Design'),
         (STATE_ENABLED, 'Enabled'),
@@ -623,7 +623,7 @@ class RuleGenerator(models.Model):
     ACCESSIBILITY_USER = 1
     ACCESSIBILITY_NODE = 2
     ACCESSIBILITY_ALL = 3
-    
+
     ACCESSIBILITY = (
         (ACCESSIBILITY_USER, 'Only Myself'),
         (ACCESSIBILITY_NODE, 'Everyone in Node'),
@@ -647,13 +647,13 @@ class RuleGenerator(models.Model):
         name = self.name
         if self.version:
             name += ' (v. %d)' % self.version
-        return name 
+        return name
 
     @property
     def state_name(self):
         return dict(RuleGenerator.STATES).get(self.state)
 
-   
+
     @property
     def is_accessible_by_user(self):
         return self.accessibility == RuleGenerator.ACCESSIBILITY_USER
@@ -730,10 +730,10 @@ class RuleGeneratorSampleBlock(models.Model):
             return 'random order'
         else:
             return 'position'
- 
+
 class RuleGeneratorEndBlock(models.Model):
     rule_generator = models.ForeignKey(RuleGenerator)
     index = models.PositiveIntegerField()
     count = models.PositiveIntegerField()
     component = models.ForeignKey(Component)
- 
+

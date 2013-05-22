@@ -4,9 +4,9 @@
 #
 # First the groups are imported
 #
-# One by one, user details are pulled over. If the user doesn't have a UserDetail object, 
+# One by one, user details are pulled over. If the user doesn't have a UserDetail object,
 # it is created. If they do, it is updated.
-# 
+#
 # The user is then added to their groups.
 #
 from ccg.auth.ldap_helper import LDAPSearchResult, LDAPHandler
@@ -54,7 +54,7 @@ def set_user_groups(user, ldap_groups):
             dbgroup.save() #checking debug
         except Exception, e:
             print 'Could not add %s to group %s: %s' % (user.username, group, e)
-    
+
     if len(ldap_groups)>1 and 'User' in ldap_groups:
         #if they are part of more than just the user group, then they aren't a client.
         #make them staff.
@@ -84,13 +84,13 @@ def django_password_from_ldap_password(ldap_details):
         if len(pwd.groups()) == 2:
             scheme = pwd.group(1)
             b64pwdhash = pwd.group(2)
-           
+
             print 'scheme: %s' % (scheme)
 
             #convert the password hash to ascii
-            #ldap password hashes are base64 
+            #ldap password hashes are base64
             rawdigest = base64.b64decode(b64pwdhash)
-            bindigest = bin_to_bytes(rawdigest) 
+            bindigest = bin_to_bytes(rawdigest)
             digest = ""
             #now for the scheme
             if scheme == 'MD5':
@@ -100,19 +100,19 @@ def django_password_from_ldap_password(ldap_details):
                 salt = rawdigest[20:]
                 digest = bin_to_bytes(rawdigest[:20])
                 djangopwstring = "sha1$%s$%s" % (salt, digest)
-                
+
                 #the above code is correct, except:
                 # - OpenLDAP salts are randombytes, which can't be written to djangos db AND
                 # - OpenLDAP passwords are pw+salt, but django passwords are salt+pw, so they won't match anyway.
                 #So in short, we can't import these passwords
                 djangopwstring = None
-                
+
             else:
                 print 'unknown password scheme: %s' % (scheme)
 
         else:
             print 'unknown password format'
-     
+
     else:
         print 'no password to migrate'
 
@@ -121,14 +121,14 @@ def django_password_from_ldap_password(ldap_details):
 def create_or_update_user(username, ldap_details, ldap_groups, failed_pw_list):
     #create the user if they dont exist.
     (user, created) = User.objects.get_or_create(username=username)
-    if created:    
+    if created:
         print 'Creating user %s' % (username)
     else:
         print 'Updating user %s' % (username)
-  
+
     set_user_groups(user, ldap_groups)
     set_user_details(user, ldap_details)
-    
+
     #we only import passwords when db has no pw
     if user.password in ['','!']:
         newpassword, rd, bd, sch, sa, di = django_password_from_ldap_password(ldap_details)
@@ -165,7 +165,7 @@ def test_pw_migrate(username):
     newpassword, rd, bd, sch, sa, di = django_password_from_ldap_password(ldap_details)
     print 'Newpassworhashd: ', newpassword
     print 'Raw Digest: ', rd
-    print 'Bin Digest: %s len=%d' %(bd, len(bd)) 
+    print 'Bin Digest: %s len=%d' %(bd, len(bd))
     print 'Scheme: ', sch
     print 'Salt: ', sa
     print 'Digest ', di

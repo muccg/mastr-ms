@@ -7,7 +7,7 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        
+
         # Adding unique constraint on 'Group', fields ['name']
         #db.create_unique('users_group', ['name'])
 
@@ -20,7 +20,7 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
-        
+
         # Removing unique constraint on 'UserDetail', fields ['user']
         db.delete_unique('users_userdetail', ['user_id'])
 

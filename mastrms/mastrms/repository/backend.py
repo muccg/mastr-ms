@@ -10,7 +10,7 @@ class MadasBackend(ModelBackend):
     '''
     supports_object_permissions = False
     supports_anonymous_user = False
-    
+
     def get_groups(self, user):
         user_manager = get_user_manager()
         return user_manager.get_user_groups(user.username)

@@ -140,7 +140,7 @@ class ExtJsonInterface(object):
 
     def handle_create(self, request):
         o = self.model()
-        
+
         # Pull in the JSON data that's been sent, if it is in fact JSON.
         try:
             row = loads(request.raw_post_data)["rows"]
@@ -199,7 +199,7 @@ class ExtJsonInterface(object):
                 "success": False,
                 "message": "The record could not be found.",
             }
-            
+
             return HttpResponseNotFound(content_type="text/plain; charset=UTF-8", content=dumps(response))
 
     def handle_read(self, request):
@@ -259,7 +259,7 @@ class ExtJsonInterface(object):
                 "success": False,
                 "message": "The record could not be found.",
             }
-            
+
             return HttpResponseNotFound(content_type="text/plain; charset=UTF-8", content=dumps(response))
         except KeyError:
             transaction.rollback()
@@ -268,9 +268,9 @@ class ExtJsonInterface(object):
                 "success": False,
                 "message": "An internal error occurred.",
             }
-            
+
             return HttpResponseServerError(content_type="text/plain; charset=UTF-8", content=dumps(response))
-    
+
     def id_dispatcher(self, request, id):
         if request.method == "PUT":
             return self.handle_update(request, id)

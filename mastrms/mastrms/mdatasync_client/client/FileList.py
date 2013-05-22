@@ -75,17 +75,17 @@ class ListCtrlPanel(wx.Panel, listmix.ColumnSorterMixin):
 
         self.log = log
         tID = wx.NewId()
-        
+
         sizer = wx.BoxSizer(wx.VERTICAL)
-        
+
         if wx.Platform == "__WXMAC__" and \
                hasattr(wx.GetApp().GetTopWindow(), "LoadDemo"):
             self.useNative = wx.CheckBox(self, -1, "Use native listctrl")
-            self.useNative.SetValue( 
+            self.useNative.SetValue(
                 not wx.SystemOptions.GetOptionInt("mac.listctrl.always_use_generic") )
             self.Bind(wx.EVT_CHECKBOX, self.OnUseNative, self.useNative)
             sizer.Add(self.useNative, 0, wx.ALL | wx.ALIGN_RIGHT, 4)
-            
+
         self.il = wx.ImageList(16, 16)
 
         self.idx1 = self.il.Add(images.Smiles.GetBitmap())
@@ -93,7 +93,7 @@ class ListCtrlPanel(wx.Panel, listmix.ColumnSorterMixin):
         self.sm_dn = self.il.Add(images.SmallDnArrow.GetBitmap())
 
         self.list = ListCtrl(self, tID,
-                                 style=wx.LC_REPORT 
+                                 style=wx.LC_REPORT
                                  #| wx.BORDER_SUNKEN
                                  | wx.BORDER_NONE
                                  | wx.LC_EDIT_LABELS
@@ -103,7 +103,7 @@ class ListCtrlPanel(wx.Panel, listmix.ColumnSorterMixin):
                                  #| wx.LC_HRULES
                                  #| wx.LC_SINGLE_SEL
                                  )
-        
+
         self.list.SetImageList(self.il, wx.IMAGE_LIST_SMALL)
         sizer.Add(self.list, 1, wx.EXPAND)
 

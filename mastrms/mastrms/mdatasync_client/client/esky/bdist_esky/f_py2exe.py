@@ -49,7 +49,7 @@ if modulefinder is not None:
      pass
 
 
-class custom_py2exe(py2exe): 
+class custom_py2exe(py2exe):
     """Custom py2exe command subclass.
 
     This py2exe command subclass incorporates some well-known py2exe "hacks"

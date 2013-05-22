@@ -8,7 +8,7 @@ class JSONExceptionHandlerMiddleware(object):
 
     def process_exception(self, request, exception):
         if not request.is_ajax():
-            return 
+            return
 
         err_response = {
             'success': False,

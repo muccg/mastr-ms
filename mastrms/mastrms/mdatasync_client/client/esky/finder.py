@@ -5,7 +5,7 @@
   esky.finder:  VersionFinder implementations for esky
 
 This module provides the default VersionFinder implementations for esky. The
-abstract base class "VersionFinder" defines the expected interface, while 
+abstract base class "VersionFinder" defines the expected interface, while
 "DefaultVersionFinder" provides a simple default implementation that hits a
 specified URL to look for new versions.
 
@@ -290,7 +290,7 @@ class DefaultVersionFinder(VersionFinder):
                     patches = path[1:]
                 # TODO: remove compatability hooks for ESKY_APPDATA_DIR="".
                 # If a patch fails to apply because we've put an appdata dir
-                # where it doesn't expect one, try again with old layout. 
+                # where it doesn't expect one, try again with old layout.
                 for _ in xrange(2):
                     #  Apply any patches in turn.
                     for (patchfile,patchurl) in patches:
@@ -509,7 +509,7 @@ class VersionGraph(object):
                     best_costs[v] = cost + v_cost
                     best_paths[v] = best_paths[best] + [v_link]
         return best_paths
-                
+
     def _get_best_link(self,source,target):
         if source not in self._links:
             return (_inf,"")

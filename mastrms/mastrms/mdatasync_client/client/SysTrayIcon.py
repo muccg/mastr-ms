@@ -8,7 +8,7 @@ class SystrayIcon(wx.TaskBarIcon):
        We add a popup menu on this to add in our own functionality.
        We also have some functionality for changing the look of the icon
        if we like'''
-    
+
     ID_ICON_TIMER = wx.NewId()
     #some ID's for our little menu
     TBMENU_RESTORE          = wx.NewId()
@@ -55,7 +55,7 @@ class SystrayIcon(wx.TaskBarIcon):
 
 
     def OnTaskBarActivate(self, evt):
-        '''activate the parent app if it is iconified or not 
+        '''activate the parent app if it is iconified or not
            shown for any reason'''
         if self.parentApp.IsIconized():
             self.parentApp.Iconize(False)
@@ -107,4 +107,4 @@ class SystrayIcon(wx.TaskBarIcon):
         #self.SetIcon(icon, "L:%d,R:%d"%(l,r) )
         #Set the icon, and the mouseover text to be the apps statusbar's 0th field
         #print  str(self.parentApp.StatusBar.GetStatusText())
-        self.SetIcon(icon, str(self.parentApp.StatusBar.GetStatusText()) )  
+        self.SetIcon(icon, str(self.parentApp.StatusBar.GetStatusText()) )

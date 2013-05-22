@@ -13,8 +13,8 @@ DATABASES = {
         'NAME': 'mastrms',
         'USER': 'mastrms',
         'PASSWORD': 'mastrms',
-        'HOST': '',                      
-        'PORT': '',                      
+        'HOST': '',
+        'PORT': '',
     }
 }
 
@@ -190,7 +190,7 @@ LOGGING = {
             'address':'/dev/log',
             'facility':'local4',
             'formatter': 'verbose'
-        },        
+        },
         'mail_admins': {
             'level': 'ERROR',
             'class': 'django.utils.log.AdminEmailHandler',

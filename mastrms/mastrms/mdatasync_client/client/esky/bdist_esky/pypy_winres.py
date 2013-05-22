@@ -57,7 +57,7 @@ def load_resource_pystr(py,filename,resname,resid,reslang):
     The filename and resource name must be ascii strings, and the resid and
     reslang must be integers.
 
-    This uses the given python dll object to load the data directly into 
+    This uses the given python dll object to load the data directly into
     a python string, saving a lot of copying and carrying on.
     """
     l_handle = k32_LoadLibraryExA(filename,0,LOAD_LIBRARY_AS_DATAFILE)
@@ -91,5 +91,5 @@ def memcpy(target,source,n):
     impl.push_arg(source)
     impl.push_arg(n)
     impl.call(lltype.Void)
-   
+
 
