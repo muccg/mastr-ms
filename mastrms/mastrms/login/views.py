@@ -21,7 +21,7 @@ logger = logging.getLogger('madas_log')
 
 def processLoginView(request, *args):
     success = processLogin(request, args)
-    return HttpResponseRedirect(siteurl(request)) 
+    return HttpResponseRedirect(siteurl(request))
 
 
 def processLogin(request, *args):
@@ -31,7 +31,7 @@ def processLogin(request, *args):
 
     if request.method == "POST":
         post = request.POST.copy()
-   
+
         try:
             username = post['username']
             password = post['password']
@@ -40,9 +40,9 @@ def processLogin(request, *args):
             password = ''
         print 'username is:', username
         user = None
-        try: 
+        try:
             user = authenticate(username = username, password = password)
-            
+
         except Exception, e:
             logger.warning("Error authenticating user: %s" % ( str(e) ) )
 
@@ -64,7 +64,7 @@ def processLogin(request, *args):
                 #Inactive user
                 print 'inactive login'
                 success = False
-                authenticated = False 
+                authenticated = False
                 authorized = False
         else:
             #invalid user
@@ -74,12 +74,12 @@ def processLogin(request, *args):
             authorized = False
 
         nextview = 'login:success' #the view that a non admin would see next
-        
+
         should_see_admin = False
         request.user.is_superuser = False
 
-        madasuser = getCurrentUser(request, force_refresh=True) 
-       
+        madasuser = getCurrentUser(request, force_refresh=True)
+
         if madasuser.IsAdmin:
             should_see_admin = True
             nextview = 'admin:adminrequests'
@@ -89,23 +89,23 @@ def processLogin(request, *args):
 
         #if they are authenticated (i.e. they have an entry in django's user table, and used the right password...)
         if authenticated:
-            request.user.save() #save the status of is_admin 
-        
+            request.user.save() #save the status of is_admin
+
         u = request.user
-        
+
         params = []
         mainContentFunction = nextview
         params = params
 
 
     logger.debug( '*** processLogin : exit ***')
-    return success 
+    return success
 
 def processLogout(request, *args):
     logger.debug( '*** processLogout : enter***')
     logout(request) #let Django log the user out
     logger.debug('*** processLogout : exit***')
-    return HttpResponseRedirect(siteurl(request)) 
+    return HttpResponseRedirect(siteurl(request))
 
 def processForgotPassword(request, *args):
     '''
@@ -127,7 +127,7 @@ def processForgotPassword(request, *args):
         pass
 
     logger.debug( '\tUpdating user record with verification key')
-    user_manager.update_user(emailaddress, None, None, u) 
+    user_manager.update_user(emailaddress, None, None, u)
     logger.debug('\tDone updating user with verification key')
 
     #Email the user
@@ -137,7 +137,7 @@ def processForgotPassword(request, *args):
     p = {}
     p['message'] = "An email has been sent to %s. Please follow the instructions in that email to continue" % (emailaddress)
 
-    return jsonResponse(params=p, mainContentFunction='message') 
+    return jsonResponse(params=p, mainContentFunction='message')
 
 def forgotPasswordRedirect(request, *args):
     u = request.user
@@ -156,10 +156,10 @@ def populateResetPasswordForm(request, *args):
     urlstate = getCurrentURLState(request, andClear=True)
     data['email'] = urlstate.resetPasswordEmail
     data['validationKey'] = urlstate.resetPasswordValidationKey
-    return jsonResponse(items=[data]) 
+    return jsonResponse(items=[data])
 
 def processResetPassword(request, *args):
-    
+
     username = request.REQUEST.get('email', '')
     vk = request.REQUEST.get('validationKey', '')
     passw = request.REQUEST.get('password', '')
@@ -177,7 +177,7 @@ def processResetPassword(request, *args):
             #update the password
             user_manager.update_user(username, username, passw, userdetails)
             sendPasswordChangedEmail(request, username)
-                
+
         else:
             logger.warning('\tEither no vk stored in ldap, or key mismatch. uservk was %s, storedvk was %s' % (vk, userdetails.get('pager', None)) )
 
@@ -187,35 +187,35 @@ def processResetPassword(request, *args):
         request.session.flush() #if we don't flush here, we are leaving the redirect function the same.
     if not success:
         raise Exception("Couldn't reset password")
-    return jsonResponse(mainContentFunction='login') 
+    return jsonResponse(mainContentFunction='login')
 
 #TODO not sure this function is even needed
 def unauthenticated(request, *args):
-    return jsonResponse() 
+    return jsonResponse()
 
 #TODO not sure this function is even needed
 def unauthorized(request, *args):
     authorized = False
     mainContentFunction = 'notauthorized'
     #TODO now go to 'pager' with action 'index'
-    return jsonResponse(mainContentFunction=mainContentFunction) 
+    return jsonResponse(mainContentFunction=mainContentFunction)
 
 ### TODO: not sure this function is even needed
 def index(request, *args):
-    return jsonResponse() 
+    return jsonResponse()
 
 def serveIndex(request, *args, **kwargs):
     force = request.GET.get('dev_force', False) #param that can be passed to force access to ccg instance, for debugging purposes
     if not force and siteurl(request).find('ccg.murdoch.edu.au') > -1:
         #display the banner
-        return render_to_response('banner.mako',{ 
-                'APP_SECURE_URL': siteurl(request), 
+        return render_to_response('banner.mako',{
+                'APP_SECURE_URL': siteurl(request),
                 'username': request.user.username,
                 'newurl':'https://mastrms.bio21.unimelb.edu.au/mastrms/',
                 'wh': webhelpers,
                 }, context_instance=RequestContext(request))
-    
-    
+
+
     currentuser = getCurrentUser(request)
     mcf = 'dashboard'
     params = ''
@@ -223,8 +223,8 @@ def serveIndex(request, *args, **kwargs):
         #only clear if we were logged in.
         urlstate = getCurrentURLState(request, andClear=True)
     else:
-        urlstate = getCurrentURLState(request) 
-    
+        urlstate = getCurrentURLState(request)
+
     if urlstate.redirectMainContentFunction:
             mcf = urlstate.redirectMainContentFunction
     if urlstate.params:
@@ -237,7 +237,7 @@ def serveIndex(request, *args, **kwargs):
 
     jsonparams = simplejson.dumps(sendparams)
 
-    return render_to_response('index.mako', { 
+    return render_to_response('index.mako', {
                         'APP_SECURE_URL': siteurl(request),
                         'username': request.user.username,
                         'mainContentFunction': mcf,

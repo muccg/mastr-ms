@@ -5,7 +5,7 @@ class LoggingLevelEntry():
     def __init__(self, value, name):
         self._value = value
         self._name = name
-    
+
     @property
     def value(self):
         return self._value
@@ -15,7 +15,7 @@ class LoggingLevelEntry():
 
 
 class LoggingLevels(object):
-    
+
     INFO = LoggingLevelEntry(logging.INFO, 'info')
     DEBUG = LoggingLevelEntry(logging.DEBUG, 'debug')
     WARNING = LoggingLevelEntry(logging.WARNING, 'warning')
@@ -24,26 +24,26 @@ class LoggingLevels(object):
 
     @staticmethod
     def getByValue(value):
-        for o in [LoggingLevels.INFO, 
-                  LoggingLevels.DEBUG, 
-                  LoggingLevels.WARNING, 
-                  LoggingLevels.FATAL, 
+        for o in [LoggingLevels.INFO,
+                  LoggingLevels.DEBUG,
+                  LoggingLevels.WARNING,
+                  LoggingLevels.FATAL,
                   LoggingLevels.CRITICAL]:
             if o.value == value:
                 return o
-        return None        
+        return None
     @staticmethod
     def getByName(name):
-        for o in [LoggingLevels.INFO, 
-                  LoggingLevels.DEBUG, 
-                  LoggingLevels.WARNING, 
-                  LoggingLevels.FATAL, 
+        for o in [LoggingLevels.INFO,
+                  LoggingLevels.DEBUG,
+                  LoggingLevels.WARNING,
+                  LoggingLevels.FATAL,
                   LoggingLevels.CRITICAL]:
             if o.name == name:
                 return o
-        return None        
+        return None
 
-DEBUG = False 
+DEBUG = False
 loggers = {}
 levels = {}
 
@@ -65,7 +65,7 @@ def init_logger(name = "default", logfile = "default.log"):
     #print "logging::init_logger(",name,",",logfile,")"
     fh = logging.handlers.TimedRotatingFileHandler(logfile, 'midnight')
     fh.setFormatter(LOGGING_FORMATTER)
-    
+
     logger = logging.getLogger(name)
     logger.setLevel(LOGGING_LEVEL.value)
     levels[name] = LOGGING_LEVEL
@@ -84,11 +84,11 @@ def set_level(name, level):
 '''
 def init():
     """Initialise the logger from the settings file..."""
-    
+
     # TODO: improve this
     for logname in settings.LOGS:
         loggers[logname] = init_logger(logname, "%s.log"%logname)
-    
+
 init()
 '''
 

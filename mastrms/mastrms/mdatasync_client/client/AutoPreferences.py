@@ -31,7 +31,7 @@ class AutoPreferences(wx.Dialog):
         #Turn the object into a proper dialog wrapper.
         self.PostCreate(pre)
 
-        
+
         self.log = log
         self.parentApp = parent
         self.config = config
@@ -43,14 +43,14 @@ class AutoPreferences(wx.Dialog):
         label.SetHelpText("Preference settings for the DataSync application")
         sizer.Add(label, 0, wx.ALIGN_CENTER|wx.ALL, 2)
 
-        self.nodeconfigselector = None 
+        self.nodeconfigselector = None
         #Get the rest of the config
         k = self.config.getConfig().keys()
         k.sort()
 
         #report current node config name, and give button to choose
         box = wx.BoxSizer(wx.HORIZONTAL)
-        self.nodeconfiglabel = wx.StaticText(self, -1, "" ) 
+        self.nodeconfiglabel = wx.StaticText(self, -1, "" )
         self.setNodeConfigLabel()
         box.Add(label, 1, wx.ALIGN_LEFT|wx.ALL, 2)
         btn = wx.Button(self, ID_CHOOSENODE_BUTTON)
@@ -66,7 +66,7 @@ class AutoPreferences(wx.Dialog):
         logbutton.SetLabel("Send Log")
         logbutton.Bind(wx.EVT_BUTTON, self.OnSendLog)
         buttonsbox.Add(logbutton, 1, wx.ALIGN_RIGHT | wx.ALL, 2)
-        #and a button to upload keys 
+        #and a button to upload keys
         keybutton = wx.Button(self, ID_SENDKEY_BUTTON)
         keybutton.SetLabel("Send Key")
         keybutton.Bind(wx.EVT_BUTTON, self.OnSendKey)
@@ -83,7 +83,7 @@ class AutoPreferences(wx.Dialog):
                 if key == 'localdir':
                     ctrl = filebrowse.DirBrowseButton(self, -1, size=(450, -1), changeCallback = None, labelText=self.config.getFormalName(key), startDirectory = str(self.config.getValue(key)) )
                     ctrl.SetValue(str(self.config.getValue(key)) )
-                else: 
+                else:
                     label = wx.StaticText(self, -1, self.config.getFormalName(key))
                     label.SetHelpText(self.config.getHelpText(key))
                     box.Add(label, 0, wx.ALIGN_LEFT| wx.ALIGN_CENTER_VERTICAL|wx.ALL, 2)
@@ -92,33 +92,33 @@ class AutoPreferences(wx.Dialog):
                     ctrl.SetHelpText(self.config.getHelpText(key))
                 box.Add(ctrl, 1, wx.ALIGN_CENTRE|wx.ALL, 2)
                 sizer.Add(box, 1, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 2)
-                
+
                 #store the field so we can serialise it later
                 self.fields[key] = ctrl
 
         btnsizer = wx.StdDialogButtonSizer()
-        
+
         if wx.Platform != "__WXMSW__":
             btn = wx.ContextHelpButton(self)
             btnsizer.AddButton(btn)
-        
+
         btn = wx.Button(self, wx.ID_OK)
         btn.SetHelpText("The OK button completes the dialog")
         btn.SetDefault()
         btnsizer.AddButton(btn)
         btn.Bind(wx.EVT_BUTTON, self.OKPressed)
-        
+
         btn = wx.Button(self, wx.ID_CANCEL)
         btn.SetHelpText("Cancel changes")
         btnsizer.AddButton(btn)
         btnsizer.Realize()
-        
+
         sizer.Add(btnsizer, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 2)
 
         self.SetSizer(sizer)
         sizer.Fit(self)
 
-    
+
     def OKPressed(self, *args):
         self.save(args)
         self.EndModal(0)
@@ -195,16 +195,16 @@ class AutoPreferences(wx.Dialog):
 
 
     def setNodeConfigLabel(self):
-        self.nodeconfiglabel.SetLabel("Current Node: %s" % (self.config.getNodeName()) ) 
+        self.nodeconfiglabel.SetLabel("Current Node: %s" % (self.config.getNodeName()) )
 
     #this function gets called by the node chooser dialog,
-    #and uses the data it passes to put values into the config, which arent 
+    #and uses the data it passes to put values into the config, which arent
     #collected in the 'save' method above.
     def setNodeConfigName(self, datadict):
         for k in datadict.keys():
             self.config.setValue(k, datadict[k])
         self.setNodeConfigLabel()
-        
+
     def openNodeChooser(self, *args):
         self.nodeconfigselector = NodeConfigSelector.NodeConfigSelector(self, ID_NODESELECTOR_DIALOG, self.log, None)
 

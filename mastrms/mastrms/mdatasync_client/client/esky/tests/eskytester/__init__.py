@@ -33,7 +33,7 @@ def yes_my_data_is_installed():
         mydir = os.path.dirname(__file__)
         assert os.path.exists(os.path.join(mydir,"datafile.txt"))
         assert os.path.exists(os.path.join(mydir,"pkgdata.txt"))
-    
+
 
 class TestHTMLParser(HTMLParser):
    def __init__(self):

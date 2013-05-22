@@ -35,12 +35,12 @@ def _handle_uploaded_file(f, name):
     retval = False
     try:
         ensure_repo_filestore_dir_with_owner(settings.QUOTE_FILES_ROOT)
-        destfname = os.path.join(settings.QUOTE_FILES_ROOT, name ) 
+        destfname = os.path.join(settings.QUOTE_FILES_ROOT, name )
         destination = open(destfname, 'wb+')
         for chunk in f.chunks():
             destination.write(chunk)
         destination.close()
-        
+
         set_repo_file_ownerships(destfname)
         retval = True
     except Exception, e:
@@ -57,16 +57,16 @@ def _findAdminOrNodeRepEmailTarget(groupname = 'Administrators'): #TODO use MADA
     grouplist.append(groupname)
     if groupname is not MADAS_ADMIN_GROUP:
         grouplist.append(MADAS_NODEREP_GROUP)
-    
-    users = getMadasUsersFromGroups(grouplist) 
-    
+
+    users = getMadasUsersFromGroups(grouplist)
+
     logger.debug('\t Users found: %s' % (users))
-   
+
     #NOTE: If this function finds multiple users to email, it only returns the
     #      first one. If we ever need to change this, here is the place to do it!
     retval = users
     logger.debug( '*** _findAdminOrNodeRepEmailTarget : exit ***' )
-    return retval 
+    return retval
 
 def sendRequest(request, *args):
     logger.debug('***quote: sendRequest***')
@@ -85,7 +85,7 @@ def sendRequest(request, *args):
     except Exception, e:
         logger.exception('Exception adding quote request.')
         raise Exception('Exception adding quote request.')
-  
+
     try:
         if request.FILES.has_key('attachfile'):
             f = request.FILES['attachfile']
@@ -98,9 +98,9 @@ def sendRequest(request, *args):
         logger.exception('Exception saving attached file.')
         raise Exception('Exception saving attached file.')
 
-    try: 
-        sendQuoteRequestConfirmationEmail(request, qr.id, email) 
-        #email the administrator(s) for the node 
+    try:
+        sendQuoteRequestConfirmationEmail(request, qr.id, email)
+        #email the administrator(s) for the node
         logger.debug('Argument to _findAdminOrNodeRepEmailTarget is: %s' % (str(toNode)) )
         if toNode == '': #if the node was 'Dont Know'
             searchgroups = MADAS_ADMIN_GROUP
@@ -113,7 +113,7 @@ def sendRequest(request, *args):
         logger.exception('Error sending mail in SendRequest: %s' % ( str(e) ) )
 
     logger.debug( '*** quote:sendRequest: exit ***' )
-    return jsonResponse( mainContentFunction='quote:request')       
+    return jsonResponse( mainContentFunction='quote:request')
 
 @admins_or_nodereps
 def listQuotesRequiringAttention(request):
@@ -121,13 +121,13 @@ def listQuotesRequiringAttention(request):
        a formal quote yet.'''
 
     qs = Quoterequest.objects.filter(completed=False,formalquote__id=None)
-    
+
     #If they are a noderep (only), we filter the qs by node
     currentuser = getCurrentUser(request)
     if currentuser.IsNodeRep and not currentuser.IsAdmin:
         nodelist = getMadasNodeMemberships(currentuser.CachedGroups)
         node = nodelist[0]
-        qs.filter(tonode=node) 
+        qs.filter(tonode=node)
 
     results = []
     qs.values('id', 'unread', 'firstname', 'lastname', 'requesttime', 'tonode', 'emailaddressid__emailaddress' )
@@ -148,21 +148,21 @@ def listQuotes(request, *args):
     g = getCurrentUser(request).CachedGroups
     nodelist = getMadasNodeMemberships(g)
 
-    results = [] 
+    results = []
     quoteslist = []
     if MADAS_NODEREP_GROUP in g:
         #retrieve quotes for the first node in the list (there shouldnt be more than 1)
         quoteslist = Quoterequest.objects.filter(Q(tonode=nodelist[0]) | Q()).values('id', 'completed', 'unread', 'tonode', 'firstname', 'lastname', 'officephone', 'details', 'country', 'requesttime', 'emailaddressid__emailaddress' )
     else: #they are just a client. Show only their own quotes
         quoteslist = Quoterequest.objects.filter(emailaddressid__emailaddress=request.user.username).values('id', 'completed', 'unread', 'tonode', 'firstname', 'lastname', 'officephone', 'details', 'country', 'requesttime', 'emailaddressid__emailaddress' )
-    
+
     quoteslist = list(quoteslist) #convert to normal list
 
     #If they are an admin, ALSO show quotes which don't yet have a node
     if MADAS_ADMIN_GROUP in g:
         homelessquotes = Quoterequest.objects.filter(tonode='').values('id', 'completed', 'unread', 'tonode', 'firstname', 'country', 'lastname', 'officephone', 'details', 'requesttime', 'emailaddressid__emailaddress' )
         quoteslist += list(homelessquotes)
-    
+
     #transform the email field to be named correctly.
     for ql in quoteslist:
         ql['email'] = ql['emailaddressid__emailaddress']
@@ -171,9 +171,9 @@ def listQuotes(request, *args):
 
     #make the list unique. We can't use a set because the list contains unhashable types
     resultsset = uniqueList(results)
-    
 
-    return jsonResponse( items=resultsset)       
+
+    return jsonResponse( items=resultsset)
 
 @admins_or_nodereps
 def listAll(request, *args):
@@ -184,20 +184,20 @@ def listAll(request, *args):
     g = getCurrentUser(request).CachedGroups
 
     nodelist = getMadasNodeMemberships(g)
-    results = [] 
+    results = []
 
     try:
         quoteslist = Quoterequest.objects.all().values('id', 'completed', 'unread', 'tonode', 'firstname', 'lastname', 'officephone', 'details', 'requesttime', 'emailaddressid__emailaddress' )
         for ql in quoteslist:
             ql['email'] = ql['emailaddressid__emailaddress']
             del ql['emailaddressid__emailaddress']
-            
+
             #find the time when this quote was marked as completed (if it is)
             if ql['completed'] == True:
                 qh = Quotehistory.objects.filter(oldcompleted = False, completed = True)
                 qh = qh[0]
                 ql['changetimestamp'] = qh.changetimestamp
-            
+
             results.append(ql)
     except Exception, e:
         logger.exception('Exception getting quotes.')
@@ -208,13 +208,13 @@ def listAll(request, *args):
         for ql in adminlist:
             ql['email'] = ql['emailaddressid__emailaddress']
             del ql['emailaddressid__emailaddress']
-            
+
             #find the time when this quote was marked as completed (if it is)
             if ql['completed'] == True:
                 qh = Quotehistory.objects.filter(oldcompleted = False, completed = True)
                 qh = qh[0]
                 ql['changetimestamp'] = qh.changetimestamp
-            
+
             results.append(ql)
 
     try:
@@ -225,7 +225,7 @@ def listAll(request, *args):
     logger.debug('\tfinished generating quoteslist')
 
     logger.debug('*** quote/listAll - exit ***')
-    return jsonResponse( items=resultsset) 
+    return jsonResponse( items=resultsset)
 
 
 def listFormal(request, *args, **kwargs):
@@ -239,18 +239,18 @@ def listFormal(request, *args, **kwargs):
 
     #if a noderep or admin, and you have a node:
     if (currentUser.IsAdmin or currentUser.IsNodeRep) and len(nodelist) > 0:
-        fquoteslist = Formalquote.objects.filter(Q(fromemail__iexact=uname)|Q(toemail__iexact=uname)|Q(quoterequestid__tonode=nodelist[0])).values('id', 'quoterequestid', 'details', 'created', 'fromemail', 'toemail', 'status')        
+        fquoteslist = Formalquote.objects.filter(Q(fromemail__iexact=uname)|Q(toemail__iexact=uname)|Q(quoterequestid__tonode=nodelist[0])).values('id', 'quoterequestid', 'details', 'created', 'fromemail', 'toemail', 'status')
     #otherwise show all quotes to me, from me, or from this node.
     else:
-        fquoteslist = Formalquote.objects.filter(Q(fromemail__iexact=uname)|Q(toemail__iexact=uname)).values('id', 'quoterequestid', 'details', 'created', 'fromemail', 'toemail', 'status') 
-    
+        fquoteslist = Formalquote.objects.filter(Q(fromemail__iexact=uname)|Q(toemail__iexact=uname)).values('id', 'quoterequestid', 'details', 'created', 'fromemail', 'toemail', 'status')
+
     qid = kwargs.get('qid', request.REQUEST.get('qid', '') )
     if qid != '':
         logger.debug('filtering fquotes where qid is %s' % (qid) )
         fquoteslist = fquoteslist.filter(quoterequestid=qid)
 
     logger.debug('*** listFormal : exit ***')
-    return jsonResponse( items=list(fquoteslist)) 
+    return jsonResponse( items=list(fquoteslist))
 
 
 def _loadQuoteRequest(qid):
@@ -268,10 +268,10 @@ def _loadQuoteRequest(qid):
         qr = [{}]
 
     #TODO: REFACTOR If there was more than one quote request, something went wrong, and we should error
-    qr = qr[0]    
-    
+    qr = qr[0]
+
     return qr
-    
+
 @authentication_required
 def load(request, *args):
     '''load quote details'''
@@ -283,12 +283,12 @@ def load(request, *args):
     suc = True
     if qid is not None:
         qr = _loadQuoteRequest(qid)
-        
+
         #mark as read
         quote = Quoterequest.objects.get(id = qid)
         quote.unread = False
         quote.save()
-        
+
         suc = True
     else:
         suc = False
@@ -298,7 +298,7 @@ def load(request, *args):
     if not suc:
         return jsonErrorResponse("Couldn't load quote " + qid)
     return jsonResponse(data=qr)
-    
+
 def history(request, *args):
     logger.debug('***quote/history : enter***')
     qid = request.REQUEST.get('qid', None)
@@ -307,7 +307,7 @@ def history(request, *args):
         qh = Quotehistory.objects.filter(quoteid = qid).values()
     else:
         qh = []
- 
+
     qh = list(qh)
     #ensure we have a sorted list by date. Most likely this wont change the list order
     #anyway, because they were probably retrieved in order.
@@ -361,7 +361,7 @@ def _addQuoteRequest(emailaddress, firstname, lastname, officephone, tonode, cou
     if emailobj is not None:
         qr = Quoterequest(emailaddressid = emailobj, tonode = tonode, details = details, firstname=firstname, lastname=lastname, officephone = officephone, country = country)
         qr.save()
-        retval = qr   
+        retval = qr
 
     return retval
 
@@ -372,7 +372,7 @@ def save(request, *args):
     comment = request.POST.get('comment', '')
     completed = request.POST.get('completed', '')
     #TODO: this only works because usernames are email addresses in this app.
-    email = request.user.username    
+    email = request.user.username
 
     qr = Quoterequest.objects.get(id=id)
     toNode = request.POST.get('tonode', None)
@@ -387,23 +387,23 @@ def save(request, *args):
             #email the administrators for the node
             for targetuser in targetusers:
                 targetemail = targetuser['uid'][0]
-                sendQuoteRequestToAdminEmail(request, id, email, '', targetemail) 
+                sendQuoteRequestToAdminEmail(request, id, email, '', targetemail)
     except Exception, e:
-        logger.exception('Exception emailing change to quote request') 
+        logger.exception('Exception emailing change to quote request')
 
-    _updateQuoteRequestStatus(qr, toNode, completed=completed, unread=0);       
+    _updateQuoteRequestStatus(qr, toNode, completed=completed, unread=0);
 
     #add the comment to the history
     _addQuoteHistory(qr, email, toNode, qr.tonode, comment, completed, qr.completed)
 
     logger.debug('*** quote: save : exit ***')
-    return jsonResponse( mainContentFunction='quote:list') 
-     
+    return jsonResponse( mainContentFunction='quote:list')
+
 def formalLoad(request, *args, **kwargs):
     '''allow loading either by quote id, or formalquoteid'''
     logger.debug('***formalLoad : enter ***')
-  
-    #get qid from quargs, then request, then blank 
+
+    #get qid from quargs, then request, then blank
     qid = kwargs.get('qid', request.REQUEST.get('qid', '') )
     fqid = request.REQUEST.get('fqid', '')
     retvals = {}
@@ -421,13 +421,13 @@ def formalLoad(request, *args, **kwargs):
               }
 
     if qid is not '' or fqid is not '':
-        qid = qid.strip() 
+        qid = qid.strip()
         fqid = fqid.strip()
-      
+
         try:
-            #This part gets us the linked formal quote data 
+            #This part gets us the linked formal quote data
             if fqid != '':
-                retvals = Formalquote.objects.filter(id=fqid).values( 'id', 'quoterequestid', 'details', 'created', 'fromemail', 'toemail', 'purchase_order_number' )   
+                retvals = Formalquote.objects.filter(id=fqid).values( 'id', 'quoterequestid', 'details', 'created', 'fromemail', 'toemail', 'purchase_order_number' )
             elif qid != '':
                 retvals = Formalquote.objects.filter(quoterequestid=qid).values( 'id', 'quoterequestid', 'details', 'created', 'fromemail', 'toemail', 'purchase_order_number' )
 
@@ -441,31 +441,31 @@ def formalLoad(request, *args, **kwargs):
                     d = _translate_ldap_to_madas(d)
                     retvals['fromname'] = d['firstname'][0] + ' ' + d['lastname'][0]
                     retvals['officePhone'] = d['telephoneNumber']
-                    
+
                     qr = Quoterequest.objects.get(id=retvals['quoterequestid'])
-                    
+
                     retvals['tonode'] = qr.tonode
                 retvals['pdf'] = retvals['details']
-                
+
             else:
                 logger.debug('\tNo formal quotes.')
-                retvals = retdata 
+                retvals = retdata
                 rows = 0
         except Exception, e:
-            logger.exception('Exception loading quote') 
+            logger.exception('Exception loading quote')
             raise Exception('Exception loading quote')
     else:
         logger.warning('\tNo qid or fqid passed')
-        
+
     logger.warning('***formalLoad : exit ***')
-    return jsonResponse(data=retvals) 
-   
-   
+    return jsonResponse(data=retvals)
+
+
 def viewFormalRedirect(request, *args):
     urlstate = getCurrentURLState(request)
     urlstate.redirectMainContentFunction = 'quote:viewformal'
     urlstate.params = ['quote:viewformal', {'qid':int(request.REQUEST.get('quoterequestid', 0))}]
-    return HttpResponseRedirect(siteurl(request)) 
+    return HttpResponseRedirect(siteurl(request))
 
 def addFormalQuote(fromemail, toemail, quoterequestid, details):
     '''adds a formal quote to the database'''
@@ -481,11 +481,11 @@ def addFormalQuote(fromemail, toemail, quoterequestid, details):
         try:
             #delete any formal quotes already attached to this quote
             qr = Quoterequest.objects.filter(id = quoterequestid)[0]
-            try: 
+            try:
                 q = Formalquote.objects.get(quoterequestid = qr.id)
             except Exception, e:
                 q = None
-            
+
             if q is not None:
                 q.delete()
         except Exception, e:
@@ -493,7 +493,7 @@ def addFormalQuote(fromemail, toemail, quoterequestid, details):
             qr = None
 
         if qr is not None:
-            try:    
+            try:
                 newrecord = Formalquote(quoterequestid = qr, details = details, fromemail = fromemail, toemail=toemail)
                 newrecord.save()
             except Exception, e:
@@ -541,7 +541,7 @@ def formalSave(request, *args):
     except Exception, e:
        logger.exception('Exception handling uploaded file')
        raise Exception('Exception handling uploaded file')
-    
+
 
     ################# ADD FORMAL QUOTE ################
     logger.debug('\tAdding formal quote')
@@ -553,7 +553,7 @@ def formalSave(request, *args):
     except Exception, e:
         logger.exception('Exception adding formal quote')
         raise Exception('Exception adding formal quote')
-    
+
     toemail = qr['emailaddressid__emailaddress']
     fromemail = email
     #get the list of admins or nodereps which should be notified:
@@ -566,7 +566,7 @@ def formalSave(request, *args):
     logger.debug('cc list is: %s' % str(cc))
     sendFormalQuoteEmail(request, qid, attachmentname, toemail, cclist = cc, fromemail=fromemail)
     logger.debug('***formalSave : exit ***')
-    return jsonResponse( mainContentFunction='quote:list') 
+    return jsonResponse( mainContentFunction='quote:list')
 
 
 def setFormalQuoteStatus(quoteobject, status):
@@ -577,7 +577,7 @@ def setFormalQuoteStatus(quoteobject, status):
     try:
         fq = Formalquote.objects.get(quoterequestid = quoteobject.id)
         #Here we do a quick check.
-        #Don't set a quote's state to 'downloaded' unless its previous 
+        #Don't set a quote's state to 'downloaded' unless its previous
         #state was new.
         if status == QUOTE_STATE_DOWNLOADED and fq.status == QUOTE_STATE_NEW:
             return retval
@@ -609,10 +609,10 @@ def formalAccept(request, *args):
     #here we want to store the user details
     #TODO: this section needs some help - can edit arbitrary user details via this form...
     u = request.REQUEST.get('email')
-        
+
     #mark the formal quote as accepted:
     fq = setFormalQuoteStatus(qr, QUOTE_STATE_ACCEPTED)
-        
+
     #add optional purchase_order_number to the qr
     po = request.REQUEST.get('purchase_order_number')
     fq.purchase_order_number = po
@@ -642,7 +642,7 @@ def formalReject(request, *args):
         raise Exception('Error getting initial quote ' + qid)
 
     try:
-        fq = setFormalQuoteStatus(qr, QUOTE_STATE_REJECTED) 
+        fq = setFormalQuoteStatus(qr, QUOTE_STATE_REJECTED)
         #leave rejection in the quote history
         _addQuoteHistory(qr, qrvalues['emailaddressid__emailaddress'], qr.tonode, qr.tonode, 'Formal quote rejected', qr.completed, qr.completed)
         #email the node rep
@@ -654,7 +654,7 @@ def formalReject(request, *args):
         logger.exception('Exception in rejecting formal quote')
         raise Exception('Exception in rejecting formal quote')
     logger.debug('***formalReject : exit ***')
-    return jsonResponse( mainContentFunction='dashboard') 
+    return jsonResponse( mainContentFunction='dashboard')
 
 def downloadPDF(request, *args):
     logger.debug('*** downloadPDF: Enter ***')
@@ -670,26 +670,26 @@ def downloadPDF(request, *args):
     fqr = fqr[0]
     filename = os.path.join(settings.QUOTE_FILES_ROOT, fqr['details'])
     logger.debug('\tThe filename is: %s' % ( filename ) )
-     
-   
+
+
     try:
         wrapper = FileWrapper(file(filename))
         content_disposition = 'attachment;  filename=\"%s\"' % (fqr['details'])
         response = HttpResponse(wrapper, content_type='application/pdf')
         response['Content-Disposition'] = content_disposition
         response['Content-Length'] = os.path.getsize(filename)
-        
+
         if fqr['fromemail'] != request.user.username:
             setFormalQuoteStatus(qrobj, QUOTE_STATE_DOWNLOADED)
-        
-        _addQuoteHistory(qrobj, qr['emailaddressid__emailaddress'], qrobj.tonode, qrobj.tonode, 'Formal quote downloaded', qrobj.completed, qrobj.completed)    
+
+        _addQuoteHistory(qrobj, qr['emailaddressid__emailaddress'], qrobj.tonode, qrobj.tonode, 'Formal quote downloaded', qrobj.completed, qrobj.completed)
 
     except Exception, e:
         response = HttpResponse('Error: The Quote file could not be retrieved')
         logger.warning('\tException: %s' % (str(e)) )
-    
+
     logger.debug('*** downloadPDF: Exit ***')
-    return response 
+    return response
 
 
 def downloadAttachment(request, *args):
@@ -697,12 +697,12 @@ def downloadAttachment(request, *args):
     qr = Quoterequest.objects.get(id = quoterequestid)
 
     logger.debug('downloadAttachment: %s' % (str(qr)) )
-    
+
     filename = os.path.join(settings.QUOTE_FILES_ROOT, qr.attachment)
     wrapper = FileWrapper(file(filename))
     content_disposition = 'attachment;  filename=\"%s\"' % (str(qr.attachment))
     response = HttpResponse(wrapper, content_type='application/download')
     response['Content-Disposition'] = content_disposition
     response['Content-Length'] = os.path.getsize(filename)
-    return response 
+    return response
 

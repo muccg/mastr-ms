@@ -7,13 +7,13 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        
+
         # Adding field 'RuleGenerator.apply_sweep_rule'
         db.add_column('repository_rulegenerator', 'apply_sweep_rule', self.gf('django.db.models.fields.BooleanField')(default=True), keep_default=False)
 
 
     def backwards(self, orm):
-        
+
         # Deleting field 'RuleGenerator.apply_sweep_rule'
         db.delete_column('repository_rulegenerator', 'apply_sweep_rule')
 

@@ -24,7 +24,7 @@ We also provide some handy utility functions:
 
     * has_root():      check whether current process has root privileges
     * can_get_root():  check whether current process may be able to get root
-    
+
 
 
 """
@@ -227,7 +227,7 @@ def allow_from_sudo(*argtypes,**kwds):
             ...
 
     Note that there are two aspects to transparently tunneling a method call
-    through the sudo proxy: allowing it via this decorator, and actually 
+    through the sudo proxy: allowing it via this decorator, and actually
     passing on the call to the proxy object.  I have no intention of making
     this any more hidden, because the fact that a method can have escalated
     privileges is somethat that needs to be very obvious from the code.

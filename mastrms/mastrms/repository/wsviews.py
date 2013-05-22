@@ -39,8 +39,8 @@ def create_object(request, model):
         args = request.GET
     else:
         args = request.POST
-    
-    obj = None 
+
+    obj = None
     if model == 'experiment':
         obj = create_experiment(request.user, args, base_experiment_id=args.get('base_experiment_id', None) )
 
@@ -48,7 +48,7 @@ def create_object(request, model):
         #create model object
         model_obj = get_model('repository', model)
         obj = model_obj()
-       
+
         for key in args.keys():
             obj.__setattr__(key, args[key])
 
@@ -69,14 +69,14 @@ def create_object(request, model):
                 obj.managers.add(user)
             else:
                 save_project_managers(obj, args.get('projectManagers'))
-        
+
         if model == 'biologicalsource':
             return records(request, 'organism', 'id', obj.organism.id)
-            
+
         if model == 'animal' or model == 'plant' or model == 'human':
             o = Organ(source=obj, name='Unknown')
             o.save()
-            
+
         if model == 'samplelog':
             user = User.objects.get(username=request.user.username)
             obj.user = user
@@ -103,7 +103,7 @@ def check_experiment_cloneable(request, experiment_id):
             if not success:
                 message = "Some sample classes in the base experiment have no organs/treatment/timelines."
         #insert more checks here if required
-         
+
 
     return HttpResponse( json.dumps({'success': success, 'message':message}) )
 
@@ -111,7 +111,7 @@ def check_experiment_cloneable(request, experiment_id):
 def check_distinct_sample_classes(experiment):
     sampleclasses = SampleClass.objects.filter(experiment = experiment)
     sampleclassnames = [s.__unicode__() for s in sampleclasses]
-    
+
     if len(sampleclasses) == len(set(sampleclassnames)):
         return True
     else:
@@ -144,9 +144,9 @@ def clone_experiment(base_experiment):
     base_exp_users = UserExperiment.objects.filter(experiment=base_exp)
     print 'setting user'
     for base_exp_user in base_exp_users:
-        exp_user = UserExperiment(user=base_exp_user.user, 
-                                    experiment=exp, 
-                                    type=base_exp_user.type, 
+        exp_user = UserExperiment(user=base_exp_user.user,
+                                    experiment=exp,
+                                    type=base_exp_user.type,
                                     additional_info=base_exp_user.additional_info)
         exp_user.save()
     print 'finished setting users'
@@ -168,7 +168,7 @@ def clone_experiment(base_experiment):
     #Timelines
     base_timelines = SampleTimeline.objects.filter(experiment=base_exp)
     for base_timeline in base_timelines:
-        tl = SampleTimeline(experiment=exp, 
+        tl = SampleTimeline(experiment=exp,
                             abbreviation=base_timeline.abbreviation,
                             timeline = base_timeline.timeline)
         tl.save()
@@ -183,7 +183,7 @@ def clone_experiment(base_experiment):
 
     #Generate sample classes, and then generate samples
     regenerate_sample_classes(exp.id)
-    
+
     #For each sample class, count all the samples which have that class.
     base_sampleclasses = SampleClass.objects.filter(experiment=base_exp)
     exp_sampleclasses = SampleClass.objects.filter(experiment=exp)
@@ -191,7 +191,7 @@ def clone_experiment(base_experiment):
     exp_sampleclass_dict = {}
 
     #Build the dicts, keyed on the sample class name
-    #These should be unique, which should have been determined earlier by 
+    #These should be unique, which should have been determined earlier by
     #calling check_experiment_cloneable
     for base_sampleclass in base_sampleclasses:
         base_sampleclass_dict[base_sampleclass.__unicode__()]=base_sampleclass
@@ -223,7 +223,7 @@ def create_experiment(user, attributes, base_experiment_id = None):
        Returns the created experiment object'''
 
     base_exp = None
-    exp = None    
+    exp = None
     #Try cloning the experiment if it needs it
     if base_experiment_id is not None:
         try:
@@ -246,14 +246,14 @@ def create_experiment(user, attributes, base_experiment_id = None):
         ue.experiment = exp
         ue.type = uit
         ue.user = exp_user
-        ue.save()   
-        
+        ue.save()
+
         #Biological Source
         source = BiologicalSource(experiment=exp)
         #default source and organ
         source.type_id=1
         source.save()
-    
+
         #Organs
         organ = Organ(experiment=exp)
         organ.name='Unknown'
@@ -265,7 +265,7 @@ def create_experiment(user, attributes, base_experiment_id = None):
 def clone_run(request, run_id):
     result = {'success':False, 'message':"None", 'data':None}
     try:
-        base_run = Run.objects.get(id=run_id) 
+        base_run = Run.objects.get(id=run_id)
         new_run = Run()
         new_run.experiment        = base_run.experiment
         new_run.method            = base_run.method
@@ -278,7 +278,7 @@ def clone_run(request, run_id):
         new_run.number_of_methods = base_run.number_of_methods
         new_run.order_of_methods  = base_run.order_of_methods
         new_run.save()
-        
+
         #samples
         base_rs = RunSample.objects.filter(run=base_run)
         for base_runsample in base_rs:
@@ -311,20 +311,20 @@ def create_samples(request):
         args = request.GET
     else:
         args = request.POST
-       
+
     #create model object
     model_obj = get_model('repository', 'sample')
-    
+
     for i in range(0, int(args['replicates'])):
         obj = model_obj()
-           
+
         for key in args.keys():
             obj.__setattr__(key, args[key])
-    
+
         obj.save()
 
     return records(request, 'sample', 'id', obj.id)
-    
+
 
 @mastr_users_only
 def create_sample_log(request, sample_id, type, description):
@@ -344,7 +344,7 @@ def batch_create_sample_logs(request):
     type = args.get('type')
     description = args.get('description')
     sampleids = args.get('sample_ids').split(',')
-    
+
     for sampleid in sampleids:
         create_sample_log(request, sampleid, type, description)
     return records(request, 'samplelog', 'id', 0)
@@ -352,21 +352,21 @@ def batch_create_sample_logs(request):
 
 @mastr_users_only
 def update_object(request, model, id):
-    
+
     if id == '0':
         return create_object(request, model)
-    
+
     if request.GET:
         args = request.GET
     else:
         args = request.POST
-       
+
     #fetch the object and update all values
     model_obj = get_model('repository', model) # try to get app name dynamically at some point
     params = {'id':id}
-    
+
     rows = model_obj.objects.filter(**params)
-    
+
     for row in rows:
         for key in args:
             row.__setattr__(key, args[key])
@@ -387,8 +387,8 @@ def update_object(request, model, id):
 
 
     return records(request, model, 'id', id)
-    
-    
+
+
 @mastr_users_only
 def delete_object(request, model, id):
 
@@ -404,8 +404,8 @@ def delete_object(request, model, id):
     rows = model_obj.objects.filter(**params)
     rows.delete()
     return records(request, model, 'id', id)
-    
-    
+
+
 @mastr_users_only
 def associate_object(request, model, association, parent_id, id):
 
@@ -413,16 +413,16 @@ def associate_object(request, model, association, parent_id, id):
         args = request.GET
     else:
         args = request.POST
-       
+
 
     #fetch the object and update all values
     model_obj = get_model('repository', model) # try to get app name dynamically at some point
     params = {'id':parent_id}
     rows = model_obj.objects.filter(**params)
-    
+
     if model == 'project' and association == 'manager':
         assoc_model_obj = User
-    else:    
+    else:
         assoc_model_obj = get_model('repository', association) # try to get app name dynamically at some point
     assoc_params = {'id':id}
     assoc_rows = assoc_model_obj.objects.filter(**assoc_params)
@@ -430,7 +430,7 @@ def associate_object(request, model, association, parent_id, id):
     if len(assoc_rows) > 0:
         assoc_item = assoc_rows[0]
         assoc_name = association + 's'
-        
+
         for row in rows:
             current_set = row.__getattribute__(assoc_name)
             current_set.add(assoc_item)
@@ -446,15 +446,15 @@ def dissociate_object(request, model, association, parent_id, id):
         args = request.GET
     else:
         args = request.POST
-       
+
 
     #fetch the object and update all values
     model_obj = get_model('repository', model) # try to get app name dynamically at some point
     params = {'id':parent_id}
     rows = model_obj.objects.filter(**params)
-    
+
     assoc_name = association + 's'
-    
+
     for row in rows:
         current_set = row.__getattribute__(assoc_name)
         found = current_set.filter(id=id)
@@ -463,7 +463,7 @@ def dissociate_object(request, model, association, parent_id, id):
         row.save()
 
     return records(request, model, 'id', parent_id)
-    
+
 
 @mastr_users_only
 def records(request, model, field, value):
@@ -489,12 +489,12 @@ def records(request, model, field, value):
 
     model_obj = get_model('repository', model) # try to get app name dynamically at some point
     params = {str(field):str(value)}
-    rows = model_obj.objects.filter(**params) 
+    rows = model_obj.objects.filter(**params)
 
     # add fields to meta data
     for f in model_obj._meta.fields:
         output['metaData']['fields'].append({'name':f.name})
-        
+
     # add many to many
     for f in model_obj._meta.many_to_many:
         output['metaData']['fields'].append({'name':f.name})
@@ -507,7 +507,7 @@ def records(request, model, field, value):
         d = {}
         for f in model_obj._meta.fields:
             d[f.name] = f.value_from_object(row)
-            
+
         if model == 'run':
             #Runs should not return their collection of RunSamples, as they cannot be json serialized
             pass
@@ -553,7 +553,7 @@ def recordsProject(request, project_id):
         })
 
     output['results'] = len(output['rows'])
-            
+
     output = makeJsonFriendly(output)
     return HttpResponse(json.dumps(output))
 
@@ -563,9 +563,9 @@ def recent_projects(request):
     user = request.user
     ninety_days_ago = datetime.now() - timedelta(90)
     projects = Project.objects.filter(
-        Q(client=user) | 
-        Q(managers=user) 
-        ).filter(created_on__gt=ninety_days_ago) 
+        Q(client=user) |
+        Q(managers=user)
+        ).filter(created_on__gt=ninety_days_ago)
     for project in projects:
         output['rows'].append({
             'id': project.id,
@@ -574,7 +574,7 @@ def recent_projects(request):
         })
 
     output['results'] = len(output['rows'])
-            
+
     output = makeJsonFriendly(output)
     return HttpResponse(json.dumps(output))
 
@@ -605,7 +605,7 @@ def recent_runs(request):
     output = json_records_template(['id', 'title', 'method', 'machine', 'state'])
     user = request.user
     ninety_days_ago = datetime.now() - timedelta(90)
-    runs = Run.objects.filter(creator=user, created_on__gt=ninety_days_ago) 
+    runs = Run.objects.filter(creator=user, created_on__gt=ninety_days_ago)
     for run in runs:
         output['rows'].append({
             'id': run.id,
@@ -616,7 +616,7 @@ def recent_runs(request):
         })
 
     output['results'] = len(output['rows'])
-            
+
     output = makeJsonFriendly(output)
     return HttpResponse(json.dumps(output))
 
@@ -670,10 +670,10 @@ def recordsClientList(request):
         #mauserobj.refresh()
         mauserdetails = mauserobj.CachedDetails
         #print mauserdetails
-        if mauserdetails == {}: 
+        if mauserdetails == {}:
             print 'bad user: ', row.username
             continue
-        
+
         record = {
             "id": row.id,
             "is_client": "Yes" if mauserobj.IsClient else "No",
@@ -692,7 +692,7 @@ def recordsClientList(request):
                 nodereps.append(record)
             else:
                 clients.append(record)
-             
+
         else:
             clients.append(record)
 
@@ -720,8 +720,8 @@ def recordsClientFiles(request):
 
     if args.get('node','dashboardFilesRoot') == 'dashboardFilesRoot':
         print 'node is dashboardFilesRoot'
-        rows = ClientFile.objects.filter(experiment__users=request.user).order_by('experiment') 
-    
+        rows = ClientFile.objects.filter(experiment__users=request.user).order_by('experiment')
+
         # add rows
         current_exp = {}
         current_exp['id'] = None
@@ -736,47 +736,47 @@ def recordsClientFiles(request):
                 current_exp['leaf'] = False
                 current_exp['metafile'] = True
                 current_exp['children'] = []
-        
+
             file = {}
             file['text'] = row.filepath
-            
+
             (abspath, exppath) = row.experiment.ensure_dir()
-            
+
             filepath = abspath + os.sep + row.filepath
-            
+
             print filepath
-            
+
             if os.path.isdir(filepath):
                 file['leaf'] = False
             else:
                 file['leaf'] = True
             file['id'] = row.id
-    
+
             current_exp['children'].append(file)
-            
+
         if current_exp['id'] != None:
             output.append(current_exp)
-        
+
         return HttpResponse(json.dumps(output))
     else:
         # parse the node id as something useful
         # it will be in the format: id/path/path
-    
+
         print args.get('node')
         pathbits = args.get('node').split('/')
 
         print 'pathbits[0] is ' + pathbits[0]
 
         baseFile = ClientFile.objects.get(id=pathbits[0],experiment__users=request.user)
-                
+
         if baseFile is not None:
             (abspath, exppath) = baseFile.experiment.ensure_dir()
-    
+
             joinedpath = baseFile.filepath + os.sep + os.sep.join(pathbits[1:])
-            
+
             print 'joinedPath is ' + joinedpath
             print 'abspath is ' + abspath
-            
+
             return _fileList(request, abspath + os.sep, joinedpath, False, [], str(baseFile.id))
         else:
             return HttpResponse(json.dumps([]))
@@ -789,7 +789,7 @@ def populate_select(request, model=None, key=None, value=None, field=None, match
         args = request.GET
     else:
         args = request.POST
-       
+
 
     model_whitelist = {'organism': ['id', 'name', 'type'],
                        'organ': ['id', 'name', 'source_id', 'tissue', 'cell_type', 'subcellular_cell_type'],
@@ -823,9 +823,9 @@ def populate_select(request, model=None, key=None, value=None, field=None, match
     main_content_function = "" # may need to change this
 
     if not authenticated or not authorized:
-        output = select_widget_json(authenticated=authenticated,authorized=authorized,main_content_function=main_content_function,success=False,input=[])        
+        output = select_widget_json(authenticated=authenticated,authorized=authorized,main_content_function=main_content_function,success=False,input=[])
         return HttpResponse(output, status=401)
-    
+
 
     try:
 
@@ -842,7 +842,7 @@ def populate_select(request, model=None, key=None, value=None, field=None, match
             model_obj = get_model('mdatasync_server', 'nodeclient')
         else:
             model_obj = get_model('repository', model)
-        
+
         if field and match:
             params = {str(field):str(match)}
             rows = model_obj.objects.filter(**params)
@@ -860,11 +860,11 @@ def populate_select(request, model=None, key=None, value=None, field=None, match
             raise ObjectDoesNotExist()
         for item in rows.all():
             values.append({"key":getattr(item, key), "value":getattr(item, value or key)})
-        
+
         output = select_widget_json(authenticated=authenticated,authorized=authorized,main_content_function=main_content_function,success=True,input=values)
         return HttpResponse(output)
 
-        
+
     except ObjectDoesNotExist:
         output = select_widget_json(authenticated=authenticated,authorized=authorized,main_content_function=main_content_function,success=False,input=[])
         return HttpResponseNotFound(output)
@@ -874,13 +874,13 @@ def populate_select(request, model=None, key=None, value=None, field=None, match
 def update_single_source(request, exp_id):
 
     args = request.GET.copy()
-    
+
     for key in args.keys():
         if args[key] == '':
             args[key] = None
         if key == 'sex' and (args[key] == '' or args[key] == 'null'):
             args[key] = u'U'
-    
+
     output = {'metaData': { 'totalProperty': 'results',
                             'successProperty': 'success',
                             'root': 'rows',
@@ -893,9 +893,9 @@ def update_single_source(request, exp_id):
               'success': True,
               'rows': []
               }
-    
+
     e = Experiment.objects.get(id=exp_id)
-    
+
     if e is None:
         output['success'] = False
     else:
@@ -903,7 +903,7 @@ def update_single_source(request, exp_id):
             bs = BiologicalSource.objects.get(experiment=e)
         except ObjectDoesNotExist:
             bs = BiologicalSource(experiment=e)
-        
+
         bs.type = OrganismType.objects.get(id=args['type'])
         bs.information = args['information']
         try:
@@ -912,7 +912,7 @@ def update_single_source(request, exp_id):
             bs.ncbi_id = None
         #bs.label = args['label']
         bs.save()
-        
+
         #process additional info
         if int(args['type']) == 1:
             #check for existing items
@@ -951,7 +951,7 @@ def update_single_source(request, exp_id):
                     pass
                 mi.gas_delivery_method = args['delivery']
                 mi.gas_delivery_method = args['delivery']
-                
+
                 bs.microbialinfo_set.add(mi)
             else:
                 mi = bs.microbialinfo_set.all()[0]
@@ -996,7 +996,7 @@ def update_single_source(request, exp_id):
                     mi.gas_delivery_method = args['delivery']
                 except:
                     pass
-                
+
                 mi.save()
         elif int(args['type']) == 2:
             if bs.plantinfo_set.count() == 0:
@@ -1049,9 +1049,9 @@ def update_single_source(request, exp_id):
                 hi.location = args['location']
 #                hi.notes = args['notes']
                 hi.save()
-    
+
     return HttpResponse(json.dumps(output))
-    
+
 
 @mastr_users_only
 def recreate_sample_classes(request, experiment_id):
@@ -1060,7 +1060,7 @@ def recreate_sample_classes(request, experiment_id):
         args = request.GET
     else:
         args = request.POST
-    
+
     regenerate_sample_classes(experiment_id)
     return recordsSampleClasses(request, experiment_id)
 
@@ -1083,9 +1083,9 @@ def regenerate_sample_classes(experiment_id):
                     combosForTreatment.append(tmp.copy())
             if len(combosForTreatment) == 0:
                 combosForTreatment = bcombos[:]
-                
+
             combosForOrgan = combosForTreatment[:]
-            
+
             combosForTimeline = []
             for timeline in SampleTimeline.objects.filter(experiment__id=experiment_id):
                 for combo in combosForOrgan:
@@ -1096,10 +1096,10 @@ def regenerate_sample_classes(experiment_id):
                 combosForOrgan = combosForTimeline[:]
 
             combosForBioSource = combosForBioSource + combosForOrgan
-        
+
         combos = combos + combosForBioSource
-        
-            
+
+
     #iterate over combos and current sampleclasses
     #if they already exist, fine
     #if they no longer exist, delete
@@ -1109,17 +1109,17 @@ def regenerate_sample_classes(experiment_id):
 
     #determine what to delete and what to add
     foundclasses = set()
-    
+
     for combo in combos:
         #look for item in currentsamples, if it exists, add it to the foundclasses set
 
         a = currentsamples
-        
+
         #item for adding
         sc = SampleClass()
         sc.experiment_id = experiment_id
         sc.class_id = 'sample class'
-        
+
         b = ''
         for key in combo.keys():
             if key == 'treatment':
@@ -1151,7 +1151,7 @@ def regenerate_sample_classes(experiment_id):
         if str(sc) != '':
             sc.class_id = str(sc)
             sc.save()
-            
+
         #renumber all the samples
         count = 1
         for sample in sc.sample_set.all().order_by('sample_class_sequence', 'id'):
@@ -1172,7 +1172,7 @@ def recordsSampleClasses(request, experiment_id):
         args = request.GET
     else:
         args = request.POST
-       
+
 
     # basic json that we will fill in
     output = {'metaData': { 'totalProperty': 'results',
@@ -1195,7 +1195,7 @@ def recordsSampleClasses(request, experiment_id):
         return HttpResponse(json.dumps(output), status=401)
 
 
-    rows = SampleClass.objects.filter(experiment__id=experiment_id) 
+    rows = SampleClass.objects.filter(experiment__id=experiment_id)
 
     # add row count
     output['results'] = len(rows);
@@ -1206,18 +1206,18 @@ def recordsSampleClasses(request, experiment_id):
         d['id'] = row.id
         d['class_id'] = row.class_id
         d['enabled'] = row.enabled
-        
+
         if row.treatments:
             d['treatment'] = row.treatments.name
-        
+
         if row.timeline:
             d['timeline'] = str(row.timeline)
         else:
             d['timeline'] = ''
-            
+
         if row.organ:
             d['organ'] = row.organ.name
-        
+
         d['count'] = row.sample_set.count()
 
         output['rows'].append(d)
@@ -1225,7 +1225,7 @@ def recordsSampleClasses(request, experiment_id):
 
     output = makeJsonFriendly(output)
     return HttpResponse(json.dumps(output))
-    
+
 
 @mastr_users_only
 def recordsExperiments(request):
@@ -1234,41 +1234,41 @@ def recordsExperiments(request):
 @mastr_users_only
 def recordsSamplesForExperiment(request):
     args = request.REQUEST
-       
+
     # basic json that we will fill in
     output = {'metaData': {
                   'successProperty': 'success',
                   'root': 'rows',
                   'idProperty': 'id',
                   'fields': [{
-                            "type": "int", 
+                            "type": "int",
                             "name": "id"
                         },{
-                            "type": "auto", 
+                            "type": "auto",
                             "name": "sample_id"
                         }, {
-                            "type": "auto", 
+                            "type": "auto",
                             "name": "sample_class"
                         }, {
-                            "type": "string", 
+                            "type": "string",
                             "name": "sample_class__unicode"
                         }, {
-                            "type": "auto", 
+                            "type": "auto",
                             "name": "experiment"
                         }, {
-                            "type": "string", 
+                            "type": "string",
                             "name": "experiment__unicode"
                         }, {
-                            "type": "auto", 
+                            "type": "auto",
                             "name": "label"
                         }, {
-                            "type": "auto", 
+                            "type": "auto",
                             "name": "comment"
                         }, {
-                            "type": "auto", 
+                            "type": "auto",
                             "name": "weight"
                         }, {
-                            "type": "int", 
+                            "type": "int",
                             "name": "sample_class_sequence"
                         }
                     ],
@@ -1279,8 +1279,8 @@ def recordsSamplesForExperiment(request):
     rows = Sample.objects.filter(experiment__id=experiment_id)
 
     randomise = args.get('randomise', False)
-    
-    
+
+
     if not randomise:
         sort_by = args.get('sort', 'sample_class') #sort by default on sample class
         if sort_by == 'sample_class':
@@ -1290,12 +1290,12 @@ def recordsSamplesForExperiment(request):
             sort1 = '-' + sort_by
         else:
             sort1 = sort_by
-       
+
         #Always sort with sequence second (mostly will be for class).
         sort2 = 'sample_class_sequence'
 
         rows = rows.order_by(sort1, sort2)
-    
+
     # add rows
     for row in rows:
         d = {}
@@ -1322,7 +1322,7 @@ def recordsSamplesForExperiment(request):
 def json_records_template(fields):
     fields_list = [{'name': f} for f in fields]
     return {
-        'metaData': { 
+        'metaData': {
             'totalProperty': 'results',
             'successProperty': 'success',
             'root': 'rows',
@@ -1339,13 +1339,13 @@ def json_records_template(fields):
 @mastr_users_only
 def recordsRuns(request):
     args = request.REQUEST
-       
+
     # basic json that we will fill in
     output = json_records_template([
         'id', 'machine__unicode', 'sample_count', 'creator', 'method__unicode',
         'creator__unicode', 'state', 'machine', 'created_on', 'experiment',
         'complete_sample_count', 'rule_generator', 'number_of_methods', 'order_of_methods',
-        'generated_output', 'title', 'method', 'incomplete_sample_count', 'experiment__unicode' 
+        'generated_output', 'title', 'method', 'incomplete_sample_count', 'experiment__unicode'
         ])
 
     condition = None
@@ -1365,7 +1365,7 @@ def recordsRuns(request):
         rows = Run.objects.filter(condition)
     else:
         rows = Run.objects.all()
-    
+
     output['results'] = len(rows)
 
     # add rows
@@ -1399,7 +1399,7 @@ def recordsRuns(request):
 @mastr_users_only
 def recordsSamplesForRun(request):
     args = request.REQUEST
-       
+
     # basic json that we will fill in
     output = json_records_template([
                 "id", "sample_id", "sample_class", "sample_class__unicode",
@@ -1417,7 +1417,7 @@ def recordsSamplesForRun(request):
         sort = sort_by
 
     rows = rows.order_by(sort)
-    
+
     # add rows
     for row in rows:
         d = {}
@@ -1490,7 +1490,7 @@ def recordsExperimentsForProject(request, project_id):
         args = request.GET
     else:
         args = request.POST
-       
+
     # basic json that we will fill in
     output = {'metaData': { 'totalProperty': 'results',
                             'successProperty': 'success',
@@ -1518,7 +1518,7 @@ def recordsExperimentsForProject(request, project_id):
         rows = Experiment.objects.all().order_by('status__id','id')
     else:
         rows = Experiment.objects.filter(Q(project__managers=request.user.id)|Q(users__id=request.user.id)).order_by('status__id','id')
-    
+
     if project_id is not None:
         rows = rows.filter(project__id=project_id)
 
@@ -1548,7 +1548,7 @@ def recordsExperimentsForProject(request, project_id):
 
     output = makeJsonFriendly(output)
     return HttpResponse(json.dumps(output))
-    
+
 @mastr_users_only
 def recordsComponents(request):
     # basic json that we will fill in
@@ -1572,7 +1572,7 @@ def recordsComponents(request):
         output['rows'].append({'id':row.id, 'component' : row.sample_type})
     output = makeJsonFriendly(output)
     return HttpResponse(json.dumps(output))
-       
+
 
 @mastr_users_only
 def recordsSamples(request, experiment_id):
@@ -1580,7 +1580,7 @@ def recordsSamples(request, experiment_id):
         args = request.GET
     else:
         args = request.POST
-       
+
 
     # basic json that we will fill in
     output = {'metaData': { 'totalProperty': 'results',
@@ -1620,8 +1620,8 @@ def recordsSamples(request, experiment_id):
 
     output = makeJsonFriendly(output)
     return HttpResponse(json.dumps(output))
-    
-    
+
+
 @mastr_users_only
 def recordsSamplesForClient(request, client):
 
@@ -1629,7 +1629,7 @@ def recordsSamplesForClient(request, client):
         args = request.GET
     else:
         args = request.POST
-       
+
 
     # basic json that we will fill in
     output = {'metaData': { 'totalProperty': 'results',
@@ -1672,108 +1672,108 @@ def recordsSamplesForClient(request, client):
     output = makeJsonFriendly(output)
 
     return HttpResponse(json.dumps(output))
-        
+
 
 @mastr_users_only
 def moveFile(request):
-    
+
     output = {'success':'', 'newlocation':''}
-    
+
     if request.GET:
         args = request.GET
     else:
         args = request.POST
-       
+
     target = args['target']
     fname = args['file']
-    
+
     exp = Experiment.objects.get(id=args['experiment_id'])
     exp.ensure_dir()
-        
-    exppath = exp.experiment_dir 
+
+    exppath = exp.experiment_dir
     pendingPath = os.path.join(settings.REPO_FILES_ROOT, 'pending', fname)
 
     (path, filename) = os.path.split(pendingPath)
-    
+
     destpath = exppath
     if not target == '':
         if not target == 'experimentRoot':
             destpath = os.path.join(destpath, target)
-    
+
     #see if pendingpath exists
     if os.path.exists(pendingPath):
         os.rename(pendingPath, os.path.join(destpath, filename) )
-    
+
     output['success'] = True
     output['newlocation'] = os.path.join(exppath, filename)
-    
+
     return HttpResponse(json.dumps(output))
 
-    
+
 @mastr_users_only
 def experimentFilesList(request):
-    
+
     if request.GET:
         args = request.GET
     else:
         args = request.POST
 
     path = args['node']
-    
+
     if path == 'experimentRoot':
         path = ''
-    
+
     if not 'experiment' in args or args['experiment'] == '0':
         print 'invalid experiment'
         return HttpResponse('[]')
-        
+
     exp = Experiment.objects.get(id=args['experiment'])
     exp.ensure_dir()
-        
-    exppath = exp.experiment_dir 
-    
+
+    exppath = exp.experiment_dir
+
     sharedList = ClientFile.objects.filter(experiment=exp)
     print sharedList
     return _fileList(request, exppath, path, True, sharedList)
-    
-    
+
+
 @mastr_users_only
 def runFilesList(request):
-    
+
     if request.GET:
         args = request.GET
     else:
         args = request.POST
 
     path = args['node']
-    
+
     if path == 'runsRoot':
         path = ''
-    
+
     if not 'run' in args or args['run'] == '0':
         print 'invalid run'
         return HttpResponse('[]')
-        
+
     run = Run.objects.get(id=args['run'])
     (abspath, relpath) = run.ensure_dir()
-        
+
     runpath = abspath + os.sep
-    
+
     print 'outputting file listing for ' + runpath + ' ' + path
-    
+
     return _fileList(request, runpath, path, False, [])
-    
+
 
 @mastr_users_only
 def pendingFilesList(request):
-    
+
     if request.GET:
         args = request.GET
     else:
         args = request.POST
-        
+
     nodepath = args['node']
-    
+
     if nodepath == 'pendingRoot':
         nodepath = ''
 
@@ -1781,8 +1781,8 @@ def pendingFilesList(request):
     ensure_repo_filestore_dir_with_owner(os.path.join('pending', nodepath))
 
     return _fileList(request, pendingpath, nodepath, False, [])
-    
-    
+
+
 @mastr_users_only
 def _fileList(request, basepath, path, withChecks, sharedList, replacementBasepath = None):
 
@@ -1797,12 +1797,12 @@ def _fileList(request, basepath, path, withChecks, sharedList, replacementBasepa
 
     files = os.listdir(os.path.join(basepath,path))
     files.sort()
-    
+
     for filename in files:
         filepath = os.path.join(basepath, filename)
         if not path == '':
             filepath = os.path.join(basepath, path, filename)
-            
+
         if os.access(filepath, os.R_OK):
             file = {}
             file['text'] = filename
@@ -1818,38 +1818,38 @@ def _fileList(request, basepath, path, withChecks, sharedList, replacementBasepa
                     file['id'] = os.path.join(replacementBasepath, filename)
             if withChecks:
                 file['checked'] = False
-                
+
                 for cf in sharedList:
                     import unicodedata as ud
                     import sys
-                    
+
                     try:
-                        a = ud.normalize('NFD',unicode(file['id'], sys.getfilesystemencoding(), errors="ignore")) 
+                        a = ud.normalize('NFD',unicode(file['id'], sys.getfilesystemencoding(), errors="ignore"))
                     except:
-                        a = ud.normalize('NFD',unicode(file['id'].encode('iso-8859-1'), encoding='iso-8859-1', errors="ignore")) 
-                            
+                        a = ud.normalize('NFD',unicode(file['id'].encode('iso-8859-1'), encoding='iso-8859-1', errors="ignore"))
+
                     b = ud.normalize('NFD',unicode(cf.filepath.encode('iso-8859-1'), encoding='iso-8859-1', errors="ignore"))
-                    
+
                     if a == b:
                         file['checked'] = True
 
             output.append(file)
-        
+
     return HttpResponse(json.dumps(output))
 
 @mastr_users_only
 def shareFile(request, *args):
     print 'shareFile:', str('')
-    
+
     args = request.POST
-    
+
     file = args['file']
     checked = args['checked']
-    
+
     exp = Experiment.objects.get(id=args['experiment_id'])
     exp.ensure_dir()
 
-    if checked == 'true':    
+    if checked == 'true':
         try:
             client_file = ClientFile.objects.get(filepath=file, experiment=exp)
         except:
@@ -1862,12 +1862,12 @@ def shareFile(request, *args):
             client_file.delete()
         except:
             pass
-    
+
     return HttpResponse(json.dumps({'success':True}))
 
 def normalise_files(exp, files):
     files = copy.copy(files)
-    
+
     logger.debug('files, pre normalise: %s' % (str(files)) )
 
     # Replace special value 'experimentDir' with the ''
@@ -1901,7 +1901,7 @@ def packageFilesForDownload(request):
     request.session[package_name] = {
         'experiment_id': exp.id,
         'files': normalise_files(exp, files)
-    }    
+    }
     return HttpResponse(json.dumps({
                 'success':True,
                 'package_name': package_name
@@ -1929,18 +1929,18 @@ def downloadPackage(request):
     package_path = pack_files(files, experiment.experiment_dir, package_name)
 
     return fileDownloadResponse(package_path, package_name)
-    
+
 @mastr_users_only
 def downloadFile(request, *args):
     print 'downloadFile:', str('')
-    
+
     args = request.REQUEST
-    
+
     file = args['file']
-    
+
     exp = Experiment.objects.get(id=args['experiment_id'])
     exp.ensure_dir()
-    
+
     filename = os.path.join(settings.REPO_FILES_ROOT, 'experiments', str(exp.created_on.year), str(exp.created_on.month), str(exp.id), file)
     from django.core.servers.basehttp import FileWrapper
     from django.http import HttpResponse
@@ -1948,7 +1948,7 @@ def downloadFile(request, *args):
     pathbits = filename.split('/')
 
     lastbit = pathbits[-1]
-    
+
     if os.path.isdir(filename):
         tmpfilename = "/tmp/madas-zip-"+lastbit
         zipdir(filename, tmpfilename)
@@ -1961,96 +1961,96 @@ def downloadFile(request, *args):
 def downloadSOPFileById(request, sop_id):
     from django.core.urlresolvers import reverse
     sop = StandardOperationProcedure.objects.get(id=sop_id)
-    return HttpResponseRedirect(reverse('downloadSOPFile', 
-                kwargs={'sop_id': sop.id, 
+    return HttpResponseRedirect(reverse('downloadSOPFile',
+                kwargs={'sop_id': sop.id,
                         'filename': os.path.basename(sop.attached_pdf.name)}))
-   
+
 @mastr_users_only
 def downloadSOPFile(request, sop_id, filename):
     sop = StandardOperationProcedure.objects.get(id=sop_id)
     if filename != os.path.basename(sop.attached_pdf.name):
         return HttpResponseForbidden()
-    
+
     from django.core.servers.basehttp import FileWrapper
     wrapper = FileWrapper(file(sop.attached_pdf.name))
     response = HttpResponse(wrapper, content_type='application/download')
     response['Content-Disposition'] = 'attachment;'
     response['Content-Length'] = os.path.getsize(sop.attached_pdf.name)
-    return response 
+    return response
 
 def downloadClientFile(request, filepath):
     print 'downloadClientFile:', str('')
-    
+
     pathbits = filepath.split('/')
-    
+
     file_id = pathbits[0]
 
     try:
         cf = ClientFile.objects.get(id=file_id, experiment__users=request.user)
     except:
         return HttpResponseNotFound("You do not have permission to a file with that ID ("+file_id+")")
-    
+
     exp = cf.experiment
     exp.ensure_dir()
 
 
     (abspath, exppath) = cf.experiment.ensure_dir()
-    
+
     joinedpath = os.path.join(abspath, cf.filepath)
     if len(pathbits) > 1:
         joinedpath = joinedpath + os.sep + os.sep.join(pathbits[1:])
 
-    
+
     filename = joinedpath
-    
+
     print 'filename is '+filename
-    
+
     outputname = pathbits[-1]
     if len(pathbits) == 1:
         outputname = cf.filepath
-    
+
     if not os.path.exists(filename):
         return HttpResponseNotFound("Cannot download file")
     else:
-    
+
         if os.path.isdir(filename):
             tmpfilename = "/tmp/madas-zip-"+outputname
             zipdir(filename, tmpfilename)
             filename = tmpfilename
             outputname = outputname + ".zip"
-            
+
         from django.core.servers.basehttp import FileWrapper
         from django.http import HttpResponse
-    
+
         from django.core.files import File
         wrapper = File(open(filename, "rb"))
         content_disposition = 'attachment;  filename=\"%s\"' % outputname
         response = HttpResponse(wrapper, content_type='application/download')
         response['Content-Disposition'] = content_disposition
         response['Content-Length'] = os.path.getsize(filename)
-        return response 
+        return response
 
 def downloadRunFile(request):
     print 'downloadFile:', str('')
-    
+
     args = request.REQUEST
-    
+
     file = args['file']
     lastbit = file.split('/')[-1]
-    
+
     run = Run.objects.get(id=args['run_id'])
     (abspath, relpath) = run.ensure_dir()
-    
+
     filename = os.path.join(abspath, file)
-    
+
     print 'download run file: ' + filename
-    
+
     if os.path.isdir(filename):
         tmpfilename = "/tmp/madas-zip-"+lastbit
         zipdir(filename, tmpfilename)
         filename = tmpfilename
         lastbit = lastbit + ".zip"
-    
+
     from django.core.servers.basehttp import FileWrapper
     from django.http import HttpResponse
 
@@ -2060,10 +2060,10 @@ def downloadRunFile(request):
     response = HttpResponse(wrapper, content_type='application/download')
     response['Content-Disposition'] = content_disposition
     response['Content-Length'] = os.path.getsize(filename)
-    return response 
+    return response
 
 
-    
+
 @mastr_users_only
 def uploadFile(request):
 
@@ -2071,10 +2071,10 @@ def uploadFile(request):
 
     ############# FILE UPLOAD ########################
     output = { 'success': True }
-    
+
     try:
         experiment_id = args['experimentId'];
-        
+
         #TODO handle file uploads - check for error values
         print request.FILES.keys()
         if request.FILES.has_key('attachfile'):
@@ -2089,10 +2089,10 @@ def uploadFile(request):
     except Exception, e:
         logger.exception('Exception uploading file')
         output = { 'success': False }
-        
+
     return HttpResponse(json.dumps(output))
-    
-    
+
+
 def _handle_uploaded_file(f, name, experiment_id):
     '''Handles a file upload to the projects WRITABLE_DIRECTORY
        Expects a django InMemoryUpload object, and a filename'''
@@ -2100,15 +2100,15 @@ def _handle_uploaded_file(f, name, experiment_id):
     retval = False
     try:
         print 'exp is ' + experiment_id
-        
+
         exp = Experiment.objects.get(id=experiment_id)
         (exppath, blah) = exp.ensure_dir()
-    
+
         print 'writing to file: ' + exppath + os.sep + name
         destination = open(exppath + os.sep + name, 'wb+')
         for chunk in f.chunks():
             destination.write(chunk)
-    
+
         import grp
         groupinfo = grp.getgrnam(settings.CHMOD_GROUP)
         gid = groupinfo.gr_gid
@@ -2117,14 +2117,14 @@ def _handle_uploaded_file(f, name, experiment_id):
         os.fchmod(destination.fileno(), stat.S_IRUSR|stat.S_IWUSR|stat.S_IRGRP|stat.S_IWGRP)
 
         destination.close()
-    
+
         retval = True
     except Exception, e:
         retval = False
         logger.exception('Exception uploading file')
     print '*** _handle_uploaded_file: exit ***'
     return retval
-    
+
 
 @mastr_users_only
 def uploadCSVFile(request):
@@ -2139,19 +2139,19 @@ def uploadCSVFile(request):
 
     ############# FILE UPLOAD ########################
     output = { 'success': True }
-    
+
     invalidCount = 0
-    
+
     try:
         #TODO handle file uploads - check for error values
         print request.FILES.keys()
         if request.FILES.has_key('samplecsv'):
             f = request.FILES['samplecsv']
-            
+
             import csv
-            
+
             data = csv.reader(f)
-            
+
             for row in data:
                 try:
                     s = Sample()
@@ -2162,34 +2162,34 @@ def uploadCSVFile(request):
                     s.save()
                 except Exception, e:
                     invalidCount = invalidCount + 1
-                    output = { 'success': False, 'invalidCount': invalidCount }            
+                    output = { 'success': False, 'invalidCount': invalidCount }
         else:
             print '\tNo file attached.'
     except Exception, e:
         logger.exception('Exception uploading file')
         output = { 'success': False }
-        
+
     return HttpResponse(json.dumps(output))
-    
-    
+
+
 
 @mastr_users_only
 def sample_class_enable(request, id):
-    
+
     if request.GET:
         args = request.GET
     else:
         args = request.POST
 
     sc = SampleClass.objects.get(id=id)
-    
+
     if sc.enabled:
         sc.enabled = False
     else:
         sc.enabled = True
-        
+
     sc.save()
-        
+
     return recordsSampleClasses(request, sc.experiment.id)
 
 def json_error(msg='Unknown error'):
@@ -2210,18 +2210,18 @@ def create_rule_generator(request):
 
     name = request.POST.get('name', "Unnamed")
     description = request.POST.get('description', "This rule generator was not given a description")
-    accessibility = request.POST.get('accessibility') 
-    apply_sweep_rule = request.POST.get('apply_sweep_rule') 
+    accessibility = request.POST.get('accessibility')
+    apply_sweep_rule = request.POST.get('apply_sweep_rule')
     if apply_sweep_rule is not None:
         apply_sweep_rule = True if apply_sweep_rule == 'true' else False
     startblockvars = json.loads(request.POST.get('startblock', []))
     sampleblockvars = json.loads(request.POST.get('sampleblock', []))
     endblockvars = json.loads(request.POST.get('endblock', []))
-   
-    success, access, message = rulegenerators.create_rule_generator(name, 
-                                         description, 
-                                         accessibility, 
-                                         request.user, 
+
+    success, access, message = rulegenerators.create_rule_generator(name,
+                                         description,
+                                         accessibility,
+                                         request.user,
                                          apply_sweep_rule,
                                          getMadasUser(request.user.username).PrimaryNode,
                                          startblockvars,
@@ -2247,13 +2247,13 @@ def edit_rule_generator(request):
     if apply_sweep_rule is not None:
         apply_sweep_rule = True if apply_sweep_rule == 'true' else False
     name = request.POST.get('name', None)
-    accessibility = request.POST.get('accessibility', None) 
+    accessibility = request.POST.get('accessibility', None)
     startblockvars = json.loads(request.POST.get('startblock', 'null'))
     sampleblockvars = json.loads(request.POST.get('sampleblock', 'null'))
     endblockvars = json.loads(request.POST.get('endblock', 'null'))
     state = json.loads(request.POST.get('state', 'null'))
 
-    success, access, message = rulegenerators.edit_rule_generator(rg_id, request.user, 
+    success, access, message = rulegenerators.edit_rule_generator(rg_id, request.user,
                                                     name=name,
                                                     description=description,
                                                     accessibility=accessibility,
@@ -2300,8 +2300,8 @@ def generate_worklist(request, run_id):
         # Shortcut on Error!
         return HttpResponse(str(e), content_type="text/plain")
     else:
-        output = {'success': True}    
-    
+        output = {'success': True}
+
     return HttpResponse(json.dumps(output))
 
 @mastr_users_only
@@ -2311,20 +2311,20 @@ def display_worklist(request, run_id):
     # TODO
     # I don't think the template for this should be in the DB
     # Change it later ...
-    #from mako.template import Template 
-    #mytemplate = Template(run.method.template) 
-    #mytemplate.output_encoding = "utf-8" 
+    #from mako.template import Template
+    #mytemplate = Template(run.method.template)
+    #mytemplate.output_encoding = "utf-8"
 
-    #create the variables to insert 
-    
+    #create the variables to insert
+
     from django.shortcuts import render_to_response
-    
+
     render_vars = {
         'username': request.user.username,
         'run': run,
-        'runsamples': run.runsample_set.all().order_by('sequence')} 
-         
-    #render 
+        'runsamples': run.runsample_set.all().order_by('sequence')}
+
+    #render
     #return HttpResponse(content=mytemplate.render(**render_vars), content_type='text/plain; charset=utf-8')
     return render_to_response('display_worklist.html', render_vars)
 
@@ -2332,16 +2332,16 @@ def display_worklist(request, run_id):
 @mastr_users_only
 def mark_run_complete(request, run_id):
     samples = RunSample.objects.filter(run__id=run_id)
-    
+
     for sample in samples:
         sample.complete = True
         sample.save()
-        
+
     run = Run.objects.get(id=run_id)
     run.state = RUN_STATES.COMPLETE[0]
     run.save()
-    
-    
+
+
     try:
         e = FixedEmailMessage(subject='MASTR-MS Run ('+run.title+') Complete', body='Run ('+run.title+') has been marked as complete', from_email = RETURN_EMAIL, to = [run.creator.username])
         e.send()
@@ -2349,8 +2349,8 @@ def mark_run_complete(request, run_id):
         pass
 
     return HttpResponse(json.dumps({ "success": True }), content_type="text/plain")
-    
-    
+
+
 def select_widget_json(authenticated=False, authorized=False, main_content_function=None, success=False, input=""):
 
     output = {}
@@ -2388,7 +2388,7 @@ def add_samples_to_run(request):
     sample_ids = [int(X) for X in sample_id_str.split(',')]
     #The following generated queryset will be in databaseid order, not
     #in the order specified by the sample_ids list. We will need to
-    #reorder it before we send it to the run for processing. 
+    #reorder it before we send it to the run for processing.
     #we do this later (see below)
     queryset = Sample.objects.filter(id__in=sample_ids)
     logger.debug("Samples to add to run: %s" % (str(sample_ids) ) )
@@ -2399,8 +2399,8 @@ def add_samples_to_run(request):
     # user could be in experiment OR be a project manager
     # I have done this with two Q objects OR'ed together.
     # The alternative approach would be to do it as a nested if:
-    # only check that the user is in the experiment access list IF the user 
-    # isn't already a PM. 
+    # only check that the user is in the experiment access list IF the user
+    # isn't already a PM.
 
     samples = Sample.objects.filter(Q(experiment__users=request.user)|Q(experiment__project__managers=request.user))
     allowed_set = set(list(samples))
@@ -2432,7 +2432,7 @@ def add_samples_to_run(request):
     logger.debug("Finished adding the samples to the samplelist")
 
     return HttpResponse()
-    
+
 @mastr_users_only
 def add_samples_to_class(request):
     '''Takes a run_id and a list of sample_ids and adds samples to the run after checking permissions etc.'''

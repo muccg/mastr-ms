@@ -121,7 +121,7 @@ class DiffError(Error):
 #
 _COMMANDS = [
  "END",           # END():               stop processing current context
- "SET_PATH",      # SET_PATH(path):      set current target path 
+ "SET_PATH",      # SET_PATH(path):      set current target path
  "JOIN_PATH",     # JOIN_PATH(path):     join path to the current target
  "POP_PATH",      # POP_PATH(h):         pop one level off current target
  "POP_JOIN_PATH", # POP_JOIN_PATH(path): pop the current path, then join
@@ -132,7 +132,7 @@ _COMMANDS = [
  "MOVE_FROM",     # MOVE_FROM(path):     move item at path to current target
  "PF_COPY",       # PF_COPY(n):          patch file; copy n bytes from input
  "PF_SKIP",       # PF_SKIP(n):          patch file; skip n bytes from input
- "PF_INS_RAW",    # PF_INS_RAW(bytes):   patch file; insert raw bytes 
+ "PF_INS_RAW",    # PF_INS_RAW(bytes):   patch file; insert raw bytes
  "PF_INS_BZ2",    # PF_INS_BZ2(bytes):   patch file; insert unbzip'd bytes
  "PF_BSDIFF4",    # PF_BSDIFF4(n,p):     patch file; bsdiff4 from n input bytes
  "PF_REC_ZIP",    # PF_REC_ZIP(m,cs):    patch file; recurse into zipfile
@@ -255,7 +255,7 @@ def paths_differ(path1,path2):
         return True
     return False
 
-    
+
 
 def calculate_digest(target,hash=hashlib.md5):
     """Calculate the digest of the given path.
@@ -398,7 +398,7 @@ class Patcher(object):
         self.outfile = None
         self.new_target = None
         return state
-        
+
     def _save_state(self):
         """Return the current state, for later restoration."""
         return (self.target,self.root_dir,self.infile,self.outfile,self.new_target)
@@ -909,7 +909,7 @@ class Differ(object):
                 return None
             # Hooray! Looks like something we can use.
             return zf
-      
+
     def _diff_dotzip_file(self,source,target):
         s_zf = self._open_and_check_zipfile(source)
         if s_zf is None:
@@ -942,8 +942,8 @@ class Differ(object):
                         self._diff(s_workdir,t_workdir)
                         self._write_command(END)
                 finally:
-                    t_zf.close() 
-                    s_zf.close() 
+                    t_zf.close()
+                    s_zf.close()
 
 
     def _diff_binary_file(self,source,target):
@@ -1121,7 +1121,7 @@ def bsdiff4_patch(source,patch):
     bcontrol = bz2.decompress(patch[32:32+l_bcontrol])
     bdiff = bz2.decompress(patch[32+l_bcontrol:32+l_bcontrol+l_bdiff])
     bextra = bz2.decompress(patch[32+l_bcontrol+l_bdiff:])
-    #  Decode the control tuples 
+    #  Decode the control tuples
     tcontrol = []
     for i in xrange(0,len(bcontrol),24):
         tcontrol.append((
@@ -1293,7 +1293,7 @@ def main(args):
                 stream.close()
         if opts.zipped:
             really_rmtree(workdir)
- 
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])

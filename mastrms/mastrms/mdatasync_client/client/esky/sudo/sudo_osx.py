@@ -178,7 +178,7 @@ def spawn_sudo(proxy):
                      | kAuthorizationFlagPreAuthorize \
                      | kAuthorizationFlagInteractionAllowed \
                      | kAuthorizationFlagExtendRights
-        
+
         err = sec.AuthorizationCopyRights(auth,None,None,kAuthFlags,None)
         if err:
             raise OSError(errno.EACCES,"could not sudo: %d" % (err,))
@@ -191,7 +191,7 @@ def spawn_sudo(proxy):
         err = sec.AuthorizationExecuteWithPrivileges(auth,exe[0],0,args,byref(io))
         if err:
             raise OSError(errno.EACCES,"could not sudo: %d" %(err,))
-        
+
         buf = ctypes.create_string_buffer(8)
         read = libc.fread(byref(buf),1,4,io)
         if read != 4:

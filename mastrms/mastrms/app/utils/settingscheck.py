@@ -1,14 +1,14 @@
 from django.conf import settings
 
 def summary():
-    for var in ['CHMOD_USER', 
-                'CHMOD_GROUP', 
-                'LOGS_TO_EMAIL', 
-                'KEYS_TO_EMAIL', 
-                'REGISTRATION_TO_EMAIL', 
-                'EMAIL_HOST', 
-                'SERVER_EMAIL', 
-                'RETURN_EMAIL', 
+    for var in ['CHMOD_USER',
+                'CHMOD_GROUP',
+                'LOGS_TO_EMAIL',
+                'KEYS_TO_EMAIL',
+                'REGISTRATION_TO_EMAIL',
+                'EMAIL_HOST',
+                'SERVER_EMAIL',
+                'RETURN_EMAIL',
                 'MEMCACHE_SERVERS',
                 'PERSISTENT_FILESTORE',
                 'QUOTE_FILES_ROOT',

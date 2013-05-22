@@ -177,7 +177,7 @@ if __rpython__:
                 for j in xrange(len(slst)):
                     if not _list_gt(slst[j][0],item[0]):
                         slst.insert(j,item)
-                        break 
+                        break
                 else:
                     slst.append(item)
         else:
@@ -185,7 +185,7 @@ if __rpython__:
                 for j in xrange(len(slst)):
                     if _list_gt(slst[j][0],item[0]):
                         slst.insert(j,item)
-                        break 
+                        break
                 else:
                     slst.append(item)
         return slst
@@ -506,7 +506,7 @@ def is_uninstalled_version_dir(vdir):
     if exists(pathjoin(vdir,ESKY_CONTROL_DIR,"bootstrap-manifest-old.txt")):
         return True
     return False
-    
+
 
 
 def split_app_version(s):
@@ -534,7 +534,7 @@ def join_app_version(appname,version,platform):
     For example, ("app-name","0.1.2","win32") => appname-0.1.2.win32
     """
     return "%s-%s.%s" % (appname,version,platform,)
-    
+
 
 def parse_version(s):
     """Parse a version string into a chronologically-sortable key

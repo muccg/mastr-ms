@@ -8,12 +8,12 @@ from identifiers import VERSION
 #class Target:
 #    def __init__(self, **kwargs):
 #        self.__dict__.update(kwargs)
-#        self.version = VERSION 
+#        self.version = VERSION
 #        self.company_name = "None"
 #        self.copyright = "None"
 #        self.name = "None"
 
-freeze_includes = ['encodings','encodings.*', 'calendar', 'tendo'] 
+freeze_includes = ['encodings','encodings.*', 'calendar', 'tendo']
 
 freeze_excludes = [#'_ssl',  # Exclude _ssl
                       'pyreadline', 'doctest',

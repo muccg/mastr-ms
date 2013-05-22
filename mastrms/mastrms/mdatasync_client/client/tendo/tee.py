@@ -140,7 +140,7 @@ def system(cmd, cwd=None, logger=None, stdout=None, log_command=_sentinel, timin
     * ``cmd`` - command to be executed
     * ``cwd`` - optional working directory to be set before running cmd
     * ``logger`` - None, a filename, handle or a function like print or :py:meth:`logging.Logger.warning`
-    
+
     Returns the exit code reported by the execution of the command, 0 means success.
 
     >>> import os, logging

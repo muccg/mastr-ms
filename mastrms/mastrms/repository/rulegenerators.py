@@ -14,7 +14,7 @@ def listRuleGenerators(user=None, accessibility=False, showEnabledOnly=False):
     if user is not None:
         mauser = getMadasUser(user.username)
         usernode = mauser.PrimaryNode
-    
+
     rows = RuleGenerator.objects.all()
 
     apply_accessibility_node = Q(accessibility=RuleGenerator.ACCESSIBILITY_NODE) & Q(node=usernode)
@@ -30,14 +30,14 @@ def listRuleGenerators(user=None, accessibility=False, showEnabledOnly=False):
     if showEnabledOnly:
         rows = rows.filter(apply_showonlyenabled)
 
-    return rows 
+    return rows
 
 def recreate_start_block(RG, startblockvars):
     # We will recreate the block by deleting the existing
-    # block elements, but only after we know that all the new 
+    # block elements, but only after we know that all the new
     # elements can be created
     newelements = []
-    
+
     index=0
     for stb in startblockvars:
         #create the start block
@@ -60,7 +60,7 @@ def recreate_start_block(RG, startblockvars):
 
 def recreate_sample_block(RG, sampleblockvars):
     # We will recreate the block by deleting the existing
-    # block elements, but only after we know that all the new 
+    # block elements, but only after we know that all the new
     # elements can be created
     newelements = []
     index = 0
@@ -69,10 +69,10 @@ def recreate_sample_block(RG, sampleblockvars):
         newSampleBlock = RuleGeneratorSampleBlock()
         newSampleBlock.rule_generator = RG
         newSampleBlock.index = index
-        newSampleBlock.sample_count = sab['every'] 
+        newSampleBlock.sample_count = sab['every']
         newSampleBlock.count = sab['count']
         newSampleBlock.component = Component.objects.get(id=sab['component'])
-        newSampleBlock.order = sab['order'] 
+        newSampleBlock.order = sab['order']
         newelements.append(newSampleBlock)
         index+=1
 
@@ -82,13 +82,13 @@ def recreate_sample_block(RG, sampleblockvars):
 
     for obj in newelements:
         obj.save()
-        
+
 def recreate_end_block(RG, endblockvars):
     # We will recreate the block by deleting the existing
-    # block elements, but only after we know that all the new 
+    # block elements, but only after we know that all the new
     # elements can be created
     newelements = []
-    
+
     index = 0
     for seb in endblockvars:
         newEndBlock = RuleGeneratorEndBlock()
@@ -118,8 +118,8 @@ def create_rule_generator(name, description, accessibility, user, apply_sweep_ru
         newRG.name = name
         newRG.description = description
         newRG.created_by = user
-        newRG.node = getMadasUser(user.username).PrimaryNode 
-        newRG.accessibility = accessibility 
+        newRG.node = getMadasUser(user.username).PrimaryNode
+        newRG.accessibility = accessibility
         #default state
         newRG.save()
 
@@ -130,18 +130,18 @@ def create_rule_generator(name, description, accessibility, user, apply_sweep_ru
                                         sampleblock = sampleblockvars,
                                         endblock = endblockvars,
                                         state = state)
-    except Exception, e: 
+    except Exception, e:
         print "Exception in create rule generator: %s" % ( e )
-    
+
     return success, access, message
 
-    
+
 def edit_rule_generator(id, user, **kwargs):
     '''Edits an existing rule generator. The
        functions which set the blocks (start, sample, end)
        will drop all current records and recreate with the
        newly submitted ones
-       
+
        Any parameters coming through as None are ignored.
        '''
     success = False
@@ -152,7 +152,7 @@ def edit_rule_generator(id, user, **kwargs):
         candidateRG = RuleGenerator.objects.get(id=id)
         print "In edit, user = ", type(user)
         if candidateRG.is_accessible_by(user):
-        
+
             if kwargs.get('apply_sweep_rule') is not None:
                 candidateRG.apply_sweep_rule = kwargs.get('apply_sweep_rule')
             if kwargs.get('state') is not None:
@@ -166,7 +166,7 @@ def edit_rule_generator(id, user, **kwargs):
             if kwargs.get('description') is not None:
                 candidateRG.description = kwargs.get('description')
             candidateRG.save()
-       
+
             if kwargs.get('startblock', None) is not None:
                 recreate_start_block(candidateRG, kwargs.get('startblock'))
             if kwargs.get('sampleblock', None) is not None:
@@ -178,7 +178,7 @@ def edit_rule_generator(id, user, **kwargs):
         else:
             success = False
             access = False
-    
+
     except Exception, e:
         print 'Exception: %s' % (e)
         #couldnt find rulegen, or some other error.
@@ -205,7 +205,7 @@ def copy_rules(sourceRG, destRG):
                 index = rule.index,
                 count = rule.count,
                 component = rule.component)
-        
+
 
 def clone_rule_generator(rg_id, user):
     rg = RuleGenerator.objects.get(pk=rg_id)
@@ -226,7 +226,7 @@ def create_new_version_of_rule_generator(rg_id, user):
     if rg.version is None:
         rg.version = 1
         rg.save()
-    
+
     newRG = RuleGenerator.objects.create(
             name = rg.name,
             version = rg.version+1,
@@ -260,9 +260,9 @@ def convert_to_dict(rulegenerator):
     d['startblock'] = [{'count': r.count, 'component_id': r.component_id, 'component': r.component.sample_type} for r in rulegenerator.start_block_rules]
     d['sampleblock'] = [
         {
-            'count': r.count, 
+            'count': r.count,
             'component_id': r.component_id,
-            'component': r.component.sample_type, 
+            'component': r.component.sample_type,
             'sample_count': r.sample_count,
             'order': r.order_name,
             'order_id' : r.order

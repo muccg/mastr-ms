@@ -18,7 +18,7 @@ class MemcacheCookiePersister(object):
         return self._client
 
     def save(self, cookies):
-        raw_cookies = '' 
+        raw_cookies = ''
         for cookie in [c for c in cookies if not c.is_session_cookie]:
             raw_cookies += cookie.as_str + '\n'
         self.client.set(self.key, raw_cookies, self.cache_time, 0)
@@ -28,6 +28,6 @@ class MemcacheCookiePersister(object):
         raw_cookies = self.client.get(self.key)
         if raw_cookies:
             for l in [l.strip() for l in raw_cookies.split('\n') if l.strip() != '']:
-                cookies.append(Cookie.from_str(l)) 
+                cookies.append(Cookie.from_str(l))
         return cookies
 

@@ -208,7 +208,7 @@ def _merge_dir(src,dst):
         else:
             if not os.path.exists(dstnm):
                shutil.copy2(srcnm,dstnm)
-        
+
 
 #  Code to fake out any bootstrappers that try to import from esky.
 _FAKE_ESKY_BOOTSTRAP_MODULE = """

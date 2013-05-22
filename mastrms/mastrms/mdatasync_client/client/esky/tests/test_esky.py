@@ -179,7 +179,7 @@ class TestEsky(unittest.TestCase):
             with setenv("ESKY_NO_CUSTOM_CHAINLOAD","1"):
               self._run_eskytester({"bdist_esky":{"freezer_module":"cxfreeze",
                                                  "compile_bootstrap_exes":1}})
- 
+
 
   def _run_eskytester(self,options):
     """Build and run the eskytester app using the given distutils options.
@@ -284,12 +284,12 @@ class TestEsky(unittest.TestCase):
         really_rmtree(tdir)
         if server:
             server.shutdown()
- 
+
   def test_esky_locking(self):
     """Test that locking an Esky works correctly."""
     platform = get_platform()
     appdir = tempfile.mkdtemp()
-    try: 
+    try:
         vdir = os.path.join(appdir,ESKY_APPDATA_DIR,"testapp-0.1.%s" % (platform,))
         os.makedirs(vdir)
         os.mkdir(os.path.join(vdir,ESKY_CONTROL_DIR))
@@ -328,11 +328,11 @@ class TestEsky(unittest.TestCase):
     finally:
         shutil.rmtree(appdir)
 
- 
+
   def test_esky_lock_breaking(self):
     """Test that breaking the lock on an Esky works correctly."""
     appdir = tempfile.mkdtemp()
-    try: 
+    try:
         os.makedirs(os.path.join(appdir,ESKY_APPDATA_DIR,"testapp-0.1",ESKY_CONTROL_DIR))
         open(os.path.join(appdir,ESKY_APPDATA_DIR,"testapp-0.1",ESKY_CONTROL_DIR,"bootstrap-manifest.txt"),"wb").close()
         e1 = esky.Esky(appdir,"http://example.com/downloads/")
@@ -592,7 +592,7 @@ class TestFSTransact(unittest.TestCase):
 
 class TestPatch(unittest.TestCase):
     """Testcases for esky.patch."""
- 
+
     _TEST_FILES = (
         ("pyenchant-1.2.0.tar.gz","2fefef0868b110b1da7de89c08344dd2"),
         ("pyenchant-1.5.2.tar.gz","fa1e4f3f3c473edd98c7bb0e46eea352"),
@@ -672,7 +672,7 @@ class TestPatch(unittest.TestCase):
             esky.patch.apply_patch(path1,f)
         self.assertEquals(esky.patch.calculate_digest(path1),
                          esky.patch.calculate_digest(path2))
-        
+
 
     def _extract(self,filename,dest):
         dest = os.path.join(self.workdir,dest)
@@ -684,7 +684,7 @@ class TestPatch(unittest.TestCase):
         finally:
             f.close()
         return dest
-        
+
 
 class TestFilesDiffer(unittest.TestCase):
 

@@ -22,7 +22,7 @@ class DBUserManager(object):
         if django_users:
             django_user = django_users[0]
         if django_user is None or not django_user.username:
-            logger.debug('No user named %s in django\'s users table' % django_user) 
+            logger.debug('No user named %s in django\'s users table' % django_user)
             return {}
 
         try:
@@ -87,13 +87,13 @@ class DBUserManager(object):
                     else:
                         filter_cond = filter_cond | Q(user__group__name=g)
             if method != 'and':
-                users_qs = models.UserDetail.objects.filter(filter_cond)  
-       
+                users_qs = models.UserDetail.objects.filter(filter_cond)
+
         return [u.to_dict() for u in users_qs]
- 
+
 
     def update_staff_status(self, user):
-        #if the user belongs to more than one users.models.Group, they should be django staff. 
+        #if the user belongs to more than one users.models.Group, they should be django staff.
         #Else, they shouldnt.
         mauser = getMadasUser(user.username)
         if not mauser.IsClient:
@@ -105,7 +105,7 @@ class DBUserManager(object):
 
 
     def add_user_to_group(self, username, groupname):
-        try: 
+        try:
             user = User.objects.get(username=username)
         except User.DoesNotExist, e:
             logger.warning('User with username % does not exist' % username)
@@ -119,13 +119,13 @@ class DBUserManager(object):
             logger.warning('User %s already in group %s' % (username, groupname))
             return False
         group.user.add(user)
-        
+
         self.update_staff_status(user)
 
         return True
 
     def remove_user_from_group(self, username, groupname):
-        try: 
+        try:
             user = User.objects.get(username=username)
         except User.DoesNotExist, e:
             logger.warning('User with username % does not exist' % username)
@@ -141,7 +141,7 @@ class DBUserManager(object):
         group.user.remove(user)
 
         self.update_staff_status(user)
-        
+
         return True
 
     def add_user(self, username, detailsDict):
@@ -154,11 +154,11 @@ class DBUserManager(object):
         user_detail.set_from_dict(detailsDict)
         user_detail.save()
         return True
-            
+
     def update_user(self, username, newusername, newpassword, detailsDict):
         if newusername is None:
             newusername = username
-        
+
         if newusername != username:
             if User.objects.filter(username=newusername).exists():
                 logger.warning('New Useraname %s already existed.' % newusername)
@@ -176,7 +176,7 @@ class DBUserManager(object):
             django_user.save()
 
         if newpassword is not None and newpassword != '':
-            django_user.set_password(newpassword) 
+            django_user.set_password(newpassword)
             user_detail.passwordResetKey = None
             django_user.save()
             user_detail.save()
@@ -184,5 +184,5 @@ class DBUserManager(object):
         user_detail.set_from_dict(detailsDict)
         user_detail.save()
 
-        return True 
+        return True
 

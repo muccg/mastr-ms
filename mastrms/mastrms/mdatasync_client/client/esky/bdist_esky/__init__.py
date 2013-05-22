@@ -157,7 +157,7 @@ class bdist_esky(Command):
     """Create a frozen application in 'esky' format.
 
     This distutils command can be used to freeze an application in the
-    format expected by esky.  It interprets the following standard 
+    format expected by esky.  It interprets the following standard
     distutils options:
 
        scripts:  list of scripts to freeze as executables;
@@ -211,7 +211,7 @@ class bdist_esky(Command):
         pre_zip_callback:  function to call just before starting to zip up
                            the frozen application; this is a good opportunity
                            to e.g. sign the resulting executables.
-    
+
     """
 
     description = "create a frozen app in 'esky' format"
@@ -480,7 +480,7 @@ class bdist_esky(Command):
                 for src in sources:
                     src = convert_path(src)
                     yield (src,os.path.join(dst,os.path.basename(src)))
- 
+
     def get_package_data(self):
         """Yield (source,destination) tuples for package data files.
 
@@ -587,12 +587,12 @@ class bdist_esky(Command):
         for assembly in manifest.getElementsByTagName("assemblyIdentity"):
             name = assembly.attributes["name"].value
             if name.startswith("Microsoft") and name.endswith("CRT"):
-                version = assembly.attributes["version"].value 
-                pubkey = assembly.attributes["publicKeyToken"].value 
+                version = assembly.attributes["version"].value
+                pubkey = assembly.attributes["publicKeyToken"].value
                 return (name,version,pubkey)
         return None
-        
-    
+
+
     @staticmethod
     def _find_msvcrt_manifest_files(name):
         """Search the system for candidate MSVCRT manifest files.

@@ -21,14 +21,14 @@ class OrganisationAdmin(admin.ModelAdmin):
     list_display = ['name', 'abn', 'projects_link']
     search_fields = ['name', 'abn']
     inlines = [UserOrganisationInline]
-    
+
     def projects_link(self, obj):
         userorgs = obj.userorganisation_set.all()
         userids = [str(x.user.id) for x in userorgs]
         change_url = urlresolvers.reverse('admin:repository_project_changelist')
         return '<a href="%s?client__id__in=%s">Projects</a>' % (change_url, urllib.quote(','.join(userids)))
     projects_link.short_description = 'Projects'
-    projects_link.allow_tags = True    
+    projects_link.allow_tags = True
 
 class QuotehistoryAdmin(admin.ModelAdmin):
     list_display = ['quoteid', 'authoremailid', 'newnode', 'oldnode', 'comment', 'completed', 'oldcompleted', 'changetimestamp']

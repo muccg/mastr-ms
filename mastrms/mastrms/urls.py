@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import * 
+from django.conf.urls.defaults import *
 from django.conf import settings
 
 from django.contrib import admin
@@ -28,7 +28,7 @@ urlpatterns = patterns('',
     (r'^registration/', include('mastrms.registration.urls')),
     # mastrms.login
     (r'^login/', include('mastrms.login.urls')),
-    # mastrms.users 
+    # mastrms.users
     (r'^user/', include('mastrms.users.urls')),
 )
 
@@ -39,6 +39,6 @@ if settings.DEBUG:
         (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root' : settings.STATIC_ROOT, 'SSL' : settings.SSL_ENABLED} ),
     )
     #default view
-urlpatterns += patterns('', 
+urlpatterns += patterns('',
     (r'^', 'mastrms.login.views.serveIndex', {'SSL': settings.SSL_ENABLED}),
     )

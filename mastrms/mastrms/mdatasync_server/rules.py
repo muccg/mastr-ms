@@ -21,7 +21,7 @@ class FileRule(object):
        include
        update_existing
     '''
-    
+
 
     def __init__(self, tpattern, action):
         self.tpattern = tpattern
@@ -32,7 +32,7 @@ class FileRule(object):
 
 
     def toString(self):
-        #find which action 
+        #find which action
         if self.action is not ActionType.MOVE:
             return ('%s%s' % (ActionType.CommandLookup[self.action], self.tpattern) )
         else:
@@ -55,7 +55,7 @@ class NodeConfig(object):
         #if not self.nodes.has_key(nodename):
         #    print 'AddStation: warning: needed to create node ', nodename
         if not self.nodes[nodename].has_key(stationname):
-            self.nodes[nodename][stationname] = [] 
+            self.nodes[nodename][stationname] = []
 
 
 
@@ -63,7 +63,7 @@ class NodeConfig(object):
         #first try to create the rule.
         r = FileRule(ruletarget, ruleaction)
         if r is not None:
-        
+
             if not self.nodes.has_key(nodename):
                 self.AddNode(nodename)
             if not self.nodes[nodename].has_key(stationname):
