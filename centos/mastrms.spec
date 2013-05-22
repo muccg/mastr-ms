@@ -20,17 +20,17 @@ Name: %{name}
 Version: %{version}
 Release: %{release}
 Source0: %{name}-%{unmangled_version}.tar.gz
-License: UNKNOWN
+License: GNU GPL v2
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Prefix: %{_prefix}
 BuildArch: x86_64
 Vendor: Centre for Comparative Genomics <web@ccg.murdoch.edu.au>
-BuildRequires: python-setuptools openldap-devel mysql-devel
-Requires: python-setuptools openldap-clients httpd mod_wsgi mysql-libs
+BuildRequires: python-setuptools openldap-devel 
+Requires: python-setuptools openldap-clients httpd mod_wsgi 
 
 %description
-Django iVEC Allocation web application
+MastrMS web application
 
 %prep
 #%setup -n %{name}-%{unmangled_version} -n %{name}-%{unmangled_version}
