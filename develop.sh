@@ -123,7 +123,6 @@ function installapp() {
 
 # django syncdb, migrate and collect static
 function syncmigrate() {
-    registry_needed
     echo "syncdb"
     virt_${PROJECT_NAME}/bin/django-admin.py syncdb --noinput --settings=${DJANGO_SETTINGS_MODULE} 1> syncdb-develop.log
     echo "migrate"
