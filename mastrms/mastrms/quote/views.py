@@ -41,8 +41,7 @@ def _handle_uploaded_file(f, name):
             destination.write(chunk)
         destination.close()
 
-        set_repo_file_ownerships(destfname)
-        retval = True
+        retval = set_repo_file_ownerships(destfname)
     except Exception, e:
         retval = False
         logger.debug('\tException in file upload: %s' % (str(e)) )
@@ -705,4 +704,3 @@ def downloadAttachment(request, *args):
     response['Content-Disposition'] = content_disposition
     response['Content-Length'] = os.path.getsize(filename)
     return response
-

@@ -401,8 +401,7 @@ def _handle_uploaded_file(f, name):
         for chunk in f.chunks():
             destination.write(chunk)
         destination.close()
-        set_repo_file_ownerships(dest_fname)
-        retval = True
+        retval = set_repo_file_ownerships(dest_fname)
     except Exception, e:
         retval = False
         logger.debug( '\tException in file upload: %s' % ( str(e) ) )
