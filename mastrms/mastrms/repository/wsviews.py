@@ -584,19 +584,19 @@ def recent_experiments(request):
     user = request.user
     ninety_days_ago = datetime.now() - timedelta(90)
     experiments = Experiment.objects.filter(
-        Q(project__client=user) | 
-        Q(project__managers=user) | 
+        Q(project__client=user) |
+        Q(project__managers=user) |
         Q(users=user)
-        ).filter(created_on__gt=ninety_days_ago) 
+        ).filter(created_on__gt=ninety_days_ago)
     for experiment in experiments:
         output['rows'].append({
             'id': experiment.id,
             'title': experiment.title,
-            'status': experiment.status.name
+            'status': experiment.status.name if experiment.status else None
         })
 
     output['results'] = len(output['rows'])
-            
+
     output = makeJsonFriendly(output)
     return HttpResponse(json.dumps(output))
 
