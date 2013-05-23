@@ -90,11 +90,12 @@ def sendQuoteRequestConfirmationEmail(request, qid, toemail, fromemail = RETURN_
     body = 'Your Madas Quote Request has been added to the system. We will contact you as soon as possible.\r\n\r\n'
     makeAndSendMail(subject, body, fromemail, [toemail],fail_silently = False)
 
-def sendRegistrationToAdminEmail(request, toemail, fromemail=RETURN_EMAIL):
+def sendRegistrationToAdminEmail(request, username, toemail, fromemail=RETURN_EMAIL):
     #This email should always come from 'the system' - i.e. the RETURN_EMAIL
     #The request goes 'TO' an admin or node rep, which is passed in in 'toemail'.
     subject = 'New Madas Registration'
     body = 'A new user has registered for Madas. Please follow the link below to review this request.\r\n\r\n'
+    body += "Their e-mail address is %s.\r\n\r\n" % username
     body += "Please click the following link to login to Madas.\r\n\r\n"
     body += "%s" % (siteurl(request))
     makeAndSendMail(subject, body, fromemail, [toemail],fail_silently = False)
