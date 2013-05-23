@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.db import transaction
 from django.db.models import Q
 from mastrms.users import models
-import mastrms.users.MAUser #import getMadasUser
+import mastrms.users.MAUser
 
 import logging
 
@@ -95,7 +95,7 @@ class DBUserManager(object):
     def update_staff_status(self, user):
         #if the user belongs to more than one users.models.Group, they should be django staff.
         #Else, they shouldnt.
-        mauser = getMadasUser(user.username)
+        mauser = mastrms.users.MAUser.getMadasUser(user.username)
         if not mauser.IsClient:
             user.is_staff=True
             user.save()
@@ -185,4 +185,3 @@ class DBUserManager(object):
         user_detail.save()
 
         return True
-
