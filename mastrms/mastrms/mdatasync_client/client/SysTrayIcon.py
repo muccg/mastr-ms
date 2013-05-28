@@ -78,7 +78,6 @@ class SystrayIcon(wx.TaskBarIcon):
 
     def OnTaskBarCheckNow(self, evt):
         self.log('CheckNow chosen', type=self.log.LOG_DEBUG)
-        #from MSDataSyncAPI import MSDSCheckFn
         self.parentApp.OnCheckNow(evt)
 
 

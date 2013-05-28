@@ -1,6 +1,6 @@
 import wx
 from MainWindow import MainWindow
-from MSDataSyncAPI import MSDataSyncAPI #, MSDSCheckFn
+from MSDataSyncAPI import MSDataSyncAPI
 import sys
 import esky
 from identifiers import *
@@ -15,7 +15,6 @@ SINGLE_LOCK = None
 
 class MDataSyncApp(wx.PySimpleApp):
     def OnInit(self):
-        global MSDSCheckFn
         #w = wx.LogChain(wx.LogStderr() )
         #wx.Log_SetActiveTarget( wx.LogStderr() )
         #wx.Log_SetActiveTarget( wx.LogGui() )
@@ -75,4 +74,3 @@ if __name__ == "__main__":
         #sys.stdout = m.win.log
         m.MainLoop()
         m.msds.stopThread() #stop the thread if there is one
-
