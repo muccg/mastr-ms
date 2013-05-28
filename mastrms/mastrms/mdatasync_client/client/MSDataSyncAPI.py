@@ -8,8 +8,6 @@
 #You can either use a worker thread to get non blocking operation, in which case you
 #call startThread and stopThread, or not. Either way will still work, just one will block and the
 #other won't.
-#
-#This makes use of the rsync script by Vivian De Smedt, relased under the BSD license.
 
 try: import json as simplejson
 except ImportError: import simplejson
@@ -19,6 +17,8 @@ import time
 import os.path
 from shutil import rmtree, copytree, copy, move
 from shutil import copy2, copytree
+import pipes
+import tempfile
 
 import Queue
 import threading
@@ -34,8 +34,6 @@ def nullFn(*args, **kwargs):
     outlog.debug('null fn')
     pass
 
-MSDSCheckFn = nullFn
-
 from config import CONFIG
 
 class RemoteSyncParams(object):
@@ -45,7 +43,7 @@ class RemoteSyncParams(object):
         self.flags = []
         self.username = ""
         self.rules = []
-        self.filesdict = {}
+        self.fileslist = None
 
         #pull the configdict into our local class members
         #but only the values we have defined
@@ -127,11 +125,6 @@ class MSDataSyncAPI(object):
                                  #we are still seeing UI lagging behind worker operations
         self.transactionvars = TransactionVars()
 
-        if self.useThreading:
-            self.log("Threading is enabled")
-        else:
-            self.log("Threading is disabled")
-
     def defaultLogSink(self, *args, **kwargs):
         pass
 
@@ -141,6 +134,7 @@ class MSDataSyncAPI(object):
         self._thread = self.Worker( self._tasks )
         self._thread.start()
         self.useThreading = True
+        self.log("Threading is enabled")
 
     def stopThread( self ):
         if not hasattr( self, "_thread" ) or self._thread == None:
@@ -148,27 +142,28 @@ class MSDataSyncAPI(object):
         self._tasks.join()              # block until task queue is empty
         self._thread.die()              # tell the thread to die
         #print 'Flushing with None task'
-        self._appendTask( None, None )  # dummy task to force thread to run
+        self._appendTask(None)          # dummy task to force thread to run
         self._thread.join()             # wait until thread is done
         self._thread = None
         self.useThreading = False
+        self.log("Thread is stopped")
 
-    def _appendTask( self, callback, command, *args, **kwargs ):
+    def _appendTask(self, command, command_kwargs={}, callback=None, callback_kwargs={}):
         '''Either uses a thread (if available) or not.
            Obviously one doesn't block, and one does.
            Either way, the callback is called once done.'''
         if hasattr( self, "_thread" ) and self._thread != None:
-            self._tasks.put_nowait( ( callback, command, args, kwargs ) )
+            self._tasks.put_nowait((command, command_kwargs, callback, callback_kwargs))
         else:
             result = None
             try:
-                result = command( *args, **kwargs )
+                result = command(**command_kwargs)
             except Exception, e:
                 outlog.warning( 'Error running command (nonthreaded): %s' % (str(e)) )
                 #print 'command(args, kwargs) was: %s(%s,%s)' % (str(command), str(args), str(kwargs))
                 result = None
             if callback != None:
-                callback( result )
+                callback(result, **callback_kwargs)
 
     def set_progress_state(self, progress, status):
         self.callingWindow.SetProgress(progress)
@@ -183,7 +178,6 @@ class MSDataSyncAPI(object):
         organisation = self.config.getValue('organisation')
         station = self.config.getValue('stationname')
         sitename = self.config.getValue('sitename')
-        localindexdir = self.config.getLocalIndexPath()
         self.log("Handshaking with server %s" % (self.config.getValue('synchub')), type=self.log.LOG_NORMAL, thread=self.useThreading)
         postvars = {'files' : simplejson.dumps({}), 'organisation' : simplejson.dumps(organisation), 'sitename' : simplejson.dumps(sitename), 'stationname': simplejson.dumps(station)}
         try:
@@ -214,9 +208,10 @@ class MSDataSyncAPI(object):
 
         outlog.info( 'Handshaking' )
         #now rsync the whole thing over
-        self._appendTask(self.handshakeReturn, self._impl.perform_rsync, "%s" % (localindexdir) , rsyncconfig)
-
-
+        self._appendTask(self._impl.perform_rsync,
+                         { "sourcedir": self.config.getValue("localdir"),
+                           "rsyncconfig": rsyncconfig },
+                         self.handshakeReturn)
 
     def ask_server_for_wanted_files(self, returnFn):
         self.callingWindow.setState(APPSTATE.INITIING_SYNC)
@@ -279,105 +274,69 @@ class MSDataSyncAPI(object):
                 samplefilemap[run_id][sample_id] = result #original file mapped to run:sample
         return foundfiles, runsamplesdict, samplefilemap
 
+    def post_sync_step(self, server_reponse, filename_id_map):
+        if self.config.getValue('archivesynced'):
+            self._appendTask(self.archive_synced_files,
+                             { "synced_samples_dict":
+                                   server_reponse['synced_samples'],
+                               "filename_id_map": filename_id_map })
 
-    #def extract_file_target(self, node, resultdict, localindexdir):
-    #    '''method to recursively extract valid file targets from a nested dict structure
-    #       relies on external scope to contain 'localindexdir' string
-    #    '''
-    #    if isinstance(node, dict):
-    #        if node.has_key('.') and isinstance(node['.'], dict):
-    #            for filename in node['.'].keys():
-    #                outlog.debug("Checking for %s" % (filename))
-    #                #any keys in . should be valid targets.
-    #                #their full source path will be ['/'] joined with the 'key'.
-    #                #theif full dest path will be the 'value'
-    #                if node['.'][filename] is not None:
-    #                    outlog.debug("Client: adding file")
-    #                    fulllocalpath = os.path.join(node['/'], filename)
-    #                    fullremotepath = os.path.join(node['.'][filename], filename)
-    #                    resultdict[fulllocalpath] = "%s" %(os.path.join(localindexdir, fullremotepath) )
-    #
-    #        #now for the directories
-    #        for dirname in node.keys():
-    #            if dirname not in ['.', '/']:
-    #                #if the value is a dict, then this dir needs to be more thouroughly explored
-    #                if isinstance(node[dirname], dict):
-    #                    outlog.debug("Checking dir %s" % (dirname))
-    #                    resultdict = self.extract_file_target(node[dirname], resultdict, localindexdir)
-    #                else:
-    #                    outlog.debug("Client: adding dir")
-    #                    fulllocalpath = os.path.join(node['/'], dirname)
-    #                    fullremotepath = os.path.join(node[dirname], dirname)
-    #                    resultdict[fulllocalpath] = "%s" %(os.path.join(localindexdir, fullremotepath) )
-    #    return resultdict
+        self._appendTask(self.cleanup_localindexdir)
 
+    def archive_synced_files(self, synced_samples_dict, filename_id_map):
+        if len(synced_samples_dict) > 0:
+            # invert the filename -> id map and make ids strings
+            filename_id_map = dict((tuple(map(str, v)), k)
+                                   for (k, v) in filename_id_map.items())
 
-    def post_sync_step(self, server_reponse):
+            # Build list of (run_id, sample_id) pairs
+            id_keys = []
+            for run_id, sample_ids in synced_samples_dict.iteritems():
+                for sample_id in sample_ids:
+                    id_keys.append((str(run_id), str(sample_id)))
+
+            # filenames from sample ids
+            filenames = [filename_id_map[id_key] for id_key in id_keys
+                         if id_key in filename_id_map]
+
+            # Do the copy
+            self.log("Archiving %d/%d synced files" % (len(filenames), len(id_keys)), thread=self.useThreading)
+            for filename in filenames:
+                self.archive_file(filename)
+            self.log("Archive complete.", thread=self.useThreading)
+        else:
+            self.log("Nothing to archive.", thread=self.useThreading)
+
+    def archive_file(self, filepath):
+        "Move a file from config.localindexdir to config.archivedfilesdir."
+        localindexdir = self.config.getLocalIndexPath()
+        archivedfilesdir = self.config.getValue('archivedfilesdir')
+
+        src = os.path.join(localindexdir, filepath)
+        dst = os.path.join(archivedfilesdir, filepath)
+
+        self.log("Move %s -> %s" % (src, dst), thread=self.useThreading)
+
         try:
-            self.archive_synced_files(server_reponse['synced_samples'])
-        except Exception, e:
-            self.log("Archive operation failed: %s" % str(e))
+            os.makedirs(os.path.dirname(dst))
+        except OSError:
+            pass # directory probably already exists
 
-        self.log('Removing temporary file cache', thread=self.useThreading)
-        self.cleanup_localindexdir()
-
-    def archive_synced_files(self, synced_samples_dict):
-        archivesynced = self.config.getValue('archivesynced')
-        if archivesynced:
-            localindexdir = self.config.getLocalIndexPath()
-            #tm = time.localtime()
-            #timestamp = "%s_%s_%s__%s_%s_%s" % (tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec)
-            #archivefilesdir = os.path.join(self.config.getValue('archivedfilesdir'), timestamp)
-            archivedfilesdir = self.config.getValue('archivedfilesdir')
-            if len(synced_samples_dict.keys()) > 0:
-
-                self.log("Archiving synced files to %s" % archivedfilesdir, thread=self.useThreading)
-                '''
-                We dont want files to moved, just copied
-                filemap = self.transactionvars.sample_file_map
-                #print "Filemap ", filemap
-                #for k in filemap.keys():
-                #    print "%s : %s" % (k, filemap[k])
-
-                # go through the synced files list and copy the original file to the archive destination,
-                # inside runid directories.
-                for runid in synced_samples_dict.keys():
-
-                    if len(synced_samples_dict[runid]) > 0:
-                        dstdir = os.path.join(archivedfilesdir, str(runid))
-                        if not os.path.exists(dstdir):
-                            os.mkdir(dstdir)
-                        for sampleid in synced_samples_dict[runid]:
-                            #synced sample keys (runid, samplid) are strings.
-                            #filemap keys are integers, so we need a cast
-                            sampleid_i = int(sampleid)
-                            runid_i = int(runid)
-                            if filemap.has_key(runid_i) and filemap[runid_i].has_key(sampleid_i):
-                                orgpath = filemap[runid_i][sampleid_i]
-                                orgfname = os.path.split(orgpath)[1]
-                                dstpath = os.path.join(dstdir, orgfname)
-                                self.log("Moving %s to %s" % (orgpath, dstpath), thread=self.useThreading )
-                                #move using shutil.move
-                                move(orgpath, dstpath)
-                            else:
-                                self.log("Could not find original filename for runsample %d" % (sampleid_i), thread=self.useThreading)
-                        self.log("Finished archive for samples in run %d" % (int(runid)), thread=self.useThreading )
-                '''
-                try:		
-                    copytree(localindexdir, archivefilesdir)		
-                except Exception, e:		
-                    self.log('Could not archive files from %s to %s: %s' % (localindexdir, archivefilesdir, str(e)) )
-            else:
-                self.log("Nothing to archive.", thread=self.useThreading)
-
+        try:
+            move(src, dst)
+        except IOError, e:
+            self.log("Could not archive file: %s" % str(e),
+                     thread=self.useThreading)
 
     def cleanup_localindexdir(self):
         localindexdir = self.config.getLocalIndexPath()
-        self.log("Clearing local index directory: %s" % localindexdir, thread=self.useThreading)
-        try:
-            rmtree(localindexdir)
-        except Exception, e:
-            self.log('Could not clear local index dir: %s' % (str(e)), type=self.log.LOG_WARNING, thread=self.useThreading)
+        if os.path.exists(localindexdir):
+            self.log("Clearing local index directory: %s" % localindexdir, thread=self.useThreading)
+            try:
+                rmtree(localindexdir)
+            except Exception, e:
+                self.log("Could not clear local index dir: %s" % e,
+                         type=self.log.LOG_WARNING, thread=self.useThreading)
 
     #Actual API methods that DO something
     def checkRsync(self, callingWindow, statuschange, notused, returnFn = None):
@@ -401,30 +360,36 @@ class MSDataSyncAPI(object):
         self.transactionvars.sample_file_map = samplefilemap
         rsyncconfig = RemoteSyncParams(configdict = remote_params, username=self.config.getValue('user'))
 
-        self.log('Server expects sync of %d files' % (len(wantedfiles.keys())) )
-        self.log('Client found %d/%d files' % (len(localfilesdict.keys()), len(wantedfiles.keys())) )
+        def wanted_filename((name, attrlist)):
+            "Returns a tuple of (filename, (run_id, sample_id))"
+            return (os.path.join(attrlist[2], name), (attrlist[0], attrlist[1]))
 
-        localindexdir = self.config.getLocalIndexPath()
+        filename_id_map = dict(map(wanted_filename, wantedfiles.items()))
+        rsyncconfig.fileslist = sorted(filename_id_map.keys())
 
-        if len(localfilesdict.keys()):
-            self.cleanup_localindexdir()
+        self.log('Server expects sync of %d files' % len(wantedfiles))
+        self.log('Client found %d/%d files' % (len(localfilesdict), len(wantedfiles)))
 
-            #self.log("Initiating file copy to local index (%d files)" % (len(localfilesdict.keys())) )
-            #self.set_progress_state(20, APPSTATE.GATHERING_FILES)
+        self.log("Server wants these files:\n%s" % "\n".join(rsyncconfig.fileslist),
+                 type=self.log.LOG_DEBUG)
 
-            #copy all the files
-            self._appendTask(self.copyFilesReturn, self._impl.copyfiles, localfilesdict)
+        #copy all the files
+        self._appendTask(self._impl.copyfiles,
+                         { "copydict": localfilesdict },
+                         self.copyFilesReturn)
 
-            #now rsync the whole thing over
-            self._appendTask(self.rsyncReturn, self._impl.perform_rsync, "%s" % (localindexdir) , rsyncconfig)
-
+        if localfilesdict:
+            # rsync the whole thing over
+            self._appendTask(self._impl.perform_rsync,
+                             { "sourcedir": self.config.getLocalIndexPath(),
+                               "rsyncconfig": rsyncconfig },
+                             self.rsyncReturn,
+                             { "rsyncconfig": rsyncconfig,
+                               "returnFn": returnFn,
+                               "filename_id_map": filename_id_map })
         else:
             self.log("No files to sync.", thread = self.useThreading)
             self.set_progress_state(100, APPSTATE.IDLE)
-
-        #now tell the server to check the files off
-        baseurl =  self.config.getValue('synchub')
-        self._appendTask(returnFn, self._impl.serverCheckRunSampleFiles, runsamplesdict, baseurl)
 
     def defaultReturn(self, *args, **kwargs):
         #print 'rsync returned: ', retval
@@ -436,12 +401,30 @@ class MSDataSyncAPI(object):
         self.set_progress_state(50, APPSTATE.UPLOADING_DATA)
         outlog.debug("Finished copying")
 
-    def rsyncReturn(self, *args, **kwargs):
+    def rsyncReturn(self, success, rsyncconfig, returnFn, filename_id_map):
+        "After rsync is finished, request the server to update samples."
         self.log('Remote transfer stage complete', thread = self.useThreading)
         self.set_progress_state(90, APPSTATE.CONFIRMING_TRANSFER)
 
+        # It's difficult to know when a complete sample is
+        # transferred. So we consider a sample file to be complete
+        # when the *second time* it is rsynced across, the file is not
+        # updated.
+        runsampledict = {}
+        for filename, updated in rsyncconfig.file_changes.iteritems():
+            if not updated and filename in filename_id_map:
+                run_id, sample_id = filename_id_map[filename]
+                runsampledict.setdefault(run_id, []).append(sample_id)
 
-    def handshakeReturn(self, *args, **kwargs):
+        #now tell the server to check the files off
+        baseurl =  self.config.getValue('synchub')
+        self._appendTask(self._impl.serverCheckRunSampleFiles,
+                         { "runsampledict": runsampledict,
+                           "filename_id_map": filename_id_map,
+                           "baseurl": baseurl },
+                         returnFn)
+
+    def handshakeReturn(self, success):
         self.log('Handshake complete', thread = self.useThreading)
         self.set_progress_state(100, APPSTATE.IDLE)
 
@@ -554,18 +537,20 @@ class MSDataSyncAPI(object):
         #-----------------------------------------------------------------------
         def run( self ):
             while not self._isDying:
-                ( callback, command, args, kwargs ) = self._tasks.get()
+                (command, command_kwargs, callback, callback_kwargs) = self._tasks.get()
+                if command is None:
+                    continue
                 result = None
                 try:
-                    #print 'worker thread executing %s with args %s' % (str(command), str(args))
-                    result = command( *args, **kwargs )
+                    #print 'worker thread executing %s with args %s' % (str(command), str(command_kwargs))
+                    result = command(**command_kwargs)
                 except Exception, e:
                     outlog.warning( 'Error running command (threaded): %s' % ( str(e) ) )
-                    #print 'command(args, kwargs) was: %s(%s,%s)' % (str(command), str(args), str(kwargs))
+                    #print 'command(kwargs) was: %s(%s,%s)' % (str(command), str(command_kwargs))
 
                     result = None
                 if callback != None:
-                    callback( result )
+                    callback(result, **callback_kwargs)
                 self._tasks.task_done()
 
         #-----------------------------------------------------------------------
@@ -631,29 +616,64 @@ class MSDSImpl(object):
 
         cmd.extend(cmdtail)
 
-        self.log('Rsync command is: %s ' % str(cmd), thread=self.controller.useThreading, type=self.log.LOG_DEBUG)
-        #self.log('cmd is %s ' % str(cmd), thread=self.controller.useThreading)
+        files_list = tempfile.NamedTemporaryFile()
 
-        p = Popen( cmd, shell=False, stdout=PIPE, stderr=PIPE)
+        if rsyncconfig.fileslist is not None:
+            files_list.write("\0".join(sorted(rsyncconfig.fileslist)))
+            files_list.flush()
+            cmd.extend(["--include-from", files_list.name, "--from0"])
 
-        #for line in p.stdout:
-        #    self.log("RSYNC %s: " % (line,), thread=self.controller.useThreading)
+        cmd.extend(["--itemize-changes"] * 2)
 
-        (retcode, pstderr) = p.communicate()
-        self.lastError = pstderr
+        self.log('Rsync command is: %s' % " ".join(map(pipes.quote, cmd)),
+                 thread=self.controller.useThreading, type=self.log.LOG_DEBUG)
 
-        if len(pstderr) > 0:
-            self.log('Error Rsyncing: %s' % (str(pstderr),), type=self.log.LOG_ERROR, thread = self.controller.useThreading)
-        return retcode
+        p = Popen(cmd, shell=False, stdout=PIPE, stderr=PIPE,
+                  universal_newlines=True)
 
+        (stdoutdata, stderrdata) = p.communicate()
+        self.lastError = stderrdata
 
-    def serverCheckRunSampleFiles(self, runsampledict, baseurl):
+        self.log("rsync output is:\n%s" % stdoutdata,
+                 thread=self.controller.useThreading, type=self.log.LOG_DEBUG)
+
+        rsyncconfig.file_changes = self.parse_rsync_changes(stdoutdata)
+
+        if len(stderrdata) > 0:
+            self.log('Error Rsyncing: %s' % (str(stderrdata),), type=self.log.LOG_ERROR, thread = self.controller.useThreading)
+
+        return p.returncode == 0
+
+    def parse_rsync_changes(self, data):
+        """
+        The rsync --itemize-changes option produces data on which
+        files changed during transfer. This function parses the output
+        and returns a map of filename -> bool indicating which files
+        changed during rsync.
+        """
+        def parse_line(line):
+            # See rsync(1) for information on the %i format
+            split = 11
+            code = line[:split]
+            filename = line[split+1:]
+            if len(code) == split:
+                ischanged = lambda c: c not in (".", " ")
+                changed = code[0] == "<" and (ischanged(code[2]) or ischanged(code[3]))
+                return (filename, changed)
+            else:
+                return None
+        return dict(filter(bool, map(parse_line, data.split("\n"))))
+
+    def serverCheckRunSampleFiles(self, runsampledict, filename_id_map, baseurl):
         self.log('Informing the server of transfer: %s' % (runsampledict), thread = self.controller.useThreading)
 
-        #get our local files dict, to send to the server also (useful for debugging)
-        clientfiles = self.controller.getFiles(self.controller.config.getValue('localdir'), ignoredirs=[self.controller.config.getLocalIndexPath()] )
-
-        postvars = {'runsamplefiles' : simplejson.dumps(runsampledict), 'lastError': self.lastError, 'organisation': self.controller.config.getValue('organisation'), 'sitename': self.controller.config.getValue('sitename'), 'stationname': self.controller.config.getValue('stationname'), 'clientfiles' : simplejson.dumps(clientfiles) }
+        postvars = {
+            'runsamplefiles' : simplejson.dumps(runsampledict),
+            'lastError': self.lastError,
+            'organisation': self.controller.config.getValue('organisation'),
+            'sitename': self.controller.config.getValue('sitename'),
+            'stationname': self.controller.config.getValue('stationname'),
+            }
         outlog.debug("Postvars: %s " % (str(postvars)) )
         url = "%s%s/" % (baseurl, "checksamplefiles")
         try:
@@ -661,7 +681,7 @@ class MSDSImpl(object):
             jsonret = f.read()
             self.log('Server returned %s' % (str(jsonret)), thread = self.controller.useThreading)
             self.log('Finished informing the server of transfer', thread = self.controller.useThreading)
-            self.controller.post_sync_step(simplejson.loads(jsonret))
+            self.controller.post_sync_step(simplejson.loads(jsonret), filename_id_map)
         except Exception, e:
             self.log('Could not connect to %s: %s' % (url, str(e)), type=self.log.LOG_ERROR, thread = self.controller.useThreading)
 
@@ -712,6 +732,3 @@ class MSDSImpl(object):
         except Exception, e:
             self.log('getFileTree: Exception: %s' % (str(e)), self.log.LOG_ERROR, thread = self.controller.useThreading)
         return allfiles
-
-
-
