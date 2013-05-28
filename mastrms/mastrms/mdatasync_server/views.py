@@ -13,7 +13,6 @@ from django.utils import simplejson
 from mastrms.mdatasync_server.models import *
 from mastrms.repository.models import *
 from mastrms.mdatasync_server.rules import *
-from ClientState import * #All the functions for dealing with clientstates
 from django.conf import settings
 from mastrms.app.utils.file_utils import ensure_repo_filestore_dir_with_owner, set_repo_file_ownerships
 
@@ -130,15 +129,30 @@ def request_sync(request, organisation=None, sitename=None, station=None):
             if syncold:
                 for runid in expectedcomplete.keys():
                     resp["files"].update(expectedcomplete[runid])
-
-        clientstate = get_saved_client_state(organisation, sitename, station)
-        clientstate.lastSyncAttempt = datetime.now()
-        ##save the client state
-        save_client_state(clientstate)
     else:
         raise("Could not find node %s-%s-%s" % (organisation, sitename, station) )
 
     return HttpResponse(simplejson.dumps(resp))
+
+def get_node_from_request(request, organisation=None, sitename=None, station=None):
+    retval = None
+
+    if organisation is None:
+        organisation = request.REQUEST('organisation', None)
+    if sitename is None:
+        sitename = request.REQUEST('sitename', None)
+    if station is None:
+        station = request.REQUEST('station', None)
+
+    logger.debug("Searching for node org=%s, sitename=%s, station=%s" % (organisation, sitename, station))
+    try:
+        nodeclient = NodeClient.objects.get(organisation_name = organisation, site_name=sitename, station_name = station)
+        retval = nodeclient
+    except:
+        retval = None
+        logger.warning("No nodeclient existed with organisation=%s, sitename=%s, station=%s" % (organisation, sitename, station))
+
+    return retval
 
 def get_node_clients(request, *args):
     ncs = NodeClient.objects.all()
@@ -151,25 +165,6 @@ def get_node_clients(request, *args):
             o[n.site_name] = []
         o[n.site_name].append(n.station_name)
     return jsonResponse(result)
-
-@login_required
-def nodeinfo(request, organisation=None, sitename=None, station=None):
-    try:
-        nodeclient = get_node_from_request(request, organisation=organisation, sitename=sitename, station=station)
-        if nodeclient is None:
-            raise Exception("No nodeclient existed with organisation=%s, sitename=%s, station=%s" % (organisation, sitename, station))
-        clientstate = get_saved_client_state(organisation, sitename, station)
-    #return HttpResponse( simplejson.dumps(nodeclient.__dict__) + simplejson.dumps(clientstate.__dict__) )
-        timediff = datetime.now() - datetime.now()
-        if clientstate.lastSyncAttempt is not None:
-            timediff = datetime.now() - clientstate.lastSyncAttempt
-
-        expectedfiles = getExpectedFilesForNode(nodeclient, include_completed=True)
-        return render_to_response("node.mako", {'nodeclient':nodeclient, 'expectedfiles': expectedfiles, 'timediff': timediff, 'clientstate': clientstate.__dict__, 'wh':webhelpers} )
-
-    except Exception, e:
-        return HttpResponse("Could not display node info: %s" % (e))
-
 
 def getExpectedFilesForNode(nodeclient, include_completed = False):
     """
@@ -301,29 +296,6 @@ def check_run_sample_files(request):
         ret['description'] = "%s - %d/%d samples marked complete, from %d run(s)" % (ret['description'], totalfound, totalsamples, totalruns)
     else:
         ret['description'] = "No files given"
-
-    #Update the clientstate. The client may have sent a file tree, which we can use
-    #to update our clientstate views
-    org = request.POST.get('organisation', None)
-    site = request.POST.get('sitename', None)
-    station = request.POST.get('stationname', None)
-    if (org is not None) and (site is not None) and (station is not None):
-        clientstate = get_saved_client_state(org, site, station)
-        clientstate.lastError = request.POST.get('lastError', "Successfully syned %d files from runs: %s." % (totalfound, totalruns))
-        clientstate.lastSyncAttempt = datetime.now()
-        #update client state if the client posted a file list through
-        clientfiles = request.POST.get('clientfiles', None)
-        if clientfiles is not None:
-            try:
-                clientfiledict = simplejson.loads(clientfiles)
-                clientstate.files = clientfiledict
-            except Exception, e:
-                clientstate.lastError = "Could not parse passed filestate: %s" % (str(e))
-
-        save_client_state(clientstate)
-        logger.debug("Saved lastError in client state")
-    else:
-        logger.debug("Could not get clientstate details: %s, %s, %s" % (org, site, station))
 
     return jsonResponse(ret)
 
