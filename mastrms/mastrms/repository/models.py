@@ -8,7 +8,7 @@ import grp
 from mastrms.users.MAUser import getMadasUser
 from django.core.files.storage import FileSystemStorage
 import os
-from mastrms import settings
+from django.conf import settings
 from mastrms.app.utils.file_utils import ensure_repo_filestore_dir_with_owner
 
 import logging

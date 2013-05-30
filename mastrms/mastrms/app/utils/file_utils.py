@@ -2,7 +2,7 @@ import os
 import os.path
 import stat
 import grp
-from mastrms import settings
+from django.conf import settings
 import logging
 LOGNAME = 'madas_log'
 logger = logging.getLogger(LOGNAME)
