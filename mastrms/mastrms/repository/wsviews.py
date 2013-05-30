@@ -21,9 +21,8 @@ from mastrms.users.MAUser import getMadasUser, loadMadasUser, getCurrentUser
 from mastrms.repository import rulegenerators
 from mastrms.app.utils.mail_functions import FixedEmailMessage
 import os, stat
-import mastrms.settings
 import copy
-from mastrms.settings import RETURN_EMAIL
+from django.conf import settings
 import logging
 logger = logging.getLogger('madas_log')
 
@@ -2343,7 +2342,7 @@ def mark_run_complete(request, run_id):
 
 
     try:
-        e = FixedEmailMessage(subject='MASTR-MS Run ('+run.title+') Complete', body='Run ('+run.title+') has been marked as complete', from_email = RETURN_EMAIL, to = [run.creator.username])
+        e = FixedEmailMessage(subject='MASTR-MS Run ('+run.title+') Complete', body='Run ('+run.title+') has been marked as complete', from_email = settings.RETURN_EMAIL, to = [run.creator.username])
         e.send()
     except e:
         pass
@@ -2523,5 +2522,3 @@ Details of the error:
     output = {}
     output["success"] = success
     return HttpResponse(json.dumps(output))
-
-

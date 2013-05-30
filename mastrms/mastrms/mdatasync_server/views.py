@@ -21,8 +21,7 @@ LOGNAME = 'mdatasync_server_log'
 logger = logging.getLogger(LOGNAME)
 logger.setLevel(logging.WARNING) #default is warning
 
-from mastrms.settings import KEYS_TO_EMAIL, LOGS_TO_EMAIL, RETURN_EMAIL
-
+from django.conf import settings
 from django.core.mail import EmailMessage
 
 class FixedEmailMessage(EmailMessage):
@@ -317,7 +316,7 @@ def log_upload(request, *args):
             else:
                 body = "MS Datasync logfile upload failed: %s\r\n" % (written_logfile_name)
                 status = 'Log upload failed'
-            e = FixedEmailMessage(subject="MS Datasync Log Upload (%s)" % (fname_prefix.strip('_')), body=body, from_email = RETURN_EMAIL, to = [LOGS_TO_EMAIL])
+            e = FixedEmailMessage(subject="MS Datasync Log Upload (%s)" % (fname_prefix.strip('_')), body=body, from_email = settings.RETURN_EMAIL, to = [settings.LOGS_TO_EMAIL])
             e.send()
         except Exception, e:
             logger.warning( 'Unable to send "Log Sent" email: %s' % (str(e)) )
@@ -347,7 +346,7 @@ def key_upload(request, *args):
             else:
                 body = "MS Datasync keyfile upload failed: %s\r\n" % (written_logfile_name)
                 status= 'key upload failed'
-            e = FixedEmailMessage(subject="MS Datasync Public Key upload (%s)" % (fname_prefix), body=body, from_email = RETURN_EMAIL, to = [KEYS_TO_EMAIL])
+            e = FixedEmailMessage(subject="MS Datasync Public Key upload (%s)" % (fname_prefix), body=body, from_email = settings.RETURN_EMAIL, to = [settings.KEYS_TO_EMAIL])
             e.send()
         except Exception, e:
             logger.warning( 'Unable to send "Key Sent" email: %s' % (str(e)) )

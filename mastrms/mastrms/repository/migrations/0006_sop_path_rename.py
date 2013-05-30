@@ -9,7 +9,6 @@ class Migration(DataMigration):
 
 
     def rewrite_paths(self, orm):
-        import mastrms.settings # we need settings for REPO_FILES_ROOT
         import os
         #we want to take each value of the attached_pdf column in the StandardOperationProcedure model,
         #and rewrite it to be REPO_FILES_ROOT/sops/filename...
