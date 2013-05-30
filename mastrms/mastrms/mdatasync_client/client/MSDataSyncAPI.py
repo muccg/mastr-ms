@@ -659,10 +659,34 @@ class MSDSImpl(object):
             if len(code) == split:
                 ischanged = lambda c: c not in (".", " ")
                 changed = code[0] == "<" and (ischanged(code[2]) or ischanged(code[3]))
-                return (filename, changed)
+                return (code[1] == "d", strip_trailing_slash(filename), changed)
             else:
                 return None
-        return dict(filter(bool, map(parse_line, data.split("\n"))))
+
+        def strip_trailing_slash(path):
+            return path.rstrip("/")
+
+        def changes_dict(change_list):
+            """
+            Convert [(isdir, filename, changed)] to a dict mapping
+            filename -> changed. If files are changed within a
+            directory, then it is also marked as changed.
+            """
+            changes = {}
+            for isdir, filename, changed in change_list:
+                if changed:
+                    # mark filename as changed and propagate this up
+                    # the directory tree
+                    parent = filename
+                    while parent:
+                        changes[parent] = True
+                        parent = os.path.split(parent)[0]
+                else:
+                    changes.setdefault(filename, False)
+            return changes
+
+        change_list = filter(bool, map(parse_line, data.split("\n")))
+        return changes_dict(change_list)
 
     def serverCheckRunSampleFiles(self, runsampledict, filename_id_map, baseurl):
         self.log('Informing the server of transfer: %s' % (runsampledict), thread = self.controller.useThreading)
