@@ -60,6 +60,8 @@ if ! test -e $CCGSOURCEDIR/build-number-.txt; then
     DATE=`date`
     echo "build.timestamp=\"$DATE\"" >> build-number.txt
 fi
+TIP=`hg tip --template "{node}" 2>/dev/null`
+echo "build.tip=\"$TIP\"" >> build-number.txt
 echo "build.user=\"$USER\"" >> build-number.txt
 echo "build.host=\"$HOSTNAME\"" >> build-number.txt
 cp build-number.txt %{buildinstalldir}/
