@@ -7,7 +7,7 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        
+
         # Changing field 'StandardOperationProcedure.attached_pdf'
         db.alter_column('repository_standardoperationprocedure', 'attached_pdf', self.gf('django.db.models.fields.files.FileField')(max_length=500, null=True))
 
@@ -16,7 +16,7 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
-        
+
         # Changing field 'StandardOperationProcedure.attached_pdf'
         db.alter_column('repository_standardoperationprocedure', 'attached_pdf', self.gf('django.db.models.fields.files.FileField')(max_length=100, null=True))
 

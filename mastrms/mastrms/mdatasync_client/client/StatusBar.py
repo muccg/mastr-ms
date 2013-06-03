@@ -23,8 +23,8 @@ class StatusBar(ESB.EnhancedStatusBar):
         self.sizeChanged = False
         self.progress =  wx.Gauge(self, -1)#, size=(400, 20))
         #self.progresstext = wx.StaticText(self, -1, "Inactive")
-        self.statusicon = wx.StaticBitmap(self, -1, self.STATUS_ICONS['ok']) 
-        
+        self.statusicon = wx.StaticBitmap(self, -1, self.STATUS_ICONS['ok'])
+
         self.AddWidget(self.progress, ESB.ESB_EXACT_FIT, ESB.ESB_EXACT_FIT, pos=1)
         #self.AddWidget(self.progresstext, pos=1)
         self.AddWidget(self.statusicon, pos=2)

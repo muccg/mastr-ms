@@ -9,11 +9,11 @@ for package in ('app', 'admin', 'dashboard', 'login', 'mdatasync_server', 'quote
     os.chdir(os.path.join('mastrms', package))
     for data_dir in ('templates', 'static', 'migrations', 'fixtures', 'views', 'utils'):
         data_files['mastrms.' + package].extend(
-            [os.path.join(subdir,f) for (subdir, dirs, files) in os.walk(data_dir) for f in files]) 
+            [os.path.join(subdir,f) for (subdir, dirs, files) in os.walk(data_dir) for f in files])
     os.chdir(start_dir)
 
 setup(name='django-mastrms',
-    version='1.2.1',
+    version='1.2.2',
     description='Mastr MS',
     long_description='Django Mastr MS web application',
     author='Centre for Comparative Genomics',
@@ -44,10 +44,8 @@ setup(name='django-mastrms',
         'wsgiref==0.1.2',
         'python-memcached==1.44',
         'django-extensions>=0.7.1',
-        'psycopg2==2.0.8',
         'python-ldap==2.3.13',
         'django-userlog==0.1',
-        'MySQL-Python==1.2.3'
     ],
     dependency_links = [
         "http://repo.ccgapps.com.au"

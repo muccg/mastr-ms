@@ -23,7 +23,7 @@ class MultipartFormEncoderFieldsOnlyTest(TestCase):
     def setUp(self):
         self.encoder = MultipartFormEncoder()
         self.fields = (
-            ('name1','value1'), 
+            ('name1','value1'),
             ('name2','value2')
         )
         self.files_to_delete = tuple()
@@ -34,10 +34,10 @@ class MultipartFormEncoderFieldsOnlyTest(TestCase):
 
     def test_fields(self):
         response_obj = self.encoder.encode(self.fields)
-        response = read_response(response_obj) 
+        response = read_response(response_obj)
         self.assertEqual(response,
 '------------ThIs_Is_tHe_bouNdaRY_$\r\n' +
-'Content-Disposition: form-data; name="name1"\r\n' + 
+'Content-Disposition: form-data; name="name1"\r\n' +
 '\r\n' +
 'value1' +
 '\r\n' +
@@ -67,7 +67,7 @@ ONE MORE TEST LINE
             ('Another file', 'file2.txt', file2),
         )
         response_obj = self.encoder.encode(self.fields, files)
-        response = read_response(response_obj) 
+        response = read_response(response_obj)
         self.assertEqual(response,
 '------------ThIs_Is_tHe_bouNdaRY_$\r\n' +
 'Content-Disposition: form-data; name="name1"\r\n' +

@@ -7,14 +7,14 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        
+
         # Changing field 'InstrumentMethod.creator'
         #db.alter_column('repository_instrumentmethod', 'creator_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'], null=True))
         pass
 
 
     def backwards(self, orm):
-        
+
         # User chose to not deal with backwards NULL issues for 'InstrumentMethod.creator'
         raise RuntimeError("Cannot reverse this migration. 'InstrumentMethod.creator' and its values cannot be restored.")
 

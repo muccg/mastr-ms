@@ -63,15 +63,15 @@ class MSDSConfig(object):
             retval = True
         except Exception, e:
             outlog.warning('Exception reading saved configuration: %s' % (str(e)) )
-            
-        
+
+
         if retval:
-            self.store.update(savedstore) 
+            self.store.update(savedstore)
 
         if fo is not None:
             fo.close()
         return retval
-            
+
     def getLocalIndexPath(self):
         return os.path.join(self.getValue('localdir'), self.getValue('localindexdir'))
 

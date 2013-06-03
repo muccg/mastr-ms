@@ -37,7 +37,7 @@ class CookieParser(object):
             if 'secure' == name:
                 secure = True
             if 'expires' == name:
-                expires_on = time.strptime(value, '%a, %d-%b-%Y %H:%M:%S %Z')       
+                expires_on = time.strptime(value, '%a, %d-%b-%Y %H:%M:%S %Z')
             # TODO these could be sanity checked against request URL
             # as per spec
             if 'domain' == name:
@@ -53,7 +53,7 @@ class CookieParser(object):
 
     def parse_header(self, header, request_url):
         default_domain, default_path = self.cookie_defaults(request_url)
-        return [self.parse_cookie(cookie,default_domain, default_path) 
+        return [self.parse_cookie(cookie,default_domain, default_path)
                     for cookie in self.split_cookies(header)]
 
 class NullPersister(object):
@@ -114,10 +114,10 @@ class CookieJar(object):
     def cookies_to_send(self, request_url):
         url = urlparse(request_url)
         domain = url.hostname
-        def most_specific_paths_first(cookie1, cookie2): 
+        def most_specific_paths_first(cookie1, cookie2):
             return cmp(cookie2.path, cookie1.path)
         return sorted(
-            [cookie for cookie in self._cookies 
+            [cookie for cookie in self._cookies
                 if self.should_send_cookie(cookie, url.scheme, domain, url.path)],
             cmp = most_specific_paths_first
         )
@@ -163,7 +163,7 @@ class Cookie(object):
         self.domain = domain
         self.path = path
         self.is_secure = secure
-        self.expires_on = expires_on        
+        self.expires_on = expires_on
 
     @staticmethod
     def from_str(s):

@@ -32,7 +32,7 @@ def lazy_import(func):
 
     The name "socket" will then be bound to a transparent object proxy which
     will import the socket module upon first use.
- 
+
     The syntax here is slightly more verbose than other lazy import recipes,
     but it's designed not to hide the actual "import" statements from tools
     like py2exe or grep.
@@ -60,7 +60,7 @@ class _LazyImport(object):
             self._esky_lazy_target = self._esky_lazy_loader()
             ns = self._esky_lazy_namespace
             if ns is not None:
-                try: 
+                try:
                     if ns[self._esky_lazy_name] is self:
                         ns[self._esky_lazy_name] = self._esky_lazy_target
                 except KeyError:
@@ -364,12 +364,12 @@ def get_platform():
     if _CACHED_PLATFORM is None:
         _CACHED_PLATFORM = distutils.util.get_platform().replace(".","_")
     return _CACHED_PLATFORM
- 
+
 
 def is_core_dependency(filenm):
     """Check whether than named file is a core python dependency.
 
-    If it is, then it's required for any frozen program to run (even the 
+    If it is, then it's required for any frozen program to run (even the
     bootstrapper).  Currently this includes only the python DLL and the
     MSVCRT private assembly.
     """

@@ -9,7 +9,7 @@ To implement this, the slave process spins up a background thread that watches
 the parent and calls os._exit(1) if it dies.
 
 On unix, the master process takes an exclusive flock on a temporary file, which
-will disappear when the master dies.  The slave process can do a blocking 
+will disappear when the master dies.  The slave process can do a blocking
 acquire on this lock to wait for the master to die.
 
 On windows, the master process creates a file with O_TEMPORARY, which will
@@ -187,7 +187,7 @@ if sys.platform == "win32":
             return []
         else:
             return ["--esky-slave-proc",tfile]
-             
+
 
 else:
 

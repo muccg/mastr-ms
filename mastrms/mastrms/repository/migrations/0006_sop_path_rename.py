@@ -24,7 +24,7 @@ class Migration(DataMigration):
 
     def forwards(self, orm):
         self.rewrite_paths(orm)
-        
+
 
 
     def backwards(self, orm):

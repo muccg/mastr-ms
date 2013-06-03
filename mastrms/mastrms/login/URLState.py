@@ -5,7 +5,7 @@
 #it is intended to live on the session
 #You get the URLState by calling getCurrentURLState and passing the request.
 #You get data out of the urlstate with normal dot notation. If the 'key' doesn't exist, it will just return None rather than an exception.
-#Internally, this class stores all the data in an internal _dict, which is easily clearable, and easy to export via json if we need it 
+#Internally, this class stores all the data in an internal _dict, which is easily clearable, and easy to export via json if we need it
 
 class URLState(object):
     def __init__(self, state=None):
@@ -21,7 +21,7 @@ class URLState(object):
 
     def get_state(self):
         return self._dict
-        
+
 
 def getCurrentURLState(request, andClear=False):
     #get existing urlstate, or create a new empty one.
@@ -29,7 +29,7 @@ def getCurrentURLState(request, andClear=False):
     urlstate = URLState(state)
     if andClear:
         request.session['urlstate'] = {}
-    else:    
+    else:
         #save it back, in case it is new
         request.session['urlstate'] = urlstate.get_state()
     return urlstate

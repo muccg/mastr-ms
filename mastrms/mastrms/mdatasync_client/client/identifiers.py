@@ -8,10 +8,10 @@ VERSION = "0.4.5"
 #updates are installed in directories under that.
 #So if we keep config and other data in a subdir of our 'working dir' or even in it,
 #it will be lost when we install a new version. We need our data dir to be in a common
-#place. 
+#place.
 #The logic is:
 #if your parent dir's parent contains a dir called 'appdata', then store your datadir at that level.
-#otherwise, store your data dir in your parent dir. This is because of how Esky packages 
+#otherwise, store your data dir in your parent dir. This is because of how Esky packages
 #the app initially as opposed to what it looks like once you have done an update.
 
 DATADIRNAME = 'data' #what we want the final leaf dir to be called

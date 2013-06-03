@@ -7,13 +7,13 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        
+
         # Adding field 'UserDetail.passwordResetKey'
         db.add_column('users_userdetail', 'passwordResetKey', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True), keep_default=False)
 
 
     def backwards(self, orm):
-        
+
         # Deleting field 'UserDetail.passwordResetKey'
         db.delete_column('users_userdetail', 'passwordResetKey')
 

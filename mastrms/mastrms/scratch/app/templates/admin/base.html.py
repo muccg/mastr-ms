@@ -375,8 +375,8 @@ def render_block_userlinks(context):
         root_path = context.get('root_path', UNDEFINED)
         __M_writer = context.writer()
         # SOURCE LINE 57
-        docsroot = url(django_admindocs_docroot) 
-        
+        docsroot = url(django_admindocs_docroot)
+
         __M_writer(u'\n <a href="')
         # SOURCE LINE 58
         __M_writer(unicode( (root_path+'logout/') if not resolvers.reverse('admin:logout') else resolvers.reverse('admin:logout') ))
