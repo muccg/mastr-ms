@@ -64,7 +64,7 @@ class FixedEmailMessage(EmailMessage):
 
 
 def checkClientVersion(versionstr):
-    print "Checking client version: %s" % (versionstr)
+    logger.debug("Checking client version: %s" % versionstr)
     components = versionstr.split('.')
     if len(components) < 2:
         return False
@@ -113,8 +113,9 @@ def request_sync(request, organisation=None, sitename=None, station=None):
     if node is not None:
         ncerror, nodeclient_details = get_nodeclient_details(organisation, sitename, station)
         resp["details"] = nodeclient_details
-        if not checkClientVersion(request.POST.get('version', None)):
-            resp["message"] = "Client version %s is not supported. Please update."
+        version = request.POST.get("version", "")
+        if not checkClientVersion(version):
+            resp["message"] = "Client version \"%s\" is not supported. Please update." % version
         else:
             resp["success"] = True
             #now get the runs for that nodeclient
