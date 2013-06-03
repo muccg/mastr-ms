@@ -83,7 +83,7 @@ class ExperimentAdmin(ExtJsonInterface, admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         obj.save()
         involvement = UserInvolvementType.objects.get(name="Principal Investigator")
-        user_exp, created = UserExperiment.objects.get_or_create(user=request.user, experiment=obj, type=involvement)        
+        user_exp, created = UserExperiment.objects.get_or_create(user=request.user, experiment=obj, type=involvement)
         user_exp.save()
 
     def queryset(self, request):
@@ -159,10 +159,10 @@ class SampleAdmin(ExtJsonInterface, admin.ModelAdmin):
         if is_superuser(request):
             return form
         form.base_fields['sample_class'].queryset = SampleClass.objects.filter(experiment__users=request.user)
-        form.base_fields['experiment'].queryset = Experiment.objects.filter(users=request.user)        
+        form.base_fields['experiment'].queryset = Experiment.objects.filter(users=request.user)
         return form
 
-    
+
     def create_run(self, request, queryset):
 
         # check that each sample is valid
@@ -203,7 +203,7 @@ class SampleAdmin(ExtJsonInterface, admin.ModelAdmin):
         change_url = urlresolvers.reverse('admin:repository_samplelog_changelist')
         return '<a href="%s?sample__id__exact=%s">Logs</a>' % (change_url, obj.id)
     logs_link.short_description = 'Logs'
-    logs_link.allow_tags = True    
+    logs_link.allow_tags = True
 
 
 class SampleTimelineAdmin(ExtJsonInterface, admin.ModelAdmin):
@@ -222,7 +222,7 @@ class SampleTimelineAdmin(ExtJsonInterface, admin.ModelAdmin):
         form.base_fields['experiment'].queryset = Experiment.objects.filter(users=request.user)
         return form
 
-    
+
 class InstrumentMethodAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ['title', 'method_path', 'method_name', 'version', 'creator', 'created_on', 'randomisation', 'blank_at_start',
                     'blank_at_end', 'blank_position', 'obsolete', 'obsolescence_date', 'run_link']
@@ -247,10 +247,10 @@ class StandardOperationProcedureAdmin(ExtJsonInterface, admin.ModelAdmin):
 
 class OrganismTypeAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ('id', 'name')
-    
+
 
 class UserExperimentAdmin(ExtJsonInterface, admin.ModelAdmin):
-    list_display = ('user', 'experiment', 'type')   
+    list_display = ('user', 'experiment', 'type')
 
     def queryset(self, request):
         qs = super(UserExperimentAdmin, self).queryset(request)
@@ -264,10 +264,10 @@ class UserExperimentAdmin(ExtJsonInterface, admin.ModelAdmin):
             return form
         form.base_fields['experiment'].queryset = Experiment.objects.filter(users=request.user)
         return form
-    
+
 
 class UserInvolvementTypeAdmin(ExtJsonInterface, admin.ModelAdmin):
-    list_display = ('id', 'name')   
+    list_display = ('id', 'name')
 
 
 class PlantInfoAdmin(ExtJsonInterface, admin.ModelAdmin):
@@ -285,7 +285,7 @@ class PlantInfoAdmin(ExtJsonInterface, admin.ModelAdmin):
             return form
         form.base_fields['source'].queryset = BiologicalSource.objects.filter(experiment__users=request.user)
         return form
-    
+
 
 class SampleClassAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ['id', 'experiment', 'biological_source', 'treatments', 'timeline', 'organ', 'enabled']
@@ -305,7 +305,7 @@ class SampleClassAdmin(ExtJsonInterface, admin.ModelAdmin):
         form.base_fields['biological_source'].queryset = BiologicalSource.objects.filter(experiment__users=request.user)
         form.base_fields['treatments'].queryset = Treatment.objects.filter(experiment__users=request.user)
         form.base_fields['timeline'].queryset = SampleTimeline.objects.filter(experiment__users=request.user)
-        form.base_fields['organ'].queryset = Organ.objects.filter(experiment__users=request.user)        
+        form.base_fields['organ'].queryset = Organ.objects.filter(experiment__users=request.user)
         return form
 
 
@@ -341,7 +341,7 @@ class RunAdmin(ExtJsonInterface, admin.ModelAdmin):
         output_url = urlresolvers.reverse('generate_worklist', kwargs={'run_id': obj.id})
         return '<a href="%s">Output</a>' % output_url
     output_link.short_description = 'Output'
-    output_link.allow_tags = True    
+    output_link.allow_tags = True
 
     def experiments_link(self, obj):
         change_url = urlresolvers.reverse('admin:repository_experiment_changelist')
@@ -366,7 +366,7 @@ class ClientFileAdmin(ExtJsonInterface, admin.ModelAdmin):
         if is_superuser(request):
             return qs
         return qs.filter(Q(experiment__project__managers=request.user)|Q(experiment__users=request.user)).distinct()
-        
+
 class InstrumentSOPAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ['title','enabled']
 

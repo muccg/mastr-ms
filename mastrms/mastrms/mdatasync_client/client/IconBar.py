@@ -40,12 +40,12 @@ class IconBar:
         image.SetData(s)
 
         bmp = image.ConvertToBitmap()
-        bmp.SetMask(wx.Mask(bmp, wx.WHITE)) #sets the transparency colour to white 
+        bmp.SetMask(wx.Mask(bmp, wx.WHITE)) #sets the transparency colour to white
 
         icon = wx.EmptyIcon()
         icon.CopyFromBitmap(bmp)
 
-                
+
 
         return icon
 

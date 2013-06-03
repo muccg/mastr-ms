@@ -51,7 +51,7 @@ def save_client_state(clientstate):
 
 def get_node_from_request(request, organisation=None, sitename=None, station=None):
     retval = None
-    
+
     if organisation is None:
         organisation = request.REQUEST('organisation', None)
     if sitename is None:
@@ -61,7 +61,7 @@ def get_node_from_request(request, organisation=None, sitename=None, station=Non
 
     logger.debug("Searching for node org=%s, sitename=%s, station=%s" % (organisation, sitename, station))
     try:
-        nodeclient = NodeClient.objects.get(organisation_name = organisation, site_name=sitename, station_name = station) 
+        nodeclient = NodeClient.objects.get(organisation_name = organisation, site_name=sitename, station_name = station)
         retval = nodeclient
     except:
         retval = None

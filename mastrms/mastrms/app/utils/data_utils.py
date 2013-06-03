@@ -31,7 +31,7 @@ def makeJsonFriendly(data):
             #print 'handling dict'
             for key in data.keys():
                 data[key] = makeJsonFriendly(data[key])
-            
+
         elif isinstance(data, datetime.datetime):
             #print 'handling datetime'
             #print 'converting datetime: ', str(data)
@@ -42,7 +42,7 @@ def makeJsonFriendly(data):
             return data #unmodified
     except Exception, e:
         print 'makeJsonFriendly encountered an error: ', str(e)
-    #print 'end makeJsonFriendly'    
+    #print 'end makeJsonFriendly'
     return data
 
 # ------------------------------------------------------------------------------
@@ -55,7 +55,7 @@ class ModelJSONEncoder(DjangoJSONEncoder):
     """
     def handle_field(self, obj, field):
         return smart_unicode(getattr(obj, field.name), strings_only=True)
-    
+
     def handle_fk_field(self, obj, field):
         related = getattr(obj, field.name)
         if related is not None:
@@ -66,7 +66,7 @@ class ModelJSONEncoder(DjangoJSONEncoder):
                 # Related to remote object via other field
                 related = getattr(related, field.rel.field_name)
         return smart_unicode(related, strings_only=True)
-    
+
     def handle_m2m_field(self, obj, field):
         if field.creates_table:
             return [
@@ -74,7 +74,7 @@ class ModelJSONEncoder(DjangoJSONEncoder):
                 for related
                 in getattr(obj, field.name).iterator()
                 ]
-    
+
     def handle_model(self, obj):
         dic = {}
         for field in obj._meta.local_fields:
@@ -87,7 +87,7 @@ class ModelJSONEncoder(DjangoJSONEncoder):
             if field.serialize:
                 dic[field.name] = self.handle_m2m_field(obj, field)
         return dic
-    
+
     def default(self, obj):
         if isinstance(obj, Model):
             return self.handle_model(obj)
@@ -125,10 +125,10 @@ def json_decode(data):
 
 def uniqueList(l):
     '''returns unique elements of l.
-       sometimes you can use a set to do this, but 
+       sometimes you can use a set to do this, but
        not if your list contains unhashable types, such as dict.
     '''
- 
+
     seen = []
     result = []
     for i in l:
@@ -143,9 +143,9 @@ def translate_dict(data, tuplelist, includeRest = False, createEmpty=False):
        for each tuple in the list, if the key (element 1) exists in the dict
        then its value is associated with a new key (element 2) in a new
        dict, which is returned.
-       if 'includeRest' is True, any keys not mentioned are transplanted to 
+       if 'includeRest' is True, any keys not mentioned are transplanted to
        the new dict 'as is'
-       if 'createNew' is True, if a key in the tuple doesn't exist, then it 
+       if 'createNew' is True, if a key in the tuple doesn't exist, then it
        is created in the new dict anyway
     """
     returnval = {}
@@ -161,7 +161,7 @@ def translate_dict(data, tuplelist, includeRest = False, createEmpty=False):
             if key not in oldkeylist:
                 returnval[key] = data[key]
 
-    return returnval         
+    return returnval
 
 
 def param_remap(d):
@@ -184,15 +184,15 @@ def jsonResponse(data={}, items=None, mainContentFunction=None, params=None):
     #a decision based on which one we are going to use for the 'totalRows'.
     if items:
         totalrows = len(items)
-    else:    
+    else:
         totalrows = len(data)
     version = 1
     response = {'value': {'items':makeJsonFriendly(items), 'version':1, 'total_count':totalrows}}
-    
-    retval = {'success': True, 
-              'data':makeJsonFriendly(data), 
+
+    retval = {'success': True,
+              'data':makeJsonFriendly(data),
               'totalRows':totalrows,
-              'response': response 
+              'response': response
               }
     if params:
         retval['params'] = params
@@ -218,7 +218,7 @@ class ZipPacker(object):
 
         zipf.close()
         return filename
-        
+
 class TarPacker(object):
     def __init__(self, compression=None):
         assert compression is None or compression in ('gz','bz2'), "Invalid compression type"
@@ -236,7 +236,7 @@ class TarPacker(object):
             tar.add(f, f[len(drop_prefix):])
         tar.close()
         return filename
-        
+
 def guess_package_type(filename):
     def endswithany(s, sa):
         for end in sa:
@@ -253,7 +253,7 @@ def guess_package_type(filename):
     elif filename.endswith('zip'):
         packer = ZipPacker()
 
-    return packer 
+    return packer
 
 def pack_files(files, drop_prefix, package_name):
     import tempfile
@@ -281,7 +281,7 @@ def zipdir(dirPath=None, zipFilePath=None, includeDirInZip=True):
         if not includeDirInZip:
             archivePath = archivePath.replace(dirToZip + os.path.sep, "", 1)
         return os.path.normcase(archivePath)
-    
+
     outFile = zipfile.ZipFile(zipFilePath, "w", compression=zipfile.ZIP_DEFLATED)
     for (archiveDirPath, dirNames, fileNames) in os.walk(dirPath):
         for fileName in fileNames:
@@ -296,5 +296,5 @@ def zipdir(dirPath=None, zipFilePath=None, includeDirInZip=True):
             #zipInfo.external_attr = 48
             #Here to allow for inserting an empty directory.  Still TBD/TODO.
             outFile.writestr(zipInfo, "")
-            
+
     outFile.close()

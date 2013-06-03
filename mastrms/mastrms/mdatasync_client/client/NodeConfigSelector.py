@@ -20,9 +20,9 @@ class NodeConfigSelector(wx.Panel):
         self.syncHubString = wx.TextCtrl(self, -1, config.getValue('synchub') ) #, size=(300,-1) )
         self.SuccessImage =  wx.ArtProvider_GetBitmap(wx.ART_TICK_MARK, wx.ART_MESSAGE_BOX,(16,16))
         self.FailImage =  wx.ArtProvider_GetBitmap(wx.ART_CROSS_MARK, wx.ART_MESSAGE_BOX,(16,16))
-        
+
         self.syncHubOKIcon = wx.StaticBitmap(self, -1, self.FailImage)
-        
+
         #Refresh Button
         #rbtnsizer = wx.StdDialogButtonSizer()
         btn = wx.Button(self, 0, label = 'Refresh', style = wx.BU_EXACTFIT)
@@ -31,10 +31,10 @@ class NodeConfigSelector(wx.Panel):
         btn.Bind(wx.EVT_BUTTON, self.refreshWebData)
         btn.Enable(True)
         self.RefreshButton = btn
-       
+
         #bind the onSetFocus
         self.syncHubString.Bind(wx.EVT_SET_FOCUS, self.focusResetButton)
-        
+
         self.sizer.Add(self.syncHubLabel, 0, wx.ALIGN_CENTER | wx.ALL, 1)
         #Prepare the syncsizer
         syncsizer.Add(btn, 1, wx.ALIGN_LEFT | wx.ALL, border=0)
@@ -59,7 +59,7 @@ class NodeConfigSelector(wx.Panel):
         self.sizer.Layout()
 
         self.nodeconfigdict = {}
-        
+
         #self.refreshWebData()
         #self.selectNode()
 
@@ -76,7 +76,7 @@ class NodeConfigSelector(wx.Panel):
         else:
             outlog.debug('Data was not available from the web.')
             self.syncHubOKIcon.SetBitmap(self.FailImage)
-        
+
         self.setNodes(j)
 
 
@@ -91,7 +91,7 @@ class NodeConfigSelector(wx.Panel):
             while child:
                 if self.tree.GetItemText(child) == text:
                     return child
-                child, cookie = self.tree.GetNextChild(node, cookie)    
+                child, cookie = self.tree.GetNextChild(node, cookie)
             return None
 
         station = None
@@ -101,11 +101,11 @@ class NodeConfigSelector(wx.Panel):
             if site is not None:
                 station = findnodebytext(site, stationname)
 
-        if station is not None:        
+        if station is not None:
             self.tree.Expand(station)
             self.tree.SelectItem(station)
-        
-        
+
+
 
     def getNodeNamesFromWeb(self):
         #get the data
@@ -121,13 +121,13 @@ class NodeConfigSelector(wx.Panel):
         except Exception, e:
             outlog.warning( 'Error retrieving node config data: %s' % (str(e)) )
             retval = None
-            
+
         return retval
 
 
     def createTree(self):
         '''creates the actual tree control from the 'nodes' class variable.
-           call this function any time you change the 'nodes' variable to reinit 
+           call this function any time you change the 'nodes' variable to reinit
            the tree'''
         #draw the tree control
         if self.tree is not None:
@@ -164,19 +164,19 @@ class NodeConfigSelector(wx.Panel):
         if item:
             return self.tree.GetItemText(item)
         else:
-            return ""   
+            return ""
 
-    #once you are sure you have a leaf node, use this function to get 
+    #once you are sure you have a leaf node, use this function to get
     #the stationname, sitename, and organisation name
     def getNodeConfigName(self, item):
-        
+
         self.nodeconfigdict['stationname'] = self.GetItemText(item)
         p = self.tree.GetItemParent(item)
         self.nodeconfigdict['sitename'] = self.GetItemText(p)
         p = self.tree.GetItemParent(p)
         self.nodeconfigdict['organisation'] = self.GetItemText(p)
         return self.nodeconfigdict
-        
+
 
     def OnItemExpanded(self, evt):
         outlog.info( "OnItemExpanded: %s" % (self.GetItemText(evt.GetItem()) ) )
@@ -191,14 +191,14 @@ class NodeConfigSelector(wx.Panel):
             self.getNodeConfigName(item) #get into the nodeconfigdict
             self.parentApp.setNodeConfigName(self.nodeconfigdict)
             #print self.getNodeConfigName(item)
-            
+
         outlog.info( "OnSelChanged: %s" % (self.GetItemText(evt.GetItem()) ) )
 
     #
     def OnActivated(self, evt):
         outlog.info( "OnActivated: %s" % (self.GetItemText(evt.GetItem()) ) )
 
-   
+
     def AddTreeNodes(self, parentItem, items):
         if type(items) == dict:
             for key in items.keys(): #assuming keys are strings
@@ -213,7 +213,7 @@ class NodeConfigSelector(wx.Panel):
                     outlog.debug('item wasnt a string.: %s' % str(item))
                     newItem = self.tree.AppendItem(parentItem, str(item))
                     #self.AddTreeNodes(newItem, str(item[0]))
-            
 
 
-    
+
+

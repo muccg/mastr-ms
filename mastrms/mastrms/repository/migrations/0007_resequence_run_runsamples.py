@@ -14,7 +14,7 @@ class Migration(DataMigration):
         errors = 0
         totalruns = len(runs)
         errortext = []
-        print 'Resequencing %d runs: [' % (totalruns), 
+        print 'Resequencing %d runs: [' % (totalruns),
         for run in runs:
             try:
                 run.resequence_samples()

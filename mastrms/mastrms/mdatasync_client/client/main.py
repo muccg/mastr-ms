@@ -19,12 +19,12 @@ class MDataSyncApp(wx.PySimpleApp):
         #w = wx.LogChain(wx.LogStderr() )
         #wx.Log_SetActiveTarget( wx.LogStderr() )
         #wx.Log_SetActiveTarget( wx.LogGui() )
-        
+
 
         win = MainWindow(None)
         self.win = win
-        self.msds = MSDataSyncAPI( win.getLog() )#, False ) #false is no threading  
-        
+        self.msds = MSDataSyncAPI( win.getLog() )#, False ) #false is no threading
+
         self.msds.isMSWINDOWS = False
         if wx.Platform == "__WXMSW__":
             sys.stderr = open(os.path.join(DATADIR, "errorlogfile.txt"),"w")  #log to file
@@ -34,13 +34,13 @@ class MDataSyncApp(wx.PySimpleApp):
         elif wx.Platform == "__WXMAC__":
             win.getLog()("Running on Macintosh")
         elif wx.Platform == "__WXGTK__":
-            win.getLog()("Running on Linux (GTK)") 
-        
+            win.getLog()("Running on Linux (GTK)")
+
 
         #let the jobs execute in threads
         #disable this for debugging
-        self.msds.startThread() 
-        
+        self.msds.startThread()
+
         win.MSDSCheckFn = self.msds.checkRsync
         win.MSDSHandshakeFn = self.msds.handshakeRsync
         win.msds = self.msds
@@ -50,7 +50,7 @@ class MDataSyncApp(wx.PySimpleApp):
         self.SetTopWindow(win)
         return True
 
-    
+
 
 if __name__ == "__main__":
     if not os.path.exists(DATADIR):
@@ -60,7 +60,7 @@ if __name__ == "__main__":
             print 'Unable to create data directory. Please create manually: %s' % os.normpath(DATADIR)
             exit()
     plogging.init_logger(name='client', logfile=os.path.join(DATADIR, 'clientlog.log'))
-    
+
 
     should_exit = False
     try:
@@ -72,7 +72,7 @@ if __name__ == "__main__":
 
     if not should_exit:
         m = MDataSyncApp()
-        #sys.stdout = m.win.log 
+        #sys.stdout = m.win.log
         m.MainLoop()
         m.msds.stopThread() #stop the thread if there is one
-    
+

@@ -123,7 +123,7 @@ DUMMY_MANIFEST =  """
 """
 
 if __name__ == "__main__":
-    import optparse 
+    import optparse
     parser = optparse.OptionParser()
     parser.add_option("-g","--gui-only",action="store_true")
     parser.add_option("","--static-msvcrt",action="store_true")

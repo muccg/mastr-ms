@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-#This is the MSDataSync API. This API provides functions to keep a remote set of directories 
+#This is the MSDataSync API. This API provides functions to keep a remote set of directories
 #synced with a local set.
 #It uses rsync to keep the directories in sync, over an SSH tunnel.
 #It can be controlled via a GUI or any other means, and can emit log messages back to the control harness.
 #
-#You can either use a worker thread to get non blocking operation, in which case you 
-#call startThread and stopThread, or not. Either way will still work, just one will block and the 
+#You can either use a worker thread to get non blocking operation, in which case you
+#call startThread and stopThread, or not. Either way will still work, just one will block and the
 #other won't.
 #
 #This makes use of the rsync script by Vivian De Smedt, relased under the BSD license.
@@ -34,7 +34,7 @@ def nullFn(*args, **kwargs):
     outlog.debug('null fn')
     pass
 
-MSDSCheckFn = nullFn 
+MSDSCheckFn = nullFn
 
 from config import CONFIG
 
@@ -42,7 +42,7 @@ class RemoteSyncParams(object):
     def __init__(self, configdict = {}, username="!"):
         self.host = ""
         self.rootdir = ""
-        self.flags = [] 
+        self.flags = []
         self.username = ""
         self.rules = []
         self.filesdict = {}
@@ -88,7 +88,7 @@ class TransactionVars(object):
     @copied_files.setter
     def copied_files(self, copiedfiles):
         self._copiedFiles = value
-    
+
     @property
     def transferred_samples(self):
         return self._transferredSamples
@@ -102,7 +102,7 @@ class TransactionVars(object):
     @sample_file_map.setter
     def sample_file_map(self, value):
         self._sampleFileMap = value
-    
+
     @property
     def samples_verified(self):
         return self._samplesverified
@@ -114,16 +114,16 @@ class TransactionVars(object):
 
 class MSDataSyncAPI(object):
     def __init__(self, log=None):
-        self._tasks = Queue.Queue() 
+        self._tasks = Queue.Queue()
         if log is None:
             self.log = self.defaultLogSink
         else:
             self.log = log
-        
-        self._impl = MSDSImpl(self.log, self) 
-        self.config = CONFIG 
+
+        self._impl = MSDSImpl(self.log, self)
+        self.config = CONFIG
         self.useThreading = False #Threading doesn't seem to help at the moment.
-                                 #it needs to be enabled and then debugged - 
+                                 #it needs to be enabled and then debugged -
                                  #we are still seeing UI lagging behind worker operations
         self.transactionvars = TransactionVars()
 
@@ -183,7 +183,7 @@ class MSDataSyncAPI(object):
         organisation = self.config.getValue('organisation')
         station = self.config.getValue('stationname')
         sitename = self.config.getValue('sitename')
-        localindexdir = self.config.getLocalIndexPath() 
+        localindexdir = self.config.getLocalIndexPath()
         self.log("Handshaking with server %s" % (self.config.getValue('synchub')), type=self.log.LOG_NORMAL, thread=self.useThreading)
         postvars = {'files' : simplejson.dumps({}), 'organisation' : simplejson.dumps(organisation), 'sitename' : simplejson.dumps(sitename), 'stationname': simplejson.dumps(station)}
         try:
@@ -202,7 +202,7 @@ class MSDataSyncAPI(object):
             returnFn(retcode=False, retstring="Error: %s\nUnexpected response from server was: %s" % (e, jsonret))
             return
 
-   
+
         #I want to do an rsync -n
         rsyncconfig = RemoteSyncParams(username=self.config.getValue('user'))
         #Lets get any of the remote params
@@ -211,13 +211,13 @@ class MSDataSyncAPI(object):
         rsyncconfig.rootdir = ''
         #flags, server is authoratative
         rsyncconfig.flags = ['-n'] #n = dry run
-        
+
         outlog.info( 'Handshaking' )
         #now rsync the whole thing over
         self._appendTask(self.handshakeReturn, self._impl.perform_rsync, "%s" % (localindexdir) , rsyncconfig)
 
-    
-    
+
+
     def ask_server_for_wanted_files(self, returnFn):
         self.callingWindow.setState(APPSTATE.INITIING_SYNC)
         self.callingWindow.SetProgress(100)
@@ -225,10 +225,10 @@ class MSDataSyncAPI(object):
         station = self.config.getValue('stationname')
         sitename = self.config.getValue('sitename')
         syncvars = {"version": VERSION , "sync_completed": self.config.getValue("syncold") }
-        print syncvars 
+        print syncvars
         details = {}
         files = {}
-        
+
         #PART 1
         #first, tell the server who we are, and get a response
         try:
@@ -240,14 +240,14 @@ class MSDataSyncAPI(object):
             jsonret = simplejson.loads( jsonresp )
             #if there is an error, bail out by calling the return function
             if not jsonret["success"]:
-                returnFn(retcode = False, retstring = "Sync Initiation failed: %s" % (jsonret["msg"]))   
+                returnFn(retcode = False, retstring = "Sync Initiation failed: %s" % (jsonret["msg"]))
             else:
                 details = jsonret["details"]
                 files = jsonret["files"]
         except Exception, e:
             returnFn(retcode = False, retstring = "Could not initiate Sync %s" % (str(e)) )
-        
-            
+
+
         #otherwise return the files
         return details, files
 
@@ -257,7 +257,7 @@ class MSDataSyncAPI(object):
         #if something goes wrong, bail out by calling the return function
         #otherwise return the local file list
         localfilesdict = self.getFiles(self.config.getValue('localdir'), ignoredirs=[self.config.getLocalIndexPath()] )
-        localindexdir = self.config.getLocalIndexPath() 
+        localindexdir = self.config.getLocalIndexPath()
         #see if we can resolve all wanted files:
         foundfiles = {}
         runsamplesdict = {}
@@ -296,7 +296,7 @@ class MSDataSyncAPI(object):
     #                    fulllocalpath = os.path.join(node['/'], filename)
     #                    fullremotepath = os.path.join(node['.'][filename], filename)
     #                    resultdict[fulllocalpath] = "%s" %(os.path.join(localindexdir, fullremotepath) )
-    #            
+    #
     #        #now for the directories
     #        for dirname in node.keys():
     #            if dirname not in ['.', '/']:
@@ -310,7 +310,7 @@ class MSDataSyncAPI(object):
     #                    fullremotepath = os.path.join(node[dirname], dirname)
     #                    resultdict[fulllocalpath] = "%s" %(os.path.join(localindexdir, fullremotepath) )
     #    return resultdict
-  
+
 
     def post_sync_step(self, server_reponse):
         try:
@@ -338,11 +338,11 @@ class MSDataSyncAPI(object):
                 #print "Filemap ", filemap
                 #for k in filemap.keys():
                 #    print "%s : %s" % (k, filemap[k])
-                
+
                 # go through the synced files list and copy the original file to the archive destination,
                 # inside runid directories.
                 for runid in synced_samples_dict.keys():
-                     
+
                     if len(synced_samples_dict[runid]) > 0:
                         dstdir = os.path.join(archivedfilesdir, str(runid))
                         if not os.path.exists(dstdir):
@@ -353,7 +353,7 @@ class MSDataSyncAPI(object):
                             sampleid_i = int(sampleid)
                             runid_i = int(runid)
                             if filemap.has_key(runid_i) and filemap[runid_i].has_key(sampleid_i):
-                                orgpath = filemap[runid_i][sampleid_i] 
+                                orgpath = filemap[runid_i][sampleid_i]
                                 orgfname = os.path.split(orgpath)[1]
                                 dstpath = os.path.join(dstdir, orgfname)
                                 self.log("Moving %s to %s" % (orgpath, dstpath), thread=self.useThreading )
@@ -366,10 +366,10 @@ class MSDataSyncAPI(object):
                 try:		
                     copytree(localindexdir, archivefilesdir)		
                 except Exception, e:		
-                    self.log('Could not archive files from %s to %s: %s' % (localindexdir, archivefilesdir, str(e)) )                
+                    self.log('Could not archive files from %s to %s: %s' % (localindexdir, archivefilesdir, str(e)) )
             else:
                 self.log("Nothing to archive.", thread=self.useThreading)
-            
+
 
     def cleanup_localindexdir(self):
         localindexdir = self.config.getLocalIndexPath()
@@ -388,40 +388,40 @@ class MSDataSyncAPI(object):
         organisation = self.config.getValue('organisation')
         station = self.config.getValue('stationname')
         sitename = self.config.getValue('sitename')
-        
+
         self.callingWindow = callingWindow
-        
+
         remote_params, wantedfiles = self.ask_server_for_wanted_files(returnFn)
         self.transactionvars.reset()
-        
+
         #localfilesdict is our map between local files that were found that the server wants,
         #and the file path that should exist on the remote end (and relative to our localindexdir)
         #runsamplesdict is just the list of found file sampleids, keyed on runid
-        localfilesdict, runsamplesdict, samplefilemap = self.find_wanted_files(wantedfiles, returnFn) 
+        localfilesdict, runsamplesdict, samplefilemap = self.find_wanted_files(wantedfiles, returnFn)
         self.transactionvars.sample_file_map = samplefilemap
         rsyncconfig = RemoteSyncParams(configdict = remote_params, username=self.config.getValue('user'))
 
         self.log('Server expects sync of %d files' % (len(wantedfiles.keys())) )
         self.log('Client found %d/%d files' % (len(localfilesdict.keys()), len(wantedfiles.keys())) )
 
-        localindexdir = self.config.getLocalIndexPath() 
+        localindexdir = self.config.getLocalIndexPath()
 
         if len(localfilesdict.keys()):
             self.cleanup_localindexdir()
 
             #self.log("Initiating file copy to local index (%d files)" % (len(localfilesdict.keys())) )
             #self.set_progress_state(20, APPSTATE.GATHERING_FILES)
-            
+
             #copy all the files
             self._appendTask(self.copyFilesReturn, self._impl.copyfiles, localfilesdict)
-            
+
             #now rsync the whole thing over
             self._appendTask(self.rsyncReturn, self._impl.perform_rsync, "%s" % (localindexdir) , rsyncconfig)
 
         else:
             self.log("No files to sync.", thread = self.useThreading)
             self.set_progress_state(100, APPSTATE.IDLE)
-        
+
         #now tell the server to check the files off
         baseurl =  self.config.getValue('synchub')
         self._appendTask(returnFn, self._impl.serverCheckRunSampleFiles, runsamplesdict, baseurl)
@@ -439,20 +439,20 @@ class MSDataSyncAPI(object):
     def rsyncReturn(self, *args, **kwargs):
         self.log('Remote transfer stage complete', thread = self.useThreading)
         self.set_progress_state(90, APPSTATE.CONFIRMING_TRANSFER)
-        
+
 
     def handshakeReturn(self, *args, **kwargs):
         self.log('Handshake complete', thread = self.useThreading)
-        self.set_progress_state(100, APPSTATE.IDLE)  
+        self.set_progress_state(100, APPSTATE.IDLE)
 
     def getFiles(self, dir, ignoredirs = []):
-        '''returns a dictionary like structure representing the 
+        '''returns a dictionary like structure representing the
            files. Like this:
            { '.' : [list of filenames],
              '..' : 'path to this dir'
              'dirname' : {dict like this one},
              'dirname2' : {dict like this one},
-           }  
+           }
         '''
 
         retfiles = {}
@@ -467,7 +467,7 @@ class MSDataSyncAPI(object):
 
             if shouldignore:
                 #print 'did an ignore of: ', root, dirs, files
-                continue #go to the next iteration of the loop 
+                continue #go to the next iteration of the loop
 
             #get the current 'node' of the dict for this level
             path = root.split(dir)[1].split(os.sep)
@@ -475,7 +475,7 @@ class MSDataSyncAPI(object):
             for p in path:
                 if len(p):
                     node = node[p]
-                
+
             #don't create ignored dirs..
             for dirname in dirs:
                 if not node.has_key(dirname) and os.path.join(root, dirname) not in ignoredirs:
@@ -487,7 +487,7 @@ class MSDataSyncAPI(object):
             for file in files:
                 #print 'setting filename %s to None' % (file.encode('utf-8'))
                 node['.'][file] = None
-        
+
         #print 'retfiles is: ', unicode(retfiles).encode('utf-8')
         return retfiles
 
@@ -502,11 +502,11 @@ class MSDataSyncAPI(object):
                 if objectname.upper().startswith(excludestring.upper()):
                     will_exclude = True
             return will_exclude
-            
+
         def checkfilesatnode(node, filename):
             #print "Node:", node
-            #print 
-            
+            #print
+
             #check against files.
             if node.has_key('.'):
                 for fname in node['.']:
@@ -532,15 +532,15 @@ class MSDataSyncAPI(object):
                         found =  checkfilesatnode(node[dname], filename)
                         if found is not None:
                             return found
-                        
+
 
             #no directories to descend into?
             #and you got this far?
             #then return None.
             return None
-        
+
         return checkfilesatnode(localfiledict, filename)
-    
+
     #------- WORKER CLASS-----------------------
     class Worker( threading.Thread ):
         SLEEP_TIME = 0.1
@@ -576,15 +576,15 @@ class MSDataSyncAPI(object):
 class MSDSImpl(object):
     '''the implementation of the MSDataSyncAPI'''
     def __init__(self, log, controller):
-       self.log = log #we expect 'log' to be a callable function. 
+       self.log = log #we expect 'log' to be a callable function.
        self.controller = controller
        self.lastError = ""
-        
+
     def perform_rsync(self, sourcedir, rsyncconfig):
         outlog.debug('checkRsync implementation entered!')
-      
+
         #fix the sourcedir.
-        #On windows, the driveletter and colon make rsync think 
+        #On windows, the driveletter and colon make rsync think
         #that it is a host:path pair. So on windows, we need to fix that.
         #What we do is find the drive letter, get rid of the colon, and then prefix
         #the sourcedir name with /cygdrive
@@ -598,7 +598,7 @@ class MSDSImpl(object):
             drive,winpath = os.path.splitdrive(os.path.normpath(sourcedir))
             drive = str(drive)
             outlog.debug('drive is %s' % (drive) )
-            
+
             outlog.debug('winpath is %s' % (winpath) )
             #so for the winpath, we replace all \\ and then \ with /
             winpath=winpath.replace(os.sep, '/')
@@ -613,32 +613,32 @@ class MSDSImpl(object):
 
         logfile = CONFIG.getValue('logfile').replace('\\', '/') #if its a windows path, convert it. cwrsync wants posix paths ALWAYS
         #Popen('rsync -t %s %s:%s' % (sourcedir, remotehost, remotedir) )
-        print 'flags:', rsyncconfig.flags 
+        print 'flags:', rsyncconfig.flags
         #cmdhead = ['rsync', '-tavz'] #t, i=itemize-changes,a=archive,v=verbose,z=zip
         cmdhead = ['rsync']
-        cmdhead.extend(rsyncconfig.flags) 
+        cmdhead.extend(rsyncconfig.flags)
         cmdtail = ['--log-file=%s' % (logfile), str(sourcedir), '%s@%s:%s' % ((rsyncconfig.username), str(rsyncconfig.host), str(rsyncconfig.rootdir) )]
 
         cmd = []
         cmd.extend(cmdhead)
-    
+
         #self.log('Rules is %s' %(str(rules)) )
-        rules = rsyncconfig.rules 
+        rules = rsyncconfig.rules
         if rules is not None and len(rules) > 0:
             for r in rules:
                 if r is not None:
                     cmd.append(r)
-            
+
         cmd.extend(cmdtail)
 
         self.log('Rsync command is: %s ' % str(cmd), thread=self.controller.useThreading, type=self.log.LOG_DEBUG)
         #self.log('cmd is %s ' % str(cmd), thread=self.controller.useThreading)
 
         p = Popen( cmd, shell=False, stdout=PIPE, stderr=PIPE)
-        
+
         #for line in p.stdout:
         #    self.log("RSYNC %s: " % (line,), thread=self.controller.useThreading)
-        
+
         (retcode, pstderr) = p.communicate()
         self.lastError = pstderr
 
@@ -646,13 +646,13 @@ class MSDSImpl(object):
             self.log('Error Rsyncing: %s' % (str(pstderr),), type=self.log.LOG_ERROR, thread = self.controller.useThreading)
         return retcode
 
-    
+
     def serverCheckRunSampleFiles(self, runsampledict, baseurl):
         self.log('Informing the server of transfer: %s' % (runsampledict), thread = self.controller.useThreading)
-        
+
         #get our local files dict, to send to the server also (useful for debugging)
         clientfiles = self.controller.getFiles(self.controller.config.getValue('localdir'), ignoredirs=[self.controller.config.getLocalIndexPath()] )
-        
+
         postvars = {'runsamplefiles' : simplejson.dumps(runsampledict), 'lastError': self.lastError, 'organisation': self.controller.config.getValue('organisation'), 'sitename': self.controller.config.getValue('sitename'), 'stationname': self.controller.config.getValue('stationname'), 'clientfiles' : simplejson.dumps(clientfiles) }
         outlog.debug("Postvars: %s " % (str(postvars)) )
         url = "%s%s/" % (baseurl, "checksamplefiles")
@@ -664,7 +664,7 @@ class MSDSImpl(object):
             self.controller.post_sync_step(simplejson.loads(jsonret))
         except Exception, e:
             self.log('Could not connect to %s: %s' % (url, str(e)), type=self.log.LOG_ERROR, thread = self.controller.useThreading)
-        
+
 
     def copyfiles(self, copydict):
         '''Takes a dict keyed on source filename, and copies each one to the dest filename (value) '''
@@ -686,10 +686,10 @@ class MSDSImpl(object):
 
     def copyfile(self, src, dst):
         import os.path
-        try: 
+        try:
             if os.path.isdir(src) and not os.path.exists(dst):
                 copytree(src, dst)
-            else:    
+            else:
                 thepath = str(os.path.dirname(dst))
                 if not os.path.exists(thepath):
                     self.log('Path %s did not exist - creating' % (thepath,) , thread = self.controller.useThreading )
@@ -713,5 +713,5 @@ class MSDSImpl(object):
             self.log('getFileTree: Exception: %s' % (str(e)), self.log.LOG_ERROR, thread = self.controller.useThreading)
         return allfiles
 
-    
-        
+
+

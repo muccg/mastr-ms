@@ -26,66 +26,66 @@ class MAUser(object):
         self.Username = username
         self.IsLoggedIn = False
 
-    @property 
+    @property
     def IsAdmin(self):
         return self._dict.get('IsAdmin', False)
     @IsAdmin.setter
     def IsAdmin(self, value):
         self._dict['IsAdmin'] = value
 
-    @property 
+    @property
     def IsNodeRep(self):
         return self._dict.get('IsNodeRep', False)
-    @IsNodeRep.setter 
+    @IsNodeRep.setter
     def IsNodeRep(self, value):
         self._dict['IsNodeRep'] = value
 
-    @property 
+    @property
     def IsClient(self):
         return self._dict.get('IsClient', False)
-    @IsClient.setter 
+    @IsClient.setter
     def IsClient(self, value):
         self._dict['IsClient'] = value
 
-    @property 
+    @property
     def IsStaff(self):
         return self._dict.get('IsStaff', False)
-    @IsStaff.setter 
+    @IsStaff.setter
     def IsStaff(self, value):
-        self._dict['IsStaff'] = value 
+        self._dict['IsStaff'] = value
 
-    @property 
+    @property
     def IsMastrAdmin(self):
         return self._dict.get('IsMastrAdmin', False)
-    @IsMastrAdmin.setter 
+    @IsMastrAdmin.setter
     def IsMastrAdmin(self, value):
-        self._dict['IsMastrAdmin'] = value 
+        self._dict['IsMastrAdmin'] = value
 
-    @property 
+    @property
     def IsProjectLeader(self):
         return self._dict.get('IsProjectLeader', False)
-    @IsProjectLeader.setter 
+    @IsProjectLeader.setter
     def IsProjectLeader(self, value):
-        self._dict['IsProjectLeader'] = value 
+        self._dict['IsProjectLeader'] = value
 
-    @property 
+    @property
     def IsMastrStaff(self):
         return self._dict.get('IsMastrStaff', False)
-    @IsMastrStaff.setter 
+    @IsMastrStaff.setter
     def IsMastrStaff(self, value):
-        self._dict['IsMastrStaff'] = value 
+        self._dict['IsMastrStaff'] = value
 
     @property
     def IsLoggedIn(self):
         return self._dict.get('IsLoggedIn', False)
-    @IsLoggedIn.setter 
+    @IsLoggedIn.setter
     def IsLoggedIn(self, value):
         self._dict['IsLoggedIn'] = value
 
-    @property 
+    @property
     def Username(self):
         return self._dict.get('Username', False)
-    @Username.setter 
+    @Username.setter
     def Username(self, value):
         self._dict['Username'] = value
 
@@ -103,7 +103,7 @@ class MAUser(object):
     @property
     def IsPrivileged(self):
         return (self.IsAdmin or self.IsMastrAdmin or self.IsNodeRep or self.IsProjectLeader)
-    
+
     @property
     def StatusGroup(self):
         return self._dict.get('StatusGroup', None)
@@ -129,8 +129,8 @@ class MAUser(object):
             return self.Nodes[0]
         else:
             return 'Unknown'
-    
-    @property 
+
+    @property
     def CachedDetails(self):
         details = self._dict.get('CachedDetails', None)
         if details is None:
@@ -158,7 +158,7 @@ class MAUser(object):
         detailsdict = getMadasUserDetails(self.Username)
         self.CachedDetails = dict(detailsdict)
         return self.CachedDetails
-    
+
     def refresh(self):
         #defaults
         #IsLoggedIn is not handled here - it is managed by the getCurrentUser function
@@ -170,11 +170,11 @@ class MAUser(object):
         self.IsProjectLeader = False
         self.IsMastrStaff = False
 
-        #Grab groups, forcing a reload. 
+        #Grab groups, forcing a reload.
         self.refreshCachedGroups()
         self.refreshCachedDetails()
         self.Nodes = getMadasNodeMemberships(self.CachedGroups)
-            
+
         if MADAS_ADMIN_GROUP in self.CachedGroups:
             self.IsAdmin = True
         if MADAS_NODEREP_GROUP in self.CachedGroups:
@@ -200,18 +200,18 @@ class MAUser(object):
 
 #Gets the MAUser object out of the session, or creates a new one
 def getCurrentUser(request, force_refresh = False):
-    
+
     currentuser = request.session.get('mauser', False)
-    if force_refresh or not currentuser: 
+    if force_refresh or not currentuser:
         currentuser = MAUser(request.user.username)
         currentuser.refresh()
-        request.session['mauser'] = currentuser 
-   
+        request.session['mauser'] = currentuser
+
     #if the authentication is different:
     if currentuser.IsLoggedIn != request.user.is_authenticated():
         currentuser.IsLoggedIn = request.user.is_authenticated()
-        request.session['mauser'] = currentuser 
-    
+        request.session['mauser'] = currentuser
+
     return request.session['mauser']
 
 def getMadasUser(username):
@@ -225,7 +225,7 @@ def getMadasUserGroups(username, include_status_groups = False):
     a = user_manager.get_user_groups(username)
     groups = []
     status = []
-    
+
     if a:
         for name in a:
             if include_status_groups or name not in MADAS_STATUS_GROUPS:
@@ -234,13 +234,13 @@ def getMadasUserGroups(username, include_status_groups = False):
             #set the status group (even if being shown in 'groups')
             if name in MADAS_STATUS_GROUPS:
                 status.append(name)
-             
+
     return {'groups': groups, 'status': status}
 
 def getMadasUsersFromGroups(grouplist, method='and') :
     '''Returns users who are a member of the groups given in grouplist
     The default 'method' is 'and', which will return only users who are a member
-    of all groups. Passing 'or' will return users who are a member of any of the groups''' 
+    of all groups. Passing 'or' will return users who are a member of any of the groups'''
     user_manager = get_user_manager()
     users = user_manager.list_users(grouplist, method)
     return users
@@ -261,7 +261,7 @@ def getMadasNodeMemberships(groups):
 def getMadasUserDetails(username):
     user_manager = get_user_manager()
     d = user_manager.get_user_details(username)
-    #this is a function to un-listify values in the dict, since 
+    #this is a function to un-listify values in the dict, since
     #ldap often returns them that way
     def _stripArrays(inputdict):
         for key in inputdict.keys():
@@ -313,13 +313,13 @@ def _translate_ldap_to_madas(ldict, createEmpty=False):
 def loadMadasUser(username):
     'takes a username, returns a dictionary of results'
     'returns empty dict if the user doesnt exist'
-    
+
     user = getMadasUser(username)
     details = user.CachedDetails
 
     if len(details) == 0:
         return {}
-    
+
     #copy one field to a new name
     details['originalEmail'] = details['email']
 
@@ -336,7 +336,7 @@ def loadMadasUser(username):
     details['isMastrStaff'] = user.IsMastrStaff
     details['isClient'] = user.IsClient
     status = user.StatusGroup
-    #This is done because the javascript wants 
+    #This is done because the javascript wants
     #'User' to be seen as 'Active'
     if status == MADAS_USER_GROUP:
         status = 'Active'
@@ -352,7 +352,7 @@ def loadMadasUser(username):
 
     details['name'] = user.Name
 
-    return details  
+    return details
 
 def addMadasUser(username, detailsdict):
     user_manager = get_user_manager()
@@ -366,10 +366,10 @@ def addMadasUser(username, detailsdict):
     if success:
         success = user_manager.add_user_to_group(username, MADAS_PENDING_GROUP)
         if not success:
-            raise Exception, 'Could not add user %s to group %s' % (username, MADAS_PENDING_GROUP) 
+            raise Exception, 'Could not add user %s to group %s' % (username, MADAS_PENDING_GROUP)
     else:
         raise Exception, 'Could not add user %s' % (username)
-        
+
     return success
 
 def updateMadasUserDetails(currentUser, username, password, detailsdict):
@@ -382,7 +382,7 @@ def updateMadasUserDetails(currentUser, username, password, detailsdict):
         except Exception, e:
             logger.warning("Could not update user %s: %s" % (username, str(e)) )
             return False
-     
+
     # Only errors will return success False
     return True
 
@@ -404,7 +404,7 @@ def set_superuser(user, superuser=False):
     django_user.save()
 
 def saveMadasUser(currentUser, username, changeddetails, changedstatus, password):
-    ''' 
+    '''
         the current user is the currently logged in madas user
         the username is the username of the person being edited
         changeddetails is a dict containing only the changed details
@@ -412,7 +412,7 @@ def saveMadasUser(currentUser, username, changeddetails, changedstatus, password
     '''
     #load the existing user
     existingUser = getMadasUser(username)
-    
+
     #If the user doesn't exist yet, add them first.
     if existingUser.CachedDetails == {}:
         logger.debug("Adding new user %s" % (username))
@@ -427,13 +427,13 @@ def saveMadasUser(currentUser, username, changeddetails, changedstatus, password
 
     if not updateMadasUserDetails(currentUser, username, password, new_details):
         return False
-   
-    if currentUser.IsAdmin: 
+
+    if currentUser.IsAdmin:
         if changedstatus['admin']:
             addMadasUserToGroup(existingUser, MADAS_ADMIN_GROUP)
             set_superuser(existingUser, True)
         else:
-            #if they are an admin, dont let them unadmin themselves 
+            #if they are an admin, dont let them unadmin themselves
             if existingUser.Username != currentUser.Username:
                 removeMadasUserFromGroup(existingUser, MADAS_ADMIN_GROUP)
                 set_superuser(existingUser, False)
@@ -441,18 +441,18 @@ def saveMadasUser(currentUser, username, changeddetails, changedstatus, password
         # Update Node
         oldnodes = existingUser.Nodes
         newnode = changedstatus.get('node')
-        if newnode is not None and newnode not in oldnodes: 
+        if newnode is not None and newnode not in oldnodes:
             if len(oldnodes) > 0:
                 #remove them from the old node:
                 removeMadasUserFromGroup(existingUser, oldnodes[0])
             addMadasUserToGroup(existingUser, newnode)
- 
+
     if currentUser.IsAdmin or (currentUser.IsNodeRep and currentUser.Nodes == existingUser.Nodes):
         if changedstatus['noderep']:
             addMadasUserToGroup(existingUser, MADAS_NODEREP_GROUP)
         else:
             removeMadasUserFromGroup(existingUser, MADAS_NODEREP_GROUP)
-        
+
         # Status: Pending, Active etc.
         oldstatus = existingUser.StatusGroup
         newstatus = changedstatus.get('status')
@@ -460,7 +460,7 @@ def saveMadasUser(currentUser, username, changeddetails, changedstatus, password
             if oldstatus is not None:
                 removeMadasUserFromGroup(existingUser, oldstatus)
             addMadasUserToGroup(existingUser, newstatus)
-        
+
     if currentUser.IsAdmin or currentUser.IsMastrAdmin:
         if changedstatus['mastradmin']:
             addMadasUserToGroup(existingUser, MASTR_ADMIN_GROUP)
@@ -469,21 +469,21 @@ def saveMadasUser(currentUser, username, changeddetails, changedstatus, password
             removeMadasUserFromGroup(existingUser, MASTR_ADMIN_GROUP)
             set_superuser(existingUser, False)
 
-    if (currentUser.IsAdmin or currentUser.IsMastrAdmin or 
+    if (currentUser.IsAdmin or currentUser.IsMastrAdmin or
             (currentUser.IsProjectLeader and currentUser.Nodes == existingUser.Nodes)):
         if changedstatus['projectleader']:
             addMadasUserToGroup(existingUser, PROJECTLEADER_GROUP)
         else:
             removeMadasUserFromGroup(existingUser, PROJECTLEADER_GROUP)
 
-    if (currentUser.IsAdmin or currentUser.IsMastrAdmin or 
+    if (currentUser.IsAdmin or currentUser.IsMastrAdmin or
             (currentUser.IsProjectLeader and currentUser.Nodes == existingUser.Nodes)):
         if changedstatus['mastrstaff']:
             addMadasUserToGroup(existingUser, MASTR_STAFF_GROUP)
         else:
             removeMadasUserFromGroup(existingUser, MASTR_STAFF_GROUP)
 
-    return True                
+    return True
 
 def getDetailsFromRequest(request):
     '''This is a generic function for parsing the form data passed in
@@ -500,17 +500,17 @@ def getDetailsFromRequest(request):
     updatedusername = getReqVarSTR('email')
     updateDict = {}
     updateDict['mail'] = updatedusername
-    updateDict['telephoneNumber'] = getReqVarSTR('telephoneNumber') 
+    updateDict['telephoneNumber'] = getReqVarSTR('telephoneNumber')
     updateDict['physicalDeliveryOfficeName'] =  getReqVarSTR('physicalDeliveryOfficeName')
     updateDict['title'] = getReqVarSTR('title')
-    updateDict['givenName'] = getReqVarSTR('firstname') 
+    updateDict['givenName'] = getReqVarSTR('firstname')
     updateDict['sn'] = getReqVarSTR('lastname')
     updateDict['cn'] = "%s %s" % (updateDict['givenName'], updateDict['sn'])
     updateDict['homePhone'] = getReqVarSTR('homephone')
-    updateDict['postalAddress'] = getReqVarSTR('address') 
-    updateDict['description'] = getReqVarSTR('areaOfInterest') 
+    updateDict['postalAddress'] = getReqVarSTR('address')
+    updateDict['description'] = getReqVarSTR('areaOfInterest')
     updateDict['destinationIndicator'] = getReqVarSTR('dept')
-    updateDict['businessCategory'] = getReqVarSTR('institute') 
+    updateDict['businessCategory'] = getReqVarSTR('institute')
     updateDict['registeredAddress'] = getReqVarSTR('supervisor')
     updateDict['carLicense'] = getReqVarSTR('country')
 
@@ -529,15 +529,15 @@ def getDetailsFromRequest(request):
     status = request.REQUEST.get('status')
     if status == 'Active':
         status = MADAS_USER_GROUP
-    statusDict['status'] = status    
+    statusDict['status'] = status
     password = getReqVarSTR('password').strip() #empty password is ignored anyway
 
     retdict = {}
     retdict['username'] =  updatedusername
-    retdict['password'] = password 
-    retdict['details'] = updateDict 
+    retdict['password'] = password
+    retdict['details'] = updateDict
     retdict['status'] = statusDict
-   
+
     logger.debug('Parsed Form results:')
     logger.debug('Username: %s', updatedusername)
     logger.debug('Password: %s', password)
@@ -547,9 +547,9 @@ def getDetailsFromRequest(request):
     logger.debug('Status:')
     for key in statusDict.keys():
         logger.debug('%s : %s' % (key, statusDict[key]))
-        
 
-    return retdict       
-                
-    
+
+    return retdict
+
+
 

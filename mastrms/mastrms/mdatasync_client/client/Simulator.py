@@ -21,14 +21,14 @@ class GeneratePopup(wx.Dialog):
         for p in xrange(0, len(fileslist)):
             self.listctrl.Select(p)
 
-        self.textlabel = wx.StaticText(_cp, -1, "Files to Generate:") 
+        self.textlabel = wx.StaticText(_cp, -1, "Files to Generate:")
         self.OkButton = wx.Button(_cp, id=wx.ID_OK)
         self.OkButton.Bind(wx.EVT_BUTTON, self.GenerateFiles)
         self.CancelButton = wx.Button(_cp, id=wx.ID_CANCEL)
         self.buttonsizer = wx.BoxSizer(wx.HORIZONTAL)
         self.buttonsizer.Add(self.OkButton, 0, flag=wx.ALL, border=2)
         self.buttonsizer.Add(self.CancelButton, 0, flag=wx.ALL, border=2)
-        
+
         self.contentsizer = wx.BoxSizer(wx.VERTICAL)
         self.contentsizer.Add(self.textlabel, 0, flag=wx.ALL, border=2)
         self.contentsizer.Add(self.listctrl, 0, flag=wx.ALL|wx.GROW, border=2)
@@ -59,7 +59,7 @@ class GeneratePopup(wx.Dialog):
                         #create a directory instead, and blat a bunch of files there.
                         os.mkdir(fname)
                         self.log("Created dir %d: %s" % (selindex, fname))
-                        for i in range(5):                            
+                        for i in range(5):
                             self.create_file(fname, str(i))
                         if self.generate_temp_files:
                             if count == 0:
@@ -80,7 +80,7 @@ class GeneratePopup(wx.Dialog):
                 self.log("Error writing item %d:%s - %s" % (selindex, fname, str(e)), type=self.log.LOG_ERROR)
             count += 1
         self.EndModal(0)
-    
+
 
 class MainWindow(wx.Frame):
     def __init__(self, parent):
@@ -89,15 +89,15 @@ class MainWindow(wx.Frame):
 
         self.contentPanel = wx.Panel(self, -1)
         _cp = self.contentPanel
-        self.inputText =  wx.TextCtrl(_cp, -1, 
+        self.inputText =  wx.TextCtrl(_cp, -1,
                                     style = wx.TE_MULTILINE|wx.HSCROLL)
 
-        self.outputText =  wx.TextCtrl(_cp, -1, 
+        self.outputText =  wx.TextCtrl(_cp, -1,
                                     style = wx.TE_MULTILINE|wx.TE_READONLY|wx.HSCROLL)
-        
+
         self.inputLabel = wx.StaticText(parent = _cp)
         self.inputLabel.SetLabel(label='Paste worklist here')
-        
+
         self.outputLabel = wx.StaticText(parent = _cp)
         self.outputLabel.SetLabel(label='Log')
 
@@ -114,9 +114,9 @@ class MainWindow(wx.Frame):
 
         self.filectrl = filebrowse.DirBrowseButton(_cp, -1, size=(450, -1), changeCallback = None, labelText='Choose Dir', startDirectory = str('.') )
         #ctrl.SetValue(str(self.config.getValue(key)) )
-        
+
         self.panelSizer = wx.BoxSizer(wx.VERTICAL)
-       
+
         self.log = Log(self.outputText)
         wx.Log_SetActiveTarget(self.log)
 
@@ -126,18 +126,18 @@ class MainWindow(wx.Frame):
 
         _p = self.panelSizer
         #tsizer.Add(self.inputText, 1, flag=wx.ALL, border=2)
-        _p.Add(self.inputLabel, 0, flag=wx.ALL, border=2) 
-        _p.Add(self.inputText, 1, flag=wx.ALL|wx.GROW, border=2) 
+        _p.Add(self.inputLabel, 0, flag=wx.ALL, border=2)
+        _p.Add(self.inputText, 1, flag=wx.ALL|wx.GROW, border=2)
         _p.Add(self.clearButton, 0, flag=wx.ALL, border=2)
         _p.Add(self.filectrl, 1, flag=wx.ALL|wx.GROW, border=2)
         _p.Add(self.tempGenerationCheckBox, 0, flag=wx.ALL, border=2)
         _p.Add(self.genButton, 0, flag=wx.ALL, border=2)
-        _p.Add(self.outputLabel, 0, flag=wx.ALL, border=2) 
+        _p.Add(self.outputLabel, 0, flag=wx.ALL, border=2)
         _p.Add(self.outputText, 1, flag=wx.ALL|wx.GROW, border=2)
 
         self.contentPanel.SetSizerAndFit(_p)
         self.panelSizer.Fit(self)
-    
+
     def toggleTempFiles(self, event):
         self.shouldGenerateTempFiles = not self.shouldGenerateTempFiles
 
@@ -153,7 +153,7 @@ class MainWindow(wx.Frame):
                 pass
         print fileslist
 
-        dlg = GeneratePopup(self.log, self, fileslist, self.filectrl.GetValue(), self.shouldGenerateTempFiles)  
+        dlg = GeneratePopup(self.log, self, fileslist, self.filectrl.GetValue(), self.shouldGenerateTempFiles)
         dlg.ShowModal()
         dlg.Destroy()
 

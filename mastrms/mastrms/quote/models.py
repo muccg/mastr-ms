@@ -26,7 +26,7 @@ class Quoterequest(models.Model):
     officephone = models.CharField(max_length=50)
     country = models.CharField(max_length=100)
     attachment = models.TextField()
-    
+
     class Meta:
         db_table = u'quoterequest'
         verbose_name = "quote request"
@@ -76,7 +76,7 @@ class Organisation(models.Model):
     user = models.ManyToManyField(User, through="UserOrganisation")
     class Meta:
         db_table = u'm_organisation'
-    
+
 class UserOrganisation(models.Model):
     user = models.ForeignKey(User)
     organisation = models.ForeignKey(Organisation)

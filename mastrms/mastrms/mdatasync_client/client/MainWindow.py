@@ -15,7 +15,7 @@ import yaphc
 from httplib2 import Http
 from urllib import urlencode
 
-class APPSTATE:  
+class APPSTATE:
 
     INITIING_SYNC = "Initiating sync with server"
     CHECKING_FILES = "Checking for files locally"
@@ -45,28 +45,28 @@ class MainWindow(wx.Frame):
 
         self.contentPanel = wx.Panel(self, -1)
         _cp = self.contentPanel
-        
+
 
         #progressLabel = wx.StaticText(parent = _cp)
         #progressLabel.SetLabel(label="Progress")
 
         #First thing, set up the log.
         self.logArea = wx.CollapsiblePane(_cp, -1, "Log", name='LogArea')
-        self.logAreaPane = self.logArea.GetPane() 
-        self.logAreaSizer = wx.BoxSizer(wx.VERTICAL) 
-        self.logTextCtrl = wx.TextCtrl(self.logAreaPane, -1, 
+        self.logAreaPane = self.logArea.GetPane()
+        self.logAreaSizer = wx.BoxSizer(wx.VERTICAL)
+        self.logTextCtrl = wx.TextCtrl(self.logAreaPane, -1,
                                     style = wx.TE_MULTILINE|wx.TE_READONLY|wx.HSCROLL)
-        
-        
+
+
 
         #modify the log
         if wx.Platform == "__WXMAC__":
             self.logTextCtrl.MacCheckSpelling(False)
-        
+
         self.log = Log(self.logTextCtrl)
         wx.Log_SetActiveTarget(self.log)
 
-        
+
 
         #self.ListCtrlPanel = ListCtrlPanel(self, self.log)
 
@@ -88,7 +88,7 @@ class MainWindow(wx.Frame):
         helpMenu = wx.Menu()
         helpMenu.Append(ID_ABOUT, "&About", "About")
         helpMenu.Append(ID_PYCRUST, "&Pycrust", "Pycrust")
-        
+
         self.menuBar.Append(fileMenu, "&File")
         self.menuBar.Append(editMenu, "&Edit")
         self.menuBar.Append(helpMenu, "&Help")
@@ -98,20 +98,20 @@ class MainWindow(wx.Frame):
         self.SetStatusBar(self.StatusBar)
         self.state = APPSTATE.IDLE
         #self.StatusBar.SetStatusText(self.state)
-        
+
         #sys tray icon
         self.SystrayIcon = SystrayIcon(self, self.log)
         self.SystrayIcon.SetIconTimer()
-      
+
         self.setState(APPSTATE.IDLE)
-   
+
         #Create a timer.
         self.timer = wx.Timer(self, -1)
         self.Bind(wx.EVT_TIMER, self.OnTimerTick, self.timer)
         self.timer.Start(milliseconds = 1000, oneShot = False)
         self.secondsUntilNextSync = 0
         self.syncFreq = 0 #local cache of syncfreq
-        
+
         #Menu Events
         self.SetMenuBar(self.menuBar)
         self.Bind(wx.EVT_MENU_HIGHLIGHT_ALL, self.OnMenuHighlight)
@@ -121,9 +121,9 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnMenuQuit, id=ID_QUIT)
         self.Bind(wx.EVT_MENU, self.OnMenuPreferences, id=ID_PREFERENCES )
         self.Bind(wx.EVT_MENU, self.pycrust, id=ID_PYCRUST )
-        self.Bind(wx.EVT_MENU, self.OnUpdateProgram, id=ID_PROGRAMUPDATES ) 
-        self.Bind(wx.EVT_MENU, self.OnAbout, id=ID_ABOUT ) 
-       
+        self.Bind(wx.EVT_MENU, self.OnUpdateProgram, id=ID_PROGRAMUPDATES )
+        self.Bind(wx.EVT_MENU, self.OnAbout, id=ID_ABOUT )
+
         #Collapsible pane event (the logArea):
         self.Bind(wx.EVT_COLLAPSIBLEPANE_CHANGED, self.OnPaneChanged, self.logArea)
 
@@ -145,11 +145,11 @@ class MainWindow(wx.Frame):
         #A place to set the log variable
         conf = self.config.getConfig()
         if self.config.getConfig():
-            
+
             box = wx.BoxSizer(wx.HORIZONTAL)
             ctrl = wx.TextCtrl(self.logAreaPane, -1, str(self.config.getValue('logfile')), size=(80,-1))
             ctrl.SetHelpText(  self.config.getHelpText('logfile') )
-            
+
             def OnLogFilenameSave(evt):
                 self.config.setValue('logfile', ctrl.GetValue() )
                 self.config.save()
@@ -163,7 +163,7 @@ class MainWindow(wx.Frame):
             box.Add(ctrl, 1, wx.ALIGN_CENTRE|wx.ALL, 0)
             box.Add(btn, 0, wx.ALIGN_RIGHT|wx.ALL, 0)
             logfooterbox.Add(box, 1,  wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 0 )
-            
+
         logfooterbox.Add(self.logbutton, 0, wx.ALL, 0)
         logfooterbox.Add(self.screenshotbutton, 0, wx.ALL, 0)
         logfooterbox.Add(logWrap, 0, wx.ALIGN_LEFT| wx.ALIGN_CENTER_VERTICAL|wx.ALL, 0)
@@ -195,12 +195,12 @@ class MainWindow(wx.Frame):
 
         self.contentPanel.SetSizerAndFit(contentpanelsizer)
         self.contentpanelsizer = contentpanelsizer
-        
+
         #Expand the debug area by default:
         self.logArea.Expand()
-        
+
         self.OnPaneChanged() #force a layout fit
-        
+
         self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
         self.log('Finished loading application')
 
@@ -235,7 +235,7 @@ class MainWindow(wx.Frame):
         #    #self.contentpanelsizer.Add(self.logArea, 1, flag=wx.ALL | wx.GROW | wx.EXPAND | wx.FIXED_MINSIZE, border=2)
         #    self.logAreaSizer.Layout()#.contentPanel)
         #    self.contentpanelsizer.Layout()
-        
+
         #self.logAreaSizer.Fit(self)#.contentPanel)
         self.contentpanelsizer.Fit(self)
         #self.logAreaSizer.Layout()#.contentPanel)
@@ -260,7 +260,7 @@ class MainWindow(wx.Frame):
         '''setState needs to set the statusbar text, and enable/disable the menu item for 'check now' '''
         #The menu on the system tray icon is created every time it is clicked:
         #We don't need to do anything here, as long as the state is set.
-        
+
         thread = self.is_using_threading()
         if (thread):
             wx.CallAfter(self._set_state, state)
@@ -282,7 +282,7 @@ class MainWindow(wx.Frame):
             help = item.GetHelp()
 
         # but in this case just call Skip so the default is done
-        event.Skip() 
+        event.Skip()
 
     def OnUpdateProgram(self, event):
         self.menuBar.Enable(ID_CHECK_NOW, False)
@@ -309,10 +309,10 @@ class MainWindow(wx.Frame):
                 #app.auto_update()
             except Exception, e:
                 self.log("Error updating app: %s" % (str(e)), type=self.log.LOG_ERROR)
-            app.cleanup()    
+            app.cleanup()
         else:
             self.log('App must be frozen to initiate update')
-        self.menuBar.Enable(ID_CHECK_NOW, True)   
+        self.menuBar.Enable(ID_CHECK_NOW, True)
         self.UnPauseCountdown()
 
 
@@ -354,9 +354,9 @@ class MainWindow(wx.Frame):
     def OnMenuPreferences(self, evt):
         '''open the prefs dialog which BLOCKS'''
         import Preferences
-        a = Preferences.Preferences(self, -1, self.config, self.log) 
+        a = Preferences.Preferences(self, -1, self.config, self.log)
          # this does not return until the dialog is closed.
-       
+
         a.Show() #Show the dialog first
         #Now refresh its stuff
         a.nodeconfigselector.refreshWebData()
@@ -370,7 +370,7 @@ class MainWindow(wx.Frame):
         if self.state != APPSTATE.IDLE: #already busy. Just return
             return
         #MSDSCheckFn is defined by the main app - MDataSyncApp. It just sets the method in a hacky way :(
-        self.SetProgress(0) #set progress to 0 
+        self.SetProgress(0) #set progress to 0
         self.setState(APPSTATE.CHECKING_SYNCHUB)
         try:
             self.MSDSCheckFn(self, APPSTATE.UPLOADING_DATA, 'notused', self.CheckReturnFn)
@@ -379,7 +379,7 @@ class MainWindow(wx.Frame):
 
 
     def SetProgress(self, prognum, add=False):
-        
+
         #may be being called from a thread
         thread = self.is_using_threading()
         if (thread):
@@ -404,19 +404,19 @@ class MainWindow(wx.Frame):
 
             self.setState(APPSTATE.IDLE)
             self.SetProgress(100)
-        
+
         outlog.debug('return function called')
         if retcode:
             self.log('Check function returned', type=self.log.LOG_DEBUG, thread = thread)
         else:
             self.log(retstring, type=self.log.LOG_DEBUG, thread=thread)
-        
+
 
     def __testMenuFunction(self, event):
         self.log('Menu event! %s' % str(event), type = self.log.LOG_DEBUG)
 
     def getLog(self):
-        #return weakref.ref(self.log) 
+        #return weakref.ref(self.log)
         return self.log
 
     def OnCloseWindow(self, event):
@@ -433,7 +433,7 @@ class MainWindow(wx.Frame):
         else:
             self.resetTimeTillNextSync(forceReset = True)
             self.OnCheckNow(None)
-        
+
     def pycrust(self,event):
         import wx.py as py
         w= py.crust.CrustFrame(parent = self)
@@ -472,8 +472,8 @@ class MainWindow(wx.Frame):
         rect = self.GetRect()
         # see http://aspn.activestate.com/ASPN/Mail/Message/wxpython-users/3575899
         # created by Andrea Gavana
- 
-        # adjust widths for Linux (figured out by John Torres 
+
+        # adjust widths for Linux (figured out by John Torres
         # http://article.gmane.org/gmane.comp.python.wxpython/67327)
         if sys.platform == 'linux2':
             client_x, client_y = self.ClientToScreen((0, 0))
@@ -481,22 +481,22 @@ class MainWindow(wx.Frame):
             title_bar_height = client_y - rect.y
             rect.width += (border_width * 2)
             rect.height += title_bar_height + border_width
- 
+
         #Create a DC for the whole screen area
         dcScreen = wx.ScreenDC()
- 
+
         #Create a Bitmap that will hold the screenshot image later on
         #Note that the Bitmap must have a size big enough to hold the screenshot
         #-1 means using the current default colour depth
         bmp = wx.EmptyBitmap(rect.width, rect.height)
- 
+
         #Create a memory DC that will be used for actually taking the screenshot
         memDC = wx.MemoryDC()
- 
+
         #Tell the memory DC to use our Bitmap
         #all drawing action on the memory DC will go to the Bitmap now
         memDC.SelectObject(bmp)
- 
+
         #Blit (in this case copy) the actual screen on the memory DC
         #and thus the Bitmap
         memDC.Blit( 0, #Copy to this X coordinate
@@ -507,11 +507,11 @@ class MainWindow(wx.Frame):
                     rect.x, #What's the X offset in the original DC?
                     rect.y  #What's the Y offset in the original DC?
                     )
- 
+
         #Select the Bitmap out of the memory DC by selecting a new
         #uninitialized Bitmap
         memDC.SelectObject(wx.NullBitmap)
- 
+
         img = bmp.ConvertToImage()
         import time
         timetext = time.asctime().replace(' ', '_').replace(':', '-')

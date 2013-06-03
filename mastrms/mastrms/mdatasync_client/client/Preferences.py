@@ -34,7 +34,7 @@ class Preferences(wx.Dialog):
         pre.width = 400
         #Turn the object into a proper dialog wrapper.
         self.PostCreate(pre)
-        
+
         self.log = log
         self.parentApp = parent
         self.config = config
@@ -42,26 +42,26 @@ class Preferences(wx.Dialog):
         # Now continue with the normal construction of the dialog
         # contents
         sizer = wx.BoxSizer(wx.VERTICAL)
-        self.nodeconfigselector = None 
+        self.nodeconfigselector = None
         #Get the rest of the config
         k = self.config.getConfig().keys()
         k.sort()
 
         #report current node config name, and give button to choose
         box = wx.BoxSizer(wx.HORIZONTAL)
-        self.nodeconfiglabel = wx.StaticText(self, -1, "" ) 
+        self.nodeconfiglabel = wx.StaticText(self, -1, "" )
         self.setNodeConfigLabel()
         #box.Add(label, 1, wx.ALIGN_LEFT|wx.ALL, 2)
-        
+
         sizer.Add(box, 1, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, INTERNAL_BORDER_WIDTH)
         self.nodeconfigselector = NodeConfigSelector.NodeConfigSelector(self, ID_NODESELECTOR_DIALOG, self.log, None)
-    
+
         #self.nodeconfigselector.createTree()
         sizer.Add(self.nodeconfigselector, 6, wx.GROW|wx.ALL, EXTERNAL_BORDER_WIDTH)
 
 
         buttonsbox = wx.BoxSizer(wx.HORIZONTAL)
-        #and a button to upload keys 
+        #and a button to upload keys
         keybutton = wx.Button(self, ID_SENDKEY_BUTTON)
         keybutton.SetLabel("Send Key")
         keybutton.Bind(wx.EVT_BUTTON, self.OnSendKey)
@@ -93,8 +93,8 @@ class Preferences(wx.Dialog):
                 #        ctrl.SetValue(wx.CHK_CHECKED)
                 #    else:
                 #        ctrl.SetValue(wx.CHK_UNCHECKED)
-                #    ctrl.SetHelpText(self.config.getHelpText(key))    
-                #    box.Add(ctrl, 1, wx.ALIGN_RIGHT|wx.ALL, border=INTERNAL_BORDER_WIDTH)    
+                #    ctrl.SetHelpText(self.config.getHelpText(key))
+                #    box.Add(ctrl, 1, wx.ALIGN_RIGHT|wx.ALL, border=INTERNAL_BORDER_WIDTH)
                 if key == 'localdir':
                     ctrl = filebrowse.DirBrowseButton(self, -1, size=(450, -1), changeCallback = None, labelText=self.config.getFormalName(key), startDirectory = str(self.config.getValue(key)) )
                     ctrl.SetValue(str(self.config.getValue(key)) )
@@ -102,30 +102,30 @@ class Preferences(wx.Dialog):
                     box.Add(ctrl, 1, wx.ALIGN_RIGHT|wx.ALL, border=INTERNAL_BORDER_WIDTH)
                 elif key == 'loglevel':
                     levelslist = [
-                                    plogging.LoggingLevels.DEBUG.name, 
-                                    plogging.LoggingLevels.INFO.name, 
-                                    plogging.LoggingLevels.WARNING.name, 
-                                    plogging.LoggingLevels.FATAL.name, 
-                                    plogging.LoggingLevels.CRITICAL.name 
+                                    plogging.LoggingLevels.DEBUG.name,
+                                    plogging.LoggingLevels.INFO.name,
+                                    plogging.LoggingLevels.WARNING.name,
+                                    plogging.LoggingLevels.FATAL.name,
+                                    plogging.LoggingLevels.CRITICAL.name
                                  ]
-                    
+
                     ctrl =  wx.Choice(self, -1, choices=levelslist )
 
                     #make a 'getvalue' for the control:
                     def gv(self):
                         label = self.GetStringSelection()
                         level = plogging.LoggingLevels.getByName(label)
-                        ret = plogging.LoggingLevels.WARNING #a good default, just in case 
+                        ret = plogging.LoggingLevels.WARNING #a good default, just in case
                         if (level):
                             ret = level
                         #actually set the logging level
                         plogging.set_level('client', ret)
                         return ret
-                    
+
                     #ctrl.GetValue = instancemethod(gv, ctrl, wx.Choice)
                     from types import MethodType
                     ctrl.GetValue = MethodType(gv, ctrl)
-                    
+
                     self.Bind(wx.EVT_CHOICE, self.logLevelChoose, ctrl)
 
                     #Lastly, lets select the current logging level.
@@ -136,7 +136,7 @@ class Preferences(wx.Dialog):
                     ctrl.SetHelpText(self.config.getHelpText(key))
                     box.Add(label, 0, wx.ALIGN_LEFT| wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=INTERNAL_BORDER_WIDTH)
                     box.Add(ctrl, 1, wx.ALIGN_RIGHT|wx.ALL, border=INTERNAL_BORDER_WIDTH)
-                else: 
+                else:
                     label = wx.StaticText(self, -1, self.config.getFormalName(key))
                     label.SetHelpText(self.config.getHelpText(key))
                     box.Add(label, 0, wx.ALIGN_LEFT| wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=INTERNAL_BORDER_WIDTH)
@@ -145,7 +145,7 @@ class Preferences(wx.Dialog):
                     ctrl.SetHelpText(self.config.getHelpText(key))
                     box.Add(ctrl, 1, wx.ALIGN_RIGHT|wx.ALL, border=INTERNAL_BORDER_WIDTH)
                 sizer.Add(box, 1, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=INTERNAL_BORDER_WIDTH)
-                
+
                 #store the field so we can serialise it later
                 self.fields[key] = ctrl
 
@@ -157,22 +157,22 @@ class Preferences(wx.Dialog):
         sizer.Add(box, 1, wx.GROW | wx.ALIGN_CENTER_VERTICAL | wx.ALL, border=INTERNAL_BORDER_WIDTH)
 
         btnsizer = wx.StdDialogButtonSizer()
-        
+
         if wx.Platform != "__WXMSW__":
             btn = wx.ContextHelpButton(self)
             btnsizer.AddButton(btn)
-        
+
         btn = wx.Button(self, wx.ID_OK)
         btn.SetHelpText("The OK button completes the dialog")
         btn.SetDefault()
         btnsizer.AddButton(btn)
         btn.Bind(wx.EVT_BUTTON, self.OKPressed)
-        
+
         btn = wx.Button(self, wx.ID_CANCEL)
         btn.SetHelpText("Cancel changes")
         btnsizer.AddButton(btn)
         btnsizer.Realize()
-        
+
         sizer.Add(btnsizer, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=6)
 
         self.SetSizer(sizer)
@@ -208,7 +208,7 @@ class Preferences(wx.Dialog):
         try:
             #Start the multipart encoded post of whatever file our log is saved to:
             posturl = self.config.getValue('synchub') + 'keyupload/'
-            
+
             #key is in the dir above the datadir
             keyfile = 'id_rsa.pub'
             keyfilepath = os.path.join(DATADIR, '..', keyfile)
@@ -218,7 +218,7 @@ class Preferences(wx.Dialog):
             resp, jsonret = http.make_request(request)
             outlog.debug('finished receiving data')
             retval = simplejson.loads(jsonret)
-            
+
             outlog.debug('sending log %s to %s' % (keyfile, posturl) )
             outlog.debug('OnSendKey: retval is %s' % (retval) )
             self.log('Key send response: %s' % (str(retval)) )
@@ -248,13 +248,13 @@ class Preferences(wx.Dialog):
 
 
     def setNodeConfigLabel(self):
-        self.nodeconfiglabel.SetLabel("Current Node: %s" % (self.config.getNodeName()) ) 
+        self.nodeconfiglabel.SetLabel("Current Node: %s" % (self.config.getNodeName()) )
 
     #this function gets called by the node chooser dialog,
-    #and uses the data it passes to put values into the config, which arent 
+    #and uses the data it passes to put values into the config, which arent
     #collected in the 'save' method above.
     def setNodeConfigName(self, datadict):
         for k in datadict.keys():
             self.config.setValue(k, datadict[k])
         self.setNodeConfigLabel()
-        
+

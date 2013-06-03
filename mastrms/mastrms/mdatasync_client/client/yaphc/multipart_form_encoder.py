@@ -4,7 +4,7 @@ import os
 class MultipartFormEncoder(object):
     def __init__(self, chunksize=8192):
         self.chunksize = chunksize
-        self.boundary = '----------ThIs_Is_tHe_bouNdaRY_$' 
+        self.boundary = '----------ThIs_Is_tHe_bouNdaRY_$'
         self.content_type = 'multipart/form-data; boundary=%s' % self.boundary
         self.eol = '\r\n'
 
@@ -31,7 +31,7 @@ class MultipartFormEncoder(object):
         self.body.add_string('Content-Disposition: form-data; name="%s"' % name + self.eol)
         self.body.add_string(self.eol + value + self.eol)
 
-    def encode_file(self, f): 
+    def encode_file(self, f):
         name, filename, path = f
         self.body.add_string('--' + self.boundary + self.eol)
         self.body.add_string('Content-Disposition: form-data; name="%s"; filename="%s"' % (name, filename) + self.eol)
@@ -46,7 +46,7 @@ class MultipartFormEncoder(object):
 
     def file_content_type(self, filename):
         return mimetypes.guess_type(filename)[0] or 'application/octet-stream'
-       
+
 
 class FilelikeBody(object):
     def __init__(self):
@@ -80,7 +80,7 @@ class FilelikeBody(object):
             rel_pos = 0
             result += str(self.read_from_item(item_idx, rel_pos, size))
         self.index += len(result)
-        return result 
+        return result
 
     def close(self):
         copy = self.open_files
@@ -124,4 +124,4 @@ class FilelikeBody(object):
         else:
             return self.read_from_file(item.path, start, size)
 
- 
+

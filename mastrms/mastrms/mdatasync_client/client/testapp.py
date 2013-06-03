@@ -44,7 +44,7 @@ class IconBar:
         image.SetData(s)
 
         bmp = image.ConvertToBitmap()
-        bmp.SetMask(wx.Mask(bmp, wx.WHITE)) #sets the transparency colour to white 
+        bmp.SetMask(wx.Mask(bmp, wx.WHITE)) #sets the transparency colour to white
 
         icon = wx.EmptyIcon()
         icon.CopyFromBitmap(bmp)
@@ -105,8 +105,8 @@ class StatusBar(wx.StatusBar):
         #set initial position of checkbox
         #self.Reposition()
 
-        #Field 3: 
-        
+        #Field 3:
+
     def OnSize(self, evt):
         self.Reposition() #for normal size events
         # Set a flag so the idle time handler will also do the repositioning.
@@ -126,7 +126,7 @@ class StatusBar(wx.StatusBar):
         self.cb.SetSize((rect.width-4, rect.height-4))
         self.sizeChanged = False
 
-    
+
 
 class winWithStatusBar(wx.Frame):
     def __init__(self, parent, log):

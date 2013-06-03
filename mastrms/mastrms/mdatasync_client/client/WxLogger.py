@@ -17,7 +17,7 @@ class Log(wx.PyLog):
 
     def DoLogString(self, message, timeStamp=0, type = 0, **kwargs): #small type hardcoding sin here
         textstyle = wx.TextAttr()
-        
+
         if type == self.LOG_DEBUG:
             message = 'DEBUG: ' + message
             outlog.debug(message)
@@ -33,7 +33,7 @@ class Log(wx.PyLog):
         else: #type == normal
             textstyle.SetTextColour(wx.Colour(0,0,0) ) #black
         #add in the time:
-        message = '[%s] %s' % (time.strftime("%X", time.localtime() ), message) 
+        message = '[%s] %s' % (time.strftime("%X", time.localtime() ), message)
 
         if self.tc: # and (not Debug or (Debug and self.DebugOn)):
             self.tc.SetDefaultStyle(textstyle)
@@ -45,7 +45,7 @@ class Log(wx.PyLog):
 
         if (thread):
             #print 'LOG: callafter:', args
-            wx.CallAfter(self.DoLogString, *args, **kwargs) 
+            wx.CallAfter(self.DoLogString, *args, **kwargs)
         else:
             #print 'LOG: notcallafter:', args
             self.DoLogString(*args, **kwargs)

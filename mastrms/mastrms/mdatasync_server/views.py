@@ -11,7 +11,7 @@ import ccg.utils.webhelpers as webhelpers
 from django.http import HttpResponse, Http404
 from django.utils import simplejson
 from mastrms.mdatasync_server.models import *
-from mastrms.repository.models import *  
+from mastrms.repository.models import *
 from mastrms.mdatasync_server.rules import *
 from ClientState import * #All the functions for dealing with clientstates
 from django.conf import settings
@@ -70,7 +70,7 @@ def checkClientVersion(versionstr):
     components = versionstr.split('.')
     if len(components) < 2:
         return False
-    
+
     major = components[0]
     minor = components[1]
 
@@ -90,7 +90,7 @@ def request_sync(request, organisation=None, sitename=None, station=None):
        organisation, sitename, and station, what verstion it is, and whether
        it wants to re-sync already completed files.
 
-       The server should, after verifying that the node exists and that the 
+       The server should, after verifying that the node exists and that the
        version is acceptable, then go through the experiments which the node
        is involved in, and send back a list of files it wants.
 
@@ -105,13 +105,13 @@ def request_sync(request, organisation=None, sitename=None, station=None):
        }
     '''
     node = get_node_from_request(request, organisation, sitename, station)
-    resp = {"success": False, 
-            "message": "", 
-            "files": {}, 
-            "details":{}, 
+    resp = {"success": False,
+            "message": "",
+            "files": {},
+            "details":{},
             "runsamples":{}}
     syncold = request.GET.get("sync_completed", False)
-    print 'syncold is:', syncold
+    logger.debug('syncold is: %s' % syncold)
     if node is not None:
         ncerror, nodeclient_details = get_nodeclient_details(organisation, sitename, station)
         resp["details"] = nodeclient_details
@@ -130,7 +130,7 @@ def request_sync(request, organisation=None, sitename=None, station=None):
             if syncold:
                 for runid in expectedcomplete.keys():
                     resp["files"].update(expectedcomplete[runid])
-        
+
         clientstate = get_saved_client_state(organisation, sitename, station)
         clientstate.lastSyncAttempt = datetime.now()
         ##save the client state
@@ -139,7 +139,7 @@ def request_sync(request, organisation=None, sitename=None, station=None):
         raise("Could not find node %s-%s-%s" % (organisation, sitename, station) )
 
     return HttpResponse(simplejson.dumps(resp))
-    
+
 def get_node_clients(request, *args):
     ncs = NodeClient.objects.all()
     result = {}
@@ -159,55 +159,57 @@ def nodeinfo(request, organisation=None, sitename=None, station=None):
         if nodeclient is None:
             raise Exception("No nodeclient existed with organisation=%s, sitename=%s, station=%s" % (organisation, sitename, station))
         clientstate = get_saved_client_state(organisation, sitename, station)
-    #return HttpResponse( simplejson.dumps(nodeclient.__dict__) + simplejson.dumps(clientstate.__dict__) )   
-        timediff = datetime.now() - datetime.now() 
+    #return HttpResponse( simplejson.dumps(nodeclient.__dict__) + simplejson.dumps(clientstate.__dict__) )
+        timediff = datetime.now() - datetime.now()
         if clientstate.lastSyncAttempt is not None:
             timediff = datetime.now() - clientstate.lastSyncAttempt
 
         expectedfiles = getExpectedFilesForNode(nodeclient, include_completed=True)
-        return render_to_response("node.mako", {'nodeclient':nodeclient, 'expectedfiles': expectedfiles, 'timediff': timediff, 'clientstate': clientstate.__dict__, 'wh':webhelpers} ) 
+        return render_to_response("node.mako", {'nodeclient':nodeclient, 'expectedfiles': expectedfiles, 'timediff': timediff, 'clientstate': clientstate.__dict__, 'wh':webhelpers} )
 
     except Exception, e:
         return HttpResponse("Could not display node info: %s" % (e))
 
 
 def getExpectedFilesForNode(nodeclient, include_completed = False):
-    '''Based on the experiments that a given nodeclient is involved in,
-       return the files which the server expects.
-       If include_completed is false, this will be every file which 
-       the server cannot see on its filesystem from incomplete experiments/runs.
-       If include_complete is true, this will be every file which the 
-       server cannot see on its filesystem from incomplete and complete experiments/runs.
-       
-       Returns a dictionary with 'complete' and 'incomplete' keys, whose values are
-       dicts keyed on runid.
-    '''
+    """
+    Based on the experiments that a given nodeclient is involved in,
+    return the files which the server expects.
+
+    If include_completed is false, this will be every file which
+    the server has not marked as complete.
+
+    If include_complete is true, this will be every file from both
+    incomplete and complete experiments/runs which the server has not
+    marked as complete.
+
+    Returns a dictionary with 'complete' and 'incomplete' keys, whose values are
+    dicts keyed on runid.
+    """
     incomplete = {}
     complete = {}
 
     #now get the runs for that nodeclient
-    runs = Run.objects.filter(machine = nodeclient) 
+    runs = Run.objects.filter(machine = nodeclient)
     for run in runs:
-        target_dict = incomplete
         logger.debug('Finding runsamples for run')
-        if (run.state != RUN_STATES.COMPLETE[0]) or ( (run.state == RUN_STATES.COMPLETE[0]) and include_completed):
-            if run.state == RUN_STATES.COMPLETE[0]:
-                target_dict = complete
-            
-            runsamples = RunSample.objects.filter(run = run)
+        if not run.is_complete() or include_completed:
+            runsamples = run.runsample_set.exclude(filename="")
+            runsamples = runsamples.exclude(filename__isnull=True) # fixme: fix the model
+
             #Build a filesdict of all the files for these runsamples
             for rs in runsamples:
                 logger.debug('Getting files for runsamples');
-                if rs.filename is None or rs.filename == "":
-                    continue #move to the next record - this one has no filename
-                
-                if not check_run_sample_file_exists(rs.id):
-                    abspath, relpath = rs.filepaths()
-                    if target_dict.has_key(rs.filename):
-                        logger.warning( 'Duplicate filename detected for %s' % (rs.filename.encode('utf-8')))
-                    if not(target_dict.has_key(run.id)):
-                        target_dict[run.id] = {}
-                    target_dict[run.id][rs.filename] = [run.id, rs.id, relpath, os.path.exists(os.path.join(abspath, rs.filename))]
+
+                target_dict = complete if rs.complete else incomplete
+
+                abspath, relpath = rs.filepaths()
+                runfiles = target_dict.setdefault(run.id, {})
+
+                if runfiles.has_key(rs.filename):
+                    logger.warning( 'Duplicate filename detected for %s' % (rs.filename.encode('utf-8')))
+
+                runfiles[rs.filename] = [run.id, rs.id, relpath, os.path.exists(os.path.join(abspath, rs.filename))]
 
     return {'complete': complete, 'incomplete': incomplete}
 
@@ -217,7 +219,7 @@ def get_nodeclient_details(organisation_name, site_name, station_name):
     error = None
     try:
         nodeclient = NodeClient.objects.get(organisation_name = organisation_name, site_name=site_name, station_name = station_name)
-        
+
         nchost = nodeclient.hostname
         if nchost is not None and len(nchost) > 0:
             nodeclient_details['host'] = str(nchost)
@@ -255,7 +257,7 @@ def check_run_sample_file_exists(runsampleid):
         logger.debug( 'Checking file %s:%s' % (complete_filename.encode('utf-8'), fileexists) )
     except Exception, e:
         logger.debug('Could not check runsample file for runsampleid: %s: %s' % (str(runsampleid), e))
-    
+
     return fileexists
 
 def check_run_sample_files(request):
@@ -272,8 +274,8 @@ def check_run_sample_files(request):
         totalruns = 0
         totalsamples = 0
         totalfound = 0
-        
-        ret['success'] = True 
+
+        ret['success'] = True
         ret['description'] = 'Success'
         ret['error'] = 'None'
         ret['synced_samples'] = {}
@@ -287,7 +289,7 @@ def check_run_sample_files(request):
                 runsample = int(runsample)
                 try:
                     rs = RunSample.objects.get(id = runsample)
-                    rs.complete = check_run_sample_file_exists(runsample) 
+                    rs.complete = check_run_sample_file_exists(runsample)
                     if rs.complete:
                         totalfound += 1
                         ret['synced_samples'][runid].append(rs.id)
@@ -295,8 +297,8 @@ def check_run_sample_files(request):
                 except Exception, e:
                     logger.debug('Error: %s' % (e) )
                     ret['success'] = False
-                    ret['error'] = "%s" % (str(e)) 
-        ret['description'] = "%s - %d/%d samples marked complete, from %d run(s)" % (ret['description'], totalfound, totalsamples, totalruns)         
+                    ret['error'] = "%s" % (str(e))
+        ret['description'] = "%s - %d/%d samples marked complete, from %d run(s)" % (ret['description'], totalfound, totalsamples, totalruns)
     else:
         ret['description'] = "No files given"
 
@@ -331,11 +333,11 @@ def log_upload(request, *args):
     fname_prefix = 'UNKNOWN_'
     if request.POST.has_key('nodename'):
         fname_prefix = request.POST['nodename'] + '_'
-    
+
     if request.FILES.has_key('uploaded'):
         f = request.FILES['uploaded']
         logger.debug( 'Uploaded file name: %s' % ( f._get_name() ) )
-        written_logfile_name = str(os.path.join('synclogs', "%s%s" % (fname_prefix,f._get_name()) ) ) 
+        written_logfile_name = str(os.path.join('synclogs', "%s%s" % (fname_prefix,f._get_name()) ) )
         write_success = _handle_uploaded_file(f, written_logfile_name )#dont allow them to replace arbitrary files
         try:
             if write_success:
@@ -359,7 +361,7 @@ def key_upload(request, *args):
     status = 'ok'
     if request.POST.has_key('nodename'):
         fname_prefix = request.POST['nodename'] + '_'
-    
+
     if request.FILES.has_key('uploaded'):
         f = request.FILES['uploaded']
         logger.debug( 'Uploaded file name: %s' % ( f._get_name() ) )
@@ -377,7 +379,7 @@ def key_upload(request, *args):
             e.send()
         except Exception, e:
             logger.warning( 'Unable to send "Key Sent" email: %s' % (str(e)) )
-         
+
     else:
         logger.warning('Keyupload: No file in the post')
         status = 'No key posted'
@@ -396,13 +398,12 @@ def _handle_uploaded_file(f, name):
         reldir = os.path.dirname(name)
         dest_fname = str(os.path.join(settings.REPO_FILES_ROOT, name))
         ensure_repo_filestore_dir_with_owner(reldir)
-        
+
         destination = open(dest_fname, 'wb+')
         for chunk in f.chunks():
             destination.write(chunk)
         destination.close()
-        set_repo_file_ownerships(dest_fname)
-        retval = True
+        retval = set_repo_file_ownerships(dest_fname)
     except Exception, e:
         retval = False
         logger.debug( '\tException in file upload: %s' % ( str(e) ) )
@@ -414,7 +415,7 @@ def utils(request):
     success = True
     message = ''
     #First, if they posted, they want to change the log level.
-    if request.method == 'POST': 
+    if request.method == 'POST':
         #set the log level:
         ll = request.POST.get('loglevel', None)
         success = True
@@ -437,7 +438,7 @@ def utils(request):
     for fname in fileslist:
         if fname.endswith('.png'):
             shotslist.append(fname)
-        else:    
+        else:
             clientlogslist.append(fname)
 
     serverloglist = os.listdir(settings.LOG_DIRECTORY)
@@ -465,20 +466,20 @@ def tail_log(request, filename=None, linesback=10, since=0):
         if (since):
             try: file.seek(since,os.SEEK_SET) #seek from start of file.
             except IOError: file.seek(0)
-    
+
         else: #else seek from the end
             try: file.seek(-1 * avgcharsperline * linesback,2)
             except IOError: file.seek(0)
-        
+
         if file.tell() == 0: atstart=1
         else: atstart=0
 
         lines=file.read().split("\n")
         pos = file.tell()
-        
+
         #break if we were in 'since' mode, or we had enough lines, or we can't go back further
         if since or (len(lines) > (linesback+1)) or atstart: break
-        
+
         #Otherwise, we are wanting to get more lines.
         #The lines are bigger than we thought
         avgcharsperline=int(avgcharsperline * 1.3) #Inc avg for retry
@@ -486,12 +487,12 @@ def tail_log(request, filename=None, linesback=10, since=0):
 
     out=""
     if not since:
-        if len(lines) > linesback: 
+        if len(lines) > linesback:
             start=len(lines)-linesback -1
-        else: 
+        else:
             start=0
 
-        for l in lines[start:len(lines)-1]: 
+        for l in lines[start:len(lines)-1]:
             out=out + l + "\n"
     else:
         for l in lines:
@@ -503,7 +504,7 @@ def tail_log(request, filename=None, linesback=10, since=0):
 def serve_file(request, path):
     root = settings.PERSISTENT_FILESTORE
     path = posixpath.normpath(urllib.unquote(path))
-    path = path.lstrip('/') 
+    path = path.lstrip('/')
     fullpath = os.path.join(root, path)
     if not os.path.isfile(fullpath):
         raise Http404, '"%s" does not exist' % fullpath
@@ -514,16 +515,16 @@ def serve_file(request, path):
     return response
 
 def set_log_level(newlevel):
-    success = True 
+    success = True
     if newlevel in [logging.INFO, logging.DEBUG, logging.WARNING, logging.FATAL, logging.CRITICAL]:
         logger.setLevel(newlevel)
-        msg = 'Logging level set to %s' % (str(newlevel)) 
+        msg = 'Logging level set to %s' % (str(newlevel))
     else:
         success = False
-        msg = 'Unable to set logging level to %s, no such level exists' % (str(newlevel)) 
+        msg = 'Unable to set logging level to %s, no such level exists' % (str(newlevel))
     #logger.debug('test')
     #logger.info('test')
     #logger.warning('test')
     #logger.critical('test')
     #logger.fatal('test')
-    return (success, msg)    
+    return (success, msg)

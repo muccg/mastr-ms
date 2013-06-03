@@ -13,8 +13,8 @@ DATABASES = {
         'NAME': 'mastrms',
         'USER': 'mastrms',
         'PASSWORD': 'mastrms',
-        'HOST': '',                      
-        'PORT': '',                      
+        'HOST': '',
+        'PORT': '',
     }
 }
 
@@ -190,7 +190,7 @@ LOGGING = {
             'address':'/dev/log',
             'facility':'local4',
             'formatter': 'verbose'
-        },        
+        },
         'mail_admins': {
             'level': 'ERROR',
             'class': 'django.utils.log.AdminEmailHandler',
@@ -233,6 +233,7 @@ RETURN_EMAIL = "example - noreply@yoursite.com"
 
 LOGS_TO_EMAIL = "log_email@yoursite.com" #email address to receive datasync client log notifications
 KEYS_TO_EMAIL = "key_email@yoursite.com" #email address to receive datasync key upload notifications
+REGISTRATION_TO_EMAIL = "reg_email@yoursite.com" #email address to receive registration requests
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-#
 

@@ -3,7 +3,7 @@ import urllib
 from multipart_form_encoder import MultipartFormEncoder
 
 
-class Request(object): 
+class Request(object):
     def __init__(self, method, url, params = None, headers = None):
         self.method = method
         self._url = url
