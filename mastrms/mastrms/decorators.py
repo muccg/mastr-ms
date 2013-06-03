@@ -10,11 +10,11 @@ def restricted_view(f, restriction):
         mauser = request.session.get('mauser', None)
 
         if mauser is None:
-            mauser = MAUser()
+            mauser = MAUser("nulluser")  # a user who doesn't exist
             mauser.refresh()
             mauser = request.session.get('mauser', None)
 
-        if restriction(mauser):
+        if mauser and restriction(mauser):
             return f(*args, **kwargs)
         else:
             return HttpResponseForbidden()
@@ -38,4 +38,3 @@ def privileged_only(f):
 
 def mastr_users_only(f):
     return restricted_view(f, lambda u: u.IsAdmin or u.IsMastrAdmin or u.IsProjectLeader or u.IsMastrStaff)
-
