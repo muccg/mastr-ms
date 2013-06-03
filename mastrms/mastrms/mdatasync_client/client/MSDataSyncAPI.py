@@ -9,8 +9,7 @@
 #call startThread and stopThread, or not. Either way will still work, just one will block and the
 #other won't.
 
-try: import json as simplejson
-except ImportError: import simplejson
+import json
 import urllib
 import os
 import time
