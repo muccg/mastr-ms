@@ -43,6 +43,7 @@ class RemoteSyncParams(object):
         self.username = ""
         self.rules = []
         self.fileslist = None
+        self.file_changes = None
 
         #pull the configdict into our local class members
         #but only the values we have defined
@@ -158,8 +159,9 @@ class MSDataSyncAPI(object):
             try:
                 result = command(**command_kwargs)
             except Exception, e:
-                outlog.warning( 'Error running command (nonthreaded): %s' % (str(e)) )
-                #print 'command(args, kwargs) was: %s(%s,%s)' % (str(command), str(args), str(kwargs))
+                import traceback
+                outlog.warning('Error running command (nonthreaded): %s' % traceback.format_exc(e))
+                outlog.debug('Command args were: %s' % ", ".join("%s=%r" % x for x in command_kwargs.iteritems()))
                 result = None
             if callback != None:
                 callback(result, **callback_kwargs)
@@ -219,7 +221,7 @@ class MSDataSyncAPI(object):
         station = self.config.getValue('stationname')
         sitename = self.config.getValue('sitename')
         syncvars = {"version": VERSION , "sync_completed": self.config.getValue("syncold") }
-        print syncvars
+        outlog.debug("syncvars are: %s" % syncvars)
         details = {}
         files = {}
 
@@ -545,7 +547,9 @@ class MSDataSyncAPI(object):
                     #print 'worker thread executing %s with args %s' % (str(command), str(command_kwargs))
                     result = command(**command_kwargs)
                 except Exception, e:
-                    outlog.warning( 'Error running command (threaded): %s' % ( str(e) ) )
+                    import traceback
+                    outlog.warning('Error running command (threaded): %s' % traceback.format_exc(e))
+                    outlog.debug('Command args were: %s' % ", ".join("%s=%r" % x for x in command_kwargs.iteritems()))
                     #print 'command(kwargs) was: %s(%s,%s)' % (str(command), str(command_kwargs))
 
                     result = None

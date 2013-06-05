@@ -375,8 +375,8 @@ class MainWindow(wx.Frame):
         try:
             self.MSDSCheckFn(self, APPSTATE.UPLOADING_DATA, 'notused', self.CheckReturnFn)
         except Exception, e:
-            self.log("Exception encountered: %s" % (str(e)), type=self.log.LOG_ERROR)
-
+            import traceback
+            self.log("Exception encountered: %s" % traceback.format_exc(e), type=self.log.LOG_ERROR)
 
     def SetProgress(self, prognum, add=False):
 
