@@ -388,7 +388,8 @@ class MSDataSyncAPI(object):
                                "filename_id_map": filename_id_map })
         else:
             self.log("No files to sync.", thread = self.useThreading)
-            self.set_progress_state(100, APPSTATE.IDLE)
+            self._appendTask(self.set_progress_state,
+                             { "progress": 100, "status": APPSTATE.IDLE })
 
     def defaultReturn(self, *args, **kwargs):
         #print 'rsync returned: ', retval
