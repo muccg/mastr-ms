@@ -84,7 +84,7 @@ class TransactionVars(object):
         return self._copiedFiles
     @copied_files.setter
     def copied_files(self, copiedfiles):
-        self._copiedFiles = value
+        self._copiedFiles = copiedfiles
 
     @property
     def transferred_samples(self):
