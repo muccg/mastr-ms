@@ -9,8 +9,7 @@ outlog = plogging.getLogger('client')
 #Dont instantiate this directly - use the module singleton defined at the end of this file
 
 class MSDSConfig(object):
-    def __init__(self):
-        self.store = {}
+    def __init__(self, **kwargs):
         '''hardcoded config for the initial object creation'''
         #format is:
         #key: [value, formalKeyName, helpText]
@@ -33,8 +32,8 @@ class MSDSConfig(object):
                    'archivesynced' : [False, 'Archive Synced Files', 'When checked, archives a copy of synced files to the specified directory.'],
                    'archivedfilesdir' : ["Choose a directory", 'Archived Files Dir', 'If archiving is enabled, synced files will be archived to this directory.'],
             }
-        self.load()
-
+        self.filename = None
+        self.update(kwargs)
 
     def getConfig(self):
         return self.store
@@ -43,34 +42,32 @@ class MSDSConfig(object):
         return "%s.%s.%s" % (self.getValue('organisation'), self.getValue('sitename'), self.getValue('stationname'))
 
     def save(self, *args):
-        try:
-            fo = open(SAVEFILE_NAME, "wb")
-            cPickle.dump(self.store, fo, protocol = cPickle.HIGHEST_PROTOCOL)
-            fo.close()
-            return True
-        except:
+        if not self.filename:
             return False
 
-    def load(self):
-        retval = False
-        fo = None
         try:
-            fo = open(SAVEFILE_NAME, "rb")
-        except IOError:
-            outlog.warning('No saved config existed: %s' % (SAVEFILE_NAME))
+            with open(self.filename, "wb") as fo:
+                cPickle.dump(self.store, fo, protocol = cPickle.HIGHEST_PROTOCOL)
+        except EnvironmentError, e:
+            return False
+
+        return True
+
+    @classmethod
+    def load(cls, filename):
+        config = cls()
+        config.filename = filename
+
         try:
-            savedstore = cPickle.load(fo)
-            retval = True
-        except Exception, e:
+            with open(filename, "rb") as fo:
+                savedstore = cPickle.load(fo)
+            config.store.update(savedstore)
+        except EnvironmentError:
+            outlog.warning('No saved config existed: %s' % (filename))
+        except cPickle.UnpicklingError, e:
             outlog.warning('Exception reading saved configuration: %s' % (str(e)) )
 
-
-        if retval:
-            self.store.update(savedstore)
-
-        if fo is not None:
-            fo.close()
-        return retval
+        return config
 
     def getLocalIndexPath(self):
         return os.path.join(self.getValue('localdir'), self.getValue('localindexdir'))
@@ -86,6 +83,16 @@ class MSDSConfig(object):
             self.store[key][0] = value
         except:
             pass
+
+    def __getitem__(self, key):
+        return self.getValue(key)
+
+    def __setitem__(self, key, value):
+        self.setValue(key, value)
+
+    def update(self, attrs):
+        for key, value in attrs.iteritems():
+            self[key] = value
 
     def getFormalName(self, key):
         try:
@@ -105,6 +112,4 @@ class MSDSConfig(object):
         except:
             return True
 
-
-
-CONFIG = MSDSConfig()
+CONFIG = MSDSConfig.load(SAVEFILE_NAME)
