@@ -378,7 +378,7 @@ def _handle_uploaded_file(f, name):
         retval = set_repo_file_ownerships(dest_fname)
     except Exception, e:
         retval = False
-        logger.debug( '\tException in file upload: %s' % ( str(e) ) )
+        logger.exception('Exception in file upload')
     logger.debug( '*** _handle_uploaded_file: exit ***')
     return retval
 
