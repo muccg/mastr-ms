@@ -217,7 +217,15 @@ LOGGING = {
         'mastrms': {
             'handlers': ['console', 'file', 'syslog'],
             'level': 'DEBUG'
-        }
+        },
+        'mdatasync_server_log': {
+            'handlers': ['console', 'file', 'syslog'],
+            'level': 'WARNING'
+        },
+        'madas_log': {
+            'handlers': ['console', 'file', 'syslog'],
+            'level': 'WARNING'
+        },
     }
 }
 
