@@ -255,7 +255,7 @@ class MSDataSyncAPI(object):
 
         return details, files
 
-    def find_wanted_files(self, wantedfiles, returnFn):
+    def find_wanted_files(self, wantedfiles):
         self.callingWindow.setState(APPSTATE.CHECKING_FILES)
         self.callingWindow.SetProgress(0)
         #if something goes wrong, bail out by calling the return function
@@ -363,13 +363,13 @@ class MSDataSyncAPI(object):
         #localfilesdict is our map between local files that were found that the server wants,
         #and the file path that should exist on the remote end (and relative to our localindexdir)
         #runsamplesdict is just the list of found file sampleids, keyed on runid
-        localfilesdict, runsamplesdict, samplefilemap = self.find_wanted_files(wantedfiles, returnFn)
+        localfilesdict, runsamplesdict, samplefilemap = self.find_wanted_files(wantedfiles)
         self.transactionvars.sample_file_map = samplefilemap
         rsyncconfig = RemoteSyncParams(configdict = remote_params, username=self.config.getValue('user'))
 
         def wanted_filename((name, attrlist)):
             "Returns a tuple of (filename, (run_id, sample_id))"
-            return (os.path.join(attrlist[2], name), (attrlist[0], attrlist[1]))
+            return ("%s/%s" % (attrlist[2], name), (attrlist[0], attrlist[1]))
 
         filename_id_map = dict(map(wanted_filename, wantedfiles.items()))
         rsyncconfig.fileslist = sorted(filename_id_map.keys())
@@ -390,10 +390,15 @@ class MSDataSyncAPI(object):
             self._appendTask(self._impl.perform_rsync,
                              { "sourcedir": self.config.getLocalIndexPath(),
                                "rsyncconfig": rsyncconfig },
-                             self.rsyncReturn,
+                             self.rsyncReturn)
+
+            #now tell the server to check the files off
+            baseurl =  self.config.getValue('synchub')
+            self._appendTask(self._impl.serverCheckRunSampleFiles,
                              { "rsyncconfig": rsyncconfig,
-                               "returnFn": returnFn,
-                               "filename_id_map": filename_id_map })
+                               "filename_id_map": filename_id_map,
+                               "baseurl": baseurl },
+                             returnFn)
         else:
             self.log("No files to sync.", thread = self.useThreading)
             self._appendTask(self.set_progress_state,
@@ -409,28 +414,10 @@ class MSDataSyncAPI(object):
         self.set_progress_state(50, APPSTATE.UPLOADING_DATA)
         outlog.debug("Finished copying")
 
-    def rsyncReturn(self, success, rsyncconfig, returnFn, filename_id_map):
+    def rsyncReturn(self, success):
         "After rsync is finished, request the server to update samples."
         self.log('Remote transfer stage complete', thread = self.useThreading)
         self.set_progress_state(90, APPSTATE.CONFIRMING_TRANSFER)
-
-        # It's difficult to know when a complete sample is
-        # transferred. So we consider a sample file to be complete
-        # when the *second time* it is rsynced across, the file is not
-        # updated.
-        runsampledict = {}
-        for filename, updated in rsyncconfig.file_changes.iteritems():
-            if not updated and filename in filename_id_map:
-                run_id, sample_id = filename_id_map[filename]
-                runsampledict.setdefault(run_id, []).append(sample_id)
-
-        #now tell the server to check the files off
-        baseurl =  self.config.getValue('synchub')
-        self._appendTask(self._impl.serverCheckRunSampleFiles,
-                         { "runsampledict": runsampledict,
-                           "filename_id_map": filename_id_map,
-                           "baseurl": baseurl },
-                         returnFn)
 
     def handshakeReturn(self, success):
         self.log('Handshake complete', thread = self.useThreading)
@@ -721,8 +708,19 @@ class MSDSImpl(object):
         change_list = filter(bool, map(parse_line, data.split("\n")))
         return changes_dict(change_list)
 
-    def serverCheckRunSampleFiles(self, runsampledict, filename_id_map, baseurl):
-        self.log('Informing the server of transfer: %s' % (runsampledict), thread = self.controller.useThreading)
+    def serverCheckRunSampleFiles(self, rsyncconfig, filename_id_map, baseurl):
+        # It's difficult to know when a complete sample is
+        # transferred. So we consider a sample file to be complete
+        # when the *second time* it is rsynced across, the file is not
+        # updated.
+        runsampledict = {}
+        for filename, updated in rsyncconfig.file_changes.iteritems():
+            if not updated and filename in filename_id_map:
+                run_id, sample_id = filename_id_map[filename]
+                runsampledict.setdefault(run_id, []).append(sample_id)
+
+        self.log('Informing the server of transfer: %s' % runsampledict,
+                 thread=self.controller.useThreading)
 
         postvars = {
             'runsamplefiles' : json.dumps(runsampledict, ensure_ascii=False),
