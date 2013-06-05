@@ -200,20 +200,15 @@ class NodeConfigSelector(wx.Panel):
 
 
     def AddTreeNodes(self, parentItem, items):
-        if type(items) == dict:
+        if isinstance(items, dict):
             for key in items.keys(): #assuming keys are strings
                 new = self.tree.AppendItem(parentItem, key)
                 self.AddTreeNodes(new, items[key])
 
         else:
             for item in items:
-                if type(item) == str:
+                if isinstance(item, basestring):
                     self.tree.AppendItem(parentItem, item)
                 else:
-                    outlog.debug('item wasnt a string.: %s' % str(item))
+                    outlog.debug('item wasnt a string.: %s' % item)
                     newItem = self.tree.AppendItem(parentItem, str(item))
-                    #self.AddTreeNodes(newItem, str(item[0]))
-
-
-
-
