@@ -575,9 +575,7 @@ class MSDSImpl(object):
        self.controller = controller
        self.lastError = ""
 
-    def perform_rsync(self, sourcedir, rsyncconfig):
-        outlog.debug('checkRsync implementation entered!')
-
+    def cygwin_pathname(self, sourcedir):
         #fix the sourcedir.
         #On windows, the driveletter and colon make rsync think
         #that it is a host:path pair. So on windows, we need to fix that.
@@ -591,24 +589,35 @@ class MSDSImpl(object):
             #os.sep gives you the dir sepator for this platform (windows = \\)
             #os.path.splitdrive splits the path into drive,path : ('c:', '\something\\somethingelse')
             drive,winpath = os.path.splitdrive(os.path.normpath(sourcedir))
-            drive = str(drive)
-            outlog.debug('drive is %s' % (drive) )
+            outlog.debug('drive is %s and winpath is %s' % (drive, winpath))
 
-            outlog.debug('winpath is %s' % (winpath) )
             #so for the winpath, we replace all \\ and then \ with /
             winpath=winpath.replace(os.sep, '/')
             winpath=winpath.replace('\\', '/')
-            #then we take the drive letter (drive[0]) and put it after /cygdrive
-            cygpath = "/%s/%s%s/" % ('cygdrive', drive[0], winpath)
-            outlog.debug('cygpath is: %s' % ( cygpath ) )
-            sourcedir = cygpath
+            if drive:
+                #then we take the drive letter (drive[0]) and put it after /cygdrive
+                cygpath = "/%s/%s%s" % ('cygdrive', drive[0], winpath)
+                outlog.debug('cygpath is: %s' % ( cygpath ) )
+                sourcedir = cygpath
+            else:
+                sourcedir = winpath
 
-        else:
-            sourcedir += '/' #make sure it ends in a slash
+        return sourcedir
 
-        logfile = CONFIG.getValue('logfile').replace('\\', '/') #if its a windows path, convert it. cwrsync wants posix paths ALWAYS
-        #Popen('rsync -t %s %s:%s' % (sourcedir, remotehost, remotedir) )
-        print 'flags:', rsyncconfig.flags
+    @staticmethod
+    def ensure_trailing_slash(dirname):
+        "make sure it ends in a slash"
+        if dirname and dirname[-1] != "/":
+            return dirname + '/'
+        return dirname
+
+    def perform_rsync(self, sourcedir, rsyncconfig):
+        outlog.debug('checkRsync implementation entered!')
+
+        sourcedir = self.ensure_trailing_slash(self.cygwin_pathname(sourcedir))
+
+        logfile = self.cygwin_pathname(CONFIG.getValue('logfile')) #if its a windows path, convert it. cwrsync wants posix paths ALWAYS
+
         #cmdhead = ['rsync', '-tavz'] #t, i=itemize-changes,a=archive,v=verbose,z=zip
         cmdhead = ['rsync']
         cmdhead.extend(rsyncconfig.flags)
@@ -637,9 +646,12 @@ class MSDSImpl(object):
         files_list = tempfile.NamedTemporaryFile()
 
         if rsyncconfig.fileslist is not None:
-            files_list.write((u"\0".join(sorted(rsyncconfig.fileslist))).encode(rsync_encoding))
+            fixed_files_list = sorted(map(self.cygwin_pathname, rsyncconfig.fileslist))
+            self.log('--include-from list is\n  %s' % u"\n  ".join(fixed_files_list),
+                     thread=self.controller.useThreading, type=self.log.LOG_DEBUG)
+            files_list.write((u"\0".join(fixed_files_list)).encode(rsync_encoding))
             files_list.flush()
-            cmd.extend(["--include-from", files_list.name, "--from0"])
+            cmd.extend(["--include-from", self.cygwin_pathname(files_list.name), "--from0"])
 
         cmd.extend(["--itemize-changes"] * 2)
 
