@@ -1,11 +1,13 @@
 import wx
 import time
+import logging
 import plogging
 outlog = plogging.getLogger('client')
 
-class Log(wx.PyLog):
+class Log(wx.PyLog, logging.Handler):
     def __init__(self, textCtrl, logTime=0):
         wx.PyLog.__init__(self)
+        logging.Handler.__init__(self)
         self.tc = textCtrl
         self.logTime = logTime
 
@@ -14,6 +16,13 @@ class Log(wx.PyLog):
         self.LOG_DEBUG = 1
         self.LOG_WARNING = 2
         self.LOG_ERROR = 3
+
+        self.PYTHON_LEVEL_MAP = { logging.INFO: self.LOG_NORMAL,
+                                  logging.DEBUG: self.LOG_DEBUG,
+                                  logging.WARNING: self.LOG_WARNING,
+                                  logging.ERROR: self.LOG_ERROR,
+                                  logging.CRITICAL: self.LOG_ERROR }
+
 
     def DoLogString(self, message, timeStamp=0, type = 0, **kwargs): #small type hardcoding sin here
         textstyle = wx.TextAttr()
@@ -49,3 +58,8 @@ class Log(wx.PyLog):
         else:
             #print 'LOG: notcallafter:', args
             self.DoLogString(*args, **kwargs)
+
+    def emit(self, record):
+        "Implementation of logging.Handler.emit"
+        self.DoLogString(record.msg, record.relativeCreated,
+                         self.PYTHON_LEVEL_MAP.get(record.levelno, self.LOG_ERROR))
