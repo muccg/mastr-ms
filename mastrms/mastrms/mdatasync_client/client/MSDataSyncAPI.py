@@ -180,10 +180,11 @@ class MSDataSyncAPI(object):
         station = self.config.getValue('stationname')
         sitename = self.config.getValue('sitename')
         self.log("Handshaking with server %s" % (self.config.getValue('synchub')), type=self.log.LOG_NORMAL, thread=self.useThreading)
-        postvars = {'files' : simplejson.dumps({}), 'organisation' : simplejson.dumps(organisation), 'sitename' : simplejson.dumps(sitename), 'stationname': simplejson.dumps(station)}
+        jsonify = lambda ob: json.dumps(ob, ensure_ascii=False)
+        postvars = {'files' : jsonify({}), 'organisation' : jsonify(organisation), 'sitename' : jsonify(sitename), 'stationname': jsonify(station)}
         try:
             f = urllib.urlopen(self.config.getValue('synchub'), urllib.urlencode(postvars))
-            jsonret = f.read()
+            jsonret = unicode(f.read(), "utf-8")
         except Exception, e:
             returnFn(retcode = False, retstring = "Could not connect %s" % (str(e)) )
             return
@@ -191,8 +192,8 @@ class MSDataSyncAPI(object):
         outlog.debug( 'Checking response' )
         #now, if something goes wrong interpreting the result, don't panic.
         try:
-            d = simplejson.loads(jsonret)
-            self.log('Synchub config loaded object is: %s' % simplejson.dumps(d, sort_keys=True, indent=2), type=self.log.LOG_NORMAL, thread=self.useThreading)
+            d = json.loads(jsonret)
+            self.log('Synchub config loaded object is: %s' % json.dumps(d, sort_keys=True, indent=2), type=self.log.LOG_NORMAL, thread=self.useThreading)
         except Exception, e:
             returnFn(retcode=False, retstring="Error: %s\nUnexpected response from server was: %s" % (e, jsonret))
             return
@@ -224,27 +225,34 @@ class MSDataSyncAPI(object):
         outlog.debug("syncvars are: %s" % syncvars)
         details = {}
         files = {}
+        jsonresp = None
 
         #PART 1
         #first, tell the server who we are, and get a response
+        sync_baseurl = self.config.getValue('synchub')
+        if not sync_baseurl.endswith('/'):
+            sync_baseurl = "%s/" % (sync_baseurl)
+        url = "%srequestsync/%s/%s/%s/" % (self.config.getValue('synchub'),
+                                           organisation, sitename, station)
         try:
-            sync_baseurl = self.config.getValue('synchub')
-            if not sync_baseurl.endswith('/'):
-                sync_baseurl = "%s/" % (sync_baseurl)
-            f = urllib.urlopen("%srequestsync/%s/%s/%s/" % (self.config.getValue('synchub'), organisation, sitename, station), urllib.urlencode(syncvars))
-            jsonresp = f.read()
-            jsonret = simplejson.loads( jsonresp )
+            f = urllib.urlopen(url, urllib.urlencode(syncvars))
+            jsonresp = unicode(f.read(), "utf-8")
+        except IOError, e:
+            returnFn(retcode=False, retstring="Could not initiate Sync %s" % e)
+
+        if jsonresp:
+            try:
+                jsonret = json.loads(jsonresp)
+            except ValueError, e:
+                jsonret = { "success": False, "msg": str(e) }
+
+        if jsonret["success"]:
+            details = jsonret["details"]
+            files = jsonret["files"]
+        else:
             #if there is an error, bail out by calling the return function
-            if not jsonret["success"]:
-                returnFn(retcode = False, retstring = "Sync Initiation failed: %s" % (jsonret["msg"]))
-            else:
-                details = jsonret["details"]
-                files = jsonret["files"]
-        except Exception, e:
-            returnFn(retcode = False, retstring = "Could not initiate Sync %s" % (str(e)) )
+            returnFn(retcode=False, retstring="Sync Initiation failed: %s" % jsonret["msg"])
 
-
-        #otherwise return the files
         return details, files
 
     def find_wanted_files(self, wantedfiles, returnFn):
@@ -326,8 +334,7 @@ class MSDataSyncAPI(object):
         try:
             move(src, dst)
         except IOError, e:
-            self.log("Could not archive file: %s" % str(e),
-                     thread=self.useThreading)
+            self.log("Could not archive file: %s" % e, thread=self.useThreading)
 
     def cleanup_localindexdir(self):
         localindexdir = self.config.getLocalIndexPath()
@@ -606,7 +613,9 @@ class MSDSImpl(object):
         #cmdhead = ['rsync', '-tavz'] #t, i=itemize-changes,a=archive,v=verbose,z=zip
         cmdhead = ['rsync']
         cmdhead.extend(rsyncconfig.flags)
-        cmdtail = ['--log-file=%s' % (logfile), str(sourcedir), '%s@%s:%s' % ((rsyncconfig.username), str(rsyncconfig.host), str(rsyncconfig.rootdir) )]
+        remote_dir = '%s@%s:%s' % (rsyncconfig.username, rsyncconfig.host,
+                                   rsyncconfig.rootdir)
+        cmdtail = ['--log-file=%s' % logfile, sourcedir, remote_dir]
 
         cmd = []
         cmd.extend(cmdhead)
@@ -620,16 +629,22 @@ class MSDSImpl(object):
 
         cmd.extend(cmdtail)
 
+        # On linux, assume file system encoding is utf-8.
+        # On windows, the file system probably stores filenames in
+        # utf-16. But cygwin rsync kindly translates these into utf-8
+        # for us.
+        rsync_encoding = "utf-8"
+
         files_list = tempfile.NamedTemporaryFile()
 
         if rsyncconfig.fileslist is not None:
-            files_list.write("\0".join(sorted(rsyncconfig.fileslist)))
+            files_list.write((u"\0".join(sorted(rsyncconfig.fileslist))).encode(rsync_encoding))
             files_list.flush()
             cmd.extend(["--include-from", files_list.name, "--from0"])
 
         cmd.extend(["--itemize-changes"] * 2)
 
-        self.log('Rsync command is: %s' % " ".join(map(pipes.quote, cmd)),
+        self.log('Rsync command is: %s' % u" ".join(map(pipes.quote, cmd)),
                  thread=self.controller.useThreading, type=self.log.LOG_DEBUG)
 
         p = Popen(cmd, shell=False, stdout=PIPE, stderr=PIPE,
@@ -638,13 +653,16 @@ class MSDSImpl(object):
         (stdoutdata, stderrdata) = p.communicate()
         self.lastError = stderrdata
 
+        stdoutdata = unicode(stdoutdata, rsync_encoding)
+        stderrdata = unicode(stderrdata, rsync_encoding)
+
         self.log("rsync output is:\n%s" % stdoutdata,
                  thread=self.controller.useThreading, type=self.log.LOG_DEBUG)
 
         rsyncconfig.file_changes = self.parse_rsync_changes(stdoutdata)
 
         if len(stderrdata) > 0:
-            self.log('Error Rsyncing: %s' % (str(stderrdata),), type=self.log.LOG_ERROR, thread = self.controller.useThreading)
+            self.log('Error Rsyncing: %s' % stderrdata, type=self.log.LOG_ERROR, thread=self.controller.useThreading)
 
         return p.returncode == 0
 
@@ -696,7 +714,7 @@ class MSDSImpl(object):
         self.log('Informing the server of transfer: %s' % (runsampledict), thread = self.controller.useThreading)
 
         postvars = {
-            'runsamplefiles' : simplejson.dumps(runsampledict),
+            'runsamplefiles' : json.dumps(runsampledict, ensure_ascii=False),
             'lastError': self.lastError,
             'organisation': self.controller.config.getValue('organisation'),
             'sitename': self.controller.config.getValue('sitename'),
@@ -706,10 +724,10 @@ class MSDSImpl(object):
         url = "%s%s/" % (baseurl, "checksamplefiles")
         try:
             f = urllib.urlopen(url, urllib.urlencode(postvars))
-            jsonret = f.read()
-            self.log('Server returned %s' % (str(jsonret)), thread = self.controller.useThreading)
+            jsonret = unicode(f.read(), "utf-8")
+            self.log('Server returned %s' % jsonret, thread = self.controller.useThreading)
             self.log('Finished informing the server of transfer', thread = self.controller.useThreading)
-            self.controller.post_sync_step(simplejson.loads(jsonret), filename_id_map)
+            self.controller.post_sync_step(json.loads(jsonret), filename_id_map)
         except Exception, e:
             self.log('Could not connect to %s: %s' % (url, str(e)), type=self.log.LOG_ERROR, thread = self.controller.useThreading)
 
