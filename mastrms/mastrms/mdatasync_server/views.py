@@ -338,7 +338,6 @@ def key_upload(request, *args):
         f = request.FILES['uploaded']
         logger.debug( 'Uploaded file name: %s' % ( f._get_name() ) )
         written_logfile_name = str(os.path.join('publickeys', "%s%s" % (fname_prefix,'id_rsa.pub')) )
-        _handle_uploaded_file(f, written_logfile_name)#dont allow them to replace arbitrary files
         write_success = _handle_uploaded_file(f, written_logfile_name )#dont allow them to replace arbitrary files
 
         try:
