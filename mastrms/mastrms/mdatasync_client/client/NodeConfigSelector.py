@@ -113,7 +113,7 @@ class NodeConfigSelector(wx.Panel):
         try:
             req = urllib2.Request(self.parentApp.config.getValue('synchub') + 'nodes/')
             f = urllib2.urlopen(req, None, 1) #one second timeout
-            jsonret = f.read()
+            jsonret = unicode(f.read(), "utf-8")
             outlog.debug('node config: %s' % jsonret  )
             retval = simplejson.loads(jsonret)
             assert isinstance(retval, dict), 'Returned json was not a dict'
