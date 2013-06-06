@@ -88,11 +88,17 @@ find %{buildinstalldir} -name '*.py' -type f | xargs sed -i 's:^#!/usr/local/bin
 find %{buildinstalldir} -name '*.py' -type f | xargs sed -i 's:^#!/usr/local/python:#!/usr/bin/python:'
 
 %post
+# Clear out staticfiles data and regenerate
+rm -rf %{staticdir}/*
 mastrms collectstatic --noinput > /dev/null
 # Remove root-owned logged files just created by collectstatic
 rm -rf /var/logs/%{name}/*
 # Touch the wsgi file to get the app reloaded by mod_wsgi
 touch ${installdir}/django.wsgi
+
+%postun
+# Nuke staticfiles
+rm -rf %{staticdir}/*
 
 %clean
 rm -rf %{buildroot}
