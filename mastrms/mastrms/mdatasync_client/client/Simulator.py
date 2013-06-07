@@ -5,6 +5,7 @@ from identifiers import *
 import  wx.lib.filebrowsebutton as filebrowse
 import os
 import os.path
+import tempfile
 import logging
 
 logger = logging.getLogger(__name__)
