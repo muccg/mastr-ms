@@ -223,7 +223,6 @@ class MSDataSyncAPI(object):
         outlog.debug("syncvars are: %s" % syncvars)
         details = {}
         files = {}
-        jsonresp = None
 
         #PART 1
         #first, tell the server who we are, and get a response
@@ -235,16 +234,14 @@ class MSDataSyncAPI(object):
         try:
             f = urllib.urlopen(url, urllib.urlencode(syncvars))
             jsonresp = unicode(f.read(), "utf-8")
+            jsonret = json.loads(jsonresp)
         except IOError, e:
             returnFn(retcode=False, retstring="Could not initiate Sync %s" % e)
+            jsonret = { "success": False, "msg": str(e) }
+        except ValueError, e:
+            jsonret = { "success": False, "msg": str(e) }
 
-        if jsonresp:
-            try:
-                jsonret = json.loads(jsonresp)
-            except ValueError, e:
-                jsonret = { "success": False, "msg": str(e) }
-
-        if jsonret["success"]:
+        if jsonret.get("success", False):
             details = jsonret["details"]
             files = jsonret["files"]
         else:

@@ -327,7 +327,10 @@ class MainWindow(wx.Frame):
         '''Close (quit) the parent app.'''
         #This is the only way to quit the app.
         self.log('Quitting...', type=self.log.LOG_DEBUG)
-        self.Bind(wx.EVT_TIMER, None)
+        try:
+            self.Bind(wx.EVT_TIMER, None)
+        except AssertionError, e:
+            self.log("Assertion error, not sure why: %s" % e, type=self.log.LOG_DEBUG)
         self.timer.Stop()
         self.StatusBar.Destroy()
         self.SystrayIcon.Destroy()
