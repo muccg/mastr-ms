@@ -33,8 +33,6 @@ def nullFn(*args, **kwargs):
     outlog.debug('null fn')
     pass
 
-from config import CONFIG
-
 class RemoteSyncParams(object):
     def __init__(self, configdict = {}, username="!"):
         self.host = ""
@@ -111,7 +109,7 @@ class TransactionVars(object):
 
 
 class MSDataSyncAPI(object):
-    def __init__(self, log=None):
+    def __init__(self, config, log=None):
         self._tasks = Queue.Queue()
         if log is None:
             self.log = self.defaultLogSink
@@ -119,7 +117,7 @@ class MSDataSyncAPI(object):
             self.log = log
 
         self._impl = MSDSImpl(self.log, self)
-        self.config = CONFIG
+        self.config = config
         self.useThreading = False #Threading doesn't seem to help at the moment.
                                  #it needs to be enabled and then debugged -
                                  #we are still seeing UI lagging behind worker operations
@@ -603,7 +601,7 @@ class MSDSImpl(object):
 
         sourcedir = self.ensure_trailing_slash(self.cygwin_pathname(sourcedir))
 
-        logfile = self.cygwin_pathname(CONFIG.getValue('logfile')) #if its a windows path, convert it. cwrsync wants posix paths ALWAYS
+        logfile = self.cygwin_pathname(self.controller.config.getValue('logfile')) #if its a windows path, convert it. cwrsync wants posix paths ALWAYS
 
         #cmdhead = ['rsync', '-tavz'] #t, i=itemize-changes,a=archive,v=verbose,z=zip
         cmdhead = ['rsync']

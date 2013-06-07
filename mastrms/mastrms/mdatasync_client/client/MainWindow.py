@@ -27,7 +27,6 @@ class APPSTATE:
     IDLE             = 'Idle'
 
 import weakref
-from config import CONFIG
 
 outlog = plogging.getLogger('client')
 
@@ -36,9 +35,9 @@ outlog = plogging.getLogger('client')
 provider = wx.SimpleHelpProvider()
 wx.HelpProvider.Set(provider)
 class MainWindow(wx.Frame):
-    def __init__(self, parent):
+    def __init__(self, config, parent):
+        self.config = config
 
-        self.config = CONFIG
         plogging.set_level('client', self.config.getValue('loglevel'))
         wx.Frame.__init__(self, parent, -1, 'MS Datasync Application: v%s' % (VERSION))
         self.countDownEnabled = True #sets the countdown to be active
