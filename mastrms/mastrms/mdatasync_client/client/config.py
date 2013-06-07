@@ -6,8 +6,6 @@ import plogging
 outlog = plogging.getLogger('client')
 
 
-#Dont instantiate this directly - use the module singleton defined at the end of this file
-
 class MSDSConfig(object):
     def __init__(self, **kwargs):
         '''hardcoded config for the initial object creation'''
@@ -54,7 +52,7 @@ class MSDSConfig(object):
         return True
 
     @classmethod
-    def load(cls, filename):
+    def load(cls, filename=SAVEFILE_NAME):
         config = cls()
         config.filename = filename
 
@@ -112,4 +110,12 @@ class MSDSConfig(object):
         except:
             return True
 
-CONFIG = MSDSConfig.load(SAVEFILE_NAME)
+    def __str__(self):
+        return "\n".join("%s=%r" % x for x in self.get_key_values())
+
+    def __repr__(self):
+        return repr(dict(self.get_key_values()))
+
+    def get_key_values(self):
+        for name, schema in self.store.iteritems():
+            yield (name, schema[0])
