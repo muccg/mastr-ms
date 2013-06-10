@@ -11,7 +11,8 @@ from mastrms.mdatasync_client.client.main import MDataSyncApp
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-# fixme: unit tests don't show errors in other threads
+# fixme: unit tests don't show exceptions in other threads
+# fixme: this requires DISPLAY pointing to an X server, e.g. Xephyr
 
 class TestClient(object):
     """
@@ -40,23 +41,10 @@ class TestClient(object):
         logger.info("Mainloop finished")
         self.m.msds.stopThread()
 
-    def _post_start_event_wrong(self):
-        timer = wx.Timer(self.m.win, 42)
-        def set_ready(event):
-            logger.info("TestClient mainloop ready")
-            self._set_ready(True)
-            timer.Stop()
-            timer.Destroy()
-        wx.EVT_TIMER(self.m.win, timer.GetId(), set_ready)
-        timer.Start(10, True) # 10ms
-
     def _post_start_event(self):
         wx.CallAfter(self._set_ready, True)
 
     def _set_ready(self, ready=True):
-        # with self.lock:
-        #     self.ready=ready
-
         if ready:
             self.ready.set()
         else:
@@ -64,34 +52,19 @@ class TestClient(object):
 
     def click_sync(self):
         logger.info("click_sync enter")
-        #self.m.win.OnCheckNow(None)
         wx.CallAfter(self.m.win.OnCheckNow, None)
         logger.info("click_sync exit")
 
     def _wait_for_ready(self):
-        #with self.lock:
-            #while not self.ready:
-            #    self.lock.wait()
         self.ready.wait()
-
-    def _wait_for_finished(self):
-        #with self.lock:
-            #while not self.finished:
-            #    self.lock.wait()
-        self.finished.wait()
 
     def quit(self):
         logger.info("Quitting")
         wx.CallAfter(self.m.win.OnMenuQuit, None)
-        #self._wait_for_finished()
         self.thread.join()
 
     def _setup_exit_hook(self):
-        # def set_finished(event):
-        #     logger.debug("Window closed")
-        #     #with self.lock:
-        #         #self.finished = True
-        #     self.finished.set()
-
-        # wx.EVT_CLOSE(self.m.win, set_finished)
-        pass
+        def set_finished(event):
+            logger.debug("Window closed")
+            self.finished.set()
+        wx.EVT_CLOSE(self.m.win, set_finished)
