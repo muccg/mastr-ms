@@ -10,6 +10,8 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+__all__ = ["Simulator", "WorkList"]
+
 class Simulator(object):
     """
     The simulator can generate "data" files from a CSV work list.
