@@ -13,7 +13,6 @@ from django.utils import simplejson
 from mastrms.mdatasync_server.models import *
 from mastrms.repository.models import *
 from mastrms.mdatasync_server.rules import *
-from ClientState import * #All the functions for dealing with clientstates
 from django.conf import settings
 from mastrms.app.utils.file_utils import ensure_repo_filestore_dir_with_owner, set_repo_file_ownerships
 
@@ -22,8 +21,7 @@ LOGNAME = 'mdatasync_server_log'
 logger = logging.getLogger(LOGNAME)
 logger.setLevel(logging.WARNING) #default is warning
 
-from mastrms.settings import KEYS_TO_EMAIL, LOGS_TO_EMAIL, RETURN_EMAIL
-
+from django.conf import settings
 from django.core.mail import EmailMessage
 
 class FixedEmailMessage(EmailMessage):
@@ -66,7 +64,7 @@ class FixedEmailMessage(EmailMessage):
 
 
 def checkClientVersion(versionstr):
-    print "Checking client version: %s" % (versionstr)
+    logger.debug("Checking client version: %s" % versionstr)
     components = versionstr.split('.')
     if len(components) < 2:
         return False
@@ -115,8 +113,9 @@ def request_sync(request, organisation=None, sitename=None, station=None):
     if node is not None:
         ncerror, nodeclient_details = get_nodeclient_details(organisation, sitename, station)
         resp["details"] = nodeclient_details
-        if not checkClientVersion(request.POST.get('version', None)):
-            resp["message"] = "Client version %s is not supported. Please update."
+        version = request.POST.get("version", "")
+        if not checkClientVersion(version):
+            resp["message"] = "Client version \"%s\" is not supported. Please update." % version
         else:
             resp["success"] = True
             #now get the runs for that nodeclient
@@ -130,15 +129,30 @@ def request_sync(request, organisation=None, sitename=None, station=None):
             if syncold:
                 for runid in expectedcomplete.keys():
                     resp["files"].update(expectedcomplete[runid])
-
-        clientstate = get_saved_client_state(organisation, sitename, station)
-        clientstate.lastSyncAttempt = datetime.now()
-        ##save the client state
-        save_client_state(clientstate)
     else:
         raise("Could not find node %s-%s-%s" % (organisation, sitename, station) )
 
     return HttpResponse(simplejson.dumps(resp))
+
+def get_node_from_request(request, organisation=None, sitename=None, station=None):
+    retval = None
+
+    if organisation is None:
+        organisation = request.REQUEST('organisation', None)
+    if sitename is None:
+        sitename = request.REQUEST('sitename', None)
+    if station is None:
+        station = request.REQUEST('station', None)
+
+    logger.debug("Searching for node org=%s, sitename=%s, station=%s" % (organisation, sitename, station))
+    try:
+        nodeclient = NodeClient.objects.get(organisation_name = organisation, site_name=sitename, station_name = station)
+        retval = nodeclient
+    except:
+        retval = None
+        logger.warning("No nodeclient existed with organisation=%s, sitename=%s, station=%s" % (organisation, sitename, station))
+
+    return retval
 
 def get_node_clients(request, *args):
     ncs = NodeClient.objects.all()
@@ -151,25 +165,6 @@ def get_node_clients(request, *args):
             o[n.site_name] = []
         o[n.site_name].append(n.station_name)
     return jsonResponse(result)
-
-@login_required
-def nodeinfo(request, organisation=None, sitename=None, station=None):
-    try:
-        nodeclient = get_node_from_request(request, organisation=organisation, sitename=sitename, station=station)
-        if nodeclient is None:
-            raise Exception("No nodeclient existed with organisation=%s, sitename=%s, station=%s" % (organisation, sitename, station))
-        clientstate = get_saved_client_state(organisation, sitename, station)
-    #return HttpResponse( simplejson.dumps(nodeclient.__dict__) + simplejson.dumps(clientstate.__dict__) )
-        timediff = datetime.now() - datetime.now()
-        if clientstate.lastSyncAttempt is not None:
-            timediff = datetime.now() - clientstate.lastSyncAttempt
-
-        expectedfiles = getExpectedFilesForNode(nodeclient, include_completed=True)
-        return render_to_response("node.mako", {'nodeclient':nodeclient, 'expectedfiles': expectedfiles, 'timediff': timediff, 'clientstate': clientstate.__dict__, 'wh':webhelpers} )
-
-    except Exception, e:
-        return HttpResponse("Could not display node info: %s" % (e))
-
 
 def getExpectedFilesForNode(nodeclient, include_completed = False):
     """
@@ -302,29 +297,6 @@ def check_run_sample_files(request):
     else:
         ret['description'] = "No files given"
 
-    #Update the clientstate. The client may have sent a file tree, which we can use
-    #to update our clientstate views
-    org = request.POST.get('organisation', None)
-    site = request.POST.get('sitename', None)
-    station = request.POST.get('stationname', None)
-    if (org is not None) and (site is not None) and (station is not None):
-        clientstate = get_saved_client_state(org, site, station)
-        clientstate.lastError = request.POST.get('lastError', "Successfully syned %d files from runs: %s." % (totalfound, totalruns))
-        clientstate.lastSyncAttempt = datetime.now()
-        #update client state if the client posted a file list through
-        clientfiles = request.POST.get('clientfiles', None)
-        if clientfiles is not None:
-            try:
-                clientfiledict = simplejson.loads(clientfiles)
-                clientstate.files = clientfiledict
-            except Exception, e:
-                clientstate.lastError = "Could not parse passed filestate: %s" % (str(e))
-
-        save_client_state(clientstate)
-        logger.debug("Saved lastError in client state")
-    else:
-        logger.debug("Could not get clientstate details: %s, %s, %s" % (org, site, station))
-
     return jsonResponse(ret)
 
 def log_upload(request, *args):
@@ -345,7 +317,7 @@ def log_upload(request, *args):
             else:
                 body = "MS Datasync logfile upload failed: %s\r\n" % (written_logfile_name)
                 status = 'Log upload failed'
-            e = FixedEmailMessage(subject="MS Datasync Log Upload (%s)" % (fname_prefix.strip('_')), body=body, from_email = RETURN_EMAIL, to = [LOGS_TO_EMAIL])
+            e = FixedEmailMessage(subject="MS Datasync Log Upload (%s)" % (fname_prefix.strip('_')), body=body, from_email = settings.RETURN_EMAIL, to = [settings.LOGS_TO_EMAIL])
             e.send()
         except Exception, e:
             logger.warning( 'Unable to send "Log Sent" email: %s' % (str(e)) )
@@ -366,7 +338,6 @@ def key_upload(request, *args):
         f = request.FILES['uploaded']
         logger.debug( 'Uploaded file name: %s' % ( f._get_name() ) )
         written_logfile_name = str(os.path.join('publickeys', "%s%s" % (fname_prefix,'id_rsa.pub')) )
-        _handle_uploaded_file(f, written_logfile_name)#dont allow them to replace arbitrary files
         write_success = _handle_uploaded_file(f, written_logfile_name )#dont allow them to replace arbitrary files
 
         try:
@@ -375,7 +346,7 @@ def key_upload(request, *args):
             else:
                 body = "MS Datasync keyfile upload failed: %s\r\n" % (written_logfile_name)
                 status= 'key upload failed'
-            e = FixedEmailMessage(subject="MS Datasync Public Key upload (%s)" % (fname_prefix), body=body, from_email = RETURN_EMAIL, to = [KEYS_TO_EMAIL])
+            e = FixedEmailMessage(subject="MS Datasync Public Key upload (%s)" % (fname_prefix), body=body, from_email = settings.RETURN_EMAIL, to = [settings.KEYS_TO_EMAIL])
             e.send()
         except Exception, e:
             logger.warning( 'Unable to send "Key Sent" email: %s' % (str(e)) )
@@ -406,7 +377,7 @@ def _handle_uploaded_file(f, name):
         retval = set_repo_file_ownerships(dest_fname)
     except Exception, e:
         retval = False
-        logger.debug( '\tException in file upload: %s' % ( str(e) ) )
+        logger.exception('Exception in file upload')
     logger.debug( '*** _handle_uploaded_file: exit ***')
     return retval
 

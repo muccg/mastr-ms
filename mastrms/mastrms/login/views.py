@@ -10,8 +10,7 @@ from django.shortcuts import render_to_response
 from django.utils import simplejson
 from ccg.utils import webhelpers
 from ccg.utils.webhelpers import siteurl, wsgibase
-from mastrms import settings #for LDAP details only, can remove when LDAP is removed
-from mastrms.settings import SESSION_COOKIE_AGE
+from django.conf import settings
 from mastrms.app.utils.data_utils import jsonResponse, jsonErrorResponse
 from mastrms.users.MAUser import *
 from mastrms.login.URLState import getCurrentURLState
@@ -59,7 +58,7 @@ def processLogin(request, *args):
                 authenticated = True
                 authorized = True
                 #set the session to expire after
-                request.session.set_expiry(SESSION_COOKIE_AGE)
+                request.session.set_expiry(settings.SESSION_COOKIE_AGE)
             else:
                 #Inactive user
                 print 'inactive login'
@@ -244,4 +243,3 @@ def serveIndex(request, *args, **kwargs):
                         'wh': webhelpers,
                         'params': jsonparams,
                         }, context_instance=RequestContext(request))
-

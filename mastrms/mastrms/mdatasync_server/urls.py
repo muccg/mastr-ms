@@ -12,7 +12,6 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
     (r'^utils', 'mastrms.mdatasync_server.views.utils'),
     (r'^nodes', 'mastrms.mdatasync_server.views.get_node_clients'),
-    (r'^node/(?P<organisation>.*)/(?P<sitename>.*)/(?P<station>.*)/', 'mastrms.mdatasync_server.views.nodeinfo'),
     (r'^requestsync/(?P<organisation>.*)/(?P<sitename>.*)/(?P<station>.*)/', 'mastrms.mdatasync_server.views.request_sync'),
     #(r'^syncadmin/(.*)', include(admin.site.urls)),
     (r'^logupload/', 'mastrms.mdatasync_server.views.log_upload'),

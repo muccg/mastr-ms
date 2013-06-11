@@ -27,7 +27,6 @@ class APPSTATE:
     IDLE             = 'Idle'
 
 import weakref
-from config import CONFIG
 
 outlog = plogging.getLogger('client')
 
@@ -36,9 +35,9 @@ outlog = plogging.getLogger('client')
 provider = wx.SimpleHelpProvider()
 wx.HelpProvider.Set(provider)
 class MainWindow(wx.Frame):
-    def __init__(self, parent):
+    def __init__(self, config, parent):
+        self.config = config
 
-        self.config = CONFIG
         plogging.set_level('client', self.config.getValue('loglevel'))
         wx.Frame.__init__(self, parent, -1, 'MS Datasync Application: v%s' % (VERSION))
         self.countDownEnabled = True #sets the countdown to be active
@@ -328,7 +327,10 @@ class MainWindow(wx.Frame):
         '''Close (quit) the parent app.'''
         #This is the only way to quit the app.
         self.log('Quitting...', type=self.log.LOG_DEBUG)
-        self.Bind(wx.EVT_TIMER, None)
+        try:
+            self.Bind(wx.EVT_TIMER, None)
+        except AssertionError, e:
+            self.log("Assertion error, not sure why: %s" % e, type=self.log.LOG_DEBUG)
         self.timer.Stop()
         self.StatusBar.Destroy()
         self.SystrayIcon.Destroy()
@@ -375,8 +377,8 @@ class MainWindow(wx.Frame):
         try:
             self.MSDSCheckFn(self, APPSTATE.UPLOADING_DATA, 'notused', self.CheckReturnFn)
         except Exception, e:
-            self.log("Exception encountered: %s" % (str(e)), type=self.log.LOG_ERROR)
-
+            import traceback
+            self.log("Exception encountered: %s" % traceback.format_exc(e), type=self.log.LOG_ERROR)
 
     def SetProgress(self, prognum, add=False):
 

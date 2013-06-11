@@ -6,11 +6,8 @@ import plogging
 outlog = plogging.getLogger('client')
 
 
-#Dont instantiate this directly - use the module singleton defined at the end of this file
-
 class MSDSConfig(object):
-    def __init__(self):
-        self.store = {}
+    def __init__(self, **kwargs):
         '''hardcoded config for the initial object creation'''
         #format is:
         #key: [value, formalKeyName, helpText]
@@ -24,7 +21,7 @@ class MSDSConfig(object):
               'organisation'  : ['defaultorg',  'Organisation', 'Identifies which organisation your site belongs to. It is important that this is correct.', False],
                    'localdir' : ['syncdir','Data root directory', 'The local root directory for the data.'],
                    'synchub'  : ['https://ccg.murdoch.edu.au/mastrms/sync/', 'SyncHub Address', 'The web address of the synchub server'],
-                   'updateurl' : ['http://ccg.murdoch.edu.au/ma/', 'Program Update URL', 'The web address of the server that should be contacted for program updates'],
+                   'updateurl' : ['http://repo.ccgapps.com.au/ma/', 'Program Update URL', 'The web address of the server that should be contacted for program updates'],
                    'logfile'  : [os.path.join(DATADIR, 'rsync_log.txt'), 'Local Log File', 'Sync operations are logged to this file'],
                    'loglevel' : [plogging.get_level('client'), "Log Level", "The log level of the client"],
                    'syncfreq' : [30, 'Sync Frequency (Mins)', 'How often the application should push updates to the server'],
@@ -33,8 +30,8 @@ class MSDSConfig(object):
                    'archivesynced' : [False, 'Archive Synced Files', 'When checked, archives a copy of synced files to the specified directory.'],
                    'archivedfilesdir' : ["Choose a directory", 'Archived Files Dir', 'If archiving is enabled, synced files will be archived to this directory.'],
             }
-        self.load()
-
+        self.filename = None
+        self.update(kwargs)
 
     def getConfig(self):
         return self.store
@@ -43,34 +40,32 @@ class MSDSConfig(object):
         return "%s.%s.%s" % (self.getValue('organisation'), self.getValue('sitename'), self.getValue('stationname'))
 
     def save(self, *args):
-        try:
-            fo = open(SAVEFILE_NAME, "wb")
-            cPickle.dump(self.store, fo, protocol = cPickle.HIGHEST_PROTOCOL)
-            fo.close()
-            return True
-        except:
+        if not self.filename:
             return False
 
-    def load(self):
-        retval = False
-        fo = None
         try:
-            fo = open(SAVEFILE_NAME, "rb")
-        except IOError:
-            outlog.warning('No saved config existed: %s' % (SAVEFILE_NAME))
+            with open(self.filename, "wb") as fo:
+                cPickle.dump(self.store, fo, protocol = cPickle.HIGHEST_PROTOCOL)
+        except EnvironmentError, e:
+            return False
+
+        return True
+
+    @classmethod
+    def load(cls, filename=SAVEFILE_NAME):
+        config = cls()
+        config.filename = filename
+
         try:
-            savedstore = cPickle.load(fo)
-            retval = True
-        except Exception, e:
+            with open(filename, "rb") as fo:
+                savedstore = cPickle.load(fo)
+            config.store.update(savedstore)
+        except EnvironmentError:
+            outlog.warning('No saved config existed: %s' % (filename))
+        except cPickle.UnpicklingError, e:
             outlog.warning('Exception reading saved configuration: %s' % (str(e)) )
 
-
-        if retval:
-            self.store.update(savedstore)
-
-        if fo is not None:
-            fo.close()
-        return retval
+        return config
 
     def getLocalIndexPath(self):
         return os.path.join(self.getValue('localdir'), self.getValue('localindexdir'))
@@ -86,6 +81,16 @@ class MSDSConfig(object):
             self.store[key][0] = value
         except:
             pass
+
+    def __getitem__(self, key):
+        return self.getValue(key)
+
+    def __setitem__(self, key, value):
+        self.setValue(key, value)
+
+    def update(self, attrs):
+        for key, value in attrs.iteritems():
+            self[key] = value
 
     def getFormalName(self, key):
         try:
@@ -105,6 +110,12 @@ class MSDSConfig(object):
         except:
             return True
 
+    def __str__(self):
+        return "\n".join("%s=%r" % x for x in self.get_key_values())
 
+    def __repr__(self):
+        return repr(dict(self.get_key_values()))
 
-CONFIG = MSDSConfig()
+    def get_key_values(self):
+        for name, schema in self.store.iteritems():
+            yield (name, schema[0])

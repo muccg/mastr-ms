@@ -1,7 +1,7 @@
 import os
 import os.path
 #This version must be incremented each build
-VERSION = "0.4.5"
+VERSION = "0.4.6"
 
 #We need a strange looking datadir because of esky.
 #Esky has an outer 'bootstrapper' exe, and all contents and
@@ -44,4 +44,3 @@ ID_CLEARINPUT_BUTTON = 209 #in the simulator application
 #Node config selector window
 ID_SENDSCREENSHOT_BUTTON = 212
 ID_ADVANCED_PREFS_BUTTON = 213
-

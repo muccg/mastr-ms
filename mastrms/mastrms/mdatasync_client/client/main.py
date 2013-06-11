@@ -1,8 +1,8 @@
 import wx
 from MainWindow import MainWindow
-from MSDataSyncAPI import MSDataSyncAPI #, MSDSCheckFn
+from MSDataSyncAPI import MSDataSyncAPI
+from config import MSDSConfig
 import sys
-import esky
 from identifiers import *
 import os
 import os.path
@@ -14,16 +14,18 @@ from tendo import singleton
 SINGLE_LOCK = None
 
 class MDataSyncApp(wx.PySimpleApp):
+    def __init__(self, config=None, *args, **kwargs):
+        self.config = config or MSDSConfig.load()
+        super(MDataSyncApp, self).__init__(*args, **kwargs)
+
     def OnInit(self):
-        global MSDSCheckFn
         #w = wx.LogChain(wx.LogStderr() )
         #wx.Log_SetActiveTarget( wx.LogStderr() )
         #wx.Log_SetActiveTarget( wx.LogGui() )
 
-
-        win = MainWindow(None)
+        win = MainWindow(self.config, None)
         self.win = win
-        self.msds = MSDataSyncAPI( win.getLog() )#, False ) #false is no threading
+        self.msds = MSDataSyncAPI(self.config, win.getLog())#, False) #false is no threading
 
         self.msds.isMSWINDOWS = False
         if wx.Platform == "__WXMSW__":
@@ -75,4 +77,3 @@ if __name__ == "__main__":
         #sys.stdout = m.win.log
         m.MainLoop()
         m.msds.stopThread() #stop the thread if there is one
-
