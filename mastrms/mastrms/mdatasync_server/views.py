@@ -130,7 +130,8 @@ def request_sync(request, organisation=None, sitename=None, station=None):
                 for runid in expectedcomplete.keys():
                     resp["files"].update(expectedcomplete[runid])
     else:
-        raise("Could not find node %s-%s-%s" % (organisation, sitename, station) )
+        resp["success"] = False
+        resp["message"] = "Could not find node %s-%s-%s" % (organisation, sitename, station)
 
     return HttpResponse(simplejson.dumps(resp))
 
