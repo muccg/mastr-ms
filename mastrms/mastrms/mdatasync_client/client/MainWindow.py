@@ -3,7 +3,6 @@ from StatusBar import StatusBar
 from SysTrayIcon import SystrayIcon
 from FileList import ListCtrlPanel
 import time
-import esky
 import sys
 from identifiers import *
 try: import json as simplejson
@@ -287,6 +286,7 @@ class MainWindow(wx.Frame):
         self.menuBar.Enable(ID_CHECK_NOW, False)
         self.PauseCountdown()
         if getattr(sys,"frozen",False):
+            import esky
             url = self.config.getValue('updateurl')
             app = esky.Esky(sys.executable,url)
             try:
