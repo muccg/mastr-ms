@@ -1,6 +1,7 @@
-import threading
 import sys
 import os.path
+import threading
+import time
 import logging
 import wx
 import mastrms.mdatasync_client.client
@@ -54,6 +55,12 @@ class TestClient(object):
         logger.info("click_sync enter")
         wx.CallAfter(self.m.win.OnCheckNow, None)
         logger.info("click_sync exit")
+        self._wait_for_sync()
+
+    def _wait_for_sync(self):
+        CRAP_TEST_CRAP = 4
+        logger.debug("sleeping for %ds" % CRAP_TEST_CRAP)
+        time.sleep(CRAP_TEST_CRAP)
 
     def _wait_for_ready(self):
         self.ready.wait()
