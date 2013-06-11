@@ -113,7 +113,7 @@ class NodeConfigSelector(wx.Panel):
         try:
             req = urllib2.Request(self.parentApp.config.getValue('synchub') + 'nodes/')
             f = urllib2.urlopen(req, None, 1) #one second timeout
-            jsonret = f.read()
+            jsonret = unicode(f.read(), "utf-8")
             outlog.debug('node config: %s' % jsonret  )
             retval = simplejson.loads(jsonret)
             assert isinstance(retval, dict), 'Returned json was not a dict'
@@ -200,20 +200,15 @@ class NodeConfigSelector(wx.Panel):
 
 
     def AddTreeNodes(self, parentItem, items):
-        if type(items) == dict:
+        if isinstance(items, dict):
             for key in items.keys(): #assuming keys are strings
                 new = self.tree.AppendItem(parentItem, key)
                 self.AddTreeNodes(new, items[key])
 
         else:
             for item in items:
-                if type(item) == str:
+                if isinstance(item, basestring):
                     self.tree.AppendItem(parentItem, item)
                 else:
-                    outlog.debug('item wasnt a string.: %s' % str(item))
+                    outlog.debug('item wasnt a string.: %s' % item)
                     newItem = self.tree.AppendItem(parentItem, str(item))
-                    #self.AddTreeNodes(newItem, str(item[0]))
-
-
-
-

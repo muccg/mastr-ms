@@ -1,5 +1,5 @@
 from django.core.mail import send_mail
-from mastrms.settings import RETURN_EMAIL
+from django.conf import settings
 from ccg.utils.webhelpers import siteurl
 from django.core.mail import EmailMessage
 import logging
@@ -65,7 +65,7 @@ def makeAndSendMail(subject, body, from_email, to, fail_silently=False):
     except Exception, e:
         logger.warning('Error sending email (subject=%s) to %s : %s' %(subject, to, str(e)) )
 
-def sendFormalQuoteEmail(request, qid, attachmentname, toemail, cclist=None, fromemail=RETURN_EMAIL):
+def sendFormalQuoteEmail(request, qid, attachmentname, toemail, cclist=None, fromemail=settings.RETURN_EMAIL):
     #The email is sent TO whoever the quote was requested by,
     #and should come FROM the webuser who was logged in and clicked the 'send formal quote' button
     subject = 'MA Formal Quote'
@@ -75,7 +75,7 @@ def sendFormalQuoteEmail(request, qid, attachmentname, toemail, cclist=None, fro
     e = FixedEmailMessage(subject=subject, body=body, from_email = fromemail, to = [toemail], cc=cclist)
     e.sendMail()
 
-def sendFormalStatusEmail(request, qid, status, toemail, fromemail=RETURN_EMAIL):
+def sendFormalStatusEmail(request, qid, status, toemail, fromemail=settings.RETURN_EMAIL):
     #Goes TO an admin or node rep, and comes FROM the default return email
     subject = 'MA Formal Quote Status: %s' % (status)
     body = '%s has changed the formal quote status to %s\r\n\r\n' % (fromemail, status)
@@ -83,14 +83,14 @@ def sendFormalStatusEmail(request, qid, status, toemail, fromemail=RETURN_EMAIL)
     body += "%s%s%s" % (siteurl(request),"quote/viewformal?quoterequestid=" , str(qid))
     makeAndSendMail(subject, body, fromemail, [toemail], fail_silently = False)
 
-def sendQuoteRequestConfirmationEmail(request, qid, toemail, fromemail = RETURN_EMAIL):
+def sendQuoteRequestConfirmationEmail(request, qid, toemail, fromemail = settings.RETURN_EMAIL):
     #This email should always come from 'the system' - i.e. the RETURN_EMAIL
     #The confirmation goes 'TO' the user who requested the quote.
     subject = 'Madas Quote Request Acknowledgement'
     body = 'Your Madas Quote Request has been added to the system. We will contact you as soon as possible.\r\n\r\n'
     makeAndSendMail(subject, body, fromemail, [toemail],fail_silently = False)
 
-def sendRegistrationToAdminEmail(request, username, toemail, fromemail=RETURN_EMAIL):
+def sendRegistrationToAdminEmail(request, username, toemail, fromemail=settings.RETURN_EMAIL):
     #This email should always come from 'the system' - i.e. the RETURN_EMAIL
     #The request goes 'TO' an admin or node rep, which is passed in in 'toemail'.
     subject = 'New Madas Registration'
@@ -100,7 +100,7 @@ def sendRegistrationToAdminEmail(request, username, toemail, fromemail=RETURN_EM
     body += "%s" % (siteurl(request))
     makeAndSendMail(subject, body, fromemail, [toemail],fail_silently = False)
 
-def sendQuoteRequestToAdminEmail(request, qid, firstname, lastname, toemail, fromemail=RETURN_EMAIL):
+def sendQuoteRequestToAdminEmail(request, qid, firstname, lastname, toemail, fromemail=settings.RETURN_EMAIL):
     #This email should always come from 'the system' - i.e. the RETURN_EMAIL
     #The request goes 'TO' an admin or node rep, which is passed in in 'toemail'.
     subject = 'Madas Quote Request Requires Attention'
@@ -110,7 +110,7 @@ def sendQuoteRequestToAdminEmail(request, qid, firstname, lastname, toemail, fro
     body += "\r\n\r\nSender's name or email: %s %s" % (firstname, lastname)
     makeAndSendMail(subject, body, fromemail, [toemail],fail_silently = False)
 
-def sendAccountModificationEmail(request, toemail, fromemail = RETURN_EMAIL):
+def sendAccountModificationEmail(request, toemail, fromemail = settings.RETURN_EMAIL):
     subject = 'Madas Account Change'
     body = 'Your Madas account has been modified\r\n\r\n'
     body += 'Either you, or an administrator has modified your account details or status\r\n\r\n'
@@ -119,7 +119,7 @@ def sendAccountModificationEmail(request, toemail, fromemail = RETURN_EMAIL):
     makeAndSendMail(subject, body, fromemail, [toemail],fail_silently = False)
 
 
-def sendApprovedRejectedEmail(request, toemail, status, fromemail=RETURN_EMAIL):
+def sendApprovedRejectedEmail(request, toemail, status, fromemail=settings.RETURN_EMAIL):
     if status == MADAS_USER_GROUP:
         status = 'Approved'
     subject = 'Madas Account ' + status
@@ -134,7 +134,7 @@ def sendApprovedRejectedEmail(request, toemail, status, fromemail=RETURN_EMAIL):
 
     makeAndSendMail(subject, body, fromemail, [toemail],fail_silently = False)
 
-def sendForgotPasswordEmail(request, toemail, vk, fromemail = RETURN_EMAIL):
+def sendForgotPasswordEmail(request, toemail, vk, fromemail = settings.RETURN_EMAIL):
     subject = 'Madas Forgot Password Link'
     body =  "Use the following link to change your Madas password.\r\n\r\n"
     body += "Either you, or someone specifying your email address, has requested a new password for Madas.\r\n\r\n"
@@ -144,7 +144,7 @@ def sendForgotPasswordEmail(request, toemail, vk, fromemail = RETURN_EMAIL):
 
     makeAndSendMail(subject, body, fromemail, [toemail], fail_silently = False)
 
-def sendPasswordChangedEmail(request, toemail, fromemail = RETURN_EMAIL):
+def sendPasswordChangedEmail(request, toemail, fromemail = settings.RETURN_EMAIL):
     subject = 'Madas Password Changed'
     body = 'Your Madas password was changed.\r\n\r\n'
     body += 'Your password has been changed using the "Forgot Password" feature in Madas.\r\n\r\n'

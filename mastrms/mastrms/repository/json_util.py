@@ -11,7 +11,7 @@ def makeJsonFriendly(data):
     '''
 
     try:
-        if type(data) in [int, str, bool, NoneType]:
+        if type(data) in [int, str, unicode, bool, NoneType]:
             return data
         #convert lists
         elif isinstance(data, list):

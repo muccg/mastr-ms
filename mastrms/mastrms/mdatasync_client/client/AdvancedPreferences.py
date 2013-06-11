@@ -3,7 +3,6 @@ import os
 import os.path
 import plogging
 import wx.lib.filebrowsebutton as filebrowse
-from config import *
 
 outlog = plogging.getLogger('client')
 
@@ -115,8 +114,3 @@ class AdvancedPreferences(wx.Dialog):
 
         #call the method that will serialise the config.
         self.config.save()
-
-
-
-
-
