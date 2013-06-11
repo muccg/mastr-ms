@@ -13,6 +13,8 @@ import logging
 import dingus
 from contextlib import contextmanager
 
+logger = logging.getLogger(__name__)
+
 def south_shut_up():
     "make south shut up"
     import south.logger
@@ -47,7 +49,6 @@ class MyFirstSyncTest(LiveServerTestCase):
                                        default_data_path="testing data path",
                                        username=os.environ["LOGNAME"],
                                        flags="-rz")
-
 
         #user = User.objects.get(username__istartswith="admin")
         user = User.objects.create(username="testuser")
@@ -108,7 +109,8 @@ class MyFirstSyncTest(LiveServerTestCase):
         self.run = run
         self.test_client = None
 
-    def test_fixture_setup(self):
+    def test_sync1(self):
+        # 1. add a run, with 2 or more samples
         self.assertEquals(self.run.runsample_set.count(), 2)
 
     def setup_client(self):
@@ -149,15 +151,13 @@ class MyFirstSyncTest(LiveServerTestCase):
                 # Initiate sync
                 logger.debug("about to click_sync")
                 self.test_client.click_sync()
-                logger.debug("sleeping")
-                time.sleep(4)
                 logger.debug("finished")
 
                 self.test_client.quit()
 
                 # load up received json object
                 self.assertEquals(len(received_json), 1)
-                requested_files = sorted(received_json[0]["files"].keys())
+                requested_files = self.find_files_in_json(received_json)[0]
 
                 # a. check that files are requested
                 self.assertEquals(len(requested_files), 2)
@@ -184,16 +184,12 @@ class MyFirstSyncTest(LiveServerTestCase):
                 # Initiate sync
                 logger.debug("about to click_sync")
                 self.test_client.click_sync()
-                logger.debug("sleeping")
-                time.sleep(4)
                 logger.debug("finished")
 
                 self.test_client.quit()
 
                 # load up received json object
-                logger.debug("received json is %s" % repr(received_json))
-                requested_files = [sorted(r["files"].keys()) for r in received_json
-                                   if "files" in r]
+                requested_files = self.find_files_in_json(received_json)
                 self.assertEquals(len(requested_files), 1)
 
                 # a. check that files are requested
@@ -210,13 +206,7 @@ class MyFirstSyncTest(LiveServerTestCase):
                               "runsample1_filename")
 
             # c. check server for file
-            server_filename = os.path.join(settings.REPO_FILES_ROOT, "runs",
-                                           str(self.run.created_on.year),
-                                           str(self.run.created_on.month),
-                                           str(self.run.id),
-                                           "runsample1_filename")
-            # fixme: there should be a method on mastrms.repository.Run
-            # to get its directory ^^^
+            server_filename = runsample_filename(self.run, "runsample1_filename")
             logger.debug("server filename is %s" % server_filename)
             self.assertTrue(os.path.exists(server_filename))
 
@@ -233,22 +223,16 @@ class MyFirstSyncTest(LiveServerTestCase):
                 # Initiate sync
                 logger.debug("about to click_sync")
                 self.test_client.click_sync()
-                logger.debug("sleeping")
-                time.sleep(4)
 
                 logger.debug("clicking sync again")
                 self.test_client.click_sync()
-                logger.debug("sleeping")
-                time.sleep(4)
 
                 logger.debug("finished")
 
                 self.test_client.quit()
 
                 # load up received json object
-                logger.debug("received json is %s" % repr(received_json))
-                requested_files = [sorted(r["files"].keys()) for r in received_json
-                                   if "files" in r]
+                requested_files = self.find_files_in_json(received_json)
                 self.assertEquals(len(requested_files), 2)
 
                 # a. check that 2 files are requested the first sync,
@@ -268,15 +252,80 @@ class MyFirstSyncTest(LiveServerTestCase):
                               "runsample1_filename")
 
             # c. check server for file
-            server_filename = os.path.join(settings.REPO_FILES_ROOT, "runs",
-                                           str(self.run.created_on.year),
-                                           str(self.run.created_on.month),
-                                           str(self.run.id),
-                                           "runsample1_filename")
-            # fixme: there should be a method on mastrms.repository.Run
-            # to get its directory ^^^
+            server_filename = runsample_filename(self.run, "runsample1_filename")
             logger.debug("server filename is %s" % server_filename)
             self.assertTrue(os.path.exists(server_filename))
+
+    def test_sync5(self):
+        rsync_results = []
+        with FakeRsync(rsync_results, do_copy=True):
+            self.setup_client()
+
+            # Add a file to the client data folder
+            self.simulator.process_worklist(self.worklist[0:1])
+
+            with json_hooker() as received_json:
+                logger.debug("about to click_sync")
+                self.test_client.click_sync()
+                logger.debug("clicking sync again")
+                self.test_client.click_sync()
+                logger.debug("finished")
+                self.test_client.quit()
+
+                # load up received json object
+                requested_files = self.find_files_in_json(received_json)
+                self.assertEquals(len(requested_files), 2)
+
+                # a. check that 2 files are requested the first sync,
+                # then 1 first is requested for second sync.
+                self.assertEquals(len(requested_files[0]), 2)
+                self.assertEquals(len(requested_files[1]), 1)
+                self.assertEquals(requested_files[0][0], "runsample1_filename")
+                self.assertEquals(requested_files[0][1], "runsample2_filename")
+                self.assertEquals(requested_files[1][0], "runsample2_filename")
+
+                # clear received json for testing purposes
+                del received_json[:]
+
+                # Add another file to the client data folder
+                self.simulator.process_worklist(self.worklist[1:2])
+                self.test_client.click_sync()
+
+                # Check that 1 file is still requested
+                requested_files = self.find_files_in_json(received_json)
+                self.assertEquals(len(requested_files), 1)
+
+            # b. check that rsync was called twice
+            self.assertEquals(len(rsync_results), 2)
+            self.assertTrue(bool(rsync_results[0]))
+            self.assertTrue(bool(rsync_results[1]))
+            # b. check that both files were rsynced
+            self.assertEquals(len(rsync_results[0]["source_files"]), 1)
+            self.assertEquals(os.path.basename(rsync_results[0]["source_files"][0][1]),
+                              "runsample1_filename")
+            self.assertEquals(len(rsync_results[1]["source_files"]), 1)
+            self.assertEquals(os.path.basename(rsync_results[1]["source_files"][0][1]),
+                              "runsample1_filename")
+
+            # c. check server for presence of files
+            server_filename = runsample_filename(self.run, "runsample1_filename")
+            logger.debug("server filename 1 is %s" % server_filename)
+            self.assertTrue(os.path.exists(server_filename))
+            server_filename = runsample_filename(self.run, "runsample2_filename")
+            logger.debug("server filename 2 is %s" % server_filename)
+            self.assertTrue(os.path.exists(server_filename))
+
+    @staticmethod
+    def find_files_in_json(received_json):
+        """
+        Looks in the captured json dicts for objects with contain
+        "files" and returns these values.
+        Returns a list of lists -- a list for each request.
+        """
+        logger.debug("received json is %s" % repr(received_json))
+        return [sorted(r["files"].keys())
+                for r in received_json
+                if "files" in r]
 
     def tearDown(self):
         # if self.test_client:
@@ -316,6 +365,17 @@ def get_csv_worklist_from_run(run, user):
                         ]))
     runsamples = run.runsample_set.order_by("sequence", "filename")
     return "\n".join(map(csv_line, runsamples)) + "\n"
+
+def runsample_filename(run, sample_filename):
+    """
+    Gets the absolute expected filename for a runsample.
+    fixme: there should be a method on mastrms.repository.Run
+           to get its directory.
+    """
+    return os.path.join(settings.REPO_FILES_ROOT, "runs",
+                        str(run.created_on.year),
+                        str(run.created_on.month),
+                        str(run.id), sample_filename)
 
 
 # # Trying out selenium tests
