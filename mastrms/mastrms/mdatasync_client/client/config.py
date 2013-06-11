@@ -21,7 +21,7 @@ class MSDSConfig(object):
               'organisation'  : ['defaultorg',  'Organisation', 'Identifies which organisation your site belongs to. It is important that this is correct.', False],
                    'localdir' : ['syncdir','Data root directory', 'The local root directory for the data.'],
                    'synchub'  : ['https://ccg.murdoch.edu.au/mastrms/sync/', 'SyncHub Address', 'The web address of the synchub server'],
-                   'updateurl' : ['http://ccg.murdoch.edu.au/ma/', 'Program Update URL', 'The web address of the server that should be contacted for program updates'],
+                   'updateurl' : ['http://repo.ccgapps.com.au/ma/', 'Program Update URL', 'The web address of the server that should be contacted for program updates'],
                    'logfile'  : [os.path.join(DATADIR, 'rsync_log.txt'), 'Local Log File', 'Sync operations are logged to this file'],
                    'loglevel' : [plogging.get_level('client'), "Log Level", "The log level of the client"],
                    'syncfreq' : [30, 'Sync Frequency (Mins)', 'How often the application should push updates to the server'],
