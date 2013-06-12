@@ -20,10 +20,11 @@ class TestClient(object):
     This class runs the client in a thread and provides methods for
     unit tests to control the client.
     """
-    def __init__(self, config):
+    def __init__(self, config, maximize=False):
         logger.info("TestClient starting")
         logger.info("Config\n%s" % config)
         self.config = config
+        self.maximize = maximize
         self.lock = threading.RLock()
         self.ready = threading.Event()
         self.finished = threading.Event()
@@ -35,6 +36,8 @@ class TestClient(object):
     def _client_thread(self):
         logger.info("TestClient mainloop thread")
         self.m = MDataSyncApp(self.config)
+        if self.maximize:
+            self.m.win.Maximize()
         logger.addHandler(self.m.win.getLog())
         self._setup_exit_hook()
         self._post_start_event()

@@ -132,7 +132,7 @@ class MyFirstSyncTest(LiveServerTestCase):
                             archivesynced=True,
                             archivedfilesdir=archivedir)
 
-        test_client = TestClient(config)
+        test_client = TestClient(config, maximize=True)
         self.test_client = test_client
 
         return test_client
@@ -269,8 +269,6 @@ class MyFirstSyncTest(LiveServerTestCase):
                 self.test_client.click_sync()
                 logger.debug("clicking sync again")
                 self.test_client.click_sync()
-                logger.debug("finished")
-                self.test_client.quit()
 
                 # load up received json object
                 requested_files = self.find_files_in_json(received_json)
@@ -291,6 +289,9 @@ class MyFirstSyncTest(LiveServerTestCase):
                 self.simulator.process_worklist(self.worklist[1:2])
                 self.test_client.click_sync()
 
+                logger.debug("finished")
+                self.test_client.quit()
+
                 # Check that 1 file is still requested
                 requested_files = self.find_files_in_json(received_json)
                 self.assertEquals(len(requested_files), 1)
@@ -305,7 +306,7 @@ class MyFirstSyncTest(LiveServerTestCase):
                               "runsample1_filename")
             self.assertEquals(len(rsync_results[1]["source_files"]), 1)
             self.assertEquals(os.path.basename(rsync_results[1]["source_files"][0][1]),
-                              "runsample1_filename")
+                              "runsample2_filename")
 
             # c. check server for presence of files
             server_filename = runsample_filename(self.run, "runsample1_filename")
