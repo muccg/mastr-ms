@@ -1,6 +1,7 @@
 import sys
 import os.path
 import threading
+import signal
 import time
 import logging
 import wx
@@ -20,6 +21,8 @@ class TestClient(object):
     This class runs the client in a thread and provides methods for
     unit tests to control the client.
     """
+    clients = []
+
     def __init__(self, config, maximize=False):
         logger.info("TestClient starting")
         logger.info("Config\n%s" % config)
@@ -28,10 +31,12 @@ class TestClient(object):
         self.lock = threading.RLock()
         self.ready = threading.Event()
         self.finished = threading.Event()
+        self.have_quit = False
         self.thread = threading.Thread(target=self._client_thread)
         self.thread.start()
         self._wait_for_ready()
         logger.debug("TestClient ready")
+        self.__class__.clients.append(self)
 
     def _client_thread(self):
         logger.info("TestClient mainloop thread")
@@ -68,13 +73,52 @@ class TestClient(object):
     def _wait_for_ready(self):
         self.ready.wait()
 
-    def quit(self):
-        logger.info("Quitting")
-        wx.CallAfter(self.m.win.OnMenuQuit, None)
-        self.thread.join()
+    def set_window_title(self, title):
+        wx.CallAfter(self.m.win.SetTitle, title)
+
+    def quit(self, force=False):
+        """
+        Cleanly quits the client, unless it is already in the process
+        of quitting, or if the TEST_CLIENT_LINGER environment variable
+        is non-zero. The TEST_CLIENT_LINGER environment variable is
+        overridden by the `force' argument to this method.
+        """
+        if not force and self._should_linger():
+            logger.info("Not quitting client due to TEST_CLIENT_LINGER setting")
+        elif not self.have_quit:
+            logger.info("Quitting")
+            wx.CallAfter(self.m.win.OnMenuQuit, None)
+            self.thread.join()
+            self.have_quit = True
+
+    def _should_linger(self):
+        """
+        For debugging test cases, it is sometimes handy to keep the
+        client open. This can be controlled with an environment
+        variable.
+        """
+        linger = os.environ.get("TEST_CLIENT_LINGER", "")
+        try:
+            return int(linger) != 0
+        except ValueError:
+            return bool(linger)
 
     def _setup_exit_hook(self):
         def set_finished(event):
             logger.debug("Window closed")
             self.finished.set()
         wx.EVT_CLOSE(self.m.win, set_finished)
+
+    def __del__(self):
+        self.__class__.clients.remove(self)
+        super(TestClient, self).__del__()
+
+    @classmethod
+    def kill_all(cls):
+        for client in cls.clients:
+            client.quit()
+
+def ctrlc_handler(signame, frame):
+    TestClient.kill_all()
+
+signal.signal(signal.SIGINT, ctrlc_handler)

@@ -10,6 +10,8 @@ import tempfile
 import mastrms.mdatasync_client.client.plogging  # wtf
 import time
 import logging
+import os
+import pipes
 import dingus
 from contextlib import contextmanager
 
@@ -22,7 +24,15 @@ def south_shut_up():
 
 south_shut_up()
 
-@override_settings(REPO_FILES_ROOT=tempfile.mkdtemp(prefix="testrepo"))
+TESTING_REPO = tempfile.mkdtemp(prefix="testrepo-")
+logger.info("Created testing repo %s" % TESTING_REPO)
+
+def tearDownModule():
+    global TESTING_REPO
+    logger.info("Removing testing repo %s" % TESTING_REPO)
+    os.rmdir(TESTING_REPO)
+
+@override_settings(REPO_FILES_ROOT=TESTING_REPO)
 class MyFirstSyncTest(LiveServerTestCase):
     # fixme: may be better to use json than setup test case by hand.
     # For some reason, fixtures are required, or else the test case
@@ -33,14 +43,40 @@ class MyFirstSyncTest(LiveServerTestCase):
         south_shut_up()
         self.setup_more_fixtures()
 
-        if not os.environ.get("DISPLAY"):
-            self.use_xvfb()
+        self.setup_display()
 
-    def use_xvfb(self):
-        from xvfbwrapper import Xvfb
-        self.vdisplay = Xvfb()
-        self.vdisplay.start()
-        self.addCleanup(self.vdisplay.stop)
+        return super(MyFirstSyncTest, self).setUp()
+
+    def tearDown(self):
+        # clean out the temporary dir
+        logger.info("Clearing out testing repo %s" % pipes.quote(settings.REPO_FILES_ROOT))
+        for f in os.listdir(settings.REPO_FILES_ROOT):
+            os.system("rm -rf %s" % pipes.quote(os.path.join(settings.REPO_FILES_ROOT, f)))
+
+    @classmethod
+    def setup_display(cls):
+        if not os.environ.get("DISPLAY"):
+            logging.info("Using Xvfb for display")
+            from xvfbwrapper import Xvfb
+            cls.vdisplay = Xvfb()
+            cls.vdisplay.start()
+        else:
+            cls.vdisplay = None
+
+    @classmethod
+    def teardown_display(cls):
+        if cls.vdisplay:
+            cls.vdisplay.stop()
+
+    @classmethod
+    def setUpClass(cls):
+        cls.setup_display()
+        super(MyFirstSyncTest, cls).setUpClass()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.teardown_display()
+        super(MyFirstSyncTest, cls).tearDownClass()
 
     def setup_more_fixtures(self):
         # nodeclient, project, experiment, run, samples
@@ -111,15 +147,16 @@ class MyFirstSyncTest(LiveServerTestCase):
 
     def test_sync1(self):
         # 1. add a run, with 2 or more samples
-        self.assertEquals(self.run.runsample_set.count(), 2)
+        self.assertEqual(self.run.runsample_set.count(), 2)
 
     def setup_client(self):
         self.worklist = WorkList(get_csv_worklist_from_run(self.run, self.user))
 
         self.simulator = Simulator()
+        self.addCleanup(self.simulator.cleanup)
 
-        logfile = tempfile.NamedTemporaryFile()
-        archivedir = tempfile.mkdtemp()
+        logfile = tempfile.NamedTemporaryFile(prefix="rsync-", suffix=".log")
+        archivedir = tempfile.mkdtemp(prefix="archive-")
 
         config = MSDSConfig(user=os.environ["LOGNAME"],
                             sitename=self.nc.site_name,
@@ -129,13 +166,24 @@ class MyFirstSyncTest(LiveServerTestCase):
                             synchub="%s/sync/" % self.live_server_url,
                             logfile=logfile.name,
                             loglevel=plogging.LoggingLevels.DEBUG,
-                            archivesynced=True,
+                            archivesynced=False,
                             archivedfilesdir=archivedir)
 
         test_client = TestClient(config, maximize=True)
+        test_client.set_window_title(self.id())
         self.test_client = test_client
 
+        self.addCleanup(self.cleanup_client_files)
+        self.addCleanup(test_client.quit)
+
         return test_client
+
+    def cleanup_client_files(self):
+        config = self.test_client.config
+        try: os.remove(config["logfile"])
+        except EnvironmentError: pass
+        try: os.system("rm -rf %s" % pipes.quote(config["archivedfilesdir"]))
+        except EnvironmentError: pass
 
     def test_sync2(self):
         # We are testing for Popen calls to check how rsync was
@@ -156,16 +204,16 @@ class MyFirstSyncTest(LiveServerTestCase):
                 self.test_client.quit()
 
                 # load up received json object
-                self.assertEquals(len(received_json), 1)
+                self.assertEqual(len(received_json), 1)
                 requested_files = self.find_files_in_json(received_json)[0]
 
                 # a. check that files are requested
-                self.assertEquals(len(requested_files), 2)
-                self.assertEquals(requested_files[0], "runsample1_filename")
-                self.assertEquals(requested_files[1], "runsample2_filename")
+                self.assertEqual(len(requested_files), 2)
+                self.assertEqual(requested_files[0], "runsample1_filename")
+                self.assertEqual(requested_files[1], "runsample2_filename")
 
                 # b. check that rsync was not called
-                self.assertEquals(len(subprocess.Popen.calls), 0)
+                self.assertEqual(len(subprocess.Popen.calls), 0)
 
         self.assertTrue(True)
 
@@ -190,19 +238,19 @@ class MyFirstSyncTest(LiveServerTestCase):
 
                 # load up received json object
                 requested_files = self.find_files_in_json(received_json)
-                self.assertEquals(len(requested_files), 1)
+                self.assertEqual(len(requested_files), 1)
 
                 # a. check that files are requested
-                self.assertEquals(len(requested_files[0]), 2)
-                self.assertEquals(requested_files[0][0], "runsample1_filename")
-                self.assertEquals(requested_files[0][1], "runsample2_filename")
+                self.assertEqual(len(requested_files[0]), 2)
+                self.assertEqual(requested_files[0][0], "runsample1_filename")
+                self.assertEqual(requested_files[0][1], "runsample2_filename")
 
             # b. check that rsync was called
-            self.assertEquals(len(rsync_results), 1)
+            self.assertEqual(len(rsync_results), 1)
             self.assertTrue(bool(rsync_results[0]))
             # b. check that the file was rsynced
-            self.assertEquals(len(rsync_results[0]["source_files"]), 1)
-            self.assertEquals(os.path.basename(rsync_results[0]["source_files"][0][1]),
+            self.assertEqual(len(rsync_results[0]["source_files"]), 1)
+            self.assertEqual(os.path.basename(rsync_results[0]["source_files"][0][1]),
                               "runsample1_filename")
 
             # c. check server for file
@@ -227,34 +275,53 @@ class MyFirstSyncTest(LiveServerTestCase):
                 logger.debug("clicking sync again")
                 self.test_client.click_sync()
 
+                logger.debug("clicking sync a third time")
+                self.test_client.click_sync() # rsync should not be run here
+
                 logger.debug("finished")
 
                 self.test_client.quit()
 
                 # load up received json object
                 requested_files = self.find_files_in_json(received_json)
-                self.assertEquals(len(requested_files), 2)
+                self.assertEqual(len(requested_files), 3,
+                                 "three requested files responses")
 
                 # a. check that 2 files are requested the first sync,
-                # then 1 first is requested for second sync.
-                self.assertEquals(len(requested_files[0]), 2)
-                self.assertEquals(len(requested_files[1]), 1)
-                self.assertEquals(requested_files[0][0], "runsample1_filename")
-                self.assertEquals(requested_files[0][1], "runsample2_filename")
-                self.assertEquals(requested_files[1][0], "runsample2_filename")
+                # then 2 are requested for second sync,
+                # then 1 file is requested for the third sync
+                self.assertEqual(len(requested_files[0]), 2,
+                                 "2 files are requested the first sync")
+                self.assertEqual(len(requested_files[1]), 2,
+                                 "2 files are requested for second sync")
+                self.assertEqual(len(requested_files[2]), 1,
+                                 "1 file is requested for third sync")
+                self.assertEqual(requested_files[0][0], "runsample1_filename")
+                self.assertEqual(requested_files[0][1], "runsample2_filename")
+                self.assertEqual(requested_files[1][0], "runsample1_filename")
+                self.assertEqual(requested_files[1][1], "runsample2_filename")
+                self.assertEqual(requested_files[2][0], "runsample2_filename")
 
-            # b. check that rsync was called only once
-            self.assertEquals(len(rsync_results), 1)
+            # b. check that rsync was called twice
+            self.assertEqual(len(rsync_results), 2,
+                             "check that rsync was called twice")
             self.assertTrue(bool(rsync_results[0]))
+            self.assertTrue(bool(rsync_results[1]))
             # b. check that the file was rsynced
-            self.assertEquals(len(rsync_results[0]["source_files"]), 1)
-            self.assertEquals(os.path.basename(rsync_results[0]["source_files"][0][1]),
-                              "runsample1_filename")
+            self.assertEqual(len(rsync_results[0]["source_files"]), 1)
+            self.assertEqual(os.path.basename(rsync_results[0]["source_files"][0][1]),
+                             "runsample1_filename",
+                             "first rsync transfers file 1")
+            self.assertEqual(len(rsync_results[1]["source_files"]), 1)
+            self.assertEqual(os.path.basename(rsync_results[1]["source_files"][0][1]),
+                             "runsample1_filename",
+                             "second rsync transfers file 1")
 
             # c. check server for file
             server_filename = runsample_filename(self.run, "runsample1_filename")
             logger.debug("server filename is %s" % server_filename)
-            self.assertTrue(os.path.exists(server_filename))
+            self.assertTrue(os.path.exists(server_filename),
+                            "%s exists on server" % server_filename)
 
     def test_sync5(self):
         rsync_results = []
@@ -272,15 +339,17 @@ class MyFirstSyncTest(LiveServerTestCase):
 
                 # load up received json object
                 requested_files = self.find_files_in_json(received_json)
-                self.assertEquals(len(requested_files), 2)
+                self.assertEqual(len(requested_files), 2)
 
                 # a. check that 2 files are requested the first sync,
-                # then 1 first is requested for second sync.
-                self.assertEquals(len(requested_files[0]), 2)
-                self.assertEquals(len(requested_files[1]), 1)
-                self.assertEquals(requested_files[0][0], "runsample1_filename")
-                self.assertEquals(requested_files[0][1], "runsample2_filename")
-                self.assertEquals(requested_files[1][0], "runsample2_filename")
+                # then 2 files are requested for second sync.
+                self.assertEqual(len(requested_files[0]), 2,
+                                 "2 files are requested the first sync")
+                self.assertEqual(len(requested_files[1]), 2,
+                                 "2 files are requested for second sync")
+                self.assertEqual(requested_files[0][0], "runsample1_filename")
+                self.assertEqual(requested_files[0][1], "runsample2_filename")
+                self.assertEqual(requested_files[1][0], "runsample1_filename")
 
                 # clear received json for testing purposes
                 del received_json[:]
@@ -294,19 +363,29 @@ class MyFirstSyncTest(LiveServerTestCase):
 
                 # Check that 1 file is still requested
                 requested_files = self.find_files_in_json(received_json)
-                self.assertEquals(len(requested_files), 1)
+                self.assertEqual(len(requested_files), 1)
 
-            # b. check that rsync was called twice
-            self.assertEquals(len(rsync_results), 2)
+            self.assertEqual(len(rsync_results), 3,
+                             "check that rsync was called three times")
             self.assertTrue(bool(rsync_results[0]))
             self.assertTrue(bool(rsync_results[1]))
-            # b. check that both files were rsynced
-            self.assertEquals(len(rsync_results[0]["source_files"]), 1)
-            self.assertEquals(os.path.basename(rsync_results[0]["source_files"][0][1]),
-                              "runsample1_filename")
-            self.assertEquals(len(rsync_results[1]["source_files"]), 1)
-            self.assertEquals(os.path.basename(rsync_results[1]["source_files"][0][1]),
-                              "runsample2_filename")
+            self.assertTrue(bool(rsync_results[2]))
+            # b. check that the file was rsynced
+            self.assertEqual(len(rsync_results[0]["source_files"]), 1,
+                             "first rsync transfers 1 file")
+            self.assertEqual(os.path.basename(rsync_results[0]["source_files"][0][1]),
+                             "runsample1_filename",
+                             "first rsync transfers file 1")
+            self.assertEqual(len(rsync_results[1]["source_files"]), 1,
+                             "second rsync transfers 1 file")
+            self.assertEqual(os.path.basename(rsync_results[1]["source_files"][0][1]),
+                             "runsample1_filename",
+                             "second rsync transfers file 1")
+            self.assertEqual(len(rsync_results[2]["source_files"]), 1,
+                             "third rsync transfers 1 file")
+            self.assertEqual(os.path.basename(rsync_results[2]["source_files"][0][1]),
+                             "runsample2_filename",
+                             "third rsync transfers file 2")
 
             # c. check server for presence of files
             server_filename = runsample_filename(self.run, "runsample1_filename")
@@ -315,6 +394,104 @@ class MyFirstSyncTest(LiveServerTestCase):
             server_filename = runsample_filename(self.run, "runsample2_filename")
             logger.debug("server filename 2 is %s" % server_filename)
             self.assertTrue(os.path.exists(server_filename))
+
+    def test_sync6(self):
+        rsync_results = []
+        with FakeRsync(rsync_results, do_copy=True):
+            self.setup_client()
+
+            # Add a file to the client data folder
+            self.simulator.process_worklist(self.worklist[0:1])
+
+            with json_hooker() as received_json:
+                logger.debug("about to click_sync")
+                self.test_client.click_sync()
+                logger.debug("clicking sync again")
+                self.test_client.click_sync()
+                logger.debug("clicking sync once more")
+                self.test_client.click_sync() # this shouldn't result in an rsync
+
+                # load up received json object
+                requested_files = self.find_files_in_json(received_json)
+                self.assertEqual(len(requested_files), 3,
+                                 "three requested files responses")
+
+                # a. check that 2 files are requested the first sync,
+                # then 2 are is requested for second sync,
+                # then 1 is requested for the third sync
+                self.assertEqual(len(requested_files[0]), 2,
+                                 "2 files are requested the first sync")
+                self.assertEqual(len(requested_files[1]), 2,
+                                 "2 files are requested for second sync")
+                self.assertEqual(len(requested_files[2]), 1,
+                                 "1 file is requested for third sync")
+                self.assertEqual(requested_files[0][0], "runsample1_filename")
+                self.assertEqual(requested_files[0][1], "runsample2_filename")
+                self.assertEqual(requested_files[1][0], "runsample1_filename")
+                self.assertEqual(requested_files[1][1], "runsample2_filename")
+                self.assertEqual(requested_files[2][0], "runsample2_filename")
+
+                # clear received json for testing purposes
+                del received_json[:]
+
+                # Add another file to the client data folder, do sync
+                self.simulator.process_worklist(self.worklist[1:2])
+                self.test_client.click_sync()
+
+                # Check that 1 file is still requested
+                requested_files = self.find_files_in_json(received_json)
+                self.assertEqual(len(requested_files), 1,
+                                 "check that 1 file is still requested")
+
+                # clear received json for testing purposes
+                del received_json[:]
+
+                # append data to a files on client, do sync
+                self.simulator.add_more_data_with_worklist(self.worklist[0:2])
+                self.test_client.click_sync()
+
+                # Check that 1 file is still requested
+                requested_files = self.find_files_in_json(received_json)
+                self.assertEqual(len(requested_files), 1,
+                                 "check that 1 file is still requested")
+
+                logger.debug("finished")
+                self.test_client.quit()
+
+
+            # b. check that rsync was called four times
+            self.assertEqual(len(rsync_results), 4,
+                             "check that rsync was called five times")
+            self.assertTrue(bool(rsync_results[0]))
+            self.assertTrue(bool(rsync_results[1]))
+            self.assertTrue(bool(rsync_results[2]))
+            self.assertTrue(bool(rsync_results[3]))
+            # b. check that both files were rsynced
+            self.assertEqual(len(rsync_results[0]["source_files"]), 1)
+            self.assertEqual(os.path.basename(rsync_results[0]["source_files"][0][1]),
+                             "runsample1_filename",
+                             "first rsync transfers file 1")
+            self.assertEqual(len(rsync_results[1]["source_files"]), 1)
+            self.assertEqual(os.path.basename(rsync_results[1]["source_files"][0][1]),
+                             "runsample1_filename",
+                             "second rsync transfers file 1")
+            self.assertEqual(len(rsync_results[1]["source_files"]), 1)
+            self.assertEqual(os.path.basename(rsync_results[2]["source_files"][0][1]),
+                             "runsample2_filename",
+                             "third rsync transfers file 2")
+            self.assertEqual(os.path.basename(rsync_results[3]["source_files"][0][1]),
+                             "runsample2_filename",
+                             "fourth rsync transfers file 2")
+
+            # c. check server for presence of files
+            server_filename = runsample_filename(self.run, "runsample1_filename")
+            logger.debug("server filename 1 is %s" % server_filename)
+            self.assertTrue(os.path.exists(server_filename),
+                            "%s exists on server" % server_filename)
+            server_filename = runsample_filename(self.run, "runsample2_filename")
+            logger.debug("server filename 2 is %s" % server_filename)
+            self.assertTrue(os.path.exists(server_filename),
+                            "%s exists on server" % server_filename)
 
     @staticmethod
     def find_files_in_json(received_json):
@@ -327,11 +504,6 @@ class MyFirstSyncTest(LiveServerTestCase):
         return [sorted(r["files"].keys())
                 for r in received_json
                 if "files" in r]
-
-    def tearDown(self):
-        # if self.test_client:
-        #     self.test_client.quit()
-        pass
 
 @contextmanager
 def json_hooker(received_json=None):
