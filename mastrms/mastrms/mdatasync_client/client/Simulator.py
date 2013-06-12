@@ -24,7 +24,7 @@ class Simulator(object):
 
     def setup_destdir(self, destdir=None):
         if destdir is None:
-            destdir = tempfile.mkdtemp()
+            destdir = tempfile.mkdtemp(prefix="simulator-")
 
         if not os.path.exists(destdir):
             logger.info("Creating directory %s" % destdir)
@@ -66,6 +66,22 @@ class Simulator(object):
 
             else:
                 logger.info("Item %d already exits: %s" % (count, fname) )
+
+    def add_more_data_with_worklist(self, worklist):
+        for listitem in worklist:
+            fname = os.path.join(self.destdir, listitem)
+            if not os.path.exists(fname):
+                logger.info("was asked to add more data, but item doesn't exist: %s" % fname)
+            else:
+                if os.path.isdir(fname):
+                    # drop another file in the directory
+                    file_num = len(os.listdir(fname))
+                    self._create_file(fname, str(file_num))
+                    self._create_file(fname, str(file_num + 1))
+                else:
+                    with open(fname, 'w+') as f:
+                        f.write("\nHere is some extra data for the test file.\n")
+                    logger.info("Updated item: %s" % fname)
 
     def _create_file(self, dir_name, file_name):
         tfname = os.path.join(dir_name, file_name)
