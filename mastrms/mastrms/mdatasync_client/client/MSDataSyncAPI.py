@@ -237,16 +237,16 @@ class MSDataSyncAPI(object):
             jsonret = json.loads(jsonresp)
         except IOError, e:
             returnFn(retcode=False, retstring="Could not initiate Sync %s" % e)
-            jsonret = { "success": False, "msg": str(e) }
+            jsonret = { "success": False, "message": str(e) }
         except ValueError, e:
-            jsonret = { "success": False, "msg": str(e) }
+            jsonret = { "success": False, "message": str(e) }
 
         if jsonret.get("success", False):
             details = jsonret["details"]
             files = jsonret["files"]
         else:
             #if there is an error, bail out by calling the return function
-            returnFn(retcode=False, retstring="Sync Initiation failed: %s" % jsonret["msg"])
+            returnFn(retcode=False, retstring="Sync Initiation failed: %s" % jsonret.get("message", "?"))
 
         return details, files
 
