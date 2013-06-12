@@ -112,7 +112,9 @@ function jslint() {
 # run the tests using django-admin.py
 function djangotests() {
     activate_virtualenv
-    ${TOPDIR}/virt_${PROJECT_NAME}/bin/django-admin.py test ${PROJECT_NAME} --noinput
+    django-admin.py test --noinput --with-xunit --xunit-file=tests.xml \
+        --exclude="esky" --exclude="yaphc" --exclude="httplib2" \
+        ${PROJECT_NAME}
 }
 
 
