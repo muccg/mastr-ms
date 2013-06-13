@@ -116,6 +116,7 @@ function callbacker(){
 <div id="appLoad" style="z-index:1;position:absolute;left:0px;top:0px;width:400px;height:200px;background:white;padding:200px;"><img src="{{ STATIC_URL }}ext-3.4.0/resources/images/default/shared/large-loading.gif"> Loading...</div>
 <div id="loginDiv" style="width:300;">
 <form id="loginForm" action="{{ APP_SECURE_URL }}login/processLogin" method="POST">
+{% csrf_token %}
 <label class="x-form-item-label">Email address:</label>
 <div class="x-form-element" style="margin-top:-10px;">
 <input id="username" name="username">
