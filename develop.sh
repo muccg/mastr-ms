@@ -6,7 +6,9 @@
 # break on error
 set -e 
 
-ACTION="$1"
+TOPDIR=$(cd `dirname $0`; pwd)
+ACTION=$1
+shift
 
 PORT='8000'
 
@@ -29,6 +31,9 @@ function settings() {
     export DJANGO_SETTINGS_MODULE="${PROJECT_NAME}.settings"
 }
 
+function activate_virtualenv() {
+    source ${TOPDIR}/virt_${PROJECT_NAME}/bin/activate
+}
 
 # ssh setup, make sure our ccg commands can run in an automated environment
 function ci_ssh_agent() {
@@ -52,7 +57,9 @@ function ci_remote_build() {
     time ccg ${AWS_BUILD_INSTANCE} puppet
     time ccg ${AWS_BUILD_INSTANCE} shutdown:50
 
-    if test "x$BAMBOO_BUILDKEY" = "x"; then
+    cd ${TOPDIR}
+
+    if [ -z "$BAMBOO_BUILDKEY" ]; then
         # We aren't running under Bamboo, create new build-number.txt.
         build_number_head > build-number.txt
     else
@@ -86,14 +93,15 @@ function ci_remote_destroy() {
 
 # lint using flake8
 function lint() {
-    source virt_${PROJECT_NAME}/bin/activate
+    activate_virtualenv
+    cd ${TOPDIR}
     flake8 ${PROJECT_NAME} --ignore=E501 --count
 }
 
 
 # lint js, assumes closure compiler
 function jslint() {
-    JSFILES="mastrms/mastrms/app/static/js/*.js mastrms/mastrms/app/static/js/repo/*.js"
+    JSFILES="${TOPDIR}/mastrms/mastrms/app/static/js/*.js ${TOPDIR}/mastrms/mastrms/app/static/js/repo/*.js"
     for JS in $JSFILES
     do
         java -jar ${CLOSURE} --js $JS --js_output_file output.js --warning_level DEFAULT --summary_detail_level 3
@@ -103,20 +111,22 @@ function jslint() {
 
 # run the tests using django-admin.py
 function djangotests() {
-    source virt_${PROJECT_NAME}/bin/activate
-    virt_${PROJECT_NAME}/bin/django-admin.py test ${PROJECT_NAME} --noinput
+    activate_virtualenv
+    django-admin.py test --noinput --with-xunit --xunit-file=tests.xml \
+        --exclude="esky" --exclude="yaphc" --exclude="httplib2" \
+        ${PROJECT_NAME}
 }
 
 
 function nosetests() {
-    source virt_${PROJECT_NAME}/bin/activate
-    virt_${PROJECT_NAME}/bin/nosetests --with-xunit --xunit-file=tests.xml -v -w tests
+    activate_virtualenv
+    nosetests --with-xunit --xunit-file=tests.xml -v -w tests
 }
 
 
 function nose_collect() {
-    source virt_${PROJECT_NAME}/bin/activate
-    virt_${PROJECT_NAME}/bin/nosetests -v -w tests --collect-only
+    activate_virtualenv
+    nosetests -v -w tests --collect-only
 }
 
 
@@ -130,50 +140,50 @@ function installapp() {
     which virtualenv >/dev/null
 
     echo "Install ${PROJECT_NAME}"
-    virtualenv --system-site-packages virt_${PROJECT_NAME}
-    pushd ${PROJECT_NAME}
+    virtualenv --system-site-packages ${TOPDIR}/virt_${PROJECT_NAME}
+    pushd ${TOPDIR}/${PROJECT_NAME}
     ../virt_${PROJECT_NAME}/bin/pip install ${PIP_OPTS} -e .
     popd
-    virt_${PROJECT_NAME}/bin/pip install ${PIP_OPTS} ${MODULES}
+    ${TOPDIR}/virt_${PROJECT_NAME}/bin/pip install ${PIP_OPTS} ${MODULES}
 }
 
 
 # django syncdb, migrate and collect static
 function syncmigrate() {
     echo "syncdb"
-    virt_${PROJECT_NAME}/bin/django-admin.py syncdb --noinput --settings=${DJANGO_SETTINGS_MODULE} 1> syncdb-develop.log
+    ${TOPDIR}/virt_${PROJECT_NAME}/bin/django-admin.py syncdb --noinput --settings=${DJANGO_SETTINGS_MODULE} 1> syncdb-develop.log
     echo "migrate"
-    virt_${PROJECT_NAME}/bin/django-admin.py migrate --settings=${DJANGO_SETTINGS_MODULE} 1> migrate-develop.log
+    ${TOPDIR}/virt_${PROJECT_NAME}/bin/django-admin.py migrate --settings=${DJANGO_SETTINGS_MODULE} 1> migrate-develop.log
     echo "collectstatic"
-    virt_${PROJECT_NAME}/bin/django-admin.py collectstatic --noinput --settings=${DJANGO_SETTINGS_MODULE} 1> collectstatic-develop.log
+    ${TOPDIR}/virt_${PROJECT_NAME}/bin/django-admin.py collectstatic --noinput --settings=${DJANGO_SETTINGS_MODULE} 1> collectstatic-develop.log
 }
 
 
 # start runserver
 function startserver() {
-    virt_${PROJECT_NAME}/bin/django-admin.py runserver_plus ${port}
+    ${TOPDIR}/virt_${PROJECT_NAME}/bin/django-admin.py runserver_plus ${port}
 }
 
 
 function pythonversion() {
-    virt_${PROJECT_NAME}/bin/python -V
+    ${TOPDIR}/virt_${PROJECT_NAME}/bin/python -V
 }
 
 
 function pipfreeze() {
     echo "${PROJECT_NAME} pip freeze"
-    virt_${PROJECT_NAME}/bin/pip freeze
+    ${TOPDIR}/virt_${PROJECT_NAME}/bin/pip freeze
     echo '' 
 }
 
 
 function clean() {
-    find ${PROJECT_NAME} -name "*.pyc" -exec rm -rf {} \;
+    find ${TOPDIR}/${PROJECT_NAME} -name "*.pyc" -exec rm -rf {} \;
 }
 
 
 function purge() {
-    rm -rf virt_${PROJECT_NAME}
+    rm -rf ${TOPDIR}/virt_${PROJECT_NAME}
     rm *.log
 }
 

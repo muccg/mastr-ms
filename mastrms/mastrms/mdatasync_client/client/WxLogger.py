@@ -61,5 +61,5 @@ class Log(wx.PyLog, logging.Handler):
 
     def emit(self, record):
         "Implementation of logging.Handler.emit"
-        self.DoLogString(record.msg, record.relativeCreated,
-                         self.PYTHON_LEVEL_MAP.get(record.levelno, self.LOG_ERROR))
+        wx.CallAfter(self.DoLogString, record.msg, record.relativeCreated,
+                     self.PYTHON_LEVEL_MAP.get(record.levelno, self.LOG_ERROR))

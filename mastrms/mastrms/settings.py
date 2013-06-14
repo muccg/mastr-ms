@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_extensions',
     'userlog',
-    'south'
+    'south',
+    'django_nose',
 ]
 
 # these determine which authentication method to use
@@ -228,6 +229,8 @@ LOGGING = {
         },
     }
 }
+
+TEST_RUNNER = "django_nose.NoseTestSuiteRunner"
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-#
 
