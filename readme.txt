@@ -5,7 +5,7 @@ Metabolomics Australia Sample Tracking Repository
 -------------------------------------------------
 
 Mastr-MS is a collaborative project undertaken by the Australian Bioinformatics Facility (ABF), located at the Centre for Comparative
-Genomics, for Metabolomics Australia (MA).
+Genomics (http://ccg.murdoch.edu.au/), for Metabolomics Australia (MA).
 
 Mastr-MS is comprised of a number of modules:
 
