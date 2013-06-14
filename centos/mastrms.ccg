@@ -1,4 +1,3 @@
-
 WSGISocketPrefix run/wsgi
 WSGIDaemonProcess mastrms processes=2 threads=15 display-name=%{GROUP}
 
@@ -17,13 +16,13 @@ WSGIDaemonProcess mastrms processes=2 threads=15 display-name=%{GROUP}
     Allow from all
   </Directory>
 
-    <Location /mastrms>
+  <Location /mastrms>
     WSGIProcessGroup mastrms
-    </Location>
-      Alias /mastrms/static /usr/local/webapps/mastrms/static
-      Alias /mastrms/images /usr/local/webapps/mastrms/static/images
-      WSGIScriptAlias /mastrms /usr/local/webapps/mastrms/django.wsgi
+  </Location>
 
+  Alias /mastrms/static /usr/local/webapps/mastrms/static
+  Alias /mastrms/images /usr/local/webapps/mastrms/static/images
+  WSGIScriptAlias /mastrms /usr/local/webapps/mastrms/django.wsgi
 </VirtualHost>
 
 <VirtualHost *:443>
@@ -49,10 +48,11 @@ WSGIDaemonProcess mastrms processes=2 threads=15 display-name=%{GROUP}
   CustomLog /etc/httpd/logs/ssl_request_log \
           "%t %h %{SSL_PROTOCOL}x %{SSL_CIPHER}x \"%r\" %b"
 
-    <Location /mastrms>
+  <Location /mastrms>
     WSGIProcessGroup mastrms
-    </Location>
-      Alias /mastrms/static /usr/local/webapps/mastrms/static
-      Alias /mastrms/images /usr/local/webapps/mastrms/static/images
-      WSGIScriptAlias /mastrms /usr/local/webapps/mastrms/django.wsgi
+  </Location>
+
+  Alias /mastrms/static /usr/local/webapps/mastrms/static
+  Alias /mastrms/images /usr/local/webapps/mastrms/static/images
+  WSGIScriptAlias /mastrms /usr/local/webapps/mastrms/django.wsgi
 </VirtualHost>
