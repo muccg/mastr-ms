@@ -68,7 +68,6 @@ class FakeRsync(object):
 
 def fake_rsync_capture(opts_filename, capture_filename):
     opts = pickle.load(open(opts_filename))
-    print "opts are %s" % repr(opts)
     result = command_line_args_info(sys.argv)
     if opts["do_copy"]:
         fake_rsync_copy(result)
@@ -121,7 +120,21 @@ def fake_rsync_copy(info):
     logfilename = info["args"].get("log_file", None)
     dirnames_written = set()
     with open(logfilename if logfilename else "/dev/null", "w") as logfile:
+        # [11:45:50] DEBUG: rsync output is:
+        # .d          ./
+        # .d          runs/
+        # .d          runs/2013/
+        # .d          runs/2013/5/
+        # .d          runs/2013/5/3/
+        # cd+++++++++ runs/2013/5/3/pbqc_3-15.d/
+        # <f+++++++++ runs/2013/5/3/pbqc_3-15.d/0
+        # <f+++++++++ runs/2013/5/3/pbqc_3-15.d/1
+        # <f+++++++++ runs/2013/5/3/pbqc_3-15.d/2
+        # <f+++++++++ runs/2013/5/3/pbqc_3-15.d/3
+        # <f+++++++++ runs/2013/5/3/pbqc_3-15.d/4
+
         logfile.write("Fake rsync\n")
+        #sys.stdout.write(".d          ./\n")
         for (dirname, filename) in info["source_files"]:
             src = os.path.join(dirname, filename)
             dst = os.path.join(destdir, filename)
@@ -134,7 +147,7 @@ def fake_rsync_copy(info):
                 sys.stdout.write("cd          %s\n" % dirname)
                 dirnames_written.add(dirname)
             if changed:
-                sys.stdout.write("<f..t...... %s\n" % filename)
+                sys.stdout.write("<f+++++++++ %s\n" % filename)
             else:
                 sys.stdout.write(".f          %s\n" % filename)
 
