@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
 from django.test import TestCase, LiveServerTestCase
 from django.test.utils import override_settings
 from django.conf import settings
 from mastrms.mdatasync_server.models import *
 from mastrms.repository.models import *
+from mastrms.repository.runbuilder import RunBuilder
 from mastrms.mdatasync_client.client.Simulator import Simulator, WorkList
 from mastrms.mdatasync_client.client.test import TestClient, FakeRsync
 from mastrms.mdatasync_client.client.config import MSDSConfig, plogging
@@ -12,6 +14,7 @@ import time
 import logging
 import os
 import pipes
+import re
 import dingus
 from contextlib import contextmanager
 
@@ -106,7 +109,23 @@ class MyFirstSyncTest(LiveServerTestCase):
                                                instrument_method=method)
 
         rulegen = RuleGenerator.objects.create(name="Rule Gen", description="test",
-                                               created_by=user)
+                                               created_by=user,
+                                               state=RuleGenerator.STATE_ENABLED,
+                                               accessibility=RuleGenerator.ACCESSIBILITY_ALL)
+
+        pbqc = Component.objects.get(sample_code="pbqc")
+        sb = Component.objects.get(sample_code="SB")
+        smp = Component.objects.get(sample_code="Smp")
+
+        sample_block = RuleGeneratorStartBlock(rule_generator=rulegen, index=1, count=1,
+                                              component=pbqc)
+        start_block = RuleGeneratorSampleBlock(rule_generator=rulegen, index=2,
+                                                sample_count=1, count=1,
+                                                component=smp, order=1)
+        end_block = RuleGeneratorEndBlock(rule_generator=rulegen, index=3, count=1,
+                                          component=sb)
+        for block in start_block, sample_block, end_block:
+            block.save()
 
         run = Run.objects.create(experiment=experiment, method=method,
                                  creator=user, machine=nc, state=RUN_STATES.NEW[0],
@@ -130,9 +149,6 @@ class MyFirstSyncTest(LiveServerTestCase):
                                        comment="Sample comment",
                                        weight="3.1415926535897931")
 
-        pbqc = Component.objects.get(sample_code="pbqc")
-        sb = Component.objects.get(sample_code="SB")
-
         runsample1 = RunSample.objects.create(run=run, sample=sample,
                                               component=pbqc,
                                               filename="runsample1_filename")
@@ -142,6 +158,7 @@ class MyFirstSyncTest(LiveServerTestCase):
 
         self.user = user
         self.nc = nc
+        self.sample = sample
         self.run = run
         self.test_client = None
 
@@ -149,7 +166,15 @@ class MyFirstSyncTest(LiveServerTestCase):
         # 1. add a run, with 2 or more samples
         self.assertEqual(self.run.runsample_set.count(), 2)
 
-    def setup_client(self):
+    def setup_client(self, **extra_config):
+        """
+        Creates a test client, CSV worklist, simulator, and the
+        necessary data directories.
+        Everything will be cleaned up when the test case is torn down.
+        Default test config parameters can be overridden with keyword
+        arguments.
+        """
+
         self.worklist = WorkList(get_csv_worklist_from_run(self.run, self.user))
 
         self.simulator = Simulator()
@@ -162,12 +187,14 @@ class MyFirstSyncTest(LiveServerTestCase):
                             sitename=self.nc.site_name,
                             stationname=self.nc.station_name,
                             organisation=self.nc.organisation_name,
-                            localdir=self.simulator.destdir,
+                            localdir=unicode(self.simulator.destdir),
                             synchub="%s/sync/" % self.live_server_url,
                             logfile=logfile.name,
                             loglevel=plogging.LoggingLevels.DEBUG,
                             archivesynced=False,
                             archivedfilesdir=archivedir)
+
+        config.update(extra_config)
 
         test_client = TestClient(config, maximize=True)
         test_client.set_window_title(self.id())
@@ -322,6 +349,15 @@ class MyFirstSyncTest(LiveServerTestCase):
             logger.debug("server filename is %s" % server_filename)
             self.assertTrue(os.path.exists(server_filename),
                             "%s exists on server" % server_filename)
+
+            # d. check sample completion status
+            samples = self.run.runsample_set.order_by("filename")
+            self.assertTrue(samples[0].complete,
+                            "First sample %s is marked complete" % samples[0].filename)
+            self.assertFalse(samples[1].complete,
+                             "Second sample %s is not marked complete" % samples[1].filename)
+            self.assertNotEqual(self.run.state, RUN_STATES.COMPLETE[0],
+                                "Run is not marked complete")
 
     def test_sync5(self):
         rsync_results = []
@@ -493,6 +529,199 @@ class MyFirstSyncTest(LiveServerTestCase):
             self.assertTrue(os.path.exists(server_filename),
                             "%s exists on server" % server_filename)
 
+    def test_sync7(self):
+        rsync_results = []
+        with FakeRsync(rsync_results, do_copy=True):
+            self.setup_client()
+
+            # Add files to the client data folder
+            self.simulator.process_worklist(self.worklist[0:2])
+
+            with json_hooker() as received_json:
+                # sync across files, have them marked as complete
+                logger.debug("doing double sync")
+                self.test_client.click_sync()
+                self.test_client.click_sync()
+
+                # load up received json object
+                requested_files = self.find_files_in_json(received_json)
+                self.assertEqual(len(requested_files), 2,
+                                 "two requested files responses")
+                # a. check that 2 files are requested the first sync,
+                # then 2 are is requested for second sync,
+                # then 1 is requested for the third sync
+                self.assertEqual(len(requested_files[0]), 2,
+                                 "2 files are requested the first sync")
+                self.assertEqual(len(requested_files[1]), 2,
+                                 "2 files are requested for second sync")
+                self.assertEqual(requested_files[0][0], "runsample1_filename")
+                self.assertEqual(requested_files[0][1], "runsample2_filename")
+                self.assertEqual(requested_files[1][0], "runsample1_filename")
+                self.assertEqual(requested_files[1][1], "runsample2_filename")
+
+                # refresh the stored run object
+                self.run = Run.objects.get(pk=self.run.pk)
+
+                # check sample completion status in db
+                rs = self.run.runsample_set.order_by("filename")
+                self.assertSequenceEqual(rs.values_list("complete", flat=True),
+                                         [True, True],
+                                         "Check that RunSamples are marked complete")
+                self.assertEqual(self.run.state, RUN_STATES.COMPLETE[0],
+                                 "Run is marked complete")
+
+                # clear received json for testing purposes
+                del received_json[:]
+
+                # mark the samples as incomplete
+                self.run.runsample_set.update(complete=False)
+                self.run.state = RUN_STATES.IN_PROGRESS[0]
+                self.run.save()
+
+                logger.debug("clicking sync again")
+                self.test_client.click_sync()
+
+                # load up received json object
+                requested_files = self.find_files_in_json(received_json)
+
+                self.assertEqual(len(requested_files), 1)
+                self.assertEqual(len(requested_files[0]), 2,
+                                 "2 files are requested")
+                self.assertEqual(requested_files[0][0], "runsample1_filename")
+                self.assertEqual(requested_files[0][1], "runsample2_filename")
+
+                logger.debug("finished")
+                self.test_client.quit()
+
+
+            # b. check that files are rsynced
+            self.assertEqual(len(rsync_results), 3,
+                             "check that rsync was called three times")
+            self.assertTrue(bool(rsync_results[0]))
+            self.assertTrue(bool(rsync_results[1]))
+            self.assertTrue(bool(rsync_results[2]))
+            # b. check that both files were rsynced
+            self.assertListEqual([os.path.basename(f[1]) for f in rsync_results[0]["source_files"]],
+                                 ["runsample1_filename", "runsample2_filename"],
+                                 "first rsync transfers both files")
+            self.assertListEqual([os.path.basename(f[1]) for f in rsync_results[1]["source_files"]],
+                                 ["runsample1_filename", "runsample2_filename"],
+                                 "second rsync transfers both files")
+            self.assertListEqual([os.path.basename(f[1]) for f in rsync_results[2]["source_files"]],
+                                 ["runsample1_filename", "runsample2_filename"],
+                                 "third rsync transfers both files")
+
+            # c. check server for presence of files
+            server_filename = runsample_filename(self.run, "runsample1_filename")
+            self.assertFileExists(server_filename)
+            self.assertTrue(os.path.exists(server_filename),
+                            "%s exists on server" % server_filename)
+            server_filename = runsample_filename(self.run, "runsample2_filename")
+            self.assertFileExists(server_filename)
+            self.assertTrue(os.path.exists(server_filename),
+                            "%s exists on server" % server_filename)
+
+    class FileDoesNotExistAssertion(AssertionError):
+        pass
+
+    def assertFileExists(self, filename, msg=""):
+        if not os.path.exists(filename):
+            raise FileDoesNotExistAssertion, msg
+
+    def test_unicode1(self):
+        """
+        Tests connecting to a station with unicode characters in its name.
+        At present we don't expect this to work.
+        This seems to be because urllib2 won't make utf-8 encoded urls.
+        """
+
+        # capture log messages from client
+        handler = MockLoggingHandler()
+        logging.getLogger("client").addHandler(handler)
+
+        self.nc.organisation_name = u"org ☃"
+        self.nc.site_name = u"site λ"
+        self.nc.station_name = u"station µ"
+        self.nc.save()
+
+        with FakeRsync():
+            self.setup_client()
+
+            # Add a file to the client data folder
+            self.simulator.process_worklist(self.worklist[0:1])
+
+            with json_hooker() as received_json:
+                self.test_client.click_sync()
+
+                # Check that request was never made
+                self.assertEqual(received_json, [], "No request should be made")
+
+        # Check for a DEBUG msg which says sync fail.
+        # It has to be asked why debug level is used for this error...
+        expected_level = "debug"
+        exp = re.compile(r".*Sync.*failed.*ASCII.*", re.I)
+        msgs = filter(exp.match, handler.messages[expected_level])
+        self.assertEqual(len(msgs), 1,
+                         "%s log with error msg" % expected_level.upper())
+
+    @staticmethod
+    def hack_unicode_filenames(runsamples):
+        """
+        I was unable to figure out how the rule generators, sample
+        blocks, etc worked, so couldn't get unicode filenames in the
+        normal way.
+        This method forces the RunSample filenames to be unicode.
+        """
+        for rs in runsamples:
+            d, f = os.path.split(rs.filename)
+            fs = f.split("_")
+            fs[0] = u"unicode test µ"
+            rs.filename = os.path.join(d, "_".join(fs))
+            rs.save()
+
+    def test_unicode2(self):
+        """
+        Test that syncing doesn't bomb when the unicode sample
+        filenames have non-ascii characters.
+        """
+        Sample.objects.update(label=u"labelµ")
+
+        rb = RunBuilder(self.run)
+        rb.generate()
+
+        self.hack_unicode_filenames(self.run.runsample_set.all())
+        self.worklist = WorkList(get_csv_worklist_from_run(self.run, self.user))
+
+        with FakeRsync():
+            self.setup_client()
+
+            # Add a file to the client data folder
+            self.simulator.process_worklist(self.worklist[0:1])
+
+            with json_hooker() as received_json:
+                self.test_client.click_sync()
+
+    def test_unicode3(self):
+        """
+        this test doesn't work.
+        """
+        #self.sample.sample_class.class_id = u"⌨"
+        #self.sample.sample_class.save()
+        SampleClass.objects.update(class_id=u"⌨")
+
+        rb = RunBuilder(self.run)
+        rb.generate()
+
+        with FakeRsync():
+            self.setup_client()
+
+            # Add a file to the client data folder
+            self.simulator.process_worklist(self.worklist[0:1])
+
+            with json_hooker() as received_json:
+                self.test_client.click_sync()
+
+
     @staticmethod
     def find_files_in_json(received_json):
         """
@@ -528,7 +757,7 @@ def get_csv_worklist_from_run(run, user):
     template, so it can't be reused => reimplement it here.
     """
     def csv_line(sample):
-        return ",".join(map(str, [
+        return ",".join(map(unicode, [
                         user,
                         run.machine.default_data_path,
                         sample.filename,
@@ -577,3 +806,24 @@ def runsample_filename(run, sample_filename):
 #         password_input = self.selenium.find_element_by_name("password")
 #         password_input.send_keys("admin")
 #         self.selenium.find_element_by_xpath("//input[@value='Log in']").click()
+
+class MockLoggingHandler(logging.Handler):
+    """
+    Mock logging handler to check for expected logs.
+    http://stackoverflow.com/a/1049375
+    """
+    def __init__(self, *args, **kwargs):
+        self.reset()
+        logging.Handler.__init__(self, *args, **kwargs)
+
+    def emit(self, record):
+        self.messages[record.levelname.lower()].append(record.getMessage())
+
+    def reset(self):
+        self.messages = {
+            'debug': [],
+            'info': [],
+            'warning': [],
+            'error': [],
+            'critical': [],
+        }
