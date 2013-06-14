@@ -40,6 +40,12 @@ MA.RequestQuoteInit = function () {
     return;
 };
 
+MA.CSRFTokenField = {
+  xtype: 'hidden',
+  name: 'csrfmiddlewaretoken',
+  value: Ext.util.Cookies.get("csrftoken_mastrms")
+};
+
 MA.RequestQuoteCmp = 
     {   id:'requestquote-container-panel', 
         autoScroll:true,
@@ -140,6 +146,7 @@ MA.RequestQuoteCmp =
                         name: 'attachfile',
                         buttonText: '...'
                 }
+                , MA.CSRFTokenField
             ],
             buttons: [
                  {
