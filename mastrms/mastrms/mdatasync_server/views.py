@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import login_required
 import ccg.utils.webhelpers as webhelpers
 from django.http import HttpResponse, Http404
 from django.utils import simplejson
+from django.views.decorators.csrf import csrf_exempt
 from mastrms.mdatasync_server.models import *
 from mastrms.repository.models import *
 from mastrms.mdatasync_server.rules import *
@@ -82,6 +83,7 @@ def jsonResponse(data):
     jdata = simplejson.dumps(data)
     return HttpResponse(jdata)
 
+@csrf_exempt
 def request_sync(request, organisation=None, sitename=None, station=None):
     '''This is the initial request the client makes of the server.
        The client will have sent (via URL or post fields) its
@@ -256,6 +258,7 @@ def check_run_sample_file_exists(runsampleid):
 
     return fileexists
 
+@csrf_exempt
 def check_run_sample_files(request):
     ret = {}
     ret['success'] = False
@@ -300,6 +303,7 @@ def check_run_sample_files(request):
 
     return jsonResponse(ret)
 
+@csrf_exempt
 def log_upload(request, *args):
     logger.debug('LOGUPLOAD')
     status = 'ok'
@@ -329,6 +333,7 @@ def log_upload(request, *args):
 
     return jsonResponse(status)
 
+@csrf_exempt
 def key_upload(request, *args):
     fname_prefix = 'UNKNOWN_'
     status = 'ok'
