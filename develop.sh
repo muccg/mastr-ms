@@ -23,7 +23,7 @@ PIP_OPTS="-v -M --download-cache ~/.pip/cache"
 
 function usage() {
     echo ""
-    echo "Usage ./develop.sh (test|lint|jslint|dropdb|start|install|clean|purge|pipfreeze|pythonversion|ci_remote_build|ci_remote_staging|ci_rpm_publish|ci_remote_destroy)"
+    echo "Usage ./develop.sh (test|lint|jslint|dropdb|start|install|clean|purge|pipfreeze|pythonversion|ci_remote_build|ci_staging|ci_rpm_publish|ci_remote_destroy)"
     echo ""
 }
 
