@@ -102,7 +102,7 @@ function ci_staging() {
 
 # run tests on staging
 function ci_staging_tests() {
-    ccg ${AWS_STAGING_INSTANCE} drun:"${PROJECT_NAME} test --with-xunit --xunit-file=tests.xml"
+    ccg ${AWS_STAGING_INSTANCE} dsudo:"${PROJECT_NAME} test \-\-with-xunit \-\-xunit-file\=tests.xml"
     ccg ${AWS_STAGING_INSTANCE} getfile:tests.xml,tests.xml
 }
 
