@@ -23,7 +23,7 @@ PIP_OPTS="-v -M --download-cache ~/.pip/cache"
 
 function usage() {
     echo ""
-    echo "Usage ./develop.sh (test|lint|jslint|dropdb|start|install|clean|purge|pipfreeze|pythonversion|ci_remote_build|ci_staging|ci_rpm_publish|ci_remote_destroy)"
+    echo "Usage ./develop.sh (test|lint|jslint|dropdb|start|install|clean|purge|pipfreeze|pythonversion|ci_remote_build|ci_staging|ci_staging_tests|ci_rpm_publish|ci_remote_destroy)"
     echo ""
 }
 
@@ -97,6 +97,13 @@ function ci_staging() {
     ccg ${AWS_STAGING_INSTANCE} boot
     ccg ${AWS_STAGING_INSTANCE} puppet
     ccg ${AWS_STAGING_INSTANCE} shutdown:50
+}
+
+
+# run tests on staging
+function ci_staging_tests() {
+    ccg ${AWS_STAGING_INSTANCE} drun:"${PROJECT_NAME} test --with-xunit --xunit-file=tests.xml"
+    ccg ${AWS_STAGING_INSTANCE} getfile:tests.xml,tests.xml
 }
 
 
@@ -248,6 +255,10 @@ ci_rpm_publish)
 ci_staging)
     ci_ssh_agent
     ci_staging
+    ;;
+ci_staging_tests)
+    ci_ssh_agent
+    ci_staging_tests
     ;;
 dropdb)
     dropdb
