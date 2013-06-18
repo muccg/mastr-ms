@@ -14,8 +14,7 @@ import urllib
 import os
 import time
 import os.path
-from shutil import rmtree, copytree, copy, move
-from shutil import copy2, copytree
+import shutil
 import pipes
 import tempfile
 
@@ -326,19 +325,18 @@ class MSDataSyncAPI(object):
             pass # directory probably already exists
 
         try:
-            move(src, dst)
-        except IOError, e:
+            shutil.move(src, dst)
+        except EnvironmentError, e:
             self.log("Could not archive file: %s" % e, thread=self.useThreading)
 
     def cleanup_localindexdir(self):
         localindexdir = self.config.getLocalIndexPath()
         if os.path.exists(localindexdir):
             self.log("Clearing local index directory: %s" % localindexdir, thread=self.useThreading)
-            try:
-                rmtree(localindexdir)
-            except Exception, e:
-                self.log("Could not clear local index dir: %s" % e,
+            def log_error(function, fullname, exc_info):
+                self.log("Could not clear local index %s: %s" % (fullname, exc_info[1]),
                          type=self.log.LOG_WARNING, thread=self.useThreading)
+            shutil.rmtree(localindexdir, onerror=log_error)
 
     #Actual API methods that DO something
     def checkRsync(self, callingWindow, statuschange, notused, returnFn = None):
@@ -755,17 +753,16 @@ class MSDSImpl(object):
         self.controller.transactionvars.copied_files = copiedfiles
 
     def copyfile(self, src, dst):
-        import os.path
         try:
             if os.path.isdir(src) and not os.path.exists(dst):
-                copytree(src, dst)
+                shutil.copytree(src, dst)
             else:
                 thepath = str(os.path.dirname(dst))
                 if not os.path.exists(thepath):
                     self.log('Path %s did not exist - creating' % (thepath,) , thread = self.controller.useThreading )
                     os.makedirs(thepath)
-                copy2(src, dst)
-        except Exception, e:
+                shutil.copy2(src, dst)
+        except EnvironmentError, e:
             self.log('Error copying %s to %s : %s' % (src, dst, e), type = self.log.LOG_ERROR,  thread = self.controller.useThreading )
 
     def getFileTree(self, directory):
