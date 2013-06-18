@@ -183,7 +183,7 @@ class MSDataSyncAPI(object):
             f = urllib.urlopen(self.config.getValue('synchub'), urllib.urlencode(postvars))
             jsonret = unicode(f.read(), "utf-8")
         except Exception, e:
-            returnFn(retcode = False, retstring = "Could not connect %s" % (str(e)) )
+            returnFn(retcode = False, retstring = "Could not connect %s" % e)
             return
 
         outlog.debug( 'Checking response' )
@@ -731,7 +731,7 @@ class MSDSImpl(object):
             self.log('Finished informing the server of transfer', thread = self.controller.useThreading)
             self.controller.post_sync_step(json.loads(jsonret), filename_id_map)
         except Exception, e:
-            self.log('Could not connect to %s: %s' % (url, str(e)), type=self.log.LOG_ERROR, thread = self.controller.useThreading)
+            self.log('Could not connect to %s: %s' % (url, e), type=self.log.LOG_ERROR, thread = self.controller.useThreading)
 
 
     def copyfiles(self, copydict):
@@ -748,7 +748,7 @@ class MSDSImpl(object):
                 self.copyfile( src, dst)
                 copiedfiles[src] = dst
         except Exception, e:
-            self.log('Problem copying: %s' % (str(e)), type=self.log.LOG_ERROR,  thread = self.controller.useThreading )
+            self.log('Problem copying: %s' % e, type=self.log.LOG_ERROR,  thread = self.controller.useThreading )
 
         self.controller.transactionvars.copied_files = copiedfiles
 
@@ -757,9 +757,10 @@ class MSDSImpl(object):
             if os.path.isdir(src) and not os.path.exists(dst):
                 shutil.copytree(src, dst)
             else:
-                thepath = str(os.path.dirname(dst))
+                thepath = os.path.dirname(dst)
                 if not os.path.exists(thepath):
-                    self.log('Path %s did not exist - creating' % (thepath,) , thread = self.controller.useThreading )
+                    self.log('Path %s did not exist - creating' % thepath,
+                             thread=self.controller.useThreading)
                     os.makedirs(thepath)
                 shutil.copy2(src, dst)
         except EnvironmentError, e:
@@ -775,7 +776,7 @@ class MSDSImpl(object):
                 #self.log('dirs: %s' % (str(dirs)) )
                 #self.log('files: %s' % (str(files)) )
             for f in allfiles:
-                self.log('File: %s' % (str(f)), thread = self.controller.useThreading )
+                self.log('File: %s' % f, thread = self.controller.useThreading )
         except Exception, e:
-            self.log('getFileTree: Exception: %s' % (str(e)), self.log.LOG_ERROR, thread = self.controller.useThreading)
+            self.log('getFileTree: Exception: %s' % e, self.log.LOG_ERROR, thread = self.controller.useThreading)
         return allfiles
