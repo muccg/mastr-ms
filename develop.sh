@@ -17,7 +17,8 @@ AWS_BUILD_INSTANCE='aws_rpmbuild_centos6'
 AWS_STAGING_INSTANCE='aws_syd_mastrms_staging'
 TARGET_DIR="/usr/local/src/${PROJECT_NAME}"
 CLOSURE="/usr/local/closure/compiler.jar"
-MODULES="MySQL-python==1.2.3 psycopg2==2.4.6 Werkzeug flake8 argparse"
+TESTING_MODULES="argparse dingus xvfbwrapper"
+MODULES="MySQL-python==1.2.3 psycopg2==2.4.6 Werkzeug flake8 ${TESTING_MODULES}"
 PIP_OPTS="-v -M --download-cache ~/.pip/cache"
 
 
@@ -102,8 +103,20 @@ function ci_staging() {
 
 # run tests on staging
 function ci_staging_tests() {
-    ccg ${AWS_STAGING_INSTANCE} dsudo:"${PROJECT_NAME} test \-\-with-xunit \-\-xunit-file\=tests.xml"
-    ccg ${AWS_STAGING_INSTANCE} getfile:tests.xml,tests.xml
+    # /tmp is used for test results because the apache user has
+    # permission to write there.
+    REMOTE_TEST_DIR=/tmp
+    REMOTE_TEST_RESULTS=${REMOTE_TEST_DIR}/tests.xml
+
+    # Grant permission to create a test database. Assume that database
+    # user is same as project name for now.
+    DATABASE_USER=${PROJECT_NAME}
+    ccg ${AWS_STAGING_INSTANCE} dsudo:"su postgres -c \"psql -c 'ALTER ROLE ${DATABASE_USER} CREATEDB;'\""
+
+    # Run tests, collect results
+    TEST_LIST="${PROJECT_NAME} --exclude\=yaphc --exclude\=esky --exclude\=httplib2"
+    ccg ${AWS_STAGING_INSTANCE} dsudo:"cd ${REMOTE_TEST_DIR} && ${PROJECT_NAME} test --noinput --with-xunit --xunit-file\=${REMOTE_TEST_RESULTS} ${TEST_LIST}"
+    ccg ${AWS_STAGING_INSTANCE} getfile:${REMOTE_TEST_RESULTS},tests.xml
 }
 
 
