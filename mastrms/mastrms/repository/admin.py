@@ -357,6 +357,26 @@ class RunAdmin(ExtJsonInterface, admin.ModelAdmin):
     samples_link.short_description = 'Samples'
     samples_link.allow_tags = True
 
+    def mark_run_incomplete(self, request, queryset):
+        # Change all runs which were complete to "in progress"
+        complete = queryset.filter(state=RUN_STATES.COMPLETE[0])
+        ncomplete = complete.count()
+        complete.update(state=RUN_STATES.IN_PROGRESS[0])
+
+        # Go through each selected run and set its samples to incomplete
+        runsamples = RunSample.objects.filter(run__in=queryset, complete=True)
+        nsamples = runsamples.count()
+        runsamples.update(complete=False)
+
+        # Notify user
+        nob = lambda n, ob: "%d %s%s" % (n, ob, "" if n == 1 else "s")
+        msg = "%s and %s changed to incomplete." % (nob(ncomplete, "run"),
+                                                    nob(nsamples, "sample"))
+        self.message_user(request, msg)
+    mark_run_incomplete.short_description = "Mark selected runs " + \
+        "and their samples as incomplete"
+    actions = [mark_run_incomplete]
+
 
 class ClientFileAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ['experiment', 'filepath', 'sharetimestamp', 'sharedby', 'downloaded']
