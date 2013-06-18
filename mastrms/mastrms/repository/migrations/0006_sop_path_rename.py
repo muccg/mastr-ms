@@ -3,17 +3,14 @@ import datetime
 from south.db import db
 from south.v2 import DataMigration
 from django.db import models
+import os.path
 
 class Migration(DataMigration):
 
-
-
     def rewrite_paths(self, orm):
-        import os
         #we want to take each value of the attached_pdf column in the StandardOperationProcedure model,
         #and rewrite it to be REPO_FILES_ROOT/sops/filename...
-        from mastrms.repository.models import *
-        sops = StandardOperationProcedure.objects.all()
+        sops = orm.StandardOperationProcedure.objects.all()
         for sop in sops:
             nametuple = sop.attached_pdf.name.rsplit(os.path.sep)
             if len(nametuple) > 0: #only rewrite paths that parsed correctly
