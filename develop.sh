@@ -116,7 +116,7 @@ function ci_staging_tests() {
     # Run tests, collect results
     TEST_LIST="${PROJECT_NAME} --exclude\=yaphc --exclude\=esky --exclude\=httplib2"
     ccg ${AWS_STAGING_INSTANCE} dsudo:"cd ${REMOTE_TEST_DIR} && ${PROJECT_NAME} test --noinput --with-xunit --xunit-file\=${REMOTE_TEST_RESULTS} ${TEST_LIST}"
-    ccg ${AWS_STAGING_INSTANCE} getfile:${REMOTE_TEST_RESULTS},tests.xml
+    ccg ${AWS_STAGING_INSTANCE} getfile:${REMOTE_TEST_RESULTS},./
 }
 
 
