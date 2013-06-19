@@ -11,6 +11,10 @@
 
 import json
 import urllib
+import urllib2
+import yaphc
+from httplib2 import Http
+
 import os
 import time
 import os.path
@@ -22,7 +26,7 @@ import Queue
 import threading
 from subprocess import Popen, PIPE, STDOUT
 
-from identifiers import *
+from identifiers import VERSION
 import plogging
 outlog = plogging.getLogger('client')
 from MainWindow import APPSTATE
@@ -173,35 +177,18 @@ class MSDataSyncAPI(object):
             returnFn = self.defaultReturn
         self.callingWindow = callingWindow
         #get the local file list
-        organisation = self.config.getValue('organisation')
-        station = self.config.getValue('stationname')
-        sitename = self.config.getValue('sitename')
-        self.log("Handshaking with server %s" % (self.config.getValue('synchub')), type=self.log.LOG_NORMAL, thread=self.useThreading)
-        jsonify = lambda ob: json.dumps(ob, ensure_ascii=False)
-        postvars = {'files' : jsonify({}), 'organisation' : jsonify(organisation), 'sitename' : jsonify(sitename), 'stationname': jsonify(station)}
         try:
-            f = urllib.urlopen(self.config.getValue('synchub'), urllib.urlencode(postvars))
-            jsonret = unicode(f.read(), "utf-8")
-        except Exception, e:
-            returnFn(retcode = False, retstring = "Could not connect %s" % e)
+            details = DataSyncServer(self.config).handshake()
+        except DataSyncServer.RestError, e:
+            returnFn(retcode=False, retstring="Error handshaking: %s" % e)
             return
-
-        outlog.debug( 'Checking response' )
-        #now, if something goes wrong interpreting the result, don't panic.
-        try:
-            d = json.loads(jsonret)
-            self.log('Synchub config loaded object is: %s' % json.dumps(d, sort_keys=True, indent=2), type=self.log.LOG_NORMAL, thread=self.useThreading)
-        except Exception, e:
-            returnFn(retcode=False, retstring="Error: %s\nUnexpected response from server was: %s" % (e, jsonret))
-            return
-
 
         #I want to do an rsync -n
-        rsyncconfig = RemoteSyncParams(username=self.config.getValue('user'))
+        rsyncconfig = RemoteSyncParams(configdict=details, username=self.config.getValue('user'))
         #Lets get any of the remote params
-        rsyncconfig.host = d['host']
+        #rsyncconfig.host = d['host']
         #rootdir
-        rsyncconfig.rootdir = ''
+        #rsyncconfig.rootdir = ''
         #flags, server is authoratative
         rsyncconfig.flags = ['-n'] #n = dry run
 
@@ -215,30 +202,13 @@ class MSDataSyncAPI(object):
     def ask_server_for_wanted_files(self, returnFn):
         self.callingWindow.setState(APPSTATE.INITIING_SYNC)
         self.callingWindow.SetProgress(100)
-        organisation = self.config.getValue('organisation')
-        station = self.config.getValue('stationname')
-        sitename = self.config.getValue('sitename')
-        syncvars = {"version": VERSION , "sync_completed": self.config.getValue("syncold") }
-        outlog.debug("syncvars are: %s" % syncvars)
         details = {}
         files = {}
 
         #PART 1
         #first, tell the server who we are, and get a response
-        sync_baseurl = self.config.getValue('synchub')
-        if not sync_baseurl.endswith('/'):
-            sync_baseurl = "%s/" % (sync_baseurl)
-        url = "%srequestsync/%s/%s/%s/" % (self.config.getValue('synchub'),
-                                           organisation, sitename, station)
-        try:
-            f = urllib.urlopen(url, urllib.urlencode(syncvars))
-            jsonresp = unicode(f.read(), "utf-8")
-            jsonret = json.loads(jsonresp)
-        except IOError, e:
-            returnFn(retcode=False, retstring="Could not initiate Sync %s" % e)
-            jsonret = { "success": False, "message": str(e) }
-        except ValueError, e:
-            jsonret = { "success": False, "message": str(e) }
+        server = DataSyncServer(self.config)
+        jsonret = server.requestsync()
 
         if jsonret.get("success", False):
             details = jsonret["details"]
@@ -386,11 +356,9 @@ class MSDataSyncAPI(object):
                              self.rsyncReturn)
 
             #now tell the server to check the files off
-            baseurl =  self.config.getValue('synchub')
             self._appendTask(self._impl.serverCheckRunSampleFiles,
                              { "rsyncconfig": rsyncconfig,
-                               "filename_id_map": filename_id_map,
-                               "baseurl": baseurl },
+                               "filename_id_map": filename_id_map },
                              returnFn)
         else:
             self.log("No files to sync.", thread = self.useThreading)
@@ -701,7 +669,7 @@ class MSDSImpl(object):
         change_list = filter(bool, map(parse_line, data.split("\n")))
         return changes_dict(change_list)
 
-    def serverCheckRunSampleFiles(self, rsyncconfig, filename_id_map, baseurl):
+    def serverCheckRunSampleFiles(self, rsyncconfig, filename_id_map):
         # It's difficult to know when a complete sample is
         # transferred. So we consider a sample file to be complete
         # when the *second time* it is rsynced across, the file is not
@@ -715,24 +683,17 @@ class MSDSImpl(object):
         self.log('Informing the server of transfer: %s' % runsampledict,
                  thread=self.controller.useThreading)
 
-        postvars = {
-            'runsamplefiles' : json.dumps(runsampledict, ensure_ascii=False),
-            'lastError': self.lastError,
-            'organisation': self.controller.config.getValue('organisation'),
-            'sitename': self.controller.config.getValue('sitename'),
-            'stationname': self.controller.config.getValue('stationname'),
-            }
-        outlog.debug("Postvars: %s " % (str(postvars)) )
-        url = "%s%s/" % (baseurl, "checksamplefiles")
+        server = DataSyncServer(self.controller.config)
+
         try:
-            f = urllib.urlopen(url, urllib.urlencode(postvars))
-            jsonret = unicode(f.read(), "utf-8")
+            jsonret = server.checksamplefiles(runsampledict, self.lastError)
             self.log('Server returned %s' % jsonret, thread = self.controller.useThreading)
             self.log('Finished informing the server of transfer', thread = self.controller.useThreading)
-            self.controller.post_sync_step(json.loads(jsonret), filename_id_map)
-        except Exception, e:
-            self.log('Could not connect to %s: %s' % (url, e), type=self.log.LOG_ERROR, thread = self.controller.useThreading)
-
+            self.controller.post_sync_step(jsonret, filename_id_map)
+        except DataSyncServer.RestError, e:
+            self.log('Could not confirm sample files: %s' % e,
+                     type=self.log.LOG_ERROR,
+                     thread=self.controller.useThreading)
 
     def copyfiles(self, copydict):
         '''Takes a dict keyed on source filename, and copies each one to the dest filename (value) '''
@@ -780,3 +741,190 @@ class MSDSImpl(object):
         except Exception, e:
             self.log('getFileTree: Exception: %s' % e, self.log.LOG_ERROR, thread = self.controller.useThreading)
         return allfiles
+
+class DataSyncSite(object):
+    """
+    Represents a data sync client site.
+    """
+    def __init__(self, organisation, station, sitename):
+        self.organisation = organisation
+        self.station = station
+        self.sitename = sitename
+
+    @classmethod
+    def from_config(cls, config):
+        organisation = config.getValue('organisation')
+        station = config.getValue('stationname')
+        sitename = config.getValue('sitename')
+        return cls(organisation, station, sitename)
+
+    def url(self):
+        return u"%(organisation)s/%(sitename)s/%(station)s" % vars(self)
+
+class DataSyncServer(object):
+    """
+    This class makes REST API calls to the MS data sync server and
+    repository components.
+    These methods all block, so need to be run different thread to the UI.
+    """
+
+    class RestError(EnvironmentError):
+        "This exception type is raised if anything goes wrong with an API call"
+        pass
+
+    def __init__(self, config):
+        self.config = config
+
+    def handshake(self):
+        """
+        Handshake with server, whatever that means.
+        Raises DataSyncServer.RestError if something went wrong.
+        """
+        #return self._handshake_wrong(DataSyncSite.from_config(self.config))
+        return self.requestsync()["details"]
+
+    def _handshake_wrong(self, site):
+        postvars = {
+            'files': self._jsonify({}),
+            'organisation': self._jsonify(site.organisation),
+            'sitename': self._jsonify(site.sitename),
+            'stationname': self._jsonify(site.station),
+            }
+
+        return self._jsoncall(self._get_synchub_url(), postvars)
+
+    def requestsync(self):
+        """
+        Ask server for wanted files.
+        Returns a dictionary with keys "success", "message", ...
+        This method handles exceptions.
+        """
+        site = DataSyncSite.from_config(self.config)
+        return self._requestsync(site)
+
+    def _requestsync(self, site):
+        syncvars = {"version": VERSION , "sync_completed": self.config.getValue("syncold") }
+        outlog.debug("syncvars are: %s" % syncvars)
+
+        sync_baseurl = self.config.getValue('synchub')
+        if not sync_baseurl.endswith('/'):
+            sync_baseurl = "%s/" % (sync_baseurl)
+        url = self._get_requestsync_url(site)
+
+        try:
+            jsonret = self._jsoncall(url, syncvars)
+            jsonret.setdefault("success", True)
+        except self.RestError, e:
+            jsonret = { "success": False, "message": str(e) }
+
+        return jsonret
+
+    def checksamplefiles(self, runsampledict, last_error):
+        site = DataSyncSite.from_config(self.config)
+        return self._checksamplefiles(site, runsampledict, last_error)
+
+    def _checksamplefiles(self, site, runsampledict, last_error):
+        postvars = {
+            'runsamplefiles' : self._jsonify(runsampledict),
+            'lastError': last_error,
+            'organisation': site.organisation,
+            'sitename': site.sitename,
+            'stationname': site.station,
+            }
+        outlog.debug("Postvars: %s " % repr(postvars))
+        url = self._get_checksamplefiles_url()
+        return self._jsoncall(url, postvars)
+
+    def get_node_names(self):
+        url = self._get_node_names_url()
+        try:
+            retval = self._jsoncall(url, timeout=1)
+            outlog.debug('node config: %s' % retval)
+            assert isinstance(retval, dict), 'Returned json was not a dict'
+            outlog.debug( 'node config loaded object is: %s' % (retval) )
+        except self.RestError, e:
+            outlog.warning( 'Error retrieving node config data: %s' % (str(e)) )
+            retval = None
+
+        return retval
+
+    def send_key(self, keyfile, keyfilepath):
+        #Start the multipart encoded post of whatever file our log is saved to:
+        posturl = self._get_send_key_url()
+        outlog.debug('sending log %s to %s' % (keyfile, posturl))
+        return self._yaphc(posturl,
+                           {'nodename': self.config.getNodeName()},
+                           [('uploaded', keyfile, keyfilepath)])
+
+    def send_log(self, logfile, logfile_path):
+        #Start the multipart encoded post of whatever file our log is saved to:
+        outlog.debug('reading logfile' )
+        params = {'nodename': self.config.getNodeName() }
+        files = [('uploaded', logfile, logfile_path)]
+        return self._yaphc(self._get_send_log_url(), params, files)
+
+    def _yaphc(self, url, params, files):
+        http = yaphc.Http()
+        request = yaphc.PostRequest(self._get_send_key_url(), params=params, files=files)
+        outlog.debug("opening url %s" % url)
+        try:
+            resp, jsonret = http.make_request(request)
+            outlog.debug('finished receiving data')
+            outlog.debug("received: %s" % jsonret)
+        except Exception, e:  # not good
+            raise self.RestError(e)
+
+        try:
+            return json.loads(jsonret)
+        except ValueError, e:
+            outlog.exception("Couldn't decode this JSON:\n%s\n" % jsonret)
+            raise self.RestError(e)
+
+    def _jsoncall(self, url, params=None, timeout=None):
+        """
+        Makes a request to `url' and decodes the json response.
+        If `params' is a dict, the request method will be POST.
+        Will raise a RestError if anything went wrong.
+        """
+        data = None if params is None else urllib.urlencode(params)
+        try:
+            req = urllib2.Request(url)
+            f = urllib2.urlopen(req, data, timeout)
+        except IOError, e: # fixme: exception handling
+            raise self.RestError(e)
+        except ValueError, e:
+            raise self.RestError(e)
+
+        jsondata = unicode(f.read(), "utf-8")
+
+        outlog.debug( 'Checking response' )
+
+        try:
+            ob = json.loads(jsondata)
+            outlog.info('Synchub config loaded object is: %s' % self._jsonify(ob))
+            return ob
+        except ValueError, e:
+            outlog.exception("Couldn't decode this JSON:\n%s\n" % jsonret)
+            raise self.RestError(e)
+
+    def _jsonify(self, ob):
+        return json.dumps(ob, ensure_ascii=False, sort_keys=True, indent=2)
+
+    def _get_synchub_url(self, *path):
+        path = "".join(elem + "/" for elem in path)
+        return self.config.getValue("synchub") + path
+
+    def _get_requestsync_url(self, site):
+        return self._get_synchub_url("requestsync", site.url())
+
+    def _get_checksamplefiles_url(self):
+        return self._get_synchub_url("checksamplefiles")
+
+    def _get_node_names_url(self):
+        return self._get_synchub_url("nodes")
+
+    def _get_send_key_url(self):
+        return self._get_synchub_url("keyupload")
+
+    def _get_send_log_url(self):
+        return self._get_synchub_url("logupload")
