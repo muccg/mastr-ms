@@ -3,15 +3,7 @@ from esky import bdist_esky
 from esky.bdist_esky import Executable
 import py2exe
 
-from identifiers import VERSION
-
-#class Target:
-#    def __init__(self, **kwargs):
-#        self.__dict__.update(kwargs)
-#        self.version = VERSION
-#        self.company_name = "None"
-#        self.copyright = "None"
-#        self.name = "None"
+from version import VERSION
 
 freeze_includes = ['encodings','encodings.*', 'calendar', 'tendo']
 
@@ -69,5 +61,3 @@ setup(name='msDataSync',
       #windows = ["main.py", "Simulator.py"],
       options={'py2exe': py2exe_options, 'bdist_esky' : bdist_esky_options_py2exe},
       )
-
-

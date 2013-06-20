@@ -4,6 +4,7 @@ from SysTrayIcon import SystrayIcon
 from FileList import ListCtrlPanel
 import time
 import sys
+from version import VERSION
 from identifiers import *
 import plogging
 from WxLogger import Log

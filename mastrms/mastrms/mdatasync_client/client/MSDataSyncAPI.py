@@ -26,7 +26,8 @@ import Queue
 import threading
 from subprocess import Popen, PIPE, STDOUT
 
-from identifiers import VERSION
+from version import VERSION
+
 import plogging
 outlog = plogging.getLogger('client')
 from MainWindow import APPSTATE
