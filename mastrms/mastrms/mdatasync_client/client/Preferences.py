@@ -174,11 +174,11 @@ class Preferences(wx.Dialog):
 
 
     def openAdvancedPrefs(self, event):
-        a = AdvancedPreferences.AdvancedPreferences(self, -1, self.config, self.log)
-        a.Show()
-        val = a.ShowModal()
+        self.advanced = AdvancedPreferences.AdvancedPreferences(self, -1, self.config, self.log)
+        self.advanced.Show()
+        val = self.advanced.ShowModal()
         #doesn't return until the dialog is closed
-        a.Destroy()
+        self.advanced.Destroy()
 
     def toggleSyncChoose(self, event):
         #Set the value of the checkbox to whatever the opposite of the current config value is.

@@ -351,17 +351,17 @@ class MainWindow(wx.Frame):
     def OnMenuPreferences(self, evt):
         '''open the prefs dialog which BLOCKS'''
         import Preferences
-        a = Preferences.Preferences(self, -1, self.config, self.log)
-         # this does not return until the dialog is closed.
-
-        a.Show() #Show the dialog first
+        self.prefs = Preferences.Preferences(self, -1, self.config, self.log)
+        self.prefs.Show() #Show the dialog first
         #Now refresh its stuff
-        a.nodeconfigselector.refreshWebData()
-        a.nodeconfigselector.selectNode()
+        self.prefs.nodeconfigselector.refreshWebData()
+        self.prefs.nodeconfigselector.selectNode()
         #Now make it modal
-        val = a.ShowModal()
+        # this does not return until the dialog is closed.
+        val = self.prefs.ShowModal()
         #do something here with val if you like (==wx.ID_OK for instance)
-        a.Destroy()
+        self.prefs.Destroy()
+        self.prefs = None
 
     def OnCheckNow(self, evt):
         if self.state != APPSTATE.IDLE: #already busy. Just return

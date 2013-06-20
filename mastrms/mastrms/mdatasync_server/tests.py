@@ -37,13 +37,13 @@ def tearDownModule():
 
 @override_settings(REPO_FILES_ROOT=TESTING_REPO)
 class MyFirstSyncTest(LiveServerTestCase):
-    # fixme: may be better to use json than setup test case by hand.
     # For some reason, fixtures are required, or else the test case
     # won't find them.
     fixtures = ['mastrms/repository/fixtures/reference_data.json']
 
     def setUp(self):
         south_shut_up()
+
         self.setup_more_fixtures()
 
         self.setup_display()
@@ -82,6 +82,12 @@ class MyFirstSyncTest(LiveServerTestCase):
         super(MyFirstSyncTest, cls).tearDownClass()
 
     def setup_more_fixtures(self):
+        """
+        Setup some objects to be used in test cases.
+
+        fixme: may be better to use json than creating them by hand.
+        """
+
         # nodeclient, project, experiment, run, samples
         nc = NodeClient.objects.create(organisation_name="org", site_name="site",
                                        station_name="station",

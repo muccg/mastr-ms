@@ -13,13 +13,17 @@ from mastrms.mdatasync_client.client.main import MDataSyncApp
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+__all__ = ["TestClient"]
+
 # fixme: unit tests don't show exceptions in other threads
-# fixme: this requires DISPLAY pointing to an X server, e.g. Xephyr
 
 class TestClient(object):
     """
     This class runs the client in a thread and provides methods for
     unit tests to control the client.
+
+    The test client uses wxWidgets and so needs an X display. Xephyr
+    or Xvfb can be used for this purpose.
     """
     clients = []
 
@@ -70,11 +74,84 @@ class TestClient(object):
         logger.debug("sleeping for %ds" % CRAP_TEST_CRAP)
         time.sleep(CRAP_TEST_CRAP)
 
+    def _wait(self):
+        CRAP_TEST_CRAP = 1
+        logger.debug("sleeping for %ds" % CRAP_TEST_CRAP)
+        time.sleep(CRAP_TEST_CRAP)
+
+    def click_send_log(self):
+        wx.CallAfter(self.m.win.OnSendLog)
+        self._wait_for_sync()
+
+    def click_send_shot(self):
+        wx.CallAfter(self.m.win.OnTakeScreenshot)
+        self._wait_for_sync()
+
+    class TestPreferences(object):
+        def __init__(self, prefs):
+            self.win = prefs
+            self.advanced = None
+
+        def _wait(self):
+            time.sleep(2)
+
+        def click_refresh(self):
+            self.win.fixme
+            self._wait()
+
+        def click_send_key(self):
+            wx.CallAfter(self.win.OnSendKey, None)
+            self._wait()
+
+        def click_send_handshake(self):
+            wx.CallAfter(self.win.OnHandshake, None)
+            self._wait()
+
+        def close(self):
+            wx.CallAfter(self.win.OKPressed)
+            self._wait()
+
+        def click_advanced(self):
+            wx.CallAfter(self.win.openAdvancedPrefs, None)
+            self._wait()
+            self.advanced = self.win.advanced
+            return self
+
+        def advanced_click_close(self):
+            assert self.advanced is not None
+            wx.CallAfter(self.advanced.OKPressed)
+            self._wait()
+            self.advanced = None # assume window was closed
+
+    def click_menu_preferences(self):
+        wx.CallAfter(self.m.win.OnMenuPreferences, None)
+        self._wait()
+        return self.TestPreferences(self.m.win.prefs)
+
     def _wait_for_ready(self):
         self.ready.wait()
 
     def set_window_title(self, title):
         wx.CallAfter(self.m.win.SetTitle, title)
+
+    def close(self):
+        """
+        Closes window, but doesn't quit (app is minimized to tray).
+        """
+        wx.CallAfter(self.m.win.Close)
+        self._wait()
+
+    def minimize(self):
+        """
+        Closes window, but doesn't quit (app is minimized to tray).
+        """
+        wx.CallAfter(self.m.win.OnMenuMinimise, None)
+        self._wait()
+
+    def activate_tray_icon(self):
+        "Same as double-clicking tray icon"
+        wx.CallAfter(self.m.win.SystrayIcon.OnTaskBarActivate, None)
+        self._wait()
 
     def quit(self, force=False):
         """
@@ -117,8 +194,3 @@ class TestClient(object):
     def kill_all(cls):
         for client in cls.clients:
             client.quit()
-
-def ctrlc_handler(signame, frame):
-    TestClient.kill_all()
-
-signal.signal(signal.SIGINT, ctrlc_handler)
