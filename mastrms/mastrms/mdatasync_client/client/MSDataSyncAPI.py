@@ -807,9 +807,6 @@ class DataSyncServer(object):
         syncvars = {"version": VERSION , "sync_completed": self.config.getValue("syncold") }
         outlog.debug("syncvars are: %s" % syncvars)
 
-        sync_baseurl = self.config.getValue('synchub')
-        if not sync_baseurl.endswith('/'):
-            sync_baseurl = "%s/" % (sync_baseurl)
         url = self._get_requestsync_url(site)
 
         try:
@@ -905,15 +902,17 @@ class DataSyncServer(object):
             outlog.info('Synchub config loaded object is: %s' % self._jsonify(ob))
             return ob
         except ValueError, e:
-            outlog.exception("Couldn't decode this JSON:\n%s\n" % jsonret)
+            outlog.exception("Couldn't decode this JSON:\n%s\n" % jsondata)
             raise self.RestError(e)
 
     def _jsonify(self, ob):
         return json.dumps(ob, ensure_ascii=False, sort_keys=True, indent=2)
 
     def _get_synchub_url(self, *path):
+        sync_baseurl = self.config.getValue('synchub')
+        slash = "/" if not sync_baseurl.endswith('/') else ""
         path = "".join(elem + "/" for elem in path)
-        return self.config.getValue("synchub") + path
+        return sync_baseurl + slash + path
 
     def _get_requestsync_url(self, site):
         return self._get_synchub_url("requestsync", site.url())
