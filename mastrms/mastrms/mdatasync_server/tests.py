@@ -8,6 +8,7 @@ from mastrms.repository.runbuilder import RunBuilder
 from mastrms.mdatasync_client.client.Simulator import Simulator, WorkList
 from mastrms.mdatasync_client.client.test import TestClient, FakeRsync
 from mastrms.mdatasync_client.client.config import MSDSConfig, plogging
+from mastrms.testutils import *
 import tempfile
 import mastrms.mdatasync_client.client.plogging  # wtf
 import time
@@ -29,7 +30,7 @@ def tearDownModule():
     os.rmdir(TESTING_REPO)
 
 @override_settings(REPO_FILES_ROOT=TESTING_REPO)
-class MyFirstSyncTest(LiveServerTestCase):
+class SyncTests(LiveServerTestCase, XDisplayTest):
     # For some reason, fixtures are required, or else the test case
     # won't find them.
     fixtures = ['mastrms/repository/fixtures/reference_data.json']
@@ -46,29 +47,11 @@ class MyFirstSyncTest(LiveServerTestCase):
             os.system("rm -rf %s" % pipes.quote(os.path.join(settings.REPO_FILES_ROOT, f)))
 
     @classmethod
-    def setup_display(cls):
-        if not os.environ.get("DISPLAY"):
-            logging.info("Using Xvfb for display")
-            from xvfbwrapper import Xvfb
-            cls.vdisplay = Xvfb()
-            cls.vdisplay.start()
-        else:
-            cls.vdisplay = None
-
-    @classmethod
-    def teardown_display(cls):
-        if cls.vdisplay:
-            cls.vdisplay.stop()
-
-    @classmethod
     def setUpClass(cls):
         cls.setup_display()
-        super(MyFirstSyncTest, cls).setUpClass()
-
     @classmethod
     def tearDownClass(cls):
         cls.teardown_display()
-        super(MyFirstSyncTest, cls).tearDownClass()
 
     def setup_more_fixtures(self):
         """
@@ -801,24 +784,3 @@ def runsample_filename(run, sample_filename):
 #         password_input = self.selenium.find_element_by_name("password")
 #         password_input.send_keys("admin")
 #         self.selenium.find_element_by_xpath("//input[@value='Log in']").click()
-
-class MockLoggingHandler(logging.Handler):
-    """
-    Mock logging handler to check for expected logs.
-    http://stackoverflow.com/a/1049375
-    """
-    def __init__(self, *args, **kwargs):
-        self.reset()
-        logging.Handler.__init__(self, *args, **kwargs)
-
-    def emit(self, record):
-        self.messages[record.levelname.lower()].append(record.getMessage())
-
-    def reset(self):
-        self.messages = {
-            'debug': [],
-            'info': [],
-            'warning': [],
-            'error': [],
-            'critical': [],
-        }

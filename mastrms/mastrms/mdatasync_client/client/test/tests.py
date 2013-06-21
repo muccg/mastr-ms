@@ -4,18 +4,26 @@ from StringIO import StringIO
 import logging
 logger = logging.getLogger(__name__)
 
+from mastrms.testutils import XDisplayTest
 from mastrms.mdatasync_client.client.MSDataSyncAPI import DataSyncServer
 from mastrms.mdatasync_client.client.config import MSDSConfig
 from mastrms.mdatasync_client.client.test.testclient import TestClient
 from mastrms.mdatasync_client.client.version import VERSION
 
-class BasicClientTests(unittest.TestCase):
+class BasicClientTests(unittest.TestCase, XDisplayTest):
     def setUp(self):
         config = MSDSConfig()
         self.client = TestClient(config)
 
     def tearDown(self):
         self.client.quit()
+
+    @classmethod
+    def setUpClass(cls):
+        cls.setup_display()
+    @classmethod
+    def tearDownClass(cls):
+        cls.teardown_display()
 
     def test1_mainwindow(self):
         self.assertTrue(self.client.m.win.IsShownOnScreen(),
