@@ -20,13 +20,6 @@ from contextlib import contextmanager
 
 logger = logging.getLogger(__name__)
 
-def south_shut_up():
-    "make south shut up"
-    import south.logger
-    logging.getLogger('south').setLevel(logging.CRITICAL)
-
-south_shut_up()
-
 TESTING_REPO = tempfile.mkdtemp(prefix="testrepo-")
 logger.info("Created testing repo %s" % TESTING_REPO)
 
@@ -42,13 +35,9 @@ class MyFirstSyncTest(LiveServerTestCase):
     fixtures = ['mastrms/repository/fixtures/reference_data.json']
 
     def setUp(self):
-        south_shut_up()
-
         self.setup_more_fixtures()
-
         self.setup_display()
-
-        return super(MyFirstSyncTest, self).setUp()
+        return super(SyncTests, self).setUp()
 
     def tearDown(self):
         # clean out the temporary dir
