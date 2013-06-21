@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env vpython-mastrms
 
 import os
 import os.path
@@ -35,13 +35,24 @@ class FakeRsync(object):
         self.exit_callback = exit_callback
 
     def __enter__(self):
-        self.initial_path = os.environ["PATH"]
-        os.environ["PATH"] = "%s:%s" % (self.MY_PATH, self.initial_path)
+        self._make_path()
         os.environ[self.OPTS_FILE_ENV] = self.opts_file.name
         os.environ[self.CAPTURE_FILE_ENV] = self.capture_file.name
         pickle.dump(self.opts, self.opts_file)
         self.opts_file.flush()
         self.sig_child_old = signal.signal(signal.SIGCHLD, self.sig_child)
+
+    def _make_path(self):
+        """
+        Changes the PATH env to include the location of this "rsync"
+        as well as the virtualenv python executable which was used to
+        run the tests.
+        """
+        self.initial_path = os.environ["PATH"]
+        paths = self.initial_path.split(":")
+        paths.insert(0, os.path.dirname(sys.executable))
+        paths.insert(0, self.MY_PATH)
+        os.environ["PATH"] = ":".join(paths)
 
     def sig_child(self, signal, frame):
         # read the capture file when the fake rsync subprocess exits
