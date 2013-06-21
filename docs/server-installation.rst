@@ -18,9 +18,9 @@ satisfy dependencies, `Epel`_ and `REMI`_ repos need to be enabled::
 Installation/Upgrade
 --------------------
 
-Install the Mastr-MS RPM, replacing X-X-X with the desired version::
+Install the Mastr-MS RPM, replacing ``X.X.X`` with the desired version::
 
-    sudo yum install mastrms-X.X.X
+    sudo yum install python-psycopg2 mastrms-X.X.X
 
 Run Django syncdb and South migrate::
 
@@ -31,39 +31,105 @@ Run Django syncdb and South migrate::
 Server Configuration
 --------------------
 
-Apache config
+Apache Web Server
+~~~~~~~~~~~~~~~~~
+
+The Mastr-MS RPM installs an example Apache config file at
+``/etc/httpd/conf.d/mastrms.ccg``. This config is designed to work out
+of the box with an otherwise unconfigured CentOS Apache
+installation. All that is needed is to rename ``mastrms.ccg`` to
+``mastrms.conf`` so that Apache will pick it up.
+
+If you have already made changes to the default Apache configuration,
+you may need to tweak ``mastrms.conf`` so that the existing setup is
+not broken. It may be necessary to consult the `Apache`_ and
+`mod_wsgi`_ documentation for this.
+
+.. _Apache: http://httpd.apache.org/docs/2.2/
+.. _mod_wsgi: http://code.google.com/p/modwsgi/wiki/ConfigurationGuidelines
+
+..  _sync-user:
+
+User Creation
 ~~~~~~~~~~~~~
 
-/etc/httpd/conf.d/mastrms.ccg
+It is a good idea to create a special user for data syncing::
 
-User creation
-~~~~~~~~~~~~~
+    SYNCUSER=maupload
+    sudo adduser $SYNCUSER
+    sudo su $SYNCUSER -c "mkdir --mode=700 /home/$SYNCUSER/.ssh"
 
-maupload
+..  _sync-repo:
 
 Data Repository and Permissions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+By default, the data repository is located at
+``/var/lib/mastrms/scratch``.
 
-Settings file
-~~~~~~~~~~~~~
+There should be ample disk space on this filesystem and some data
+redundancy would be desirable. If this is not the case, then you could
+mount a suitable file system at this path.
 
-/etc/ccg/mastrms/appsettings.py  ??? fixme
+The data sync user needs to be able to write to this directory, and
+the web server user needs to be able to read from this directory, so::
 
-Link to example config on bitbucket.
+    DATADIR=/var/lib/mastrms/scratch
+    sudo chown maupload:apache $DATADIR
+    sudo chmod 750 $DATADIR
 
+If the data repository needs to be at another location, its path can
+be configured in the settings file.
+
+Django Settings File
+~~~~~~~~~~~~~~~~~~~~
+
+The default settings for Mastr-MS are installed at
+``/usr/local/webapps/mastrms/defaultsettings/mastrms.py``. In case any
+settings need to be overridden, this can be done by creating an
+optional appsettings file. To set up the appsettings file, do::
+
+    sudo mkdir -p /etc/ccgapps/appsettings
+    sudo touch /etc/ccgapps/appsettings/{__init__,mastrms}.py
+
+The Python variable declarations in
+``/etc/ccgapps/appsettings/mastrms.py`` will override the defaults,
+which can be seen in `settings.py`_.
+
+.. _settings.py:
+   https://bitbucket.org/ccgmurdoch/mastr-ms/src/default/mastrms/mastrms/settings.py
 
 
 Testing
 -------
 
-https://your-web-host/mastrms/
+After changing the configuration, start/restart the web server with::
+
+    service httpd restart
+
+Mastr-MS is available at https://your-web-host/mastrms/. A login page
+should be visible at this URL.
 
 
 Administration
 --------------
 
-https://your-web-host/mastrms/repoadmin/
+There are two levels of administration necessary for Mastr-MS.
+
+ * **Management**
+
+   This involves administrating users, projects, quotes, experiments,
+   etc. The URL for management is the normal Mastr-MS address, but
+   only users who are in the admin group can see the interface.
+
+   https://your-web-host/mastrms/
+
+ * **Django Admin**
+
+   This involves manipulation of database objects to configure the
+   data sync system. Only admin users can access the address:
+
+   https://your-web-host/mastrms/repoadmin/
 
 
 .. _nodeclient-setup:
@@ -71,58 +137,51 @@ https://your-web-host/mastrms/repoadmin/
 Data Sync Node Client Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Configuration of a new site is done by adding a *Node client* using
+the **Django Admin**. The fields should be set as follows.
+
++--------------------+------------------------------------------------+
+| Field              | Description                                    |
++====================+================================================+
+| Organisation name  | These values determine how the node is visible |
++--------------------+ in the data sync client.                       |
+| Site name          |                                                |
++--------------------+                                                |
+| Station name       |                                                |
++--------------------+------------------------------------------------+
+| Default data path  | This should be a subdirectory of ``$DATADIR``  |
+|                    | (see :ref:`sync-repo`).                        |
++--------------------+------------------------------------------------+
+| Username           | This should be the data sync user              |
+|                    | (see :ref:`sync-user`).                        |
++--------------------+------------------------------------------------+
+| Hostname           | The hostname of the Mastr-MS server.           |
++--------------------+------------------------------------------------+
+| Flags              | This controls the options the data sync client |
+|                    | will pass to rsync. They should always be set  |
+|                    | to ``--protocol=30 -rzv --chmod=ug=rwX``.      |
++--------------------+------------------------------------------------+
+
 
 .. _adding-keys:
 
 SSH Key Management
-------------------
+~~~~~~~~~~~~~~~~~~
 
-1. e-mail
+When the data sync clients hit *Send Key*, it sends the client's
+public key via a HTTP post to a URL at the Mastr-MS site, and a view
+handles this, saving it to the ``publickeys`` directory on the
+server. It then sends an e-mail to the admins configured for the site,
+telling them that a new key has been uploaded, and they should append
+it on to the ``authorized_keys`` for the data sync user.
 
-2. uploaded key location 
+To install the key, run::
 
-3. authorized_keys
+     cat $DATADIR/files/publickeys/$ORG.$SITE.$STATION_id_rsa.pub \
+         >> /home/$SYNCUSER/.ssh/authorized_keys
 
-   /home/maupload/.ssh/authorized_keys
+(Replace ``$DATADIR``, ``$SYNCUSER`` and ``$ORG.$SITE.$STATION`` with
+your actual settings and the information from the e-mail.)
 
-
-
-Brad's Text
-===========
-
-Hi Maceij
-
-Here are some of the more important details about Mastr and the data 
-sync client that you might need to refer to in future:
-
-- Sync client installation packages and updates should be uploaded to 
-Faramir. They go in /usr/local/python/htdocs/ma
-- The rsync account for maupload is on minerva.
-     Username: maupload
-     Password: tub=gerc
-     Obviously all the clients authenticate using public key, so none of 
-them know this password. I use it for testing though. The data that gets 
-synced to minerva ends up accessible to the webserver somehow - either 
-through some network mount or some other sysadmin voodoo. We 
-occasionally have had problems with permissions - the sync clients at 
-times have not been able to write files or the rsync daemon hasn't been 
-able to create directories. This is pretty much a thing of the past and 
-I believe it was just configuration that was needed, which Mark O'Shea 
-sorted out.
-- When the data sync clients hit 'send key' it sends the client's public 
-key via a HTTP post to a URL at the mastrms site, and a view handles 
-this, saving it to the publickeys directory on the server. It then sends 
-an email to the admins configured for the site, telling them that a new 
-key has been uploaded, and they should append it on to the 
-authorized_keys for the maupload user.
-- The Handshake button just does an rsync connection to the server 
-without sending any data. It is a good way to test that the public key 
-auth is working. Since the initial 'Do you want to trust this host' 
-prompt still comes up in a DOS box on the client machines, I normally 
-get the client to hit this button during installation - it helps get 
-that prompt out of the way.
-- Rsync flags: pretty much the minimum set you need when setting up a 
-new client is:
-     --protocol=30 -rzv --chmod=ug=rwX
-you enter this on the server admin under Node Clients - each node client 
-has a flags section.
+Once the key is added, the client should be able to "Handshake" with
+the server (see :ref:`client-config`).

@@ -1,95 +1,213 @@
 Mastr-MS Development
 ====================
 
-1. copy and paste e-mails
+This document is intended for developers who wish to change Mastr-MS
+or see how it works.
 
-2. jira
+Mastr-MS is Django web application and works with both PostgreSQL and
+MySQL.
 
-3. old link to google code
 
-Mastrms was orignially hosted on google code.
+Source Code
+-----------
 
-https://code.google.com/p/mastr-ms/
+The Mastr-MS code is hosted at BitBucket.
 
-Recently it was pushed to bit bucket:
+    https://bitbucket.org/ccgmurdoch/mastr-ms
 
-https://bitbucket.org/ccgmurdoch/mastr-ms
+Mastr-MS was originally hosted on Google Code. Until the project is
+deleted, or Google Code is discontinued, new versions of the code will
+occasionally be pushed there.
 
-4. checking out
+    https://code.google.com/p/mastr-ms/
 
-5. building rpm
+Mercurial_ is required to check out the code.
 
-6. running tests
-   Testing requirements:
+.. _Mercurial: http://mercurial.selenic.com/
+
+
+Issue Tracking
+--------------
+
+All new bugs/feature requests should be submitted to the JIRA tracker:
+
+    https://ccgmurdoch.atlassian.net/browse/MAS
+
+If all significant changes have a JIRA ticket associated, then release
+notes can be accurately generated.
+
+There still remains a small bug list on Google Code:
+
+    http://code.google.com/p/mastr-ms/issues/list
+
+
+Development Environment
+-----------------------
+
+We develop on Ubuntu. Installing the following packages is
+recommended::
+
+    sudo apt-get install postgresql-server \
+        ipython python-pip python-sphinx \
+        python-wxgtk2.8 xvfb xserver-xephyr
+
+
+Packages not really required::
+
+        python-django \
+        python-werkzeug python-django-extensions \
+        python-selenium chromium-chromedriver \
+
+
+Building a CentOS RPM
+---------------------
+
+todo
+
+How to build the sync client
+----------------------------
+
+The support libraries and binaries are in the
+``mdatasync_client/client/supportwin32`` directory.
+
+You should be able to build the client on a 32-bit Windows XP box, by
+installing these resources as described below.
+
+Initial Setup of build environment
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#. Copy client and supportwin32 over to the windows machine.
+#. Install Python27 (utf8 encoding for json is broken in earlier versions)
+#. Install wx for python 2.7
+#. Install py2exe for python 2.7
+#. Install NSIS
+#. Install 7Zip
+#. Extract the ``EnvVarUpdate`` extension
+#. Copy the extension into ``c:\program files\nsis\include``
+#. Open a shell
+#. Change dir to the ``client`` dir
+
+Building the code
+~~~~~~~~~~~~~~~~~
+
+First, make sure you have updated the version number in ``version.py``
+to be unique, and sequentially higher than previous ones.
+
+On Windows box, get the latest client dir. Run::
+
+    c:\Python27\python.exe setup.py bdist_esky
+
+Then unzip the build you just did (in ``dist/``) so that the files are
+available to the installer.
+
+If you then ran the ``nsi`` file (right click on the file and choose
+'Compile with NSIS'), it would make an installer, using the build you
+just did (in ``/dist``) as a source. So that is how you make an
+installer.
+
+If you want to publish just the update, you take the ``.zip`` that is
+generated in the ``dist`` directory, and ``scp`` it to the
+distribution URL. Currently, this is on S3, under
+http://repo.ccgapps.com.au/ma/
+
+As long as the ``version.py`` version was incremented, a new version
+will be available to esky.
+
+Errors
+~~~~~~
+
+When building with Esky, if you get the message ``cannot access
+../main.py. The file is in use by another process/``, this probably
+means your python code fails a syntax check or has some other runtime
+error.
+
+
+Running Tests
+-------------
+
+Testing requirements:
    * wxpython
    * Xvfb
    * selenium
-   * chrome webdriver
+   * chrome/firefox webdriver
+   * splinter
+   * dingus
+   * python xvfbwrapper
 
+Command to run::
 
-Brad's Description of Mastr-MS
-==============================
+    ./manage.py test --exclude=yaphc --exclude=esky --exclude=httplib2
+
+Product Overview
+----------------
+
+This list, written by Brad, may be useful in understanding the system.
 
 Goals of MASTR
+~~~~~~~~~~~~~~
 
-* To provide a web based tool for experimental design, sample metadata
-configuration, and sample data acquisition.
-* To enable researchers and scientists from geographically separate
-institutions to work together on experiments, analysis, and to be able
-to share results and outcomes.
-* To enable institutions to provide quotes for analysis work to
-third-parties, with automatic linkage through to the relevant projects
-and experiments.
+ * To provide a web based tool for experimental design, sample
+   metadata configuration, and sample data acquisition.
+
+ * To enable researchers and scientists from geographically separate
+   institutions to work together on experiments, analysis, and to be
+   able to share results and outcomes.
+
+ * To enable institutions to provide quotes for analysis work to
+   third-parties, with automatic linkage through to the relevant
+   projects and experiments.
 
 Features of MASTR
-* User / Group administration
-* Experimental design, catering for:
-* User roles and access control
-* Sample origin metadata
-* Sample timeline and treatment metadata
-* Sample tracking
-* Sample information import / export via CSV
-* Standard Operating Procedure upload
-* Run creation, generating worklists for the purposes of instrument
-automation.
-* Fully customisable rules system for worklist generation
-* Sample blocks, order, randomisation, and solvents/blanks can
-be specified as a programmable template.
-* Worklist rulesets can be rolled out per individual, or shared
-with groups or the entire institution
-* Rulesets can be branched and cloned
-* Runs and Experiments can also be cloned for convenience.
+~~~~~~~~~~~~~~~~~
 
-* Data acquisition, consisting of:
-* A program which runs on the computer connected to the instrument
-which processes MASTR worklists
-* The program will check periodically for filesets related to
-experiment runs being performed for MASTR
-* The sample data is compressed and uploaded to the MASTR-connected
-storage, and optionally archived on the client machine.
-* The sample data is then securely available to relevant users
-through the MASTR web interface for viewing or download.
-* Full end-to-end data acquisition, from experimental design to
-sample file access.
+ * User / Group administration
+ * Experimental design, catering for:
+    * User roles and access control
+    * Sample origin metadata
+    * Sample timeline and treatment metadata
+    * Sample tracking
+    * Sample information import / export via CSV
+    * Standard Operating Procedure upload
+    * Run creation, generating worklists for the purposes of
+      instrument automation.
+    * Fully customisable rules system for worklist generation
+    * Sample blocks, order, randomisation, and solvents/blanks can be
+      specified as a programmable template.
+    * Worklist rulesets can be rolled out per individual, or shared
+      with groups or the entire institution
+    * Rulesets can be branched and cloned
+    * Runs and Experiments can also be cloned for convenience.
 
-* Quote requests and tracking
-* A system for third parties to request quotes for analysis work of
-any of the institutions in MASTR
-* Institution Administrators or Node Representatives can review the
-requests and service replies, with optional PDF attachments.
-* Full quote event history is maintained.
-* Quotes in the system can be linked to Projects / Experiments
+ * Data acquisition, consisting of:
+    * A program which runs on the computer connected to the instrument
+      which processes MASTR worklists
+    * The program will check periodically for filesets related to
+      experiment runs being performed for MASTR
+    * The sample data is compressed and uploaded to the
+      MASTR-connected storage, and optionally archived on the client
+      machine.
+    * The sample data is then securely available to relevant users
+      through the MASTR web interface for viewing or download.
+    * Full end-to-end data acquisition, from experimental design to
+      sample file access.
 
-* Modern technologies
-* Able to be accessed in all major web browsers
-* Lightweight and powerful UI
-* Open data formats and transports used (rsync, json)
-* Open Source code repository
+ * Quote requests and tracking
+    * A system for third parties to request quotes for analysis work
+      of any of the institutions in MASTR
+    * Institution Administrators or Node Representatives can review
+      the requests and service replies, with optional PDF attachments.
+    * Full quote event history is maintained.
+    * Quotes in the system can be linked to Projects / Experiments
+
+ * Modern technologies
+    * Able to be accessed in all major web browsers
+    * Lightweight and powerful UI
+    * Open data formats and transports used (rsync, json)
+    * Open Source code repository
 
 
-Documentation which needs merging
-=================================
+Documentation which still needs merging
+=======================================
 
-  INSTALL        --> client-install.rst
-  BUILD_HOWO     --> dev-client-build-howto.rst
-  WXPYTHON_HOWTO --> dev-wxpython-howto.rst
+ * ``INSTALL`` → ``client-install.rst``
+ * ``WXPYTHON_HOWTO`` → ``dev-wxpython-howto.rst``

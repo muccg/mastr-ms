@@ -42,6 +42,7 @@ Starting
 To start the data sync client application, open the installation
 folder and double click "main.exe".
 
+.. _client-config:
 
 Configuration
 -------------
@@ -70,7 +71,9 @@ be used to sync data. To configure the data sync client, visit the
    button to test the connection. A black command console box will
    appear and ask you to type 'yes' or 'no' to confirm that you want
    to connect to the server. Type yes to proceed. This is a one time
-   operation.
+   operation. It is a good way to test that public key authentication
+   is working and gets the "Do you want to trust this host?" prompt
+   out of the way.
 
 5. Click the OK button to save your changes.
 
