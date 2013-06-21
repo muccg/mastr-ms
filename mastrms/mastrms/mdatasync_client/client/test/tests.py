@@ -1,4 +1,4 @@
-import unittest
+from django.utils import unittest
 import dingus
 from StringIO import StringIO
 import logging
