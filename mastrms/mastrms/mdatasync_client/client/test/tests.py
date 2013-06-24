@@ -11,6 +11,10 @@ from mastrms.mdatasync_client.client.test.testclient import TestClient
 from mastrms.mdatasync_client.client.version import VERSION
 
 class BasicClientTests(unittest.TestCase, XDisplayTest):
+    """
+    These are simple tests just to exercise all the dialogs in the
+    data sync client.
+    """
     def setUp(self):
         config = MSDSConfig()
         self.client = TestClient(config)
@@ -26,10 +30,12 @@ class BasicClientTests(unittest.TestCase, XDisplayTest):
         cls.teardown_display()
 
     def test1_mainwindow(self):
+        """Show main window on screen, check if it's visible."""
         self.assertTrue(self.client.m.win.IsShownOnScreen(),
                         "Window is on screen")
 
     def test2_tray_minimize_maximize(self):
+        """Minimize window to tray, then unminimize it."""
         self.client.close() # doesn't seem to disappear window
         #self.assertFalse(self.client.m.win.IsShownOnScreen(),
         #                 "Window exists but is hidden")
@@ -41,12 +47,12 @@ class BasicClientTests(unittest.TestCase, XDisplayTest):
                         "Window is on screen again")
 
     def test3_preferences_window(self):
-        "Exercise the code which shows preferences dialog"
+        """Exercise the code which shows preferences dialog."""
         prefs = self.client.click_menu_preferences()
         prefs.close()
 
     def test3_advanced_preferences_window(self):
-        "Exercise advanced preferences dialog code"
+        """Exercise advanced preferences dialog code."""
         prefs = self.client.click_menu_preferences()
         advanced = prefs.click_advanced()
         advanced.advanced_click_close()
@@ -61,6 +67,9 @@ def betterpatch(object_path, new_object=dingus.NoArgument):
     return _BetterPatcher(module_name, attribute_name, new_object)
 
 class DataSyncServerTests(unittest.TestCase):
+    """
+    These are unit tests for the `DataSyncServer` class.
+    """
     def setUp(self):
         self.config = MSDSConfig()
         self.server = DataSyncServer(self.config)

@@ -18,6 +18,9 @@ import sys, os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath("../mastrms"))
 
+# Just use the django dev settings for building docs.
+os.environ["DJANGO_SETTINGS_MODULE"] = "mastrms.settings"
+
 # -- General configuration -----------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -240,3 +243,15 @@ texinfo_documents = [
 
 # How to display URL addresses: 'footnote', 'no', or 'inline'.
 #texinfo_show_urls = 'footnote'
+
+
+# -- Mock modules for autodoc building -----------------------------------------
+# https://read-the-docs.readthedocs.org/en/latest/faq.html#i-get-import-errors-on-libraries-that-depend-on-c-modules
+
+import dingus
+
+MOCK_MODULES = ['splinter',
+                'wx', 'wx.lib', 'wx.lib.mixins', 'wx.lib.mixins.listctrl',
+                'wx.lib.filebrowsebutton', 'wx.lib.embeddedimage']
+for mod_name in MOCK_MODULES:
+    sys.modules[mod_name] = dingus.Dingus()
