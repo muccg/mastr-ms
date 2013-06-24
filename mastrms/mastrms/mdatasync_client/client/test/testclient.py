@@ -22,10 +22,19 @@ class TestClient(object):
     This class runs the client in a thread and provides methods for
     unit tests to control the client.
 
-    The test client uses wxWidgets and so needs an X display. Xephyr
-    or Xvfb can be used for this purpose.
+    The test client uses wxWidgets and so needs an X display.
+    ``Xephyr`` or ``Xvfb`` can be used for this purpose.
+
+    The `config` parameter should be a
+    :class:`mastrms.mdatasync_client.client.config.MSDSConfig` object.
+
+    If `maximize` is True, then the main window will be maximized,
+    which is helpful when watching tests run in a nested X server.
     """
     clients = []
+
+    # give the test case 60 seconds to run
+    MAX_TIME = 60
 
     def __init__(self, config, maximize=False):
         logger.info("TestClient starting")
@@ -64,6 +73,7 @@ class TestClient(object):
             self.ready.clear()
 
     def click_sync(self):
+        """Clicks the "Check Now" menu item."""
         logger.info("click_sync enter")
         wx.CallAfter(self.m.win.OnCheckNow, None)
         logger.info("click_sync exit")
@@ -80,10 +90,12 @@ class TestClient(object):
         time.sleep(CRAP_TEST_CRAP)
 
     def click_send_log(self):
+        """Clicks the "Send Log" button."""
         wx.CallAfter(self.m.win.OnSendLog)
         self._wait_for_sync()
 
     def click_send_shot(self):
+        """Clicks the "Send Shot" screenshot button."""
         wx.CallAfter(self.m.win.OnTakeScreenshot)
         self._wait_for_sync()
 
@@ -124,6 +136,11 @@ class TestClient(object):
             self.advanced = None # assume window was closed
 
     def click_menu_preferences(self):
+        """
+        Clicks the *Edit -> Preferences* menu. This method returns a
+        `TestPreferences` object which can be used to control the
+        preferences window.
+        """
         wx.CallAfter(self.m.win.OnMenuPreferences, None)
         self._wait()
         return self.TestPreferences(self.m.win.prefs)
@@ -132,6 +149,8 @@ class TestClient(object):
         self.ready.wait()
 
     def set_window_title(self, title):
+        """Changes the main window title, useful for showing the test
+        case name."""
         wx.CallAfter(self.m.win.SetTitle, title)
 
     def close(self):
@@ -156,9 +175,9 @@ class TestClient(object):
     def quit(self, force=False):
         """
         Cleanly quits the client, unless it is already in the process
-        of quitting, or if the TEST_CLIENT_LINGER environment variable
-        is non-zero. The TEST_CLIENT_LINGER environment variable is
-        overridden by the `force' argument to this method.
+        of quitting, or if the ``TEST_CLIENT_LINGER`` environment
+        variable is non-zero. The ``TEST_CLIENT_LINGER`` environment
+        variable is overridden by the `force` argument to this method.
         """
         if not force and self._should_linger():
             logger.info("Not quitting client due to TEST_CLIENT_LINGER setting")

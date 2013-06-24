@@ -138,6 +138,36 @@ Command to run::
 
     ./manage.py test --exclude=yaphc --exclude=esky --exclude=httplib2
 
+Testing
+-------
+
+Mastr-MS contains some system tests as well as unit tests.
+
+The WxPython client is tested using the TestClient class. TestClient
+runs the client in a thread and allows "clicking" on GUI buttons by
+calling the associated event handlers.
+
+.. autoclass:: mastrms.mdatasync_client.client.test.TestClient
+   :members:
+
+To generate sample data files like the lab instrument software would
+create, use the :class:`Simulator` class. Simulator can be run as a
+standalone WxPython GUI, or operated programmatically through
+:class:`Worklist`.
+
+.. autoclass:: mastrms.mdatasync_client.client.Simulator.Simulator
+   :members:
+
+.. autoclass:: mastrms.mdatasync_client.client.Simulator.WorkList
+
+For testing you usually don't want to do actual file transfers, but
+you do want to check that ``rsync`` was called. For this, we put a
+mock command into the ``PATH`` which can be queried from the test cases.
+
+.. autoclass:: mastrms.mdatasync_client.client.test.fake_rsync.FakeRsync
+
+
+
 Product Overview
 ----------------
 

@@ -6,6 +6,9 @@
 Mastr-MS
 ========
 
+Mastr-MS is a web-based tool for experimental design, sample metadata
+configuration, and sample data acquisition.
+
 Metabolomics Australia Sample Tracking Repository
 -------------------------------------------------
 
@@ -18,45 +21,43 @@ Genomics`_, for Metabolomics Australia (MA).
 
 Mastr-MS is comprised of a number of modules:
 
-User Management Module
-~~~~~~~~~~~~~~~~~~~~~~
+**User Management Module**
 
-Provision of a secure, online user management module for the
-Metabolomics Australia Data and Sample Management System
+  Provision of a secure, online user management module for the
+  Metabolomics Australia Data and Sample Management System.
     
-Sample Management Module
-~~~~~~~~~~~~~~~~~~~~~~~~
+**Sample Management Module**
 
-Provision of a secure, online sample management module allowing users
-to submit samples, track samples through experimental workflows and
-receive results
+  Provision of a secure, online sample management module allowing
+  users to submit samples, track samples through experimental
+  workflows and receive results.
 
-Data Management Module
-~~~~~~~~~~~~~~~~~~~~~~
+**Data Management Module**
 
-Provision of secure, online metabolomics repository to capture all
-relevant MA experimental workflows. It includes storage of raw data
-files as well as all relevant meta data associated with an experiment
+  Provision of secure, online metabolomics repository to capture all
+  relevant MA experimental workflows. It includes storage of raw data
+  files as well as all relevant meta data associated with an
+  experiment.
 
 ABF Team
 --------
 
-Project Director
+**Project Director**
   Prof. Matthew Bellgard
-Project Leader
+**Project Leader**
   Adam Hunter
-Software Developers
+**Software Developers**
   Rodney Lorrimar, Brad Power, Tamas Szabo, Maciej Radochonski,
   Nick Takayama, Andrew Macgregor
-System Administrator
+**System Administrator**
   David Schibeci
 
 MA Team
 -------
 
-MA Informatics Group Leader
+**MA Informatics Group Leader**
   Dr. Vladimir Likic
-Computer Scientist
+**Computer Scientist**
   Dr. Saravanan Dayalan
 
 Table of Contents
