@@ -150,9 +150,9 @@ test classes are:
     * :class:`mastrms.mdatasync_server.tests.AdminTests`
 
 
-The WxPython client is tested using the TestClient class. TestClient
-runs the client in a thread and allows "clicking" on GUI buttons by
-calling the associated event handlers.
+The WxPython client is tested using the :class:`TestClient`
+class. :class:`TestClient` runs the client in a thread and allows
+"clicking" on GUI buttons by calling the associated event handlers.
 
 .. autoclass:: mastrms.mdatasync_client.client.test.TestClient
    :members:
