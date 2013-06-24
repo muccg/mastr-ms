@@ -30,17 +30,18 @@ class TestClient(object):
 
     If `maximize` is True, then the main window will be maximized,
     which is helpful when watching tests run in a nested X server.
+
+    If `timeout` is not None, the test client will be killed after
+    `timeout` seconds.
     """
     clients = []
 
-    # give the test case 60 seconds to run
-    MAX_TIME = 60
-
-    def __init__(self, config, maximize=False):
+    def __init__(self, config, maximize=False, timeout=None):
         logger.info("TestClient starting")
         logger.info("Config\n%s" % config)
         self.config = config
         self.maximize = maximize
+        self.timeout = timeout
         self.lock = threading.RLock()
         self.ready = threading.Event()
         self.finished = threading.Event()
@@ -59,12 +60,24 @@ class TestClient(object):
         logger.addHandler(self.m.win.getLog())
         self._setup_exit_hook()
         self._post_start_event()
+        self._set_killer_timeout()
         self.m.MainLoop()
         logger.info("Mainloop finished")
         self.m.msds.stopThread()
 
     def _post_start_event(self):
         wx.CallAfter(self._set_ready, True)
+
+    def _set_killer_timeout(self):
+        if self.timeout is not None:
+            self.timer = wx.Timer(self.m.win)
+            self.m.win.Bind(wx.EVT_TIMER, self._timed_out, self.timer)
+            self.timer.Start(int(self.timeout * 1000))
+            logger.info("The test client will quit after %d seconds" % self.timeout)
+
+    def _timed_out(self, event):
+        logger.info("Timed out after %d seconds" % self.timeout)
+        self.m.win.OnMenuQuit(None)
 
     def _set_ready(self, ready=True):
         if ready:
