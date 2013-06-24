@@ -15,6 +15,7 @@ class SilenceSouthPlugin(Plugin):
     def configure(self, options, conf):
         super(SilenceSouthPlugin, self).configure(options, conf)
         logging.getLogger('south').setLevel(self.south_logging_level)
+        logging.getLogger("selenium.webdriver.remote.remote_connection").setLevel(self.south_logging_level)
 
 class MockLoggingHandler(logging.Handler):
     """
