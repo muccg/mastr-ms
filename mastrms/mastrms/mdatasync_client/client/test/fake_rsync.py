@@ -14,8 +14,38 @@ __all__ = ["FakeRsync"]
 
 class FakeRsync(object):
     """
-    FakeRsync is a context manager which puts a stub rsync command in
-    the PATH and captures the arguments which were supplied to it.
+    FakeRsync is a context manager which puts a stub ``rsync`` command
+    in the ``PATH`` and captures the arguments which were supplied to
+    it.
+
+    It can be used like so:
+
+    >>> worklist = ["a", "b"]
+    >>> sim = Simulator()
+    >>> config = MSDSConfig(localdir=sim.destdir)
+    >>> cl = TestClient(config)
+    >>> sim.process_worklist(worklist)
+    >>> with FakeRsync() as results:
+    ...     cl.click_sync()
+    ...     assert len(results) == 1, "rsync is called once"
+    ...     assert bool(results[0])
+    ...     assert len(results[0]["source_files"]) == 2, "two files synced"
+    ...     assert results[0]["source_files"][0] == "a", "a is sent"
+    ...
+    >>> cl.quit()
+    >>> sim.cleanup()
+
+    If the results need to be accessed outside the scope of the
+    ``with`` block, then a list can be passed in for `results`.
+
+    `retcode` is the desired exit code of the mock ``rsync`` command.
+
+    `stdoutdata` is the desired text to write to the command's
+    standard output.
+
+    If `do_copy` is true, the mock ``rsync`` will actually copy the
+    files locally to the destination given on the ``rsync`` command
+    line.
     """
     OPTS_FILE_ENV = "FAKE_RSYNC_OPTS_FILE"
     CAPTURE_FILE_ENV = "FAKE_RSYNC_CAPTURE_FILE"

@@ -2,7 +2,7 @@ import wx
 import time
 from WxLogger import Log
 from identifiers import *
-import  wx.lib.filebrowsebutton as filebrowse
+import wx.lib.filebrowsebutton as filebrowse
 import os
 import os.path
 import tempfile
@@ -15,14 +15,20 @@ __all__ = ["Simulator", "WorkList"]
 class Simulator(object):
     """
     The simulator can generate "data" files from a CSV work list.
+
+    `destdir` is the place to create files; a temporary directory is
+    used by default.
+
+    If `temp_files` is True, then TEMPBASE, TEMPDAT and TEMPDIR files
+    will be dropped into any sample directory ending with .d.
     """
     def __init__(self, destdir=None, temp_files=False):
-        self.destdir = self.setup_destdir(destdir)
+        self.destdir = self._setup_destdir(destdir)
         self.generate_temp_files = temp_files
         self._created_files = []
         self._created_dirs = []
 
-    def setup_destdir(self, destdir=None):
+    def _setup_destdir(self, destdir=None):
         if destdir is None:
             destdir = tempfile.mkdtemp(prefix="simulator-")
 
@@ -35,6 +41,11 @@ class Simulator(object):
         return destdir
 
     def process_worklist(self, worklist):
+        """
+        Creates "data" for each item in `worklist`. This should be a
+        list of filenames, such as what is created by
+        :class:`WorkList`.
+        """
         temp_files = ['TEMPBASE', 'TEMPDAT', 'TEMPDIR']
         count = 0
         for count, listitem in enumerate(worklist):
@@ -68,6 +79,10 @@ class Simulator(object):
                 logger.info("Item %d already exits: %s" % (count, fname) )
 
     def add_more_data_with_worklist(self, worklist):
+        """
+        Appends/creates "more data" to the files/directories already
+        created by :method:`Simulator.process_worklist`.
+        """
         for listitem in worklist:
             fname = os.path.join(self.destdir, listitem)
             if not os.path.exists(fname):
@@ -96,6 +111,10 @@ class Simulator(object):
         self._created_dirs.append(fname)
 
     def cleanup(self):
+        """
+        This method will delete all files and directories which have
+        been created by this simulator.
+        """
         for fname in self._created_files:
             logger.info("Removing file %s" % fname)
             try:
@@ -232,6 +251,10 @@ class MainWindow(wx.Frame):
         self.inputText.Clear()
 
 class WorkList(list):
+    """
+    WorkList is a list of sample filenames loaded a CSV file. `text`
+    is the CSV-formatted worklist.
+    """
     def __init__(self, text):
         for line in text.splitlines():
             try:
