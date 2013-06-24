@@ -141,7 +141,14 @@ Command to run::
 Testing
 -------
 
-Mastr-MS contains some system tests as well as unit tests.
+Mastr-MS contains some system tests as well as unit tests. The current
+test classes are:
+
+    * :class:`mastrms.mdatasync_client.client.test.tests.BasicClientTests`
+    * :class:`mastrms.mdatasync_client.client.test.tests.DataSyncServerTests`
+    * :class:`mastrms.mdatasync_server.tests.SyncTests`
+    * :class:`mastrms.mdatasync_server.tests.AdminTests`
+
 
 The WxPython client is tested using the TestClient class. TestClient
 runs the client in a thread and allows "clicking" on GUI buttons by
@@ -241,3 +248,8 @@ Documentation which still needs merging
 
  * ``INSTALL`` → ``client-install.rst``
  * ``WXPYTHON_HOWTO`` → ``dev-wxpython-howto.rst``
+
+.. toctree::
+    client-install
+    dev-wxpython-howto
+    tests

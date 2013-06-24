@@ -61,7 +61,7 @@ be used to sync data. To configure the data sync client, visit the
 
 2. Use the *Browse* button to select the folder containing your data.
  
-3. Click *Send*Key" to upload the generated SSH key. The Mastr-MS
+3. Click *Send Key* to upload the generated SSH key. The Mastr-MS
    server administrator will be e-mailed the key and must then install
    it (see :ref:`adding-keys`). Syncing will not be possible until the
    key is installed on the server. If the key was successfully sent,

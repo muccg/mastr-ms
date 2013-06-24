@@ -81,7 +81,7 @@ class Simulator(object):
     def add_more_data_with_worklist(self, worklist):
         """
         Appends/creates "more data" to the files/directories already
-        created by :method:`Simulator.process_worklist`.
+        created by `Simulator.process_worklist`.
         """
         for listitem in worklist:
             fname = os.path.join(self.destdir, listitem)
