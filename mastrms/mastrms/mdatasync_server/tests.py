@@ -29,29 +29,14 @@ def tearDownModule():
     logger.info("Removing testing repo %s" % TESTING_REPO)
     os.rmdir(TESTING_REPO)
 
-@override_settings(REPO_FILES_ROOT=TESTING_REPO)
-class SyncTests(LiveServerTestCase, XDisplayTest):
+class WithFixtures(object):
+    "TestCase mixin to provide fixtures for tests."
     # For some reason, fixtures are required, or else the test case
     # won't find them.
-    fixtures = ['mastrms/repository/fixtures/reference_data.json']
-
-    def setUp(self):
-        self.setup_more_fixtures()
-        self.setup_display()
-        return super(SyncTests, self).setUp()
-
-    def tearDown(self):
-        # clean out the temporary dir
-        logger.info("Clearing out testing repo %s" % pipes.quote(settings.REPO_FILES_ROOT))
-        for f in os.listdir(settings.REPO_FILES_ROOT):
-            os.system("rm -rf %s" % pipes.quote(os.path.join(settings.REPO_FILES_ROOT, f)))
-
-    @classmethod
-    def setUpClass(cls):
-        cls.setup_display()
-    @classmethod
-    def tearDownClass(cls):
-        cls.teardown_display()
+    fixtures = [
+        "mastrms/repository/fixtures/reference_data.json",
+        "mastrms/users/fixtures/initial_user.json",
+        ]
 
     def setup_more_fixtures(self):
         """
@@ -68,16 +53,18 @@ class SyncTests(LiveServerTestCase, XDisplayTest):
                                        flags="-rz")
 
         #user = User.objects.get(username__istartswith="admin")
-        user = User.objects.create(username="testuser")
+        #user = User.objects.create(username="testuser", is_staff=True)
+        self.user_password = "testing"
+        self.user = self.create_user("testuser", self.user_password)
 
         project = Project.objects.create(title="Project", description="Test project",
-                                         client=user)
+                                         client=self.user)
 
         method = InstrumentMethod.objects.create(title="Instrument Method",
                                                  method_path="METHOD_PATH",
                                                  method_name="METHOD_NAME",
                                                  version="", template="",
-                                                 creator=user)
+                                                 creator=self.user)
 
         experiment = Experiment.objects.create(title="Test experiment",
                                                description="We're testing to see if this code works",
@@ -87,7 +74,7 @@ class SyncTests(LiveServerTestCase, XDisplayTest):
                                                instrument_method=method)
 
         rulegen = RuleGenerator.objects.create(name="Rule Gen", description="test",
-                                               created_by=user,
+                                               created_by=self.user,
                                                state=RuleGenerator.STATE_ENABLED,
                                                accessibility=RuleGenerator.ACCESSIBILITY_ALL)
 
@@ -106,7 +93,7 @@ class SyncTests(LiveServerTestCase, XDisplayTest):
             block.save()
 
         run = Run.objects.create(experiment=experiment, method=method,
-                                 creator=user, machine=nc, state=RUN_STATES.NEW[0],
+                                 creator=self.user, machine=nc, state=RUN_STATES.NEW[0],
                                  rule_generator=rulegen)
 
         biological_source = None
@@ -134,11 +121,62 @@ class SyncTests(LiveServerTestCase, XDisplayTest):
                                               component=sb,
                                               filename="runsample2_filename")
 
-        self.user = user
         self.nc = nc
         self.sample = sample
-        self.run = run
+        self.run = Run.objects.get(id=run.id)
+
+    def create_user(self, username, password="test", is_admin=True):
+        """
+        Creates a django user and associated MAUser baggage.
+        Returns the django user
+        """
+        from mastrms.users.MAUser import getMadasUser, saveMadasUser
+
+        # need an admin user to create a user
+        adminUser = getMadasUser('nulluser')
+        adminUser.IsAdmin = True
+
+        # need some extra information
+        changed_details = { }
+        changed_status = { "admin": is_admin, "noderep": is_admin, "node": "", "status": "",
+                           "mastradmin": is_admin, "mastrstaff": is_admin,
+                           "projectleader": is_admin }
+
+        # use MAUser wrapper to create user
+        created = saveMadasUser(adminUser, username,
+                                changed_details, changed_status,
+                                password)
+
+        assert created, "created user"
+
+        user = User.objects.get(username=username)
+        user.set_password(password)
+
+        return user
+
+@override_settings(REPO_FILES_ROOT=TESTING_REPO)
+class SyncTests(LiveServerTestCase, XDisplayTest, WithFixtures):
+    def setUp(self):
         self.test_client = None
+        self.setup_more_fixtures()
+        self.setup_display()
+        return super(SyncTests, self).setUp()
+
+    def tearDown(self):
+        # clean out the temporary dir
+        logger.info("Clearing out testing repo %s" % pipes.quote(settings.REPO_FILES_ROOT))
+        for f in os.listdir(settings.REPO_FILES_ROOT):
+            os.system("rm -rf %s" % pipes.quote(os.path.join(settings.REPO_FILES_ROOT, f)))
+
+    @classmethod
+    def setUpClass(cls):
+        cls.setup_display()
+        super(SyncTests, cls).setUpClass()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.teardown_display()
+        super(SyncTests, cls).tearDownClass()
 
     def test_sync1(self):
         # 1. add a run, with 2 or more samples
@@ -758,29 +796,122 @@ def runsample_filename(run, sample_filename):
                         str(run.id), sample_filename)
 
 
-# # Trying out selenium tests
-# # fixme: maybe use splinter for testing
-# # http://splinter.cobrateam.info/
-# from django.test import LiveServerTestCase
-# from selenium.webdriver.chrome.webdriver import WebDriver
+# Trying out selenium tests
+# fixme: maybe use splinter for testing
+# http://splinter.cobrateam.info/
+#from selenium.webdriver.chrome.webdriver import WebDriver
+from selenium.webdriver.firefox.webdriver import WebDriver
+from splinter import Browser
+import re
+from django.test.client import Client
+from django.conf import settings
 
-# class MySeleniumTests(LiveServerTestCase):
-#     #fixtures = ['user-data.json']
+# dependencies
+# yum -y install firefox
+# pip install splinter selenium WebDriver
 
-#     @classmethod
-#     def setUpClass(cls):
-#         cls.selenium = WebDriver()
-#         super(MySeleniumTests, cls).setUpClass()
+def create_session_store():
+    """ Creates a session storage object. """
 
-#     @classmethod
-#     def tearDownClass(cls):
-#         cls.selenium.quit()
-#         super(MySeleniumTests, cls).tearDownClass()
+    from django.utils.importlib import import_module
+    engine = import_module(settings.SESSION_ENGINE)
+    # Implement a database session store object that will contain the session key.
+    store = engine.SessionStore()
+    store.save()
+    return store
 
-#     def test_login(self):
-#         self.selenium.get("%s%s" % (self.live_server_url, "/repoadmin/"))
-#         username_input = self.selenium.find_element_by_name("username")
-#         username_input.send_keys("admin@example.com")
-#         password_input = self.selenium.find_element_by_name("password")
-#         password_input.send_keys("admin")
-#         self.selenium.find_element_by_xpath("//input[@value='Log in']").click()
+class AdminTests(LiveServerTestCase, XDisplayTest, WithFixtures):
+    def setUp(self):
+        self.client = Client()
+
+    @classmethod
+    def setUpClass(cls):
+        cls.setup_display()
+        super(AdminTests, cls).setUpClass()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.teardown_display()
+        super(AdminTests, cls).tearDownClass()
+
+    def test1_login(self):
+        "This test is given as an example in the django docs"
+        self.selenium = WebDriver()
+        self.selenium.get(self.url("/repoadmin/login/"))
+        username_input = self.selenium.find_element_by_name("username")
+        username_input.send_keys("admin@example.com")
+        password_input = self.selenium.find_element_by_name("password")
+        password_input.send_keys("admin")
+        self.selenium.find_element_by_xpath("//input[@value='Log in']").click()
+        self.selenium.quit()
+
+    def junk_code(self):
+        session_store = create_session_store()
+        session_items = session_store
+        # Add a session key/value pair.
+        session_items['uid'] = 1
+        session_items.save()
+
+        #test user setup
+        username = "testuser"
+        self.assertTrue(User.objects.filter(username=username).exists(),
+                        "Test user exists")
+        #success = self.client.login(username=username, password=password)
+        #self.assertTrue(success, "Log in as test user")
+
+            #logger.info("adding cookie %s=%s" % (settings.SESSION_COOKIE_NAME, session_store.session_key))
+            #browser.cookies.add({settings.SESSION_COOKIE_NAME:
+            #                     session_store.session_key})
+            # logger.info("adding cookies %s" % str(self.client.cookies))
+            # browser.cookies.add(dict((k, m.value) for (k, m) in self.client.cookies.items()))
+            # self.assertEqual(unicode(browser.cookies[settings.SESSION_COOKIE_NAME]),
+            #                  unicode(self.client.cookies[settings.SESSION_COOKIE_NAME].value))
+
+
+    def test2_mark_incomplete(self):
+        """
+        Tests the admin action where a run can be set as incomplete.
+        """
+
+        # run setup
+        self.setup_more_fixtures()
+        self.assertEqual(Run.objects.count(), 1)
+
+        # make the run complete
+        self.run.runsample_set.update(complete=True)
+        self.run.update_sample_counts()
+        self.assertEqual(self.run.state, RUN_STATES.COMPLETE[0])
+
+        with Browser() as browser:
+            # ah bugger it, just login
+            browser.visit(self.url("/repoadmin/login/?next=/repoadmin/repository/run/"))
+            browser.fill("username", self.user.username)
+            browser.fill("password", self.user_password)
+            browser.find_by_xpath("//input[@value='Log in']").click()
+
+            # select the run
+            browser.visit(self.url("/repoadmin/repository/run/"))
+            browser.find_by_name("_selected_action").first.check()
+
+            # Select the "Mark Run Incomplete" action from dropdown box
+            browser.select("action", "mark_run_incomplete")
+
+            # Click "Go" button
+            button = browser.find_by_name("index")
+            button.click()
+
+            self.assertTrue(browser.is_text_present("changed to incomplete"),
+                            "Check for a status message")
+
+            # grab status message
+            message = browser.find_by_css(".messagelist").text
+            logger.debug("message is: %s" % message)
+
+            # check the number of samples and runs
+            pat = re.compile(r"(\d+) runs? and (\d+) samples? changed to incomplete")
+            m = pat.match(message)
+            self.assertEqual(int(m.group(1)), 1, "Check num. runs changed")
+            self.assertEqual(int(m.group(2)), 2, "Check num. samples changed")
+
+    def url(self, path):
+        return "%s%s" % (self.live_server_url, path)
