@@ -56,11 +56,3 @@ class XDisplayTest(object):
     def teardown_display(cls):
         if cls.vdisplay:
             cls.vdisplay.stop()
-
-    @classmethod
-    def setUpClass(cls):
-        cls.setup_display()
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.teardown_display()
