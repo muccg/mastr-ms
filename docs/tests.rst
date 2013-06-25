@@ -4,6 +4,9 @@ Tests
 This is a list of testing classes. For complete information, please
 consult the source code.
 
+If this page is empty, it means that the :mod:`sphinx.ext.autodoc`
+generated documentation failed to build.
+
 .. autoclass:: mastrms.mdatasync_client.client.test.tests.BasicClientTests
     :members:
 

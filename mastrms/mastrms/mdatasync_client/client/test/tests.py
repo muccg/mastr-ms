@@ -51,7 +51,7 @@ class BasicClientTests(unittest.TestCase, XDisplayTest):
         prefs = self.client.click_menu_preferences()
         prefs.close()
 
-    def test3_advanced_preferences_window(self):
+    def test4_advanced_preferences_window(self):
         """Exercise advanced preferences dialog code."""
         prefs = self.client.click_menu_preferences()
         advanced = prefs.click_advanced()
@@ -81,6 +81,7 @@ class DataSyncServerTests(unittest.TestCase):
         return betterpatch("urllib2.urlopen", urlopen)
 
     def test_handshake(self):
+        """Try the "handshake" API call."""
         with self.fake_urlopen('{ "success": true, "details": { "host": "testhost", "flags": "testflags", "username": "username", "rootdir": "rootdir", "rules": ["a", "b", "c"] } }'):
             details = self.server.handshake()
 
@@ -88,16 +89,25 @@ class DataSyncServerTests(unittest.TestCase):
             self.assertListEqual(details["rules"], ["a", "b", "c"])
 
     def test_handshake_weird_json(self):
+        """Test handshaking when server returns unexpected json."""
         with self.assertRaises(KeyError):
             with self.fake_urlopen("{ lah: 'hello' }"):
                 details = self.server.handshake()
 
     def test_handshake_not_json(self):
+        """
+        Test handshaking when server returns something other than json.
+        This test case expects `KeyError`, which isn't ideal.
+        """
         with self.assertRaises(KeyError):
             with self.fake_urlopen("  *8>--O===3  this is not json; it's an emu  "):
                 details = self.server.handshake()
 
     def test_requestsync(self):
+        """
+        Tests calling the /sync/requestsync/ view. The fake server
+        requests no files.
+        """
         with self.fake_urlopen('{ "success": true, "details": { "host": "testhost", "flags": "testflags", "username": "username", "rootdir": "rootdir", "rules": ["a", "b", "c"] } }') as d:
             result = self.server.requestsync()
             self.assertTrue(result["success"])
@@ -108,6 +118,10 @@ class DataSyncServerTests(unittest.TestCase):
                                     dingus.DontCare).once())
 
     def test_requestsync_expected_files(self):
+        """
+        Tests calling /sync/requestsync, with 1 file requested by the
+        fake server.
+        """
         # fixme: this is the wrong place to test such things
         with self.fake_urlopen('{ "success": true, "details": {}, "files": { "1": { "test.txt": [1, 2, "relpath", false] } } }') as d:
             result = self.server.requestsync()

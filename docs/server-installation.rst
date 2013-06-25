@@ -1,6 +1,11 @@
 Mastr-MS Server
 ===============
 
+The Mastr-MS server is a Django application which provides a web
+interface for user management, sample management, and access to
+experiment data.
+
+
 Yum repository setup
 --------------------
 

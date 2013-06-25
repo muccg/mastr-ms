@@ -173,6 +173,13 @@ mock command into the ``PATH`` which can be queried from the test cases.
 
 .. autoclass:: mastrms.mdatasync_client.client.test.fake_rsync.FakeRsync
 
+Documentation
+-------------
+
+The documentation is in :ref:`Sphinx <sphinx:contents>` format under
+the ``docs`` subdirectory of the source. To build it, simply run::
+
+    make html
 
 
 Product Overview
