@@ -1,6 +1,7 @@
 import setuptools
 import os
 from setuptools import setup
+from mastrms import VERSION
 
 data_files = {}
 start_dir = os.getcwd()
@@ -13,7 +14,7 @@ for package in ('app', 'admin', 'dashboard', 'login', 'mdatasync_server', 'quote
     os.chdir(start_dir)
 
 setup(name='django-mastrms',
-    version='1.2.3',
+    version=VERSION,
     description='Mastr MS',
     long_description='Django Mastr MS web application',
     author='Centre for Comparative Genomics',
@@ -25,6 +26,12 @@ setup(name='django-mastrms',
         'mastrms.dashboard',
         'mastrms.login',
         'mastrms.mdatasync_client',
+        'mastrms.mdatasync_client.client',
+        'mastrms.mdatasync_client.client.plogging',
+        'mastrms.mdatasync_client.client.yaphc',
+        'mastrms.mdatasync_client.client.httplib2',
+        'mastrms.mdatasync_client.client.tendo',
+        'mastrms.mdatasync_client.client.test',
         'mastrms.mdatasync_server',
         'mastrms.quote',
         'mastrms.registration',

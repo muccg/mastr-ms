@@ -13,21 +13,35 @@ from mastrms.mdatasync_client.client.main import MDataSyncApp
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+__all__ = ["TestClient"]
+
 # fixme: unit tests don't show exceptions in other threads
-# fixme: this requires DISPLAY pointing to an X server, e.g. Xephyr
 
 class TestClient(object):
     """
     This class runs the client in a thread and provides methods for
     unit tests to control the client.
+
+    The test client uses wxWidgets and so needs an X display.
+    ``Xephyr`` or ``Xvfb`` can be used for this purpose.
+
+    The `config` parameter should be a
+    :class:`mastrms.mdatasync_client.client.config.MSDSConfig` object.
+
+    If `maximize` is True, then the main window will be maximized,
+    which is helpful when watching tests run in a nested X server.
+
+    If `timeout` is not None, the test client will be killed after
+    `timeout` seconds.
     """
     clients = []
 
-    def __init__(self, config, maximize=False):
+    def __init__(self, config, maximize=False, timeout=None):
         logger.info("TestClient starting")
         logger.info("Config\n%s" % config)
         self.config = config
         self.maximize = maximize
+        self.timeout = timeout
         self.lock = threading.RLock()
         self.ready = threading.Event()
         self.finished = threading.Event()
@@ -46,12 +60,24 @@ class TestClient(object):
         logger.addHandler(self.m.win.getLog())
         self._setup_exit_hook()
         self._post_start_event()
+        self._set_killer_timeout()
         self.m.MainLoop()
         logger.info("Mainloop finished")
         self.m.msds.stopThread()
 
     def _post_start_event(self):
         wx.CallAfter(self._set_ready, True)
+
+    def _set_killer_timeout(self):
+        if self.timeout is not None:
+            self.timer = wx.Timer(self.m.win)
+            self.m.win.Bind(wx.EVT_TIMER, self._timed_out, self.timer)
+            self.timer.Start(int(self.timeout * 1000))
+            logger.info("The test client will quit after %d seconds" % self.timeout)
+
+    def _timed_out(self, event):
+        logger.info("Timed out after %d seconds" % self.timeout)
+        self.m.win.OnMenuQuit(None)
 
     def _set_ready(self, ready=True):
         if ready:
@@ -60,6 +86,7 @@ class TestClient(object):
             self.ready.clear()
 
     def click_sync(self):
+        """Clicks the "Check Now" menu item."""
         logger.info("click_sync enter")
         wx.CallAfter(self.m.win.OnCheckNow, None)
         logger.info("click_sync exit")
@@ -70,18 +97,100 @@ class TestClient(object):
         logger.debug("sleeping for %ds" % CRAP_TEST_CRAP)
         time.sleep(CRAP_TEST_CRAP)
 
+    def _wait(self):
+        CRAP_TEST_CRAP = 1
+        logger.debug("sleeping for %ds" % CRAP_TEST_CRAP)
+        time.sleep(CRAP_TEST_CRAP)
+
+    def click_send_log(self):
+        """Clicks the "Send Log" button."""
+        wx.CallAfter(self.m.win.OnSendLog)
+        self._wait_for_sync()
+
+    def click_send_shot(self):
+        """Clicks the "Send Shot" screenshot button."""
+        wx.CallAfter(self.m.win.OnTakeScreenshot)
+        self._wait_for_sync()
+
+    class TestPreferences(object):
+        def __init__(self, prefs):
+            self.win = prefs
+            self.advanced = None
+
+        def _wait(self):
+            time.sleep(2)
+
+        def click_refresh(self):
+            self.win.fixme
+            self._wait()
+
+        def click_send_key(self):
+            wx.CallAfter(self.win.OnSendKey, None)
+            self._wait()
+
+        def click_send_handshake(self):
+            wx.CallAfter(self.win.OnHandshake, None)
+            self._wait()
+
+        def close(self):
+            wx.CallAfter(self.win.OKPressed)
+            self._wait()
+
+        def click_advanced(self):
+            wx.CallAfter(self.win.openAdvancedPrefs, None)
+            self._wait()
+            self.advanced = self.win.advanced
+            return self
+
+        def advanced_click_close(self):
+            assert self.advanced is not None
+            wx.CallAfter(self.advanced.OKPressed)
+            self._wait()
+            self.advanced = None # assume window was closed
+
+    def click_menu_preferences(self):
+        """
+        Clicks the *Edit -> Preferences* menu. This method returns a
+        `TestPreferences` object which can be used to control the
+        preferences window.
+        """
+        wx.CallAfter(self.m.win.OnMenuPreferences, None)
+        self._wait()
+        return self.TestPreferences(self.m.win.prefs)
+
     def _wait_for_ready(self):
         self.ready.wait()
 
     def set_window_title(self, title):
+        """Changes the main window title, useful for showing the test
+        case name."""
         wx.CallAfter(self.m.win.SetTitle, title)
+
+    def close(self):
+        """
+        Closes window, but doesn't quit (app is minimized to tray).
+        """
+        wx.CallAfter(self.m.win.Close)
+        self._wait()
+
+    def minimize(self):
+        """
+        Closes window, but doesn't quit (app is minimized to tray).
+        """
+        wx.CallAfter(self.m.win.OnMenuMinimise, None)
+        self._wait()
+
+    def activate_tray_icon(self):
+        "Same as double-clicking tray icon"
+        wx.CallAfter(self.m.win.SystrayIcon.OnTaskBarActivate, None)
+        self._wait()
 
     def quit(self, force=False):
         """
         Cleanly quits the client, unless it is already in the process
-        of quitting, or if the TEST_CLIENT_LINGER environment variable
-        is non-zero. The TEST_CLIENT_LINGER environment variable is
-        overridden by the `force' argument to this method.
+        of quitting, or if the ``TEST_CLIENT_LINGER`` environment
+        variable is non-zero. The ``TEST_CLIENT_LINGER`` environment
+        variable is overridden by the `force` argument to this method.
         """
         if not force and self._should_linger():
             logger.info("Not quitting client due to TEST_CLIENT_LINGER setting")
@@ -117,8 +226,3 @@ class TestClient(object):
     def kill_all(cls):
         for client in cls.clients:
             client.quit()
-
-def ctrlc_handler(signame, frame):
-    TestClient.kill_all()
-
-signal.signal(signal.SIGINT, ctrlc_handler)
