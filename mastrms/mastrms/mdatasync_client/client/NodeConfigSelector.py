@@ -1,7 +1,4 @@
 import wx
-import urllib2
-try: import json as simplejson
-except ImportError: import simplejson
 import plogging
 outlog = plogging.getLogger('client')
 
@@ -70,7 +67,9 @@ class NodeConfigSelector(wx.Panel):
     def refreshWebData(self, *args):
         self.parentApp.config.setValue('synchub', self.syncHubString.Value )
         self.parentApp.config.save()
-        j = self.getNodeNamesFromWeb()
+        from MSDataSyncAPI import DataSyncServer
+        j = DataSyncServer(self.parentApp.config).get_node_names()
+
         if j is not None:
             self.syncHubOKIcon.SetBitmap(self.SuccessImage)
         else:
@@ -106,23 +105,6 @@ class NodeConfigSelector(wx.Panel):
             self.tree.SelectItem(station)
 
 
-
-    def getNodeNamesFromWeb(self):
-        #get the data
-        retval = None
-        try:
-            req = urllib2.Request(self.parentApp.config.getValue('synchub') + 'nodes/')
-            f = urllib2.urlopen(req, None, 1) #one second timeout
-            jsonret = unicode(f.read(), "utf-8")
-            outlog.debug('node config: %s' % jsonret  )
-            retval = simplejson.loads(jsonret)
-            assert isinstance(retval, dict), 'Returned json was not a dict'
-            outlog.debug( 'node config loaded object is: %s' % (retval) )
-        except Exception, e:
-            outlog.warning( 'Error retrieving node config data: %s' % (str(e)) )
-            retval = None
-
-        return retval
 
 
     def createTree(self):

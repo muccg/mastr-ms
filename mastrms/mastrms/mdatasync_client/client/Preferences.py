@@ -1,18 +1,12 @@
 import wx
-import urllib2
-try: import json as simplejson
-except ImportError: import simplejson
 import os
 import os.path
 import NodeConfigSelector
+from MSDataSyncAPI import DataSyncServer
 
 from identifiers import *
 import  wx.lib.filebrowsebutton as filebrowse
 import plogging
-
-import yaphc
-from httplib2 import Http
-from urllib import urlencode
 
 import AdvancedPreferences
 
@@ -180,11 +174,11 @@ class Preferences(wx.Dialog):
 
 
     def openAdvancedPrefs(self, event):
-        a = AdvancedPreferences.AdvancedPreferences(self, -1, self.config, self.log)
-        a.Show()
-        val = a.ShowModal()
+        self.advanced = AdvancedPreferences.AdvancedPreferences(self, -1, self.config, self.log)
+        self.advanced.Show()
+        val = self.advanced.ShowModal()
         #doesn't return until the dialog is closed
-        a.Destroy()
+        self.advanced.Destroy()
 
     def toggleSyncChoose(self, event):
         #Set the value of the checkbox to whatever the opposite of the current config value is.
@@ -206,26 +200,17 @@ class Preferences(wx.Dialog):
         self.keybutton.SetLabel('Sending')
 
         try:
-            #Start the multipart encoded post of whatever file our log is saved to:
-            posturl = self.config.getValue('synchub') + 'keyupload/'
-
             #key is in the dir above the datadir
             keyfile = 'id_rsa.pub'
             keyfilepath = os.path.join(DATADIR, '..', keyfile)
-            http = yaphc.Http()
-            request = yaphc.PostRequest(posturl, params={'nodename': self.config.getNodeName()}, files=[('uploaded', keyfile, keyfilepath)])
-            outlog.debug( 'opening url')
-            resp, jsonret = http.make_request(request)
-            outlog.debug('finished receiving data')
-            retval = simplejson.loads(jsonret)
 
-            outlog.debug('sending log %s to %s' % (keyfile, posturl) )
-            outlog.debug('OnSendKey: retval is %s' % (retval) )
-            self.log('Key send response: %s' % (str(retval)) )
-        except Exception, e:
-            outlog.warning( 'OnSendKey: Exception occured: %s' % (str(e)) )
-            self.log('Exception occured sending key: %s' % (str(e)), type=self.log.LOG_ERROR)
-
+            # Send it
+            retval = DataSyncServer(self.config).send_key(keyfile, keyfilepath)
+            outlog.debug('OnSendKey: retval is %s' % retval)
+            self.log('Key send response: %s' % retval)
+        except DataSyncServer.RestError, e:
+            outlog.warning('OnSendKey: Exception occured: %s' % e)
+            self.log('Exception occured sending key: %s' % e, type=self.log.LOG_ERROR)
 
         self.keybutton.Enable()
         self.keybutton.SetLabel(origlabel)
@@ -257,4 +242,3 @@ class Preferences(wx.Dialog):
         for k in datadict.keys():
             self.config.setValue(k, datadict[k])
         self.setNodeConfigLabel()
-

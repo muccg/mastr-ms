@@ -13,16 +13,18 @@ shift
 PORT='8000'
 
 PROJECT_NAME='mastrms'
-AWS_BUILD_INSTANCE='rpmbuild-centos6-aws'
+AWS_BUILD_INSTANCE='aws_rpmbuild_centos6'
+AWS_STAGING_INSTANCE='aws_syd_mastrms_staging'
 TARGET_DIR="/usr/local/src/${PROJECT_NAME}"
 CLOSURE="/usr/local/closure/compiler.jar"
-MODULES="MySQL-python==1.2.3 psycopg2==2.4.6 Werkzeug flake8"
+TESTING_MODULES="argparse dingus xvfbwrapper"
+MODULES="MySQL-python==1.2.3 psycopg2==2.4.6 Werkzeug flake8 ${TESTING_MODULES}"
 PIP_OPTS="-v -M --download-cache ~/.pip/cache"
 
 
 function usage() {
     echo ""
-    echo "Usage ./develop.sh (test|lint|jslint|dropdb|start|install|clean|purge|pipfreeze|pythonversion|ci_remote_build|ci_rpm_publish|ci_remote_destroy)"
+    echo "Usage ./develop.sh (test|lint|jslint|dropdb|start|install|clean|purge|pipfreeze|pythonversion|ci_remote_build|ci_staging|ci_staging_tests|ci_rpm_publish|ci_remote_destroy)"
     echo ""
 }
 
@@ -88,6 +90,33 @@ function ci_rpm_publish() {
 # destroy our ci build server
 function ci_remote_destroy() {
     ccg ${AWS_BUILD_INSTANCE} destroy
+}
+
+
+# puppet up staging which will install the latest rpm
+function ci_staging() {
+    ccg ${AWS_STAGING_INSTANCE} boot
+    ccg ${AWS_STAGING_INSTANCE} puppet
+    ccg ${AWS_STAGING_INSTANCE} shutdown:50
+}
+
+
+# run tests on staging
+function ci_staging_tests() {
+    # /tmp is used for test results because the apache user has
+    # permission to write there.
+    REMOTE_TEST_DIR=/tmp
+    REMOTE_TEST_RESULTS=${REMOTE_TEST_DIR}/tests.xml
+
+    # Grant permission to create a test database. Assume that database
+    # user is same as project name for now.
+    DATABASE_USER=${PROJECT_NAME}
+    ccg ${AWS_STAGING_INSTANCE} dsudo:"su postgres -c \"psql -c 'ALTER ROLE ${DATABASE_USER} CREATEDB;'\""
+
+    # Run tests, collect results
+    TEST_LIST="${PROJECT_NAME} --exclude\=yaphc --exclude\=esky --exclude\=httplib2"
+    ccg ${AWS_STAGING_INSTANCE} dsudo:"cd ${REMOTE_TEST_DIR} && ${PROJECT_NAME} test --noinput --with-xunit --xunit-file\=${REMOTE_TEST_RESULTS} ${TEST_LIST}"
+    ccg ${AWS_STAGING_INSTANCE} getfile:${REMOTE_TEST_RESULTS},./
 }
 
 
@@ -235,6 +264,14 @@ ci_remote_destroy)
 ci_rpm_publish)
     ci_ssh_agent
     ci_rpm_publish
+    ;;
+ci_staging)
+    ci_ssh_agent
+    ci_staging
+    ;;
+ci_staging_tests)
+    ci_ssh_agent
+    ci_staging_tests
     ;;
 dropdb)
     dropdb

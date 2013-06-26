@@ -4,15 +4,10 @@ from SysTrayIcon import SystrayIcon
 from FileList import ListCtrlPanel
 import time
 import sys
+from version import VERSION
 from identifiers import *
-try: import json as simplejson
-except ImportError: import simplejson
 import plogging
 from WxLogger import Log
-
-import yaphc
-from httplib2 import Http
-from urllib import urlencode
 
 class APPSTATE:
 
@@ -356,17 +351,17 @@ class MainWindow(wx.Frame):
     def OnMenuPreferences(self, evt):
         '''open the prefs dialog which BLOCKS'''
         import Preferences
-        a = Preferences.Preferences(self, -1, self.config, self.log)
-         # this does not return until the dialog is closed.
-
-        a.Show() #Show the dialog first
+        self.prefs = Preferences.Preferences(self, -1, self.config, self.log)
+        self.prefs.Show() #Show the dialog first
         #Now refresh its stuff
-        a.nodeconfigselector.refreshWebData()
-        a.nodeconfigselector.selectNode()
+        self.prefs.nodeconfigselector.refreshWebData()
+        self.prefs.nodeconfigselector.selectNode()
         #Now make it modal
-        val = a.ShowModal()
+        # this does not return until the dialog is closed.
+        val = self.prefs.ShowModal()
         #do something here with val if you like (==wx.ID_OK for instance)
-        a.Destroy()
+        self.prefs.Destroy()
+        self.prefs = None
 
     def OnCheckNow(self, evt):
         if self.state != APPSTATE.IDLE: #already busy. Just return
@@ -447,21 +442,13 @@ class MainWindow(wx.Frame):
         self.logbutton.Disable()
         origlabel = self.logbutton.GetLabel()
         self.logbutton.SetLabel('Sending')
+        rsync_logfile_path = self.config.getValue('logfile')
+        rsync_logfile = os.path.split(rsync_logfile_path)[1]
+        from MSDataSyncAPI import DataSyncServer
         try:
-            #Start the multipart encoded post of whatever file our log is saved to:
-            posturl = self.config.getValue('synchub') + 'logupload/'
-            outlog.debug('reading logfile' )
-            rsync_logfile_path = self.config.getValue('logfile')
-            rsync_logfile = os.path.split(rsync_logfile_path)[1]
-            http = yaphc.Http()
-            request = yaphc.PostRequest(posturl, params={'nodename': self.config.getNodeName()}, files=[('uploaded', rsync_logfile, rsync_logfile_path)])
-            outlog.debug( 'opening url')
-            resp, jsonret = http.make_request(request)
-            outlog.debug('finished receiving data')
-            retval = simplejson.loads(jsonret)
-            #print 'OnSendLog: retval is %s' % (retval)
-            self.log('Log send response: %s' % (str(retval)) )
-        except Exception, e:
+            retval = DataSyncServer(self.config).send_log(rsync_logfile, rsync_logfile_path)
+            self.log('Log send response: %s' % retval)
+        except DataSyncServer.RestError, e:
             outlog.warning('OnSendLog: Exception occured: %s' % (str(e)) )
             self.log('Exception occured sending log: %s' % (str(e)), type=self.log.LOG_ERROR)
 
@@ -522,19 +509,11 @@ class MainWindow(wx.Frame):
         img.SaveFile(fullfileName, wx.BITMAP_TYPE_PNG)
         outlog.info('...saving as png!')
 
-        try:
+        from MSDataSyncAPI import DataSyncServer
 
-            #Start the multipart encoded post of whatever file our log is saved to:
-            posturl = self.config.getValue('synchub') + 'logupload/'
-            outlog.info( 'reading imagefile' )
-            http = yaphc.Http()
-            request = yaphc.PostRequest(posturl, params={'nodename': self.config.getNodeName()}, files=[('uploaded', fileName, fullfileName)])
-            outlog.debug( 'opening url')
-            resp, jsonret = http.make_request(request)
-            outlog.debug('reading response')
-            outlog.debug( 'finished receiving data' )
-            retval = simplejson.loads(jsonret)
-            self.log('Screenshot send response: %s' % (str(retval)) )
-        except Exception, e:
-            outlog.warning( 'OnSendScreenShot: Exception occured: %s' % (str(e)) )
-            self.log('Exception occured sending screenshot: %s' % (str(e)), type=self.log.LOG_ERROR)
+        try:
+            retval = DataSyncServer(self.config).send_log(fileName, fullfileName)
+            self.log('Screenshot send response: %s' % retval)
+        except DataSyncServer.RestError, e:
+            outlog.warning('OnSendScreenShot: Exception occured: %s' % e)
+            self.log('Exception occured sending screenshot: %s' % e, type=self.log.LOG_ERROR)

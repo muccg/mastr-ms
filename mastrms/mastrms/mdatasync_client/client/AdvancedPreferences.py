@@ -3,6 +3,7 @@ import os
 import os.path
 import plogging
 import wx.lib.filebrowsebutton as filebrowse
+from identifiers import INTERNAL_BORDER_WIDTH, EXTERNAL_BORDER_WIDTH
 
 outlog = plogging.getLogger('client')
 
