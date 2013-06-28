@@ -6,8 +6,11 @@ interface for user management, sample management, and access to
 experiment data.
 
 
+Installation
+------------
+
 Yum repository setup
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
 Mastr-MS is distributed as RPM, tested on Centos 6.x (x86_64). To
 satisfy dependencies, `Epel`_ and `REMI`_ repos need to be enabled::
@@ -19,22 +22,48 @@ satisfy dependencies, `Epel`_ and `REMI`_ repos need to be enabled::
 .. _Epel: http://fedoraproject.org/wiki/EPEL
 .. _REMI: http://rpms.famillecollet.com/
 
+Dependencies
+~~~~~~~~~~~~
 
-Installation/Upgrade
---------------------
+The database and python database driver aren't dependencies of the
+Mastr-MS RPM, so have to be installed manually::
+
+    sudo yum install postgresql-server python-psycopg2
+
+These instructions are written for PostgreSQL. If you are using
+MySQL/MariaDB, adapt the steps according to the :ref:`Django MySQL
+notes <django:mysql-notes>`.
+
+Install
+~~~~~~~
 
 Install the Mastr-MS RPM, replacing ``X.X.X`` with the desired version::
 
-    sudo yum install python-psycopg2 mastrms-X.X.X
+    sudo yum install mastrms-X.X.X
+
+Server Configuration
+--------------------
+
+Database Creation
+~~~~~~~~~~~~~~~~~
+
+Create the database in the normal way for Django/PostgreSQL::
+
+    sudo su postgres
+    createuser -e -DRS -P mastrms
+    createdb -e -O mastrms mastrms
+    exit
+
+The default database, username, password are all set to
+*mastrms*. These settings can be changed, see (:ref:`django-settings`).
+
+Database Population
+~~~~~~~~~~~~~~~~~~~
 
 Run Django syncdb and South migrate::
 
     sudo mastrms syncdb
     sudo mastrms migrate
-
-
-Server Configuration
---------------------
 
 Apache Web Server
 ~~~~~~~~~~~~~~~~~
@@ -86,6 +115,8 @@ the web server user needs to be able to read from this directory, so::
 If the data repository needs to be at another location, its path can
 be configured in the settings file.
 
+.. _django-settings:
+
 Django Settings File
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -103,6 +134,19 @@ which can be seen in `settings.py`_.
 
 .. _settings.py:
    https://bitbucket.org/ccgmurdoch/mastr-ms/src/default/mastrms/mastrms/settings.py
+
+
+Upgrading to a new version
+--------------------------
+
+Install the Mastr-MS RPM, replacing ``X.X.X`` with the desired version::
+
+    sudo yum install mastrms-X.X.X
+
+Run Django syncdb and South migrate::
+
+    sudo mastrms syncdb
+    sudo mastrms migrate
 
 
 Testing
