@@ -41,7 +41,7 @@ function activate_virtualenv() {
 function ci_ssh_agent() {
     ssh-agent > /tmp/agent.env.sh
     source /tmp/agent.env.sh
-    ssh-add ~/.ssh/ccg-syd-staging.pem 2> >(grep -v "Identity added" 1>&2)
+    ssh-add ~/.ssh/ccg-syd-staging.pem
 }
 
 function build_number_head() {
