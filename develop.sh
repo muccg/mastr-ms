@@ -113,9 +113,19 @@ function ci_staging_tests() {
     DATABASE_USER=${PROJECT_NAME}
     ccg ${AWS_STAGING_INSTANCE} dsudo:"su postgres -c \"psql -c 'ALTER ROLE ${DATABASE_USER} CREATEDB;'\""
 
+    # fixme: this config should be put in nose.cfg or settings.py or similar
+    EXCLUDES="--exclude\=yaphc --exclude\=esky --exclude\=httplib2"
+    TEST_LIST="
+mastrms.mastrms.registration.tests
+mastrms.mastrms.mdatasync_server.tests
+mastrms.mdatasync_client.client.test.tests"
+
+    # Start virtual X server here to work around a problem starting it
+    # from xvfbwrapper.
+    ccg ${AWS_STAGING_INSTANCE} drunbg:"Xvfb \:0"
+
     # Run tests, collect results
-    TEST_LIST="${PROJECT_NAME} --exclude\=yaphc --exclude\=esky --exclude\=httplib2"
-    ccg ${AWS_STAGING_INSTANCE} dsudo:"cd ${REMOTE_TEST_DIR} && ${PROJECT_NAME} test --noinput --with-xunit --xunit-file\=${REMOTE_TEST_RESULTS} ${TEST_LIST}"
+    ccg ${AWS_STAGING_INSTANCE} dsudo:"cd ${REMOTE_TEST_DIR} && env DISPLAY\=\:0 dbus-launch ${PROJECT_NAME} test --noinput --with-xunit --xunit-file\=${REMOTE_TEST_RESULTS} ${TEST_LIST} ${EXCLUDES}"
     ccg ${AWS_STAGING_INSTANCE} getfile:${REMOTE_TEST_RESULTS},./
 }
 
