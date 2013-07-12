@@ -125,7 +125,7 @@ mastrms.mdatasync_client.client.test.tests"
     ccg ${AWS_STAGING_INSTANCE} drunbg:"Xvfb \:0"
 
     # Run tests, collect results
-    ccg ${AWS_STAGING_INSTANCE} dsudo:"cd ${REMOTE_TEST_DIR} && env DISPLAY\=\:0 dbus-launch ${PROJECT_NAME} test --noinput --with-xunit --xunit-file\=${REMOTE_TEST_RESULTS} ${TEST_LIST} ${EXCLUDES}"
+    ccg ${AWS_STAGING_INSTANCE} dsudo:"cd ${REMOTE_TEST_DIR} && env DISPLAY\=\:0 dbus-launch ${PROJECT_NAME} test --noinput --with-xunit --xunit-file\=${REMOTE_TEST_RESULTS} ${TEST_LIST} ${EXCLUDES} || true"
     ccg ${AWS_STAGING_INSTANCE} getfile:${REMOTE_TEST_RESULTS},./
 }
 
