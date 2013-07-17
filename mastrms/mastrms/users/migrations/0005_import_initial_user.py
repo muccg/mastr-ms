@@ -11,8 +11,8 @@ class Migration(DataMigration):
         if len(a) > 0:
             print 'You seem to already have at least one user. Skipping example user data import'
         else:
-            from django.core.management import call_command
-            call_command("loaddata", "initial_user.json", exceptiononerror = True)
+            from mastrms.utils import migration_loaddata
+            migration_loaddata(orm, "initial_user.json")
 
     def backwards(self, orm):
         pass
