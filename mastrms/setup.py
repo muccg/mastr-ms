@@ -57,6 +57,7 @@ setup(name='django-mastrms',
         'python-ldap==2.3.13',
         'django-userlog==0.1',
         'django-nose',
+        'dingus',
     ],
     dependency_links = [
         "http://repo.ccgapps.com.au"
