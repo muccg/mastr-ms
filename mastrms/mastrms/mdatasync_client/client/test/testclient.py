@@ -32,7 +32,7 @@ class TestClient(object):
     which is helpful when watching tests run in a nested X server.
 
     If `timeout` is not None, the test client will be killed after
-    `timeout` seconds.
+    `timeout` seconds of inactivity.
     """
     clients = []
 
@@ -42,6 +42,7 @@ class TestClient(object):
         self.config = config
         self.maximize = maximize
         self.timeout = timeout
+        self.timer = None
         self.lock = threading.RLock()
         self.ready = threading.Event()
         self.finished = threading.Event()
@@ -60,20 +61,31 @@ class TestClient(object):
         logger.addHandler(self.m.win.getLog())
         self._setup_exit_hook()
         self._post_start_event()
-        self._set_killer_timeout()
+        self._reset_watchdog(initial=True)
         self.m.MainLoop()
         logger.info("Mainloop finished")
         self.m.msds.stopThread()
 
-    def _post_start_event(self):
-        wx.CallAfter(self._set_ready, True)
+    def _command(self, function, *args, **kwargs):
+        """
+        Queues a function to run in the wxPython thread.
+        Also updates the watchdog timer.
+        """
+        wx.CallAfter(self._reset_watchdog)
+        wx.CallAfter(function, *args, **kwargs)
 
-    def _set_killer_timeout(self):
+    def _post_start_event(self):
+        self._command(self._set_ready, True)
+
+    def _reset_watchdog(self, initial=False):
         if self.timeout is not None:
-            self.timer = wx.Timer(self.m.win)
-            self.m.win.Bind(wx.EVT_TIMER, self._timed_out, self.timer)
-            self.timer.Start(int(self.timeout * 1000))
-            logger.info("The test client will quit after %d seconds" % self.timeout)
+            if self.timer is None:
+                self.timer = wx.Timer(self.m.win)
+                self.m.win.Bind(wx.EVT_TIMER, self._timed_out, self.timer)
+
+            self.timer.Start(int(self.timeout * 1000), True)
+            if initial:
+                logger.info("The test client will quit after %d seconds of inactivity" % self.timeout)
 
     def _timed_out(self, event):
         logger.info("Timed out after %d seconds" % self.timeout)
@@ -88,7 +100,7 @@ class TestClient(object):
     def click_sync(self):
         """Clicks the "Check Now" menu item."""
         logger.info("click_sync enter")
-        wx.CallAfter(self.m.win.OnCheckNow, None)
+        self._command(self.m.win.OnCheckNow, None)
         logger.info("click_sync exit")
         self._wait_for_sync()
 
@@ -104,12 +116,12 @@ class TestClient(object):
 
     def click_send_log(self):
         """Clicks the "Send Log" button."""
-        wx.CallAfter(self.m.win.OnSendLog)
+        self._command(self.m.win.OnSendLog)
         self._wait_for_sync()
 
     def click_send_shot(self):
         """Clicks the "Send Shot" screenshot button."""
-        wx.CallAfter(self.m.win.OnTakeScreenshot)
+        self._command(self.m.win.OnTakeScreenshot)
         self._wait_for_sync()
 
     class TestPreferences(object):
@@ -125,26 +137,26 @@ class TestClient(object):
             self._wait()
 
         def click_send_key(self):
-            wx.CallAfter(self.win.OnSendKey, None)
+            self._command(self.win.OnSendKey, None)
             self._wait()
 
         def click_send_handshake(self):
-            wx.CallAfter(self.win.OnHandshake, None)
+            self._command(self.win.OnHandshake, None)
             self._wait()
 
         def close(self):
-            wx.CallAfter(self.win.OKPressed)
+            self._command(self.win.OKPressed)
             self._wait()
 
         def click_advanced(self):
-            wx.CallAfter(self.win.openAdvancedPrefs, None)
+            self._command(self.win.openAdvancedPrefs, None)
             self._wait()
             self.advanced = self.win.advanced
             return self
 
         def advanced_click_close(self):
             assert self.advanced is not None
-            wx.CallAfter(self.advanced.OKPressed)
+            self._command(self.advanced.OKPressed)
             self._wait()
             self.advanced = None # assume window was closed
 
@@ -154,7 +166,7 @@ class TestClient(object):
         `TestPreferences` object which can be used to control the
         preferences window.
         """
-        wx.CallAfter(self.m.win.OnMenuPreferences, None)
+        self._command(self.m.win.OnMenuPreferences, None)
         self._wait()
         return self.TestPreferences(self.m.win.prefs)
 
@@ -164,25 +176,25 @@ class TestClient(object):
     def set_window_title(self, title):
         """Changes the main window title, useful for showing the test
         case name."""
-        wx.CallAfter(self.m.win.SetTitle, title)
+        self._command(self.m.win.SetTitle, title)
 
     def close(self):
         """
         Closes window, but doesn't quit (app is minimized to tray).
         """
-        wx.CallAfter(self.m.win.Close)
+        self._command(self.m.win.Close)
         self._wait()
 
     def minimize(self):
         """
         Closes window, but doesn't quit (app is minimized to tray).
         """
-        wx.CallAfter(self.m.win.OnMenuMinimise, None)
+        self._command(self.m.win.OnMenuMinimise, None)
         self._wait()
 
     def activate_tray_icon(self):
         "Same as double-clicking tray icon"
-        wx.CallAfter(self.m.win.SystrayIcon.OnTaskBarActivate, None)
+        self._command(self.m.win.SystrayIcon.OnTaskBarActivate, None)
         self._wait()
 
     def quit(self, force=False):
