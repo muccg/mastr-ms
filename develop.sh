@@ -115,7 +115,7 @@ function ci_staging_tests() {
 
     # fixme: this config should be put in nose.cfg or settings.py or similar
     EXCLUDES="--exclude\=yaphc --exclude\=esky --exclude\=httplib2"
-    TEST_LIST="mastrms.mastrms.registration.tests mastrms.mastrms.mdatasync_server.tests mastrms.mdatasync_client.client.test.tests"
+    TEST_LIST="mastrms.registration.tests mastrms.mdatasync_server.tests mastrms.mdatasync_client.client.test.tests"
 
     # Start virtual X server here to work around a problem starting it
     # from xvfbwrapper.
