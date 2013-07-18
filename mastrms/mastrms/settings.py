@@ -232,7 +232,7 @@ LOGGING = {
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-#
 
 TEST_RUNNER = "django_nose.NoseTestSuiteRunner"
-#NOSE_PLUGINS = ["mastrms.testutils.noseplugins.SilenceSouthPlugin"]
+NOSE_PLUGINS = ["mastrms.testutils.noseplugins.SilenceSouthPlugin"]
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-#
 
