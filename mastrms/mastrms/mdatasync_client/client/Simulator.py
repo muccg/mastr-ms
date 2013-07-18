@@ -119,15 +119,17 @@ class Simulator(object):
             logger.info("Removing file %s" % fname)
             try:
                 os.remove(fname)
-            except OSError, e:
-                logger.exception("cleanup", e)
+            except OSError:
+                logger.exception("cleanup")
+        self._created_files = []
 
         for dirname in reversed(self._created_dirs):
             logger.info("Removing directory %s" % dirname)
             try:
                 os.rmdir(dirname)
-            except OSError, e:
-                logger.exception("cleanup", e)
+            except OSError:
+                logger.exception("cleanup")
+        self._created_dirs = []
 
 class GeneratePopup(wx.Dialog):
     def __init__(self, log, parent, fileslist, destdir, generate_temp_files = False):
