@@ -382,6 +382,11 @@ MA.SampleCSVUploadForm = new Ext.Window({
                     emptyText: '',
                     fieldLabel: 'File',
                     name: 'samplecsv'
+                },
+                {
+                    xtype: 'hidden',
+                    name: 'csrfmiddlewaretoken',
+                    value: Ext.util.Cookies.get("csrftoken_mastrms")
                 }
             ]
         }
