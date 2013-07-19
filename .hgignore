@@ -15,6 +15,7 @@ mastrms/mastrms/mdatasync_client/client/build/*
 mastrms/mastrms/mdatasync_client/client/dist/*
 mastrms/mastrms/mdatasync_client/client/client.log*
 mastrms/mastrms/mdatasync_client/data
+mastrms/mastrms/mdatasync_client/id_rsa*
 docs/_build/*
 mastrms/django_mastrms.egg-info
 tests.xml
