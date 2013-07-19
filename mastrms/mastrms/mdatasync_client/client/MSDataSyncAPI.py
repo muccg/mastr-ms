@@ -389,7 +389,7 @@ class MSDataSyncAPI(object):
         '''returns a dictionary like structure representing the
            files. Like this:
            { '.' : [list of filenames],
-             '..' : 'path to this dir'
+             '/' : 'path to this dir'
              'dirname' : {dict like this one},
              'dirname2' : {dict like this one},
            }
