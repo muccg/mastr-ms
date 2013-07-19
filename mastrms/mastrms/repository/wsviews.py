@@ -20,6 +20,7 @@ from django.core.mail import mail_admins
 from mastrms.users.MAUser import getMadasUser, loadMadasUser, getCurrentUser
 from mastrms.repository import rulegenerators
 from mastrms.app.utils.mail_functions import FixedEmailMessage
+from decimal import Decimal, DecimalException
 import os, stat
 import copy
 from django.conf import settings
@@ -2127,23 +2128,23 @@ def _handle_uploaded_file(f, name, experiment_id):
 
 @mastr_users_only
 def uploadCSVFile(request):
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
 
-    if request.GET:
-        args = request.GET
-    else:
-        args = request.POST
-
-    expId = args['experiment_id']
-    experiment = Experiment.objects.get(id=expId)
+    expId = request.POST.get('experiment_id', None)
+    if expId is None:
+        return HttpResponseBadRequest(json.dumps({ 'success': False, 'msg': 'need experiment_id param' }))
+    try:
+        experiment = Experiment.objects.get(id=expId)
+    except Experiment.DoesNotExist, e:
+        return HttpResponseBadRequest(json.dumps({ 'success': False, 'msg': str(e) }))
 
     ############# FILE UPLOAD ########################
-    output = { 'success': True }
-
-    invalidCount = 0
+    output = { "success": True, "invalid_lines": [] }
+    max_error = 10
 
     try:
         #TODO handle file uploads - check for error values
-        print request.FILES.keys()
         if request.FILES.has_key('samplecsv'):
             f = request.FILES['samplecsv']
 
@@ -2151,22 +2152,25 @@ def uploadCSVFile(request):
 
             data = csv.reader(f)
 
-            for row in data:
+            for num, row in enumerate(data, 1):
                 try:
                     s = Sample()
                     s.label = row[0]
-                    s.weight = row[1]
+                    s.weight = Decimal(row[1])
                     s.comment = row[2]
                     s.experiment = experiment
                     s.save()
-                except Exception, e:
-                    invalidCount = invalidCount + 1
-                    output = { 'success': False, 'invalidCount': invalidCount }
+                except DecimalException, e:
+                    if len(output["invalid_lines"]) < max_error:
+                        output["invalid_lines"].append(num)
+                    else:
+                        output["max_error"] = max_error
+                    output["success"] = False
         else:
-            print '\tNo file attached.'
+            output = { "success": False, "msg": "No file attached." }
     except Exception, e:
         logger.exception('Exception uploading file')
-        output = { 'success': False }
+        output = { 'success': False, "msg": "Exception uploading file: %s" % e }
 
     return HttpResponse(json.dumps(output))
 
