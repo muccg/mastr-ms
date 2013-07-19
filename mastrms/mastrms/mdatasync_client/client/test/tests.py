@@ -1,11 +1,12 @@
 from django.utils import unittest
 import dingus
+import os.path
 from StringIO import StringIO
 import logging
 logger = logging.getLogger(__name__)
 
 from mastrms.testutils import XDisplayTest
-from mastrms.mdatasync_client.client.MSDataSyncAPI import DataSyncServer
+from mastrms.mdatasync_client.client.MSDataSyncAPI import DataSyncServer, MSDataSyncAPI
 from mastrms.mdatasync_client.client.config import MSDSConfig
 from mastrms.mdatasync_client.client.test.testclient import TestClient
 from mastrms.mdatasync_client.client.version import VERSION
@@ -157,3 +158,101 @@ class DataSyncServerTests(unittest.TestCase):
     #  * DataSyncServer.get_node_names()
     #  * DataSyncServer.send_key()  - this uses yaphc
     #  * DataSyncServer.send_log()  - this uses yaphc
+
+
+class MSDataSyncAPITests(unittest.TestCase):
+    """
+    This class is for unit tests of the `MSDataSyncAPI` class.
+    At present, there is only one test.
+    """
+    def setUp(self):
+        self.config = MSDSConfig()
+        self.api = MSDataSyncAPI(self.config, self.msds_log)
+
+    def msds_log(self, msg, *args, **kwargs):
+        logger.info("MSDS: %s" % msg)
+
+    def test1_find_local_file_or_directory(self):
+        """
+        Tests `MSDataSyncAPI.find_local_file_or_directory()`. Checks
+        that TEMP files are correctly removed from list of files to
+        copy to staging directory.
+        """
+        exclude = ["TEMP"]
+        wanted_filename = "asdf"
+        path = "/path/to/this/dir"
+        p = lambda f: os.path.join(path, f)
+
+        # localfiledict - as specified in MSDataSyncAPI.getFiles() docstring
+        lfd = {
+            ".": ["1", "2", "3"],
+            "/": path,
+            "asdf": {
+                ".": ["a", "b", "c", "TEMPBASE", "TEMPDAT", "TEMPDIR",
+                      "TEMP", "TEMPprefix", "suffixTEMP"],
+                "/": p("asdf"),
+                },
+            "qwerty": {
+                ".": ["A", "B", "C", "TEMPBASE", "TEMPDAT", "TEMPDIR"],
+                "/": p("qwerty"),
+                "hjkl": {
+                    ".": ["h", "j", "k", "l"],
+                    "/": p("qwerty/hjkl"),
+                    },
+                "zxc": {
+                    ".": ["z", "x", "c", "tempqwerty"],
+                    "/": p("qwerty/zxc"),
+                    },
+                },
+            "foo": {
+                ".": ["X", "Y", "Z"],
+                "/": p("foo"),
+                },
+            "bar": {
+                ".": ["4", "5", "6"],
+                "/": p("bar"),
+                },
+            "suffix": {
+                ".": ["S1", "S2", "S3", "suffixTEMP"],
+                "/": p("suffix"),
+                },
+            "baz": {
+                ".": ["B1", "B2", "B3", "temp"],
+                "/": p("baz"),
+                },
+            }
+
+        result = self.api.find_local_file_or_directory(lfd, "asdf", exclude)
+        self.assertIsNone(result, "asdf skipped")
+
+        result = self.api.find_local_file_or_directory(lfd, "qwerty", exclude)
+        self.assertIsNone(result, "qwerty skipped")
+
+        result = self.api.find_local_file_or_directory(lfd, "foo", exclude)
+        self.assertTrue(bool(result), "subdirectory")
+
+        result = self.api.find_local_file_or_directory(lfd, "bar", exclude)
+        self.assertEqual(result, p("bar"), "another subdirectory")
+
+        result = self.api.find_local_file_or_directory(lfd, "2", exclude)
+        self.assertEqual(result, p("2"), "file at top level")
+
+        # this one is surprising maybe
+        result = self.api.find_local_file_or_directory(lfd, "B", exclude)
+        self.assertEqual(result, p("qwerty/B"), "file within ignored directory")
+
+        result = self.api.find_local_file_or_directory(lfd, "Y", exclude)
+        self.assertEqual(result, p("foo/Y"), "file within subdirectory")
+
+        result = self.api.find_local_file_or_directory(lfd, "suffix", exclude)
+        self.assertEqual(result, p("suffix"), "TEMP at end of filename")
+
+        result = self.api.find_local_file_or_directory(lfd, "baz", exclude)
+        self.assertIsNone(result, "lowercase TEMP")
+
+        # this one is also surprising maybe?
+        result = self.api.find_local_file_or_directory(lfd, "hjkl", exclude)
+        self.assertEqual(result, p("qwerty/hjkl"), "subdir within excluded dir")
+
+        result = self.api.find_local_file_or_directory(lfd, "zxc", exclude)
+        self.assertIsNone(result, "excluded subdir within excluded dir")
