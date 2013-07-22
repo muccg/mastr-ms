@@ -2153,15 +2153,58 @@ def _handle_uploaded_sample_csv(experiment, csvfile):
     Read a file object of CSV text and create samples from it.
     Returns a "success" dict suitable for returning to the client.
     """
-    output = { "success": True, "invalid_lines": [] }
+    output = { "success": True,
+               "num_created": 0,
+               "num_updated": 0 }
+
+    for sid, label, weight, comment in _read_uploaded_sample_csv(csvfile, output):
+        # If a valid sample id is provided, try to update exising
+        # sample, otherwise create a new one.
+        samples = Sample.objects.filter(experiment=experiment, id=sid)
+        if sid and len(samples) == 1:
+            s = samples[0]
+            output["num_updated"] += 1
+        else:
+            s = Sample()
+            output["num_created"] += 1
+
+        s.label = label
+        s.weight = weight
+        s.comment = comment
+        s.experiment = experiment
+        s.save()
+
+    return output
+
+def _read_uploaded_sample_csv(csvfile, output):
+    """
+    This generates (sample_id, label, weight, comment) triples from
+    the CSV text. The `output` dict is updated if there are parse
+    errors, etc.
+    """
     max_error = 10
+    def add_format_error(output, msg):
+        "This function makes a note in the output dict that a value was wrong"
+        invalid_lines = output.setdefault("invalid_lines", [])
+        if len(invalid_lines) < max_error:
+            invalid_lines.append(num)
+        else:
+            output["max_error"] = max_error
+        output.update({ "success": False, "msg": msg })
 
     try:
         snuff = csvfile.read(1024)
         csvfile.seek(0)
 
         if len(snuff.strip()) == 0:
-            return { "success": False, "msg": "File is empty" }
+            output.update({ "success": False, "msg": "File is empty" })
+            raise StopIteration
+
+        try:
+            dialect = csv.Sniffer().sniff(snuff)
+        except csv.Error, e:
+            output.update({ "success": False, "msg": str(e) })
+            raise StopIteration
 
         data = csv.reader(csvfile)
 
@@ -2177,40 +2220,50 @@ def _handle_uploaded_sample_csv(experiment, csvfile):
             cols = map(find, WANTED_COLS)
             start_line = 2
 
+            # check for required columns
             missing = [WANTED_COLS[i] for i,j in enumerate(cols) if j < 0]
-
             if missing:
                 missing = ("Column %s is missing" % m for m in missing)
-                return { "success": False,
-                         "msg": ", ".join(missing) }
+                output.update({ "success": False,
+                                "msg": ", ".join(missing) })
+                raise StopIteration
+
+            # check for the optional id column. The javascript CSV
+            # export puts a hash sign before it.
+            id_col = find("ID")
+            if id_col < 0:
+                id_col = find("# ID")
+            cols.insert(0, id_col)
         else:
-            cols = range(3)
+            cols = [-1, 0, 1, 2]
             start_line = 1
 
-        label_col, weight_col, comment_col = cols
+        id_col, label_col, weight_col, comment_col = cols
+
+        def parse_id(row):
+            "Converts the optional id cell to either an int or None"
+            if id_col < 0 or not row[id_col].strip():
+                return None
+            else:
+                return int(row[id_col])
 
         for num, row in enumerate(data, start_line):
             if len(row) == 0:
                 continue
             try:
-                s = Sample()
-                s.label = row[label_col]
-                s.weight = Decimal(row[weight_col])
-                s.comment = row[comment_col]
-                s.experiment = experiment
-                s.save()
+                yield (parse_id(row),
+                       row[label_col],
+                       Decimal(row[weight_col]),
+                       row[comment_col])
+            except ValueError, e:
+                add_format_error(output, "Incorrectly formatted id integer")
             except DecimalException, e:
-                if len(output["invalid_lines"]) < max_error:
-                    output["invalid_lines"].append(num)
-                else:
-                    output["max_error"] = max_error
-                output["success"] = False
-                output["msg"] = "Incorrectly formatted decimal number"
+                add_format_error(output, "Incorrectly formatted decimal number")
+
     except EnvironmentError, e:
         logger.exception('Exception uploading file')
-        output = { 'success': False, "msg": "Exception uploading file: %s" % e }
-
-    return output
+        output.update({ "success": False,
+                        "msg": "Exception uploading file: %s" % e })
 
 @mastr_users_only
 def sample_class_enable(request, id):
