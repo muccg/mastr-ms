@@ -23,6 +23,7 @@ from mastrms.app.utils.mail_functions import FixedEmailMessage
 from decimal import Decimal, DecimalException
 import os, stat
 import copy
+import csv
 from django.conf import settings
 import logging
 logger = logging.getLogger('madas_log')
@@ -2139,42 +2140,77 @@ def uploadCSVFile(request):
     except Experiment.DoesNotExist, e:
         return HttpResponseBadRequest(json.dumps({ 'success': False, 'msg': str(e) }))
 
-    ############# FILE UPLOAD ########################
+    if request.FILES.has_key('samplecsv'):
+        f = request.FILES['samplecsv']
+        output = _handle_uploaded_sample_csv(experiment, f)
+    else:
+        output = { "success": False, "msg": "No file attached." }
+
+    return HttpResponse(json.dumps(output))
+
+def _handle_uploaded_sample_csv(experiment, csvfile):
+    """
+    Read a file object of CSV text and create samples from it.
+    Returns a "success" dict suitable for returning to the client.
+    """
     output = { "success": True, "invalid_lines": [] }
     max_error = 10
 
     try:
-        #TODO handle file uploads - check for error values
-        if request.FILES.has_key('samplecsv'):
-            f = request.FILES['samplecsv']
+        snuff = csvfile.read(1024)
+        csvfile.seek(0)
 
-            import csv
+        if len(snuff.strip()) == 0:
+            return { "success": False, "msg": "File is empty" }
 
-            data = csv.reader(f)
+        data = csv.reader(csvfile)
 
-            for num, row in enumerate(data, 1):
+        WANTED_COLS = ["LABEL", "WEIGHT", "COMMENT"]
+
+        if len(snuff.splitlines()) > 1 and csv.Sniffer().has_header(snuff):
+            header = [h.upper().strip() for h in data.next()]
+            def find(name):
                 try:
-                    s = Sample()
-                    s.label = row[0]
-                    s.weight = Decimal(row[1])
-                    s.comment = row[2]
-                    s.experiment = experiment
-                    s.save()
-                except DecimalException, e:
-                    if len(output["invalid_lines"]) < max_error:
-                        output["invalid_lines"].append(num)
-                    else:
-                        output["max_error"] = max_error
-                    output["success"] = False
+                    return header.index(name)
+                except ValueError:
+                    return -1
+            cols = map(find, WANTED_COLS)
+            start_line = 2
+
+            missing = [WANTED_COLS[i] for i,j in enumerate(cols) if j < 0]
+
+            if missing:
+                missing = ("Column %s is missing" % m for m in missing)
+                return { "success": False,
+                         "msg": ", ".join(missing) }
         else:
-            output = { "success": False, "msg": "No file attached." }
-    except Exception, e:
+            cols = range(3)
+            start_line = 1
+
+        label_col, weight_col, comment_col = cols
+
+        for num, row in enumerate(data, start_line):
+            if len(row) == 0:
+                continue
+            try:
+                s = Sample()
+                s.label = row[label_col]
+                s.weight = Decimal(row[weight_col])
+                s.comment = row[comment_col]
+                s.experiment = experiment
+                s.save()
+            except DecimalException, e:
+                if len(output["invalid_lines"]) < max_error:
+                    output["invalid_lines"].append(num)
+                else:
+                    output["max_error"] = max_error
+                output["success"] = False
+                output["msg"] = "Incorrectly formatted decimal number"
+    except EnvironmentError, e:
         logger.exception('Exception uploading file')
         output = { 'success': False, "msg": "Exception uploading file: %s" % e }
 
-    return HttpResponse(json.dumps(output))
-
-
+    return output
 
 @mastr_users_only
 def sample_class_enable(request, id):
