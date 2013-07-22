@@ -430,7 +430,12 @@ var createSampleCSV = function(records){
         var r = records[0];
         for (var propname in r){
             fields.push(propname);
-            header += propname + ", ";
+        }
+        for (var i = 0; i < fields.length; i++) {
+            header += fields[i];
+            if (i < fields.length - 1) {
+                header += ", ";
+            }
         }
         
         csvtext += header + "</br>";
