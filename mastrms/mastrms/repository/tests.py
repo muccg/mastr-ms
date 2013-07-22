@@ -336,3 +336,80 @@ Sample Label
         self.assertEqual(samples[1].label, "label 2")
         self.assertEqual(samples[1].weight, Decimal("43.0"))
         self.assertEqual(samples[1].comment, "comment")
+
+    def make_more_samples(self):
+        for sid in ["001", "002"]:
+            Sample.objects.create(sample_id=sid,
+                                  experiment=self.experiment,
+                                  label="", comment="", weight=None)
+        return Sample.objects.all()
+
+    def test15_sample_update(self):
+        """
+        Valid CSV containing sample id column, used to update existing
+        samples.
+        """
+        samples = self.make_more_samples()
+
+        self.assertEqual(len(samples), 2)
+
+        # Exported CSV is actually created with javascript so we can't
+        # reuse code here... hence formatting
+        text = """# id, sample_id, sample_class, sample_class__unicode, experiment, experiment__unicode, label, comment, weight, sample_class_sequence,
+%d,,1,class_1,1,exp,label A,comment A,42,1
+%d,,1,class_1,1,exp,label B,comment B,43,1
+""" % (samples[0].id, samples[1].id)
+
+        result = _handle_uploaded_sample_csv(self.experiment, StringIO(text))
+
+        samples = Sample.objects.all()
+
+        self.assertTrue(result["success"])
+        self.assertEqual(len(samples), 2)
+        self.assertEqual(samples[0].experiment, self.experiment)
+        self.assertEqual(samples[0].label, "label A")
+        self.assertEqual(samples[0].weight, Decimal("42.0"))
+        self.assertEqual(samples[0].comment, "comment A")
+        self.assertEqual(samples[1].experiment, self.experiment)
+        self.assertEqual(samples[1].label, "label B")
+        self.assertEqual(samples[1].weight, Decimal("43.0"))
+        self.assertEqual(samples[1].comment, "comment B")
+
+    def test16_sample_update_create(self):
+        """
+        Valid CSV containing sample id column, used to update existing
+        samples, and to create more samples.
+        """
+        samples = self.make_more_samples()
+
+        self.assertEqual(len(samples), 2)
+
+        # Exported CSV is actually created with javascript so we can't
+        # reuse code here... hence formatting
+        text = """# id, sample_id, sample_class, sample_class__unicode, experiment, experiment__unicode, label, comment, weight, sample_class_sequence,
+%d,,1,class_1,1,exp,label A,comment A,42,1
+%d,,1,class_1,1,exp,label B,comment B,43,1
+,,1,class_1,1,exp,label C,comment C,44,1
+""" % (samples[0].id, samples[1].id)
+
+        result = _handle_uploaded_sample_csv(self.experiment, StringIO(text))
+
+        samples = Sample.objects.all()
+
+        self.assertEqual(len(samples), 3)
+        self.assertEqual(samples[0].experiment, self.experiment)
+        self.assertEqual(samples[0].label, "label A")
+        self.assertEqual(samples[0].weight, Decimal("42.0"))
+        self.assertEqual(samples[0].comment, "comment A")
+        self.assertEqual(samples[1].experiment, self.experiment)
+        self.assertEqual(samples[1].label, "label B")
+        self.assertEqual(samples[1].weight, Decimal("43.0"))
+        self.assertEqual(samples[1].comment, "comment B")
+        self.assertEqual(samples[2].experiment, self.experiment)
+        self.assertEqual(samples[2].label, "label C")
+        self.assertEqual(samples[2].weight, Decimal("44.0"))
+        self.assertEqual(samples[2].comment, "comment C")
+
+        self.assertTrue(result["success"])
+        self.assertEqual(result["num_created"], 1)
+        self.assertEqual(result["num_updated"], 2)
