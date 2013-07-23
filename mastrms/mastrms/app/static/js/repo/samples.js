@@ -402,16 +402,42 @@ MA.SampleCSVUploadForm = new Ext.Window({
                     {   
                         successProperty: 'success',        
                         success: function (form, action) {
-                            if (action.result.success === true) {
+                            var res = action.result;
+                            if (res.success === true) {
+                                var created = res.num_created + " sample" + (res.num_created == 1 ? "" : "s") + " added";
+                                var updated = res.num_updated + " sample" + (res.num_updated == 1 ? "" : "s") + " updated";
+                                var msg = ((res.num_created && res.num_updated) ? (created + " and " + updated) : (res.num_created ? created : updated)) + "."
                                 form.reset(); 
                                 MA.ExperimentSamplesOnlyInit();
+
+                                Ext.Msg.alert('CSV Upload', msg);
+
                                 Ext.getCmp('sampleCSVUploadWindow').hide();
                             } 
                         },
                         failure: function (form, action) {
-                            //do nothing special. this gets called on validation failures and server errors
+                            // this gets called both on server errors
+                            // and when view returns success: false
                             MA.ExperimentSamplesOnlyInit();
-                            alert('Error processing CSV. Some lines were not imported as they did not seem to be formatted properly. Some samples may have been imported successfully.');
+                            var msg = "Error processing CSV.";
+                            var res = action.result;
+                            if (res && res.msg) {
+                                msg += " " + res.msg + ".\n";
+                                if (res.invalid_lines) {
+                                    msg += "Line number(s) ";
+                                    for (var i = 0; i < res.invalid_lines.length; i++) {
+                                        msg += res.invalid_lines[i];
+                                        if (i + 1 < res.invalid_lines.length) {
+                                            msg += ", ";
+                                        }
+                                    }
+                                    if (res.max_error) {
+                                        msg += "...";
+                                    }
+                                    msg += " were invalid.";
+                                }
+                            }
+                            Ext.Msg.alert('CSV Upload', msg);
                         }
                     }
                 );
