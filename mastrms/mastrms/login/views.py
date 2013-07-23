@@ -202,17 +202,6 @@ def index(request, *args):
     return jsonResponse()
 
 def serveIndex(request, *args, **kwargs):
-    force = request.GET.get('dev_force', False) #param that can be passed to force access to ccg instance, for debugging purposes
-    if not force and siteurl(request).find('ccg.murdoch.edu.au') > -1:
-        #display the banner
-        return render_to_response('banner.html',{
-                'APP_SECURE_URL': siteurl(request),
-                'username': request.user.username,
-                'newurl':'https://mastrms.bio21.unimelb.edu.au/mastrms/',
-                'wh': webhelpers,
-                }, context_instance=RequestContext(request))
-
-
     currentuser = getCurrentUser(request)
     mcf = 'dashboard'
     params = ''
