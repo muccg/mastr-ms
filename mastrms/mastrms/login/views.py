@@ -1,20 +1,18 @@
-# Create your views here.
-import md5, time
-
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
-import logging
 from django.contrib.auth import authenticate, login, logout
-from mastrms.users.user_manager import get_user_manager
 from django.shortcuts import render_to_response
 from django.utils import simplejson
+from django.conf import settings
 from ccg.utils import webhelpers
 from ccg.utils.webhelpers import siteurl, wsgibase
-from django.conf import settings
+from mastrms.users.user_manager import get_user_manager
 from mastrms.app.utils.data_utils import jsonResponse, jsonErrorResponse
 from mastrms.users.MAUser import *
 from mastrms.login.URLState import getCurrentURLState
 from mastrms.app.utils.mail_functions import sendForgotPasswordEmail, sendPasswordChangedEmail
+import md5, time
+import logging
 
 logger = logging.getLogger('madas_log')
 
@@ -207,7 +205,7 @@ def serveIndex(request, *args, **kwargs):
     force = request.GET.get('dev_force', False) #param that can be passed to force access to ccg instance, for debugging purposes
     if not force and siteurl(request).find('ccg.murdoch.edu.au') > -1:
         #display the banner
-        return render_to_response('banner.mako',{
+        return render_to_response('banner.html',{
                 'APP_SECURE_URL': siteurl(request),
                 'username': request.user.username,
                 'newurl':'https://mastrms.bio21.unimelb.edu.au/mastrms/',
@@ -236,7 +234,7 @@ def serveIndex(request, *args, **kwargs):
 
     jsonparams = simplejson.dumps(sendparams)
 
-    return render_to_response('index.mako', {
+    return render_to_response('index.html', {
                         'APP_SECURE_URL': siteurl(request),
                         'username': request.user.username,
                         'mainContentFunction': mcf,
