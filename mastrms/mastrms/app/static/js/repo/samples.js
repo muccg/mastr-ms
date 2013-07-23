@@ -347,10 +347,10 @@ MA.SaveSampleOnlyRow = function(roweditor, changes, rec, i) {
 MA.SampleCSVUploadForm = new Ext.Window({
     title: 'Upload CSV of Samples',
     closeAction:'hide',
-    width:300,
-    height:200,
-    minHeight:200,
-    minWidth:300,
+    width:330,
+    height:250,
+    minHeight:250,
+    minWidth:330,
     id:'sampleCSVUploadWindow',
     defaults: {
         bodyStyle:'padding:15px;background:transparent;'
@@ -374,7 +374,7 @@ MA.SampleCSVUploadForm = new Ext.Window({
                     xtype: 'panel',
                     border: false,
                     bodyStyle:'padding:15px;background:transparent;',
-                    html: 'Uploaded CSVs must be of the format:<br><br><code>label,weight,comment</code><br><br>'
+                    html: 'Uploaded CSVs must be of the format:<br><br><code>label,weight,comment</code><br><br>or contain a header line with these words. If an <code>id</code> header is included, samples can be updated by their ID.'
                 },
                 {
                     xtype: 'fileuploadfield',
