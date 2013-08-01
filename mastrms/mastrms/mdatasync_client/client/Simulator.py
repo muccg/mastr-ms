@@ -26,7 +26,7 @@ class Simulator(object):
         self.destdir = self._setup_destdir(destdir)
         self.generate_temp_files = temp_files
         self._created_files = []
-        self._created_dirs = []
+        self._created_dirs = set()
 
     TEMP_NAMES = ['TEMPBASE', 'TEMPDAT', 'TEMPDIR']
 
@@ -108,8 +108,13 @@ class Simulator(object):
         self._created_files.append(tfname)
 
     def _create_dir(self, fname):
+        parent = os.path.join(*os.path.split(os.path.normpath(fname))[:-1])
+        if not os.path.exists(parent):
+            # create parents first
+            self._create_dir(parent)
+
         os.mkdir(fname)
-        self._created_dirs.append(fname)
+        self._created_dirs.add(fname)
 
     def cleanup(self):
         """
@@ -124,13 +129,13 @@ class Simulator(object):
                 logger.exception("cleanup")
         self._created_files = []
 
-        for dirname in reversed(self._created_dirs):
+        for dirname in sorted(self._created_dirs, reverse=True):
             logger.info("Removing directory %s" % dirname)
             try:
                 os.rmdir(dirname)
             except OSError:
                 logger.exception("cleanup")
-        self._created_dirs = []
+        self._created_dirs.clear()
 
     @property
     def created_files(self):
