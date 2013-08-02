@@ -1,12 +1,13 @@
 from django.utils import unittest
 import dingus
 import os.path
+import tempfile
 from StringIO import StringIO
 import logging
 logger = logging.getLogger(__name__)
 
 from mastrms.testutils import XDisplayTest
-from mastrms.mdatasync_client.client.MSDataSyncAPI import DataSyncServer, MSDataSyncAPI
+from mastrms.mdatasync_client.client.MSDataSyncAPI import DataSyncServer, MSDataSyncAPI, MSDSImpl
 from mastrms.mdatasync_client.client.config import MSDSConfig
 from mastrms.mdatasync_client.client.test.testclient import TestClient
 from mastrms.mdatasync_client.client.version import VERSION
@@ -159,6 +160,9 @@ class DataSyncServerTests(unittest.TestCase):
     #  * DataSyncServer.send_key()  - this uses yaphc
     #  * DataSyncServer.send_log()  - this uses yaphc
 
+def msds_log(msg, *args, **kwargs):
+    logger.info("MSDS: %s" % msg)
+msds_log.LOG_ERROR = 0
 
 class MSDataSyncAPITests(unittest.TestCase):
     """
@@ -167,10 +171,7 @@ class MSDataSyncAPITests(unittest.TestCase):
     """
     def setUp(self):
         self.config = MSDSConfig()
-        self.api = MSDataSyncAPI(self.config, self.msds_log)
-
-    def msds_log(self, msg, *args, **kwargs):
-        logger.info("MSDS: %s" % msg)
+        self.api = MSDataSyncAPI(self.config, msds_log)
 
     def test1_find_local_file_or_directory(self):
         """
@@ -256,3 +257,98 @@ class MSDataSyncAPITests(unittest.TestCase):
 
         result = self.api.find_local_file_or_directory(lfd, "zxc", exclude)
         self.assertIsNone(result, "excluded subdir within excluded dir")
+
+class MSDSImplTests(unittest.TestCase):
+    """
+    These are unit tests for the `MSDSImpl` class.
+    """
+    def setUp(self):
+        self.config = MSDSConfig(localdir=tempfile.mkdtemp())
+        self.api = MSDataSyncAPI(self.config, msds_log)
+        self.impl = MSDSImpl(msds_log, self.api)
+
+        # method stub
+        self.api.post_sync_step = dingus.Dingus()
+
+        def remove_localdir():
+            os.rmdir(self.config["localdir"])
+        self.addCleanup(remove_localdir)
+
+        self.rsyncconfig = self.RemoteSyncParamsStub({
+                "filename1": False, # this file didn't change
+                "filename2": False, # this file didn't change
+                "filename3": True,  # this file changed
+                "asdf": True,       # this file changed
+                })
+
+        self.filename_id_map = {
+            "filename1": (1, 10),
+            "filename2": (2, 20),
+            "filename3": (3, 30),
+            "filename4": (4, 40),
+        }
+
+    # serverCheckRunSampleFiles method only uses the
+    # file_changes member of RemoteSyncParams, so stub it
+    class RemoteSyncParamsStub(object):
+        def __init__(self, file_changes):
+            self.file_changes = file_changes
+
+    def test1_check_run_sample_files(self):
+        """
+        Check that `MSDSImpl.serverCheckRunSampleFiles()` results in
+        an API call marking complete the correct samples.
+        """
+        Server = dingus.Dingus()
+        with dingus.patch("mastrms.mdatasync_client.client.MSDataSyncAPI.DataSyncServer", Server):
+            self.impl.serverCheckRunSampleFiles(self.rsyncconfig,
+                                                self.filename_id_map)
+
+        self.assertEqual(len(Server.return_value.calls), 1,
+                         "One DataSyncServer instance is created")
+
+        runsampledict, last_error = Server.return_value.calls[0][1]
+
+        self.assertEqual(len(runsampledict), 2,
+                         "Two samples are marked complete")
+        self.assertEqual(runsampledict, { 1: [10], 2: [20] },
+                         "The correct samples are marked complete")
+
+    def create_data_file(self, *path):
+        temp_name = os.path.join(self.config["localdir"], *path)
+        os.makedirs(os.path.dirname(temp_name))
+        open(temp_name, "w").close()
+
+        def cleanup(temp_name, nparents):
+            logger.debug("removing %s" % temp_name)
+            os.remove(temp_name)
+            for p in range(nparents):
+                temp_name = os.path.dirname(temp_name)
+                logger.debug("rmdir %s" % temp_name)
+                os.rmdir(temp_name)
+
+        self.addCleanup(cleanup, temp_name, len(path) - 1)
+
+    def test2_check_run_sample_files_temp_files(self):
+        """
+        Sample is not marked incomplete if there is a TEMP file in its
+        directory.
+        """
+        # create a file called TEMP within a directory called
+        # filename2 somewhere within the data dir
+        self.create_data_file("test", "dir", "filename2", "TEMP")
+
+        Server = dingus.Dingus()
+        with dingus.patch("mastrms.mdatasync_client.client.MSDataSyncAPI.DataSyncServer", Server):
+            self.impl.serverCheckRunSampleFiles(self.rsyncconfig,
+                                                self.filename_id_map)
+
+        self.assertEqual(len(Server.return_value.calls), 1,
+                         "One DataSyncServer instance is created")
+
+        runsampledict, last_error = Server.return_value.calls[0][1]
+
+        self.assertEqual(len(runsampledict), 1,
+                         "One sample is marked complete")
+        self.assertEqual(runsampledict, { 1: [10] },
+                         "The correct sample is marked complete")
