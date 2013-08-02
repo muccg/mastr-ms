@@ -881,7 +881,10 @@ class AdminTests(LiveServerTestCase, XDisplayTest, WithFixtures):
         super(AdminTests, cls).tearDownClass()
 
     def test1_login(self):
-        "This test is given as an example in the django docs"
+        """
+        Login to the admin page. This test is given as an example in
+        the django docs.
+        """
         self.selenium = WebDriver()
         self.selenium.get(self.url("/repoadmin/login/"))
         username_input = self.selenium.find_element_by_name("username")
