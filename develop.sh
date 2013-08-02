@@ -124,7 +124,7 @@ function ci_staging_tests() {
     sleep 2
 
     # Run tests, collect results
-    ccg ${AWS_STAGING_INSTANCE} dsudo:"cd ${REMOTE_TEST_DIR} && env DISPLAY\=\:0 dbus-launch timeout -sHUP 30m ${PROJECT_NAME} test --verbosity\=2 --noinput --with-xunit --xunit-file\=${REMOTE_TEST_RESULTS} ${TEST_LIST} ${EXCLUDES} || true"
+    ccg ${AWS_STAGING_INSTANCE} dsudo:"cd ${REMOTE_TEST_DIR} && env DISPLAY\=\:0 dbus-launch timeout -sHUP 30m ${PROJECT_NAME} test --verbosity\=2 --liveserver\=localhost\:8082\,8090-8100\,9000-9200\,7041 --noinput --with-xunit --xunit-file\=${REMOTE_TEST_RESULTS} ${TEST_LIST} ${EXCLUDES} || true"
     ccg ${AWS_STAGING_INSTANCE} getfile:${REMOTE_TEST_RESULTS},./
 }
 
