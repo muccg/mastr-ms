@@ -179,7 +179,6 @@ class MSDataSyncAPITests(unittest.TestCase):
         that TEMP files are correctly removed from list of files to
         copy to staging directory.
         """
-        exclude = ["TEMP"]
         wanted_filename = "asdf"
         path = "/path/to/this/dir"
         p = lambda f: os.path.join(path, f)
@@ -223,39 +222,39 @@ class MSDataSyncAPITests(unittest.TestCase):
                 },
             }
 
-        result = self.api.find_local_file_or_directory(lfd, "asdf", exclude)
+        result = self.api.find_local_file_or_directory(lfd, "asdf")
         self.assertIsNone(result, "asdf skipped")
 
-        result = self.api.find_local_file_or_directory(lfd, "qwerty", exclude)
+        result = self.api.find_local_file_or_directory(lfd, "qwerty")
         self.assertIsNone(result, "qwerty skipped")
 
-        result = self.api.find_local_file_or_directory(lfd, "foo", exclude)
+        result = self.api.find_local_file_or_directory(lfd, "foo")
         self.assertTrue(bool(result), "subdirectory")
 
-        result = self.api.find_local_file_or_directory(lfd, "bar", exclude)
+        result = self.api.find_local_file_or_directory(lfd, "bar")
         self.assertEqual(result, p("bar"), "another subdirectory")
 
-        result = self.api.find_local_file_or_directory(lfd, "2", exclude)
+        result = self.api.find_local_file_or_directory(lfd, "2")
         self.assertEqual(result, p("2"), "file at top level")
 
         # this one is surprising maybe
-        result = self.api.find_local_file_or_directory(lfd, "B", exclude)
+        result = self.api.find_local_file_or_directory(lfd, "B")
         self.assertEqual(result, p("qwerty/B"), "file within ignored directory")
 
-        result = self.api.find_local_file_or_directory(lfd, "Y", exclude)
+        result = self.api.find_local_file_or_directory(lfd, "Y")
         self.assertEqual(result, p("foo/Y"), "file within subdirectory")
 
-        result = self.api.find_local_file_or_directory(lfd, "suffix", exclude)
+        result = self.api.find_local_file_or_directory(lfd, "suffix")
         self.assertEqual(result, p("suffix"), "TEMP at end of filename")
 
-        result = self.api.find_local_file_or_directory(lfd, "baz", exclude)
+        result = self.api.find_local_file_or_directory(lfd, "baz")
         self.assertIsNone(result, "lowercase TEMP")
 
         # this one is also surprising maybe?
-        result = self.api.find_local_file_or_directory(lfd, "hjkl", exclude)
+        result = self.api.find_local_file_or_directory(lfd, "hjkl")
         self.assertEqual(result, p("qwerty/hjkl"), "subdir within excluded dir")
 
-        result = self.api.find_local_file_or_directory(lfd, "zxc", exclude)
+        result = self.api.find_local_file_or_directory(lfd, "zxc")
         self.assertIsNone(result, "excluded subdir within excluded dir")
 
 class MSDSImplTests(unittest.TestCase):
