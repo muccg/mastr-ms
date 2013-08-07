@@ -11,8 +11,7 @@ from django.db.models import Model
 
 from django.utils import simplejson
 from django.utils.functional import Promise
-from django.utils.translation import force_unicode
-from django.utils.encoding import smart_unicode
+from django.utils.encoding import smart_text, force_text
 from django.core.serializers.json import DjangoJSONEncoder
 
 
@@ -54,7 +53,7 @@ class ModelJSONEncoder(DjangoJSONEncoder):
      factor out this part of the algorithm)
     """
     def handle_field(self, obj, field):
-        return smart_unicode(getattr(obj, field.name), strings_only=True)
+        return smart_text(getattr(obj, field.name), strings_only=True)
 
     def handle_fk_field(self, obj, field):
         related = getattr(obj, field.name)
@@ -65,12 +64,12 @@ class ModelJSONEncoder(DjangoJSONEncoder):
             else:
                 # Related to remote object via other field
                 related = getattr(related, field.rel.field_name)
-        return smart_unicode(related, strings_only=True)
+        return smart_text(related, strings_only=True)
 
     def handle_m2m_field(self, obj, field):
         if field.creates_table:
             return [
-                smart_unicode(related._get_pk_val(), strings_only=True)
+                smart_text(related._get_pk_val(), strings_only=True)
                 for related
                 in getattr(obj, field.name).iterator()
                 ]
@@ -98,7 +97,7 @@ class ModelJSONEncoder(DjangoJSONEncoder):
 class LazyEncoder(ModelJSONEncoder):
     def default(self, o):
         if isinstance(o, Promise):
-            return force_unicode(o)
+            return force_text(o)
         else:
             return super(LazyEncoder, self).default(o)
 

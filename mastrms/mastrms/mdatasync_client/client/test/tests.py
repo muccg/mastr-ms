@@ -95,7 +95,7 @@ class DataSyncServerTests(unittest.TestCase):
     def test_handshake_weird_json(self):
         """Test handshaking when server returns unexpected json."""
         with self.assertRaises(KeyError):
-            with self.fake_urlopen("{ lah: 'hello' }"):
+            with self.fake_urlopen("{ 'lah': 'hello' }"):
                 details = self.server.handshake()
 
     def test_handshake_not_json(self):
