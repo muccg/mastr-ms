@@ -149,65 +149,69 @@ LOGGING = {
     'disable_existing_loggers': True,
     'formatters': {
         'verbose': {
-            'format': 'mastrms [%(name)s:%(levelname)s:%(asctime)s:%(filename)s:%(lineno)s:%(funcName)s] %(message)s'
+            'format': '[%(name)s:%(levelname)s:%(asctime)s:%(filename)s:%(lineno)s:%(funcName)s] %(message)s'
         },
         'db': {
-            'format': 'mastrms [%(name)s:%(duration)s:%(sql)s:%(params)s] %(message)s'
+            'format': '[%(name)s:%(duration)s:%(sql)s:%(params)s] %(message)s'
+        },
+        'syslog': {
+            'format': 'mastrms: %(name)s:%(levelname)s %(message)s'
         },
         'simple': {
-            'format': 'mastrms %(levelname)s %(message)s'
+            'format': '%(levelname)s %(filename)s:%(lineno)s (%(funcName)s)  %(message)s'
         },
     },
     'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        }
     },
     'handlers': {
-        'null': {
-            'level':'DEBUG',
-            'class':'django.utils.log.NullHandler',
-        },
         'console':{
-            'level':'DEBUG',
-            'class':'logging.StreamHandler',
-            'formatter': 'verbose'
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
         },
         'file':{
-            'level':'DEBUG',
-            'class':'logging.handlers.TimedRotatingFileHandler',
+            'level': 'DEBUG',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
             'filename': os.path.join(CCG_LOG_DIRECTORY, 'mastrms.log'),
-            'when':'midnight',
+            'when': 'midnight',
             'formatter': 'verbose'
         },
         'db_logfile':{
-            'level':'DEBUG',
-            'class':'logging.handlers.TimedRotatingFileHandler',
+            'level': 'DEBUG',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
             'filename': os.path.join(CCG_LOG_DIRECTORY, 'mastrms_db.log'),
-            'when':'midnight',
+            'when': 'midnight',
             'formatter': 'db'
         },
         'syslog':{
-            'level':'DEBUG',
-            'class':'logging.handlers.SysLogHandler',
-            'address':'/dev/log',
-            'facility':'local4',
-            'formatter': 'verbose'
+            'level': 'WARNING',
+            'filters': ['require_debug_false'],
+            'class': 'logging.handlers.SysLogHandler',
+            'address': '/dev/log',
+            'facility': 'local4',
+            'formatter': 'syslog'
         },
         'mail_admins': {
             'level': 'ERROR',
+            'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler',
-            'formatter':'verbose',
+            'formatter': 'verbose',
             'include_html':True
         }
     },
     'loggers': {
-        'django': {
-            'handlers':['null'],
-            'propagate': True,
-            'level':'INFO',
+        '': {
+            'handlers': ['console', 'file', 'syslog'],
+            'level': 'WARNING',
+            'propagate': False,
         },
         'django.request': {
-            'handlers': ['file', 'syslog', 'mail_admins'],
+            'handlers': ['mail_admins'],
             'level': 'ERROR',
-            'propagate': False,
+            'propagate': True,
         },
         'django.db.backends': {
             'handlers': ['db_logfile', 'mail_admins'],
@@ -215,16 +219,9 @@ LOGGING = {
             'propagate': False,
         },
         'mastrms': {
-            'handlers': ['console', 'file', 'syslog'],
-            'level': 'DEBUG'
-        },
-        'mdatasync_server_log': {
-            'handlers': ['console', 'file', 'syslog'],
-            'level': 'WARNING'
-        },
-        'madas_log': {
-            'handlers': ['console', 'file', 'syslog'],
-            'level': 'WARNING'
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': False,
         },
     }
 }

@@ -14,7 +14,7 @@ from mastrms.app.utils.mail_functions import sendForgotPasswordEmail, sendPasswo
 import md5, time
 import logging
 
-logger = logging.getLogger('madas_log')
+logger = logging.getLogger('mastrms.general')
 
 def processLoginView(request, *args):
     success = processLogin(request, args)

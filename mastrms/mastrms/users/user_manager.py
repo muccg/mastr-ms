@@ -10,7 +10,7 @@ import logging
 # The idea is to support the methods LDAPHandler was supporting and return data in the exact same format
 # as it was from LDAP (but now from the DB) to minimize the rewriting that has to be done
 
-logger = logging.getLogger('madas_log')
+logger = logging.getLogger('mastrms.general')
 
 def get_user_manager():
     return DBUserManager()

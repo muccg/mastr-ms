@@ -16,7 +16,7 @@ PROJECTLEADER_GROUP = 'Project Leaders'
 MASTR_STAFF_GROUP = 'Mastr Staff'
 MADAS_ADMIN_GROUPS = [MADAS_ADMIN_GROUP, MADAS_NODEREP_GROUP, MASTR_ADMIN_GROUP, PROJECTLEADER_GROUP, MASTR_STAFF_GROUP]
 
-logger = logging.getLogger('madas_log')
+logger = logging.getLogger('mastrms.general')
 
 #Just a class to encapsulate data to send to the frontend (as json)
 class MAUser(object):

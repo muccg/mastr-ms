@@ -2,7 +2,7 @@ from django.utils import simplejson as json
 from django.http import HttpResponse
 import logging
 
-logger = logging.getLogger('madas_log')
+logger = logging.getLogger('mastrms.general')
 
 class JSONExceptionHandlerMiddleware(object):
 

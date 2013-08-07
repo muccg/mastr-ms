@@ -4,7 +4,7 @@ import stat
 import grp
 from django.conf import settings
 import logging
-LOGNAME = 'madas_log'
+LOGNAME = 'mastrms.general'
 logger = logging.getLogger(LOGNAME)
 def ensure_repo_filestore_dir_with_owner(relpath, ownerid=os.getuid(), groupname=settings.CHMOD_GROUP):
     '''helper function to create directories within the mastrms permanent filestore, with the correct perms'''
