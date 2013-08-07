@@ -5,7 +5,7 @@ from django.core.mail import EmailMessage
 import logging
 from mastrms.users.MAUser import MADAS_USER_GROUP
 
-logger = logging.getLogger('madas_log')
+logger = logging.getLogger('mastrms.general')
 
 class FixedEmailMessage(EmailMessage):
     def __init__(self, subject='', body='', from_email=None, to=None, cc=None,

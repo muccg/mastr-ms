@@ -4,7 +4,7 @@ from mastrms.app.utils.mail_functions import sendRegistrationToAdminEmail
 import logging
 from django.conf import settings
 
-logger = logging.getLogger('madas_log')
+logger = logging.getLogger('mastrms.general')
 
 def submit(request, *args):
     '''This adds a new user into ldap with no groups

@@ -26,7 +26,7 @@ import copy
 import csv
 from django.conf import settings
 import logging
-logger = logging.getLogger('madas_log')
+logger = logging.getLogger('mastrms.general')
 
 @mastr_users_only
 def create_object(request, model):
