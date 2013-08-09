@@ -1,7 +1,7 @@
-from mastrms.users.models import User
 from django.db import transaction
 from django.db.models import Q
-from mastrms.users import models
+from django.contrib.auth.models import Group
+from mastrms.users.models import User
 import mastrms.users.MAUser
 
 import logging
@@ -32,17 +32,17 @@ class DBUserManager(object):
         else:
             details_dict = details.to_dict()
 
-        details_dict['groups'] = [g.name for g in models.Group.objects.filter(user=django_user)]
+        details_dict['groups'] = [g.name for g in Group.objects.filter(user=django_user)]
 
         return details_dict
 
     def list_groups(self):
-        return [g.name for g in models.Group.objects.all()]
+        return [g.name for g in Group.objects.all()]
 
     def add_group(self, groupname):
         try:
             groupname = groupname.strip()
-            models.Group.objects.create(name=groupname)
+            Group.objects.create(name=groupname)
         except Exception, e:
             logger.exception("Couldn't create group %s." % groupname)
             return False
@@ -52,7 +52,7 @@ class DBUserManager(object):
         try:
             oldname = oldname.strip()
             newname = newname.strip()
-            group = models.Group.objects.get(name=oldname)
+            group = Group.objects.get(name=oldname)
             group.name = newname
             group.save()
         except Exception, e:
@@ -62,7 +62,7 @@ class DBUserManager(object):
 
     def delete_group(self, groupname):
         try:
-            group = models.Group.objects.get(name=groupname)
+            group = Group.objects.get(name=groupname)
             group.delete()
         except Exception, e:
             logger.exception("Couldn't delete group %s." % groupname)
@@ -70,7 +70,7 @@ class DBUserManager(object):
         return True
 
     def get_user_groups(self, username):
-        return [g.name for g in models.Group.objects.filter(user__username=username)]
+        return [g.name for g in Group.objects.filter(user__username=username)]
 
     def list_users(self, searchGroup, method= 'and'):
         if not searchGroup:
@@ -93,8 +93,8 @@ class DBUserManager(object):
 
 
     def update_staff_status(self, user):
-        #if the user belongs to more than one users.models.Group, they should be django staff.
-        #Else, they shouldnt.
+        #if the user belongs to more than one Group, they should be
+        #django staff.  Else, they shouldnt.
         mauser = mastrms.users.MAUser.getMadasUser(user.username)
         if not mauser.IsClient:
             user.is_staff=True
@@ -111,8 +111,8 @@ class DBUserManager(object):
             logger.warning('User with username % does not exist' % username)
             return False
         try:
-            group = models.Group.objects.get(name=groupname)
-        except models.Group.DoesNotExist, e:
+            group = Group.objects.get(name=groupname)
+        except Group.DoesNotExist, e:
             logger.warning('Group with name %s does not exist' % groupname)
             return False
         if group.user.filter(username=username):
@@ -131,8 +131,8 @@ class DBUserManager(object):
             logger.warning('User with username % does not exist' % username)
             return False
         try:
-            group = models.Group.objects.get(name=groupname)
-        except models.Group.DoesNotExist, e:
+            group = Group.objects.get(name=groupname)
+        except Group.DoesNotExist, e:
             logger.warning('Group with name %s does not exist' % groupname)
             return False
         if not group.user.filter(username=username):

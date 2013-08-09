@@ -58,7 +58,3 @@ class UserDetail(models.Model):
                 if isinstance(val, list):
                     val = val[0]
                 setattr(self, attr, val)
-
-class Group(models.Model):
-    user = models.ManyToManyField(User)
-    name = models.CharField(max_length=255, unique=True)
