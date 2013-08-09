@@ -3,7 +3,7 @@ from django.conf import settings
 from ccg.utils.webhelpers import siteurl
 from django.core.mail import EmailMessage
 import logging
-from mastrms.users.MAUser import MADAS_USER_GROUP
+from mastrms.users.models import MADAS_USER_GROUP
 
 logger = logging.getLogger('mastrms.general')
 

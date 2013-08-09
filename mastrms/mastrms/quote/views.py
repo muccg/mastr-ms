@@ -16,9 +16,8 @@ from mastrms.decorators import *
 from mastrms.app.utils.data_utils import jsonResponse, jsonErrorResponse, json_encode, uniqueList
 from mastrms.app.utils.file_utils import ensure_repo_filestore_dir_with_owner, set_repo_file_ownerships
 from mastrms.quote.models import Quoterequest, Formalquote, Quotehistory, Emailmap
-from mastrms.users.MAUser import *
+from mastrms.users.models import *
 from mastrms.login.URLState import getCurrentURLState
-#from string import *
 from mastrms.app.utils.mail_functions import sendQuoteRequestConfirmationEmail, sendQuoteRequestToAdminEmail, sendFormalQuoteEmail, sendFormalStatusEmail
 
 logger = logging.getLogger('mastrms.general')

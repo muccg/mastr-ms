@@ -5,7 +5,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from mastrms.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RUN_STATES, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure, MadasUser, RuleGenerator, Component
 from mastrms.quote.models import Organisation, Formalquote
 from ccg.utils import webhelpers
-from mastrms.users.models import User
 from django.utils import simplejson as json
 from mastrms.decorators import mastr_users_only
 from django.contrib.auth.decorators import login_required
@@ -17,7 +16,7 @@ from mastrms.repository.permissions import user_passes_test
 from django.db.models import Q
 from datetime import datetime, timedelta
 from django.core.mail import mail_admins
-from mastrms.users.MAUser import getMadasUser, loadMadasUser, getCurrentUser
+from mastrms.users.models import User, getMadasUser, loadMadasUser, getCurrentUser
 from mastrms.repository import rulegenerators
 from mastrms.app.utils.mail_functions import FixedEmailMessage
 from decimal import Decimal, DecimalException
