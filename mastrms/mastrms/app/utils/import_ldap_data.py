@@ -1,18 +1,17 @@
 #
 #
-# This tool is to import ldap user details across to become UserDetail entries.
+# This tool is to import ldap user details across to become User entries.
 #
 # First the groups are imported
 #
-# One by one, user details are pulled over. If the user doesn't have a UserDetail object,
+# One by one, user details are pulled over. If the user doesn't have a User object,
 # it is created. If they do, it is updated.
 #
 # The user is then added to their groups.
 #
 from ccg.auth.ldap_helper import LDAPSearchResult, LDAPHandler
 import settings
-from users.models import Group, UserDetail
-from mastrms.users.models import User
+from mastrms.users.models import Group, User
 import re
 import base64
 
@@ -35,13 +34,9 @@ def import_ldap_groups():
 
 def set_user_details(user, ldap_details):
     try:
-        (userdetails, created) = UserDetail.objects.get_or_create(user=user)
-        if created:
-            print 'creating user details for %s' % user.username
-        else:
-            print 'updating user details for %s' % user.username
-        userdetails.set_from_dict(ldap_details)
-        userdetails.save()
+        print 'updating user details for %s' % user.username
+        user.set_from_dict(ldap_details)
+        user.save()
 
     except Exception, e:
         print 'Could not set user details for %s: %s' % (user.username, e)
@@ -171,4 +166,3 @@ def test_pw_migrate(username):
     print 'Digest ', di
 
     return (newpassword, rd, sch, sa, di)
-
