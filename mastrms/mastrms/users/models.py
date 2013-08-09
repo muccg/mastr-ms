@@ -3,9 +3,24 @@ from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
     """
-    This will be renamed to something less confusing.
+    Extended user model.
+    This could be renamed to something less confusing.
     """
-    pass
+    commonName = models.CharField(max_length=255, blank=True)
+    givenName = models.CharField(max_length=255, blank=True)
+    sn = models.CharField(max_length=255, blank=True)
+    mail = models.CharField(max_length=255, blank=True)
+    telephoneNumber = models.CharField(max_length=255, blank=True)
+    homePhone = models.CharField(max_length=255, blank=True)
+    physicalDeliveryOfficeName = models.CharField(max_length=255, blank=True)
+    title = models.CharField(max_length=255, blank=True)
+    destinationIndicator = models.CharField(max_length=255, blank=True)
+    description = models.CharField(max_length=255, blank=True)
+    postalAddress = models.CharField(max_length=255, blank=True)
+    businessCategory = models.CharField(max_length=255, blank=True)
+    registeredAddress = models.CharField(max_length=255, blank=True)
+    carLicense = models.CharField(max_length=255, blank=True)
+    passwordResetKey = models.CharField(max_length=255, blank=True)
 
 class UserDetail(models.Model):
     user = models.OneToOneField(User)
@@ -27,7 +42,7 @@ class UserDetail(models.Model):
 
     @property
     def uid(self):
-        return self.user.username
+        return self.username
 
     def to_dict(self):
         d = {
