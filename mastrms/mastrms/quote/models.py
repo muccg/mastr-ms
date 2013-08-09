@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from mastrms.users.models import User
 
 class Emailmap(models.Model):
     id = models.AutoField(primary_key=True) # This field type is a guess.

@@ -2,7 +2,7 @@ from django.utils import simplejson
 from mastrms.users.user_manager import get_user_manager
 import logging
 from mastrms.app.utils.data_utils import translate_dict, makeJsonFriendly
-from django.contrib.auth.models import User
+from mastrms.users.models import User
 
 MADAS_USER_GROUP = 'User'
 MADAS_PENDING_GROUP = 'Pending'

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.db import models
-from django.contrib.auth.models import User
+from mastrms.users.models import User
 from datetime import datetime, date, time
 from mastrms.quote.models import Organisation, Formalquote
 from mastrms.mdatasync_server.models import NodeClient

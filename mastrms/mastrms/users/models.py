@@ -1,5 +1,11 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
+
+class User(AbstractUser):
+    """
+    This will be renamed to something less confusing.
+    """
+    pass
 
 class UserDetail(models.Model):
     user = models.OneToOneField(User)
@@ -53,8 +59,6 @@ class UserDetail(models.Model):
                     val = val[0]
                 setattr(self, attr, val)
 
-
 class Group(models.Model):
     user = models.ManyToManyField(User)
     name = models.CharField(max_length=255, unique=True)
-

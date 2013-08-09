@@ -12,7 +12,7 @@
 from ccg.auth.ldap_helper import LDAPSearchResult, LDAPHandler
 import settings
 from users.models import Group, UserDetail
-from django.contrib.auth.models import User
+from mastrms.users.models import User
 import re
 import base64
 

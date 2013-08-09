@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from mastrms.users.models import User
 from django.db import transaction
 from django.db.models import Q
 from mastrms.users import models
