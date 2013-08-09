@@ -7,23 +7,20 @@ from datetime import datetime, timedelta
 import copy
 from django.shortcuts import render_to_response, get_object_or_404
 from django.contrib.auth.decorators import login_required
-import ccg.utils.webhelpers as webhelpers
 from django.http import HttpResponse, Http404
 from django.utils import simplejson
 from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+from django.core.mail import EmailMessage
+import ccg.utils.webhelpers as webhelpers
 from mastrms.mdatasync_server.models import *
 from mastrms.repository.models import *
 from mastrms.mdatasync_server.rules import *
-from django.conf import settings
 from mastrms.app.utils.file_utils import ensure_repo_filestore_dir_with_owner, set_repo_file_ownerships
 
 import logging
-LOGNAME = 'mastrms.mdatasync_server'
-logger = logging.getLogger(LOGNAME)
-logger.setLevel(logging.WARNING) #default is warning
+logger = logging.getLogger("mastrms.mdatasync_server")
 
-from django.conf import settings
-from django.core.mail import EmailMessage
 
 class FixedEmailMessage(EmailMessage):
     def __init__(self, subject='', body='', from_email=None, to=None, cc=None,

@@ -209,7 +209,6 @@ LOGGING = {
         '': {
             'handlers': ['console', 'file', 'syslog'],
             'level': 'WARNING',
-            'propagate': False,
         },
         'django.request': {
             'handlers': ['mail_admins'],
