@@ -3,9 +3,10 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import simplejson
-from mastrms.users.models import *
 from mastrms.app.utils.data_utils import jsonResponse, makeJsonFriendly
 from mastrms.app.utils.mail_functions import sendAccountModificationEmail
+from .models import *
+from .forms import getDetailsFromRequest
 
 ##The user info view, which sends the state of the logged in
 ##user to the frontend.

@@ -14,6 +14,7 @@ from mastrms.repository.json_util import makeJsonFriendly
 from mastrms.decorators import admins_only, admins_or_nodereps, privileged_only, authentication_required
 from mastrms.users.user_manager import get_user_manager
 from mastrms.users.models import * # All the MAUser functions, plus the groups information
+from mastrms.users.forms import getDetailsFromRequest
 from mastrms.app.utils.mail_functions import sendApprovedRejectedEmail, sendAccountModificationEmail
 
 logger = logging.getLogger('mastrms.general')
@@ -158,16 +159,27 @@ def user_save(request, *args):
             nextview = 'admin:deletedUsersearch'
 
     #apply organisational changes
+    mail = request.REQUEST['email']
     try:
-        targetUser = User.objects.get(username=request.REQUEST['email'])
-    except:
-        targetUser = User.objects.create_user(request.REQUEST['email'], request.REQUEST['email'], '')
-        targetUser.save()
+        targetUser = User.objects.get(username=mail)
+    except User.DoesNotExist:
+        try:
+            targetUser = User.objects.get(email=mail)
+        except User.DoesNotExist:
+            targetUser = User(username=mail, email=mail)
+
+    targetUser.save()
 
     try:
         UserOrganisation.objects.filter(user=targetUser).delete()
 
-        org = Organisation.objects.get(id=request.REQUEST['organisation'])
+        try:
+            orgid = request.REQUEST['organisation']
+            org = Organisation.objects.get(id=orgid)
+        except ValueError:
+            org = None
+        except Organisation.DoesNotExist:
+            org = None
 
         if org:
             uo = UserOrganisation(user=targetUser, organisation=org)
