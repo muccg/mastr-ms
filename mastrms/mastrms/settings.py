@@ -56,6 +56,9 @@ AUTHENTICATION_BACKENDS = [
  'django.contrib.auth.backends.ModelBackend'
 ]
 
+# New feature in Django 1.5 -- custom user models
+AUTH_USER_MODEL = 'users.User'
+
 # We have a puppet function to generate these by hashing appname and a secret
 SECRET_KEY = 'change-it'
 

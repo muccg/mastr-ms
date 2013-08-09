@@ -5,7 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from mastrms.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RUN_STATES, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure, MadasUser, RuleGenerator, Component
 from mastrms.quote.models import Organisation, Formalquote
 from ccg.utils import webhelpers
-from django.contrib.auth.models import User
+from mastrms.users.models import User
 from django.utils import simplejson as json
 from mastrms.decorators import mastr_users_only
 from django.contrib.auth.decorators import login_required
