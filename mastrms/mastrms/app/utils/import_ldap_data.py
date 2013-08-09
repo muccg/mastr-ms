@@ -45,7 +45,7 @@ def set_user_groups(user, ldap_groups):
     for group in ldap_groups:
         try:
             dbgroup = Group.objects.get(name=group)
-            dbgroup.user.add(user)
+            dbgroup.user_set.add(user)
             dbgroup.save() #checking debug
         except Exception, e:
             print 'Could not add %s to group %s: %s' % (user.username, group, e)

@@ -111,10 +111,10 @@ class DBUserManager(object):
         except Group.DoesNotExist, e:
             logger.warning('Group with name %s does not exist' % groupname)
             return False
-        if group.user.filter(username=username):
+        if group.user_set.filter(username=username):
             logger.warning('User %s already in group %s' % (username, groupname))
             return False
-        group.user.add(user)
+        group.user_set.add(user)
 
         self.update_staff_status(user)
 
@@ -132,10 +132,10 @@ class DBUserManager(object):
         except Group.DoesNotExist, e:
             logger.warning('Group with name %s does not exist' % groupname)
             return False
-        if not group.user.filter(username=username):
+        if not group.user_set.filter(username=username):
             logger.warning('User %s not in group %s' % (username, groupname))
             return False
-        group.user.remove(user)
+        group.user_set.remove(user)
 
         self.update_staff_status(user)
 
