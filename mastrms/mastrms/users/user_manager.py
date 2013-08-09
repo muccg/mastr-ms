@@ -25,12 +25,7 @@ class DBUserManager(object):
             logger.debug('No user named %s in django\'s users table' % django_user)
             return {}
 
-        try:
-            details = models.UserDetail.objects.get(user=django_user)
-        except models.UserDetail.DoesNotExist, e:
-            details_dict = {}
-        else:
-            details_dict = details.to_dict()
+        details_dict = django_user.to_dict()
 
         details_dict['groups'] = [g.name for g in Group.objects.filter(user=django_user)]
 
@@ -73,10 +68,9 @@ class DBUserManager(object):
         return [g.name for g in Group.objects.filter(user__username=username)]
 
     def list_users(self, searchGroup, method= 'and'):
-        if not searchGroup:
-            users_qs = models.UserDetail.objects.all()
-        else:
-            users_qs = models.UserDetail.objects
+        users_qs = User.objects.all()
+        if searchGroup:
+            users_qs = User.objects
             filter_cond = None
             for g in searchGroup:
                 if method == 'and':
@@ -87,7 +81,7 @@ class DBUserManager(object):
                     else:
                         filter_cond = filter_cond | Q(groups__name=g)
             if method != 'and':
-                users_qs = models.UserDetail.objects.filter(filter_cond)
+                users_qs = User.objects.filter(filter_cond)
 
         return [u.to_dict() for u in users_qs]
 
@@ -150,9 +144,8 @@ class DBUserManager(object):
             logger.warning('A user called %s already existed. Refusing to add.' % username)
             return False
         django_user = User.objects.create(username=username)
-        user_detail = models.UserDetail.objects.create(user=django_user)
-        user_detail.set_from_dict(detailsDict)
-        user_detail.save()
+        django_user.set_from_dict(detailsDict)
+        django_user.save()
         return True
 
     def update_user(self, username, newusername, newpassword, detailsDict):
@@ -169,19 +162,16 @@ class DBUserManager(object):
             logger.warning('User with username %s does not exist' % username)
             return False
 
-        user_detail = models.UserDetail.objects.get(user=django_user)
-
         if username != newusername:
             django_user.username = newusername
             django_user.save()
 
         if newpassword is not None and newpassword != '':
             django_user.set_password(newpassword)
-            user_detail.passwordResetKey = None
+            django_user.passwordResetKey = None
             django_user.save()
-            user_detail.save()
 
-        user_detail.set_from_dict(detailsDict)
-        user_detail.save()
+        django_user.set_from_dict(detailsDict)
+        django_user.save()
 
         return True
