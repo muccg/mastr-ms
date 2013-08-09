@@ -80,12 +80,12 @@ class DBUserManager(object):
             filter_cond = None
             for g in searchGroup:
                 if method == 'and':
-                    users_qs = users_qs.filter(user__group__name=g)
+                    users_qs = users_qs.filter(groups__name=g)
                 else:
                     if filter_cond is None:
-                        filter_cond = Q(user__group__name=g)
+                        filter_cond = Q(groups__name=g)
                     else:
-                        filter_cond = filter_cond | Q(user__group__name=g)
+                        filter_cond = filter_cond | Q(groups__name=g)
             if method != 'and':
                 users_qs = models.UserDetail.objects.filter(filter_cond)
 
