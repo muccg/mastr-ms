@@ -7,12 +7,18 @@ from django.db import models
 class Migration(DataMigration):
 
     def forwards(self, orm):
+        from mastrms.utils import migration_loaddata
         a = orm['auth.user'].objects.all()
         if len(a) > 0:
             print 'You seem to already have at least one user. Skipping example user data import'
         else:
-            from mastrms.utils import migration_loaddata
+            print 'Importing example user'
             migration_loaddata(orm, "initial_user.json")
+        if orm.Group.objects.exists():
+            print 'You seem to already have at least one group. Skipping system groups import'
+        else:
+            print 'Importing system groups'
+            migration_loaddata(orm, "initial_groups.json")
 
     def backwards(self, orm):
         pass
