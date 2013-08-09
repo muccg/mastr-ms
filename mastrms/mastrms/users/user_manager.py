@@ -1,8 +1,6 @@
 from django.db import transaction
 from django.db.models import Q
 from django.contrib.auth.models import Group
-from mastrms.users.models import User
-import mastrms.users.MAUser
 
 import logging
 
@@ -17,6 +15,7 @@ def get_user_manager():
 
 class DBUserManager(object):
     def get_user_details(self, username):
+        from mastrms.users.models import User
         django_user = None
         django_users = User.objects.filter(username=username)
         if django_users:
@@ -68,6 +67,7 @@ class DBUserManager(object):
         return [g.name for g in Group.objects.filter(user__username=username)]
 
     def list_users(self, searchGroup, method= 'and'):
+        from mastrms.users.models import User
         users_qs = User.objects.all()
         if searchGroup:
             users_qs = User.objects
@@ -89,7 +89,8 @@ class DBUserManager(object):
     def update_staff_status(self, user):
         #if the user belongs to more than one Group, they should be
         #django staff.  Else, they shouldnt.
-        mauser = mastrms.users.MAUser.getMadasUser(user.username)
+        from mastrms.users.models import getMadasUser
+        mauser = getMadasUser(user.username)
         if not mauser.IsClient:
             user.is_staff=True
             user.save()
@@ -99,6 +100,7 @@ class DBUserManager(object):
 
 
     def add_user_to_group(self, username, groupname):
+        from mastrms.users.models import User
         try:
             user = User.objects.get(username=username)
         except User.DoesNotExist, e:
@@ -119,6 +121,7 @@ class DBUserManager(object):
         return True
 
     def remove_user_from_group(self, username, groupname):
+        from mastrms.users.models import User
         try:
             user = User.objects.get(username=username)
         except User.DoesNotExist, e:
@@ -139,6 +142,7 @@ class DBUserManager(object):
         return True
 
     def add_user(self, username, detailsDict):
+        from mastrms.users.models import User
         username = username.strip()
         if User.objects.filter(username=username).exists():
             logger.warning('A user called %s already existed. Refusing to add.' % username)
@@ -149,6 +153,7 @@ class DBUserManager(object):
         return True
 
     def update_user(self, username, newusername, newpassword, detailsDict):
+        from mastrms.users.models import User
         if newusername is None:
             newusername = username
 

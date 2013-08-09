@@ -1,5 +1,5 @@
 from mastrms.app.utils.data_utils import jsonResponse, jsonErrorResponse
-from mastrms.users.MAUser import *
+from mastrms.users.models import *
 from mastrms.app.utils.mail_functions import sendRegistrationToAdminEmail
 import logging
 from django.conf import settings

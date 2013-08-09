@@ -3,8 +3,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import simplejson
-from mastrms.users.MAUser import *
-from mastrms.users.MAUser import _translate_ldap_to_madas, _translate_madas_to_ldap
+from mastrms.users.models import *
 from mastrms.app.utils.data_utils import jsonResponse, makeJsonFriendly
 from mastrms.app.utils.mail_functions import sendAccountModificationEmail
 
@@ -81,8 +80,3 @@ def userSave(request, *args):
 
     logger.debug('***users/userSave : exit ***')
     return jsonResponse(mainContentFunction='user:myaccount')
-
-
-
-
-

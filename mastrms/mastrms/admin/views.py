@@ -4,8 +4,6 @@ from django.conf import settings
 from django.db import models
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseNotFound
-from mastrms.users.user_manager import get_user_manager
-from mastrms.users.models import User
 from django.utils import simplejson as json
 from django.contrib.auth.decorators import login_required
 import logging
@@ -14,7 +12,8 @@ from mastrms.app.utils.data_utils import jsonResponse, jsonErrorResponse, transl
 from mastrms.quote.models import Quoterequest, Formalquote, Organisation, UserOrganisation
 from mastrms.repository.json_util import makeJsonFriendly
 from mastrms.decorators import admins_only, admins_or_nodereps, privileged_only, authentication_required
-from mastrms.users.MAUser import * #All the MAUser functions, plus the groups information
+from mastrms.users.user_manager import get_user_manager
+from mastrms.users.models import * # All the MAUser functions, plus the groups information
 from mastrms.app.utils.mail_functions import sendApprovedRejectedEmail, sendAccountModificationEmail
 
 logger = logging.getLogger('mastrms.general')

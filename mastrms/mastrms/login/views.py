@@ -8,7 +8,7 @@ from ccg.utils import webhelpers
 from ccg.utils.webhelpers import siteurl, wsgibase
 from mastrms.users.user_manager import get_user_manager
 from mastrms.app.utils.data_utils import jsonResponse, jsonErrorResponse
-from mastrms.users.MAUser import *
+from mastrms.users.models import *
 from mastrms.login.URLState import getCurrentURLState
 from mastrms.app.utils.mail_functions import sendForgotPasswordEmail, sendPasswordChangedEmail
 import md5, time

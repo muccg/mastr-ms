@@ -130,7 +130,7 @@ class WithFixtures(object):
         Creates a django user and associated MAUser baggage.
         Returns the django user
         """
-        from mastrms.users.MAUser import getMadasUser, saveMadasUser
+        from mastrms.users.models import getMadasUser, saveMadasUser
 
         # need an admin user to create a user
         adminUser = getMadasUser('nulluser')
