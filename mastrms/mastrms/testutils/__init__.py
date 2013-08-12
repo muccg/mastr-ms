@@ -1,7 +1,9 @@
 import logging
 import os
+from testcases import NonFlushingTransactionTestCaseMixin
 
-__all__ = ["MockLoggingHandler", "XDisplayTest"]
+__all__ = ["MockLoggingHandler", "XDisplayTest",
+           "NonFlushingTransactionTestCaseMixin"]
 
 class MockLoggingHandler(logging.Handler):
     """

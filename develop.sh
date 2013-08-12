@@ -115,17 +115,19 @@ function ci_staging_tests() {
 
     # fixme: this config should be put in nose.cfg or settings.py or similar
     EXCLUDES="--exclude\=yaphc --exclude\=esky --exclude\=httplib2"
-    TEST_LIST="
-mastrms.mastrms.registration.tests
-mastrms.mastrms.mdatasync_server.tests
-mastrms.mdatasync_client.client.test.tests"
+    TEST_LIST="mastrms.repository.tests mastrms.mdatasync_client.client.test.tests mastrms.mdatasync_server.tests"
 
     # Start virtual X server here to work around a problem starting it
     # from xvfbwrapper.
     ccg ${AWS_STAGING_INSTANCE} drunbg:"Xvfb \:0"
 
+    sleep 2
+
+    # firefox won't run without a profile directory
+    ccg ${AWS_STAGING_INSTANCE} dsudo:"mkdir -p /var/www/.mozilla && chown apache:apache /var/www/.mozilla"
+
     # Run tests, collect results
-    ccg ${AWS_STAGING_INSTANCE} dsudo:"cd ${REMOTE_TEST_DIR} && env DISPLAY\=\:0 dbus-launch ${PROJECT_NAME} test --noinput --with-xunit --xunit-file\=${REMOTE_TEST_RESULTS} ${TEST_LIST} ${EXCLUDES} || true"
+    ccg ${AWS_STAGING_INSTANCE} dsudo:"cd ${REMOTE_TEST_DIR} && env DISPLAY\=\:0 dbus-launch timeout -sHUP 30m ${PROJECT_NAME} test --verbosity\=2 --liveserver\=localhost\:8082\,8090-8100\,9000-9200\,7041 --noinput --with-xunit --xunit-file\=${REMOTE_TEST_RESULTS} ${TEST_LIST} ${EXCLUDES} || true"
     ccg ${AWS_STAGING_INSTANCE} getfile:${REMOTE_TEST_RESULTS},./
 }
 

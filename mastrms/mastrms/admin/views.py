@@ -17,7 +17,7 @@ from mastrms.decorators import admins_only, admins_or_nodereps, privileged_only,
 from mastrms.users.MAUser import * #All the MAUser functions, plus the groups information
 from mastrms.app.utils.mail_functions import sendApprovedRejectedEmail, sendAccountModificationEmail
 
-logger = logging.getLogger('madas_log')
+logger = logging.getLogger('mastrms.general')
 
 
 def _filter_users(groups, requestinguser):

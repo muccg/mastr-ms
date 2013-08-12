@@ -559,7 +559,7 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
             }
         });
     },
-    items: [{
+    items: {
         bodyStyle: 'padding: 5px',
         id: 'ruleGeneratorCreateForm',
         xtype: 'form',
@@ -609,9 +609,9 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
                 activeItem:0,
                 border:true,
                 frame: true,
-                anchor: '100%, 100%', //so anchoring works at lower level containers, and full height tabs
+                anchor: '100% 55%',
                 defaults: { layout: 'form', labelWidth: 80, hideMode: 'offsets'},
-                autoHeight: true,
+                autoHeight: false,
                 items: [
                     createRuleBlockComponent('startblock', 'Start Block', false),
                     createRuleBlockComponent('sampleblock', 'Sample Block', true),
@@ -691,7 +691,7 @@ MA.RuleGeneratorCreateCmp = new Ext.Window({
                 }
             }
         ]
-    }]
+    }
 });
 
 
