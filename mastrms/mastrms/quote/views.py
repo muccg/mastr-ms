@@ -21,7 +21,7 @@ from mastrms.login.URLState import getCurrentURLState
 #from string import *
 from mastrms.app.utils.mail_functions import sendQuoteRequestConfirmationEmail, sendQuoteRequestToAdminEmail, sendFormalQuoteEmail, sendFormalStatusEmail
 
-logger = logging.getLogger('madas_log')
+logger = logging.getLogger('mastrms.general')
 
 QUOTE_STATE_DOWNLOADED = 'downloaded'
 QUOTE_STATE_NEW = 'new' #is the default on the DB column

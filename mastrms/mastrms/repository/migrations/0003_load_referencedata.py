@@ -7,8 +7,8 @@ from django.db import models
 class Migration(DataMigration):
 
     def forwards(self, orm):
-        from django.core.management import call_command
-        call_command("loaddata", "reference_data.json", exceptiononerror = True)
+        from mastrms.utils import migration_loaddata
+        migration_loaddata(orm, "reference_data.json")
 
     def backwards(self, orm):
         raise RuntimeError("Cannot reverse this migration.")

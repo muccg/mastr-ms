@@ -127,6 +127,10 @@ class MSDataSyncAPI(object):
                                  #we are still seeing UI lagging behind worker operations
         self.transactionvars = TransactionVars()
 
+    # regard directories containing files which have this string in
+    # their filename as being in the process of data collection.
+    TEMP_FILE_NAMES = ["TEMP"]
+
     def defaultLogSink(self, *args, **kwargs):
         pass
 
@@ -232,7 +236,7 @@ class MSDataSyncAPI(object):
         runsamplesdict = {}
         samplefilemap = {}
         for wantedfile in wantedfiles.keys():
-            result = self.find_local_file_or_directory(localfilesdict, wantedfile, exclude=['TEMP'])
+            result = self.find_local_file_or_directory(localfilesdict, wantedfile)
             if result is not None:
                 wantedrecord = wantedfiles[wantedfile]
                 run_id = wantedrecord[0]
@@ -389,7 +393,7 @@ class MSDataSyncAPI(object):
         '''returns a dictionary like structure representing the
            files. Like this:
            { '.' : [list of filenames],
-             '..' : 'path to this dir'
+             '/' : 'path to this dir'
              'dirname' : {dict like this one},
              'dirname2' : {dict like this one},
            }
@@ -431,17 +435,17 @@ class MSDataSyncAPI(object):
         #print 'retfiles is: ', unicode(retfiles).encode('utf-8')
         return retfiles
 
-    def find_local_file_or_directory(self, localfiledict, filename, exclude=[]):
+    def should_exclude(self, objectname):
+        will_exclude = False
+        for excludestring in self.TEMP_FILE_NAMES:
+            if objectname.upper().startswith(excludestring.upper()):
+                will_exclude = True
+        return will_exclude
+
+    def find_local_file_or_directory(self, localfiledict, filename):
         ''' does a depth first search of the localfiledict.
             will return the local path to the file/directory if found, or None.
             The filename comparison is non case sensitive '''
-
-        def should_exclude(objectname):
-            will_exclude = False
-            for excludestring in exclude:
-                if objectname.upper().startswith(excludestring.upper()):
-                    will_exclude = True
-            return will_exclude
 
         def checkfilesatnode(node, filename):
             #print "Node:", node
@@ -452,7 +456,7 @@ class MSDataSyncAPI(object):
                 for fname in node['.']:
                     #print "Checking file ", fname
                     if fname.upper() == filename.upper():
-                        if not should_exclude(filename):
+                        if not self.should_exclude(filename):
                             return os.path.join(node['/'], fname)
 
             #check against dirs
@@ -463,7 +467,7 @@ class MSDataSyncAPI(object):
                         #for dirs, their correct path will be in their node:
                         found_exclude = False
                         for fname in node[dname]['.']:
-                            if should_exclude(fname):
+                            if self.should_exclude(fname):
                                 found_exclude = True
                         if not found_exclude:
                             return node[dname]['/']
@@ -672,12 +676,17 @@ class MSDSImpl(object):
 
     def serverCheckRunSampleFiles(self, rsyncconfig, filename_id_map):
         # It's difficult to know when a complete sample is
-        # transferred. So we consider a sample file to be complete
+        # transferred.
+        # So we consider a sample file to be complete
         # when the *second time* it is rsynced across, the file is not
         # updated.
+        # If the sample filename is a directory and it contains TEMP files,
+        # immediately assume the instrument software is still writing
+        # data and therefore the sample is not complete.
         runsampledict = {}
         for filename, updated in rsyncconfig.file_changes.iteritems():
-            if not updated and filename in filename_id_map:
+            has_temp = bool(self.find_temp_files(filename))
+            if not updated and filename in filename_id_map and not has_temp:
                 run_id, sample_id = filename_id_map[filename]
                 runsampledict.setdefault(run_id, []).append(sample_id)
 
@@ -695,6 +704,34 @@ class MSDSImpl(object):
             self.log('Could not confirm sample files: %s' % e,
                      type=self.log.LOG_ERROR,
                      thread=self.controller.useThreading)
+
+    def find_temp_files(self, objectname):
+        """
+        If objectname is a directory within the datadir, return list
+        of pathnames (relative to localdir) of any TEMP files.
+        """
+        localdir = self.controller.config.getValue("localdir")
+
+        objectname = os.path.basename(objectname)
+
+        def find_object(dir, name):
+            "generates all instances of objectname within the data dir"
+            for dirpath, dirnames, filenames in os.walk(dir):
+                for dirname in dirnames:
+                    if dirname == name:
+                        yield os.path.join(dirpath, dirname)
+
+        is_temp = self.controller.should_exclude
+
+        temp_files = []
+        for dirname in find_object(localdir, objectname):
+            for dirpath, dirnames, filenames in os.walk(dirname):
+                temp_files.extend(os.path.join(dirpath, f)
+                                  for f in filenames if is_temp(f))
+                temp_files.extend(os.path.join(dirpath, f)
+                                  for f in dirnames if is_temp(f))
+
+        return [os.path.relpath(f, localdir) for f in temp_files]
 
     def copyfiles(self, copydict):
         '''Takes a dict keyed on source filename, and copies each one to the dest filename (value) '''

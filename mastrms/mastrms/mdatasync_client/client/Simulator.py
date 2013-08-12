@@ -26,7 +26,9 @@ class Simulator(object):
         self.destdir = self._setup_destdir(destdir)
         self.generate_temp_files = temp_files
         self._created_files = []
-        self._created_dirs = []
+        self._created_dirs = set()
+
+    TEMP_NAMES = ['TEMPBASE', 'TEMPDAT', 'TEMPDIR']
 
     def _setup_destdir(self, destdir=None):
         if destdir is None:
@@ -46,7 +48,6 @@ class Simulator(object):
         list of filenames, such as what is created by
         :class:`WorkList`.
         """
-        temp_files = ['TEMPBASE', 'TEMPDAT', 'TEMPDIR']
         count = 0
         for count, listitem in enumerate(worklist):
             fname = os.path.join(self.destdir, listitem)
@@ -60,14 +61,14 @@ class Simulator(object):
                             self._create_file(fname, str(i))
                         if self.generate_temp_files:
                             if count == 0:
-                                for temp_file in temp_files:
+                                for temp_file in self.TEMP_NAMES:
                                     self._create_file(fname, temp_file)
                             if count == 1:
-                                self._create_file(fname, temp_files[0])
+                                self._create_file(fname, self.TEMP_NAMES[0])
                             if count == 2:
-                                self._create_file(fname, temp_files[1])
+                                self._create_file(fname, self.TEMP_NAMES[1])
                             if count == 3:
-                                self._create_file(fname, temp_files[2])
+                                self._create_file(fname, self.TEMP_NAMES[2])
                     else:
                         open(fname, 'w').close()
                         self._created_files.append(fname)
@@ -107,8 +108,13 @@ class Simulator(object):
         self._created_files.append(tfname)
 
     def _create_dir(self, fname):
+        parent = os.path.join(*os.path.split(os.path.normpath(fname))[:-1])
+        if not os.path.exists(parent):
+            # create parents first
+            self._create_dir(parent)
+
         os.mkdir(fname)
-        self._created_dirs.append(fname)
+        self._created_dirs.add(fname)
 
     def cleanup(self):
         """
@@ -119,15 +125,30 @@ class Simulator(object):
             logger.info("Removing file %s" % fname)
             try:
                 os.remove(fname)
-            except OSError, e:
-                logger.exception("cleanup", e)
+            except OSError:
+                logger.exception("cleanup")
+        self._created_files = []
 
-        for dirname in reversed(self._created_dirs):
+        for dirname in sorted(self._created_dirs, reverse=True):
             logger.info("Removing directory %s" % dirname)
             try:
                 os.rmdir(dirname)
-            except OSError, e:
-                logger.exception("cleanup", e)
+            except OSError:
+                logger.exception("cleanup")
+        self._created_dirs.clear()
+
+    @property
+    def created_files(self):
+        return self._created_files
+
+    @classmethod
+    def istemp(cls, filename):
+        return any(filename.endswith(name) for name in cls.TEMP_NAMES)
+
+    def relpath(self, filename):
+        if not filename.startswith(self.destdir):
+            raise ValueError, "filename doesn't start with %s" % self.destdir
+        return filename[len(self.destdir)+1:]
 
 class GeneratePopup(wx.Dialog):
     def __init__(self, log, parent, fileslist, destdir, generate_temp_files = False):

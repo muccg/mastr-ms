@@ -135,6 +135,21 @@ which can be seen in `settings.py`_.
 .. _settings.py:
    https://bitbucket.org/ccgmurdoch/mastr-ms/src/default/mastrms/mastrms/settings.py
 
+SELinux and Mastr-MS
+~~~~~~~~~~~~~~~~~~~~
+
+Mastr-MS does not yet ship with a SELinux policy (issue `MAS-21`_).
+For Mastr-MS to function correctly on a CentOS server, SELinux must be
+disabled.
+
+The CentOS wiki contains `instructions`_ on how to disable SELinux.
+
+.. _MAS-21:
+   https://ccgmurdoch.atlassian.net/browse/MAS-21
+
+.. _instructions:
+   http://wiki.centos.org/HowTos/SELinux#head-430e52f7f8a7b41ad5fc42a2f95d3e495d13d348
+
 
 Upgrading to a new version
 --------------------------
