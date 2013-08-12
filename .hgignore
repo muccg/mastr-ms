@@ -14,6 +14,7 @@ syntax: glob
 /mastrms/mastrms/mdatasync_client/client/build/*
 /mastrms/mastrms/mdatasync_client/client/dist/*
 /mastrms/mastrms/mdatasync_client/client/client.log*
+/mastrms/mastrms/mdatasync_client/data
 /docs/_build/*
 /mastrms/django_mastrms.egg-info
 /mastrms/tests.xml
