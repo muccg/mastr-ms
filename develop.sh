@@ -17,7 +17,7 @@ AWS_BUILD_INSTANCE='aws_rpmbuild_centos6'
 AWS_STAGING_INSTANCE='aws_syd_mastrms_staging'
 TARGET_DIR="/usr/local/src/${PROJECT_NAME}"
 CLOSURE="/usr/local/closure/compiler.jar"
-TESTING_MODULES="argparse dingus xvfbwrapper"
+TESTING_MODULES="argparse dingus xvfbwrapper nose"
 MODULES="MySQL-python==1.2.3 psycopg2==2.4.6 Werkzeug flake8 ${TESTING_MODULES}"
 PIP_OPTS="-v -M --download-cache ~/.pip/cache"
 
@@ -70,7 +70,7 @@ function ci_remote_build() {
         build_number_head >> build-number.txt
     fi
 
-    EXCLUDES="('bootstrap'\, '.hg*'\, 'virt*'\, '*.log'\, '*.rpm')"
+    EXCLUDES="('bootstrap'\, '.hg*'\, '.git'\, 'virt*'\, '*.log'\, '*.rpm'\, 'mastrms/build'\, 'mastrms/dist'\, '*.egg-info')"
     SSH_OPTS="-o StrictHostKeyChecking\=no"
     RSYNC_OPTS="-l"
     time ccg ${AWS_BUILD_INSTANCE} rsync_project:local_dir=./,remote_dir=${TARGET_DIR}/,ssh_opts="${SSH_OPTS}",extra_opts="${RSYNC_OPTS}",exclude="${EXCLUDES}",delete=True
@@ -113,9 +113,19 @@ function ci_staging_tests() {
     DATABASE_USER=${PROJECT_NAME}
     ccg ${AWS_STAGING_INSTANCE} dsudo:"su postgres -c \"psql -c 'ALTER ROLE ${DATABASE_USER} CREATEDB;'\""
 
+    # fixme: this config should be put in nose.cfg or settings.py or similar
+    EXCLUDES="--exclude\=yaphc --exclude\=esky --exclude\=httplib2"
+    TEST_LIST="
+mastrms.mastrms.registration.tests
+mastrms.mastrms.mdatasync_server.tests
+mastrms.mdatasync_client.client.test.tests"
+
+    # Start virtual X server here to work around a problem starting it
+    # from xvfbwrapper.
+    ccg ${AWS_STAGING_INSTANCE} drunbg:"Xvfb \:0"
+
     # Run tests, collect results
-    TEST_LIST="${PROJECT_NAME} --exclude\=yaphc --exclude\=esky --exclude\=httplib2"
-    ccg ${AWS_STAGING_INSTANCE} dsudo:"cd ${REMOTE_TEST_DIR} && ${PROJECT_NAME} test --noinput --with-xunit --xunit-file\=${REMOTE_TEST_RESULTS} ${TEST_LIST}"
+    ccg ${AWS_STAGING_INSTANCE} dsudo:"cd ${REMOTE_TEST_DIR} && env DISPLAY\=\:0 dbus-launch ${PROJECT_NAME} test --noinput --with-xunit --xunit-file\=${REMOTE_TEST_RESULTS} ${TEST_LIST} ${EXCLUDES} || true"
     ccg ${AWS_STAGING_INSTANCE} getfile:${REMOTE_TEST_RESULTS},./
 }
 
