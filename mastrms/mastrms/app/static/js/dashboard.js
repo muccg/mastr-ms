@@ -516,7 +516,7 @@ MA.Dashboard.CreateToolbar = function() {
         },
         items: [{
             xtype: 'tbbutton',
-            text: 'Refresh Dasboard Data',
+            text: 'Refresh Dashboard Data',
             handler: function() {
                     var dashboard = Ext.getCmp('dashboard-panel');
                     dashboard.init();

@@ -18,7 +18,7 @@ from django.conf import settings
 from mastrms.app.utils.file_utils import ensure_repo_filestore_dir_with_owner, set_repo_file_ownerships
 
 import logging
-LOGNAME = 'mdatasync_server_log'
+LOGNAME = 'mastrms.mdatasync_server'
 logger = logging.getLogger(LOGNAME)
 logger.setLevel(logging.WARNING) #default is warning
 
@@ -434,7 +434,7 @@ def tail_log(request, filename=None, linesback=10, since=0):
     avgcharsperline=75
     pos = 0
     if filename is None:
-        filename = 'mdatasync_server_log.log'
+        filename = 'mastrms.mdatasync_server.log'
 
     logfilename = os.path.join(settings.LOG_DIRECTORY, filename)
     file = open(logfilename,'r')

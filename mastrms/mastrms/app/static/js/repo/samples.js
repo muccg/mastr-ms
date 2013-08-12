@@ -347,10 +347,10 @@ MA.SaveSampleOnlyRow = function(roweditor, changes, rec, i) {
 MA.SampleCSVUploadForm = new Ext.Window({
     title: 'Upload CSV of Samples',
     closeAction:'hide',
-    width:300,
-    height:200,
-    minHeight:200,
-    minWidth:300,
+    width:330,
+    height:250,
+    minHeight:250,
+    minWidth:330,
     id:'sampleCSVUploadWindow',
     defaults: {
         bodyStyle:'padding:15px;background:transparent;'
@@ -374,7 +374,7 @@ MA.SampleCSVUploadForm = new Ext.Window({
                     xtype: 'panel',
                     border: false,
                     bodyStyle:'padding:15px;background:transparent;',
-                    html: 'Uploaded CSVs must be of the format:<br><br><code>label,weight,comment</code><br><br>'
+                    html: 'Uploaded CSVs must be of the format:<br><br><code>label,weight,comment</code><br><br>or contain a header line with these words. If an <code>id</code> header is included, samples can be updated by their ID.'
                 },
                 {
                     xtype: 'fileuploadfield',
@@ -382,6 +382,11 @@ MA.SampleCSVUploadForm = new Ext.Window({
                     emptyText: '',
                     fieldLabel: 'File',
                     name: 'samplecsv'
+                },
+                {
+                    xtype: 'hidden',
+                    name: 'csrfmiddlewaretoken',
+                    value: Ext.util.Cookies.get("csrftoken_mastrms")
                 }
             ]
         }
@@ -397,16 +402,42 @@ MA.SampleCSVUploadForm = new Ext.Window({
                     {   
                         successProperty: 'success',        
                         success: function (form, action) {
-                            if (action.result.success === true) {
+                            var res = action.result;
+                            if (res.success === true) {
+                                var created = res.num_created + " sample" + (res.num_created == 1 ? "" : "s") + " added";
+                                var updated = res.num_updated + " sample" + (res.num_updated == 1 ? "" : "s") + " updated";
+                                var msg = ((res.num_created && res.num_updated) ? (created + " and " + updated) : (res.num_created ? created : updated)) + "."
                                 form.reset(); 
                                 MA.ExperimentSamplesOnlyInit();
+
+                                Ext.Msg.alert('CSV Upload', msg);
+
                                 Ext.getCmp('sampleCSVUploadWindow').hide();
                             } 
                         },
                         failure: function (form, action) {
-                            //do nothing special. this gets called on validation failures and server errors
+                            // this gets called both on server errors
+                            // and when view returns success: false
                             MA.ExperimentSamplesOnlyInit();
-                            alert('Error processing CSV. Some lines were not imported as they did not seem to be formatted properly. Some samples may have been imported successfully.');
+                            var msg = "Error processing CSV.";
+                            var res = action.result;
+                            if (res && res.msg) {
+                                msg += " " + res.msg + ".\n";
+                                if (res.invalid_lines) {
+                                    msg += "Line number(s) ";
+                                    for (var i = 0; i < res.invalid_lines.length; i++) {
+                                        msg += res.invalid_lines[i];
+                                        if (i + 1 < res.invalid_lines.length) {
+                                            msg += ", ";
+                                        }
+                                    }
+                                    if (res.max_error) {
+                                        msg += "...";
+                                    }
+                                    msg += " were invalid.";
+                                }
+                            }
+                            Ext.Msg.alert('CSV Upload', msg);
                         }
                     }
                 );
@@ -425,7 +456,12 @@ var createSampleCSV = function(records){
         var r = records[0];
         for (var propname in r){
             fields.push(propname);
-            header += propname + ", ";
+        }
+        for (var i = 0; i < fields.length; i++) {
+            header += fields[i];
+            if (i < fields.length - 1) {
+                header += ", ";
+            }
         }
         
         csvtext += header + "</br>";

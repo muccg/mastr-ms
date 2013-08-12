@@ -71,6 +71,7 @@ class FakeRsync(object):
         pickle.dump(self.opts, self.opts_file)
         self.opts_file.flush()
         self.sig_child_old = signal.signal(signal.SIGCHLD, self.sig_child)
+        return self.results
 
     def _make_path(self):
         """

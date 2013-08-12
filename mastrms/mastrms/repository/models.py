@@ -12,7 +12,7 @@ from django.conf import settings
 from mastrms.app.utils.file_utils import ensure_repo_filestore_dir_with_owner
 
 import logging
-logger = logging.getLogger('madas_log')
+logger = logging.getLogger('mastrms.general')
 
 
 class SampleNotInClassException(Exception):

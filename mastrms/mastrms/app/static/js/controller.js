@@ -42,15 +42,10 @@ MA.ChangeMainContent = function(contentName, paramArray){
     var affectMenu = true;
     var cancelBackTarget = true; //whether or not this action should be invoked if a user clicks Cancel (where the variable is obeyed)
     Ext.QuickTips.init();
-    
+
     switch (contentName) {
     
         case "dashboard": 
-            if (paramArray) {
-                resultContent = paramArray[0];
-                params = paramArray[1];
-                break;
-            }
             //default
             MA.Dashboard.Init();
             Ext.getCmp('center-panel').layout.setActiveItem('dashboard-panel'); 
