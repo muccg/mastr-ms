@@ -25,10 +25,6 @@ class User(AbstractUser):
     Extended user model.
     Some attributes still need to be chopped out or renamed.
     """
-    commonName = models.CharField(max_length=255, blank=True)
-    givenName = models.CharField(max_length=255, blank=True)
-    sn = models.CharField(max_length=255, blank=True)
-    mail = models.CharField(max_length=255, blank=True)
     telephoneNumber = models.CharField(max_length=255, blank=True)
     homePhone = models.CharField(max_length=255, blank=True)
     physicalDeliveryOfficeName = models.CharField(max_length=255, blank=True)
@@ -48,9 +44,9 @@ class User(AbstractUser):
     def to_dict(self):
         d = {
             'uid': [self.uid],
-            'givenName': [self.givenName],
-            'sn': [self.sn],
-            'mail': [self.mail],
+            'givenName': [self.first_name],
+            'sn': [self.last_name],
+            'mail': [self.email],
             'telephoneNumber': [self.telephoneNumber],
             'homePhone': [self.homePhone],
             'physicalDeliveryOfficeName': [self.physicalDeliveryOfficeName],
@@ -66,14 +62,26 @@ class User(AbstractUser):
         return d
 
     def set_from_dict(self, d):
-        for attr in ('givenName','sn','mail','telephoneNumber', 'homePhone', 'physicalDeliveryOfficeName', 'title',
-                     'destinationIndicator', 'description', 'postalAddress', 'businessCategory', 'registeredAddress',
-                     'carLicense', 'passwordResetKey'):
-            if d.get(attr):
-                val = d.get(attr)
+        trans = [('givenName', 'first_name'),
+                 ('sn', 'last_name'),
+                 ('mail', 'email'),
+                 ('telephoneNumber', 'telephoneNumber'),
+                 ('homePhone', 'homePhone'),
+                 ('physicalDeliveryOfficeName', 'physicalDeliveryOfficeName'),
+                 ('title', 'title'),
+                 ('destinationIndicator', 'destinationIndicator'),
+                 ('description', 'description'),
+                 ('postalAddress', 'postalAddress'),
+                 ('businessCategory', 'businessCategory'),
+                 ('registeredAddress', 'registeredAddress'),
+                 ('carLicense', 'carLicense'),
+                 ('passwordResetKey', 'passwordResetKey')]
+        for ldap_attr, model_attr in trans:
+            val = d.get(ldap_attr, None)
+            if val:
                 if isinstance(val, list):
                     val = val[0]
-                setattr(self, attr, val)
+                setattr(self, model_attr, val)
 
     @property
     def IsAdmin(self):
