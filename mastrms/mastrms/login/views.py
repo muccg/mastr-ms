@@ -14,7 +14,7 @@ from mastrms.app.utils.mail_functions import sendForgotPasswordEmail, sendPasswo
 import md5, time
 import logging
 
-logger = logging.getLogger('mastrms.general')
+logger = logging.getLogger('mastrms.login')
 
 def processLoginView(request, *args):
     success = processLogin(request, args)
@@ -29,71 +29,34 @@ def processLogin(request, *args):
     if request.method == "POST":
         post = request.POST.copy()
 
-        try:
-            username = post['username']
-            password = post['password']
-        except Exception,e:
-            username = ''
-            password = ''
-        print 'username is:', username
-        user = None
-        try:
-            user = authenticate(username = username, password = password)
+        username = post.get('username', '')
+        password = post.get('password', '')
+        logger.debug('username is: %s', username)
 
-        except Exception, e:
-            logger.warning("Error authenticating user: %s" % ( str(e) ) )
+        try:
+            user = authenticate(username=username, password=password)
+        except:
+            # fixme: don't think normal django auth will ever raise an
+            # exception.
+            user = None
+            logger.exception("Error authenticating user: %s" % username)
 
-        authenticated = 0
-        authorized = 0
         if user is not None:
             if user.is_active:
                 try:
-                    a = login(request, user)
+                    login(request, user)
                 except Exception, e:
-                    logger.warning("Login error: %s" % ( str(e) ) )
-                print 'successful login'
-                success = True
-                authenticated = True
-                authorized = True
-                #set the session to expire after
-                request.session.set_expiry(settings.SESSION_COOKIE_AGE)
+                    # fixme: same as above, don't think django raises exceptions
+                    logger.exception("Login error for %s" % user)
+                else:
+                    logger.debug('successful login')
+                    success = True
+                    #set the session to expire after
+                    request.session.set_expiry(settings.SESSION_COOKIE_AGE)
             else:
-                #Inactive user
-                print 'inactive login'
-                success = False
-                authenticated = False
-                authorized = False
+                logger.debug('inactive login')
         else:
-            #invalid user
-            print 'invalid login'
-            success = False
-            authenticated = False
-            authorized = False
-
-        nextview = 'login:success' #the view that a non admin would see next
-
-        should_see_admin = False
-        request.user.is_superuser = False
-
-        madasuser = getCurrentUser(request, force_refresh=True)
-
-        if madasuser.IsAdmin:
-            should_see_admin = True
-            nextview = 'admin:adminrequests'
-            request.user.is_superuser = True
-        else:
-            request.user.is_superuser = False
-
-        #if they are authenticated (i.e. they have an entry in django's user table, and used the right password...)
-        if authenticated:
-            request.user.save() #save the status of is_admin
-
-        u = request.user
-
-        params = []
-        mainContentFunction = nextview
-        params = params
-
+            logger.debug('invalid login')
 
     logger.debug( '*** processLogin : exit ***')
     return success
@@ -205,7 +168,7 @@ def serveIndex(request, *args, **kwargs):
     currentuser = getCurrentUser(request)
     mcf = 'dashboard'
     params = ''
-    if currentuser.IsLoggedIn:
+    if currentuser.is_authenticated():
         #only clear if we were logged in.
         urlstate = getCurrentURLState(request, andClear=True)
     else:

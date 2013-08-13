@@ -69,7 +69,7 @@ def userSave(request, *args):
 
     #With a usersave, you are always editing your own user
     parsedform['username'] = currentuser.Username
-    success = saveMadasUser(currentuser,parsedform['username'], parsedform['details'], parsedform['status'], parsedform['password'])
+    success = saveMadasUser(currentuser, parsedform['username'], parsedform['details'], parsedform['status'], parsedform['password'])
     #refresh the user in case their details were just changed
     currentuser = getCurrentUser(request, force_refresh=True)
 

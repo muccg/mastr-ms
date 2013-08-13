@@ -15,13 +15,15 @@ def get_user_manager():
 
 class DBUserManager(object):
     def get_user_details(self, username):
+        if not username or username == "nulluser":
+            logger.warning("Looked up details for the nulluser")
+            return {}
+
         from mastrms.users.models import User
-        django_user = None
-        django_users = User.objects.filter(username=username)
-        if django_users:
-            django_user = django_users[0]
-        if django_user is None or not django_user.username:
-            logger.debug('No user named %s in django\'s users table' % django_user)
+        try:
+            django_user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            logger.exception("User \"%s\" doesn't exist" % username)
             return {}
 
         details_dict = django_user.to_dict()
@@ -98,85 +100,34 @@ class DBUserManager(object):
             user.is_staff=False
             user.save()
 
-
-    def add_user_to_group(self, username, groupname):
-        from mastrms.users.models import User
-        try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist, e:
-            logger.warning('User with username % does not exist' % username)
-            return False
-        try:
-            group = Group.objects.get(name=groupname)
-        except Group.DoesNotExist, e:
-            logger.warning('Group with name %s does not exist' % groupname)
-            return False
-        if group.user_set.filter(username=username):
-            logger.warning('User %s already in group %s' % (username, groupname))
-            return False
-        group.user_set.add(user)
-
-        self.update_staff_status(user)
-
-        return True
-
-    def remove_user_from_group(self, username, groupname):
-        from mastrms.users.models import User
-        try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist, e:
-            logger.warning('User with username % does not exist' % username)
-            return False
-        try:
-            group = Group.objects.get(name=groupname)
-        except Group.DoesNotExist, e:
-            logger.warning('Group with name %s does not exist' % groupname)
-            return False
-        if not group.user_set.filter(username=username):
-            logger.warning('User %s not in group %s' % (username, groupname))
-            return False
-        group.user_set.remove(user)
-
-        self.update_staff_status(user)
-
-        return True
-
     def add_user(self, username, detailsDict):
         from mastrms.users.models import User
         username = username.strip()
         if User.objects.filter(username=username).exists():
             logger.warning('A user called %s already existed. Refusing to add.' % username)
-            return False
+            return None
         django_user = User.objects.create(username=username)
         django_user.set_from_dict(detailsDict)
         django_user.save()
-        return True
+        return django_user
 
-    def update_user(self, username, newusername, newpassword, detailsDict):
+    def update_user(self, user, newusername, newpassword, detailsDict):
         from mastrms.users.models import User
+
         if newusername is None:
-            newusername = username
-
-        if newusername != username:
+            newusername = user.username
+        elif newusername != user.username:
             if User.objects.filter(username=newusername).exists():
-                logger.warning('New Useraname %s already existed.' % newusername)
+                logger.warning('New Username %s already existed.' % newusername)
+            else:
+                user.username = newusername
 
-        try:
-            django_user = User.objects.get(username=username)
-        except User.DoesNotExist, e:
-            logger.warning('User with username %s does not exist' % username)
-            return False
+        if newpassword:
+            user.set_password(newpassword)
+            user.passwordResetKey = ""
 
-        if username != newusername:
-            django_user.username = newusername
-            django_user.save()
+        user.set_from_dict(detailsDict)
 
-        if newpassword is not None and newpassword != '':
-            django_user.set_password(newpassword)
-            django_user.passwordResetKey = None
-            django_user.save()
-
-        django_user.set_from_dict(detailsDict)
-        django_user.save()
+        user.save()
 
         return True

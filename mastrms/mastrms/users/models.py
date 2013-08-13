@@ -1,7 +1,7 @@
 import logging
+import json
 from django.db import models
-from django.utils import simplejson
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Group
 from mastrms.users.user_manager import get_user_manager
 from mastrms.app.utils.data_utils import translate_dict, makeJsonFriendly
 
@@ -23,10 +23,7 @@ logger = logging.getLogger('mastrms.users')
 class User(AbstractUser):
     """
     Extended user model.
-    This could be renamed to something less confusing.
-
-    Fixme: add validation so user can only be a member of a single
-    special group.
+    Some attributes still need to be chopped out or renamed.
     """
     commonName = models.CharField(max_length=255, blank=True)
     givenName = models.CharField(max_length=255, blank=True)
@@ -78,86 +75,74 @@ class User(AbstractUser):
                     val = val[0]
                 setattr(self, attr, val)
 
-#Just a class to encapsulate data to send to the frontend (as json)
-class MAUser(object):
-    def __init__(self, username):
-        self._dict = {}
-        self.Username = username
-        self.IsLoggedIn = False
-
     @property
     def IsAdmin(self):
-        return self._dict.get('IsAdmin', False)
+        return self.groups.filter(name=MADAS_ADMIN_GROUP).exists()
     @IsAdmin.setter
     def IsAdmin(self, value):
-        self._dict['IsAdmin'] = value
+        self.update_groups(Group.objects.filter(name=MADAS_ADMIN_GROUP), value)
+        self.is_admin = value
+        self.save()
 
     @property
     def IsNodeRep(self):
-        return self._dict.get('IsNodeRep', False)
+        return self.groups.filter(name=MADAS_NODEREP_GROUP).exists()
     @IsNodeRep.setter
     def IsNodeRep(self, value):
-        self._dict['IsNodeRep'] = value
+        self.update_groups(Group.objects.filter(name=MADAS_NODEREP_GROUP), value)
 
     @property
     def IsClient(self):
-        return self._dict.get('IsClient', False)
+        # fixme: this does too many database queries
+        return not (self.IsPrivileged or self.IsStaff or self.IsMastrStaff)
     @IsClient.setter
     def IsClient(self, value):
-        self._dict['IsClient'] = value
+        raise NotImplemented
 
     @property
     def IsStaff(self):
-        return self._dict.get('IsStaff', False)
+        # fixme: this does too many database queries
+        return not self.IsPrivileged and self.Nodes
     @IsStaff.setter
     def IsStaff(self, value):
-        self._dict['IsStaff'] = value
+        raise NotImplemented
 
     @property
     def IsMastrAdmin(self):
-        return self._dict.get('IsMastrAdmin', False)
+        return self.groups.filter(name=MASTR_ADMIN_GROUP).exists()
     @IsMastrAdmin.setter
     def IsMastrAdmin(self, value):
-        self._dict['IsMastrAdmin'] = value
+        self.update_groups(Group.objects.filter(name=MASTR_ADMIN_GROUP), value)
 
     @property
     def IsProjectLeader(self):
-        return self._dict.get('IsProjectLeader', False)
+        return self.groups.filter(name=PROJECTLEADER_GROUP).exists()
     @IsProjectLeader.setter
     def IsProjectLeader(self, value):
-        self._dict['IsProjectLeader'] = value
+        self.update_groups(Group.objects.filter(name=PROJECTLEADER_GROUP), value)
 
     @property
     def IsMastrStaff(self):
-        return self._dict.get('IsMastrStaff', False)
+        return self.groups.filter(name=MASTR_STAFF_GROUP).exists()
     @IsMastrStaff.setter
     def IsMastrStaff(self, value):
-        self._dict['IsMastrStaff'] = value
+        self.update_groups(Group.objects.filter(name=MASTR_STAFF_GROUP), value)
 
     @property
     def IsLoggedIn(self):
-        return self._dict.get('IsLoggedIn', False)
-    @IsLoggedIn.setter
-    def IsLoggedIn(self, value):
-        self._dict['IsLoggedIn'] = value
+        return self.is_authenticated()
 
     @property
     def Username(self):
-        return self._dict.get('Username', False)
+        return self.username
     @Username.setter
     def Username(self, value):
-        self._dict['Username'] = value
+        self.username = value
 
     @property
     def CachedGroups(self):
-        groups = self._dict.get('CachedGroups', None)
-        if groups == None:
-            #we do a refresh
-            self.refreshCachedGroups()
-        return self._dict.get('CachedGroups', [])
-    @CachedGroups.setter
-    def CachedGroups(self, value):
-        self._dict['CachedGroups'] = value
+        self.refreshCachedGroups()
+        return self._cached_groups
 
     @property
     def IsPrivileged(self):
@@ -165,22 +150,59 @@ class MAUser(object):
 
     @property
     def StatusGroup(self):
-        return self._dict.get('StatusGroup', None)
+        self.refreshCachedGroups()
+        return self._status_group
     @StatusGroup.setter
-    def StatusGroup(self, value):
-        if isinstance(value, list):
-            if len(value) > 0:
-                value = value[0]
-            else:
-                value = None
-        self._dict['StatusGroup'] = value
+    def StatusGroup(self, new_group):
+        if new_group not in MADAS_STATUS_GROUPS:
+            raise ValueError, "bug: bad user status group \"%s\"" % new_group
+        other_groups = [g for g in MADAS_STATUS_GROUPS if g != new_group]
+        self.update_groups(self.groups.filter(name__in=other_groups), False)
+        self.update_groups(Group.objects.filter(name=new_group), True)
+        self.is_active = new_group == MADAS_USER_GROUP
+        self.save()
+
+        # strip deleted/rejected users of any admin groups they may
+        # have somehow gotten
+        if not self.is_active:
+            self.update_groups(self.groups.filter(name__in=MADAS_ADMIN_GROUPS), False)
+
+    def disable(self):
+        "Deletes the user"
+        self.StatusGroup = MADAS_DELETED_GROUP
+
+    def reject(self):
+        self.StatusGroup = MADAS_REJECTED_GROUP
 
     @property
     def Nodes(self):
-        return self._dict.get('Nodes', [])
+        groups = self.groups.exclude(name__in=MADAS_STATUS_GROUPS)
+        groups = groups.exclude(name__in=MADAS_ADMIN_GROUPS)
+        # fixme: remove list conversion, fix json serializer
+        return list(groups.values_list("name", flat=True))
     @Nodes.setter
-    def Nodes(self, value):
-        self._dict['Nodes'] = value
+    def Nodes(self, nodes):
+        # remove user from all non-special groups which don't include nodes
+        other_groups = self.groups.exclude(name__in=MADAS_STATUS_GROUPS)
+        other_groups = other_groups.exclude(name__in=MADAS_ADMIN_GROUPS)
+        other_groups = other_groups.exclude(name__in=nodes)
+        self.update_groups(other_groups, False)
+
+        # add user to node groups
+        self.update_groups(Group.objects.filter(name__in=nodes), True)
+
+    def update_groups(self, groups, is_member):
+        """
+        Adds or removes user from each group in groups, depending on
+        the truth of is_member. This method also logs what is done.
+        """
+        for group in groups:
+            if is_member:
+                logger.info("Adding user %s to group \"%s\"" % (self.username, group.name))
+                self.groups.add(group)
+            else:
+                logger.info("Removing user %s from group \"%s\"" % (self.username, group.name))
+                self.groups.remove(group)
 
     @property
     def PrimaryNode(self):
@@ -191,92 +213,59 @@ class MAUser(object):
 
     @property
     def CachedDetails(self):
-        details = self._dict.get('CachedDetails', None)
-        if details is None:
-            #we do a refresh
-            self.refreshCachedDetails()
-        return self._dict.get('CachedDetails', {})
-    @CachedDetails.setter
-    def CachedDetails(self, value):
-        self._dict['CachedDetails'] = value
+        self.refreshCachedDetails()
+        return self._cached_details
 
     @property
     def Name(self):
-        return " ".join((self.CachedDetails.get('firstname', ''), self.CachedDetails.get('lastname', '')))
-
+        return self.get_full_name()
 
     def refreshCachedGroups(self):
-        #logger.debug('\tRefreshing groups for %s. Fetching.' % (self.Username) )
-        groupsdict = getMadasUserGroups(self.Username)
-        self.CachedGroups = groupsdict['groups'] + groupsdict['status']
-        self.StatusGroup = groupsdict['status']
-        return self.CachedGroups
+        if getattr(self, "_cached_groups", None) is None:
+            #logger.debug('\tRefreshing groups for %s. Fetching.' % (self.Username) )
+            groupsdict = getMadasUserGroups(self.Username)
+            self._cached_groups = groupsdict['groups'] + groupsdict['status']
+            self._status_group = groupsdict['status']
 
     def refreshCachedDetails(self):
-        #logger.debug('\tRefreshing user details for %s.' % (self.Username) )
-        detailsdict = getMadasUserDetails(self.Username)
-        self.CachedDetails = dict(detailsdict)
-        return self.CachedDetails
+        if not hasattr(self, "_cached_details"):
+            #logger.debug('\tRefreshing user details for %s.' % (self.Username) )
+            self._cached_details = dict(getMadasUserDetails(self.Username))
 
-    def refresh(self):
-        #defaults
-        #IsLoggedIn is not handled here - it is managed by the getCurrentUser function
-        self.IsAdmin = False
-        self.IsClient = False
-        self.IsNodeRep = False
-        self.IsStaff = False
-        self.IsMastrAdmin = False
-        self.IsProjectLeader = False
-        self.IsMastrStaff = False
-
-        #Grab groups, forcing a reload.
-        self.refreshCachedGroups()
-        self.refreshCachedDetails()
-        self.Nodes = getMadasNodeMemberships(self.CachedGroups)
-
-        if MADAS_ADMIN_GROUP in self.CachedGroups:
-            self.IsAdmin = True
-        if MADAS_NODEREP_GROUP in self.CachedGroups:
-            self.IsNodeRep = True
-        if MASTR_ADMIN_GROUP in self.CachedGroups:
-            self.IsMastrAdmin = True
-        if PROJECTLEADER_GROUP in self.CachedGroups:
-            self.IsProjectLeader = True
-        if MASTR_STAFF_GROUP in self.CachedGroups:
-            self.IsMastrStaff = True
-
-        if not self.IsPrivileged and self.Nodes:
-            self.IsStaff = True
-
-        if not (self.IsPrivileged or self.IsStaff or self.IsMastrStaff):
-            self.IsClient = True
-
+    #Just a class to encapsulate data to send to the frontend (as json)
     def getData(self):
-        return self._dict
+        attrs = [ "Username", "IsLoggedIn", "IsAdmin", "IsClient", "IsNodeRep",
+                  "IsStaff", "IsMastrAdmin", "IsProjectLeader", "IsMastrStaff",
+                  "Nodes", "CachedGroups", "StatusGroup", "CachedDetails" ]
+
+        return dict((attr, getattr(self, attr)) for attr in attrs)
+
 
     def toJson(self):
-        return simplejson.dumps(self._dict)
+        return json.dumps(self.getData())
 
-#Gets the MAUser object out of the session, or creates a new one
+
+# Gets MAUser for currently logged in user, or a dummy MAUser object
 def getCurrentUser(request, force_refresh = False):
+    anon_json = json.dumps({
+        "Username": "nulluser",
+        "IsLoggedIn": False, "IsAdmin": False, "IsClient": False,
+        "IsNodeRep": False, "IsStaff": False, "IsMastrAdmin": False,
+        "IsProjectLeader": False, "IsMastrStaff": False,
+        "Nodes": [],  "CachedDetails": [],
+        "CachedGroups": [], "StatusGroup": []
+        })
 
-    currentuser = request.session.get('mauser', False)
-    if force_refresh or not currentuser:
-        currentuser = MAUser(request.user.username)
-        currentuser.refresh()
-        request.session['mauser'] = currentuser
-
-    #if the authentication is different:
-    if currentuser.IsLoggedIn != request.user.is_authenticated():
-        currentuser.IsLoggedIn = request.user.is_authenticated()
-        request.session['mauser'] = currentuser
-
-    return request.session['mauser']
+    user = request.user
+    if user.is_anonymous():
+        user.toJson = lambda: anon_json
+    return user
 
 def getMadasUser(username):
-    mauser = MAUser(username)
-    mauser.refresh()
-    return mauser
+    try:
+        return User.objects.get(username=username)
+    except User.DoesNotExist:
+        return None
 
 #Utility methods
 def getMadasUserGroups(username, include_status_groups = False):
@@ -308,14 +297,6 @@ def getMadasGroups():
     user_manager = get_user_manager()
     groups = user_manager.list_groups()
     return groups
-
-def getMadasNodeMemberships(groups):
-    if groups is None:
-        return []
-
-    specialGroups = MADAS_STATUS_GROUPS + MADAS_ADMIN_GROUPS
-    i = [item for item in groups if not item in specialGroups]
-    return i
 
 def getMadasUserDetails(username):
     user_manager = get_user_manager()
@@ -374,7 +355,7 @@ def loadMadasUser(username):
     'returns empty dict if the user doesnt exist'
 
     user = getMadasUser(username)
-    details = user.CachedDetails
+    details = user.CachedDetails if user else {}
 
     if len(details) == 0:
         return {}
@@ -421,46 +402,26 @@ def addMadasUser(username, detailsdict):
     #combine in the details dict
     new_details = dict(emptydetails, **detailsdict)
 
-    success = user_manager.add_user(username, detailsdict)
-    if success:
-        success = user_manager.add_user_to_group(username, MADAS_PENDING_GROUP)
-        if not success:
-            raise Exception, 'Could not add user %s to group %s' % (username, MADAS_PENDING_GROUP)
-    else:
-        raise Exception, 'Could not add user %s' % (username)
+    user = user_manager.add_user(username, detailsdict)
 
-    return success
+    if user:
+        user.StatusGroup = MASTR_USER_PENDING
 
-def updateMadasUserDetails(currentUser, username, password, detailsdict):
+    return user is not None
+
+def updateMadasUserDetails(currentUser, existingUser, username, password, detailsdict):
     #The only people who can edit a record is an admin, or the actual user
-    if currentUser.IsAdmin or currentUser.IsMastrAdmin or currentUser.Username == username:
+    if currentUser.IsAdmin or currentUser.IsMastrAdmin or currentUser == existingUser:
         try:
             user_manager = get_user_manager()
             #pass username twice, as the old and new username (so we don't allow changing username
-            user_manager.update_user(username, username, password, detailsdict)
+            user_manager.update_user(existingUser, username, password, detailsdict)
         except Exception, e:
             logger.warning("Could not update user %s: %s" % (username, str(e)) )
             return False
 
     # Only errors will return success False
     return True
-
-def addMadasUserToGroup(user, groupname):
-    user_manager = get_user_manager()
-    #add them to the group as long as they arent already in it
-    if groupname not in user.CachedGroups:
-        user_manager.add_user_to_group(user.Username, groupname)
-
-def removeMadasUserFromGroup(user, groupname):
-    user_manager = get_user_manager()
-    #remove them from the group as long as they are in it.
-    if groupname in user.CachedGroups:
-        user_manager.remove_user_from_group(user.Username, groupname)
-
-def set_superuser(user, superuser=False):
-    django_user = User.objects.get(username=user.Username)
-    django_user.is_superuser = superuser
-    django_user.save()
 
 def saveMadasUser(currentUser, username, changeddetails, changedstatus, password):
     '''
@@ -473,7 +434,7 @@ def saveMadasUser(currentUser, username, changeddetails, changedstatus, password
     existingUser = getMadasUser(username)
 
     #If the user doesn't exist yet, add them first.
-    if existingUser.CachedDetails == {}:
+    if existingUser is None:
         logger.debug("Adding new user %s" % (username))
         if not addMadasUser(username, changeddetails):
             return False
@@ -484,62 +445,37 @@ def saveMadasUser(currentUser, username, changeddetails, changedstatus, password
     #combine the dictionaries, overriding existing_details with changeddetails
     new_details = dict(existing_details, **changeddetails)
 
-    if not updateMadasUserDetails(currentUser, username, password, new_details):
+    if not updateMadasUserDetails(currentUser, existingUser, username, password, new_details):
         return False
 
+    if not currentUser.is_authenticated():
+        # if not logged in, the rest of the changes are only doable by
+        # adminish users, so quit here, job done.
+        return True
+
     if currentUser.IsAdmin:
-        if changedstatus['admin']:
-            addMadasUserToGroup(existingUser, MADAS_ADMIN_GROUP)
-            set_superuser(existingUser, True)
-        else:
-            #if they are an admin, dont let them unadmin themselves
-            if existingUser.Username != currentUser.Username:
-                removeMadasUserFromGroup(existingUser, MADAS_ADMIN_GROUP)
-                set_superuser(existingUser, False)
+        # if they are an admin, dont let them unadmin themselves
+        if existingUser != currentUser:
+            existingUser.IsAdmin = changedstatus['admin']
 
         # Update Node
-        oldnodes = existingUser.Nodes
-        newnode = changedstatus.get('node')
-        if newnode is not None and newnode not in oldnodes:
-            if len(oldnodes) > 0:
-                #remove them from the old node:
-                removeMadasUserFromGroup(existingUser, oldnodes[0])
-            addMadasUserToGroup(existingUser, newnode)
-
-    if currentUser.IsAdmin or (currentUser.IsNodeRep and currentUser.Nodes == existingUser.Nodes):
-        if changedstatus['noderep']:
-            addMadasUserToGroup(existingUser, MADAS_NODEREP_GROUP)
-        else:
-            removeMadasUserFromGroup(existingUser, MADAS_NODEREP_GROUP)
-
-        # Status: Pending, Active etc.
-        oldstatus = existingUser.StatusGroup
-        newstatus = changedstatus.get('status')
-        if newstatus is not None and newstatus != oldstatus:
-            if oldstatus is not None:
-                removeMadasUserFromGroup(existingUser, oldstatus)
-            addMadasUserToGroup(existingUser, newstatus)
+        existingUser.Nodes = [changedstatus.get('node')]
 
     if currentUser.IsAdmin or currentUser.IsMastrAdmin:
-        if changedstatus['mastradmin']:
-            addMadasUserToGroup(existingUser, MASTR_ADMIN_GROUP)
-            set_superuser(existingUser, True)
-        else:
-            removeMadasUserFromGroup(existingUser, MASTR_ADMIN_GROUP)
-            set_superuser(existingUser, False)
+        existingUser.IsMastrAdmin = bool(changedstatus['mastradmin'])
 
     if (currentUser.IsAdmin or currentUser.IsMastrAdmin or
             (currentUser.IsProjectLeader and currentUser.Nodes == existingUser.Nodes)):
-        if changedstatus['projectleader']:
-            addMadasUserToGroup(existingUser, PROJECTLEADER_GROUP)
-        else:
-            removeMadasUserFromGroup(existingUser, PROJECTLEADER_GROUP)
+        existingUser.IsProjectLeader = bool(changedstatus['projectleader'])
 
     if (currentUser.IsAdmin or currentUser.IsMastrAdmin or
             (currentUser.IsProjectLeader and currentUser.Nodes == existingUser.Nodes)):
-        if changedstatus['mastrstaff']:
-            addMadasUserToGroup(existingUser, MASTR_STAFF_GROUP)
-        else:
-            removeMadasUserFromGroup(existingUser, MASTR_STAFF_GROUP)
+        existingUser.IsMastrStaff = bool(changedstatus['mastrstaff'])
+
+    if (currentUser.IsAdmin or (currentUser.IsNodeRep and currentUser.Nodes == existingUser.Nodes)):
+        existingUser.IsNodeRep = bool(changedstatus['noderep'])
+
+        # Status: Pending, Active etc.
+        existingUser.StatusGroup = changedstatus.get('status')
 
     return True

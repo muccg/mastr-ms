@@ -139,7 +139,6 @@ def user_save(request, *args):
     existingUser = getMadasUser(parsedform['username'])
     existingstatus = existingUser.StatusGroup
     success = saveMadasUser(currentuser, parsedform['username'], parsedform['details'], parsedform['status'], parsedform['password'])
-    existingUser.refresh()
     newstatus = existingUser.StatusGroup
 
     if newstatus != existingstatus:

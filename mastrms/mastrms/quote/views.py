@@ -123,7 +123,7 @@ def listQuotesRequiringAttention(request):
     #If they are a noderep (only), we filter the qs by node
     currentuser = getCurrentUser(request)
     if currentuser.IsNodeRep and not currentuser.IsAdmin:
-        nodelist = getMadasNodeMemberships(currentuser.CachedGroups)
+        nodelist = currentuser.Nodes
         node = nodelist[0]
         qs.filter(tonode=node)
 
@@ -143,12 +143,12 @@ def listQuotes(request, *args):
     '''This corresponds to Madas Dashboard->Quotes->View Quote Requests
        Accessible by Administrators, Node Reps and Clients but it filters down to just Client's quote requests if it is a Client
     '''
-    g = getCurrentUser(request).CachedGroups
-    nodelist = getMadasNodeMemberships(g)
+    user = getCurrentUser(request)
+    nodelist = user.Nodes
 
     results = []
     quoteslist = []
-    if MADAS_NODEREP_GROUP in g:
+    if user.IsNodeRep:
         #retrieve quotes for the first node in the list (there shouldnt be more than 1)
         quoteslist = Quoterequest.objects.filter(Q(tonode=nodelist[0]) | Q()).values('id', 'completed', 'unread', 'tonode', 'firstname', 'lastname', 'officephone', 'details', 'country', 'requesttime', 'emailaddressid__emailaddress' )
     else: #they are just a client. Show only their own quotes
@@ -157,7 +157,7 @@ def listQuotes(request, *args):
     quoteslist = list(quoteslist) #convert to normal list
 
     #If they are an admin, ALSO show quotes which don't yet have a node
-    if MADAS_ADMIN_GROUP in g:
+    if user.IsAdmin:
         homelessquotes = Quoterequest.objects.filter(tonode='').values('id', 'completed', 'unread', 'tonode', 'firstname', 'country', 'lastname', 'officephone', 'details', 'requesttime', 'emailaddressid__emailaddress' )
         quoteslist += list(homelessquotes)
 
@@ -179,9 +179,9 @@ def listAll(request, *args):
        Accessible by Administrators, Node Reps
     '''
     logger.debug( '*** quote/listAll - enter ***' )
-    g = getCurrentUser(request).CachedGroups
+    user = getCurrentUser(request)
 
-    nodelist = getMadasNodeMemberships(g)
+    nodelist = user.Nodes
     results = []
 
     try:
@@ -201,7 +201,7 @@ def listAll(request, *args):
         logger.exception('Exception getting quotes.')
         raise Exception('Exception getting quotes.')
 
-    if MADAS_ADMIN_GROUP in g:
+    if user.IsAdmin:
         adminlist = Quoterequest.objects.filter(tonode='Administrators').values('id', 'completed', 'unread', 'tonode', 'firstname', 'lastname', 'officephone', 'details', 'requesttime', 'emailaddressid__emailaddress' )
         for ql in adminlist:
             ql['email'] = ql['emailaddressid__emailaddress']
@@ -233,7 +233,7 @@ def listFormal(request, *args, **kwargs):
     logger.debug('*** listFormal : enter ***')
     uname = request.user.username
     currentUser = getCurrentUser(request)
-    nodelist = getMadasNodeMemberships(currentUser.CachedGroups)
+    nodelist = currentUser.Nodes
 
     #if a noderep or admin, and you have a node:
     if (currentUser.IsAdmin or currentUser.IsNodeRep) and len(nodelist) > 0:
