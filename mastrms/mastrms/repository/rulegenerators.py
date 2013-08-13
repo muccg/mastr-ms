@@ -1,7 +1,7 @@
 import logging
 from django.db.models import Q
 from mastrms.repository.models import RuleGenerator, RuleGeneratorStartBlock, RuleGeneratorSampleBlock, RuleGeneratorEndBlock, Component
-from mastrms.users.models import MAUser, getMadasUser
+from mastrms.users.models import getMadasUser
 
 logger = logging.getLogger('mastrms.general')
 

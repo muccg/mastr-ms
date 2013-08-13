@@ -667,7 +667,6 @@ def recordsClientList(request):
     for row in rows:
         print 'Getting ', row.username
         mauserobj = getMadasUser(row.username)
-        #mauserobj.refresh()
         mauserdetails = mauserobj.CachedDetails
         #print mauserdetails
         if mauserdetails == {}:
