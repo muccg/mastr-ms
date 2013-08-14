@@ -274,10 +274,10 @@ class MSDSImplTests(unittest.TestCase):
         self.addCleanup(remove_localdir)
 
         self.rsyncconfig = self.RemoteSyncParamsStub({
-                "filename1": False, # this file didn't change
-                "filename2": False, # this file didn't change
-                "filename3": True,  # this file changed
-                "asdf": True,       # this file changed
+                "filename1": (False, False), # this file didn't change
+                "filename2": (False, False), # this file didn't change
+                "filename3": (False, True),  # this file changed
+                "asdf": (False, True),       # this file changed
                 })
 
         self.filename_id_map = {
@@ -351,3 +351,103 @@ class MSDSImplTests(unittest.TestCase):
                          "One sample is marked complete")
         self.assertEqual(runsampledict, { 1: [10] },
                          "The correct sample is marked complete")
+
+    def test_parse_rsync_changes(self):
+        """
+        Check parsing of rsync output -- changed and unchanged files
+        and directories.
+        """
+        data = """
+.d          ./
+.d          runs/
+.d          runs/2013/
+.d          runs/2013/7/
+.d          runs/2013/7/475/
+cd+++++++++ runs/2013/7/475/solvent_475-50479.d/
+.d          runs/2013/7/475/sweep_475-50563.d/
+<f..T...... runs/2013/7/475/sweep_475-50563.d/DATA.MS
+<f..T...... runs/2013/7/475/sweep_475-50563.d/GC.ini
+<f..T...... runs/2013/7/475/sweep_475-50563.d/PRE_POST.INI
+<f..T...... runs/2013/7/475/sweep_475-50563.d/acqmeth.txt
+<f..T...... runs/2013/7/475/sweep_475-50563.d/cnorm.ini
+<f..T...... runs/2013/7/475/sweep_475-50563.d/runstart.txt
+<f..T...... runs/2013/7/475/sweep_475-50563.d/tic_front.csv
+"""
+
+        changes = MSDSImpl.parse_rsync_changes(data)
+
+        self.assertEqual(changes["runs/2013/7/475/solvent_475-50479.d"],
+                         (True, True))
+        self.assertEqual(changes["runs/2013/7/475/sweep_475-50563.d"],
+                         (True, False))
+        self.assertEqual(changes["runs/2013/7/475"],
+                         (True, True))
+        self.assertEqual(changes["runs"],
+                         (True, True))
+        # self.assertEqual(changes["."],
+        #                  (True, True))
+
+    def test_parse_rsync_changes_propagate(self):
+        """
+        Check propagation of file changes to parent directories.
+        """
+        data = """
+.d          ./
+.d          runs/
+.d          runs/2013/
+.d          runs/2013/7/
+.d          runs/2013/7/475/
+cd+++++++++ runs/2013/7/475/solvent_475-50479.d/
+.d          runs/2013/7/475/sweep_475-50563.d/
+<f..T...... runs/2013/7/475/sweep_475-50563.d/DATA.MS
+<f..T...... runs/2013/7/475/sweep_475-50563.d/GC.ini
+<f..T...... runs/2013/7/475/sweep_475-50563.d/PRE_POST.INI
+<f+.T...... runs/2013/7/475/sweep_475-50563.d/acqmeth.txt
+<f..T...... runs/2013/7/475/sweep_475-50563.d/cnorm.ini
+<f..T...... runs/2013/7/475/sweep_475-50563.d/runstart.txt
+<f..T...... runs/2013/7/475/sweep_475-50563.d/tic_front.csv
+"""
+        changes = MSDSImpl.parse_rsync_changes(data)
+
+        self.assertEqual(changes["runs/2013/7/475/solvent_475-50479.d"],
+                         (True, True),
+                         "runs/2013/7/475/solvent_475-50479.d")
+        self.assertEqual(changes["runs/2013/7/475/sweep_475-50563.d"],
+                         (True, True),
+                         "runs/2013/7/475/sweep_475-50563.d")
+        self.assertEqual(changes["runs/2013/7/475/sweep_475-50563.d/DATA.MS"],
+                         (False, False),
+                         "runs/2013/7/475/sweep_475-50563.d/DATA.MS")
+        self.assertEqual(changes["runs/2013/7/475/sweep_475-50563.d/acqmeth.txt"],
+                         (False, True),
+                         "runs/2013/7/475/solvent_475-50479.d/acqmeth.txt")
+
+
+    def test_parse_rsync_changes_cull(self):
+        """
+        Check culling of empty directories from file_changes map.
+        """
+        changes = {
+            '.': (True, True),
+            'runs': (True, True),
+            'runs/2013': (True, True),
+            'runs/2013/7': (True, True),
+            'runs/2013/7/475': (True, True),
+            'runs/2013/7/475/solvent_475-50479.d': (True, True),
+            'runs/2013/7/475/sweep_475-50563.d': (True, True),
+            'runs/2013/7/475/sweep_475-50563.d/DATA.MS': (False, False),
+            'runs/2013/7/475/sweep_475-50563.d/GC.ini': (False, False),
+            'runs/2013/7/475/sweep_475-50563.d/PRE_POST.INI': (False, False),
+            'runs/2013/7/475/sweep_475-50563.d/acqmeth.txt': (False, True),
+            'runs/2013/7/475/sweep_475-50563.d/cnorm.ini': (False, False),
+            'runs/2013/7/475/sweep_475-50563.d/runstart.txt': (False, False),
+            'runs/2013/7/475/sweep_475-50563.d/tic_front.csv': (False, False)
+            }
+
+        culled = MSDSImpl.cull_empty_dirs(changes)
+        culled_files = [f for f, c in culled]
+        self.assertTrue("runs/2013" in culled_files)
+        self.assertFalse("runs/2013/7/475/solvent_475-50479.d" in culled_files)
+        self.assertTrue("runs/2013/7/475/sweep_475-50563.d" in culled_files)
+        self.assertTrue("runs/2013/7/475/sweep_475-50563.d/DATA.MS" in culled_files)
+        self.assertTrue("runs/2013/7/475/sweep_475-50563.d/acqmeth.txt" in culled_files)
