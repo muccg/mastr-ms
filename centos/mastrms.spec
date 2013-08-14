@@ -73,9 +73,9 @@ touch %{settingsdir}/__init__.py
 ln -fs ..`find %{buildinstalldir} -path "*/$NAME/settings.py" | sed s:^%{buildinstalldir}::` %{settingsdir}/%{name}.py
 
 # Create symlinks under install directory to real persistent data directories
-ln -fs /var/log/%{name} %{buildinstalldir}/log
-ln -fs /var/lib/%{name}/scratch %{buildinstalldir}/scratch
-ln -fs /var/lib/%{name}/media %{buildinstalldir}/media
+ln -sfT /var/log/%{name} %{buildinstalldir}/log
+ln -sfT /var/lib/%{name}/scratch %{buildinstalldir}/scratch
+ln -sfT /var/lib/%{name}/media %{buildinstalldir}/media
 
 # Install WSGI configuration into httpd/conf.d
 install -D centos/%{name}.ccg %{buildroot}/etc/httpd/conf.d/%{name}.ccg
@@ -112,3 +112,4 @@ rm -rf %{buildroot}
 %attr(-,apache,,apache) /var/log/%{name}
 %attr(-,apache,,apache) /var/lib/%{name}
 
+%config /etc/httpd/conf.d/%{name}.ccg
