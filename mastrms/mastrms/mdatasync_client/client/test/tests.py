@@ -352,7 +352,7 @@ class MSDSImplTests(unittest.TestCase):
         self.assertEqual(runsampledict, { 1: [10] },
                          "The correct sample is marked complete")
 
-    def test_parse_rsync_changes(self):
+    def test_parse_rsync_changes_empty_dir(self):
         """
         Check parsing of rsync output -- changed and unchanged files
         and directories.

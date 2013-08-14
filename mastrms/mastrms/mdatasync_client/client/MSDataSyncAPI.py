@@ -691,10 +691,9 @@ class MSDSImpl(object):
         files = sorted(file_changes.keys())
 
         def has_children(dirname):
-            "Returns whether there exist filenames prefixed with dirname"
-            prefixes = [filename[:len(dirname)] for filename in files
-                        if len(filename) > len(dirname)]
-            return dirname in prefixes
+            "Returns whether there are filenames prefixed with dirname"
+            return any(f for f in files
+                       if f != dirname and f.startswith(dirname))
 
         sorted_change_list = [(f, file_changes[f]) for f in files]
 
