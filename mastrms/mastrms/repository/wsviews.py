@@ -16,7 +16,7 @@ from mastrms.repository.permissions import user_passes_test
 from django.db.models import Q
 from datetime import datetime, timedelta
 from django.core.mail import mail_admins
-from mastrms.users.models import User, getMadasUser, loadMadasUser, getCurrentUser
+from mastrms.users.models import User, getMadasUser, getCurrentUser
 from mastrms.repository import rulegenerators
 from mastrms.app.utils.mail_functions import FixedEmailMessage
 from decimal import Decimal, DecimalException
@@ -539,9 +539,7 @@ def recordsProject(request, project_id):
     output = json_records_template(['id', 'title', 'client', 'managers'])
     project = Project.objects.get(pk=project_id)
     def manager_details(manager):
-        maUser = loadMadasUser(manager.username)
-        if not maUser: return None
-        return {"id": manager.id, "username": "%s (%s)" % (maUser['name'], maUser['email'])}
+        return {"id": manager.id, "username": "%s (%s)" % (manager.Name, manager.email)}
     managers = map(manager_details, project.managers.all())
     managers = filter(lambda x: x is not None, managers)
     output['rows'].append({
@@ -625,16 +623,11 @@ def recordsMAStaff(request):
     args = request.REQUEST
     output = json_records_template(['key', 'value'])
 
-    rows = User.objects.all()
-
-    for row in rows:
-        mauser = loadMadasUser(row.username)
-        if not mauser: continue
-        if not mauser.get('isClient'):
-            print 'name: ', mauser['name']
+    for user in User.objects.all():
+        if not user.IsClient:
             output["rows"].append({
-                "key": row.id,
-                "value": "%s (%s)" % (mauser['name'],mauser['email'])
+                "key": user.id,
+                "value": "%s (%s)" % (user.get_full_name(), user.email)
             })
 
     output["rows"].sort(key=lambda r: r["value"])
@@ -650,12 +643,10 @@ def recordsClientList(request):
     args = request.REQUEST
     output = json_records_template(['id', 'is_client', 'name', 'email', 'organisationName', 'displayValue'])
 
-    if args.get('allUsers'):
-        rows = User.objects.all()
-        print 'getting all users'
-    else:
-        rows = User.objects.extra(where=["id IN (SELECT DISTINCT client_id FROM repository_project ORDER BY client_id)"])
-        print 'getting only some users'
+    qs = User.objects.all()
+
+    if not args.get('allUsers'):
+        qs = qs.extra(where=["id IN (SELECT DISTINCT client_id FROM repository_project ORDER BY client_id)"])
 
     nodemembers = []
     mastaff = []
@@ -664,30 +655,24 @@ def recordsClientList(request):
 
     currentuser = getMadasUser(request.user.username)
 
-    for row in rows:
-        print 'Getting ', row.username
-        mauserobj = getMadasUser(row.username)
-        mauserdetails = mauserobj.CachedDetails
-        #print mauserdetails
-        if mauserdetails == {}:
-            print 'bad user: ', row.username
-            continue
+    for user in qs:
+        logger.debug('Getting %s', user.username)
 
         record = {
-            "id": row.id,
-            "is_client": "Yes" if mauserobj.IsClient else "No",
-            "name": mauserobj.Name,
-            "email": mauserdetails.get('email', '<None>'),
-            "displayValue": "%s (%s)" % (mauserobj.Name, mauserdetails.get('email', '<None>')),
-            "organisationName": row.organisation_set.all()[0].name if row.organisation_set.exists() else ''
+            "id": user.id,
+            "is_client": "Yes" if user.IsClient else "No",
+            "name": user.Name,
+            "email": user.email or '<None>',
+            "displayValue": "%s (%s)" % (user.Name, user.email or '<None>'),
+            "organisationName": user.organisation_set.all()[0].name if user.organisation_set.exists() else ''
         }
 
         if args.get('sortUsers') and currentuser:
-            if mauserobj.PrimaryNode == currentuser.PrimaryNode:
+            if user.PrimaryNode == currentuser.PrimaryNode:
                 nodemembers.append(record)
-            elif mauserobj.IsStaff or mauserobj.IsMastrStaff or mauserobj.IsMastrAdmin:
+            elif user.IsStaff or user.IsMastrStaff or user.IsMastrAdmin:
                 mastaff.append(record)
-            elif not mauserobj.IsClient:
+            elif not user.IsClient:
                 nodereps.append(record)
             else:
                 clients.append(record)
