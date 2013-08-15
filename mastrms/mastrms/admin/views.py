@@ -8,11 +8,11 @@ from django.utils import simplejson as json
 from django.contrib.auth.decorators import login_required
 import logging
 
-from mastrms.app.utils.data_utils import jsonResponse, jsonErrorResponse, translate_dict
+from mastrms.app.utils.data_utils import jsonResponse, jsonErrorResponse
 from mastrms.quote.models import Quoterequest, Formalquote, Organisation, UserOrganisation
 from mastrms.repository.json_util import makeJsonFriendly
 from mastrms.decorators import admins_only, admins_or_nodereps, privileged_only, authentication_required
-from mastrms.users.user_manager import get_user_manager
+from mastrms.users.user_manager import GroupManager
 from mastrms.users.models import * # All the MAUser functions, plus the groups information
 from mastrms.users.forms import getDetailsFromRequest
 from mastrms.app.utils.mail_functions import sendApprovedRejectedEmail, sendAccountModificationEmail
@@ -39,26 +39,7 @@ def _filter_users(groups, requestinguser):
 
     #The default 'method' is and
     userlist = getMadasUsersFromGroups(searchGroups)
-
-    #now do our keyname substitution
-    try:
-        for entry in userlist:
-            d = translate_dict(entry, [\
-                           ('uid', 'username'), \
-                           ('commonName', 'commonname'), \
-                           ('givenName', 'firstname'), \
-                           ('sn', 'lastname'), \
-                           ('mail', 'email'), \
-                           ('telephoneNumber', 'telephoneNumber'), \
-                           ('homephone', 'homephone'), \
-                           ('physicalDeliveryOfficeName', 'physicalDeliveryOfficeName'), \
-                           ('title', 'title'), \
-                                ])
-            retval.append(d)
-    except Exception, e:
-        logger.warning('_filter_users: Exception: %s' % ( str(e) ) )
-    return retval
-
+    return userlist
 
 @admins_or_nodereps
 def admin_requests(request, *args):
@@ -79,11 +60,8 @@ def user_search(request, *args):
     #for each user in newlist, set the client flag if applicable.
     #This is potentially pretty inefficient, because we are loading every user.
     for user_n in newlist:
-        u = getMadasUser(user_n['username'][0])
-        if u.IsClient:
-            user_n['isClient'] = True
-        else:
-            user_n['isClient'] = False
+        u = getMadasUser(user_n['username'])
+        user_n['isClient'] = u.IsClient
     return jsonResponse(items=newlist)
 
 @admins_or_nodereps
@@ -111,10 +89,10 @@ def user_load(request, *args):
        Accessible by Administrators, Node Reps
     '''
     logger.debug('***admin/user_load : enter ***' )
-    d = loadMadasUser(request.REQUEST['username'])
     #find user organisation
     try:
         u = User.objects.get(username=request.REQUEST['username'])
+        d = u.get_client_dict()
         orgs = UserOrganisation.objects.filter(user=u)
         d['organisation'] = ''
         if len(orgs) > 0:
@@ -122,6 +100,7 @@ def user_load(request, *args):
             logger.debug('user in org %d' % (orgs[0].organisation.id))
     except Exception, e:
         logger.debug('Exception loading organisation %s' % (str(e)) )
+        d = {}
 
     logger.debug('***admin/user_load : exit ***' )
     return jsonResponse(data=d)
@@ -203,12 +182,11 @@ def node_save(request, *args):
 
     returnval = False
     if oldname!=newname and newname !='':
-        user_manager = get_user_manager()
         if oldname == '':
-            if not user_manager.add_group(newname):
+            if not GroupManager.add_group(newname):
                 raise Exception("Couldn't add new node: " + newname)
         else:
-            if not user_manager.rename_group(oldname, newname):
+            if not GroupManager.rename_group(oldname, newname):
                 raise Exception("Couldn't rename node %s to %s" % (oldname, newname))
     else:
         #make no changes.
@@ -231,8 +209,7 @@ def node_delete(request, *args):
         #Don't delete these sorts of groups.
         pass
     else:
-        user_manager = get_user_manager()
-        ret = user_manager.delete_group(delname)
+        ret = GroupManager.delete_group(delname)
 
     logger.debug( '*** node_delete : enter ***' )
     return jsonResponse(mainContentFunction='admin:nodelist')

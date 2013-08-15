@@ -6,7 +6,6 @@ from django.utils import simplejson
 from django.conf import settings
 from ccg.utils import webhelpers
 from ccg.utils.webhelpers import siteurl, wsgibase
-from mastrms.users.user_manager import get_user_manager
 from mastrms.app.utils.data_utils import jsonResponse, jsonErrorResponse
 from mastrms.users.models import *
 from mastrms.login.URLState import getCurrentURLState
@@ -74,8 +73,8 @@ def processForgotPassword(request, *args):
     sets a validaton key in the user's ldap entry which is used to validate the user when they click the link in email
     '''
     emailaddress = request.REQUEST['username'].strip()
-    user_manager = get_user_manager()
-    u = user_manager.get_user_details(emailaddress)
+    user = User.objects.get(username=emailaddress)
+    u = user.to_dict()
     m = md5.new()
     m.update('madas' + str(time.time()) + 'resetPasswordToken123')
     vk = m.hexdigest()
@@ -87,7 +86,7 @@ def processForgotPassword(request, *args):
         pass
 
     logger.debug( '\tUpdating user record with verification key')
-    user_manager.update_user(emailaddress, None, None, u)
+    user.update_user(None, None, u)
     logger.debug('\tDone updating user with verification key')
 
     #Email the user
@@ -127,15 +126,15 @@ def processResetPassword(request, *args):
     if username is not '' and vk is not '' and passw is not '':
 
         #get existing details
-        user_manager = get_user_manager()
-        userdetails = user_manager.get_user_details(request.REQUEST['email'])
+        user = User.objects.get(username=request.REQUEST['email'])
+        userdetails = user_manager.to_dict()
         if userdetails.has_key('groups'):
             del userdetails['groups'] #remove 'groups' - they don't belong in an update.
         if userdetails.has_key('passwordResetKey') and len(userdetails['passwordResetKey']) == 1 and userdetails['passwordResetKey'][0] == vk:
             #clear out the pager vk
             del userdetails['passwordResetKey']
             #update the password
-            user_manager.update_user(username, username, passw, userdetails)
+            user.update_user(username, passw, userdetails)
             sendPasswordChangedEmail(request, username)
 
         else:

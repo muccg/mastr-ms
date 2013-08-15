@@ -6,6 +6,7 @@ from django.utils import simplejson
 from mastrms.app.utils.data_utils import jsonResponse, makeJsonFriendly
 from mastrms.app.utils.mail_functions import sendAccountModificationEmail
 from .models import *
+from .user_manager import GroupManager
 from .forms import getDetailsFromRequest
 
 ##The user info view, which sends the state of the logged in
@@ -29,7 +30,7 @@ def listAllNodes(request, *args):
     If request.REQUEST has 'ignoreNone', we do not do this.
     ""
     '''
-    ldapgroups = getMadasGroups()
+    ldapgroups = GroupManager.list_groups()
     groups = []
     if not request.REQUEST.has_key('ignoreNone'):
         groups.append({'name':'Don\'t Know', 'submitValue':''})
@@ -50,8 +51,18 @@ def userload(request, *args):
        Accessible by any logged in user
     '''
     logger.debug('***userload : enter ***')
-    u = request.REQUEST.get('username', request.user.username)
-    d = [loadMadasUser(u)]
+    username = request.REQUEST.get('username', request.user.username)
+    d = {}
+    if username and username != "nulluser":
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            logger.exception("User \"%s\" doesn't exist" % username)
+        else:
+            d = user.get_client_dict()
+    else:
+        logger.warning("Looked up details for the nulluser")
+
     d = makeJsonFriendly(d)
     logger.debug('***userload : exit ***')
     return jsonResponse(data=d)

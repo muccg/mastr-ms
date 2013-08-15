@@ -56,15 +56,14 @@ def _findAdminOrNodeRepEmailTarget(groupname = 'Administrators'): #TODO use MADA
     if groupname is not MADAS_ADMIN_GROUP:
         grouplist.append(MADAS_NODEREP_GROUP)
 
-    users = getMadasUsersFromGroups(grouplist)
+    users = getMadasUsersFromGroups(grouplist, ldap_style=True)
 
     logger.debug('\t Users found: %s' % (users))
 
     #NOTE: If this function finds multiple users to email, it only returns the
     #      first one. If we ever need to change this, here is the place to do it!
-    retval = users
     logger.debug( '*** _findAdminOrNodeRepEmailTarget : exit ***' )
-    return retval
+    return users
 
 def sendRequest(request, *args):
     logger.debug('***quote: sendRequest***')
@@ -434,11 +433,13 @@ def formalLoad(request, *args, **kwargs):
                 rows = len(retvals)
 
                 #get the details of the auth user in the toemail
-                d = getMadasUserDetails(retvals['fromemail'])
-                if len(d) > 0:
-                    d = _translate_ldap_to_madas(d)
-                    retvals['fromname'] = d['firstname'][0] + ' ' + d['lastname'][0]
-                    retvals['officePhone'] = d['telephoneNumber']
+                try:
+                    user = User.objects.get(username=retvals['fromemail'])
+                except User.DoesNotExist:
+                    pass
+                else:
+                    retvals['fromname'] = user.get_full_name()
+                    retvals['officePhone'] = user.telephoneNumber
 
                     qr = Quoterequest.objects.get(id=retvals['quoterequestid'])
 

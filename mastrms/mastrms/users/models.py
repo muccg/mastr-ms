@@ -1,9 +1,9 @@
 import logging
 import json
 from django.db import models
+from django.db.models import Q
 from django.contrib.auth.models import AbstractUser, Group
-from mastrms.users.user_manager import get_user_manager
-from mastrms.app.utils.data_utils import translate_dict, makeJsonFriendly
+from mastrms.users.user_manager import GroupManager
 
 MADAS_USER_GROUP = 'User'
 MADAS_PENDING_GROUP = 'Pending'
@@ -23,65 +23,45 @@ logger = logging.getLogger('mastrms.users')
 class User(AbstractUser):
     """
     Extended user model.
-    Some attributes still need to be chopped out or renamed.
+    Some attributes still need to be renamed.
     """
     telephoneNumber = models.CharField(max_length=255, blank=True)
-    homePhone = models.CharField(max_length=255, blank=True)
+    homePhone = models.CharField(max_length=255, blank=True) # homephone
     physicalDeliveryOfficeName = models.CharField(max_length=255, blank=True)
     title = models.CharField(max_length=255, blank=True)
-    destinationIndicator = models.CharField(max_length=255, blank=True)
-    description = models.CharField(max_length=255, blank=True)
-    postalAddress = models.CharField(max_length=255, blank=True)
-    businessCategory = models.CharField(max_length=255, blank=True)
-    registeredAddress = models.CharField(max_length=255, blank=True)
-    carLicense = models.CharField(max_length=255, blank=True)
+    destinationIndicator = models.CharField(max_length=255, blank=True) # dept
+    description = models.CharField(max_length=255, blank=True) # areaOfInterest
+    postalAddress = models.CharField(max_length=255, blank=True) # address
+    businessCategory = models.CharField(max_length=255, blank=True) # institute
+    registeredAddress = models.CharField(max_length=255, blank=True) # supervisor
+    carLicense = models.CharField(max_length=255, blank=True) # country
     passwordResetKey = models.CharField(max_length=255, blank=True)
 
-    @property
-    def uid(self):
-        return self.username
-
-    def to_dict(self):
+    def to_dict(self, ldap_style=True):
         d = {
-            'uid': [self.uid],
-            'givenName': [self.first_name],
-            'sn': [self.last_name],
-            'mail': [self.email],
-            'telephoneNumber': [self.telephoneNumber],
-            'homePhone': [self.homePhone],
-            'physicalDeliveryOfficeName': [self.physicalDeliveryOfficeName],
-            'title': [self.title],
-            'destinationIndicator': [self.destinationIndicator],
-            'description': [self.description],
-            'postalAddress': [self.postalAddress],
-            'businessCategory': [self.businessCategory],
-            'registeredAddress': [self.registeredAddress],
-            'carLicense': [self.carLicense],
-            'passwordResetKey': [self.passwordResetKey]
+            'uid' if ldap_style else 'username': self.username,
+            'firstname': self.first_name,
+            'lastname': self.last_name,
+            'email': self.email,
+            'telephoneNumber': self.telephoneNumber,
+            'homephone': self.homePhone,
+            'physicalDeliveryOfficeName': self.physicalDeliveryOfficeName,
+            'title': self.title,
+            'dept': self.destinationIndicator,
+            'areaOfInterest': self.description,
+            'address': self.postalAddress,
+            'institute': self.businessCategory,
+            'supervisor': self.registeredAddress,
+            'country': self.carLicense,
+            'passwordResetKey': self.passwordResetKey,
         }
-        return d
 
-    def set_from_dict(self, d):
-        trans = [('givenName', 'first_name'),
-                 ('sn', 'last_name'),
-                 ('mail', 'email'),
-                 ('telephoneNumber', 'telephoneNumber'),
-                 ('homePhone', 'homePhone'),
-                 ('physicalDeliveryOfficeName', 'physicalDeliveryOfficeName'),
-                 ('title', 'title'),
-                 ('destinationIndicator', 'destinationIndicator'),
-                 ('description', 'description'),
-                 ('postalAddress', 'postalAddress'),
-                 ('businessCategory', 'businessCategory'),
-                 ('registeredAddress', 'registeredAddress'),
-                 ('carLicense', 'carLicense'),
-                 ('passwordResetKey', 'passwordResetKey')]
-        for ldap_attr, model_attr in trans:
-            val = d.get(ldap_attr, None)
-            if val:
-                if isinstance(val, list):
-                    val = val[0]
-                setattr(self, model_attr, val)
+        if ldap_style:
+            # wrap each value in a list like ldap attrs
+            d = dict((k, [v]) for (k, v) in d.iteritems())
+
+        d['groups'] = list(self.groups.values_list("name", flat=True))
+        return d
 
     @property
     def IsAdmin(self):
@@ -89,7 +69,7 @@ class User(AbstractUser):
     @IsAdmin.setter
     def IsAdmin(self, value):
         self.update_groups(Group.objects.filter(name=MADAS_ADMIN_GROUP), value)
-        self.is_admin = value
+        self.is_superuser = bool(value)
         self.save()
 
     @property
@@ -101,19 +81,15 @@ class User(AbstractUser):
 
     @property
     def IsClient(self):
+        "Client users are unprivileged and aren't members of any node group."
         # fixme: this does too many database queries
         return not (self.IsPrivileged or self.IsStaff or self.IsMastrStaff)
-    @IsClient.setter
-    def IsClient(self, value):
-        raise NotImplemented
 
     @property
     def IsStaff(self):
+        "Staff are not privileged but are members of a node group"
         # fixme: this does too many database queries
-        return not self.IsPrivileged and self.Nodes
-    @IsStaff.setter
-    def IsStaff(self, value):
-        raise NotImplemented
+        return not self.IsPrivileged and bool(self.Nodes)
 
     @property
     def IsMastrAdmin(self):
@@ -148,18 +124,21 @@ class User(AbstractUser):
         self.username = value
 
     @property
-    def CachedGroups(self):
-        self.refreshCachedGroups()
-        return self._cached_groups
-
-    @property
     def IsPrivileged(self):
         return (self.IsAdmin or self.IsMastrAdmin or self.IsNodeRep or self.IsProjectLeader)
 
     @property
     def StatusGroup(self):
-        self.refreshCachedGroups()
-        return self._status_group
+        status = self.groups.filter(name__in=MADAS_STATUS_GROUPS)
+        status = status.values_list("name", flat=True)
+        if len(status) == 0:
+            logger.warning("User %s has no status group, assuming deleted." % self.username)
+            return MADAS_DELETED_GROUP
+        if len(status) > 1:
+            logger.warning("User %s somehow got multiple groups: %s. Using the"
+                           " first one." % (self.username, ", ".join(status)))
+        return status[0]
+
     @StatusGroup.setter
     def StatusGroup(self, new_group):
         if new_group not in MADAS_STATUS_GROUPS:
@@ -205,10 +184,11 @@ class User(AbstractUser):
         the truth of is_member. This method also logs what is done.
         """
         for group in groups:
-            if is_member:
+            in_group = self.groups.filter(id=group.id).exists()
+            if is_member and not in_group:
                 logger.info("Adding user %s to group \"%s\"" % (self.username, group.name))
                 self.groups.add(group)
-            else:
+            elif not is_member and in_group:
                 logger.info("Removing user %s from group \"%s\"" % (self.username, group.name))
                 self.groups.remove(group)
 
@@ -220,37 +200,74 @@ class User(AbstractUser):
             return 'Unknown'
 
     @property
-    def CachedDetails(self):
-        self.refreshCachedDetails()
-        return self._cached_details
-
-    @property
     def Name(self):
         return self.get_full_name()
-
-    def refreshCachedGroups(self):
-        if getattr(self, "_cached_groups", None) is None:
-            #logger.debug('\tRefreshing groups for %s. Fetching.' % (self.Username) )
-            groupsdict = getMadasUserGroups(self.Username)
-            self._cached_groups = groupsdict['groups'] + groupsdict['status']
-            self._status_group = groupsdict['status']
-
-    def refreshCachedDetails(self):
-        if not hasattr(self, "_cached_details"):
-            #logger.debug('\tRefreshing user details for %s.' % (self.Username) )
-            self._cached_details = dict(getMadasUserDetails(self.Username))
 
     #Just a class to encapsulate data to send to the frontend (as json)
     def getData(self):
         attrs = [ "Username", "IsLoggedIn", "IsAdmin", "IsClient", "IsNodeRep",
                   "IsStaff", "IsMastrAdmin", "IsProjectLeader", "IsMastrStaff",
-                  "Nodes", "CachedGroups", "StatusGroup", "CachedDetails" ]
+                  "Nodes" ]
 
         return dict((attr, getattr(self, attr)) for attr in attrs)
 
-
     def toJson(self):
         return json.dumps(self.getData())
+
+    def get_client_dict(self):
+        'takes a username, returns a dictionary of results'
+        'returns empty dict if the user doesnt exist'
+
+        details = self.to_dict(ldap_style=False)
+
+        #copy one field to a new name
+        details['originalEmail'] = details['email']
+
+        #groups
+        details['node'] = self.PrimaryNode or []
+        details['isAdmin'] = self.IsAdmin
+        details['isNodeRep'] = self.IsNodeRep
+        details['isMastrAdmin'] = self.IsMastrAdmin
+        details['isProjectLeader'] = self.IsProjectLeader
+        details['isMastrStaff'] = self.IsMastrStaff
+        details['isClient'] = self.IsClient
+        status = self.StatusGroup
+        #This is done because the javascript wants
+        #'Self' to be seen as 'Active'
+        if status == MADAS_USER_GROUP:
+            status = 'Active'
+        details['status'] = status
+        #groups - for some reason the frontend code wants this limited to one?
+        #         so I choose the most important.
+        if self.IsAdmin:
+            details['groups'] = MADAS_ADMIN_GROUP
+        elif self.IsNodeRep:
+            details['groups'] = MADAS_NODEREP_GROUP
+        else:
+            details['groups'] = details['node']
+
+        details['name'] = self.Name
+
+        return details
+
+    def update_user(self, newusername, newpassword, detailsDict):
+        if newusername is None:
+            newusername = self.username
+        elif newusername != self.username:
+            if type(self).objects.filter(username=newusername).exists():
+                logger.warning('New Username %s already existed.' % newusername)
+            else:
+                self.username = newusername
+
+        if newpassword:
+            self.set_password(newpassword)
+            self.passwordResetKey = ""
+
+        for field, value in detailsDict.iteritems():
+            setattr(self, field, value)
+        self.save()
+
+        return True
 
 
 # Gets MAUser for currently logged in user, or a dummy MAUser object
@@ -260,8 +277,7 @@ def getCurrentUser(request, force_refresh = False):
         "IsLoggedIn": False, "IsAdmin": False, "IsClient": False,
         "IsNodeRep": False, "IsStaff": False, "IsMastrAdmin": False,
         "IsProjectLeader": False, "IsMastrStaff": False,
-        "Nodes": [],  "CachedDetails": [],
-        "CachedGroups": [], "StatusGroup": []
+        "Nodes": [],
         })
 
     user = request.user
@@ -275,161 +291,51 @@ def getMadasUser(username):
     except User.DoesNotExist:
         return None
 
-#Utility methods
-def getMadasUserGroups(username, include_status_groups = False):
-    user_manager = get_user_manager()
-    a = user_manager.get_user_groups(username)
-    groups = []
-    status = []
-
-    if a:
-        for name in a:
-            if include_status_groups or name not in MADAS_STATUS_GROUPS:
-                groups.append(name)
-
-            #set the status group (even if being shown in 'groups')
-            if name in MADAS_STATUS_GROUPS:
-                status.append(name)
-
-    return {'groups': groups, 'status': status}
-
-def getMadasUsersFromGroups(grouplist, method='and') :
+def getMadasUsersFromGroups(grouplist, method='and', ldap_style=False) :
     '''Returns users who are a member of the groups given in grouplist
     The default 'method' is 'and', which will return only users who are a member
     of all groups. Passing 'or' will return users who are a member of any of the groups'''
-    user_manager = get_user_manager()
-    users = user_manager.list_users(grouplist, method)
-    return users
+    def list_users(searchGroup, method):
+        users_qs = User.objects.all()
+        if searchGroup:
+            users_qs = User.objects
+            filter_cond = None
+            for g in searchGroup:
+                if method == 'and':
+                    users_qs = users_qs.filter(groups__name=g)
+                else:
+                    if filter_cond is None:
+                        filter_cond = Q(groups__name=g)
+                    else:
+                        filter_cond = filter_cond | Q(groups__name=g)
+            if method != 'and':
+                users_qs = User.objects.filter(filter_cond)
 
-def getMadasGroups():
-    user_manager = get_user_manager()
-    groups = user_manager.list_groups()
-    return groups
+        return users_qs
 
-def getMadasUserDetails(username):
-    user_manager = get_user_manager()
-    d = user_manager.get_user_details(username)
-    #this is a function to un-listify values in the dict, since
-    #ldap often returns them that way
-    def _stripArrays(inputdict):
-        for key in inputdict.keys():
-            if isinstance(inputdict[key], list) and len(inputdict[key]) > 0:
-                inputdict[key] = inputdict[key][0]
-        return inputdict
-    d = _stripArrays(d)
-    return _translate_ldap_to_madas(d)
+    users = list_users(grouplist, method)
+    return [u.to_dict(ldap_style) for u in users]
 
-def _translate_madas_to_ldap(mdict, createEmpty=False):
-    retdict = translate_dict(mdict, [('username', 'uid'), \
-                           ('commonname', 'commonName'), \
-                           ('firstname', 'givenName'), \
-                           ('lastname', 'sn'), \
-                           ('email', 'mail'), \
-                           ('telephoneNumber', 'telephoneNumber'), \
-                           ('homephone', 'homePhone'), \
-                           ('physicalDeliveryOfficeName', 'physicalDeliveryOfficeName'), \
-                           ('title', 'title'), \
-                           ('dept', 'destinationIndicator'), \
-                           ('areaOfInterest', 'description'), \
-                           ('address', 'postalAddress'), \
-                           ('institute', 'businessCategory'), \
-                           ('supervisor', 'registeredAddress'), \
-                           ('country', 'carLicense'), \
-                            ], createEmpty=createEmpty)
-    return retdict
-
-
-def _translate_ldap_to_madas(ldict, createEmpty=False):
-    retdict = translate_dict(ldict, [('uid', 'username'), \
-                           ('commonName', 'commonname'), \
-                           ('givenName', 'firstname'), \
-                           ('sn', 'lastname'), \
-                           ('mail', 'email'), \
-                           ('telephoneNumber', 'telephoneNumber'), \
-                           ('homePhone', 'homephone'), \
-                           ('physicalDeliveryOfficeName', 'physicalDeliveryOfficeName'), \
-                           ('title', 'title'), \
-                           ('destinationIndicator', 'dept'), \
-                           ('description', 'areaOfInterest'), \
-                           ('postalAddress', 'address'), \
-                           ('businessCategory', 'institute'), \
-                           ('registeredAddress', 'supervisor'), \
-                           ('carLicense', 'country'), \
-                            ], createEmpty=createEmpty)
-    return retdict
-
-def loadMadasUser(username):
-    'takes a username, returns a dictionary of results'
-    'returns empty dict if the user doesnt exist'
-
-    user = getMadasUser(username)
-    details = user.CachedDetails if user else {}
-
-    if len(details) == 0:
-        return {}
-
-    #copy one field to a new name
-    details['originalEmail'] = details['email']
-
-    #groups
-    nodes = user.Nodes
-    if len(nodes) > 0:
-        details['node'] = user.PrimaryNode
+def addMadasUser(username, detailsdict, password):
+    logger.info("Adding new user %s" % username)
+    if User.objects.filter(username=username).exists():
+        logger.warning('A user called %s already existed. Refusing to add.' % username)
+        user = None
     else:
-        details['node'] = []
-    details['isAdmin'] = user.IsAdmin
-    details['isNodeRep'] = user.IsNodeRep
-    details['isMastrAdmin'] = user.IsMastrAdmin
-    details['isProjectLeader'] = user.IsProjectLeader
-    details['isMastrStaff'] = user.IsMastrStaff
-    details['isClient'] = user.IsClient
-    status = user.StatusGroup
-    #This is done because the javascript wants
-    #'User' to be seen as 'Active'
-    if status == MADAS_USER_GROUP:
-        status = 'Active'
-    details['status'] = status
-    #groups - for some reason the frontend code wants this limited to one?
-    #         so I choose the most important.
-    if user.IsAdmin:
-        details['groups'] = MADAS_ADMIN_GROUP
-    elif user.IsNodeRep:
-        details['groups'] = MADAS_NODEREP_GROUP
-    else:
-        details['groups'] = details['node']
+        detailsdict["username"] = username
+        user = User.objects.create(**detailsdict)
+        user.StatusGroup = MADAS_PENDING_GROUP
+        user.set_password(password)
+        user.save()
 
-    details['name'] = user.Name
-
-    return details
-
-def addMadasUser(username, detailsdict):
-    user_manager = get_user_manager()
-
-    #create an empty dict with the ldap format
-    emptydetails = _translate_madas_to_ldap({}, createEmpty=True)
-    #combine in the details dict
-    new_details = dict(emptydetails, **detailsdict)
-
-    user = user_manager.add_user(username, detailsdict)
-
-    if user:
-        user.StatusGroup = MASTR_USER_PENDING
-
-    return user is not None
+    return user
 
 def updateMadasUserDetails(currentUser, existingUser, username, password, detailsdict):
     #The only people who can edit a record is an admin, or the actual user
     if currentUser.IsAdmin or currentUser.IsMastrAdmin or currentUser == existingUser:
-        try:
-            user_manager = get_user_manager()
-            #pass username twice, as the old and new username (so we don't allow changing username
-            user_manager.update_user(existingUser, username, password, detailsdict)
-        except Exception, e:
-            logger.warning("Could not update user %s: %s" % (username, str(e)) )
-            return False
-
-    # Only errors will return success False
-    return True
+        existingUser.update_user(username, password, detailsdict)
+        return True
+    return False
 
 def saveMadasUser(currentUser, username, changeddetails, changedstatus, password):
     '''
@@ -443,23 +349,15 @@ def saveMadasUser(currentUser, username, changeddetails, changedstatus, password
 
     #If the user doesn't exist yet, add them first.
     if existingUser is None:
-        logger.debug("Adding new user %s" % (username))
-        if not addMadasUser(username, changeddetails):
-            return False
-    existingUser = getMadasUser(username)
-
-    #translate their details to ldap
-    existing_details = _translate_madas_to_ldap(existingUser.CachedDetails)
-    #combine the dictionaries, overriding existing_details with changeddetails
-    new_details = dict(existing_details, **changeddetails)
-
-    if not updateMadasUserDetails(currentUser, existingUser, username, password, new_details):
-        return False
+        existingUser = addMadasUser(username.strip(), changeddetails, password)
 
     if not currentUser.is_authenticated():
         # if not logged in, the rest of the changes are only doable by
-        # adminish users, so quit here, job done.
+        # adminish users or the user himself, so quit here, job done.
         return True
+
+    if not updateMadasUserDetails(currentUser, existingUser, username, password, changeddetails):
+        return False
 
     if currentUser.IsAdmin:
         # if they are an admin, dont let them unadmin themselves
@@ -485,5 +383,10 @@ def saveMadasUser(currentUser, username, changeddetails, changedstatus, password
 
         # Status: Pending, Active etc.
         existingUser.StatusGroup = changedstatus.get('status')
+
+    # update django is_staff and is_superuser from madas groups
+    existingUser.is_superuser = existingUser.IsAdmin
+    existingUser.is_staff = existingUser.is_superuser or existingUser.IsStaff
+    existingUser.save()
 
     return True
