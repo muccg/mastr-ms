@@ -39,9 +39,15 @@ function activate_virtualenv() {
 
 # ssh setup, make sure our ccg commands can run in an automated environment
 function ci_ssh_agent() {
-    ssh-agent > /tmp/agent.env.sh
-    source /tmp/agent.env.sh
+    source <(ssh-agent)
     ssh-add ~/.ssh/ccg-syd-staging.pem
+    trap ci_ssh_agent_kill EXIT
+}
+
+function ci_ssh_agent_kill() {
+    if [ -n "${SSH_AGENT_PID}" ]; then
+        source <(ssh-agent -k)
+    fi
 }
 
 function build_number_head() {
