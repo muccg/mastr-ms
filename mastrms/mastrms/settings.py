@@ -30,12 +30,12 @@ MIDDLEWARE_CLASSES = [
 
 # see: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = [
+    'mastrms.users',
     'mastrms.mdatasync_server',
     'mastrms.login',
     'mastrms.quote',
     'mastrms.admin',
     'mastrms.repository',
-    'mastrms.users',
     'mastrms.app',
     'django.contrib.auth',
     'django.contrib.contenttypes',
