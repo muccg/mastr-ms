@@ -40,7 +40,7 @@ class Migration(DataMigration):
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '50'})
         },
-        'auth.user': {
+        'users.user': {
             'Meta': {'object_name': 'User'},
             'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
@@ -134,7 +134,7 @@ class Migration(DataMigration):
             'experiment': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['repository.Experiment']"}),
             'filepath': ('django.db.models.fields.TextField', [], {}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'sharedby': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"}),
+            'sharedby': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['users.User']"}),
             'sharetimestamp': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'})
         },
         'repository.component': {
@@ -163,7 +163,7 @@ class Migration(DataMigration):
             'sample_preparation_notes': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'status': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['repository.ExperimentStatus']", 'null': 'True', 'blank': 'True'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'users': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'to': "orm['auth.User']", 'null': 'True', 'through': "orm['repository.UserExperiment']", 'blank': 'True'})
+            'users': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'to': "orm['users.User']", 'null': 'True', 'through': "orm['repository.UserExperiment']", 'blank': 'True'})
         },
         'repository.experimentstatus': {
             'Meta': {'object_name': 'ExperimentStatus'},
@@ -188,7 +188,7 @@ class Migration(DataMigration):
             'blank_at_start': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'blank_position': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
             'created_on': ('django.db.models.fields.DateField', [], {'default': 'datetime.date.today'}),
-            'creator': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']", 'null': 'True'}),
+            'creator': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['users.User']", 'null': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'method_name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'method_path': ('django.db.models.fields.TextField', [], {}),
@@ -261,18 +261,18 @@ class Migration(DataMigration):
         },
         'repository.project': {
             'Meta': {'object_name': 'Project'},
-            'client': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']", 'null': 'True', 'blank': 'True'}),
+            'client': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['users.User']", 'null': 'True', 'blank': 'True'}),
             'created_on': ('django.db.models.fields.DateField', [], {'default': 'datetime.date.today'}),
             'description': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'managers': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'managed_projects'", 'symmetrical': 'False', 'to': "orm['auth.User']"}),
+            'managers': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'managed_projects'", 'symmetrical': 'False', 'to': "orm['users.User']"}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '255'})
         },
         'repository.rulegenerator': {
             'Meta': {'object_name': 'RuleGenerator'},
             'accessibility': ('django.db.models.fields.PositiveIntegerField', [], {'default': '1'}),
             'apply_sweep_rule': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'created_by': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"}),
+            'created_by': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['users.User']"}),
             'created_on': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'description': ('django.db.models.fields.CharField', [], {'max_length': '1000'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -312,7 +312,7 @@ class Migration(DataMigration):
             'Meta': {'object_name': 'Run'},
             'complete_sample_count': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'created_on': ('django.db.models.fields.DateField', [], {'default': 'datetime.date.today'}),
-            'creator': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"}),
+            'creator': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['users.User']"}),
             'experiment': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['repository.Experiment']", 'null': 'True'}),
             'generated_output': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -368,7 +368,7 @@ class Migration(DataMigration):
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'sample': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['repository.Sample']"}),
             'type': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']", 'null': 'True', 'blank': 'True'})
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['users.User']", 'null': 'True', 'blank': 'True'})
         },
         'repository.sampletimeline': {
             'Meta': {'object_name': 'SampleTimeline'},
@@ -406,7 +406,7 @@ class Migration(DataMigration):
             'experiment': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['repository.Experiment']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['repository.UserInvolvementType']"}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['users.User']"})
         },
         'repository.userinvolvementtype': {
             'Meta': {'object_name': 'UserInvolvementType'},

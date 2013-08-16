@@ -3,19 +3,54 @@ import datetime
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
+from django.db.utils import DatabaseError
 
 
 class Migration(SchemaMigration):
 
+    @staticmethod
+    def db_table_exists(table_name):
+        connection = db._get_connection()
+        return table_name in connection.introspection.table_names()
+
     def forwards(self, orm):
-        db.rename_table('auth_user', 'users_user')
-        db.rename_table('auth_user_groups', 'users_user_groups')
-        db.rename_table('auth_user_user_permissions', 'users_user_user_permissions')
+        """
+        This needs to be explained.
+
+        We are migrating to change the standard django user model into
+        a custom user model.
+
+        In running projects, the auth_user table will need to be
+        renamed to users_user, the custom user table.
+
+        But with django custom user models, the user model is
+        specified in settings. In fresh projects, no auth_user table
+        will ever get created.
+
+        So we check whether the custom user table exists before
+        renaming.
+        """
+
+        if not self.db_table_exists("users_user"):
+            db.rename_table('auth_user', 'users_user')
+        else:
+            print "users_user was already renamed, nothing to do."
+
+        if not self.db_table_exists("users_user_groups"):
+            db.rename_table('auth_user_groups', 'users_user_groups')
+        else:
+            print "users_user_groups was already renamed, nothing to do."
+
+        if not self.db_table_exists("users_user_user_permissions"):
+            db.rename_table('auth_user_user_permissions', 'users_user_user_permissions')
+        else:
+            print "users_user_user_permissions was already renamed, nothing to do."
 
     def backwards(self, orm):
-        db.rename_table('users_user', 'auth_user')
-        db.rename_table('users_user_groups', 'auth_user_groups')
-        db.rename_table('users_user_user_permissions', 'auth_user_user_permissions')
+        "Never rename the tables back to auth -- settings specify users"
+        # db.rename_table('auth_user', 'users_user')
+        # db.rename_table('auth_user_groups', 'users_user_groups')
+        # db.rename_table('auth_user_user_permissions', 'users_user_user_permissions')
 
     models = {
         u'auth.group': {

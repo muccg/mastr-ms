@@ -11,7 +11,7 @@ class Migration(SchemaMigration):
         # Adding model 'UserDetail'
         db.create_table('users_userdetail', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
+            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['users.User'])),
             ('commonName', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
             ('givenName', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
             ('sn', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
@@ -40,7 +40,7 @@ class Migration(SchemaMigration):
         db.create_table('users_group_user', (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
             ('group', models.ForeignKey(orm['users.group'], null=False)),
-            ('user', models.ForeignKey(orm['auth.user'], null=False))
+            ('user', models.ForeignKey(orm['users.user'], null=False))
         ))
         db.create_unique('users_group_user', ['group_id', 'user_id'])
 
@@ -71,7 +71,7 @@ class Migration(SchemaMigration):
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '50'})
         },
-        'auth.user': {
+        'users.user': {
             'Meta': {'object_name': 'User'},
             'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
@@ -98,7 +98,7 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'Group'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'user': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.User']", 'symmetrical': 'False'})
+            'user': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['users.User']", 'symmetrical': 'False'})
         },
         'users.userdetail': {
             'Meta': {'object_name': 'UserDetail'},
@@ -117,7 +117,7 @@ class Migration(SchemaMigration):
             'sn': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
             'telephoneNumber': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['users.User']"})
         }
     }
 
