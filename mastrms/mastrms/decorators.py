@@ -1,20 +1,13 @@
 from django.http import HttpResponse, HttpResponseForbidden
 from ccg.http import HttpResponseUnauthorized
-from mastrms.users.MAUser import MAUser
 
 def restricted_view(f, restriction):
     def new_function(*args, **kwargs):
         request = args[0]
         if not request.user.is_authenticated():
             return HttpResponseUnauthorized()
-        mauser = request.session.get('mauser', None)
 
-        if mauser is None:
-            mauser = MAUser("nulluser")  # a user who doesn't exist
-            mauser.refresh()
-            mauser = request.session.get('mauser', None)
-
-        if mauser and restriction(mauser):
+        if restriction(request.user):
             return f(*args, **kwargs)
         else:
             return HttpResponseForbidden()

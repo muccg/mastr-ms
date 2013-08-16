@@ -1,10 +1,8 @@
-from mastrms.repository.models import RuleGenerator, RuleGeneratorStartBlock, RuleGeneratorSampleBlock, RuleGeneratorEndBlock, Component
-from mastrms.users.MAUser import MAUser
-
-from mastrms.users.MAUser import getMadasUser
-from django.db.models import Q
-
 import logging
+from django.db.models import Q
+from mastrms.repository.models import RuleGenerator, RuleGeneratorStartBlock, RuleGeneratorSampleBlock, RuleGeneratorEndBlock, Component
+from mastrms.users.models import getMadasUser
+
 logger = logging.getLogger('mastrms.general')
 
 def listRuleGenerators(user=None, accessibility=False, showEnabledOnly=False):

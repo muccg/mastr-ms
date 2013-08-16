@@ -1,5 +1,6 @@
 from mastrms.app.utils.data_utils import jsonResponse, jsonErrorResponse
-from mastrms.users.MAUser import *
+from mastrms.users.models import *
+from mastrms.users.forms import getDetailsFromRequest
 from mastrms.app.utils.mail_functions import sendRegistrationToAdminEmail
 import logging
 from django.conf import settings
@@ -12,14 +13,11 @@ def submit(request, *args):
     detailsDict = getDetailsFromRequest(request)
 
     username = detailsDict['username']
-    user_exists = bool(loadMadasUser(username))
+    user_exists = User.objects.filter(username=username).exists()
 
     if not user_exists:
-        #if not, add the user
-        adminUser = getMadasUser('nulluser') #a user who doesn't exist
-        adminUser.IsAdmin = True #make them a priveleged user.
         #saveMadasUser will add the user if they do not exist already.
-        user_exists = saveMadasUser(adminUser, username, detailsDict['details'], detailsDict['status'], detailsDict['password'])
+        user_exists = saveMadasUser(request.user, username, detailsDict['details'], detailsDict['status'], detailsDict['password'])
 
         if not user_exists:
             logger.warning("Could not add new user %s" % (username))

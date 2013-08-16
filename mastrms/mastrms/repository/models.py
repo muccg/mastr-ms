@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
-from django.db import models
-from django.contrib.auth.models import User
+import grp
+import os
 from datetime import datetime, date, time
+import logging
+from django.db import models
+from django.core.files.storage import FileSystemStorage
+from django.conf import settings
 from mastrms.quote.models import Organisation, Formalquote
 from mastrms.mdatasync_server.models import NodeClient
-import grp
-from mastrms.users.MAUser import getMadasUser
-from django.core.files.storage import FileSystemStorage
-import os
-from django.conf import settings
+from mastrms.users.models import User, getMadasUser
 from mastrms.app.utils.file_utils import ensure_repo_filestore_dir_with_owner
 
-import logging
 logger = logging.getLogger('mastrms.general')
 
 

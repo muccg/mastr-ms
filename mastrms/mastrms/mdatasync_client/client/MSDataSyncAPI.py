@@ -630,12 +630,13 @@ class MSDSImpl(object):
 
         return p.returncode == 0
 
-    def parse_rsync_changes(self, data):
+    @staticmethod
+    def parse_rsync_changes(data):
         """
         The rsync --itemize-changes option produces data on which
         files changed during transfer. This function parses the output
-        and returns a map of filename -> bool indicating which files
-        changed during rsync.
+        and returns a map of filename -> (bool, bool) indicating which
+        items changed during rsync, and which were directories.
         """
         def parse_line(line):
             # See rsync(1) for information on the %i format
@@ -644,7 +645,8 @@ class MSDSImpl(object):
             filename = line[split+1:]
             if len(code) == split:
                 ischanged = lambda c: c not in (".", " ")
-                changed = code[0] == "<" and (ischanged(code[2]) or ischanged(code[3]))
+                changed = (code[0] in ("<", "c") and
+                           (ischanged(code[2]) or ischanged(code[3])))
                 return (code[1] == "d", strip_trailing_slash(filename), changed)
             else:
                 return None
@@ -655,8 +657,10 @@ class MSDSImpl(object):
         def changes_dict(change_list):
             """
             Convert [(isdir, filename, changed)] to a dict mapping
-            filename -> changed. If files are changed within a
-            directory, then it is also marked as changed.
+            filename -> (isdir, changed).
+
+            If files are changed within a directory, then it is also
+            marked as changed.
             """
             changes = {}
             for isdir, filename, changed in change_list:
@@ -665,16 +669,39 @@ class MSDSImpl(object):
                     # the directory tree
                     parent = filename
                     while parent:
-                        changes[parent] = True
+                        changes[parent] = (isdir, True)
                         parent = os.path.split(parent)[0]
+                        isdir = True
                 else:
-                    changes.setdefault(filename, False)
+                    changes.setdefault(filename, (isdir, False))
+
             return changes
 
         change_list = filter(bool, map(parse_line, data.split("\n")))
         return changes_dict(change_list)
 
-    def serverCheckRunSampleFiles(self, rsyncconfig, filename_id_map):
+    @staticmethod
+    def cull_empty_dirs(file_changes):
+        """
+        Removes empty directories from the rsync file_changes listing
+        and strip out isdir attribute.
+        file_changes is a dictionary of { filename: (isdir, changed) }
+        and this function returns [(filename, changed)].
+        """
+        files = sorted(file_changes.keys())
+
+        def has_children(dirname):
+            "Returns whether there are filenames prefixed with dirname"
+            return any(f for f in files
+                       if f != dirname and f.startswith(dirname))
+
+        sorted_change_list = [(f, file_changes[f]) for f in files]
+
+        return [(filename, changed)
+                for filename, (isdir, changed) in sorted_change_list
+                if not isdir or has_children(filename)]
+
+    def make_run_sample_dict(self, rsyncconfig, filename_id_map):
         # It's difficult to know when a complete sample is
         # transferred.
         # So we consider a sample file to be complete
@@ -684,11 +711,15 @@ class MSDSImpl(object):
         # immediately assume the instrument software is still writing
         # data and therefore the sample is not complete.
         runsampledict = {}
-        for filename, updated in rsyncconfig.file_changes.iteritems():
+        for filename, updated in self.cull_empty_dirs(rsyncconfig.file_changes):
             has_temp = bool(self.find_temp_files(filename))
             if not updated and filename in filename_id_map and not has_temp:
                 run_id, sample_id = filename_id_map[filename]
                 runsampledict.setdefault(run_id, []).append(sample_id)
+        return runsampledict
+
+    def serverCheckRunSampleFiles(self, rsyncconfig, filename_id_map):
+        runsampledict = self.make_run_sample_dict(rsyncconfig, filename_id_map)
 
         self.log('Informing the server of transfer: %s' % runsampledict,
                  thread=self.controller.useThreading)

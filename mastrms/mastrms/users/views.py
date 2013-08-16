@@ -3,10 +3,11 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import simplejson
-from mastrms.users.MAUser import *
-from mastrms.users.MAUser import _translate_ldap_to_madas, _translate_madas_to_ldap
 from mastrms.app.utils.data_utils import jsonResponse, makeJsonFriendly
 from mastrms.app.utils.mail_functions import sendAccountModificationEmail
+from .models import *
+from .user_manager import GroupManager
+from .forms import getDetailsFromRequest
 
 ##The user info view, which sends the state of the logged in
 ##user to the frontend.
@@ -29,7 +30,7 @@ def listAllNodes(request, *args):
     If request.REQUEST has 'ignoreNone', we do not do this.
     ""
     '''
-    ldapgroups = getMadasGroups()
+    ldapgroups = GroupManager.list_groups()
     groups = []
     if not request.REQUEST.has_key('ignoreNone'):
         groups.append({'name':'Don\'t Know', 'submitValue':''})
@@ -50,8 +51,18 @@ def userload(request, *args):
        Accessible by any logged in user
     '''
     logger.debug('***userload : enter ***')
-    u = request.REQUEST.get('username', request.user.username)
-    d = [loadMadasUser(u)]
+    username = request.REQUEST.get('username', request.user.username)
+    d = {}
+    if username and username != "nulluser":
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            logger.exception("User \"%s\" doesn't exist" % username)
+        else:
+            d = user.get_client_dict()
+    else:
+        logger.warning("Looked up details for the nulluser")
+
     d = makeJsonFriendly(d)
     logger.debug('***userload : exit ***')
     return jsonResponse(data=d)
@@ -69,7 +80,7 @@ def userSave(request, *args):
 
     #With a usersave, you are always editing your own user
     parsedform['username'] = currentuser.Username
-    success = saveMadasUser(currentuser,parsedform['username'], parsedform['details'], parsedform['status'], parsedform['password'])
+    success = saveMadasUser(currentuser, parsedform['username'], parsedform['details'], parsedform['status'], parsedform['password'])
     #refresh the user in case their details were just changed
     currentuser = getCurrentUser(request, force_refresh=True)
 
@@ -81,8 +92,3 @@ def userSave(request, *args):
 
     logger.debug('***users/userSave : exit ***')
     return jsonResponse(mainContentFunction='user:myaccount')
-
-
-
-
-

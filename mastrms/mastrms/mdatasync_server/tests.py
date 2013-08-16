@@ -130,7 +130,7 @@ class WithFixtures(object):
         Creates a django user and associated MAUser baggage.
         Returns the django user
         """
-        from mastrms.users.MAUser import getMadasUser, saveMadasUser
+        from mastrms.users.models import getMadasUser, saveMadasUser
 
         # need an admin user to create a user
         adminUser = getMadasUser('nulluser')
@@ -676,6 +676,64 @@ class SyncTests(LiveServerTestCase, XDisplayTest, WithFixtures):
             istemp = lambda (srcdir, path): Simulator.istemp(path)
             temps = filter(istemp, rsync_results[0]["source_files"])
             self.assertEqual(len(temps), 0, "no temp files rsynced")
+
+    def test_sync9(self):
+        """
+        Tests that empty directories aren't marked as complete.
+        """
+        rsync_results = []
+        with FakeRsync(rsync_results, do_copy=True):
+            self.setup_client()
+
+            # Add an empty directory to the client data folder
+            test_directory = os.path.join(self.simulator.destdir, self.worklist[0])
+            os.mkdir(test_directory)
+            self.addCleanup(os.rmdir, test_directory)
+
+            # Start recording json received from server
+            with json_hooker() as received_json:
+                # Initiate sync
+                logger.debug("about to click_sync")
+                self.test_client.click_sync()
+
+                logger.debug("clicking sync again")
+                self.test_client.click_sync()
+
+                logger.debug("clicking sync a third time")
+                self.test_client.click_sync() # rsync should not be run here
+
+                logger.debug("finished")
+
+                self.test_client.quit()
+
+            # b. check that rsync was called three times
+            self.assertEqual(len(rsync_results), 3,
+                             "check that rsync was called three times")
+            self.assertTrue(bool(rsync_results[0]))
+            self.assertTrue(bool(rsync_results[1]))
+            self.assertTrue(bool(rsync_results[2]))
+            # b. check that the directory was rsynced
+            self.assertEqual(len(rsync_results[0]["source_files"]), 1)
+            self.assertEqual(os.path.basename(rsync_results[0]["source_files"][0][1]),
+                             "runsample1_filename",
+                             "first rsync transfers file 1")
+            self.assertEqual(len(rsync_results[1]["source_files"]), 1)
+            self.assertEqual(os.path.basename(rsync_results[1]["source_files"][0][1]),
+                             "runsample1_filename",
+                             "second rsync transfers file 1")
+
+            # c. check server for directory
+            server_filename = runsample_filename(self.run, "runsample1_filename")
+            logger.debug("server filename is %s" % server_filename)
+            self.assertTrue(os.path.exists(server_filename),
+                            "%s exists on server" % server_filename)
+            self.assertTrue(os.path.isdir(server_filename),
+                            "%s is still a directory" % server_filename)
+
+            # d. check sample completion status
+            samples = self.run.runsample_set.order_by("filename")
+            self.assertFalse(samples[0].complete,
+                             "First sample %s is not marked complete" % samples[0].filename)
 
     class FileDoesNotExistAssertion(AssertionError):
         pass
