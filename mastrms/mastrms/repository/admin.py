@@ -8,7 +8,7 @@ from ccg.utils.webhelpers import url
 from django.core import urlresolvers
 from django.db.models import Q
 
-from mastrms.users.MAUser import getCurrentUser
+from mastrms.users.models import getCurrentUser
 
 ##
 ## Most of the Admin classes here override queryset to restrict access, ie row level permissions.

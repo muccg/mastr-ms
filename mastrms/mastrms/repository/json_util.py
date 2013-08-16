@@ -1,6 +1,6 @@
 import datetime
 import decimal
-from django.contrib.auth.models import User
+from mastrms.users.models import User
 from mastrms.repository.models import Sample
 from django.db import models
 from types import *
