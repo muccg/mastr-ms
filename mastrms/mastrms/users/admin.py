@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin, GroupAdmin
-from django.contrib.auth.forms import UserChangeForm
+from django.contrib.auth.forms import UserChangeForm, UserCreationForm
 from django.contrib.auth.models import User as DjangoUser, Group
 from mastrms.users.models import User
 from django import forms
@@ -21,8 +21,39 @@ class MAUserChangeForm(UserChangeForm):
     carLicense = forms.CharField(label="Country", required=False)
     passwordResetKey = forms.CharField(label="Password Reset Key", required=False)
 
+class MAUserCreationForm(UserCreationForm):
+    class Meta(UserCreationForm.Meta):
+        model = User
+        fields = ("username",)
+
+    INITIAL_GROUPS = ["User"]
+
+    username = forms.EmailField(label="E-mail address", max_length=30)
+
+    def clean_username(self):
+        """
+        Need to override this method because django refers to
+        auth.User directly.
+        """
+        username = self.cleaned_data["username"]
+        try:
+            self.Meta.model.objects.get(username=username)
+        except User.DoesNotExist:
+            return username
+        raise forms.ValidationError(self.error_messages['duplicate_username'])
+
+    def save(self, commit=True):
+        user = super(MAUserCreationForm, self).save(commit=False)
+        user.email = user.username
+        user.save()
+        # Add the user to a group
+        for g in Group.objects.filter(name__in=self.INITIAL_GROUPS):
+            user.groups.add(g)
+        return user
+
 class MAUserAdmin(UserAdmin):
     form = MAUserChangeForm
+    add_form = MAUserCreationForm
     ma_fieldsets = (
         ("Other info", {'fields': (
                     "physicalDeliveryOfficeName",
