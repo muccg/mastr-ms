@@ -685,36 +685,23 @@ class SyncTests(LiveServerTestCase, XDisplayTest, WithFixtures):
                 logger.debug("clicking sync again")
                 self.test_client.click_sync()
 
-                logger.debug("clicking sync a third time")
-                self.test_client.click_sync() # rsync should not be run here
-
                 logger.debug("finished")
 
                 self.test_client.quit()
 
-            # b. check that rsync was called three times
-            self.assertEqual(len(rsync_results), 3,
-                             "check that rsync was called three times")
+            # b. check that rsync was called twice
+            self.assertEqual(len(rsync_results), 2,
+                             "check that rsync was called twice")
             self.assertTrue(bool(rsync_results[0]))
             self.assertTrue(bool(rsync_results[1]))
-            self.assertTrue(bool(rsync_results[2]))
-            # b. check that the directory was rsynced
-            self.assertEqual(len(rsync_results[0]["source_files"]), 1)
-            self.assertEqual(os.path.basename(rsync_results[0]["source_files"][0][1]),
-                             "runsample1_filename",
-                             "first rsync transfers file 1")
-            self.assertEqual(len(rsync_results[1]["source_files"]), 1)
-            self.assertEqual(os.path.basename(rsync_results[1]["source_files"][0][1]),
-                             "runsample1_filename",
-                             "second rsync transfers file 1")
+            # b. check that nothing was rsynced
+            self.assertEqual(len(rsync_results[0]["source_files"]), 0)
+            self.assertEqual(len(rsync_results[1]["source_files"]), 0)
 
             # c. check server for directory
-            server_filename = runsample_filename(self.run, "runsample1_filename")
-            logger.debug("server filename is %s" % server_filename)
-            self.assertTrue(os.path.exists(server_filename),
-                            "%s exists on server" % server_filename)
-            self.assertTrue(os.path.isdir(server_filename),
-                            "%s is still a directory" % server_filename)
+            server_filename = runsample_filename(self.run, self.worklist[0])
+            self.assertFalse(os.path.exists(server_filename),
+                            "%s doesn't exist on server" % server_filename)
 
             # d. check sample completion status
             samples = self.run.runsample_set.order_by("filename")
