@@ -21,14 +21,6 @@ TESTING_MODULES="argparse dingus xvfbwrapper nose"
 MODULES="MySQL-python==1.2.3 psycopg2==2.4.6 Werkzeug flake8 ${TESTING_MODULES}"
 PIP_OPTS="-v -M --download-cache ~/.pip/cache"
 
-
-function usage() {
-    echo ""
-    echo "Usage ./develop.sh (test|lint|jslint|dropdb|start|install|clean|purge|pipfreeze|pythonversion|ci_remote_build|ci_staging|ci_staging_tests|ci_rpm_publish|ci_remote_destroy)"
-    echo ""
-}
-
-
 function settings() {
     export DJANGO_SETTINGS_MODULE="${PROJECT_NAME}.settings"
 }
@@ -152,10 +144,14 @@ function jslint() {
 
 # run the tests using django-admin.py
 function djangotests() {
+    TEST_EXCLUDES="--exclude=yaphc --exclude=esky --exclude=httplib2"
+    TEST_LIST="mastrms.repository.tests mastrms.mdatasync_client.client.test.tests mastrms.mdatasync_server.tests"
+    LIVESERVER="--liveserver=localhost:8082,8090-8100,9000-9200,7041"
+
     activate_virtualenv
-    django-admin.py test --noinput --with-xunit --xunit-file=tests.xml \
-        --exclude="esky" --exclude="yaphc" --exclude="httplib2" \
-        ${PROJECT_NAME}
+    dbus-launch django-admin.py test --noinput ${LIVESERVER} \
+        --with-xunit --xunit-file=tests.xml \
+        ${TEST_EXCLUDES} ${TEST_LIST} || true
 }
 
 
@@ -229,12 +225,11 @@ function purge() {
 }
 
 
-function runtest() {
-    #nosetests
-    djangotests
+function usage() {
+    echo ""
+    echo "Usage ./develop.sh (test|lint|jslint|dropdb|start|install|clean|purge|pipfreeze|pythonversion|ci_remote_build|ci_staging|ci_staging_tests|ci_rpm_publish|ci_remote_destroy)"
+    echo ""
 }
-
-
 
 case ${ACTION} in
 pythonversion)
@@ -245,7 +240,7 @@ pipfreeze)
     ;;
 test)
     settings
-    runtest
+    djangotests
     ;;
 lint)
     lint
