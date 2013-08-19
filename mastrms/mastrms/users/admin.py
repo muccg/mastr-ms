@@ -6,51 +6,32 @@ from mastrms.users.models import User
 from django import forms
 
 class MAUserChangeForm(UserChangeForm):
-    class Meta:
+    class Meta(UserChangeForm.Meta):
         model = User
-        # fields = (
-        #     "username", "first_name", "last_name",
-        #     "email", "password",
-        #     "is_staff", "is_active", "is_superuser",
-        #     "last_login", "date_joined",
-        #     "groups", "user_permissions",
-        #     "commonName", "givenName", "sn", "mail",
-        #     "telephoneNumber", "homePhone",
-        #     "physicalDeliveryOfficeName", "title",
-        #     "destinationIndicator", "description", "postalAddress",
-        #     "businessCategory", "registeredAddress",
-        #     "carLicense", "passwordResetKey")
 
-    commonName = forms.CharField(required=False)
-    givenName = forms.CharField(required=False)
-    sn = forms.CharField(required=False)
-    mail = forms.CharField(required=False)
-    telephoneNumber = forms.CharField(required=False)
-    homePhone = forms.CharField(required=False)
-    physicalDeliveryOfficeName = forms.CharField(required=False)
-    title = forms.CharField(required=False)
-    destinationIndicator = forms.CharField(required=False)
-    description = forms.CharField(required=False)
-    postalAddress = forms.CharField(required=False)
-    businessCategory = forms.CharField(required=False)
-    registeredAddress = forms.CharField(required=False)
-    carLicense = forms.CharField(required=False)
-    passwordResetKey = forms.CharField(required=False)
+    physicalDeliveryOfficeName = forms.CharField(label="Office", required=False)
+    telephoneNumber = forms.CharField(label="Office Phone", required=False)
+    homePhone = forms.CharField(label="Home Phone", required=False)
+    title = forms.CharField(label="Position", required=False)
+    destinationIndicator = forms.CharField(label="Department", required=False)
+    businessCategory = forms.CharField(label="Institute", required=False)
+    postalAddress = forms.CharField(label="Address", required=False)
+    registeredAddress = forms.CharField(label="Supervisor", required=False)
+    description = forms.CharField(label="Area of Interest", required=False)
+    carLicense = forms.CharField(label="Country", required=False)
+    passwordResetKey = forms.CharField(label="Password Reset Key", required=False)
 
 class MAUserAdmin(UserAdmin):
     form = MAUserChangeForm
     ma_fieldsets = (
         ("Other info", {'fields': (
-                    "commonName", "givenName", "sn", "mail",
+                    "physicalDeliveryOfficeName",
                     "telephoneNumber", "homePhone",
-                    "physicalDeliveryOfficeName", "title",
-                    "destinationIndicator", "description", "postalAddress",
+                    "title", "destinationIndicator",
                     "businessCategory", "registeredAddress",
-                    "carLicense", "passwordResetKey")}),)
+                    "postalAddress", "description", "carLicense")}),)
 
-    def get_fieldsets(self, request, obj=None):
-        fieldsets = super(MAUserAdmin, self).get_fieldsets(request, obj)
-        return fieldsets + self.ma_fieldsets
+    fieldsets = UserAdmin.fieldsets + ma_fieldsets
 
 # register the django auth admins
 try:
