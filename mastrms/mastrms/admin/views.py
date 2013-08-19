@@ -89,21 +89,10 @@ def user_load(request, *args):
        Accessible by Administrators, Node Reps
     '''
     logger.debug('***admin/user_load : enter ***' )
-    #find user organisation
-    try:
-        u = User.objects.get(username=request.REQUEST['username'])
-        d = u.get_client_dict()
-        orgs = UserOrganisation.objects.filter(user=u)
-        d['organisation'] = ''
-        if len(orgs) > 0:
-            d['organisation'] = orgs[0].organisation.id
-            logger.debug('user in org %d' % (orgs[0].organisation.id))
-    except Exception, e:
-        logger.debug('Exception loading organisation %s' % (str(e)) )
-        d = {}
-
+    u = User.objects.get(username=request.REQUEST['username'])
+    d = u.get_client_dict()
     logger.debug('***admin/user_load : exit ***' )
-    return jsonResponse(data=d)
+    return jsonResponse(data=[d])
 
 @privileged_only
 def user_save(request, *args):
