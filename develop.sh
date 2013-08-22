@@ -3,12 +3,12 @@
 # Script to control Mastrms in dev and test
 #
 
-# break on error
-set -e 
-
 TOPDIR=$(cd `dirname $0`; pwd)
 ACTION=$1
 shift
+
+# break on error
+set -e
 
 PORT='8000'
 
