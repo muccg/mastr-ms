@@ -8,50 +8,13 @@ from django.core.files.storage import FileSystemStorage
 from django.conf import settings
 from mastrms.quote.models import Organisation, Formalquote
 from mastrms.mdatasync_server.models import NodeClient
-from mastrms.users.models import User, getMadasUser
+from mastrms.users.models import User
 from mastrms.app.utils.file_utils import ensure_repo_filestore_dir_with_owner
 
 logger = logging.getLogger('mastrms.general')
 
-
 class SampleNotInClassException(Exception):
     pass
-
-class NotAuthorizedError(StandardError):
-    pass
-
-class MadasUser(User):
-    class Meta:
-        proxy = True
-
-    def __init__(self, *args, **kwargs):
-        User.__init__(self, *args, **kwargs)
-        self.magroups = None
-
-    def set_magroups(self, groups):
-        if groups is None: groups = tuple()
-        self.magroups = groups
-
-    @property
-    def is_admin(self):
-        assert self.magroups is not None, "Groups not set"
-        return ('Administrators' in self.magroups)
-
-    @property
-    def is_noderep(self):
-        assert self.magroups is not None, "Groups not set"
-        return ('Node Reps' in self.magroups)
-
-    @property
-    def is_client(self):
-        assert self.magroups is not None, "Groups not set"
-        return len(self.magroups) == 0
-
-    def is_project_manager_of(self, project):
-        return self.pk in [m.pk for m in project.managers.all()]
-
-    def is_client_of(self, project):
-        return (project.client and self.pk == project.client.pk)
 
 class OrganismType(models.Model):
     """Currently, Microorganism, Plant, Animal or Human"""
@@ -692,10 +655,9 @@ class RuleGenerator(models.Model):
         return list(self.rulegeneratorendblock_set.all())
 
     def is_accessible_by(self, user):
-        mauser = getMadasUser(user.username)
-        if mauser.IsAdmin or mauser.IsMastrAdmin or \
+        if user.IsAdmin or user.IsMastrAdmin or \
            (self.is_accessible_by_user and user.id == self.created_by.id) or \
-           (self.is_accessible_by_node and mauser.PrimaryNode == self.node) or \
+           (self.is_accessible_by_node and user.PrimaryNode == self.node) or \
            (self.is_accessible_by_all):
            return True
         else:
