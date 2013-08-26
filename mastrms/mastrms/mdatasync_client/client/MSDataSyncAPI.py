@@ -980,7 +980,7 @@ class DataSyncServer(object):
         sync_baseurl = self.config.getValue('synchub')
         slash = "/" if not sync_baseurl.endswith('/') else ""
         path = "".join(elem + "/" for elem in path)
-        return sync_baseurl + slash + path
+        return sync_baseurl + slash + urllib.quote(path)
 
     def _get_requestsync_url(self, site):
         return self._get_synchub_url("requestsync", site.url())
