@@ -532,13 +532,10 @@ class RunSample(models.Model):
         else:
             return "%s_%s-%s.d"  % (self.component.filename_prefix, self.run.id, self.id)
 
-    def get_sample_name(self):
-        #for now, just return the filename without the .d suffix
-        #this is a poor implementation
-        #TODO better implementation
-        return self.filename[:-2]
-
-    sample_name = property(get_sample_name, None)
+    @property
+    def sample_name(self):
+        "Just returns the filename without the .d suffix"
+        return self.filename.rstrip(".d")
 
     def is_sample(self):
         return self.component_id == 0
