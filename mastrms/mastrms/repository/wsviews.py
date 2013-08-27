@@ -2126,6 +2126,31 @@ def uploadCSVFile(request):
 
     return HttpResponse(json.dumps(output))
 
+
+@mastr_users_only
+def uploadRunCaptureCSV(request):
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+
+    expId = request.POST.get('experiment_id', None)
+    if expId is None:
+        return HttpResponseBadRequest(json.dumps({ 'success': False, 'msg': 'need experiment_id param' }))
+    try:
+        experiment = Experiment.objects.get(id=expId)
+    except Experiment.DoesNotExist, e:
+        return HttpResponseBadRequest(json.dumps({ 'success': False, 'msg': str(e) }))
+
+    if request.FILES.has_key('runcapturecsv'):
+        f = request.FILES['runcapturescv']
+        output = _handle_uploaded_sample_csv(experiment, f)
+    else:
+        output = { "success": False, "msg": "No file attached." }
+
+    return HttpResponse(json.dumps(output))
+
+def _handle_uploaded_run_capture_csv(experiment, csvfile):
+    pass
+
 def _handle_uploaded_sample_csv(experiment, csvfile):
     """
     Read a file object of CSV text and create samples from it.
@@ -2157,8 +2182,19 @@ def _handle_uploaded_sample_csv(experiment, csvfile):
 def _read_uploaded_sample_csv(csvfile, output):
     """
     This generates (sample_id, label, weight, comment) triples from
-    the CSV text. The `output` dict is updated if there are parse
-    errors, etc.
+    the CSV text. 
+    """
+    required = ["LABEL", "WEIGHT", "COMMENT"]
+    cleanup = lambda label, weight, comment: (label, Decimal(weight), comment)
+    return _read_csv(csvfile, output, required, cleanup)
+
+def _read_csv(csvfile, output, column_names, convert_fn):
+    """
+    The `output` dict is updated if there are parse
+    errors, etc. In addition to required cols in `column_names` and 
+    optional ID column is looked for. `convert_fn` is called with values
+    in the same order as `column_names` for any casts, cleanup requried, 
+    before the values are yielded.
     """
     max_error = 10
     def add_format_error(output, msg):
@@ -2186,8 +2222,6 @@ def _read_uploaded_sample_csv(csvfile, output):
 
         data = csv.reader(csvfile)
 
-        WANTED_COLS = ["LABEL", "WEIGHT", "COMMENT"]
-
         if len(snuff.splitlines()) > 1 and csv.Sniffer().has_header(snuff):
             header = [h.upper().strip() for h in data.next()]
             def find(name):
@@ -2195,11 +2229,11 @@ def _read_uploaded_sample_csv(csvfile, output):
                     return header.index(name)
                 except ValueError:
                     return -1
-            cols = map(find, WANTED_COLS)
+            cols = map(find, column_names)
             start_line = 2
 
             # check for required columns
-            missing = [WANTED_COLS[i] for i,j in enumerate(cols) if j < 0]
+            missing = [column_names[i] for i,j in enumerate(cols) if j < 0]
             if missing:
                 missing = ("Column %s is missing" % m for m in missing)
                 output.update({ "success": False,
@@ -2211,12 +2245,10 @@ def _read_uploaded_sample_csv(csvfile, output):
             id_col = find("ID")
             if id_col < 0:
                 id_col = find("# ID")
-            cols.insert(0, id_col)
         else:
-            cols = [-1, 0, 1, 2]
+            id_col = -1
+            cols = range(len(column_names))
             start_line = 1
-
-        id_col, label_col, weight_col, comment_col = cols
 
         def parse_id(row):
             "Converts the optional id cell to either an int or None"
@@ -2229,10 +2261,7 @@ def _read_uploaded_sample_csv(csvfile, output):
             if len(row) == 0:
                 continue
             try:
-                yield (parse_id(row),
-                       row[label_col],
-                       Decimal(row[weight_col]),
-                       row[comment_col])
+                yield [parse_id(row)] + list(convert_fn(*[row[t] for t in cols]))
             except ValueError, e:
                 add_format_error(output, "Incorrectly formatted id integer")
             except DecimalException, e:
