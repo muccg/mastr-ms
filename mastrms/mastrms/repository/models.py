@@ -352,7 +352,7 @@ class Run(models.Model):
     creator = models.ForeignKey(User)
     title = models.CharField(max_length=255,null=True,blank=True)
     samples = models.ManyToManyField(Sample, through="RunSample")
-    machine = models.ForeignKey(NodeClient, null=True, blank=True)
+    machine = models.ForeignKey(NodeClient, null=True, blank=True, db_index=True)
     generated_output = models.TextField(null=True, blank=True)
     state = models.SmallIntegerField(choices=RUN_STATES_TUPLES, default=0, db_index=True)
     sample_count = models.IntegerField(default=0)
@@ -361,7 +361,6 @@ class Run(models.Model):
     rule_generator = models.ForeignKey('RuleGenerator')
     number_of_methods = models.IntegerField(null=True, blank=True)
     order_of_methods = models.IntegerField(choices=METHOD_ORDERS, null=True, blank=True)
-
 
     def sortedSamples(self):
         #TODO if method indicates randomisation and blanks, now is when we would do it
