@@ -2142,11 +2142,14 @@ def _handle_uploaded_run_capture_csv(experiment, csvfile):
                "num_created": 0,
                "num_updated": 0 }
 
-    run = Run
+    # don't save until we're sure we made it through. not using the create/ 
+    # API endpoint as that'd leave cruft around if the CSV file can't be parsed
+    run = Run()
 
     # sample_id ignored for now..
     for sample_id, filename in _read_uploaded_run_capture_csv(csvfile, output):
-        logger.debug(x)
+        logger.debug(sample_id)
+        logger.debug(filename)
 
     return output
 

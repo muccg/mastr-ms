@@ -7,12 +7,12 @@ runListStore = new Ext.data.GroupingStore({
 });
 
 MA.RunCaptureCSVUploadForm = new Ext.Window({
-    title: 'Upload CSV of already completed runs to capture',
+    title: 'Upload CSV of Completed External Run',
     closeAction:'hide',
-    width:330,
-    height:250,
-    minHeight:250,
-    minWidth:330,
+    width:450,
+    height:450,
+    minHeight:450,
+    minWidth:450,
     id:'runCaptureCSVUploadWindow',
     defaults: {
         bodyStyle:'padding:15px;background:transparent;'
@@ -32,6 +32,47 @@ MA.RunCaptureCSVUploadForm = new Ext.Window({
                     name: 'experiment_id',
                     itemId: 'expIdField'
                 },
+                new Ext.form.ComboBox({
+                    fieldLabel: 'Instrument method',
+                    itemId: 'method',
+                    name: 'method_id',
+                    editable:false,
+                    forceSelection:true,
+                    displayField:'value',
+                    valueField:'key',
+                    hiddenName:'method_id',
+                    lazyRender:true,
+                    allowBlank:false,
+                    typeAhead:false,
+                    triggerAction:'all',
+                    listWidth:230,
+                    width: 200,
+                    store: methodStore
+                }),
+                new Ext.form.ComboBox({
+                    fieldLabel: 'Machine',
+                    itemId: 'machine',
+                    name: 'machine_id',
+                    editable:false,
+                    forceSelection:true,
+                    displayField:'station_name',
+                    valueField:'id',
+                    hiddenName:'machine_id',
+                    lazyRender:true,
+                    allowBlank:false,
+                    typeAhead:false,
+                    triggerAction:'all',
+                    mode:'local',
+                    listWidth:230,
+                    width: 200,
+                    store: machineStore,
+                    itemSelector: 'div.search-item',
+                    tpl:new Ext.XTemplate(
+                    '<tpl for="."><div style="padding:8px;padding-top:5px;padding-bottom:5px;border-bottom:1px solid #ccc;" class="search-item">',
+                    '{station_name}<br /><span style="color:#666;">{organisation_name} > {site_name}</span>',
+                    '</div></tpl>'
+                    )
+                }),
                 {
                     xtype: 'panel',
                     border: false,
@@ -204,7 +245,7 @@ MA.RunList = Ext.extend(Ext.Panel, {
                             }
                         },
                         {
-                            text: "Capture Completed",
+                            text: "Capture Completed External Run",
                             cls: "x-btn-text-icon",
                             icon: "static/images/arrow-up.png",
                             handler: function () {
