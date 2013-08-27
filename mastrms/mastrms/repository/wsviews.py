@@ -2134,7 +2134,21 @@ def uploadCSVWrapper(request, file_field_name, csv_handler_fn):
     return HttpResponse(json.dumps(output))
 
 def _handle_uploaded_run_capture_csv(experiment, csvfile):
-    pass
+    """
+    Read a file object of CSV text and create RunSample instances from it.
+    Returns a "success" dict suitable for returning to the client.
+    """
+    output = { "success": True,
+               "num_created": 0,
+               "num_updated": 0 }
+
+    run = Run
+
+    # sample_id ignored for now..
+    for sample_id, filename in _read_uploaded_run_capture_csv(csvfile, output):
+        logger.debug(x)
+
+    return output
 
 def _handle_uploaded_sample_csv(experiment, csvfile):
     """
@@ -2163,6 +2177,15 @@ def _handle_uploaded_sample_csv(experiment, csvfile):
         s.save()
 
     return output
+
+def _read_uploaded_run_capture_csv(csvfile, output):
+    """
+    this generates (sample_id, filename) tuples from 
+    the CSV text.
+    """
+    required = ["FILENAME"]
+    cleanup = lambda *args: args
+    return _read_csv(csvfile, output, required, cleanup)
 
 def _read_uploaded_sample_csv(csvfile, output):
     """
