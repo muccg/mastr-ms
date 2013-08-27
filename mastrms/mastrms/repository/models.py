@@ -358,7 +358,7 @@ class Run(models.Model):
     sample_count = models.IntegerField(default=0)
     incomplete_sample_count = models.IntegerField(default=0)
     complete_sample_count = models.IntegerField(default=0)
-    rule_generator = models.ForeignKey('RuleGenerator')
+    rule_generator = models.ForeignKey('RuleGenerator', null=True, blank=True)
     number_of_methods = models.IntegerField(null=True, blank=True)
     order_of_methods = models.IntegerField(choices=METHOD_ORDERS, null=True, blank=True)
 

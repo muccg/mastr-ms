@@ -54,7 +54,7 @@ def create_object(request, model):
 
         if model == 'run':
             obj.creator = request.user
-            if not obj.rule_generator.is_accessible_by(request.user):
+            if (obj.rule_generator is not None) and (not obj.rule_generator.is_accessible_by(request.user)):
                 return HttpResponseForbidden("Invalid rule generator for run");
             if obj.number_of_methods in ('', 'null'):
                 obj.number_of_methods = None
@@ -371,7 +371,7 @@ def update_object(request, model, id):
         #TODO clean this stuff up!
         if model == 'run':
             logger.debug('updating run.')
-            if not row.rule_generator.is_accessible_by(request.user):
+            if (row.rule_generator is not None) and (not row.rule_generator.is_accessible_by(request.user)):
                 return HttpResponseForbidden("Invalid rule generator for run");
 
             if row.number_of_methods in ('', 'null'):
