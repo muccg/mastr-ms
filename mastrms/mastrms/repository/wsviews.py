@@ -2107,28 +2107,13 @@ def _handle_uploaded_file(f, name, experiment_id):
 
 @mastr_users_only
 def uploadCSVFile(request):
-    if request.method != "POST":
-        return HttpResponseNotAllowed(["POST"])
-
-    expId = request.POST.get('experiment_id', None)
-    if expId is None:
-        return HttpResponseBadRequest(json.dumps({ 'success': False, 'msg': 'need experiment_id param' }))
-    try:
-        experiment = Experiment.objects.get(id=expId)
-    except Experiment.DoesNotExist, e:
-        return HttpResponseBadRequest(json.dumps({ 'success': False, 'msg': str(e) }))
-
-    if request.FILES.has_key('samplecsv'):
-        f = request.FILES['samplecsv']
-        output = _handle_uploaded_sample_csv(experiment, f)
-    else:
-        output = { "success": False, "msg": "No file attached." }
-
-    return HttpResponse(json.dumps(output))
-
+    return uploadCSVWrapper(request, 'samplecsv', _handle_uploaded_sample_csv)
 
 @mastr_users_only
 def uploadRunCaptureCSV(request):
+    return uploadCSVWrapper(request, 'runcapturecsv', _handle_uploaded_run_capture_csv)
+
+def uploadCSVWrapper(request, file_field_name, csv_handler_fn):
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
 
@@ -2140,9 +2125,9 @@ def uploadRunCaptureCSV(request):
     except Experiment.DoesNotExist, e:
         return HttpResponseBadRequest(json.dumps({ 'success': False, 'msg': str(e) }))
 
-    if request.FILES.has_key('runcapturecsv'):
-        f = request.FILES['runcapturescv']
-        output = _handle_uploaded_sample_csv(experiment, f)
+    if request.FILES.has_key(file_field_name):
+        f = request.FILES[file_field_name]
+        output = csv_handler_fn(experiment, f)
     else:
         output = { "success": False, "msg": "No file attached." }
 
