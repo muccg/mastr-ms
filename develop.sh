@@ -80,12 +80,21 @@ function ci_remote_build() {
     ccg ${AWS_BUILD_INSTANCE} getfile:rpmbuild/RPMS/x86_64/${PROJECT_NAME}*.rpm,build/
 }
 
-
-# publish rpms 
+# publish rpms to testing repo
 function ci_rpm_publish() {
-    time ccg ${AWS_BUILD_INSTANCE} publish_rpm:build/${PROJECT_NAME}*.rpm,release=6
+    time ccg ${AWS_BUILD_INSTANCE} publish_testing_rpm:build/${PROJECT_NAME}*.rpm,release=6
 }
 
+# copy a version from testing repo to release repo
+function ci_rpm_release() {
+    if [ -z "$1" ]; then
+        echo "ci_rpm_release requires an rpm filename argument"
+        usage
+        exit 1
+    fi
+
+    time ccg ${AWS_BUILD_INSTANCE} release_rpm:$1,release=6
+}
 
 # destroy our ci build server
 function ci_remote_destroy() {
@@ -234,7 +243,7 @@ function purge() {
 
 function usage() {
     echo ""
-    echo "Usage ./develop.sh (test|nosetests|lint|jslint|dropdb|start|install|clean|purge|pipfreeze|pythonversion|ci_remote_build|ci_staging|ci_staging_tests|ci_rpm_publish|ci_remote_destroy)"
+    echo "Usage ./develop.sh (test|nosetests|lint|jslint|dropdb|start|install|clean|purge|pipfreeze|pythonversion|ci_remote_build|ci_staging|ci_staging_tests|ci_rpm_publish|ci_rpm_release VERSION|ci_remote_destroy)"
     echo ""
 }
 
@@ -282,6 +291,10 @@ ci_remote_destroy)
 ci_rpm_publish)
     ci_ssh_agent
     ci_rpm_publish
+    ;;
+ci_rpm_release)
+    ci_ssh_agent
+    ci_rpm_release $*
     ;;
 ci_staging)
     ci_ssh_agent
