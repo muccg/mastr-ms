@@ -853,12 +853,35 @@ def populate_select(request, model=None, key=None, value=None, field=None, match
 def update_single_source(request, exp_id):
 
     args = request.GET.copy()
+    # fixme: a ModelForm could be used here
 
     for key in args.keys():
-        if args[key] == '':
-            args[key] = None
-        if key == 'sex' and (args[key] == '' or args[key] == 'null'):
-            args[key] = u'U'
+        if args[key] in ('', 'null', 'undefined'):
+            del args[key]
+
+    def arg_str(key):
+        return args.get(key, "")
+
+    def arg_sex():
+        return arg_str("sex") or u'U'
+
+    def arg_int(key):
+        if key in args:
+            try: return int(args[key])
+            except ValueError: pass
+        return None
+
+    def arg_decimal(key):
+        if key in args:
+            try: return Decimal(args[key])
+            except DecimalException: pass
+        return None
+
+    def arg_date(key):
+        if key in args:
+            try: return datetime.strptime(args[key], "%Y-%m-%d").date()
+            except ValueError: pass
+        return None
 
     output = {'metaData': { 'totalProperty': 'results',
                             'successProperty': 'success',
@@ -879,155 +902,69 @@ def update_single_source(request, exp_id):
         output['success'] = False
     else:
         try:
+            # fixme: what about multiple objects returned?
             bs = BiologicalSource.objects.get(experiment=e)
         except ObjectDoesNotExist:
             bs = BiologicalSource(experiment=e)
 
         bs.type = OrganismType.objects.get(id=args['type'])
-        bs.information = args['information']
-        try:
-            bs.ncbi_id = int(args['ncbi_id'])
-        except:
-            bs.ncbi_id = None
-        #bs.label = args['label']
+        bs.information = arg_str('information')
+        bs.ncbi_id = arg_int('ncbi_id')
+        #bs.label = arg_str('label')
         bs.save()
 
+        def get_bio_info(Cls):
+            # check for existing items
+            infos = Cls.objects.filter(source=bs)
+            if len(infos) == 0:
+                return Cls(source=bs)
+            else:
+                return infos[0]
+
         #process additional info
-        if int(args['type']) == 1:
-            #check for existing items
-            if bs.microbialinfo_set.count() == 0:
-                mi = MicrobialInfo()
-                mi.genus = args['genus']
-                mi.species = args['species']
-                mi.culture_collection_id = args['culture']
-                mi.media = args['media']
-                mi.fermentation_vessel = args['vessel']
-                mi.fermentation_mode = args['mode']
-                try:
-                    mi.innoculation_density = str(float(args['density']))
-                except:
-                    pass
-                try:
-                    mi.fermentation_volume = str(float(args['volume']))
-                except:
-                    pass
-                try:
-                    mi.temperature = str(float(args['temperature']))
-                except:
-                    pass
-                try:
-                    mi.agitation = str(float(args['agitation']))
-                except:
-                    pass
-                try:
-                    mi.ph = str(float(args['ph']))
-                except:
-                    pass
-                mi.gas_type = args['gastype']
-                try:
-                    mi.gas_flow_rate = str(float(args['flowrate']))
-                except:
-                    pass
-                mi.gas_delivery_method = args['delivery']
-                mi.gas_delivery_method = args['delivery']
+        if arg_int('type') == 1:
+            info = get_bio_info(MicrobialInfo)
+            info.genus = arg_str('genus')
+            info.species = arg_str('species')
+            info.culture_collection_id = arg_str('culture')
+            info.media = arg_str('media')
+            info.fermentation_vessel = arg_str('vessel')
+            info.fermentation_mode = arg_str('mode')
+            info.innoculation_density = arg_decimal('density')
+            info.fermentation_volume = arg_decimal('volume')
+            info.temperature = arg_decimal('temperature')
+            info.agitation = arg_decimal('agitation')
+            info.ph = arg_decimal('ph')
+            info.gas_type = arg_str('gastype')
+            info.gas_flow_rate = arg_decimal('flowrate')
+            info.gas_delivery_method = arg_str('delivery')
+        elif arg_int('type') == 2:
+            info = get_bio_info(PlantInfo)
+            info.development_stage = arg_str('development_stage')
+        elif arg_int('type') == 3:
+            info = get_bio_info(AnimalInfo)
+            info.sex = arg_sex()
+            info.age = arg_int('age')
+            info.parental_line = arg_str('parental_line')
+            info.location = arg_str('location')
+            # info.notes = arg_str('notes')
+        elif arg_int('type') == 4:
+            info = get_bio_info(HumanInfo)
+            info.sex = arg_sex()
+            info.date_of_birth = arg_date('date_of_birth')
+            info.bmi = arg_decimal('bmi')
+            info.diagnosis = arg_str('diagnosis')
+            info.location = arg_str('location')
+            # info.notes = arg_str('notes')
+        else:
+            info = None
 
-                bs.microbialinfo_set.add(mi)
-            else:
-                mi = bs.microbialinfo_set.all()[0]
-                try:
-                    mi.genus = args['genus']
-                    mi.species = args['species']
-                    mi.culture_collection_id = args['culture']
-                    mi.media = args['media']
-                    mi.fermentation_vessel = args['vessel']
-                    mi.fermentation_mode = args['mode']
-                except:
-                    pass
-                try:
-                    mi.innoculation_density = str(float(args['density']))
-                except:
-                    pass
-                try:
-                    mi.fermentation_volume = str(float(args['volume']))
-                except:
-                    pass
-                try:
-                    mi.temperature = str(float(args['temperature']))
-                except:
-                    pass
-                try:
-                    mi.agitation = str(float(args['agitation']))
-                except:
-                    pass
-                try:
-                    mi.ph = str(float(args['ph']))
-                except:
-                    pass
-                try:
-                    mi.gas_type = args['gastype']
-                except:
-                    pass
-                try:
-                    mi.gas_flow_rate = str(float(args['flowrate']))
-                except:
-                    pass
-                try:
-                    mi.gas_delivery_method = args['delivery']
-                except:
-                    pass
-
-                mi.save()
-        elif int(args['type']) == 2:
-            if bs.plantinfo_set.count() == 0:
-                pi = PlantInfo()
-                pi.development_stage = args['development_stage']
-                bs.plantinfo_set.add(pi)
-            else:
-                pi = bs.plantinfo_set.all()[0]
-                pi.development_stage = args['development_stage']
-                pi.save()
-        elif int(args['type']) == 3:
-            if bs.animalinfo_set.count() == 0:
-                ai = AnimalInfo()
-                ai.sex = args['sex']
-                try:
-                    ai.age = str(int(args['age']))
-                except:
-                    pass
-                ai.parental_line = args['parental_line']
-                ai.location = args['location']
-#                ai.notes = args['notes']
-                bs.animalinfo_set.add(ai)
-            else:
-                ai = bs.animalinfo_set.all()[0]
-                ai.sex = args['sex']
-                try:
-                    ai.age = str(int(args['age']))
-                except:
-                    pass
-                ai.parental_line = args['parental_line']
-                ai.location = args['location']
-#                ai.notes = args['notes']
-                ai.save()
-        elif int(args['type']) == 4:
-            if bs.humaninfo_set.count() == 0:
-                hi = HumanInfo()
-                hi.sex = args['sex']
-                hi.date_of_birth = args['date_of_birth']
-                hi.bmi = args['bmi']
-                hi.diagnosis = args['diagnosis']
-                hi.location = args['location']
-#                hi.notes = args['notes']
-                bs.humaninfo_set.add(hi)
-            else:
-                hi = bs.humaninfo_set.all()[0]
-                hi.sex = args['sex']
-                hi.date_of_birth = args['date_of_birth']
-                hi.bmi = args['bmi']
-                hi.diagnosis = args['diagnosis']
-                hi.location = args['location']
-#                hi.notes = args['notes']
-                hi.save()
+        if info:
+            try:
+                info.save()
+            except Exception, e:
+                output['success'] = False
+                output['msg'] = str(e)
 
     return HttpResponse(json.dumps(output))
 
@@ -2142,7 +2079,7 @@ def _handle_uploaded_run_capture_csv(experiment, csvfile):
                "num_created": 0,
                "num_updated": 0 }
 
-    # don't save until we're sure we made it through. not using the create/ 
+    # don't save until we're sure we made it through. not using the create/
     # API endpoint as that'd leave cruft around if the CSV file can't be parsed
     run = Run()
 
@@ -2183,7 +2120,7 @@ def _handle_uploaded_sample_csv(experiment, csvfile):
 
 def _read_uploaded_run_capture_csv(csvfile, output):
     """
-    this generates (sample_id, filename) tuples from 
+    this generates (sample_id, filename) tuples from
     the CSV text.
     """
     required = ["FILENAME"]
@@ -2193,7 +2130,7 @@ def _read_uploaded_run_capture_csv(csvfile, output):
 def _read_uploaded_sample_csv(csvfile, output):
     """
     This generates (sample_id, label, weight, comment) triples from
-    the CSV text. 
+    the CSV text.
     """
     required = ["LABEL", "WEIGHT", "COMMENT"]
     cleanup = lambda label, weight, comment: (label, Decimal(weight), comment)
@@ -2202,9 +2139,9 @@ def _read_uploaded_sample_csv(csvfile, output):
 def _read_csv(csvfile, output, column_names, convert_fn):
     """
     The `output` dict is updated if there are parse
-    errors, etc. In addition to required cols in `column_names` and 
+    errors, etc. In addition to required cols in `column_names` and
     optional ID column is looked for. `convert_fn` is called with values
-    in the same order as `column_names` for any casts, cleanup requried, 
+    in the same order as `column_names` for any casts, cleanup requried,
     before the values are yielded.
     """
     max_error = 10
