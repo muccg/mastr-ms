@@ -28,9 +28,9 @@ class BiologicalSource(models.Model):
     experiment = models.ForeignKey('Experiment')
     abbreviation = models.CharField(max_length=5)
     type = models.ForeignKey(OrganismType)
-    information = models.TextField(null=True, blank=True)
+    information = models.TextField(blank=True)
     ncbi_id = models.PositiveIntegerField(null=True, blank=True)
-    label = models.CharField(max_length=50, null=True, blank=True)
+    label = models.CharField(max_length=50, blank=True)
 
     def __unicode__(self):
         return ("%s %s %s %s" % (self.abbreviation, self.type, self.ncbi_id, self.label)).replace('None', '--')
@@ -48,8 +48,8 @@ class AnimalInfo(models.Model):
     sex = models.CharField(max_length=2, choices=GENDER_CHOICES, default=u'U')
     age = models.PositiveIntegerField(null=True, blank=True)
     parental_line = models.CharField(max_length=255)
-    location = models.CharField(max_length=255, null=True, blank=True)
-    notes = models.TextField(null=True)
+    location = models.CharField(max_length=255, blank=True)
+    notes = models.TextField(blank=True)
 
     def __unicode__(self):
         return u"%s - %s - %s" % (self.sex, str(self.age), self.parental_line)
@@ -59,9 +59,9 @@ class PlantInfo(models.Model):
         verbose_name_plural = "Plant information"
 
     source = models.ForeignKey(BiologicalSource)
-    development_stage = models.CharField(max_length=255, null=True, blank=True)
-    location = models.CharField(max_length=255, null=True, blank=True)
-    growing_place = models.CharField(max_length=255, null=True, blank=True)
+    development_stage = models.CharField(max_length=255, blank=True)
+    location = models.CharField(max_length=255, blank=True)
+    growing_place = models.CharField(max_length=255, blank=True)
     seeded_on = models.DateField(null=True, blank=True)
     transplated_on = models.DateField(null=True, blank=True)
     harvested_on = models.DateField(null=True, blank=True)
@@ -70,8 +70,8 @@ class PlantInfo(models.Model):
     day_temp_cels = models.PositiveIntegerField(null=True, blank=True)
     light_hrs_per_day = models.DecimalField(null=True, max_digits=4, decimal_places=2, blank=True)
     light_fluence = models.DecimalField(null=True, max_digits=10, decimal_places=2, blank=True)
-    light_source = models.TextField(null=True, blank=True)
-    lamp_details = models.TextField(null=True, blank=True)
+    light_source = models.TextField(blank=True)
+    lamp_details = models.TextField(blank=True)
 
     def __unicode__(self):
         return u"%s - %s" % (self.development_stage, self.growing_place)
@@ -83,41 +83,41 @@ class HumanInfo(models.Model):
         (u'F', u'Female'),
         (u'U', u'Unknown')
     )
-    sex = models.CharField(null=True, max_length=2, choices=GENDER_CHOICES)
+    sex = models.CharField(max_length=2, choices=GENDER_CHOICES, default="U")
     date_of_birth = models.DateField(null=True, blank=True)
     bmi = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    diagnosis = models.TextField(null=True, blank=True)
-    location = models.CharField(max_length=255, null=True, blank=True)
-    notes = models.TextField(null=True, blank=True)
+    diagnosis = models.TextField(blank=True)
+    location = models.CharField(max_length=255, blank=True)
+    notes = models.TextField(blank=True)
 
     def __unicode__(self):
         return u"%s - %s - %s" % (self.sex, self.date_of_birth, self.location)
 
 class MicrobialInfo(models.Model):
     source = models.ForeignKey(BiologicalSource)
-    genus = models.CharField(max_length=255, null=True, blank=True)
-    species = models.CharField(max_length=255, null=True, blank=True)
-    culture_collection_id = models.CharField(max_length=255, null=True, blank=True)
-    media = models.CharField(max_length=255, null=True, blank=True)
-    fermentation_vessel = models.CharField(max_length=255, null=True, blank=True)
-    fermentation_mode = models.CharField(max_length=255, null=True, blank=True)
+    genus = models.CharField(max_length=255, blank=True)
+    species = models.CharField(max_length=255, blank=True)
+    culture_collection_id = models.CharField(max_length=255, blank=True)
+    media = models.CharField(max_length=255, blank=True)
+    fermentation_vessel = models.CharField(max_length=255, blank=True)
+    fermentation_mode = models.CharField(max_length=255, blank=True)
     innoculation_density = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     fermentation_volume = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     temperature = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     agitation = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     ph = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
-    gas_type = models.CharField(max_length=255, null=True, blank=True)
+    gas_type = models.CharField(max_length=255, blank=True)
     gas_flow_rate = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
-    gas_delivery_method = models.CharField(max_length=255, null=True, blank=True)
+    gas_delivery_method = models.CharField(max_length=255, blank=True)
 
     def __unicode__(self):
         return u"%s - %s" % (self.genus, self.species)
 
 class Organ(models.Model):
     experiment = models.ForeignKey('Experiment')
-    name = models.CharField(max_length=255, null=True, blank=True)
+    name = models.CharField(max_length=255, blank=True)
     abbreviation = models.CharField(max_length=5)
-    detail = models.CharField(max_length=255, null=True, blank=True)
+    detail = models.CharField(max_length=255, blank=True)
 
     def __unicode__(self):
         return self.name
@@ -127,14 +127,14 @@ class ExperimentStatus(models.Model):
         verbose_name_plural = "Experiment statuses"
 
     name = models.CharField(max_length=50)
-    description = models.TextField(null=True, blank=True)
+    description = models.TextField(blank=True)
 
     def __unicode__(self):
         return self.name
 
 class Project(models.Model):
     title = models.CharField(max_length=255)
-    description = models.TextField(null=True, blank=True)
+    description = models.TextField(blank=True)
     created_on = models.DateField(null=False, default=date.today)
     client = models.ForeignKey(User, null=True, blank=True)
     managers = models.ManyToManyField(User, related_name='managed_projects')
@@ -156,7 +156,7 @@ class InstrumentMethod(models.Model):
     randomisation = models.BooleanField(default=False)
     blank_at_start = models.BooleanField(default=False)
     blank_at_end = models.BooleanField(default=False)
-    blank_position = models.CharField(max_length=255,null=True,blank=True)
+    blank_position = models.CharField(max_length=255,blank=True)
     obsolete = models.BooleanField(default=False)
     obsolescence_date = models.DateField(null=True,blank=True)
 
@@ -167,8 +167,8 @@ class InstrumentMethod(models.Model):
 
 class Experiment(models.Model):
     title = models.CharField(max_length=255)
-    description = models.TextField(null=True, blank=True)
-    comment = models.TextField(null=True, blank=True)
+    description = models.TextField(blank=True)
+    comment = models.TextField(blank=True)
     users = models.ManyToManyField(User, through='UserExperiment', null=True, blank=True)
     status = models.ForeignKey(ExperimentStatus, null=True, blank=True)
     created_on = models.DateField(null=False, default=date.today)
@@ -176,7 +176,7 @@ class Experiment(models.Model):
     job_number = models.CharField(max_length=30)
     project = models.ForeignKey(Project)
     instrument_method = models.ForeignKey(InstrumentMethod, null=True, blank=True)
-    sample_preparation_notes = models.TextField(null=True, blank=True)
+    sample_preparation_notes = models.TextField(blank=True)
     # ? files
 
     @property
@@ -217,15 +217,15 @@ sopdir = 'sops'
 sopfs = FileSystemStorage(location=os.path.join(settings.REPO_FILES_ROOT, sopdir))
 
 class StandardOperationProcedure(models.Model):
-    responsible = models.CharField(max_length=255, null=True, blank=True)
-    label = models.CharField(max_length=255, null=True, blank=True)
-    area_where_valid = models.CharField(max_length=255, null=True, blank=True)
-    comment = models.CharField(max_length=255, null=True, blank=True)
-    organisation = models.CharField(max_length=255, null=True, blank=True)
-    version = models.CharField(max_length=255, null=True, blank=True)
-    defined_by = models.CharField(max_length=255, null=True, blank=True)
-    replaces_document = models.CharField(max_length=255, null=True, blank=True)
-    content = models.CharField(max_length=255, null=True, blank=True)
+    responsible = models.CharField(max_length=255, blank=True)
+    label = models.CharField(max_length=255, blank=True)
+    area_where_valid = models.CharField(max_length=255, blank=True)
+    comment = models.CharField(max_length=255, blank=True)
+    organisation = models.CharField(max_length=255, blank=True)
+    version = models.CharField(max_length=255, blank=True)
+    defined_by = models.CharField(max_length=255, blank=True)
+    replaces_document = models.CharField(max_length=255, blank=True)
+    content = models.CharField(max_length=255, blank=True)
 
     def _filepath(self, filename):
         ensure_repo_filestore_dir_with_owner(sopdir)
@@ -242,7 +242,7 @@ class Treatment(models.Model):
     experiment = models.ForeignKey('Experiment')
     abbreviation = models.CharField(max_length=5)
     name = models.CharField(max_length=255)
-    description = models.TextField(null=True, blank=True)
+    description = models.TextField(blank=True)
 
     def __unicode__(self):
         return self.name
@@ -250,7 +250,7 @@ class Treatment(models.Model):
 class SampleTimeline(models.Model):
     experiment = models.ForeignKey('Experiment')
     abbreviation = models.CharField(max_length=5)
-    timeline = models.CharField(max_length=255, null=True, blank=True)
+    timeline = models.CharField(max_length=255, blank=True)
 
     def __unicode__(self):
         if self.timeline == None:
@@ -296,7 +296,7 @@ class Sample(models.Model):
     sample_class = models.ForeignKey(SampleClass, null=True, blank=True)
     experiment = models.ForeignKey(Experiment)
     label = models.CharField(max_length=255)
-    comment = models.TextField(null=True, blank=True)
+    comment = models.TextField(blank=True)
     weight = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     sample_class_sequence = models.SmallIntegerField(default=1, db_index=True)
 
@@ -350,10 +350,10 @@ class Run(models.Model):
     method = models.ForeignKey(InstrumentMethod)
     created_on = models.DateField(null=False, default=date.today)
     creator = models.ForeignKey(User)
-    title = models.CharField(max_length=255,null=True,blank=True)
+    title = models.CharField(max_length=255,blank=True)
     samples = models.ManyToManyField(Sample, through="RunSample")
     machine = models.ForeignKey(NodeClient, null=True, blank=True, db_index=True)
-    generated_output = models.TextField(null=True, blank=True)
+    generated_output = models.TextField(blank=True)
     state = models.SmallIntegerField(choices=RUN_STATES_TUPLES, default=0, db_index=True)
     sample_count = models.IntegerField(default=0)
     incomplete_sample_count = models.IntegerField(default=0)
@@ -468,7 +468,7 @@ class UserExperiment(models.Model):
     user = models.ForeignKey(User)
     experiment = models.ForeignKey(Experiment)
     type = models.ForeignKey(UserInvolvementType)
-    additional_info = models.TextField(null=True, blank=True)
+    additional_info = models.TextField(blank=True)
 
     def __unicode__(self):
         return "%s-%s" % (self.user, self.experiment)
@@ -478,7 +478,7 @@ class RunSample(models.Model):
     SWEEP_ID = 6
     run = models.ForeignKey(Run)
     sample = models.ForeignKey(Sample, null=True, blank=True)
-    filename = models.CharField(max_length=255, null=True, blank=True)
+    filename = models.CharField(max_length=255, blank=True)
     complete = models.BooleanField(default=False, db_index=True)
     component = models.ForeignKey("Component", default=0)
     sequence = models.PositiveIntegerField(null=False, default=0)
@@ -605,7 +605,7 @@ class RuleGenerator(models.Model):
     previous_version = models.ForeignKey('RuleGenerator', null=True, blank=True)
     created_by = models.ForeignKey(User)
     created_on = models.DateTimeField(auto_now_add=True)
-    node = models.CharField(max_length=255, null=True)
+    node = models.CharField(max_length=255, blank=True)
 
     @property
     def full_name(self):
