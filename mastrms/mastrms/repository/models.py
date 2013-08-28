@@ -513,7 +513,7 @@ class RunSample(models.Model):
 
     def filepaths(self):
         if self.is_sample():
-            return self.sample.experiment.ensure_dir()
+            return self.run.experiment.ensure_dir()
         else:
             return self.run.ensure_dir()
 

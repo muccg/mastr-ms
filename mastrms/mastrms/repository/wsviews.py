@@ -2,7 +2,7 @@ from django.db import transaction
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden, HttpResponseNotAllowed, HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
-from mastrms.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RUN_STATES, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure, RuleGenerator, Component
+from mastrms.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RUN_STATES, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure, RuleGenerator, Component, NodeClient
 from mastrms.quote.models import Organisation, Formalquote
 from ccg.utils import webhelpers
 from django.utils import simplejson as json
@@ -26,6 +26,27 @@ import csv
 from django.conf import settings
 import logging
 logger = logging.getLogger('mastrms.general')
+
+class ClientLookupException(Exception):
+    """
+    exception message will be a json-encoded message suitable to return to the client
+    """
+    def __init__(self, msg):
+        json_message = json.dumps({
+            'success' : False,
+            'msg' : msg
+            })
+        super(ClientLookupException, self).__init__(json_message)
+
+def get_object_by_id_or_error(request, cls, key):
+    obj_id = request.POST.get(key, None)
+    if obj_id is None:
+        raise ClientLookupException('need %s param' % key)
+    try:
+        obj = cls.objects.get(id=obj_id)
+    except cls.DoesNotExist, e:
+        raise ClientLookupException(str(e))
+    return obj
 
 @mastr_users_only
 def create_object(request, model):
@@ -2054,23 +2075,20 @@ def uploadCSVWrapper(request, file_field_name, csv_handler_fn):
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
 
-    expId = request.POST.get('experiment_id', None)
-    if expId is None:
-        return HttpResponseBadRequest(json.dumps({ 'success': False, 'msg': 'need experiment_id param' }))
     try:
-        experiment = Experiment.objects.get(id=expId)
-    except Experiment.DoesNotExist, e:
-        return HttpResponseBadRequest(json.dumps({ 'success': False, 'msg': str(e) }))
+        experiment = get_object_by_id_or_error(request, Experiment, 'experiment_id')
+    except ClientLookupException, e:
+        return HttpResponseBadRequest(e.message)
 
     if request.FILES.has_key(file_field_name):
         f = request.FILES[file_field_name]
-        output = csv_handler_fn(experiment, f)
+        output = csv_handler_fn(request, experiment, f)
     else:
         output = { "success": False, "msg": "No file attached." }
 
     return HttpResponse(json.dumps(output))
 
-def _handle_uploaded_run_capture_csv(experiment, csvfile):
+def _handle_uploaded_run_capture_csv(request, experiment, csvfile):
     """
     Read a file object of CSV text and create RunSample instances from it.
     Returns a "success" dict suitable for returning to the client.
@@ -2079,18 +2097,38 @@ def _handle_uploaded_run_capture_csv(experiment, csvfile):
                "num_created": 0,
                "num_updated": 0 }
 
-    # don't save until we're sure we made it through. not using the create/
-    # API endpoint as that'd leave cruft around if the CSV file can't be parsed
-    run = Run()
+    try:
+        machine = get_object_by_id_or_error(request, NodeClient, 'machine_id')
+        method = get_object_by_id_or_error(request, InstrumentMethod, 'method_id')
+    except ClientLookupException:
+        return HttpResponseBadRequest(e.message)
 
-    # sample_id ignored for now..
-    for sample_id, filename in _read_uploaded_run_capture_csv(csvfile, output):
-        logger.debug(sample_id)
-        logger.debug(filename)
+    run = Run(
+        method = method,
+        creator = request.user, 
+        title = "FIXME",
+        experiment = experiment,
+        machine = machine,
+        state = RUN_STATES.NEW[0],
+        )
+    run.save()
+
+    try:
+        # sample_id ignored for now.. probably could be got rid of
+        run_samples = []
+        for sample_id, filename in _read_uploaded_run_capture_csv(csvfile, output):
+            rs = RunSample(run=run, filename=filename)
+            rs.save()
+    except Exception:
+        # possibly unnecessary, depends on django settings, but playing safe
+        run.delete()
+        raise
+
+    logger.debug("that worked...")
 
     return output
 
-def _handle_uploaded_sample_csv(experiment, csvfile):
+def _handle_uploaded_sample_csv(request, experiment, csvfile):
     """
     Read a file object of CSV text and create samples from it.
     Returns a "success" dict suitable for returning to the client.
