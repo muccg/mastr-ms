@@ -20,7 +20,7 @@ class Migration(DataMigration):
         for userdetail in orm.UserDetail.objects.all():
             user = userdetail.user
             for field in self.fields:
-                setattr(user, field, getattr(userdetail, field))
+                setattr(user, field, getattr(userdetail, field) or "")
             user.save()
 
         # destroy all userdetail

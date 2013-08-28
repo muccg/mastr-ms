@@ -2,7 +2,7 @@ from django.db import transaction
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden, HttpResponseNotAllowed, HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
-from mastrms.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RUN_STATES, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure, MadasUser, RuleGenerator, Component
+from mastrms.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RUN_STATES, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure, RuleGenerator, Component
 from mastrms.quote.models import Organisation, Formalquote
 from ccg.utils import webhelpers
 from django.utils import simplejson as json
@@ -16,7 +16,7 @@ from mastrms.repository.permissions import user_passes_test
 from django.db.models import Q
 from datetime import datetime, timedelta
 from django.core.mail import mail_admins
-from mastrms.users.models import User, getMadasUser, getCurrentUser
+from mastrms.users.models import User
 from mastrms.repository import rulegenerators
 from mastrms.app.utils.mail_functions import FixedEmailMessage
 from decimal import Decimal, DecimalException
@@ -53,7 +53,7 @@ def create_object(request, model):
             obj.__setattr__(key, args[key])
 
         if model == 'run':
-            obj.creator = User.objects.get(username=request.user.username)
+            obj.creator = request.user
             if not obj.rule_generator.is_accessible_by(request.user):
                 return HttpResponseForbidden("Invalid rule generator for run");
             if obj.number_of_methods in ('', 'null'):
@@ -65,8 +65,7 @@ def create_object(request, model):
 
         if model == 'project':
             if not args.get('projectManagers'):
-                user = User.objects.get(username=request.user.username)
-                obj.managers.add(user)
+                obj.managers.add(request.user)
             else:
                 save_project_managers(obj, args.get('projectManagers'))
 
@@ -78,8 +77,7 @@ def create_object(request, model):
             o.save()
 
         if model == 'samplelog':
-            user = User.objects.get(username=request.user.username)
-            obj.user = user
+            obj.user = request.user
             obj.save()
 
     return records(request, model, 'id', obj.id)
@@ -241,11 +239,10 @@ def create_experiment(user, attributes, base_experiment_id = None):
 
         #create a single user
         uit, created = UserInvolvementType.objects.get_or_create(name='Principal Investigator')
-        exp_user = User.objects.get(username=user.username)
         ue = UserExperiment()
         ue.experiment = exp
         ue.type = uit
-        ue.user = exp_user
+        ue.user = user
         ue.save()
 
         #Biological Source
@@ -653,8 +650,6 @@ def recordsClientList(request):
     nodereps = []
     clients = []
 
-    currentuser = getMadasUser(request.user.username)
-
     for user in qs:
         logger.debug('Getting %s', user.username)
 
@@ -667,8 +662,8 @@ def recordsClientList(request):
             "organisationName": user.organisation_set.all()[0].name if user.organisation_set.exists() else ''
         }
 
-        if args.get('sortUsers') and currentuser:
-            if user.PrimaryNode == currentuser.PrimaryNode:
+        if args.get('sortUsers') and request.user:
+            if user.PrimaryNode == request.user.PrimaryNode:
                 nodemembers.append(record)
             elif user.IsStaff or user.IsMastrStaff or user.IsMastrAdmin:
                 mastaff.append(record)
@@ -1338,7 +1333,7 @@ def recordsRuns(request):
     if experiment_id:
         condition = Q(experiment__id = experiment_id)
 
-    if not getMadasUser(request.user.username).IsAdmin:
+    if not request.user.IsAdmin:
         extra_condition = Q(samples__experiment__project__managers=request.user)|Q(samples__experiment__users=request.user) | Q(creator=request.user)
         if condition:
             condition = condition & extra_condition
@@ -2298,7 +2293,7 @@ def create_rule_generator(request):
                                          accessibility,
                                          request.user,
                                          apply_sweep_rule,
-                                         getMadasUser(request.user.username).PrimaryNode,
+                                         request.user.PrimaryNode,
                                          startblockvars,
                                          sampleblockvars,
                                          endblockvars)

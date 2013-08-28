@@ -45,25 +45,13 @@ def listAllNodes(request, *args):
 
 #Use view decorator here
 @login_required
-def userload(request, *args):
+def user_load_profile(request, *args):
     '''This is called when loading user details - when the user
        clicks on the User button in the dashboard and selects 'My Account'
        Accessible by any logged in user
     '''
     logger.debug('***userload : enter ***')
-    username = request.REQUEST.get('username', request.user.username)
-    d = {}
-    if username and username != "nulluser":
-        try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            logger.exception("User \"%s\" doesn't exist" % username)
-        else:
-            d = user.get_client_dict()
-    else:
-        logger.warning("Looked up details for the nulluser")
-
-    d = makeJsonFriendly(d)
+    d = makeJsonFriendly([request.user.get_client_dict()])
     logger.debug('***userload : exit ***')
     return jsonResponse(data=d)
 

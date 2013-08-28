@@ -71,7 +71,7 @@ class Migration(SchemaMigration):
         # Adding model 'UserOrganisation'
         db.create_table('m_userorganisation', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
+            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['users.User'])),
             ('organisation', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['quote.Organisation'])),
         ))
         db.send_create_signal('quote', ['UserOrganisation'])
@@ -112,7 +112,7 @@ class Migration(SchemaMigration):
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '50'})
         },
-        'auth.user': {
+        'users.user': {
             'Meta': {'object_name': 'User'},
             'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
@@ -157,7 +157,7 @@ class Migration(SchemaMigration):
             'abn': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'user': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.User']", 'through': "orm['quote.UserOrganisation']", 'symmetrical': 'False'})
+            'user': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['users.User']", 'through': "orm['quote.UserOrganisation']", 'symmetrical': 'False'})
         },
         'quote.quotehistory': {
             'Meta': {'object_name': 'Quotehistory', 'db_table': "u'quotehistory'"},
@@ -190,7 +190,7 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'UserOrganisation', 'db_table': "'m_userorganisation'"},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'organisation': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['quote.Organisation']"}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['users.User']"})
         }
     }
 
