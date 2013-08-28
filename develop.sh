@@ -39,20 +39,18 @@ activate_virtualenv() {
 
 # ssh setup, make sure our ccg commands can run in an automated environment
 ci_ssh_agent() {
-    envfile=$(tempfile)
-    ssh-agent > $envfile
-    source "$envfile"
-    rm -f -- "$envfile"
+    ssh-agent > /tmp/agent.env.sh
+    source /tmp/agent.env.sh
+    rm -f /tmp/agent.env.sh
     ssh-add ~/.ssh/ccg-syd-staging.pem
     trap ci_ssh_agent_kill EXIT
 }
 
 ci_ssh_agent_kill() {
     if [ -n "${SSH_AGENT_PID}" ]; then
-        envfile=$(tempfile)
-        ssh-agent -k > $envfile
-        source "$envfile"
-        rm -f -- "$envfile"
+        ssh-agent -k > /tmp/agent.env.sh
+        source /tmp/agent.env.sh
+        rm -f /tmp/agent.env.sh
     fi
 }
 
