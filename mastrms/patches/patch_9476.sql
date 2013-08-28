@@ -1,2 +1,0 @@
-alter table repository_instrumentsop add column "vials_per_tray" integer CHECK ("vials_per_tray" >= 0) NOT NULL;
-alter table repository_instrumentsop add column "trays_max" integer CHECK ("trays_max" >= 0) NOT NULL;

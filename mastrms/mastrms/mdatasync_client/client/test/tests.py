@@ -154,6 +154,21 @@ class DataSyncServerTests(unittest.TestCase):
             self.assertFalse(result["success"])
             self.assertEqual(result["message"], "you fail")
 
+    def test_requestsync_spaces(self):
+        self.config["synchub"] = "http://test"
+        self.config["sitename"] = "An Interesting Site"
+        self.config["stationname"] = "A Station Name"
+        self.config["organisation"] = "The Organisation"
+
+        my_dingus = dingus.Dingus()
+        with self.fake_urlopen('{ "success": true, "details": {} }') as d:
+            with dingus.patch("urllib2.Request", my_dingus):
+                result = self.server.requestsync()
+                self.assertTrue(result["success"])
+                self.assertTrue(d.calls("()").once())
+            self.assertEqual(len(my_dingus.calls), 1)
+            self.assertEqual(my_dingus.calls[0].args[0], "http://test/requestsync/The%20Organisation/An%20Interesting%20Site/A%20Station%20Name/")
+
     # todo: make tests for
     #  * DataSyncServer.checksamplefiles()
     #  * DataSyncServer.get_node_names()

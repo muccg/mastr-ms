@@ -3,12 +3,12 @@
 # Script to control Mastrms in dev and test
 #
 
-# break on error
-set -e 
-
 TOPDIR=$(cd `dirname $0`; pwd)
 ACTION=$1
 shift
+
+# break on error
+set -e
 
 PORT='8000'
 
@@ -21,12 +21,12 @@ TESTING_MODULES="argparse dingus xvfbwrapper nose"
 MODULES="MySQL-python==1.2.3 psycopg2==2.4.6 Werkzeug flake8 ${TESTING_MODULES}"
 PIP_OPTS="-v -M --download-cache ~/.pip/cache"
 
-
-function usage() {
-    echo ""
-    echo "Usage ./develop.sh (test|lint|jslint|dropdb|start|install|clean|purge|pipfreeze|pythonversion|ci_remote_build|ci_staging|ci_staging_tests|ci_rpm_publish|ci_remote_destroy)"
-    echo ""
-}
+# A lot of tests need a database and/or X display to run. So the full
+# test suite TEST_LIST and the tests which don't need a database or X
+# are in NOSE_TEST_LIST, because they can be run outside the django
+# test runner.
+TEST_LIST="mastrms.repository.tests mastrms.mdatasync_client.client.test.tests mastrms.mdatasync_server.tests"
+NOSE_TEST_LIST="mastrms.mdatasync_client.client.test.tests:DataSyncServerTests mastrms.mdatasync_client.client.test.tests:MSDataSyncAPITests mastrms.mdatasync_client.client.test.tests:MSDSImplTests"
 
 
 function settings() {
@@ -106,7 +106,6 @@ function ci_staging() {
     ccg ${AWS_STAGING_INSTANCE} shutdown:50
 }
 
-
 # run tests on staging
 function ci_staging_tests() {
     # /tmp is used for test results because the apache user has
@@ -121,7 +120,6 @@ function ci_staging_tests() {
 
     # fixme: this config should be put in nose.cfg or settings.py or similar
     EXCLUDES="--exclude\=yaphc --exclude\=esky --exclude\=httplib2"
-    TEST_LIST="mastrms.repository.tests mastrms.mdatasync_client.client.test.tests mastrms.mdatasync_server.tests"
 
     # Start virtual X server here to work around a problem starting it
     # from xvfbwrapper.
@@ -158,16 +156,21 @@ function jslint() {
 
 # run the tests using django-admin.py
 function djangotests() {
+    TEST_EXCLUDES="--exclude=yaphc --exclude=esky --exclude=httplib2"
+    LIVESERVER="--liveserver=localhost:8082,8090-8100,9000-9200,7041"
+
     activate_virtualenv
-    django-admin.py test --noinput --with-xunit --xunit-file=tests.xml \
-        --exclude="esky" --exclude="yaphc" --exclude="httplib2" \
-        ${PROJECT_NAME}
+    dbus-launch django-admin.py test --noinput ${LIVESERVER} \
+        --with-xunit --xunit-file="${TARGET_DIR}/tests.xml" \
+        ${TEST_EXCLUDES} ${TEST_LIST} || true
 }
 
 
-function nosetests() {
+function nose_tests() {
     activate_virtualenv
-    nosetests --with-xunit --xunit-file=tests.xml -v -w tests
+    export PYTHONPATH="${TARGET_DIR}:${PYTHONPATH}"
+    nosetests --with-xunit --xunit-file="${TARGET_DIR}/tests.xml" \
+        -v -w ${TARGET_DIR} ${NOSE_TEST_LIST} || true
 }
 
 
@@ -235,12 +238,11 @@ function purge() {
 }
 
 
-function runtest() {
-    #nosetests
-    djangotests
+function usage() {
+    echo ""
+    echo "Usage ./develop.sh (test|nosetests|lint|jslint|dropdb|start|install|clean|purge|pipfreeze|pythonversion|ci_remote_build|ci_staging|ci_staging_tests|ci_rpm_publish|ci_remote_destroy)"
+    echo ""
 }
-
-
 
 case ${ACTION} in
 pythonversion)
@@ -251,7 +253,11 @@ pipfreeze)
     ;;
 test)
     settings
-    runtest
+    djangotests
+    ;;
+nosetests)
+    settings
+    nose_tests
     ;;
 lint)
     lint

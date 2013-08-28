@@ -17,7 +17,7 @@
     },
     {
         "pk": 1, 
-        "model": "auth.user", 
+        "model": "users.user", 
         "fields": {
             "username": "admin@example.com", 
             "first_name": "", 

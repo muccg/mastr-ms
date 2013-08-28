@@ -246,6 +246,9 @@ class User(AbstractUser):
         else:
             details['groups'] = details['node']
 
+        orgs = self.userorganisation_set.values_list("id", flat=True)
+        details['organisation'] = orgs[0] if orgs else ''
+
         details['name'] = self.Name
 
         return details

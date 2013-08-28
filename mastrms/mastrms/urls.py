@@ -9,9 +9,9 @@ from mastrms.quote import admin as mastrmsadmin
 from mastrms.mdatasync_server import admin as mdatasync_admin
 
 urlpatterns = patterns('',
+    (r'^/?$', 'mastrms.login.views.serveIndex', {'SSL': settings.SSL_ENABLED}),
 
     (r'^userinfo', 'mastrms.users.views.userinfo'),
-    #(r'^status/', status_view),
     (r'^sync/', include('mastrms.mdatasync_server.urls')),
 
     # mastrms.epo
@@ -37,8 +37,4 @@ if settings.DEBUG:
     print 'Running with django view for static path.'
     urlpatterns += patterns('',
         (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root' : settings.STATIC_ROOT, 'SSL' : settings.SSL_ENABLED} ),
-    )
-    #default view
-urlpatterns += patterns('',
-    (r'^', 'mastrms.login.views.serveIndex', {'SSL': settings.SSL_ENABLED}),
     )

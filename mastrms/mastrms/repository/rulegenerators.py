@@ -1,17 +1,12 @@
 import logging
 from django.db.models import Q
 from mastrms.repository.models import RuleGenerator, RuleGeneratorStartBlock, RuleGeneratorSampleBlock, RuleGeneratorEndBlock, Component
-from mastrms.users.models import getMadasUser
 
 logger = logging.getLogger('mastrms.general')
 
 def listRuleGenerators(user=None, accessibility=False, showEnabledOnly=False):
     logger.debug('Listing rule generators')
-    usernode = None
-    mauser = None
-    if user is not None:
-        mauser = getMadasUser(user.username)
-        usernode = mauser.PrimaryNode
+    usernode = user.PrimaryNode if user else None
 
     rows = RuleGenerator.objects.all()
 
@@ -22,7 +17,7 @@ def listRuleGenerators(user=None, accessibility=False, showEnabledOnly=False):
 
 
     #only bother doing accessibility if you arent an Admin or MA admin, and accessibility is true.
-    if accessibility and (mauser is not None) and not mauser.IsAdmin and not mauser.IsMastrAdmin:
+    if accessibility and (user is not None) and not user.IsAdmin and not user.IsMastrAdmin:
         rows = rows.filter(apply_accessibility_node | apply_accessibility_user | apply_accessibility_everyone)
 
     if showEnabledOnly:
@@ -116,7 +111,7 @@ def create_rule_generator(name, description, accessibility, user, apply_sweep_ru
         newRG.name = name
         newRG.description = description
         newRG.created_by = user
-        newRG.node = getMadasUser(user.username).PrimaryNode
+        newRG.node = user.PrimaryNode
         newRG.accessibility = accessibility
         #default state
         newRG.save()
@@ -213,7 +208,7 @@ def clone_rule_generator(rg_id, user):
             accessibility = rg.accessibility,
             created_by = user,
             apply_sweep_rule = rg.apply_sweep_rule,
-            node = getMadasUser(user.username).PrimaryNode
+            node = user.PrimaryNode
         )
 
     copy_rules(rg, newRG)
@@ -233,7 +228,7 @@ def create_new_version_of_rule_generator(rg_id, user):
             previous_version = rg,
             created_by = user,
             apply_sweep_rule = rg.apply_sweep_rule,
-            node = getMadasUser(user.username).PrimaryNode
+            node = user.PrimaryNode
         )
 
     copy_rules(rg, newRG)

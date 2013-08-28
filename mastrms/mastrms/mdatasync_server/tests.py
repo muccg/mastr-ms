@@ -2,6 +2,7 @@
 from django.test import TestCase, LiveServerTestCase
 from django.test.utils import override_settings
 from django.conf import settings
+from mastrms.users.models import User
 from mastrms.mdatasync_server.models import *
 from mastrms.repository.models import *
 from mastrms.repository.runbuilder import RunBuilder
@@ -35,7 +36,6 @@ class WithFixtures(object):
     # won't find them.
     fixtures = [
         "mastrms/repository/fixtures/reference_data.json",
-        "mastrms/users/fixtures/initial_user.json",
         ]
 
     def setup_more_fixtures(self):
@@ -55,7 +55,7 @@ class WithFixtures(object):
         #user = User.objects.get(username__istartswith="admin")
         #user = User.objects.create(username="testuser", is_staff=True)
         self.user_password = "testing"
-        self.user = self.create_user("testuser", self.user_password)
+        self.user = self.create_user("testuser@ccg.murdoch.edu.au", self.user_password)
 
         project = Project.objects.create(title="Project", description="Test project",
                                          client=self.user)
@@ -125,33 +125,19 @@ class WithFixtures(object):
         self.sample = sample
         self.run = Run.objects.get(id=run.id)
 
-    def create_user(self, username, password="test", is_admin=True):
+    def create_user(self, email, password="test", is_admin=True):
         """
-        Creates a django user and associated MAUser baggage.
-        Returns the django user
+        Creates a django user and returns it.
         """
-        from mastrms.users.models import getMadasUser, saveMadasUser
-
-        # need an admin user to create a user
-        adminUser = getMadasUser('nulluser')
-        adminUser.IsAdmin = True
-
-        # need some extra information
-        changed_details = { }
-        changed_status = { "admin": is_admin, "noderep": is_admin, "node": "", "status": "",
-                           "mastradmin": is_admin, "mastrstaff": is_admin,
-                           "projectleader": is_admin }
-
-        # use MAUser wrapper to create user
-        created = saveMadasUser(adminUser, username,
-                                changed_details, changed_status,
-                                password)
-
-        assert created, "created user"
-
-        user = User.objects.get(username=username)
+        user = User.objects.filter(username=email)
+        if user.exists():
+            user = user[0]
+        else:
+            user = User(username=email, email=email)
         user.set_password(password)
-
+        user.save()
+        user.IsAdmin = is_admin
+        user.save()
         return user
 
 @override_settings(REPO_FILES_ROOT=TESTING_REPO)
@@ -699,36 +685,23 @@ class SyncTests(LiveServerTestCase, XDisplayTest, WithFixtures):
                 logger.debug("clicking sync again")
                 self.test_client.click_sync()
 
-                logger.debug("clicking sync a third time")
-                self.test_client.click_sync() # rsync should not be run here
-
                 logger.debug("finished")
 
                 self.test_client.quit()
 
-            # b. check that rsync was called three times
-            self.assertEqual(len(rsync_results), 3,
-                             "check that rsync was called three times")
+            # b. check that rsync was called twice
+            self.assertEqual(len(rsync_results), 2,
+                             "check that rsync was called twice")
             self.assertTrue(bool(rsync_results[0]))
             self.assertTrue(bool(rsync_results[1]))
-            self.assertTrue(bool(rsync_results[2]))
-            # b. check that the directory was rsynced
-            self.assertEqual(len(rsync_results[0]["source_files"]), 1)
-            self.assertEqual(os.path.basename(rsync_results[0]["source_files"][0][1]),
-                             "runsample1_filename",
-                             "first rsync transfers file 1")
-            self.assertEqual(len(rsync_results[1]["source_files"]), 1)
-            self.assertEqual(os.path.basename(rsync_results[1]["source_files"][0][1]),
-                             "runsample1_filename",
-                             "second rsync transfers file 1")
+            # b. check that nothing was rsynced
+            self.assertEqual(len(rsync_results[0]["source_files"]), 0)
+            self.assertEqual(len(rsync_results[1]["source_files"]), 0)
 
             # c. check server for directory
-            server_filename = runsample_filename(self.run, "runsample1_filename")
-            logger.debug("server filename is %s" % server_filename)
-            self.assertTrue(os.path.exists(server_filename),
-                            "%s exists on server" % server_filename)
-            self.assertTrue(os.path.isdir(server_filename),
-                            "%s is still a directory" % server_filename)
+            server_filename = runsample_filename(self.run, self.worklist[0])
+            self.assertFalse(os.path.exists(server_filename),
+                            "%s doesn't exist on server" % server_filename)
 
             # d. check sample completion status
             samples = self.run.runsample_set.order_by("filename")
