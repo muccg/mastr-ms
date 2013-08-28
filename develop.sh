@@ -29,28 +29,34 @@ TEST_LIST="mastrms.repository.tests mastrms.mdatasync_client.client.test.tests m
 NOSE_TEST_LIST="mastrms.mdatasync_client.client.test.tests:DataSyncServerTests mastrms.mdatasync_client.client.test.tests:MSDataSyncAPITests mastrms.mdatasync_client.client.test.tests:MSDSImplTests"
 
 
-function settings() {
+settings() {
     export DJANGO_SETTINGS_MODULE="${PROJECT_NAME}.settings"
 }
 
-function activate_virtualenv() {
+activate_virtualenv() {
     source ${TOPDIR}/virt_${PROJECT_NAME}/bin/activate
 }
 
 # ssh setup, make sure our ccg commands can run in an automated environment
-function ci_ssh_agent() {
-    source <(ssh-agent)
+ci_ssh_agent() {
+    envfile=$(tempfile)
+    ssh-agent > $envfile
+    source "$envfile"
+    rm -f -- "$envfile"
     ssh-add ~/.ssh/ccg-syd-staging.pem
     trap ci_ssh_agent_kill EXIT
 }
 
-function ci_ssh_agent_kill() {
+ci_ssh_agent_kill() {
     if [ -n "${SSH_AGENT_PID}" ]; then
-        source <(ssh-agent -k)
+        envfile=$(tempfile)
+        ssh-agent -k > $envfile
+        source "$envfile"
+        rm -f -- "$envfile"
     fi
 }
 
-function build_number_head() {
+build_number_head() {
     export TZ=Australia/Perth
     DATE=`date`
     TIP=`hg tip --template "{node}" 2>/dev/null || /bin/true`
@@ -60,7 +66,7 @@ function build_number_head() {
 }
 
 # build RPMs on a remote host from ci environment
-function ci_remote_build() {
+ci_remote_build() {
     time ccg ${AWS_BUILD_INSTANCE} boot
     time ccg ${AWS_BUILD_INSTANCE} puppet
     time ccg ${AWS_BUILD_INSTANCE} shutdown:50
@@ -87,12 +93,12 @@ function ci_remote_build() {
 }
 
 # publish rpms to testing repo
-function ci_rpm_publish() {
+ci_rpm_publish() {
     time ccg ${AWS_BUILD_INSTANCE} publish_testing_rpm:build/${PROJECT_NAME}*.rpm,release=6
 }
 
 # copy a version from testing repo to release repo
-function ci_rpm_release() {
+ci_rpm_release() {
     if [ -z "$1" ]; then
         echo "ci_rpm_release requires an rpm filename argument"
         usage
@@ -103,20 +109,20 @@ function ci_rpm_release() {
 }
 
 # destroy our ci build server
-function ci_remote_destroy() {
+ci_remote_destroy() {
     ccg ${AWS_BUILD_INSTANCE} destroy
 }
 
 
 # puppet up staging which will install the latest rpm
-function ci_staging() {
+ci_staging() {
     ccg ${AWS_STAGING_INSTANCE} boot
     ccg ${AWS_STAGING_INSTANCE} puppet
     ccg ${AWS_STAGING_INSTANCE} shutdown:50
 }
 
 # run tests on staging
-function ci_staging_tests() {
+ci_staging_tests() {
     # /tmp is used for test results because the apache user has
     # permission to write there.
     REMOTE_TEST_DIR=/tmp
@@ -146,7 +152,7 @@ function ci_staging_tests() {
 
 
 # lint using flake8
-function lint() {
+lint() {
     activate_virtualenv
     cd ${TOPDIR}
     flake8 ${PROJECT_NAME} --ignore=E501 --count
@@ -154,7 +160,7 @@ function lint() {
 
 
 # lint js, assumes closure compiler
-function jslint() {
+jslint() {
     JSFILES="${TOPDIR}/mastrms/mastrms/app/static/js/*.js ${TOPDIR}/mastrms/mastrms/app/static/js/repo/*.js"
     for JS in $JSFILES
     do
@@ -164,7 +170,7 @@ function jslint() {
 
 
 # run the tests using django-admin.py
-function djangotests() {
+djangotests() {
     TEST_EXCLUDES="--exclude=yaphc --exclude=esky --exclude=httplib2"
     LIVESERVER="--liveserver=localhost:8082,8090-8100,9000-9200,7041"
 
@@ -175,7 +181,7 @@ function djangotests() {
 }
 
 
-function nose_tests() {
+nose_tests() {
     activate_virtualenv
     export PYTHONPATH="${TARGET_DIR}:${PYTHONPATH}"
     nosetests --with-xunit --xunit-file="${TARGET_DIR}/tests.xml" \
@@ -183,18 +189,18 @@ function nose_tests() {
 }
 
 
-function nose_collect() {
+nose_collect() {
     activate_virtualenv
     nosetests -v -w tests --collect-only
 }
 
 
-function dropdb() {
+dropdb() {
     echo "todo"
 }
 
 
-function installapp() {
+installapp() {
     # check requirements
     which virtualenv >/dev/null
 
@@ -208,7 +214,7 @@ function installapp() {
 
 
 # django syncdb, migrate and collect static
-function syncmigrate() {
+syncmigrate() {
     echo "syncdb"
     ${TOPDIR}/virt_${PROJECT_NAME}/bin/django-admin.py syncdb --noinput --settings=${DJANGO_SETTINGS_MODULE} 1> syncdb-develop.log
     echo "migrate"
@@ -219,35 +225,35 @@ function syncmigrate() {
 
 
 # start runserver
-function startserver() {
+startserver() {
     ${TOPDIR}/virt_${PROJECT_NAME}/bin/django-admin.py runserver_plus ${port}
 }
 
 
-function pythonversion() {
+pythonversion() {
     ${TOPDIR}/virt_${PROJECT_NAME}/bin/python -V
 }
 
 
-function pipfreeze() {
+pipfreeze() {
     echo "${PROJECT_NAME} pip freeze"
     ${TOPDIR}/virt_${PROJECT_NAME}/bin/pip freeze
     echo '' 
 }
 
 
-function clean() {
+clean() {
     find ${TOPDIR}/${PROJECT_NAME} -name "*.pyc" -exec rm -rf {} \;
 }
 
 
-function purge() {
+purge() {
     rm -rf ${TOPDIR}/virt_${PROJECT_NAME}
     rm *.log
 }
 
 
-function usage() {
+usage() {
     echo ""
     echo "Usage ./develop.sh (test|nosetests|lint|jslint|dropdb|start|install|clean|purge|pipfreeze|pythonversion|ci_remote_build|ci_staging|ci_staging_tests|ci_rpm_publish|ci_rpm_release VERSION|ci_remote_destroy)"
     echo ""
