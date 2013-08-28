@@ -32,6 +32,14 @@ MA.RunCaptureCSVUploadForm = new Ext.Window({
                     name: 'experiment_id',
                     itemId: 'expIdField'
                 },
+                {
+                    fieldLabel:'Title',
+                    xtype:'textfield',
+                    itemId:'title',
+                    name:'title',
+                    value:'New Captured External Run',
+                    allowBlank:false
+                },
                 new Ext.form.ComboBox({
                     fieldLabel: 'Instrument method',
                     itemId: 'method',
@@ -107,15 +115,12 @@ MA.RunCaptureCSVUploadForm = new Ext.Window({
                         success: function (form, action) {
                             var res = action.result;
                             if (res.success === true) {
-                                var created = res.num_created + " sample" + (res.num_created == 1 ? "" : "s") + " added";
-                                var updated = res.num_updated + " sample" + (res.num_updated == 1 ? "" : "s") + " updated";
-                                var msg = ((res.num_created && res.num_updated) ? (created + " and " + updated) : (res.num_created ? created : updated)) + "."
+                                var created = res.num_created + " file" + (res.num_created == 1 ? "" : "s") + " will be captured.";
                                 form.reset(); 
                                 MA.ExperimentSamplesOnlyInit();
-
                                 Ext.Msg.alert('CSV Upload', msg);
-
-                                Ext.getCmp('sampleCSVUploadWindow').hide();
+                                Ext.getCmp('runCaptureCSVUpload').hide();
+                                runListStore.reload();
                             } 
                         },
                         failure: function (form, action) {

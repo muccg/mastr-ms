@@ -32,11 +32,11 @@ class ClientLookupException(Exception):
     exception message will be a json-encoded message suitable to return to the client
     """
     def __init__(self, msg):
-        json_message = json.dumps({
+        self.json = {
             'success' : False,
             'msg' : msg
-            })
-        super(ClientLookupException, self).__init__(json_message)
+            }
+        super(ClientLookupException, self).__init__(json.dumps(self.json))
 
 def get_object_by_id_or_error(request, cls, key):
     obj_id = request.POST.get(key, None)
@@ -2062,7 +2062,6 @@ def _handle_uploaded_file(f, name, experiment_id):
     print '*** _handle_uploaded_file: exit ***'
     return retval
 
-
 @mastr_users_only
 def uploadCSVFile(request):
     return uploadCSVWrapper(request, 'samplecsv', _handle_uploaded_sample_csv)
@@ -2093,20 +2092,19 @@ def _handle_uploaded_run_capture_csv(request, experiment, csvfile):
     Read a file object of CSV text and create RunSample instances from it.
     Returns a "success" dict suitable for returning to the client.
     """
-    output = { "success": True,
-               "num_created": 0,
-               "num_updated": 0 }
-
     try:
         machine = get_object_by_id_or_error(request, NodeClient, 'machine_id')
         method = get_object_by_id_or_error(request, InstrumentMethod, 'method_id')
-    except ClientLookupException:
-        return HttpResponseBadRequest(e.message)
+        title = request.POST.get('title', None)
+        if title is None:
+            raise ClientLookupException("need title param")
+    except ClientLookupException, e:
+        return e.json
 
     run = Run(
         method = method,
         creator = request.user, 
-        title = "FIXME",
+        title = title,
         experiment = experiment,
         machine = machine,
         state = RUN_STATES.NEW[0],
@@ -2116,17 +2114,20 @@ def _handle_uploaded_run_capture_csv(request, experiment, csvfile):
     try:
         # sample_id ignored for now.. probably could be got rid of
         run_samples = []
+        created = 0
         for sample_id, filename in _read_uploaded_run_capture_csv(csvfile, output):
             rs = RunSample(run=run, filename=filename)
             rs.save()
-    except Exception:
+            craeted += 1
+    except:
         # possibly unnecessary, depends on django settings, but playing safe
         run.delete()
         raise
 
-    logger.debug("that worked...")
-
-    return output
+    return {
+        'success' : True,
+        'num_created' : created
+    }
 
 def _handle_uploaded_sample_csv(request, experiment, csvfile):
     """
