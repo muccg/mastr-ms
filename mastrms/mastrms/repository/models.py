@@ -33,7 +33,8 @@ class BiologicalSource(models.Model):
     label = models.CharField(max_length=50, blank=True)
 
     def __unicode__(self):
-        return ("%s %s %s %s" % (self.abbreviation, self.type, self.ncbi_id, self.label)).replace('None', '--')
+        return "%s %s %s %s" % (self.abbreviation, self.type,
+                                self.ncbi_id or '--', self.label or '--')
 
 class AnimalInfo(models.Model):
     class Meta:
@@ -253,8 +254,6 @@ class SampleTimeline(models.Model):
     timeline = models.CharField(max_length=255, blank=True)
 
     def __unicode__(self):
-        if self.timeline == None:
-            return ""
         return self.timeline
 
 class SampleClass(models.Model):
