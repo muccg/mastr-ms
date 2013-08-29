@@ -32,11 +32,11 @@ class ClientLookupException(Exception):
     exception message will be a json-encoded message suitable to return to the client
     """
     def __init__(self, msg):
-        self.json = {
+        self.output = {
             'success' : False,
             'msg' : msg
             }
-        super(ClientLookupException, self).__init__(json.dumps(self.json))
+        super(ClientLookupException, self).__init__(json.dumps(self.output))
 
 def get_object_by_id_or_error(request, cls, key):
     obj_id = request.POST.get(key, None)
@@ -2099,7 +2099,7 @@ def _handle_uploaded_run_capture_csv(request, experiment, csvfile):
         if title is None:
             raise ClientLookupException("need title param")
     except ClientLookupException, e:
-        return e.json
+        return e.output
 
     run = Run(
         method = method,
@@ -2111,23 +2111,29 @@ def _handle_uploaded_run_capture_csv(request, experiment, csvfile):
         )
     run.save()
 
+    output = {
+        "success" : True,
+        "num_created" : 0
+    }
+
     try:
         # sample_id ignored for now.. probably could be got rid of
         run_samples = []
-        created = 0
         for sample_id, filename in _read_uploaded_run_capture_csv(csvfile, output):
             rs = RunSample(run=run, filename=filename)
             rs.save()
-            craeted += 1
-    except:
-        # possibly unnecessary, depends on django settings, but playing safe
-        run.delete()
-        raise
+    except ClientLookupException, e:
+        output = e.output
+    except Exception, e:
+        output = { 
+            "success" : False,
+            "msg" : str(e)
+        }
 
-    return {
-        'success' : True,
-        'num_created' : created
-    }
+    # examine output, if we've failed destroy the Run we created
+    if not output['success']:
+        run.delete()
+    return output
 
 def _handle_uploaded_sample_csv(request, experiment, csvfile):
     """

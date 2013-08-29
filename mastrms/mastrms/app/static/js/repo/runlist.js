@@ -115,7 +115,7 @@ MA.RunCaptureCSVUploadForm = new Ext.Window({
                         success: function (form, action) {
                             var res = action.result;
                             if (res.success === true) {
-                                var created = res.num_created + " file" + (res.num_created == 1 ? "" : "s") + " will be captured.";
+                                var msg = res.num_created + " file" + (res.num_created == 1 ? "" : "s") + " from external run will be captured.";
                                 form.reset(); 
                                 MA.ExperimentSamplesOnlyInit();
                                 Ext.Msg.alert('CSV Upload', msg);
