@@ -783,7 +783,11 @@ MA.QuoteRequestEditCmp =
                         emptyText: 'Select a PDF',
                         fieldLabel: 'Formal Quote File',
                         name: 'pdf'
-                    } 
+                    },{
+                        xtype: 'hidden',
+                        name: 'csrfmiddlewaretoken',
+                        value: Ext.util.Cookies.get("csrftoken_mastrms")
+                    }
                 ],
             buttons: [
                  {
