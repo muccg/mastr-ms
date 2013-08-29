@@ -2,17 +2,18 @@
 """
 This file contains unit tests for the repository application.
 """
-
 from django.test import TestCase
+from django.test.client import Client
 from django.utils import unittest
 from StringIO import StringIO
 from decimal import Decimal
-from mastrms.repository.wsviews import _handle_uploaded_sample_csv
+from mastrms.repository.wsviews import uploadCSVFile, _handle_uploaded_sample_csv
 from mastrms.repository.models import Project, Experiment, Sample
-import logging
+import json, logging
 logger = logging.getLogger(__name__)
 
 class SampleCsvUploadTest(TestCase):
+    urls = 'mastrms.repository.wsurls'
     """
     Unit tests for parsing of uploaded samples CSV. The target
     function is `_handle_uploaded_sample_csv`.
@@ -28,14 +29,32 @@ class SampleCsvUploadTest(TestCase):
                                                     project=project,
                                                     instrument_method=None)
 
+    def upload_samplecsv(self, text):
+        fp = StringIO(text)
+        fp.name = "test.csv"
+        client = Client()
+        client.login(username='admin@example.com', password='admin')
+        response = client.post('/uploadSampleCSV', {
+            'experiment_id': self.experiment.id,
+            'samplecsv' : fp
+        })
+        try:
+            result = json.loads(response.content)
+        except ValueError:
+            print "JSON decode failed, status_code = %d, data is:" % (response.status_code)
+            print response.content
+        self.assertEqual(response.status_code, 200)
+        return result
+
     def test01_simple_noheader(self):
         """
         Basic valid CSV file without header
         """
         text = "Sample Label,1.0,Comment about the sample\n"
 
-        result = _handle_uploaded_sample_csv(self.experiment, StringIO(text))
+        import urls
 
+        result = self.upload_samplecsv(text)
         samples = Sample.objects.all()
 
         self.assertTrue(result["success"])
@@ -53,7 +72,7 @@ class SampleCsvUploadTest(TestCase):
 Sample Label,1.0,Comment about the sample
 """
 
-        result = _handle_uploaded_sample_csv(self.experiment, StringIO(text))
+        result = self.upload_samplecsv(text)
 
         samples = Sample.objects.all()
 
@@ -72,7 +91,7 @@ Sample Label,1.0,Comment about the sample
 1.0,Sample Label,Comment about the sample
 """
 
-        result = _handle_uploaded_sample_csv(self.experiment, StringIO(text))
+        result = self.upload_samplecsv(text)
 
         samples = Sample.objects.all()
 
@@ -91,7 +110,7 @@ Sample Label,1.0,Comment about the sample
 Sample Label,1.0,Comment about the sample
 """
 
-        result = _handle_uploaded_sample_csv(self.experiment, StringIO(text))
+        result = self.upload_samplecsv(text)
 
         samples = Sample.objects.all()
 
@@ -108,7 +127,7 @@ Sample Label,1.0,Comment about the sample
         """
         text = "Sample Label,1.0,Comment about the sample,an interesting column,,,4,5,6,lah,\n"
 
-        result = _handle_uploaded_sample_csv(self.experiment, StringIO(text))
+        result = self.upload_samplecsv(text)
 
         samples = Sample.objects.all()
 
@@ -127,7 +146,7 @@ Sample Label,1.0,Comment about the sample
 Green,Sample Label,1.0,kg,Comment about the sample,Large
 """
 
-        result = _handle_uploaded_sample_csv(self.experiment, StringIO(text))
+        result = self.upload_samplecsv(text)
 
         samples = Sample.objects.all()
 
@@ -146,7 +165,7 @@ Green,Sample Label,1.0,kg,Comment about the sample,Large
     Sample Label,  1.0  ,  Comment about the sample
 """
 
-        result = _handle_uploaded_sample_csv(self.experiment, StringIO(text))
+        result = self.upload_samplecsv(text)
 
         samples = Sample.objects.all()
 
@@ -163,7 +182,7 @@ Green,Sample Label,1.0,kg,Comment about the sample,Large
         """
         text = "Label,Weight,Comment\r\nSample Label,1.0,Comment about the sample\r\nSample Label,1.0,Comment about the sample\r\n\r\n"
 
-        result = _handle_uploaded_sample_csv(self.experiment, StringIO(text))
+        result = self.upload_samplecsv(text)
 
         samples = Sample.objects.all()
 
@@ -181,7 +200,7 @@ Green,Sample Label,1.0,kg,Comment about the sample,Large
         """
         text = "\n"
 
-        result = _handle_uploaded_sample_csv(self.experiment, StringIO(text))
+        result = self.upload_samplecsv(text)
 
         samples = Sample.objects.all()
 
@@ -195,7 +214,7 @@ Green,Sample Label,1.0,kg,Comment about the sample,Large
         """
         text = "label,weight,comment\n"
 
-        result = _handle_uploaded_sample_csv(self.experiment, StringIO(text))
+        result = self.upload_samplecsv(text)
 
         samples = Sample.objects.all()
 
@@ -210,7 +229,7 @@ Green,Sample Label,1.0,kg,Comment about the sample,Large
         """
         text = u"Sample µ,1.0,☃ Snowman ☃\n"
 
-        result = _handle_uploaded_sample_csv(self.experiment, StringIO(text))
+        result = self.upload_samplecsv(text)
 
         samples = Sample.objects.all()
 
@@ -230,7 +249,7 @@ Green,Sample Label,1.0,kg,Comment about the sample,Large
 Sample Label,1.0,Comment about the sample,µ,☃,❄,🐈
 """
 
-        result = _handle_uploaded_sample_csv(self.experiment, StringIO(text))
+        result = self.upload_samplecsv(text)
 
         samples = Sample.objects.all()
 
@@ -249,7 +268,7 @@ Sample Label,1.0,Comment about the sample,µ,☃,❄,🐈
 Sample Label,not a number,Comment about the sample
 """
 
-        result = _handle_uploaded_sample_csv(self.experiment, StringIO(text))
+        result = self.upload_samplecsv(text)
 
         samples = Sample.objects.all()
 
@@ -267,7 +286,7 @@ Sample Label,1.0,Comment about the sample
 Sample Label,not a number,Comment about the sample
 """
 
-        result = _handle_uploaded_sample_csv(self.experiment, StringIO(text))
+        result = self.upload_samplecsv(text)
 
         samples = Sample.objects.all()
 
@@ -289,7 +308,7 @@ Sample Label,not a number,Comment about the sample
 Sample Label,1.0
 """
 
-        result = _handle_uploaded_sample_csv(self.experiment, StringIO(text))
+        result = self.upload_samplecsv(text)
 
         samples = Sample.objects.all()
 
@@ -306,7 +325,7 @@ Sample Label,1.0
 Sample Label
 """
 
-        result = _handle_uploaded_sample_csv(self.experiment, StringIO(text))
+        result = self.upload_samplecsv(text)
 
         samples = Sample.objects.all()
 
@@ -322,7 +341,7 @@ Sample Label
         """
         text = "# id, sample_id, sample_class, sample_class__unicode, experiment, experiment__unicode, label, comment, weight, sample_class_sequence, \n1,,1,class_1,1,exp,label 1,comment,42,1\n2,,1,class_1,1,exp,label 2,comment,43,1\n"
 
-        result = _handle_uploaded_sample_csv(self.experiment, StringIO(text))
+        result = self.upload_samplecsv(text)
 
         samples = Sample.objects.all()
 
@@ -360,7 +379,7 @@ Sample Label
 %d,,1,class_1,1,exp,label B,comment B,43,1
 """ % (samples[0].id, samples[1].id)
 
-        result = _handle_uploaded_sample_csv(self.experiment, StringIO(text))
+        result = self.upload_samplecsv(text)
 
         samples = Sample.objects.all()
 
@@ -392,7 +411,7 @@ Sample Label
 ,,1,class_1,1,exp,label C,comment C,44,1
 """ % (samples[0].id, samples[1].id)
 
-        result = _handle_uploaded_sample_csv(self.experiment, StringIO(text))
+        result = self.upload_samplecsv(text)
 
         samples = Sample.objects.all()
 

@@ -2074,25 +2074,21 @@ def uploadCSVWrapper(request, file_field_name, csv_handler_fn):
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
 
-    try:
-        experiment = get_object_by_id_or_error(request, Experiment, 'experiment_id')
-    except ClientLookupException, e:
-        return HttpResponseBadRequest(e.message)
-
     if request.FILES.has_key(file_field_name):
         f = request.FILES[file_field_name]
-        output = csv_handler_fn(request, experiment, f)
+        output = csv_handler_fn(request, f)
     else:
         output = { "success": False, "msg": "No file attached." }
 
     return HttpResponse(json.dumps(output))
 
-def _handle_uploaded_run_capture_csv(request, experiment, csvfile):
+def _handle_uploaded_run_capture_csv(request, csvfile):
     """
     Read a file object of CSV text and create RunSample instances from it.
     Returns a "success" dict suitable for returning to the client.
     """
     try:
+        experiment = get_object_by_id_or_error(request, Experiment, 'experiment_id')
         machine = get_object_by_id_or_error(request, NodeClient, 'machine_id')
         method = get_object_by_id_or_error(request, InstrumentMethod, 'method_id')
         title = request.POST.get('title', None)
@@ -2136,7 +2132,7 @@ def _handle_uploaded_run_capture_csv(request, experiment, csvfile):
         run.delete()
     return output
 
-def _handle_uploaded_sample_csv(request, experiment, csvfile):
+def _handle_uploaded_sample_csv(request, csvfile):
     """
     Read a file object of CSV text and create samples from it.
     Returns a "success" dict suitable for returning to the client.
@@ -2144,6 +2140,11 @@ def _handle_uploaded_sample_csv(request, experiment, csvfile):
     output = { "success": True,
                "num_created": 0,
                "num_updated": 0 }
+
+    try:
+        experiment = get_object_by_id_or_error(request, Experiment, 'experiment_id')
+    except ClientLookupException, e:
+        return HttpResponseBadRequest(e.message)
 
     for sid, label, weight, comment in _read_uploaded_sample_csv(csvfile, output):
         # If a valid sample id is provided, try to update exising
