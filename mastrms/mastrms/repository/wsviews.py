@@ -2121,6 +2121,7 @@ def _handle_uploaded_run_capture_csv(request, experiment, csvfile):
         run_samples = []
         for sample_id, filename in _read_uploaded_run_capture_csv(csvfile, output):
             rs = RunSample(run=run, filename=filename)
+            output['num_created'] += 1
             rs.save()
     except ClientLookupException, e:
         output = e.output

@@ -119,7 +119,7 @@ MA.RunCaptureCSVUploadForm = new Ext.Window({
                                 form.reset(); 
                                 MA.ExperimentSamplesOnlyInit();
                                 Ext.Msg.alert('CSV Upload', msg);
-                                Ext.getCmp('runCaptureCSVUpload').hide();
+                                Ext.getCmp('runCaptureCSVUploadWindow').hide();
                                 runListStore.reload();
                             } 
                         },
