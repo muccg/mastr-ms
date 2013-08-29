@@ -2,22 +2,44 @@
 """
 This file contains unit tests for the repository application.
 """
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.test.client import Client
 from django.utils import unittest
 from StringIO import StringIO
 from decimal import Decimal
 from mastrms.repository.wsviews import uploadCSVFile, _handle_uploaded_sample_csv
-from mastrms.repository.models import Project, Experiment, Sample
+from mastrms.repository.models import Project, Experiment, Sample, InstrumentMethod, RunSample
+from mastrms.mdatasync_server.models import NodeClient
 import json, logging
 logger = logging.getLogger(__name__)
 
-class SampleCsvUploadTest(TestCase):
-    urls = 'mastrms.repository.wsurls'
+class TestUploadCSV(TestCase):
+    def upload_csv(self, endpoint, fname, text, **kwargs):
+        fp = StringIO(text)
+        fp.name = "test.csv"
+        client = Client()
+        client.login(username='admin@example.com', password='admin')
+        data = {
+            fname : fp
+        }
+        data.update(kwargs)
+        response = client.post(endpoint, data)
+        try:
+            result = json.loads(response.content)
+        except ValueError:
+            print "JSON decode failed, status_code = %d, data is:" % (response.status_code)
+            print response.content
+        self.assertEqual(response.status_code, 200)
+        return result
+
+class SampleCsvUploadTest(TestUploadCSV):
     """
     Unit tests for parsing of uploaded samples CSV. The target
     function is `_handle_uploaded_sample_csv`.
     """
+
+    urls = 'mastrms.repository.wsurls'
     def setUp(self):
         project = Project.objects.create(title="Test Project",
                                          description="Test",
@@ -29,22 +51,8 @@ class SampleCsvUploadTest(TestCase):
                                                     project=project,
                                                     instrument_method=None)
 
-    def upload_samplecsv(self, text):
-        fp = StringIO(text)
-        fp.name = "test.csv"
-        client = Client()
-        client.login(username='admin@example.com', password='admin')
-        response = client.post('/uploadSampleCSV', {
-            'experiment_id': self.experiment.id,
-            'samplecsv' : fp
-        })
-        try:
-            result = json.loads(response.content)
-        except ValueError:
-            print "JSON decode failed, status_code = %d, data is:" % (response.status_code)
-            print response.content
-        self.assertEqual(response.status_code, 200)
-        return result
+    def upload_csv(self, text):
+        return super(SampleCsvUploadTest, self).upload_csv('/uploadSampleCSV', 'samplecsv', text, experiment_id=self.experiment.id)
 
     def test01_simple_noheader(self):
         """
@@ -54,7 +62,7 @@ class SampleCsvUploadTest(TestCase):
 
         import urls
 
-        result = self.upload_samplecsv(text)
+        result = self.upload_csv(text)
         samples = Sample.objects.all()
 
         self.assertTrue(result["success"])
@@ -72,7 +80,7 @@ class SampleCsvUploadTest(TestCase):
 Sample Label,1.0,Comment about the sample
 """
 
-        result = self.upload_samplecsv(text)
+        result = self.upload_csv(text)
 
         samples = Sample.objects.all()
 
@@ -91,7 +99,7 @@ Sample Label,1.0,Comment about the sample
 1.0,Sample Label,Comment about the sample
 """
 
-        result = self.upload_samplecsv(text)
+        result = self.upload_csv(text)
 
         samples = Sample.objects.all()
 
@@ -110,7 +118,7 @@ Sample Label,1.0,Comment about the sample
 Sample Label,1.0,Comment about the sample
 """
 
-        result = self.upload_samplecsv(text)
+        result = self.upload_csv(text)
 
         samples = Sample.objects.all()
 
@@ -127,7 +135,7 @@ Sample Label,1.0,Comment about the sample
         """
         text = "Sample Label,1.0,Comment about the sample,an interesting column,,,4,5,6,lah,\n"
 
-        result = self.upload_samplecsv(text)
+        result = self.upload_csv(text)
 
         samples = Sample.objects.all()
 
@@ -146,7 +154,7 @@ Sample Label,1.0,Comment about the sample
 Green,Sample Label,1.0,kg,Comment about the sample,Large
 """
 
-        result = self.upload_samplecsv(text)
+        result = self.upload_csv(text)
 
         samples = Sample.objects.all()
 
@@ -165,7 +173,7 @@ Green,Sample Label,1.0,kg,Comment about the sample,Large
     Sample Label,  1.0  ,  Comment about the sample
 """
 
-        result = self.upload_samplecsv(text)
+        result = self.upload_csv(text)
 
         samples = Sample.objects.all()
 
@@ -182,7 +190,7 @@ Green,Sample Label,1.0,kg,Comment about the sample,Large
         """
         text = "Label,Weight,Comment\r\nSample Label,1.0,Comment about the sample\r\nSample Label,1.0,Comment about the sample\r\n\r\n"
 
-        result = self.upload_samplecsv(text)
+        result = self.upload_csv(text)
 
         samples = Sample.objects.all()
 
@@ -200,7 +208,7 @@ Green,Sample Label,1.0,kg,Comment about the sample,Large
         """
         text = "\n"
 
-        result = self.upload_samplecsv(text)
+        result = self.upload_csv(text)
 
         samples = Sample.objects.all()
 
@@ -214,7 +222,7 @@ Green,Sample Label,1.0,kg,Comment about the sample,Large
         """
         text = "label,weight,comment\n"
 
-        result = self.upload_samplecsv(text)
+        result = self.upload_csv(text)
 
         samples = Sample.objects.all()
 
@@ -229,7 +237,7 @@ Green,Sample Label,1.0,kg,Comment about the sample,Large
         """
         text = u"Sample µ,1.0,☃ Snowman ☃\n"
 
-        result = self.upload_samplecsv(text)
+        result = self.upload_csv(text)
 
         samples = Sample.objects.all()
 
@@ -249,7 +257,7 @@ Green,Sample Label,1.0,kg,Comment about the sample,Large
 Sample Label,1.0,Comment about the sample,µ,☃,❄,🐈
 """
 
-        result = self.upload_samplecsv(text)
+        result = self.upload_csv(text)
 
         samples = Sample.objects.all()
 
@@ -268,7 +276,7 @@ Sample Label,1.0,Comment about the sample,µ,☃,❄,🐈
 Sample Label,not a number,Comment about the sample
 """
 
-        result = self.upload_samplecsv(text)
+        result = self.upload_csv(text)
 
         samples = Sample.objects.all()
 
@@ -286,7 +294,7 @@ Sample Label,1.0,Comment about the sample
 Sample Label,not a number,Comment about the sample
 """
 
-        result = self.upload_samplecsv(text)
+        result = self.upload_csv(text)
 
         samples = Sample.objects.all()
 
@@ -308,7 +316,7 @@ Sample Label,not a number,Comment about the sample
 Sample Label,1.0
 """
 
-        result = self.upload_samplecsv(text)
+        result = self.upload_csv(text)
 
         samples = Sample.objects.all()
 
@@ -325,7 +333,7 @@ Sample Label,1.0
 Sample Label
 """
 
-        result = self.upload_samplecsv(text)
+        result = self.upload_csv(text)
 
         samples = Sample.objects.all()
 
@@ -341,7 +349,7 @@ Sample Label
         """
         text = "# id, sample_id, sample_class, sample_class__unicode, experiment, experiment__unicode, label, comment, weight, sample_class_sequence, \n1,,1,class_1,1,exp,label 1,comment,42,1\n2,,1,class_1,1,exp,label 2,comment,43,1\n"
 
-        result = self.upload_samplecsv(text)
+        result = self.upload_csv(text)
 
         samples = Sample.objects.all()
 
@@ -379,7 +387,7 @@ Sample Label
 %d,,1,class_1,1,exp,label B,comment B,43,1
 """ % (samples[0].id, samples[1].id)
 
-        result = self.upload_samplecsv(text)
+        result = self.upload_csv(text)
 
         samples = Sample.objects.all()
 
@@ -411,7 +419,7 @@ Sample Label
 ,,1,class_1,1,exp,label C,comment C,44,1
 """ % (samples[0].id, samples[1].id)
 
-        result = self.upload_samplecsv(text)
+        result = self.upload_csv(text)
 
         samples = Sample.objects.all()
 
@@ -432,3 +440,99 @@ Sample Label
         self.assertTrue(result["success"])
         self.assertEqual(result["num_created"], 1)
         self.assertEqual(result["num_updated"], 2)
+
+class UploadRunCaptureCSVTest(TestUploadCSV):
+    """
+    Unit tests for parsing of uploaded samples CSV. The target
+    function is `uploadRunCaptureCSV`. CSV quirk tests are in 
+    SampleCsvUploadTest, and as CSV parsing is in common they are 
+    not replicated here.
+    """
+
+    urls = 'mastrms.repository.wsurls'
+    def upload_csv(self, text):
+        return super(UploadRunCaptureCSVTest, self).upload_csv('/uploadRunCaptureCSV', 'runcapturecsv', text,
+            experiment_id=self.experiment.id,
+            machine_id=self.machine.id,
+            method_id = self.method.id,
+            title='A test run'
+        )
+
+    def setUp(self):
+        project = Project.objects.create(title="Test Project",
+                                         description="Test",
+                                         client=None)
+        self.experiment = Experiment.objects.create(title="Test Experiment",
+                                                    description="Test",
+                                                    comment="Test",
+                                                    job_number="001",
+                                                    project=project,
+                                                    instrument_method=None)
+        self.machine = NodeClient.objects.create(
+            organisation_name = "Murdoch University",
+            site_name = "CCG",
+            station_name = "linuxpc"
+            )
+        self.method = InstrumentMethod.objects.create(
+            title = "Test Case",
+            method_path = "/test",
+            method_name = "rusty python",
+            version = "2.7.3",
+            creator = get_user_model().objects.all()[0]
+            )
+
+    def test_upload_runcapture(self):
+        """
+        Upload single file to be captured from external run
+        """
+        text = "filename\ncat.jpg"
+        result = self.upload_csv(text)
+        run_samples = RunSample.objects.all()
+        self.assertEqual(len(run_samples), 1)
+
+        self.assertEqual(run_samples[0].filename, "cat.jpg")
+
+        self.assertEqual(result['num_created'], 1)
+
+    def test_upload_runcapture_no_header(self):
+        """
+        Upload single file to be captured from external run (no header line)
+        """
+        text = "cat.jpg"
+        result = self.upload_csv(text)
+        run_samples = RunSample.objects.all()
+        self.assertEqual(len(run_samples), 1)
+
+        self.assertEqual(run_samples[0].filename, "cat.jpg")
+
+        self.assertEqual(result['num_created'], 1)
+
+    def test_upload_multiple(self):
+        """
+        Upload multiple files to be captured from external run
+        """
+        text = "filename\ncat.jpg\ndog.jpg\nbudgie.jpg"
+        result = self.upload_csv(text)
+        run_samples = RunSample.objects.all()
+        self.assertEqual(len(run_samples), 3)
+
+        self.assertEqual(run_samples[0].filename, "cat.jpg")
+        self.assertEqual(run_samples[1].filename, "dog.jpg")
+        self.assertEqual(run_samples[2].filename, "budgie.jpg")
+
+        self.assertEqual(result['num_created'], 3)
+
+    def test_upload_multiple_no_header(self):
+        """
+        Upload multiple files to be captured from external run (no heaer line)
+        """
+        text = "cat.jpg\ndog.jpg\nbudgie.jpg"
+        result = self.upload_csv(text)
+        run_samples = RunSample.objects.all()
+        self.assertEqual(len(run_samples), 3)
+
+        self.assertEqual(run_samples[0].filename, "cat.jpg")
+        self.assertEqual(run_samples[1].filename, "dog.jpg")
+        self.assertEqual(run_samples[2].filename, "budgie.jpg")
+
+        self.assertEqual(result['num_created'], 3)

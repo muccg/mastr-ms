@@ -2209,15 +2209,23 @@ def _read_csv(csvfile, output, column_names, convert_fn):
             output.update({ "success": False, "msg": "File is empty" })
             raise StopIteration
 
-        try:
-            dialect = csv.Sniffer().sniff(snuff)
-        except csv.Error, e:
-            output.update({ "success": False, "msg": str(e) })
-            raise StopIteration
+        dialect = csv.excel
+        has_header = False
+        if len(snuff.splitlines()) > 1:
+            try:
+                has_header = csv.Sniffer().has_header(snuff)
+            except csv.Error:
+                maybe_header = [t.strip().upper() for t in snuff.splitlines()[0].split(dialect.delimiter)]
+                nfound = 0
+                for column in column_names:
+                    if column in maybe_header:
+                        nfound += 1
+                if nfound > 0:
+                    has_header = True
 
-        data = csv.reader(csvfile)
+        data = csv.reader(csvfile, dialect=dialect)
 
-        if len(snuff.splitlines()) > 1 and csv.Sniffer().has_header(snuff):
+        if has_header:
             header = [h.upper().strip() for h in data.next()]
             def find(name):
                 try:
