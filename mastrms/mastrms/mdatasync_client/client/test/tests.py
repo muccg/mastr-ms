@@ -19,7 +19,7 @@ class BasicClientTests(unittest.TestCase, XDisplayTest):
     """
     def setUp(self):
         config = MSDSConfig()
-        self.client = TestClient(config)
+        self.client = TestClient(config, timeout=120)
 
     def tearDown(self):
         self.client.quit()

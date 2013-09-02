@@ -198,7 +198,7 @@ class SyncTests(LiveServerTestCase, XDisplayTest, WithFixtures):
 
         config.update(extra_config)
 
-        test_client = TestClient(config, maximize=True)
+        test_client = TestClient(config, timeout=120, maximize=True)
         test_client.set_window_title(self.id())
         self.test_client = test_client
 
