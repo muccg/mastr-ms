@@ -103,8 +103,6 @@ def recreate_end_block(RG, endblockvars):
 def create_rule_generator(name, description, accessibility, user, apply_sweep_rule, node, startblockvars, sampleblockvars, endblockvars, state=None, version=None, previous_version=None, **kwargs):
     '''Creates a new rule generator record and sets basic attributes.
        Then uses edit_rule_generator to set the blocks and state attributes'''
-    success = False
-    access = True
     message = ""
     try:
         newRG = RuleGenerator()
@@ -116,18 +114,16 @@ def create_rule_generator(name, description, accessibility, user, apply_sweep_ru
         #default state
         newRG.save()
 
-
-        success, access, message = edit_rule_generator(newRG.id, user,
+        message = edit_rule_generator(newRG.id, user,
                                         apply_sweep_rule = apply_sweep_rule,
                                         startblock = startblockvars,
                                         sampleblock = sampleblockvars,
                                         endblock = endblockvars,
                                         state = state)
     except Exception, e:
+        success = False
         print "Exception in create rule generator: %s" % ( e )
-
-    return success, access, message
-
+    return message
 
 def edit_rule_generator(id, user, **kwargs):
     '''Edits an existing rule generator. The
@@ -137,18 +133,18 @@ def edit_rule_generator(id, user, **kwargs):
 
        Any parameters coming through as None are ignored.
        '''
-    success = False
-    access = True
     message = ""
 
     try:
         candidateRG = RuleGenerator.objects.get(id=id)
         print "In edit, user = ", type(user)
         if candidateRG.is_accessible_by(user):
-
             if kwargs.get('apply_sweep_rule') is not None:
                 candidateRG.apply_sweep_rule = kwargs.get('apply_sweep_rule')
             if kwargs.get('state') is not None:
+                # additional policy from MAS-27: user must match to change state
+                if candidateRG.created_by != user:
+                    raise Exception("Only %s can change the enable or disable this rule generator." % (candidateRG.created_by.email))
                 candidateRG.state = kwargs.get('state')
             if kwargs.get('accessibility') is not None:
                 candidateRG.accessibility = kwargs.get('accessibility')
@@ -166,19 +162,14 @@ def edit_rule_generator(id, user, **kwargs):
                 recreate_sample_block(candidateRG, kwargs.get('sampleblock'))
             if kwargs.get('endblock', None) is not None:
                 recreate_end_block(candidateRG, kwargs.get('endblock'))
-
-            success = True
         else:
-            success = False
-            access = False
-
+            raise Exception("You do not have access to modify this rule generator.")
     except Exception, e:
-        print 'Exception: %s' % (e)
         #couldnt find rulegen, or some other error.
-        success = False
         message = "Error editing rule generator details"
+        raise
 
-    return success, access, message
+    return message
 
 def copy_rules(sourceRG, destRG):
     for rule in sourceRG.start_block_rules:

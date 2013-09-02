@@ -2320,23 +2320,19 @@ def create_rule_generator(request):
     sampleblockvars = json.loads(request.POST.get('sampleblock', []))
     endblockvars = json.loads(request.POST.get('endblock', []))
 
-    success, access, message = rulegenerators.create_rule_generator(name,
-                                         description,
-                                         accessibility,
-                                         request.user,
-                                         apply_sweep_rule,
-                                         request.user.PrimaryNode,
-                                         startblockvars,
-                                         sampleblockvars,
-                                         endblockvars)
-
-    if success:
-        return HttpResponse(json.dumps({'success':True}))
-    else:
-        if access:
-            raise Exception("Could not create rule generator")
-        else:
-            return HttpResponseForbidden('Improper rule generator access')
+    try:
+        message = rulegenerators.create_rule_generator(name,
+            description,
+            accessibility,
+            request.user,
+            apply_sweep_rule,
+            request.user.PrimaryNode,
+            startblockvars,
+            sampleblockvars,
+            endblockvars)
+        return HttpResponse(json.dumps({'success':True,'msg':message}))
+    except Exception, e:
+        return HttpResponse(json.dumps({'success':False, 'msg' : str(e)}))
 
 @mastr_users_only
 def edit_rule_generator(request):
@@ -2355,22 +2351,19 @@ def edit_rule_generator(request):
     endblockvars = json.loads(request.POST.get('endblock', 'null'))
     state = json.loads(request.POST.get('state', 'null'))
 
-    success, access, message = rulegenerators.edit_rule_generator(rg_id, request.user,
-                                                    name=name,
-                                                    description=description,
-                                                    accessibility=accessibility,
-                                                    apply_sweep_rule=apply_sweep_rule,
-                                                    startblock=startblockvars,
-                                                    sampleblock=sampleblockvars,
-                                                    endblock=endblockvars,
-                                                    state=state)
-    if success:
-        return HttpResponse(json.dumps({'success':success}))
-    else:
-        if access:
-            raise Exception('Exception during editing rule generator')
-        else:
-            return HttpResponseForbidden('Improper rule generator access')
+    try:
+        message = rulegenerators.edit_rule_generator(rg_id, request.user,
+                                                        name=name,
+                                                        description=description,
+                                                        accessibility=accessibility,
+                                                        apply_sweep_rule=apply_sweep_rule,
+                                                        startblock=startblockvars,
+                                                        sampleblock=sampleblockvars,
+                                                        endblock=endblockvars,
+                                                        state=state)
+        return HttpResponse(json.dumps({'success':True, 'msg': message}))
+    except Exception, e:
+        return HttpResponse(json.dumps({'success':False, 'msg': str(e)}))
 
 @mastr_users_only
 def create_new_version_of_rule_generator(request):
