@@ -591,8 +591,8 @@ def formalAccept(request, *args):
     fq = setFormalQuoteStatus(qr, QUOTE_STATE_ACCEPTED)
 
     #add optional purchase_order_number to the qr
-    po = request.REQUEST.get('purchase_order_number')
-    fq.purchase_order_number = po
+    po = request.REQUEST.get('purchase_order_number', None)
+    fq.purchase_order_number = po or ""
     fq.save()
 
     #leave acceptance in the quote history
