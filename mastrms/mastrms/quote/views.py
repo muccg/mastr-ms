@@ -379,12 +379,40 @@ def formalLoad(request, *args, **kwargs):
     logger.debug('***formalLoad : enter ***')
 
     #get qid from quargs, then request, then blank
-    qid = kwargs.get('qid', request.REQUEST.get('qid', '') )
-    fqid = request.REQUEST.get('fqid', '')
-    retvals = {}
+    qid = (kwargs.get('qid', request.REQUEST.get("qid", None)) or "").strip()
+    fqid = (request.REQUEST.get("fqid", None) or "").strip()
 
-    #retdata
-    retdata = { 'quoterequestid' : qid,
+    if qid or fqid:
+        #This part gets us the linked formal quote data
+        if fqid:
+            quotes = Formalquote.objects.filter(id=fqid)
+        else:
+            quotes = Formalquote.objects.filter(quoterequestid=qid)
+
+        retvals = quotes.values('id', 'quoterequestid', 'details', 'created',
+                                'fromemail', 'toemail', 'purchase_order_number')
+
+        if len(retvals) > 0:
+            retvals = retvals[0]
+            rows = len(retvals)
+
+            #get the details of the auth user in the toemail
+            try:
+                user = User.objects.get(username=retvals['fromemail'])
+            except User.DoesNotExist:
+                pass
+            else:
+                retvals['fromname'] = user.get_full_name()
+                retvals['officePhone'] = user.telephoneNumber
+
+            qr = Quoterequest.objects.get(id=retvals['quoterequestid'])
+            retvals['tonode'] = qr.tonode
+
+            retvals['pdf'] = retvals['details']
+        else:
+            logger.debug('\tNo formal quotes.')
+            retvals = {
+                'quoterequestid' : qid,
                 'toemail' : '',
                 'fromemail' : '',
                 'details' : '',
@@ -394,45 +422,10 @@ def formalLoad(request, *args, **kwargs):
                 'tonode' : '',
                 'purchase_order_number' : ''
               }
-
-    if qid is not '' or fqid is not '':
-        qid = qid.strip()
-        fqid = fqid.strip()
-
-        try:
-            #This part gets us the linked formal quote data
-            if fqid != '':
-                retvals = Formalquote.objects.filter(id=fqid).values( 'id', 'quoterequestid', 'details', 'created', 'fromemail', 'toemail', 'purchase_order_number' )
-            elif qid != '':
-                retvals = Formalquote.objects.filter(quoterequestid=qid).values( 'id', 'quoterequestid', 'details', 'created', 'fromemail', 'toemail', 'purchase_order_number' )
-
-            if len(retvals) > 0:
-                retvals = retvals[0]
-                rows = len(retvals)
-
-                #get the details of the auth user in the toemail
-                try:
-                    user = User.objects.get(username=retvals['fromemail'])
-                except User.DoesNotExist:
-                    pass
-                else:
-                    retvals['fromname'] = user.get_full_name()
-                    retvals['officePhone'] = user.telephoneNumber
-
-                    qr = Quoterequest.objects.get(id=retvals['quoterequestid'])
-
-                    retvals['tonode'] = qr.tonode
-                retvals['pdf'] = retvals['details']
-
-            else:
-                logger.debug('\tNo formal quotes.')
-                retvals = retdata
-                rows = 0
-        except Exception, e:
-            logger.exception('Exception loading quote')
-            raise Exception('Exception loading quote')
+            rows = 0
     else:
         logger.warning('\tNo qid or fqid passed')
+        retvals = {}
 
     logger.warning('***formalLoad : exit ***')
     return jsonResponse(data=retvals)
