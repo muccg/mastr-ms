@@ -80,7 +80,7 @@ ci_remote_build() {
         build_number_head >> build-number.txt
     fi
 
-    EXCLUDES="('bootstrap'\, '.hg*'\, '.git'\, 'virt*'\, '*.log'\, '*.rpm'\, 'mastrms/build'\, 'mastrms/dist'\, '*.egg-info')"
+    EXCLUDES="('bootstrap'\, '.hg*'\, '.git'\, 'virt*'\, '*.log'\, '*.rpm'\, 'mastrms/build'\, 'mastrms/dist'\, '*.egg-info'\, 'mastrms/mastrms/mdatasync_client/supportwin32')"
     SSH_OPTS="-o StrictHostKeyChecking\=no"
     RSYNC_OPTS="-l"
     time ccg ${AWS_BUILD_INSTANCE} rsync_project:local_dir=./,remote_dir=${TARGET_DIR}/,ssh_opts="${SSH_OPTS}",extra_opts="${RSYNC_OPTS}",exclude="${EXCLUDES}",delete=True
@@ -92,18 +92,18 @@ ci_remote_build() {
 
 # publish rpms to testing repo
 ci_rpm_publish() {
-    time ccg ${AWS_BUILD_INSTANCE} publish_testing_rpm:build/${PROJECT_NAME}*.rpm,release=6
+    time ccg publish_testing_rpm:build/${PROJECT_NAME}*.rpm,release=6
 }
 
 # copy a version from testing repo to release repo
-ci_rpm_release() {
+rpm_release() {
     if [ -z "$1" ]; then
-        echo "ci_rpm_release requires an rpm filename argument"
+        echo "rpm_release requires an rpm filename argument"
         usage
         exit 1
     fi
 
-    time ccg ${AWS_BUILD_INSTANCE} release_rpm:$1,release=6
+    time ccg release_rpm:$1,release=6
 }
 
 # destroy our ci build server
@@ -254,7 +254,7 @@ purge() {
 
 usage() {
     echo ""
-    echo "Usage ./develop.sh (test|nosetests|lint|jslint|dropdb|start|install|clean|purge|pipfreeze|pythonversion|ci_remote_build|ci_staging|ci_staging_tests|ci_rpm_publish|ci_rpm_release VERSION|ci_remote_destroy)"
+    echo "Usage ./develop.sh (test|nosetests|lint|jslint|dropdb|start|install|clean|purge|pipfreeze|pythonversion|ci_remote_build|ci_staging|ci_staging_tests|ci_rpm_publish|rpm_release VERSION|ci_remote_destroy)"
     echo ""
 }
 
@@ -303,9 +303,9 @@ ci_rpm_publish)
     ci_ssh_agent
     ci_rpm_publish
     ;;
-ci_rpm_release)
+rpm_release)
     ci_ssh_agent
-    ci_rpm_release $*
+    rpm_release $*
     ;;
 ci_staging)
     ci_ssh_agent
