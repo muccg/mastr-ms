@@ -18,19 +18,17 @@ Genomics`_, for Metabolomics Australia (MA).
 
 .. _Centre for Comparative Genomics: http://ccg.murdoch.edu.au/
 
-
 Mastr-MS is comprised of a number of modules:
 
 **User Management Module**
 
-  Provision of a secure, online user management module for the
-  Metabolomics Australia Data and Sample Management System.
+  A secure online user management module for the Metabolomics
+  Australia Data and Sample Management System.
     
 **Sample Management Module**
 
-  Provision of a secure, online sample management module allowing
-  users to submit samples, track samples through experimental
-  workflows and receive results.
+  An online sample management module allowing users to submit samples,
+  track samples through experimental workflows and receive results.
 
 **Data Management Module**
 
@@ -39,26 +37,6 @@ Mastr-MS is comprised of a number of modules:
   files as well as all relevant meta data associated with an
   experiment.
 
-ABF Team
---------
-
-**Project Director**
-  Prof. Matthew Bellgard
-**Project Leader**
-  Adam Hunter
-**Software Developers**
-  Rodney Lorrimar, Brad Power, Tamas Szabo, Maciej Radochonski,
-  Nick Takayama, Andrew Macgregor
-**System Administrator**
-  David Schibeci
-
-MA Team
--------
-
-**MA Informatics Group Leader**
-  Dr. Vladimir Likic
-**Computer Scientist**
-  Dr. Saravanan Dayalan
 
 Table of Contents
 =================
@@ -68,11 +46,6 @@ Table of Contents
 
     server-installation
     client-installation
+    usage
+    credits
     development
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

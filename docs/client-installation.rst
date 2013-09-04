@@ -40,7 +40,7 @@ Starting
 --------
 
 To start the data sync client application, open the installation
-folder and double click "main.exe".
+folder and double click ``main.exe``.
 
 .. _client-config:
 
@@ -49,7 +49,7 @@ Configuration
 
 Once installed, some configuration is required before the program can
 be used to sync data. To configure the data sync client, visit the
-*Edit -> Preferences* menu.
+*Edit → Preferences* menu.
 
 .. image:: client-preferences.png
 
@@ -84,12 +84,12 @@ be used to sync data. To configure the data sync client, visit the
 Usage
 -----
 
-You can force the sync client to check right now by clicking *File ->
+You can force the sync client to check right now by clicking *File →
 Check Now*. Otherwise, the program will periodically sync according to
 the configured interval.
 
 If you close the client by clicking the [X] in the top corner of the
-window, or minimise it with *File -> Minimize*, it will still be
+window, or minimise it with *File → Minimize*, it will still be
 running in the background. You can tell if the client is running if
 you see this symbol in the system tray:
 
@@ -98,13 +98,13 @@ you see this symbol in the system tray:
 To re-open the client window, double click the icon, or right click
 and select *Open Main Window*.
 
-To fully quit the program you must choose *File -> Quit*.
+To fully quit the program you must choose *File → Quit*.
 
 
 Program Updates
 ---------------
 
-Clicking *File -> Program Updates* will check the server to see if any
+Clicking *File → Program Updates* will check the server to see if any
 new updates are available. If a new version is available it will be
 downloaded and applied, and the application must be restarted for the
 updates to take effect.

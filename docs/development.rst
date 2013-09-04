@@ -62,7 +62,19 @@ Packages not really required::
 Building a CentOS RPM
 ---------------------
 
-todo
+The RPM build is unlikely to work unless done under CentOS. Assuming
+the Mastr-MS source code is checked out at ``/usr/local/src``, you can
+build an RPM in more-or-less the normal way by running these
+commands::
+
+    CCGSOURCEDIR=/usr/local/src
+    export CCGSOURCEDIR
+    cd $CCGSOURCEDIR && rpmbuild -bb centos/mastrms.spec
+
+The spec file requires ``CCGSOURCEDIR`` to be set. It will download
+all the python dependencies with ``pip``, create the RPM, and output
+it to ``~/rpmbuild/RPMS`` (or the location you have configured in
+``~/.rpmrc``).
 
 How to build the sync client
 ----------------------------
@@ -251,7 +263,7 @@ Features of MASTR
 
 
 Documentation which still needs merging
-=======================================
+---------------------------------------
 
  * ``INSTALL`` → ``client-install.rst``
  * ``WXPYTHON_HOWTO`` → ``dev-wxpython-howto.rst``
