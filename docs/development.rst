@@ -262,11 +262,8 @@ Features of MASTR
     * Open Source code repository
 
 
-Documentation which still needs merging
----------------------------------------
-
- * ``INSTALL`` → ``client-install.rst``
+Auto-generated Documentation
+----------------------------
 
 .. toctree::
-    client-install
     tests

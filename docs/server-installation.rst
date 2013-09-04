@@ -290,8 +290,6 @@ the **Django Admin**. The fields should be set as follows.
 +--------------------+------------------------------------------------+
 
 
-.. _adding-keys:
-
 Instrument Method Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -327,6 +325,7 @@ operation procedures page.
 Once the documents are uploaded, they can be attached to experiments
 and viewed through the Experiment Sample Preparation screen.
 
+.. _adding-keys:
 
 SSH Key Management
 ~~~~~~~~~~~~~~~~~~
