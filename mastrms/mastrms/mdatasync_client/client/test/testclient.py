@@ -17,6 +17,28 @@ __all__ = ["TestClient"]
 
 # fixme: unit tests don't show exceptions in other threads
 
+class WatchdogThread(threading.Thread):
+    def __init__(self, timeout):
+        super(WatchdogThread, self).__init__()
+        self.daemon = True
+        self.timeout = timeout
+        self.lock = threading.Lock()
+
+    def reset(self):
+        "call this at least once per timeout to avoid exit"
+        with self.lock:
+            self.ok = True
+
+    def run(self):
+        while True:
+            self.ok = False
+            time.sleep(self.timeout)
+            logger.debug("WatchdogThread: ok=%s" % self.ok)
+            with self.lock:
+                if not self.ok:
+                    logger.debug("goodbye cruel world")
+                    os.kill(os.getpid(), 9)
+
 class TestClient(object):
     """
     This class runs the client in a thread and provides methods for
@@ -78,18 +100,11 @@ class TestClient(object):
         self._command(self._set_ready, True)
 
     def _reset_watchdog(self, initial=False):
-        if self.timeout is not None:
-            if self.timer is None:
-                self.timer = wx.Timer(self.m.win)
-                self.m.win.Bind(wx.EVT_TIMER, self._timed_out, self.timer)
-
-            self.timer.Start(int(self.timeout * 1000), True)
-            if initial:
-                logger.info("The test client will quit after %d seconds of inactivity" % self.timeout)
-
-    def _timed_out(self, event):
-        logger.info("Timed out after %d seconds" % self.timeout)
-        self.m.win.OnMenuQuit(None)
+        if initial and self.timeout is not None:
+            logger.debug("The test client will time out after %d seconds of inactivity." % self.timeout)
+            self.watchdog = WatchdogThread(self.timeout)
+            self.watchdog.start()
+        self.watchdog.reset()
 
     def _set_ready(self, ready=True):
         if ready:

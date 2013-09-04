@@ -39,7 +39,7 @@
         "fields": {
             "name": "Administrators",
             "user": [
-                1
+                1, 2
             ]
         }
     },
@@ -72,7 +72,7 @@
         "model": "users.group",
         "fields": {
             "name": "Node Reps",
-            "user": [1]
+            "user": [1, 2]
         }
     },
     {
@@ -80,7 +80,7 @@
         "model": "users.group",
         "fields": {
             "name": "Example Node",
-            "user": [1]
+            "user": [1, 2]
         }
     },
     {

@@ -6,6 +6,153 @@ runListStore = new Ext.data.GroupingStore({
     remoteSort: false
 });
 
+MA.RunCaptureCSVUploadForm = new Ext.Window({
+    title: 'Upload CSV of Completed External Run',
+    closeAction:'hide',
+    width:450,
+    height:450,
+    minHeight:450,
+    minWidth:450,
+    id:'runCaptureCSVUploadWindow',
+    defaults: {
+        bodyStyle:'padding:15px;background:transparent;'
+    },
+    
+    items:[
+        {
+            id:'runCaptureCSVUpload',
+            xtype:'form',
+            fileUpload: true,
+            url: wsBaseUrl + 'uploadRunCaptureCSV',
+            waitTitle: 'Uploading...',
+            border:false,
+            items:[
+                { 
+                    xtype: 'hidden',
+                    name: 'experiment_id',
+                    itemId: 'expIdField'
+                },
+                {
+                    fieldLabel:'Title',
+                    xtype:'textfield',
+                    itemId:'title',
+                    name:'title',
+                    value:'New Captured External Run',
+                    allowBlank:false
+                },
+                new Ext.form.ComboBox({
+                    fieldLabel: 'Instrument method',
+                    itemId: 'method',
+                    name: 'method_id',
+                    editable:false,
+                    forceSelection:true,
+                    displayField:'value',
+                    valueField:'key',
+                    hiddenName:'method_id',
+                    lazyRender:true,
+                    allowBlank:false,
+                    typeAhead:false,
+                    triggerAction:'all',
+                    listWidth:230,
+                    width: 200,
+                    store: methodStore
+                }),
+                new Ext.form.ComboBox({
+                    fieldLabel: 'Machine',
+                    itemId: 'machine',
+                    name: 'machine_id',
+                    editable:false,
+                    forceSelection:true,
+                    displayField:'station_name',
+                    valueField:'id',
+                    hiddenName:'machine_id',
+                    lazyRender:true,
+                    allowBlank:false,
+                    typeAhead:false,
+                    triggerAction:'all',
+                    mode:'local',
+                    listWidth:230,
+                    width: 200,
+                    store: machineStore,
+                    itemSelector: 'div.search-item',
+                    tpl:new Ext.XTemplate(
+                    '<tpl for="."><div style="padding:8px;padding-top:5px;padding-bottom:5px;border-bottom:1px solid #ccc;" class="search-item">',
+                    '{station_name}<br /><span style="color:#666;">{organisation_name} > {site_name}</span>',
+                    '</div></tpl>'
+                    )
+                }),
+                {
+                    xtype: 'panel',
+                    border: false,
+                    bodyStyle:'padding:15px;background:transparent;',
+                    html: 'Uploaded CSVs must be of the format:<br><br><code>filename</code><br><br>or contain a header line with these words.'
+                },
+                {
+                    xtype: 'fileuploadfield',
+                    itemId: 'runcapturecsvupload',
+                    emptyText: '',
+                    fieldLabel: 'File',
+                    name: 'runcapturecsv'
+                },
+                {
+                    xtype: 'hidden',
+                    name: 'csrfmiddlewaretoken',
+                    value: Ext.util.Cookies.get("csrftoken_mastrms")
+                }
+            ]
+        }
+    ],
+    buttons: [
+        {
+            text: 'Upload',
+            itemId:'csvUploadBtn',
+            handler: function(){
+                Ext.getCmp('runCaptureCSVUpload').getComponent('expIdField').setValue( MA.ExperimentController.currentId() );
+            
+                Ext.getCmp('runCaptureCSVUpload').getForm().submit(
+                    {   
+                        successProperty: 'success',        
+                        success: function (form, action) {
+                            var res = action.result;
+                            if (res.success === true) {
+                                var msg = res.num_created + " file" + (res.num_created == 1 ? "" : "s") + " from external run will be captured.";
+                                form.reset(); 
+                                MA.ExperimentSamplesOnlyInit();
+                                Ext.Msg.alert('CSV Upload', msg);
+                                Ext.getCmp('runCaptureCSVUploadWindow').hide();
+                                runListStore.reload();
+                            } 
+                        },
+                        failure: function (form, action) {
+                            // this gets called both on server errors
+                            // and when view returns success: false
+                            MA.ExperimentSamplesOnlyInit();
+                            var msg = "Error processing CSV.";
+                            var res = action.result;
+                            if (res && res.msg) {
+                                msg += " " + res.msg + ".\n";
+                                if (res.invalid_lines) {
+                                    msg += "Line number(s) ";
+                                    for (var i = 0; i < res.invalid_lines.length; i++) {
+                                        msg += res.invalid_lines[i];
+                                        if (i + 1 < res.invalid_lines.length) {
+                                            msg += ", ";
+                                        }
+                                    }
+                                    if (res.max_error) {
+                                        msg += "...";
+                                    }
+                                    msg += " were invalid.";
+                                }
+                            }
+                            Ext.Msg.alert('CSV Upload', msg);
+                        }
+                    }
+                );
+            }
+        }
+    ]
+});
 
 MA.RunList = Ext.extend(Ext.Panel, {
     constructor: function (config) {
@@ -100,6 +247,15 @@ MA.RunList = Ext.extend(Ext.Panel, {
                                         
                                     }
                                 }
+                            }
+                        },
+                        {
+                            text: "Capture Completed External Run",
+                            cls: "x-btn-text-icon",
+                            icon: "static/images/arrow-up.png",
+                            handler: function () {
+                                var selModel = self.getComponent("grid").getSelectionModel();
+                                MA.RunCaptureCSVUploadForm.show();
                             }
                         }
                     ],

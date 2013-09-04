@@ -198,7 +198,7 @@ class SyncTests(LiveServerTestCase, XDisplayTest, WithFixtures):
 
         config.update(extra_config)
 
-        test_client = TestClient(config, maximize=True)
+        test_client = TestClient(config, timeout=120, maximize=True)
         test_client.set_window_title(self.id())
         self.test_client = test_client
 
@@ -724,8 +724,6 @@ class SyncTests(LiveServerTestCase, XDisplayTest, WithFixtures):
     def test_unicode1(self):
         """
         Tests connecting to a station with unicode characters in its name.
-        At present we don't expect this to work.
-        This seems to be because urllib2 won't make utf-8 encoded urls.
         """
 
         # capture log messages from client
@@ -746,16 +744,15 @@ class SyncTests(LiveServerTestCase, XDisplayTest, WithFixtures):
             with json_hooker() as received_json:
                 self.test_client.click_sync()
 
-                # Check that request was never made
-                self.assertEqual(received_json, [], "No request should be made")
+                # check that the request was made
+                requested_files = self.find_files_in_json(received_json)
+                
+                self.assertEqual(len(requested_files), 1)
 
-        # Check for a DEBUG msg which says sync fail.
-        # It has to be asked why debug level is used for this error...
-        expected_level = "debug"
-        exp = re.compile(r".*Sync.*failed.*ASCII.*", re.I)
-        msgs = filter(exp.match, handler.messages[expected_level])
-        self.assertEqual(len(msgs), 1,
-                         "%s log with error msg" % expected_level.upper())
+                # a. check that files are requested
+                self.assertEqual(len(requested_files[0]), 2)
+                self.assertEqual(requested_files[0][0], "runsample1_filename")
+                self.assertEqual(requested_files[0][1], "runsample2_filename")
 
     @staticmethod
     def hack_unicode_filenames(runsamples):

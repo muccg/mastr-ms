@@ -2,7 +2,7 @@ from django.db import transaction
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden, HttpResponseNotAllowed, HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
-from mastrms.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RUN_STATES, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure, RuleGenerator, Component
+from mastrms.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RUN_STATES, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure, RuleGenerator, Component, NodeClient
 from mastrms.quote.models import Organisation, Formalquote
 from ccg.utils import webhelpers
 from django.utils import simplejson as json
@@ -26,6 +26,27 @@ import csv
 from django.conf import settings
 import logging
 logger = logging.getLogger('mastrms.general')
+
+class ClientLookupException(Exception):
+    """
+    exception message will be a json-encoded message suitable to return to the client
+    """
+    def __init__(self, msg):
+        self.output = {
+            'success' : False,
+            'msg' : msg
+            }
+        super(ClientLookupException, self).__init__(json.dumps(self.output))
+
+def get_object_by_id_or_error(request, cls, key):
+    obj_id = request.POST.get(key, None)
+    if obj_id is None:
+        raise ClientLookupException('need %s param' % key)
+    try:
+        obj = cls.objects.get(id=obj_id)
+    except cls.DoesNotExist, e:
+        raise ClientLookupException(str(e))
+    return obj
 
 @mastr_users_only
 def create_object(request, model):
@@ -54,7 +75,7 @@ def create_object(request, model):
 
         if model == 'run':
             obj.creator = request.user
-            if not obj.rule_generator.is_accessible_by(request.user):
+            if (obj.rule_generator is not None) and (not obj.rule_generator.is_accessible_by(request.user)):
                 return HttpResponseForbidden("Invalid rule generator for run");
             if obj.number_of_methods in ('', 'null'):
                 obj.number_of_methods = None
@@ -371,7 +392,7 @@ def update_object(request, model, id):
         #TODO clean this stuff up!
         if model == 'run':
             logger.debug('updating run.')
-            if not row.rule_generator.is_accessible_by(request.user):
+            if (row.rule_generator is not None) and (not row.rule_generator.is_accessible_by(request.user)):
                 return HttpResponseForbidden("Invalid rule generator for run");
 
             if row.number_of_methods in ('', 'null'):
@@ -853,12 +874,35 @@ def populate_select(request, model=None, key=None, value=None, field=None, match
 def update_single_source(request, exp_id):
 
     args = request.GET.copy()
+    # fixme: a ModelForm could be used here
 
     for key in args.keys():
-        if args[key] == '':
-            args[key] = None
-        if key == 'sex' and (args[key] == '' or args[key] == 'null'):
-            args[key] = u'U'
+        if args[key] in ('', 'null', 'undefined'):
+            del args[key]
+
+    def arg_str(key):
+        return args.get(key, "")
+
+    def arg_sex():
+        return arg_str("sex") or u'U'
+
+    def arg_int(key):
+        if key in args:
+            try: return int(args[key])
+            except ValueError: pass
+        return None
+
+    def arg_decimal(key):
+        if key in args:
+            try: return Decimal(args[key])
+            except DecimalException: pass
+        return None
+
+    def arg_date(key):
+        if key in args:
+            try: return datetime.strptime(args[key], "%Y-%m-%d").date()
+            except ValueError: pass
+        return None
 
     output = {'metaData': { 'totalProperty': 'results',
                             'successProperty': 'success',
@@ -879,155 +923,69 @@ def update_single_source(request, exp_id):
         output['success'] = False
     else:
         try:
+            # fixme: what about multiple objects returned?
             bs = BiologicalSource.objects.get(experiment=e)
         except ObjectDoesNotExist:
             bs = BiologicalSource(experiment=e)
 
         bs.type = OrganismType.objects.get(id=args['type'])
-        bs.information = args['information']
-        try:
-            bs.ncbi_id = int(args['ncbi_id'])
-        except:
-            bs.ncbi_id = None
-        #bs.label = args['label']
+        bs.information = arg_str('information')
+        bs.ncbi_id = arg_int('ncbi_id')
+        #bs.label = arg_str('label')
         bs.save()
 
+        def get_bio_info(Cls):
+            # check for existing items
+            infos = Cls.objects.filter(source=bs)
+            if len(infos) == 0:
+                return Cls(source=bs)
+            else:
+                return infos[0]
+
         #process additional info
-        if int(args['type']) == 1:
-            #check for existing items
-            if bs.microbialinfo_set.count() == 0:
-                mi = MicrobialInfo()
-                mi.genus = args['genus']
-                mi.species = args['species']
-                mi.culture_collection_id = args['culture']
-                mi.media = args['media']
-                mi.fermentation_vessel = args['vessel']
-                mi.fermentation_mode = args['mode']
-                try:
-                    mi.innoculation_density = str(float(args['density']))
-                except:
-                    pass
-                try:
-                    mi.fermentation_volume = str(float(args['volume']))
-                except:
-                    pass
-                try:
-                    mi.temperature = str(float(args['temperature']))
-                except:
-                    pass
-                try:
-                    mi.agitation = str(float(args['agitation']))
-                except:
-                    pass
-                try:
-                    mi.ph = str(float(args['ph']))
-                except:
-                    pass
-                mi.gas_type = args['gastype']
-                try:
-                    mi.gas_flow_rate = str(float(args['flowrate']))
-                except:
-                    pass
-                mi.gas_delivery_method = args['delivery']
-                mi.gas_delivery_method = args['delivery']
+        if arg_int('type') == 1:
+            info = get_bio_info(MicrobialInfo)
+            info.genus = arg_str('genus')
+            info.species = arg_str('species')
+            info.culture_collection_id = arg_str('culture')
+            info.media = arg_str('media')
+            info.fermentation_vessel = arg_str('vessel')
+            info.fermentation_mode = arg_str('mode')
+            info.innoculation_density = arg_decimal('density')
+            info.fermentation_volume = arg_decimal('volume')
+            info.temperature = arg_decimal('temperature')
+            info.agitation = arg_decimal('agitation')
+            info.ph = arg_decimal('ph')
+            info.gas_type = arg_str('gastype')
+            info.gas_flow_rate = arg_decimal('flowrate')
+            info.gas_delivery_method = arg_str('delivery')
+        elif arg_int('type') == 2:
+            info = get_bio_info(PlantInfo)
+            info.development_stage = arg_str('development_stage')
+        elif arg_int('type') == 3:
+            info = get_bio_info(AnimalInfo)
+            info.sex = arg_sex()
+            info.age = arg_int('age')
+            info.parental_line = arg_str('parental_line')
+            info.location = arg_str('location')
+            # info.notes = arg_str('notes')
+        elif arg_int('type') == 4:
+            info = get_bio_info(HumanInfo)
+            info.sex = arg_sex()
+            info.date_of_birth = arg_date('date_of_birth')
+            info.bmi = arg_decimal('bmi')
+            info.diagnosis = arg_str('diagnosis')
+            info.location = arg_str('location')
+            # info.notes = arg_str('notes')
+        else:
+            info = None
 
-                bs.microbialinfo_set.add(mi)
-            else:
-                mi = bs.microbialinfo_set.all()[0]
-                try:
-                    mi.genus = args['genus']
-                    mi.species = args['species']
-                    mi.culture_collection_id = args['culture']
-                    mi.media = args['media']
-                    mi.fermentation_vessel = args['vessel']
-                    mi.fermentation_mode = args['mode']
-                except:
-                    pass
-                try:
-                    mi.innoculation_density = str(float(args['density']))
-                except:
-                    pass
-                try:
-                    mi.fermentation_volume = str(float(args['volume']))
-                except:
-                    pass
-                try:
-                    mi.temperature = str(float(args['temperature']))
-                except:
-                    pass
-                try:
-                    mi.agitation = str(float(args['agitation']))
-                except:
-                    pass
-                try:
-                    mi.ph = str(float(args['ph']))
-                except:
-                    pass
-                try:
-                    mi.gas_type = args['gastype']
-                except:
-                    pass
-                try:
-                    mi.gas_flow_rate = str(float(args['flowrate']))
-                except:
-                    pass
-                try:
-                    mi.gas_delivery_method = args['delivery']
-                except:
-                    pass
-
-                mi.save()
-        elif int(args['type']) == 2:
-            if bs.plantinfo_set.count() == 0:
-                pi = PlantInfo()
-                pi.development_stage = args['development_stage']
-                bs.plantinfo_set.add(pi)
-            else:
-                pi = bs.plantinfo_set.all()[0]
-                pi.development_stage = args['development_stage']
-                pi.save()
-        elif int(args['type']) == 3:
-            if bs.animalinfo_set.count() == 0:
-                ai = AnimalInfo()
-                ai.sex = args['sex']
-                try:
-                    ai.age = str(int(args['age']))
-                except:
-                    pass
-                ai.parental_line = args['parental_line']
-                ai.location = args['location']
-#                ai.notes = args['notes']
-                bs.animalinfo_set.add(ai)
-            else:
-                ai = bs.animalinfo_set.all()[0]
-                ai.sex = args['sex']
-                try:
-                    ai.age = str(int(args['age']))
-                except:
-                    pass
-                ai.parental_line = args['parental_line']
-                ai.location = args['location']
-#                ai.notes = args['notes']
-                ai.save()
-        elif int(args['type']) == 4:
-            if bs.humaninfo_set.count() == 0:
-                hi = HumanInfo()
-                hi.sex = args['sex']
-                hi.date_of_birth = args['date_of_birth']
-                hi.bmi = args['bmi']
-                hi.diagnosis = args['diagnosis']
-                hi.location = args['location']
-#                hi.notes = args['notes']
-                bs.humaninfo_set.add(hi)
-            else:
-                hi = bs.humaninfo_set.all()[0]
-                hi.sex = args['sex']
-                hi.date_of_birth = args['date_of_birth']
-                hi.bmi = args['bmi']
-                hi.diagnosis = args['diagnosis']
-                hi.location = args['location']
-#                hi.notes = args['notes']
-                hi.save()
+        if info:
+            try:
+                info.save()
+            except Exception, e:
+                output['success'] = False
+                output['msg'] = str(e)
 
     return HttpResponse(json.dumps(output))
 
@@ -2104,29 +2062,77 @@ def _handle_uploaded_file(f, name, experiment_id):
     print '*** _handle_uploaded_file: exit ***'
     return retval
 
-
 @mastr_users_only
 def uploadCSVFile(request):
+    return uploadCSVWrapper(request, 'samplecsv', _handle_uploaded_sample_csv)
+
+@mastr_users_only
+def uploadRunCaptureCSV(request):
+    return uploadCSVWrapper(request, 'runcapturecsv', _handle_uploaded_run_capture_csv)
+
+def uploadCSVWrapper(request, file_field_name, csv_handler_fn):
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
 
-    expId = request.POST.get('experiment_id', None)
-    if expId is None:
-        return HttpResponseBadRequest(json.dumps({ 'success': False, 'msg': 'need experiment_id param' }))
-    try:
-        experiment = Experiment.objects.get(id=expId)
-    except Experiment.DoesNotExist, e:
-        return HttpResponseBadRequest(json.dumps({ 'success': False, 'msg': str(e) }))
-
-    if request.FILES.has_key('samplecsv'):
-        f = request.FILES['samplecsv']
-        output = _handle_uploaded_sample_csv(experiment, f)
+    if request.FILES.has_key(file_field_name):
+        f = request.FILES[file_field_name]
+        output = csv_handler_fn(request, f)
     else:
         output = { "success": False, "msg": "No file attached." }
 
     return HttpResponse(json.dumps(output))
 
-def _handle_uploaded_sample_csv(experiment, csvfile):
+def _handle_uploaded_run_capture_csv(request, csvfile):
+    """
+    Read a file object of CSV text and create RunSample instances from it.
+    Returns a "success" dict suitable for returning to the client.
+    """
+    try:
+        experiment = get_object_by_id_or_error(request, Experiment, 'experiment_id')
+        machine = get_object_by_id_or_error(request, NodeClient, 'machine_id')
+        method = get_object_by_id_or_error(request, InstrumentMethod, 'method_id')
+        title = request.POST.get('title', None)
+        if title is None:
+            raise ClientLookupException("need title param")
+    except ClientLookupException, e:
+        return e.output
+
+    run = Run(
+        method = method,
+        creator = request.user, 
+        title = title,
+        experiment = experiment,
+        machine = machine,
+        state = RUN_STATES.NEW[0],
+        )
+    run.save()
+
+    output = {
+        "success" : True,
+        "num_created" : 0
+    }
+
+    try:
+        # sample_id ignored for now.. probably could be got rid of
+        run_samples = []
+        for sample_id, filename in _read_uploaded_run_capture_csv(csvfile, output):
+            rs = RunSample(run=run, filename=filename)
+            output['num_created'] += 1
+            rs.save()
+    except ClientLookupException, e:
+        output = e.output
+    except Exception, e:
+        output = { 
+            "success" : False,
+            "msg" : str(e)
+        }
+
+    # examine output, if we've failed destroy the Run we created
+    if not output['success']:
+        run.delete()
+    return output
+
+def _handle_uploaded_sample_csv(request, csvfile):
     """
     Read a file object of CSV text and create samples from it.
     Returns a "success" dict suitable for returning to the client.
@@ -2134,6 +2140,11 @@ def _handle_uploaded_sample_csv(experiment, csvfile):
     output = { "success": True,
                "num_created": 0,
                "num_updated": 0 }
+
+    try:
+        experiment = get_object_by_id_or_error(request, Experiment, 'experiment_id')
+    except ClientLookupException, e:
+        return HttpResponseBadRequest(e.message)
 
     for sid, label, weight, comment in _read_uploaded_sample_csv(csvfile, output):
         # If a valid sample id is provided, try to update exising
@@ -2154,11 +2165,31 @@ def _handle_uploaded_sample_csv(experiment, csvfile):
 
     return output
 
+def _read_uploaded_run_capture_csv(csvfile, output):
+    """
+    this generates (sample_id, filename) tuples from
+    the CSV text.
+    """
+    required = ["FILENAME"]
+    cleanup = lambda *args: args
+    return _read_csv(csvfile, output, required, cleanup)
+
 def _read_uploaded_sample_csv(csvfile, output):
     """
     This generates (sample_id, label, weight, comment) triples from
-    the CSV text. The `output` dict is updated if there are parse
-    errors, etc.
+    the CSV text.
+    """
+    required = ["LABEL", "WEIGHT", "COMMENT"]
+    cleanup = lambda label, weight, comment: (label, Decimal(weight), comment)
+    return _read_csv(csvfile, output, required, cleanup)
+
+def _read_csv(csvfile, output, column_names, convert_fn):
+    """
+    The `output` dict is updated if there are parse
+    errors, etc. In addition to required cols in `column_names` and
+    optional ID column is looked for. `convert_fn` is called with values
+    in the same order as `column_names` for any casts, cleanup requried,
+    before the values are yielded.
     """
     max_error = 10
     def add_format_error(output, msg):
@@ -2178,28 +2209,34 @@ def _read_uploaded_sample_csv(csvfile, output):
             output.update({ "success": False, "msg": "File is empty" })
             raise StopIteration
 
-        try:
-            dialect = csv.Sniffer().sniff(snuff)
-        except csv.Error, e:
-            output.update({ "success": False, "msg": str(e) })
-            raise StopIteration
+        dialect = csv.excel
+        has_header = False
+        if len(snuff.splitlines()) > 1:
+            try:
+                has_header = csv.Sniffer().has_header(snuff)
+            except csv.Error:
+                maybe_header = [t.strip().upper() for t in snuff.splitlines()[0].split(dialect.delimiter)]
+                nfound = 0
+                for column in column_names:
+                    if column in maybe_header:
+                        nfound += 1
+                if nfound > 0:
+                    has_header = True
 
-        data = csv.reader(csvfile)
+        data = csv.reader(csvfile, dialect=dialect)
 
-        WANTED_COLS = ["LABEL", "WEIGHT", "COMMENT"]
-
-        if len(snuff.splitlines()) > 1 and csv.Sniffer().has_header(snuff):
+        if has_header:
             header = [h.upper().strip() for h in data.next()]
             def find(name):
                 try:
                     return header.index(name)
                 except ValueError:
                     return -1
-            cols = map(find, WANTED_COLS)
+            cols = map(find, column_names)
             start_line = 2
 
             # check for required columns
-            missing = [WANTED_COLS[i] for i,j in enumerate(cols) if j < 0]
+            missing = [column_names[i] for i,j in enumerate(cols) if j < 0]
             if missing:
                 missing = ("Column %s is missing" % m for m in missing)
                 output.update({ "success": False,
@@ -2211,12 +2248,10 @@ def _read_uploaded_sample_csv(csvfile, output):
             id_col = find("ID")
             if id_col < 0:
                 id_col = find("# ID")
-            cols.insert(0, id_col)
         else:
-            cols = [-1, 0, 1, 2]
+            id_col = -1
+            cols = range(len(column_names))
             start_line = 1
-
-        id_col, label_col, weight_col, comment_col = cols
 
         def parse_id(row):
             "Converts the optional id cell to either an int or None"
@@ -2229,10 +2264,7 @@ def _read_uploaded_sample_csv(csvfile, output):
             if len(row) == 0:
                 continue
             try:
-                yield (parse_id(row),
-                       row[label_col],
-                       Decimal(row[weight_col]),
-                       row[comment_col])
+                yield [parse_id(row)] + list(convert_fn(*[row[t] for t in cols]))
             except ValueError, e:
                 add_format_error(output, "Incorrectly formatted id integer")
             except DecimalException, e:
@@ -2288,23 +2320,19 @@ def create_rule_generator(request):
     sampleblockvars = json.loads(request.POST.get('sampleblock', []))
     endblockvars = json.loads(request.POST.get('endblock', []))
 
-    success, access, message = rulegenerators.create_rule_generator(name,
-                                         description,
-                                         accessibility,
-                                         request.user,
-                                         apply_sweep_rule,
-                                         request.user.PrimaryNode,
-                                         startblockvars,
-                                         sampleblockvars,
-                                         endblockvars)
-
-    if success:
-        return HttpResponse(json.dumps({'success':True}))
-    else:
-        if access:
-            raise Exception("Could not create rule generator")
-        else:
-            return HttpResponseForbidden('Improper rule generator access')
+    try:
+        message = rulegenerators.create_rule_generator(name,
+            description,
+            accessibility,
+            request.user,
+            apply_sweep_rule,
+            request.user.PrimaryNode,
+            startblockvars,
+            sampleblockvars,
+            endblockvars)
+        return HttpResponse(json.dumps({'success':True,'msg':message}))
+    except Exception, e:
+        return HttpResponse(json.dumps({'success':False, 'msg' : str(e)}))
 
 @mastr_users_only
 def edit_rule_generator(request):
@@ -2323,22 +2351,19 @@ def edit_rule_generator(request):
     endblockvars = json.loads(request.POST.get('endblock', 'null'))
     state = json.loads(request.POST.get('state', 'null'))
 
-    success, access, message = rulegenerators.edit_rule_generator(rg_id, request.user,
-                                                    name=name,
-                                                    description=description,
-                                                    accessibility=accessibility,
-                                                    apply_sweep_rule=apply_sweep_rule,
-                                                    startblock=startblockvars,
-                                                    sampleblock=sampleblockvars,
-                                                    endblock=endblockvars,
-                                                    state=state)
-    if success:
-        return HttpResponse(json.dumps({'success':success}))
-    else:
-        if access:
-            raise Exception('Exception during editing rule generator')
-        else:
-            return HttpResponseForbidden('Improper rule generator access')
+    try:
+        message = rulegenerators.edit_rule_generator(rg_id, request.user,
+                                                        name=name,
+                                                        description=description,
+                                                        accessibility=accessibility,
+                                                        apply_sweep_rule=apply_sweep_rule,
+                                                        startblock=startblockvars,
+                                                        sampleblock=sampleblockvars,
+                                                        endblock=endblockvars,
+                                                        state=state)
+        return HttpResponse(json.dumps({'success':True, 'msg': message}))
+    except Exception, e:
+        return HttpResponse(json.dumps({'success':False, 'msg': str(e)}))
 
 @mastr_users_only
 def create_new_version_of_rule_generator(request):

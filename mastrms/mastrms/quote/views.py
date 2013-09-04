@@ -142,26 +142,38 @@ def listQuotes(request, *args):
     '''This corresponds to Madas Dashboard->Quotes->View Quote Requests
        Accessible by Administrators, Node Reps and Clients but it filters down to just Client's quote requests if it is a Client
     '''
-    user = getCurrentUser(request)
-    nodelist = user.Nodes
+    # Show own quotes
+    qq = Q(emailaddressid__emailaddress=request.user.username)
 
-    results = []
-    quoteslist = []
-    if user.IsNodeRep:
+    if request.user.IsNodeRep:
         #retrieve quotes for the first node in the list (there shouldnt be more than 1)
-        quoteslist = Quoterequest.objects.filter(Q(tonode=nodelist[0]) | Q()).values('id', 'completed', 'unread', 'tonode', 'firstname', 'lastname', 'officephone', 'details', 'country', 'requesttime', 'emailaddressid__emailaddress' )
-    else: #they are just a client. Show only their own quotes
-        quoteslist = Quoterequest.objects.filter(emailaddressid__emailaddress=request.user.username).values('id', 'completed', 'unread', 'tonode', 'firstname', 'lastname', 'officephone', 'details', 'country', 'requesttime', 'emailaddressid__emailaddress' )
-
-    quoteslist = list(quoteslist) #convert to normal list
+        qq = qq | Q(tonode=request.user.Nodes[0])
 
     #If they are an admin, ALSO show quotes which don't yet have a node
-    if user.IsAdmin:
-        homelessquotes = Quoterequest.objects.filter(tonode='').values('id', 'completed', 'unread', 'tonode', 'firstname', 'country', 'lastname', 'officephone', 'details', 'requesttime', 'emailaddressid__emailaddress' )
-        quoteslist += list(homelessquotes)
+    if request.user.IsAdmin:
+        qq = qq | Q(tonode='')
 
-    #transform the email field to be named correctly.
+    # do query and convert to a normal list
+    quotes = Quoterequest.objects.filter(qq)
+    resultsset = _make_quote_list(quotes)
+
+    return jsonResponse(items=resultsset)
+
+def _make_quote_list(quotes):
+    quoteslist = list(quotes.values('id', 'completed', 'unread', 'tonode',
+                                    'firstname', 'lastname', 'officephone',
+                                    'details', 'country', 'requesttime',
+                                    'emailaddressid__emailaddress'))
+
+    results = []
     for ql in quoteslist:
+        #find the time when this quote was marked as completed (if it is)
+        if ql['completed'] == True:
+            qh = Quotehistory.objects.filter(oldcompleted=False, completed=True)[:1]
+            if len(qh) > 0:
+                ql['changetimestamp'] = qh[0].changetimestamp
+
+        #transform the email field to be named correctly.
         ql['email'] = ql['emailaddressid__emailaddress']
         del ql['emailaddressid__emailaddress']
         results.append(ql)
@@ -169,8 +181,7 @@ def listQuotes(request, *args):
     #make the list unique. We can't use a set because the list contains unhashable types
     resultsset = uniqueList(results)
 
-
-    return jsonResponse( items=resultsset)
+    return resultsset
 
 @admins_or_nodereps
 def listAll(request, *args):
@@ -178,47 +189,9 @@ def listAll(request, *args):
        Accessible by Administrators, Node Reps
     '''
     logger.debug( '*** quote/listAll - enter ***' )
-    user = getCurrentUser(request)
 
-    nodelist = user.Nodes
-    results = []
+    resultsset = _make_quote_list(Quoterequest.objects.all())
 
-    try:
-        quoteslist = Quoterequest.objects.all().values('id', 'completed', 'unread', 'tonode', 'firstname', 'lastname', 'officephone', 'details', 'requesttime', 'emailaddressid__emailaddress' )
-        for ql in quoteslist:
-            ql['email'] = ql['emailaddressid__emailaddress']
-            del ql['emailaddressid__emailaddress']
-
-            #find the time when this quote was marked as completed (if it is)
-            if ql['completed'] == True:
-                qh = Quotehistory.objects.filter(oldcompleted = False, completed = True)
-                qh = qh[0]
-                ql['changetimestamp'] = qh.changetimestamp
-
-            results.append(ql)
-    except Exception, e:
-        logger.exception('Exception getting quotes.')
-        raise Exception('Exception getting quotes.')
-
-    if user.IsAdmin:
-        adminlist = Quoterequest.objects.filter(tonode='Administrators').values('id', 'completed', 'unread', 'tonode', 'firstname', 'lastname', 'officephone', 'details', 'requesttime', 'emailaddressid__emailaddress' )
-        for ql in adminlist:
-            ql['email'] = ql['emailaddressid__emailaddress']
-            del ql['emailaddressid__emailaddress']
-
-            #find the time when this quote was marked as completed (if it is)
-            if ql['completed'] == True:
-                qh = Quotehistory.objects.filter(oldcompleted = False, completed = True)
-                qh = qh[0]
-                ql['changetimestamp'] = qh.changetimestamp
-
-            results.append(ql)
-
-    try:
-        resultsset = uniqueList(results) #these may not be unique. need to uniquify them.
-    except Exception, e:
-        logger.exception('Exception making results set unique')
-        raise Exception('Exception making results set unique')
     logger.debug('\tfinished generating quoteslist')
 
     logger.debug('*** quote/listAll - exit ***')
@@ -231,20 +204,25 @@ def listFormal(request, *args, **kwargs):
     '''
     logger.debug('*** listFormal : enter ***')
     uname = request.user.username
-    currentUser = getCurrentUser(request)
-    nodelist = currentUser.Nodes
-
-    #if a noderep or admin, and you have a node:
-    if (currentUser.IsAdmin or currentUser.IsNodeRep) and len(nodelist) > 0:
-        fquoteslist = Formalquote.objects.filter(Q(fromemail__iexact=uname)|Q(toemail__iexact=uname)|Q(quoterequestid__tonode=nodelist[0])).values('id', 'quoterequestid', 'details', 'created', 'fromemail', 'toemail', 'status')
-    #otherwise show all quotes to me, from me, or from this node.
-    else:
-        fquoteslist = Formalquote.objects.filter(Q(fromemail__iexact=uname)|Q(toemail__iexact=uname)).values('id', 'quoterequestid', 'details', 'created', 'fromemail', 'toemail', 'status')
+    nodelist = request.user.Nodes
 
     qid = kwargs.get('qid', request.REQUEST.get('qid', '') )
-    if qid != '':
+    if qid:
+        # if qid specified, then list just that quote
         logger.debug('filtering fquotes where qid is %s' % (qid) )
-        fquoteslist = fquoteslist.filter(quoterequestid=qid)
+        qq = Q(quoterequestid=qid)
+    else:
+        # show all quotes to me or from me
+        qq = Q(fromemail__iexact=uname)|Q(toemail__iexact=uname)
+
+        #if a noderep or admin, and you have a node:
+        if (request.user.IsAdmin or request.user.IsNodeRep) and len(nodelist) > 0:
+            # then also show quotes from this node.
+            qq = qq | Q(quoterequestid__tonode=nodelist[0])
+
+    quotes = Formalquote.objects.filter(qq)
+    fquoteslist = quotes.values('id', 'quoterequestid', 'details', 'created',
+                                'fromemail', 'toemail', 'status')
 
     logger.debug('*** listFormal : exit ***')
     return jsonResponse( items=list(fquoteslist))
@@ -401,12 +379,40 @@ def formalLoad(request, *args, **kwargs):
     logger.debug('***formalLoad : enter ***')
 
     #get qid from quargs, then request, then blank
-    qid = kwargs.get('qid', request.REQUEST.get('qid', '') )
-    fqid = request.REQUEST.get('fqid', '')
-    retvals = {}
+    qid = (kwargs.get('qid', request.REQUEST.get("qid", None)) or "").strip()
+    fqid = (request.REQUEST.get("fqid", None) or "").strip()
 
-    #retdata
-    retdata = { 'quoterequestid' : qid,
+    if qid or fqid:
+        #This part gets us the linked formal quote data
+        if fqid:
+            quotes = Formalquote.objects.filter(id=fqid)
+        else:
+            quotes = Formalquote.objects.filter(quoterequestid=qid)
+
+        retvals = quotes.values('id', 'quoterequestid', 'details', 'created',
+                                'fromemail', 'toemail', 'purchase_order_number')
+
+        if len(retvals) > 0:
+            retvals = retvals[0]
+            rows = len(retvals)
+
+            #get the details of the auth user in the toemail
+            try:
+                user = User.objects.get(username=retvals['fromemail'])
+            except User.DoesNotExist:
+                pass
+            else:
+                retvals['fromname'] = user.get_full_name()
+                retvals['officePhone'] = user.telephoneNumber
+
+            qr = Quoterequest.objects.get(id=retvals['quoterequestid'])
+            retvals['tonode'] = qr.tonode
+
+            retvals['pdf'] = retvals['details']
+        else:
+            logger.debug('\tNo formal quotes.')
+            retvals = {
+                'quoterequestid' : qid,
                 'toemail' : '',
                 'fromemail' : '',
                 'details' : '',
@@ -416,45 +422,10 @@ def formalLoad(request, *args, **kwargs):
                 'tonode' : '',
                 'purchase_order_number' : ''
               }
-
-    if qid is not '' or fqid is not '':
-        qid = qid.strip()
-        fqid = fqid.strip()
-
-        try:
-            #This part gets us the linked formal quote data
-            if fqid != '':
-                retvals = Formalquote.objects.filter(id=fqid).values( 'id', 'quoterequestid', 'details', 'created', 'fromemail', 'toemail', 'purchase_order_number' )
-            elif qid != '':
-                retvals = Formalquote.objects.filter(quoterequestid=qid).values( 'id', 'quoterequestid', 'details', 'created', 'fromemail', 'toemail', 'purchase_order_number' )
-
-            if len(retvals) > 0:
-                retvals = retvals[0]
-                rows = len(retvals)
-
-                #get the details of the auth user in the toemail
-                try:
-                    user = User.objects.get(username=retvals['fromemail'])
-                except User.DoesNotExist:
-                    pass
-                else:
-                    retvals['fromname'] = user.get_full_name()
-                    retvals['officePhone'] = user.telephoneNumber
-
-                    qr = Quoterequest.objects.get(id=retvals['quoterequestid'])
-
-                    retvals['tonode'] = qr.tonode
-                retvals['pdf'] = retvals['details']
-
-            else:
-                logger.debug('\tNo formal quotes.')
-                retvals = retdata
-                rows = 0
-        except Exception, e:
-            logger.exception('Exception loading quote')
-            raise Exception('Exception loading quote')
+            rows = 0
     else:
         logger.warning('\tNo qid or fqid passed')
+        retvals = {}
 
     logger.warning('***formalLoad : exit ***')
     return jsonResponse(data=retvals)
@@ -613,8 +584,8 @@ def formalAccept(request, *args):
     fq = setFormalQuoteStatus(qr, QUOTE_STATE_ACCEPTED)
 
     #add optional purchase_order_number to the qr
-    po = request.REQUEST.get('purchase_order_number')
-    fq.purchase_order_number = po
+    po = request.REQUEST.get('purchase_order_number', None)
+    fq.purchase_order_number = po or ""
     fq.save()
 
     #leave acceptance in the quote history

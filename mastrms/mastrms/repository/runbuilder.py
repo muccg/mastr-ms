@@ -10,6 +10,8 @@ class RunBuilder(object):
         self.run = run
 
     def validate(self):
+        if self.run.rule_generator is None:
+            raise Exception("runs captured from outside mastr-ms cannot be built")
         for sample in self.run.samples.distinct():
             sample.run_filename(self.run)
 

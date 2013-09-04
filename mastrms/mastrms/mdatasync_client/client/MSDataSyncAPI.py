@@ -952,7 +952,20 @@ class DataSyncServer(object):
         If `params' is a dict, the request method will be POST.
         Will raise a RestError if anything went wrong.
         """
-        data = None if params is None else urllib.urlencode(params)
+
+        # pinched from http://stackoverflow.com/questions/6480723/urllib-urlencode-doesnt-like-unicode-values-how-about-this-workaround
+        def encoded_dict(in_dict):
+            out_dict = {}
+            for k, v in in_dict.iteritems():
+                if isinstance(v, unicode):
+                    v = v.encode('utf8')
+                elif isinstance(v, str):
+                    # Must be encoded in UTF-8
+                    v.decode('utf8')
+                out_dict[k] = v
+            return out_dict
+
+        data = None if params is None else urllib.urlencode(encoded_dict(params))
         try:
             req = urllib2.Request(url)
             f = urllib2.urlopen(req, data, timeout)
@@ -980,7 +993,7 @@ class DataSyncServer(object):
         sync_baseurl = self.config.getValue('synchub')
         slash = "/" if not sync_baseurl.endswith('/') else ""
         path = "".join(elem + "/" for elem in path)
-        return sync_baseurl + slash + urllib.quote(path)
+        return sync_baseurl + slash + urllib.quote(path.encode('utf8'))
 
     def _get_requestsync_url(self, site):
         return self._get_synchub_url("requestsync", site.url())

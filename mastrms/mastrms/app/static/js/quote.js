@@ -27,16 +27,16 @@ MA.EmailDisplayField = Ext.extend(Ext.form.DisplayField,  {
 Ext.reg('emaildisplayfield', MA.EmailDisplayField);
 
 
- 
+
 MA.RequestQuoteInit = function () {
-	var reqQuoCmp = Ext.getCmp('requestquote-panel');   
+	var reqQuoCmp = Ext.getCmp('requestquote-panel');
 
     //fetch user details
     if (MA.CurrentUser.IsLoggedIn){
         reqQuoCmp.load({url: MA.BaseUrl + 'user/userload', waitMsg:'Loading'});
     }
     reqQuoCmp.doLayout();
-    
+
     return;
 };
 
@@ -46,21 +46,21 @@ MA.CSRFTokenField = {
   value: Ext.util.Cookies.get("csrftoken_mastrms")
 };
 
-MA.RequestQuoteCmp = 
-    {   id:'requestquote-container-panel', 
+MA.RequestQuoteCmp =
+    {   id:'requestquote-container-panel',
         autoScroll:true,
         deferredRender:false,
         forceLayout:true,
         items:[
-            {  xtype:'form', 
+            {  xtype:'form',
             labelWidth: 100, // label settings here cascade unless overridden
             id:'requestquote-panel',
             url:MA.BaseUrl + 'quote/sendRequest',
             method:'POST',
             frame:true,
             fileUpload: true,
-            reader: new Ext.data.JsonReader({successProperty:'success', root: 'data'}, 
-                                          [ {name: 'firstname', mapping: 'firstname'}, 
+            reader: new Ext.data.JsonReader({successProperty:'success', root: 'data'},
+                                          [ {name: 'firstname', mapping: 'firstname'},
                                             {name: 'lastname', mapping: 'lastname'},
                                             {name: 'telephoneNumber', mapping: 'telephoneNumber'},
                                             {name: 'country', mapping: 'country'}
@@ -73,7 +73,7 @@ MA.RequestQuoteCmp =
             defaultType: 'textfield',
             trackResetOnLoad: true,
             waitMsgTarget: true,
-            
+
             items: [
                 {
                     fieldLabel: 'Email address',
@@ -159,35 +159,40 @@ MA.RequestQuoteCmp =
                 text: 'Send Request',
                 id:'requestQuoteSubmit',
                 handler: function(){
-                    Ext.getCmp('requestquote-panel').getForm().submit(
-                        {   successProperty: 'success',        
+                    var form = Ext.getCmp('requestquote-panel').getForm();
+                    if (form.isValid()) {
+                      form.submit({
+                          successProperty: 'success',
                             success: function (form, action) {
-                                if (action.result.success === true) {
-                                    form.reset(); 
-                                    
+                                if (action.result && action.result.success === true) {
+                                    form.reset();
+
                                     //display a success alert that auto-closes in 5 seconds
                                     Ext.Msg.alert("Request sent successfully", "We will contact you via email or phone as soon as possible. Thank you for your inquiry.");
-                                    
+
                                     //load up the menu and next content area as declared in response
                                     MA.ChangeMainContent(action.result.mainContentFunction);
-                                } 
+                                } else {
+                                  Ext.Msg.alert("Error", "There was an error submitting the inquiry form.");
+                                }
                             },
                             failure: function (form, action) {
-                                //do nothing special. this gets called on validation failures and server errors
-                                alert('error submitting form\n' + action.response );
+                                Ext.Msg.alert("Error", "There was an error submitting the inquiry form.");
                             }
                         });
+                    } else {
+                        Ext.Msg.alert("Make an Inquiry", "Please correct the marked errors in the quote request.");
                     }
                 }
-                ]
+                }]
             }
             ]
     };
 
 MA.QuoteRequestListInit = function(){
-        
+
     var dataurl = MA.BaseUrl + "quote/list";
-        
+
     var madasReader = new Ext.data.JsonReader({
         root            : 'response.value.items',
         versionProperty : 'response.value.version',
@@ -205,7 +210,7 @@ MA.QuoteRequestListInit = function(){
             { name: 'tonode', sortType: Ext.data.SortTypes.asText},
             { name: 'country', sortType: Ext.data.SortTypes.asText}
         ]);
-    
+
     var dataStore = new Ext.data.GroupingStore({
         id         : 'bSId',
         autoLoad   : true,
@@ -229,7 +234,7 @@ MA.QuoteRequestListInit = function(){
     var topToolbar = new Ext.Toolbar({
             items   : [
                 {  id: 'quoterequestsEditBtn', text: 'View/Edit', handler: editHandler, disabled: true }
-            ]       
+            ]
         });
     var selectionModel = new Ext.grid.RowSelectionModel({ singleSelect: true });
     var colModel = new Ext.grid.ColumnModel([
@@ -266,9 +271,9 @@ MA.QuoteRequestListInit = function(){
     });
     selectionModel.on('selectionchange', function() { var editBtn = Ext.getCmp('quoterequestsEditBtn'); if (selectionModel.hasSelection()) { editBtn.enable(); } else { editBtn.disable(); } } );
     grid.on('rowdblclick', editHandler);
-    
+
     //add this component to the center component
-    var detailPanel = new Ext.FormPanel({ 
+    var detailPanel = new Ext.FormPanel({
         region:'center',
         autoScroll:true,
         id:'quoteDetailPanel',
@@ -278,8 +283,8 @@ MA.QuoteRequestListInit = function(){
         method:'POST',
         deferredRender:false,
         bodyStyle:'padding:5px 5px 0;background-color:transparent;',
-        reader: new Ext.data.JsonReader({successProperty:'success', root: 'data'}, 
-                                      [ {name: 'id', mapping: 'id'}, 
+        reader: new Ext.data.JsonReader({successProperty:'success', root: 'data'},
+                                      [ {name: 'id', mapping: 'id'},
                                         {name: 'tonode', mapping: 'tonode'},
                                         {name: 'details', mapping: 'details'},
                                         {name: 'requesttime', mapping: 'requesttime'},
@@ -347,16 +352,16 @@ MA.QuoteRequestListInit = function(){
                 height:230,
                 //disabled: true,
                 readOnly: true
-            },{  
+            },{
                 name: 'attachment',
                 inputType: 'hidden'
             }
         ]
-    });    
-    
-    selectionModel.on('selectionchange', function(sm) { 
+    });
+
+    selectionModel.on('selectionchange', function(sm) {
         var rec = sm.getSelected();
-    
+
         if (Ext.isDefined(rec)) {
             Ext.getCmp('quoteDetailPanel').getComponent('id').setValue(rec.data.id);
             Ext.getCmp('quoteDetailPanel').getComponent('email').setValue(rec.data.email);
@@ -369,7 +374,7 @@ MA.QuoteRequestListInit = function(){
         } else {
         }
      } );
-    
+
     var qrFormalPanel = new Ext.list.ListView({
         title:'Formal Quote',
         hideMode:'offsets',
@@ -400,19 +405,19 @@ MA.QuoteRequestListInit = function(){
             {
                 storeId:"qrfqlist",
                 fields: ["id", "created", "fromemail", "status"],
-                data: [ 
+                data: [
                 ]
             }
           )
     });
-    
+
     var formalWrapper = new Ext.Panel({
         title:'Formal Quote',
         region:'south',
         height:90,
         items:[qrFormalPanel]
     });
-    
+
     var rightPanel = new Ext.Panel({
         layout:'border',
         region:'east',
@@ -421,18 +426,18 @@ MA.QuoteRequestListInit = function(){
         border:false,
         items:[detailPanel, formalWrapper]
     });
-    
-    selectionModel.on('selectionchange', function(sm) { 
+
+    selectionModel.on('selectionchange', function(sm) {
         var rec = sm.getSelected();
         var dataurl;
         var madasReader;
         var dataStore;
-    
+
         if (Ext.isDefined(rec)) {
             rightPanel.enable();
-            
+
             dataurl = MA.BaseUrl + "quote/listFormal/" + rec.get("id");
-                
+
             madasReader = new Ext.data.JsonReader({
                 root            : 'response.value.items',
                 versionProperty : 'response.value.version',
@@ -446,26 +451,26 @@ MA.QuoteRequestListInit = function(){
                     { name: 'toemail', sortType: Ext.data.SortTypes.asText },
                     { name: 'status', sortType: Ext.data.SortTypes.asText }
                 ]);
-                
+
             dataStore = new Ext.data.Store({
                 autoLoad   : true,
                 reader     : madasReader,
                 sortInfo   : {field: 'created', direction: 'DESC'},
                 url        : dataurl
                 });
-            
+
             Ext.getCmp('qrFormalPanel').bindStore(dataStore);
         } else {
             rightPanel.disable();
         }
     });
-    
+
     var panel = new Ext.Panel({
         layout:'border',
         id:'quotelistpanel',
         items:[grid,rightPanel]
     });
-    
+
     var center = Ext.getCmp('center-panel');
     center.add(panel);
 
@@ -493,10 +498,10 @@ MA.QuoteRequestEditInit = function (paramArray) {
     //fetch history
     quoteHistoryCmp.load({url:MA.BaseUrl + 'quote/history', params:{'qid':id}, callback:MA.RenderQuoteHistory, text:'Loading...'});
 
-    //reload the combobox   
+    //reload the combobox
     if (Ext.StoreMgr.containsKey('redirectQuoteNodeDS')) {
         Ext.StoreMgr.get('redirectQuoteNodeDS').reload();
-    }   
+    }
 
 	Ext.getCmp('downloadattachbutton').disable();
 	Ext.getCmp('downloadattachbutton').setText('looking for attachments...');
@@ -514,7 +519,7 @@ MA.QuoteRequestEditLoaded = function () {
 		Ext.getCmp('downloadattachbutton').setText('Download '+Ext.getCmp('attachment').value);
 		Ext.getCmp('downloadattachbutton').enable();
 	}
-	
+
 };
 
 
@@ -532,8 +537,8 @@ MA.QuoteRequestEditCmp =
             method:'POST',
             frame:true,
             deferredRender:false,
-            reader: new Ext.data.JsonReader({successProperty:'success', root: 'data'}, 
-                                          [ {name: 'id', mapping: 'id'}, 
+            reader: new Ext.data.JsonReader({successProperty:'success', root: 'data'},
+                                          [ {name: 'id', mapping: 'id'},
                                             {name: 'tonode', mapping: 'tonode'},
                                             {name: 'details', mapping: 'details'},
                                             {name: 'requesttime', mapping: 'requesttime'},
@@ -645,15 +650,15 @@ MA.QuoteRequestEditCmp =
                     allowBlank:false,
                     grow:true,
                     growMax:360
-                },{  
+                },{
                     name: 'attachment',
                     id: 'attachment',
                     inputType: 'hidden'
                 },{
-	            	xtype:'panel', 
-	            	width: 350, 
+	            	xtype:'panel',
+	            	width: 350,
 	            	id: 'downloadattach',
-	            	style:'padding-top:8px;padding-left:100px;padding-bottom:8px;', 
+	            	style:'padding-top:8px;padding-left:100px;padding-bottom:8px;',
 	            	items: [
 	            		{
 	            		xtype:'button',
@@ -697,7 +702,7 @@ MA.QuoteRequestEditCmp =
                  handler: function(){
                     quoteReqEditCmp = Ext.getCmp('quoterequestedit-panel');
                     quoteReqEditCmp.getForm().reset();
-                    
+
                     //trying to reload the data into the form
                     //quoteReqEditCmp.load({url: MA.BaseUrl + 'quote/load', params: {'qid': quoteReqEditCmp.getForm().findField("id").getValue()}});
                     MA.QuoteEditVisualToggle(false);
@@ -712,7 +717,7 @@ MA.QuoteRequestEditCmp =
                             success: function (form, action) {
                                 if (action.result.success === true) {
                                     form.reset();
-    
+
                                     MA.QuoteEditVisualToggle(false);
 
                                     //display a success alert that auto-closes in 5 seconds
@@ -743,7 +748,7 @@ MA.QuoteRequestEditCmp =
                 url:MA.BaseUrl + 'quote/formalsave',
                 method:'POST',
                 fileUpload: true,
-                reader: new Ext.data.JsonReader({successProperty:'success', root: 'data', idProperty: 'quoterequestid'}, 
+                reader: new Ext.data.JsonReader({successProperty:'success', root: 'data', idProperty: 'quoterequestid'},
                                 [
                                 {name: 'quoterequestid', mapping: 'quoterequestid'},
                                 {name: 'details', mapping: 'details'},
@@ -758,9 +763,9 @@ MA.QuoteRequestEditCmp =
                 defaultType: 'textfield',
 //                trackResetOnLoad: true,
                 waitMsgTarget: true,
-    
+
                 items: [
-                    {  
+                    {
                         name: 'quoterequestid',
                         id: 'fquo-qid',
                         inputType: 'hidden'
@@ -783,7 +788,11 @@ MA.QuoteRequestEditCmp =
                         emptyText: 'Select a PDF',
                         fieldLabel: 'Formal Quote File',
                         name: 'pdf'
-                    } 
+                    },{
+                        xtype: 'hidden',
+                        name: 'csrfmiddlewaretoken',
+                        value: Ext.util.Cookies.get("csrftoken_mastrms")
+                    }
                 ],
             buttons: [
                  {
@@ -798,7 +807,7 @@ MA.QuoteRequestEditCmp =
                             success: function (form, action) {
                                 if (action.result.success === true) {
                                     form.reset();
-    
+
                                     //display a success alert that auto-closes in 5 seconds
                                     Ext.Msg.alert("Formal Quote Saved", "(this message will auto-close in 5 seconds)");
                                     setTimeout(Ext.Msg.hide, 5000);
@@ -848,27 +857,27 @@ MA.RenderQuoteHistory = function(el, success, response, options) {
             '<span style="float:left;color:#666666;">{changetimestamp}</span><span style="float:right;color:#666666;">{email}</span><br/>',
         '</div>',
         '<tpl if="completed != oldcompleted">',
-        '<div>', 
+        '<div>',
             '<span style="float:right;">',
                 '<tpl if="completed">quote marked as completed</tpl>',
                 '<tpl if="!completed">completed flag cleared</tpl>',
             '</span><br/>',
-        '</div>',    
+        '</div>',
         '</tpl>',
         '<div style="padding-top:4px;padding-bottom:8px;border-bottom:1px solid #7EADD9;">',
             '<div style="color:#999999;">Comment:</div>',
             '{comment}',
         '</div>',
         '</tpl>');
-    t.overwrite(el, Ext.util.JSON.decode(response.responseText));   
-    
+    t.overwrite(el, Ext.util.JSON.decode(response.responseText));
+
     window.setTimeout("MA.QuoteRequestEditLoaded()", 1000);
 };
 
 MA.QuoteRequestListAllInit = function(){
-        
+
     var dataurl = MA.BaseUrl + "quote/listAll";
-        
+
     var madasReader = new Ext.data.JsonReader({
         root            : 'response.value.items',
         versionProperty : 'response.value.version',
@@ -885,7 +894,7 @@ MA.QuoteRequestListAllInit = function(){
             { name: 'tonode', sortType: Ext.data.SortTypes.asText },
             { name: 'changetimestamp', sortType: Ext.data.SortTypes.asDate}
         ]);
-    
+
     var dataStore = new Ext.data.GroupingStore({
         id         : 'bSId',
         autoLoad   : true,
@@ -908,7 +917,7 @@ MA.QuoteRequestListAllInit = function(){
     var topToolbar = new Ext.Toolbar({
            /** items   : [
                 {  id: 'quoterequestsallEditBtn', text: 'View/Edit', handler: editHandler, disabled: true }
-            ] */      
+            ] */
         });
     var selectionModel = new Ext.grid.RowSelectionModel({ singleSelect: true });
     var colModel = new Ext.grid.ColumnModel([
@@ -956,9 +965,9 @@ MA.QuoteRequestListAllInit = function(){
 
 
 MA.FormalQuoteUserListInit = function(){
-        
+
     var dataurl = MA.BaseUrl + "quote/listFormal";
-        
+
     var madasReader = new Ext.data.JsonReader({
         root            : 'response.value.items',
         versionProperty : 'response.value.version',
@@ -972,16 +981,16 @@ MA.FormalQuoteUserListInit = function(){
             { name: 'toemail', sortType: Ext.data.SortTypes.asText },
             { name: 'status', sortType: Ext.data.SortTypes.asText }
         ]);
-    
+
     var viewHandler = function(grid, rowIndex, e) {
         var selectionModel = grid.getSelectionModel();
-    
+
         if (selectionModel.hasSelection() && selectionModel.getSelected().data.quoterequestid !== '') {
             //MA.Authorize('quote:viewformal', {"qid" : selectionModel.getSelected().data.quoterequestid});
             MA.ChangeMainContent('quote:viewformal', {"qid" : selectionModel.getSelected().data.quoterequestid});
         }
     };
-    
+
     var dataStore = new Ext.data.GroupingStore({
         id         : 'bSId',
         autoLoad   : true,
@@ -1000,7 +1009,7 @@ MA.FormalQuoteUserListInit = function(){
     var topToolbar = new Ext.Toolbar({
             items   : [
                 {  id: 'fquoListViewBtn', text: 'View', handler: viewHandler, disabled: true }
-            ] 
+            ]
         });
     var selectionModel = new Ext.grid.RowSelectionModel({ singleSelect: true });
 
@@ -1053,15 +1062,15 @@ MA.FquoValidatePassword = function (textfield, event) {
     var passEl = Ext.getCmp('fquoUserEditPassword');
     var confirmEl = Ext.getCmp('fquoUserEditConfirmPassword');
     var submitEl = Ext.getCmp('fquoAcceptButton');
-    
+
     var passVal = Ext.getDom('fquoUserEditPassword').value;
     var confirmVal = Ext.getDom('fquoUserEditConfirmPassword').value;
 
     if (passVal == confirmVal) {
         confirmEl.clearInvalid();
         submitEl.enable();
-        return true; 
-    } else { 
+        return true;
+    } else {
         confirmEl.markInvalid('Password and Confirm Password must match');
         submitEl.disable();
         return false;
@@ -1087,13 +1096,13 @@ MA.ViewFormalInit = function(paramArray){
             quoteRequestEditCmp.items.get(i).enable();
         }
     }
-    
+
     if (MA.CurrentUser.IsNodeRep || MA.CurrentUser.IsAdmin) {
         Ext.getCmp('fquoadminmode').show();
     } else {
         Ext.getCmp('fquoadminmode').hide();
     }
-    
+
     //fetch user details
     quoteRequestEditCmp.load({url: MA.BaseUrl + 'quote/load', params: {'qid': id}});
     formalQuoteCmp.load({url: MA.BaseUrl + 'quote/formalload', params: {'qid': id}, waitMsg:'Loading', success: function(form, action) {
@@ -1104,7 +1113,7 @@ MA.ViewFormalInit = function(paramArray){
     Ext.getCmp('quov-qid').setValue(id);
 };
 
-MA.ViewFormalCmp = {   
+MA.ViewFormalCmp = {
     id:'viewformalquote-container-panel',
     autoScroll:true,
     layout:'column',
@@ -1112,7 +1121,7 @@ MA.ViewFormalCmp = {
     deferredRender:false,
     forceLayout:true,
     items:[
-       {   xtype:'form', 
+       {   xtype:'form',
         labelWidth: 100, // label settings here cascade unless overridden
         id:'fquouserdetails-panel',
         url:MA.BaseUrl + 'quote/formalaccept',
@@ -1120,8 +1129,8 @@ MA.ViewFormalCmp = {
         method:'POST',
         frame:true,
         width: 380,
-        reader: new Ext.data.JsonReader({successProperty:'success', root: 'data'}, 
-                                          [ {name: 'id', mapping: 'id'}, 
+        reader: new Ext.data.JsonReader({successProperty:'success', root: 'data'},
+                                          [ {name: 'id', mapping: 'id'},
                                             {name: 'tonode', mapping: 'tonode'},
                                             {name: 'details', mapping: 'details'},
                                             {name: 'requesttime', mapping: 'requesttime'},
@@ -1129,7 +1138,7 @@ MA.ViewFormalCmp = {
                                             {name: 'lastname', mapping: 'lastname'},
                                             {name: 'officephone', mapping: 'officephone'},
                                             {name: 'completed', mapping: 'completed'},
-                                            {name: 'email', mapping: 'email'} 
+                                            {name: 'email', mapping: 'email'}
                                           ]),
         title: 'Your details',
         bodyStyle:'padding:5px 5px 0',
@@ -1137,7 +1146,7 @@ MA.ViewFormalCmp = {
         defaultType: 'textfield',
         trackResetOnLoad: true,
         waitMsgTarget: true,
-        
+
         items: [
                 { xtype:'panel',
                 id:'fquoadminmode',
@@ -1147,8 +1156,8 @@ MA.ViewFormalCmp = {
                 title:'Admin/node rep mode',
                 html:'As you are logged in as an admin or node rep, you may Accept/Reject this formal quote on behalf of the user, but user edit fields have been disabled.'
                 },
-            
-            {  
+
+            {
                 name: 'id',
                 id: 'quov-qid',
                 xtype:'madisplayfield',
@@ -1260,22 +1269,22 @@ MA.ViewFormalCmp = {
                         baseParams:{'qid':Ext.getCmp('quov-qid').getValue()},
                         method:'POST'
                         });
-                
+
                     var submitOptions = {
-                        successProperty: 'success',        
+                        successProperty: 'success',
                         success: function (form, action) {
-                            if (action.result.success === true) { 
-                            
+                            if (action.result.success === true) {
+
                                 Ext.Msg.alert('Formal quote rejected', 'The formal quote has been rejected.');
-                                
+
                                 //load up the menu and next content area as declared in response
                                 MA.ChangeMainContent(action.result.mainContentFunction);
-                            } 
+                            }
                         },
                         failure: function (form, action) {
                         }
                     };
-                
+
                     simple.submit(submitOptions);
 
                 }
@@ -1285,15 +1294,15 @@ MA.ViewFormalCmp = {
             id: 'fquoAcceptButton',
             handler: function(){
                 Ext.getCmp('fquouserdetails-panel').getForm().submit(
-                    {   successProperty: 'success',        
+                    {   successProperty: 'success',
                         success: function (form, action) {
                             if (action.result.success === true) {
                                 //display a success alert that auto-closes in 5 seconds
                                 Ext.Msg.alert("You have accepted this formal quote. Thank you.", "An email has been sent to the node representative. We will contact you as soon as possible.");
-                                
+
                                 //load up the menu and next content area as declared in response
                                 MA.ChangeMainContent(action.result.mainContentFunction);
-                            } 
+                            }
                         },
                         failure: function (form, action) {
                             //do nothing special. this gets called on validation failures and server errors
@@ -1312,7 +1321,7 @@ MA.ViewFormalCmp = {
         xtype:'form',
         labelWidth: 100, // label settings here cascade unless overridden
         id:'formalquoteview-panel',
-        reader: new Ext.data.JsonReader({successProperty:'success', root: 'data'}, 
+        reader: new Ext.data.JsonReader({successProperty:'success', root: 'data'},
                                         [
                                         {name: 'quoterequestid', mapping: 'quoterequestid'},
                                         {name: 'details', mapping: 'details'},
@@ -1329,7 +1338,7 @@ MA.ViewFormalCmp = {
         trackResetOnLoad: true,
         waitMsgTarget: true,
         items: [
-            {  
+            {
                 name: 'quoterequestid',
                 id: 'fquov-qid',
                 inputType: 'hidden'
@@ -1356,9 +1365,9 @@ MA.ViewFormalCmp = {
                 disabled:true,
                 id: 'fquov-officePhone'
             },{
-            	xtype:'panel', 
-            	width: 350, 
-            	style:'padding-top:8px;padding-left:120px;padding-bottom:8px;', 
+            	xtype:'panel',
+            	width: 350,
+            	style:'padding-top:8px;padding-left:120px;padding-bottom:8px;',
             	items: [
             		{
             		xtype:'button',

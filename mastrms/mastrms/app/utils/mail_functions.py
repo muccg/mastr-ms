@@ -50,11 +50,12 @@ class FixedEmailMessage(EmailMessage):
         return msg
 
     def sendMail(self):
+        logger.debug('Sending email \"%s\" from: %s, to: %s' % (self.subject, self.from_email,
+                                                                ", ".join(self.to)))
         try:
-            logger.debug('\tSending email (subject=%s) from: %s, to: %s' % (subject, self.fromemail, self.toemail))
             self.send()
         except Exception, e:
-            logger.warning('Error sending email (subject=%s) to %s : %s' %(subject, toemail, str(e)) )
+            logger.exception('Error sending email')
 
 
 def makeAndSendMail(subject, body, from_email, to, fail_silently=False):

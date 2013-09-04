@@ -80,6 +80,8 @@ def jsonResponse(data):
     jdata = simplejson.dumps(data)
     return HttpResponse(jdata)
 
+
+
 @csrf_exempt
 def request_sync(request, organisation=None, sitename=None, station=None):
     '''This is the initial request the client makes of the server.
@@ -121,6 +123,8 @@ def request_sync(request, organisation=None, sitename=None, station=None):
             expectedFiles = getExpectedFilesForNode(node, include_completed=syncold)
             expectedincomplete = expectedFiles['incomplete']
             expectedcomplete = expectedFiles['complete']
+
+            logger.debug(expectedFiles)
 
             for runid in expectedincomplete.keys():
                 resp["files"].update(expectedincomplete[runid])
