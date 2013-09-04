@@ -50,7 +50,9 @@ class Migration(DataMigration):
                   ("repository.Sample", ["comment"]),
                   ("repository.Run", ["title", "generated_output"]),
                   ("repository.UserExperiment", ["additional_info"]),
-                  ("repository.RunSample", ["filename", "node"])]
+                  ("repository.RunSample", ["filename"]),
+                  ("repository.RuleGenerator", ["node"]),
+                  ]
 
         replace_null_with_value(orm, [("repository.HumanInfo", ["sex"])], "U")
         replace_null_with_value(orm, to_fix, "")
