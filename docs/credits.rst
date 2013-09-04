@@ -13,8 +13,8 @@ ABF Team
   Rodney Lorrimar, Grahame Bowland, Maciej Radochonski, Brad Power,
   Tamas Szabo, Nick Takayama, Andrew Macgregor
 
-**System Administrators**
-  Thu Nguyen, David Schibeci
+**System Administrator**
+  David Schibeci
 
 MA Team
 -------
@@ -23,3 +23,5 @@ MA Team
   Dr. Vladimir Likic
 **Computer Scientist**
   Dr. Saravanan Dayalan
+**System Administrator**
+  Thu Nguyen

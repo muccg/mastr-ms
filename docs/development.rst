@@ -266,9 +266,7 @@ Documentation which still needs merging
 ---------------------------------------
 
  * ``INSTALL`` → ``client-install.rst``
- * ``WXPYTHON_HOWTO`` → ``dev-wxpython-howto.rst``
 
 .. toctree::
     client-install
-    dev-wxpython-howto
     tests
