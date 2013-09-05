@@ -54,6 +54,8 @@ class WithFixtures(object):
 
         #user = User.objects.get(username__istartswith="admin")
         #user = User.objects.create(username="testuser", is_staff=True)
+        self.admin_password = "admin"
+        self.admin = self.create_user("admin@example.com", self.admin_password, True)
         self.user_password = "testing"
         self.user = self.create_user("testuser@ccg.murdoch.edu.au", self.user_password)
 
@@ -746,7 +748,7 @@ class SyncTests(LiveServerTestCase, XDisplayTest, WithFixtures):
 
                 # check that the request was made
                 requested_files = self.find_files_in_json(received_json)
-                
+
                 self.assertEqual(len(requested_files), 1)
 
                 # a. check that files are requested
@@ -913,12 +915,13 @@ class AdminTests(LiveServerTestCase, XDisplayTest, WithFixtures):
         Login to the admin page. This test is given as an example in
         the django docs.
         """
+        self.setup_more_fixtures()
         self.selenium = WebDriver()
         self.selenium.get(self.url("/repoadmin/login/"))
         username_input = self.selenium.find_element_by_name("username")
-        username_input.send_keys("admin@example.com")
+        username_input.send_keys(self.admin.username)
         password_input = self.selenium.find_element_by_name("password")
-        password_input.send_keys("admin")
+        password_input.send_keys(self.admin_password)
         self.selenium.find_element_by_xpath("//input[@value='Log in']").click()
         self.selenium.quit()
 
@@ -960,14 +963,15 @@ class AdminTests(LiveServerTestCase, XDisplayTest, WithFixtures):
         self.assertEqual(self.run.state, RUN_STATES.COMPLETE[0])
 
         with Browser() as browser:
-            # ah bugger it, just login
-            browser.visit(self.url("/repoadmin/login/?next=/repoadmin/repository/run/"))
-            browser.fill("username", self.user.username)
-            browser.fill("password", self.user_password)
-            browser.find_by_xpath("//input[@value='Log in']").click()
-
             # select the run
             browser.visit(self.url("/repoadmin/repository/run/"))
+
+            # fill out login form
+            if browser.is_element_present_by_xpath("//input[@value='Log in']"):
+                browser.fill("username", self.admin.username)
+                browser.fill("password", self.admin_password)
+                browser.find_by_xpath("//input[@value='Log in']").click()
+
             browser.find_by_name("_selected_action").first.check()
 
             # Select the "Mark Run Incomplete" action from dropdown box
