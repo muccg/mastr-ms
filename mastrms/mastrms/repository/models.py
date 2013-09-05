@@ -147,19 +147,24 @@ class Project(models.Model):
         return "%s (%s)" % (self.title, client_username)
 
 class InstrumentMethod(models.Model):
-    title = models.CharField(max_length=255)
-    method_path = models.TextField()
-    method_name = models.CharField(max_length=255)
-    version = models.CharField(max_length=255)
-    created_on = models.DateField(null=False, default=date.today)
-    creator = models.ForeignKey(User, null=True)
-    template = models.TextField()
-    randomisation = models.BooleanField(default=False)
-    blank_at_start = models.BooleanField(default=False)
-    blank_at_end = models.BooleanField(default=False)
-    blank_position = models.CharField(max_length=255,blank=True)
-    obsolete = models.BooleanField(default=False)
-    obsolescence_date = models.DateField(null=True,blank=True)
+    title = models.CharField(max_length=255, help_text="Text which will be shown in Mastr-MS")
+    method_path = models.CharField(max_length=1000, help_text="A folder path on the lab machine which will be put in the worklist CSV")
+    method_name = models.CharField(max_length=255, help_text="Text which will be put in the worklist")
+    version = models.CharField(max_length=255, default="1")
+    created_on = models.DateField(default=date.today)
+    creator = models.ForeignKey(User, null=True, blank=True)
+    template = models.CharField(max_length=10, choices=(("csv", "CSV"),),
+                                default="csv",
+                                help_text="Determines the worklist format")
+
+    randomisation = models.BooleanField(default=False, help_text="Unused")
+    blank_at_start = models.BooleanField(default=False, help_text="Unused")
+    blank_at_end = models.BooleanField(default=False, help_text="Unused")
+    blank_position = models.CharField(max_length=255, blank=True,
+                                      help_text="Unused")
+    obsolete = models.BooleanField(default=False, help_text="Unused")
+    obsolescence_date = models.DateField(null=True, blank=True,
+                                         help_text="Unused")
 
     #future: quality control sample locations
 

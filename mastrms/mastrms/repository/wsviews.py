@@ -1,30 +1,31 @@
-from django.db import transaction
-from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden, HttpResponseNotAllowed, HttpResponseRedirect, HttpResponseBadRequest
-from django.shortcuts import render_to_response, get_object_or_404
-from django.core.exceptions import ObjectDoesNotExist
-from mastrms.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RUN_STATES, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure, RuleGenerator, Component, NodeClient
-from mastrms.quote.models import Organisation, Formalquote
-from ccg.utils import webhelpers
-from django.utils import simplejson as json
-from mastrms.decorators import mastr_users_only
-from django.contrib.auth.decorators import login_required
-from django.core import urlresolvers
-from django.db.models import get_model
-from json_util import makeJsonFriendly
-from mastrms.app.utils.data_utils import jsonResponse, zipdir, pack_files
-from mastrms.repository.permissions import user_passes_test
-from django.db.models import Q
-from datetime import datetime, timedelta
-from django.core.mail import mail_admins
-from mastrms.users.models import User
-from mastrms.repository import rulegenerators
-from mastrms.app.utils.mail_functions import FixedEmailMessage
-from decimal import Decimal, DecimalException
 import os, stat
 import copy
 import csv
-from django.conf import settings
 import logging
+from decimal import Decimal, DecimalException
+from datetime import datetime, timedelta
+from django.db import transaction
+from django.db.models import get_model, Q
+from django.core import urlresolvers
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.mail import mail_admins
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden, HttpResponseNotAllowed, HttpResponseRedirect, HttpResponseBadRequest
+from django.shortcuts import render_to_response, get_object_or_404
+from django.utils import simplejson as json
+from django.utils.encoding import smart_str
+from ccg.utils import webhelpers
+from mastrms.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RUN_STATES, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure, RuleGenerator, Component, NodeClient
+from mastrms.quote.models import Organisation, Formalquote
+from mastrms.decorators import mastr_users_only
+from json_util import makeJsonFriendly
+from mastrms.app.utils.data_utils import jsonResponse, zipdir, pack_files
+from mastrms.repository.permissions import user_passes_test
+from mastrms.users.models import User
+from mastrms.repository import rulegenerators
+from mastrms.app.utils.mail_functions import FixedEmailMessage
+
 logger = logging.getLogger('mastrms.general')
 
 class ClientLookupException(Exception):
@@ -2099,7 +2100,7 @@ def _handle_uploaded_run_capture_csv(request, csvfile):
 
     run = Run(
         method = method,
-        creator = request.user, 
+        creator = request.user,
         title = title,
         experiment = experiment,
         machine = machine,
@@ -2122,7 +2123,7 @@ def _handle_uploaded_run_capture_csv(request, csvfile):
     except ClientLookupException, e:
         output = e.output
     except Exception, e:
-        output = { 
+        output = {
             "success" : False,
             "msg" : str(e)
         }
@@ -2401,28 +2402,31 @@ def generate_worklist(request, run_id):
 
 @mastr_users_only
 def display_worklist(request, run_id):
-    run = Run.objects.get(id=run_id)
+    run = get_object_or_404(Run, id=run_id)
+    samples = run.runsample_set.order_by('sequence')
 
-    # TODO
-    # I don't think the template for this should be in the DB
-    # Change it later ...
-    #from mako.template import Template
-    #mytemplate = Template(run.method.template)
-    #mytemplate.output_encoding = "utf-8"
+    if run.method.template == "csv":
+        return _display_worklist_csv(request, run, samples)
 
-    #create the variables to insert
+    return HttpResponseServerError("InstrumentMethod has unknown template")
 
-    from django.shortcuts import render_to_response
+def _display_worklist_csv(request, run, samples):
+    """
+    Returns a HttpResponse in CSV format with a worklist.
+    I assume this CSV format is understood by the MassHunter software.
+    """
+    response = HttpResponse(content_type='text/plain; charset=utf-8')
 
-    render_vars = {
-        'username': request.user.username,
-        'run': run,
-        'runsamples': run.runsample_set.all().order_by('sequence')}
+    w = csv.writer(response)
 
-    #render
-    #return HttpResponse(content=mytemplate.render(**render_vars), content_type='text/plain; charset=utf-8')
-    return render_to_response('display_worklist.html', render_vars)
+    for sample in samples:
+        row = [request.user.username, run.machine.default_data_path,
+               sample.filename,
+               run.method.method_path, run.method.method_name,
+               sample.sample_name]
+        w.writerow(map(smart_str, row))
 
+    return response
 
 @mastr_users_only
 def mark_run_complete(request, run_id):
