@@ -25,6 +25,7 @@ from mastrms.repository.permissions import user_passes_test
 from mastrms.users.models import User
 from mastrms.repository import rulegenerators
 from mastrms.app.utils.mail_functions import FixedEmailMessage
+from django.views.generic import View
 
 logger = logging.getLogger('mastrms.general')
 
@@ -2063,108 +2064,114 @@ def _handle_uploaded_file(f, name, experiment_id):
     print '*** _handle_uploaded_file: exit ***'
     return retval
 
-@mastr_users_only
-def uploadCSVFile(request):
-    return uploadCSVWrapper(request, 'samplecsv', _handle_uploaded_sample_csv)
+class CSVUploadView(View):
+    http_method_names = ['post']
+    @classmethod
+    def get_file(cls, request):
+        if request.FILES.has_key(cls.file_field_name):
+            return request.FILES[cls.file_field_name]
+        else:
+            raise ClientLookupException("No file attached.")
 
-@mastr_users_only
-def uploadRunCaptureCSV(request):
-    return uploadCSVWrapper(request, 'runcapturecsv', _handle_uploaded_run_capture_csv)
+class CSVUploadViewFile(CSVUploadView):
+    file_field_name = 'samplecsv'
+    def post(self, request, *args, **kwargs):
+        try:
+            fd = CSVUploadViewFile.get_file(request)
+            experiment = get_object_by_id_or_error(request, Experiment, 'experiment_id')
+        except ClientLookupException, e:
+            return HttpResponseBadRequest(e.message)
 
-def uploadCSVWrapper(request, file_field_name, csv_handler_fn):
-    if request.method != "POST":
-        return HttpResponseNotAllowed(["POST"])
+        status = self.handle_csv(fd, experiment)
+        return HttpResponse(json.dumps(status))
 
-    if request.FILES.has_key(file_field_name):
-        f = request.FILES[file_field_name]
-        output = csv_handler_fn(request, f)
-    else:
-        output = { "success": False, "msg": "No file attached." }
+    @classmethod
+    def handle_csv(cls, csvfile, experiment):
+        """
+        Read a file object of CSV text and create samples from it.
+        Returns a "success" dict suitable for returning to the client.
+        """
+        output = { "success": True,
+                   "num_created": 0,
+                   "num_updated": 0 }
 
-    return HttpResponse(json.dumps(output))
 
-def _handle_uploaded_run_capture_csv(request, csvfile):
-    """
-    Read a file object of CSV text and create RunSample instances from it.
-    Returns a "success" dict suitable for returning to the client.
-    """
-    try:
-        experiment = get_object_by_id_or_error(request, Experiment, 'experiment_id')
-        machine = get_object_by_id_or_error(request, NodeClient, 'machine_id')
-        method = get_object_by_id_or_error(request, InstrumentMethod, 'method_id')
-        title = request.POST.get('title', None)
-        if title is None:
-            raise ClientLookupException("need title param")
-    except ClientLookupException, e:
-        return e.output
+        for sid, label, weight, comment in _read_uploaded_sample_csv(csvfile, output):
+            # If a valid sample id is provided, try to update exising
+            # sample, otherwise create a new one.
+            samples = Sample.objects.filter(experiment=experiment, id=sid)
+            if sid and len(samples) == 1:
+                s = samples[0]
+                output["num_updated"] += 1
+            else:
+                s = Sample()
+                output["num_created"] += 1
 
-    run = Run(
-        method = method,
-        creator = request.user,
-        title = title,
-        experiment = experiment,
-        machine = machine,
-        state = RUN_STATES.NEW[0],
-        )
-    run.save()
+            s.label = label
+            s.weight = weight
+            s.comment = comment
+            s.experiment = experiment
+            s.save()
 
-    output = {
-        "success" : True,
-        "num_created" : 0
-    }
+        return output
 
-    try:
-        # sample_id ignored for now.. probably could be got rid of
-        run_samples = []
-        for sample_id, filename in _read_uploaded_run_capture_csv(csvfile, output):
-            rs = RunSample(run=run, filename=filename)
-            output['num_created'] += 1
-            rs.save()
-    except ClientLookupException, e:
-        output = e.output
-    except Exception, e:
+class CSVUploadViewCaptureCSV(CSVUploadView):
+    file_field_name = 'runcapturecsv'
+    def post(self, request, *args, **kwargs):
+        try:
+            fd = CSVUploadViewCaptureCSV.get_file(request)
+            experiment = get_object_by_id_or_error(request, Experiment, 'experiment_id')
+            machine = get_object_by_id_or_error(request, NodeClient, 'machine_id')
+            method = get_object_by_id_or_error(request, InstrumentMethod, 'method_id')
+            title = request.POST.get('title', None)
+            if title is None:
+                raise ClientLookupException("need title param")
+        except ClientLookupException, e:
+            return HttpResponseBadRequest(e.message)
+
+        status = self.handle_csv(fd, experiment, machine, method, title, request.user)
+        return HttpResponse(json.dumps(status))
+
+    @classmethod
+    def handle_csv(cls, csvfile, experiment, machine, method, title, user):
+        """
+        Read a file object of CSV text and create RunSample instances from it.
+        Returns a "success" dict suitable for returning to the client.
+        """
+        run = Run(
+            method = method,
+            creator = user,
+            title = title,
+            experiment = experiment,
+            machine = machine,
+            state = RUN_STATES.NEW[0],
+            )
+        run.save()
+
         output = {
-            "success" : False,
-            "msg" : str(e)
+            "success" : True,
+            "num_created" : 0
         }
 
-    # examine output, if we've failed destroy the Run we created
-    if not output['success']:
-        run.delete()
-    return output
+        try:
+            # sample_id ignored for now.. probably could be got rid of
+            run_samples = []
+            for sample_id, filename in _read_uploaded_run_capture_csv(csvfile, output):
+                rs = RunSample(run=run, filename=filename)
+                output['num_created'] += 1
+                rs.save()
+        except ClientLookupException, e:
+            output = e.output
+        except Exception, e:
+            output = {
+                "success" : False,
+                "msg" : str(e)
+            }
 
-def _handle_uploaded_sample_csv(request, csvfile):
-    """
-    Read a file object of CSV text and create samples from it.
-    Returns a "success" dict suitable for returning to the client.
-    """
-    output = { "success": True,
-               "num_created": 0,
-               "num_updated": 0 }
-
-    try:
-        experiment = get_object_by_id_or_error(request, Experiment, 'experiment_id')
-    except ClientLookupException, e:
-        return HttpResponseBadRequest(e.message)
-
-    for sid, label, weight, comment in _read_uploaded_sample_csv(csvfile, output):
-        # If a valid sample id is provided, try to update exising
-        # sample, otherwise create a new one.
-        samples = Sample.objects.filter(experiment=experiment, id=sid)
-        if sid and len(samples) == 1:
-            s = samples[0]
-            output["num_updated"] += 1
-        else:
-            s = Sample()
-            output["num_created"] += 1
-
-        s.label = label
-        s.weight = weight
-        s.comment = comment
-        s.experiment = experiment
-        s.save()
-
-    return output
+        # examine output, if we've failed destroy the Run we created
+        if not output['success']:
+            run.delete()
+        return output
 
 def _read_uploaded_run_capture_csv(csvfile, output):
     """
