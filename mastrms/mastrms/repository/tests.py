@@ -6,34 +6,15 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.test.client import Client
 from django.utils import unittest
-from StringIO import StringIO
+from io import StringIO
 from decimal import Decimal
-from mastrms.repository.wsviews import uploadCSVFile, _handle_uploaded_sample_csv
+from mastrms.repository.wsviews import CSVUploadViewCaptureCSV, CSVUploadViewFile
 from mastrms.repository.models import Project, Experiment, Sample, InstrumentMethod, RunSample
 from mastrms.mdatasync_server.models import NodeClient
 import json, logging
 logger = logging.getLogger(__name__)
 
-class TestUploadCSV(TestCase):
-    def upload_csv(self, endpoint, fname, text, **kwargs):
-        fp = StringIO(text)
-        fp.name = "test.csv"
-        client = Client()
-        client.login(username='admin@example.com', password='admin')
-        data = {
-            fname : fp
-        }
-        data.update(kwargs)
-        response = client.post(endpoint, data)
-        try:
-            result = json.loads(response.content)
-        except ValueError:
-            print "JSON decode failed, status_code = %d, data is:" % (response.status_code)
-            print response.content
-        self.assertEqual(response.status_code, 200)
-        return result
-
-class SampleCsvUploadTest(TestUploadCSV):
+class SampleCsvUploadTest(TestCase):
     """
     Unit tests for parsing of uploaded samples CSV. The target
     function is `_handle_uploaded_sample_csv`.
@@ -52,7 +33,7 @@ class SampleCsvUploadTest(TestUploadCSV):
                                                     instrument_method=None)
 
     def upload_csv(self, text):
-        return super(SampleCsvUploadTest, self).upload_csv('/uploadSampleCSV', 'samplecsv', text, experiment_id=self.experiment.id)
+        return CSVUploadViewFile.handle_csv(StringIO(text, newline=None), self.experiment)
 
     def test_simple_noheader(self):
         """
@@ -459,7 +440,7 @@ Sample Label
         self.assertEqual(result["num_created"], 1)
         self.assertEqual(result["num_updated"], 2)
 
-class UploadRunCaptureCSVTest(TestUploadCSV):
+class UploadRunCaptureCSVTest(TestCase):
     """
     Unit tests for parsing of uploaded samples CSV. The target
     function is `uploadRunCaptureCSV`. CSV quirk tests are in
@@ -469,12 +450,13 @@ class UploadRunCaptureCSVTest(TestUploadCSV):
 
     urls = 'mastrms.repository.wsurls'
     def upload_csv(self, text):
-        return super(UploadRunCaptureCSVTest, self).upload_csv('/uploadRunCaptureCSV', 'runcapturecsv', text,
-            experiment_id=self.experiment.id,
-            machine_id=self.machine.id,
-            method_id = self.method.id,
-            title='A test run'
-        )
+        return CSVUploadViewCaptureCSV.handle_csv(
+            StringIO(text, newline=None),
+            self.experiment,
+            self.machine,
+            self.method,
+            'A Test Run',
+            get_user_model().objects.all()[0])
 
     def setUp(self):
         project = Project.objects.create(title="Test Project",
