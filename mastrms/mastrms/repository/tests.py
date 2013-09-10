@@ -54,7 +54,7 @@ class SampleCsvUploadTest(TestUploadCSV):
     def upload_csv(self, text):
         return super(SampleCsvUploadTest, self).upload_csv('/uploadSampleCSV', 'samplecsv', text, experiment_id=self.experiment.id)
 
-    def test01_simple_noheader(self):
+    def test_simple_noheader(self):
         """
         Basic valid CSV file without header
         """
@@ -72,7 +72,7 @@ class SampleCsvUploadTest(TestUploadCSV):
         self.assertEqual(samples[0].weight, Decimal("1.0"))
         self.assertEqual(samples[0].comment, "Comment about the sample")
 
-    def test02_simple_header(self):
+    def test_simple_header(self):
         """
         Basic valid CSV file with header.
         """
@@ -91,7 +91,7 @@ Sample Label,1.0,Comment about the sample
         self.assertEqual(samples[0].weight, Decimal("1.0"))
         self.assertEqual(samples[0].comment, "Comment about the sample")
 
-    def test03_simple_header_order(self):
+    def test_simple_header_order(self):
         """
         Basic valid CSV file with header, different column order.
         """
@@ -110,7 +110,7 @@ Sample Label,1.0,Comment about the sample
         self.assertEqual(samples[0].weight, Decimal("1.0"))
         self.assertEqual(samples[0].comment, "Comment about the sample")
 
-    def test04_simple_header_capitalized(self):
+    def test_simple_header_capitalized(self):
         """
         Basic valid CSV file with capitalized headers.
         """
@@ -129,7 +129,7 @@ Sample Label,1.0,Comment about the sample
         self.assertEqual(samples[0].weight, Decimal("1.0"))
         self.assertEqual(samples[0].comment, "Comment about the sample")
 
-    def test05_extra_columns(self):
+    def test_extra_columns(self):
         """
         Valid CSV file, no header, extra columns.
         """
@@ -146,7 +146,7 @@ Sample Label,1.0,Comment about the sample
         self.assertEqual(samples[0].weight, Decimal("1.0"))
         self.assertEqual(samples[0].comment, "Comment about the sample")
 
-    def test06_extra_headers(self):
+    def test_extra_headers(self):
         """
         Valid CSV file, extra columns with headers.
         """
@@ -165,7 +165,7 @@ Green,Sample Label,1.0,kg,Comment about the sample,Large
         self.assertEqual(samples[0].weight, Decimal("1.0"))
         self.assertEqual(samples[0].comment, "Comment about the sample")
 
-    def test07_whitespace(self):
+    def test_whitespace(self):
         """
         Valid CSV file, columns have some whitespace.
         """
@@ -184,7 +184,7 @@ Green,Sample Label,1.0,kg,Comment about the sample,Large
         self.assertEqual(samples[0].weight, Decimal("1.0"))
         self.assertEqual(samples[0].comment, "  Comment about the sample")
 
-    def test07_msdos_newlines(self):
+    def test_msdos_newlines(self):
         """
         Valid CSV file with dos/windows newlines.
         """
@@ -202,7 +202,25 @@ Green,Sample Label,1.0,kg,Comment about the sample,Large
             self.assertEqual(sample.weight, Decimal("1.0"))
             self.assertEqual(sample.comment, "Comment about the sample")
 
-    def test07_empty(self):
+    def test_mac_newlines(self):
+        """
+        Valid CSV file with mac newlines (carriage returns).
+        """
+        text = "Label,Weight,Comment\rSample Label,1.0,Comment about the sample\rSample Label,1.0,Comment about the sample\r"
+
+        result = self.upload_csv(text)
+
+        samples = Sample.objects.all()
+
+        self.assertTrue(result["success"])
+        self.assertEqual(len(samples), 2)
+        for sample in samples:
+            self.assertEqual(sample.experiment, self.experiment)
+            self.assertEqual(sample.label, "Sample Label")
+            self.assertEqual(sample.weight, Decimal("1.0"))
+            self.assertEqual(sample.comment, "Comment about the sample")
+
+    def test_empty(self):
         """
         Empty file. Should return an error message to client.
         """
@@ -216,7 +234,7 @@ Green,Sample Label,1.0,kg,Comment about the sample,Large
         self.assertTrue(bool(result.get("msg", "")))
         self.assertEqual(len(samples), 0)
 
-    def test08_empty_with_header(self):
+    def test_empty_with_header(self):
         """
         Single header line. Should return an error message to client.
         """
@@ -231,7 +249,7 @@ Green,Sample Label,1.0,kg,Comment about the sample,Large
         self.assertEqual(len(samples), 0)
 
     @unittest.skip("haven't implemented unicode csv reading yet")
-    def test09_unicode_data(self):
+    def test_unicode_data(self):
         """
         Valid CSV with utf-8 encoded text in column data.
         """
@@ -249,7 +267,7 @@ Green,Sample Label,1.0,kg,Comment about the sample,Large
         self.assertEqual(samples[0].comment, "☃ Snowman ☃")
 
     @unittest.skip("haven't implemented unicode csv reading yet")
-    def test10_unicode_header(self):
+    def test_unicode_header(self):
         """
         Valid CSV with utf-8 encoded text in additional headers.
         """
@@ -268,7 +286,7 @@ Sample Label,1.0,Comment about the sample,µ,☃,❄,🐈
         self.assertEqual(samples[0].weight, Decimal("1.0"))
         self.assertEqual(samples[0].comment, "Comment about the sample")
 
-    def test11_invalid_decimal(self):
+    def test_invalid_decimal(self):
         """
         CSV with non-numeric weight value.
         """
@@ -285,7 +303,7 @@ Sample Label,not a number,Comment about the sample
         self.assertEqual(result.get("invalid_lines", -1), [2])
         self.assertEqual(len(samples), 0)
 
-    def test11_some_invalid_lines(self):
+    def test_some_invalid_lines(self):
         """
         CSV with one valid line, and one with a non-numeric weight value.
         """
@@ -308,7 +326,7 @@ Sample Label,not a number,Comment about the sample
         self.assertEqual(samples[0].weight, Decimal("1.0"))
         self.assertEqual(samples[0].comment, "Comment about the sample")
 
-    def test12_missing_column(self):
+    def test_missing_column(self):
         """
         CSV which is valid, except missing an essential column.
         """
@@ -325,7 +343,7 @@ Sample Label,1.0
         self.assertIn("missing", result.get("msg", "").lower())
         self.assertEqual(len(samples), 0)
 
-    def test13_missing_columns(self):
+    def test_missing_columns(self):
         """
         CSV is missing two essential columns.
         """
@@ -343,7 +361,7 @@ Sample Label
         self.assertIn("missing", result.get("msg", "").lower())
         self.assertEqual(len(samples), 0)
 
-    def test14_multiple_samples(self):
+    def test_multiple_samples(self):
         """
         CSV exported from mastrms with 2 samples.
         """
@@ -371,7 +389,7 @@ Sample Label
                                   label="", comment="", weight=None)
         return Sample.objects.all()
 
-    def test15_sample_update(self):
+    def test_sample_update(self):
         """
         Valid CSV containing sample id column, used to update existing
         samples.
@@ -402,7 +420,7 @@ Sample Label
         self.assertEqual(samples[1].weight, Decimal("43.0"))
         self.assertEqual(samples[1].comment, "comment B")
 
-    def test16_sample_update_create(self):
+    def test_sample_update_create(self):
         """
         Valid CSV containing sample id column, used to update existing
         samples, and to create more samples.
@@ -444,8 +462,8 @@ Sample Label
 class UploadRunCaptureCSVTest(TestUploadCSV):
     """
     Unit tests for parsing of uploaded samples CSV. The target
-    function is `uploadRunCaptureCSV`. CSV quirk tests are in 
-    SampleCsvUploadTest, and as CSV parsing is in common they are 
+    function is `uploadRunCaptureCSV`. CSV quirk tests are in
+    SampleCsvUploadTest, and as CSV parsing is in common they are
     not replicated here.
     """
 
