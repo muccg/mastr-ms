@@ -33,7 +33,7 @@ class SampleCsvUploadTest(TestCase):
                                                     instrument_method=None)
 
     def upload_csv(self, text):
-        return CSVUploadViewFile.handle_csv(StringIO(text, newline=None), self.experiment)
+        return CSVUploadViewFile.handle_csv(StringIO(text), self.experiment)
 
     def test_simple_noheader(self):
         """
@@ -451,7 +451,7 @@ class UploadRunCaptureCSVTest(TestCase):
     urls = 'mastrms.repository.wsurls'
     def upload_csv(self, text):
         return CSVUploadViewCaptureCSV.handle_csv(
-            StringIO(text, newline=None),
+            StringIO(text),
             self.experiment,
             self.machine,
             self.method,
