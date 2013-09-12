@@ -1,5 +1,6 @@
 import os, stat
 import copy
+import io
 import csv
 import logging
 from decimal import Decimal, DecimalException
@@ -9,6 +10,7 @@ from django.db.models import get_model, Q
 from django.core import urlresolvers
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import mail_admins
+from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden, HttpResponseNotAllowed, HttpResponseRedirect, HttpResponseBadRequest
@@ -2231,6 +2233,10 @@ def _read_csv(csvfile, output, column_names, convert_fn):
                 if nfound > 0:
                     has_header = True
 
+        # Switch on "universal newlines" mode for the uploaded file,
+        # so unix, dos, and mac line endings are all supported.
+        csvfile = _universal_newlines(csvfile)
+
         data = csv.reader(csvfile, dialect=dialect)
 
         if has_header:
@@ -2282,6 +2288,20 @@ def _read_csv(csvfile, output, column_names, convert_fn):
         logger.exception('Exception uploading file')
         output.update({ "success": False,
                         "msg": "Exception uploading file: %s" % e })
+
+def _universal_newlines(csvfile):
+    """
+    This wraps a django uploaded file object using the python 2.6 io
+    library so that all newline formats are understood.
+    """
+    if isinstance(csvfile, TemporaryUploadedFile):
+        # This csv upload was a largish file so Django put it on
+        # the filesystem -- reopen the file.
+        return io.open(csvfile.temporary_file_path(), newline=None)
+    else:
+        # This csv upload was smaller than the limit so Django
+        # stored the data in memory -- make a copy.
+        return io.StringIO(csvfile.read(), newline=None)
 
 @mastr_users_only
 def sample_class_enable(request, id):
