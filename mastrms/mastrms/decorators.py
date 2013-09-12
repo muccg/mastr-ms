@@ -1,14 +1,15 @@
 from django.http import HttpResponse, HttpResponseForbidden
 from ccg.http import HttpResponseUnauthorized
+from functools import wraps
 
 def restricted_view(f, restriction):
-    def new_function(*args, **kwargs):
-        request = args[0]
+    @wraps(f)
+    def new_function(request, *args, **kwargs):
         if not request.user.is_authenticated():
             return HttpResponseUnauthorized()
 
         if restriction(request.user):
-            return f(*args, **kwargs)
+            return f(request, *args, **kwargs)
         else:
             return HttpResponseForbidden()
     return new_function

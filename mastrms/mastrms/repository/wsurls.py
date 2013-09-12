@@ -1,5 +1,6 @@
 from django.conf.urls import *
 from django.conf import settings
+from mastrms.repository.wsviews import CSVUploadViewFile, CSVUploadViewCaptureCSV
 
 urlpatterns = patterns('mastrms.repository.wsviews',
     (r'^populate_select/(?P<model>\w+)/(?P<key>\w+)[/]*$', 'populate_select', {'SSL':settings.SSL_ENABLED}),
@@ -38,8 +39,8 @@ urlpatterns = patterns('mastrms.repository.wsviews',
     (r'^pendingfiles[/]*$', 'pendingFilesList', {'SSL':settings.SSL_ENABLED}),
     (r'^moveFile[/]*$', 'moveFile', {'SSL':settings.SSL_ENABLED}),
     (r'^uploadFile[/]*$', 'uploadFile', {'SSL':settings.SSL_ENABLED}),
-    (r'^uploadSampleCSV[/]*$', 'uploadCSVFile', {'SSL':settings.SSL_ENABLED}),
-    (r'^uploadRunCaptureCSV[/]*$', 'uploadRunCaptureCSV', {'SSL':settings.SSL_ENABLED}),
+    (r'^uploadSampleCSV[/]*$', CSVUploadViewFile.as_view(), {'SSL':settings.SSL_ENABLED}),
+    (r'^uploadRunCaptureCSV[/]*$', CSVUploadViewCaptureCSV.as_view(), {'SSL':settings.SSL_ENABLED}),
     (r'^packageFilesForDownload[/]*$', 'packageFilesForDownload', {'SSL':settings.SSL_ENABLED}),
     (r'^downloadPackage[/]*$', 'downloadPackage', {'SSL':settings.SSL_ENABLED}),
     (r'^downloadFile[/]*$', 'downloadFile', {'SSL':settings.SSL_ENABLED}),

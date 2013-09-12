@@ -38,7 +38,7 @@ MA.Dashboard.CreatePendingUserRequests = function() {
 
 
     function editUser(username) {
-        MA.ChangeMainContent('admin:useredit', username);
+        MA.ChangeMainContent('admin:useredit', [username]);
     }
 
     var editHandler = function(el, ev) {

@@ -117,27 +117,16 @@ def listQuotesRequiringAttention(request):
     '''Used by dashboard to list the quotes that aren't Completed and don't have
        a formal quote yet.'''
 
-    qs = Quoterequest.objects.filter(completed=False,formalquote__id=None)
+    qs = Quoterequest.objects.filter(completed=False, formalquote__isnull=True)
 
     #If they are a noderep (only), we filter the qs by node
-    currentuser = getCurrentUser(request)
-    if currentuser.IsNodeRep and not currentuser.IsAdmin:
-        nodelist = currentuser.Nodes
-        node = nodelist[0]
-        qs.filter(tonode=node)
+    if request.user.IsNodeRep and not request.user.IsAdmin:
+        qs = qs.filter(tonode__in=request.user.Nodes)
 
-    results = []
-    qs.values('id', 'unread', 'firstname', 'lastname', 'requesttime', 'tonode', 'emailaddressid__emailaddress' )
-    for ql in quoteslist:
-            ql['email'] = ql['emailaddressid__emailaddress']
-            del ql['emailaddressid__emailaddress']
-            results.append(ql)
-
-    results = []
-
-    return jsonResponse( items=resultsset)
+    return jsonResponse(items=_make_quote_list(qs))
 
 
+@authentication_required
 def listQuotes(request, *args):
     '''This corresponds to Madas Dashboard->Quotes->View Quote Requests
        Accessible by Administrators, Node Reps and Clients but it filters down to just Client's quote requests if it is a Client
@@ -147,7 +136,7 @@ def listQuotes(request, *args):
 
     if request.user.IsNodeRep:
         #retrieve quotes for the first node in the list (there shouldnt be more than 1)
-        qq = qq | Q(tonode=request.user.Nodes[0])
+        qq = qq | Q(tonode__in=request.user.Nodes)
 
     #If they are an admin, ALSO show quotes which don't yet have a node
     if request.user.IsAdmin:
@@ -218,7 +207,7 @@ def listFormal(request, *args, **kwargs):
         #if a noderep or admin, and you have a node:
         if (request.user.IsAdmin or request.user.IsNodeRep) and len(nodelist) > 0:
             # then also show quotes from this node.
-            qq = qq | Q(quoterequestid__tonode=nodelist[0])
+            qq = qq | Q(quoterequestid__tonode__in=nodelist)
 
     quotes = Formalquote.objects.filter(qq)
     fquoteslist = quotes.values('id', 'quoterequestid', 'details', 'created',
@@ -229,23 +218,15 @@ def listFormal(request, *args, **kwargs):
 
 
 def _loadQuoteRequest(qid):
-    logger.debug('\t_loadQuoteRequest: qid was %s' % (qid) )
-    if qid is not None and qid.isdigit() and qid is not '':
-        qr = Quoterequest.objects.filter(id = qid).values('id', 'emailaddressid__emailaddress', 'tonode', 'details', 'requesttime', 'unread', 'completed', 'firstname', 'lastname', 'officephone', 'country', 'attachment')
-        try:
-            for ql in qr:
-                ql['email'] = ql['emailaddressid__emailaddress']
-                del ql['emailaddressid__emailaddress']
-        except Exception, e:
-            logger.warning('exception: %s' % (str(e)))
-
+    if qid and qid.isdigit():
+        qr = _make_quote_list(Quoterequest.objects.filter(id=qid))
     else:
-        qr = [{}]
+        qr = []
 
-    #TODO: REFACTOR If there was more than one quote request, something went wrong, and we should error
-    qr = qr[0]
-
-    return qr
+    if qr:
+        return qr
+    else:
+        raise Exception, "Quoterequest \"%s\" was not found" % qid
 
 @authentication_required
 def load(request, *args):
