@@ -19,7 +19,7 @@ TARGET_DIR="/usr/local/src/${PROJECT_NAME}"
 CLOSURE="/usr/local/closure/compiler.jar"
 TESTING_MODULES="argparse dingus xvfbwrapper nose"
 MODULES="MySQL-python==1.2.3 psycopg2==2.4.6 Werkzeug flake8 ${TESTING_MODULES}"
-PIP_OPTS="-v -M --download-cache ~/.pip/cache"
+PIP_OPTS="-v -M --download-cache ~/.pip/cache --index-url=https://restricted.crate.io"
 
 # A lot of tests need a database and/or X display to run. So the full
 # test suite TEST_LIST and the tests which don't need a database or X
@@ -230,7 +230,7 @@ syncmigrate() {
 
 # start runserver
 startserver() {
-    ${TOPDIR}/virt_${PROJECT_NAME}/bin/django-admin.py runserver_plus ${port}
+    ${TOPDIR}/virt_${PROJECT_NAME}/bin/django-admin.py runserver_plus 0.0.0.0:${PORT}
 }
 
 
