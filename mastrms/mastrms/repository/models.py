@@ -319,10 +319,7 @@ class Sample(models.Model):
 
     def is_valid_for_run(self):
         '''Test to determine whether this sample can be used in a run'''
-        if not self.sample_class or not self.sample_class.enabled:
-            return False
-        return True
-
+        return bool(self.sample_class and self.sample_class.enabled)
 
 class RUN_STATES:
     NEW = (0, u"New")
