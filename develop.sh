@@ -227,9 +227,18 @@ syncmigrate() {
     ${TOPDIR}/virt_${PROJECT_NAME}/bin/django-admin.py collectstatic --noinput --settings=${DJANGO_SETTINGS_MODULE} 1> collectstatic-develop.log
 }
 
+ipaddress() {
+    if [ -n "$1" ]; then
+        DEV="dev $1"
+    else
+        DEV=""
+    fi
+    ip -4 addr show ${DEV} 2> /dev/null | awk '/inet / { gsub(/\/.*/, ""); print $2; }'
+}
 
 # start runserver
 startserver() {
+    echo "Visit http://$(ipaddress eth0):${PORT}/"
     ${TOPDIR}/virt_${PROJECT_NAME}/bin/django-admin.py runserver_plus 0.0.0.0:${PORT}
 }
 
