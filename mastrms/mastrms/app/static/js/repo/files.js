@@ -3,7 +3,7 @@ MA.FilesInit = function() {
 
     //reload trees
     Ext.getCmp('filesTree').getLoader().load(Ext.getCmp('filesTree').getRootNode());
-    
+
     Ext.getCmp('uploadExperimentId').setValue(expId);
 };
 
@@ -45,37 +45,130 @@ MA.Files = {
                    xtype:'hidden',
                    id:'uploadExperimentId',
                    name:'experimentId'
-               }
-               ]
+               },
+               {
+                   xtype:'hidden',
+                   id:'uploadParentNodeId',
+                   name:'parentId'
+               },
+               {
+                   xtype: 'hidden',
+                   name: 'csrfmiddlewaretoken',
+                   value: Ext.util.Cookies.get("csrftoken_mastrms")
+               }]
            },{
                text: 'Upload',
                id:'upload file',
                handler: function(){
-                   Ext.getCmp('pendingFileUpload').getForm().submit(
-                   {   successProperty: 'success',        
+                 var form = Ext.getCmp('pendingFileUpload').getForm();
+                 var tree = Ext.getCmp('filesTree');
+                 var nodes = tree.getSelectionModel().getSelectedNodes();
+                 var parentId = nodes.length > 0 ? nodes[0].id : "";
+
+                 if (parentId == tree.getRootNode().id) {
+                   parentId = "";
+                 }
+
+                 // set the destination to be the selected folder
+                 Ext.getCmp("uploadParentNodeId").setValue(parentId);
+                 Ext.getCmp("uploadExperimentId").setValue(MA.ExperimentController.currentId());
+
+                   form.submit(
+                   {   successProperty: 'success',
                        success: function (form, action) {
                            if (action.result.success === true) {
-                               form.reset(); 
-                               
+                               form.reset();
+
                                //reload the pending files tree
                                Ext.getCmp('filesTree').getLoader().load(Ext.getCmp('filesTree').getRootNode());
                                Ext.getCmp('filesTree').getRootNode().expand();
-                               
-                           } 
+
+                           }
+                       },
+                       failure: function (form, action, response) {
+                         console.log("action", action);
+                         console.log("response", response);
+                           //do nothing special. this gets called on validation failures and server errors
+                           alert('error submitting form\n' + response.msg);
+                       }
+                   });
+               }
+           }, { xtype: "tbseparator" },
+           {
+               text: 'New Folder...',
+               id:'new folder',
+               handler: function(){
+                 var tree = Ext.getCmp('filesTree');
+                 var nodes = tree.getSelectionModel().getSelectedNodes();
+                 var node = null;
+
+                 if (nodes.length == 0) {
+                   node = tree.getRootNode();
+                 } else if (nodes.length > 1) {
+                   Ext.Msg.alert("Please select just one folder.",
+                                 "(this message will auto-close in 2 seconds)");
+                   window.setTimeout(function() {Ext.Msg.hide();}, 2000);
+                   return;
+                 } else {
+                   node = nodes[0];
+                 }
+
+                 var msg = "";
+
+                 if (node.id != tree.getRootNode().id) {
+                   msg = "Folder will be created under:<br/>" + node.id + "<br/>";
+                 }
+                 msg += "Please choose a name:";
+                 Ext.Msg.prompt("Folder Name", msg, function(btn, text){
+                   if (btn == 'ok' && text.length > 0) {
+                     Ext.Ajax.request({
+                       method:'POST',
+                       url: wsBaseUrl + 'newFolder',
+                       success: function() {
+                         Ext.Msg.alert("Folder Created", "(this message will auto-close in 1 second)");
+                         window.setTimeout(function() {Ext.Msg.hide();}, 1000);
+
+                         //reload the pending files tree
+                         tree.getLoader().clearOnLoad = true;
+                         tree.getLoader().load(Ext.getCmp('filesTree').getRootNode());
+                         tree.getRootNode().expand();
+                       },
+                       failure: function() {
+                         Ext.Msg.alert("Fail", "Could not create the folder.");
+                       },
+                       params: {
+                         parent: node.id,
+                         name: name,
+                         csrfmiddlewaretoken: Ext.util.Cookies.get("csrftoken_mastrms"),
+                         experiment_id: MA.ExperimentController.currentId()
+                       }
+                     });
+                   }
+
+                   Ext.getCmp('pendingFileUpload').getForm().submit(
+                   {   successProperty: 'success',
+                       success: function (form, action) {
+                           if (action.result.success === true) {
+                               form.reset();
+
+                               //reload the pending files tree
+                               Ext.getCmp('filesTree').getLoader().load(Ext.getCmp('filesTree').getRootNode());
+                               Ext.getCmp('filesTree').getRootNode().expand();
+
+                           }
                        },
                        failure: function (form, action) {
                            //do nothing special. this gets called on validation failures and server errors
                            alert('error submitting form\n' + action.response );
                        }
                    });
+               });
+
                }
            }, { xtype: "tbseparator" },{
                text: 'Download ',
                handler: function(){
                     var tree = Ext.getCmp('filesTree');
-                    //var selModel = tree.getSelectionModel();
-                    //var selectedNodes = selModel.getSelectedNodes();
-                    //var node;
                     var checkedNodes = tree.getChecked();
                     var filesToDownload;
                     if (checkedNodes.length === 1 && !checkedNodes[0].attributes.metafile) {
@@ -86,9 +179,9 @@ MA.Files = {
                         for (var i = 0; i < checkedNodes.length; i++) {
                             node = checkedNodes[i];
                             filesToDownload.push(node.attributes.id);
-                        }    
+                        }
                         Ext.Ajax.request({
-                            url: wsBaseUrl + 'packageFilesForDownload', 
+                            url: wsBaseUrl + 'packageFilesForDownload',
                             method: 'POST',
                             params: {
                                 'experiment_id': MA.ExperimentController.currentId(),
@@ -114,7 +207,7 @@ MA.Files = {
                         ['tbz2', '.tbz2'],
                         ['zip', '.zip'],
                         ['tar', '.tar']
-                    ] 
+                    ]
                 }),
                 displayField:'description',
                 valueField:'ext',
@@ -136,6 +229,7 @@ MA.Files = {
                animate: true,
                region:'center',
                enableDrop:true,
+               //enableDD: true,
                useArrows: true,
                dropConfig: { appendOnly: true },
                dataUrl:wsBaseUrl + 'files',
@@ -170,18 +264,18 @@ MA.Files = {
                                     });
                    },
                    checkchange: function(node, checked){
-                                   Ext.Ajax.request({
-                                       method:'POST',
-                                       url: wsBaseUrl + 'shareFile',
-                                       success: function() {  },
-                                       failure: function() {  },
-                                       params: { file: node.id, checked: checked, experiment_id: MA.ExperimentController.currentId() }
-                                                                   });
-                               }
+                     Ext.Ajax.request({
+                       method:'POST',
+                       url: wsBaseUrl + 'shareFile',
+                       success: function() {  },
+                       failure: function() {  },
+                       params: { file: node.id, checked: checked, experiment_id: MA.ExperimentController.currentId() }
+                     });
+                   }
                 }
                }
-               
-               
+
+
                ]
        }
        ]
