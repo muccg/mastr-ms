@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from django.db import transaction
 from django.db.models import get_model, Q
 from django.core import urlresolvers
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.core.mail import mail_admins
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.conf import settings
@@ -1665,7 +1665,7 @@ def experimentFilesList(request):
         path = ''
 
     if not 'experiment' in args or args['experiment'] == '0':
-        print 'invalid experiment'
+        logger.error("invalid experiment: %s" % args.get("experiment", None))
         return HttpResponse('[]')
 
     exp = Experiment.objects.get(id=args['experiment'])
@@ -2014,7 +2014,14 @@ def uploadFile(request):
     output = { 'success': True }
 
     try:
-        experiment_id = args['experimentId'];
+        experiment_id = args.get('experimentId', '');
+        parent_folder = args.get('parentId', '');
+
+        if not experiment_id:
+            output = {"success": False, "msg": "Need to supply an experimentId" }
+            return HttpResponse(json.dumps(output))
+
+        logger.debug("parentId is %s" % parent_folder)
 
         #TODO handle file uploads - check for error values
         print request.FILES.keys()
@@ -2023,7 +2030,7 @@ def uploadFile(request):
             print '\tuploaded file name: ', f._get_name()
             translated_name = f._get_name().replace(' ', '_')
             print '\ttranslated name: ', translated_name
-            _handle_uploaded_file(f, translated_name, experiment_id)
+            _handle_uploaded_file(f, translated_name, experiment_id, parent_folder)
             attachmentname = translated_name
         else:
             print '\tNo file attached.'
@@ -2034,19 +2041,31 @@ def uploadFile(request):
     return HttpResponse(json.dumps(output))
 
 
-def _handle_uploaded_file(f, name, experiment_id):
+def _handle_uploaded_file(f, name, experiment_id, parent_folder):
     '''Handles a file upload to the projects WRITABLE_DIRECTORY
        Expects a django InMemoryUpload object, and a filename'''
-    print '*** _handle_uploaded_file: enter ***'
+    logger.debug('*** _handle_uploaded_file: enter ***')
     retval = False
     try:
-        print 'exp is ' + experiment_id
+        logger.debug('exp is ' + experiment_id)
 
         exp = Experiment.objects.get(id=experiment_id)
         (exppath, blah) = exp.ensure_dir()
 
-        print 'writing to file: ' + exppath + os.sep + name
-        destination = open(exppath + os.sep + name, 'wb+')
+        # clean folder name
+        if parent_folder:
+            dest = os.path.join(exppath, parent_folder)
+        else:
+            dest = exppath
+
+        dest = os.path.abspath(os.path.join(dest, name))
+
+        # try to stop naughty path traversals
+        if not dest.startswith(os.path.abspath(exppath)):
+            raise PermissionDenied
+
+        logger.debug('writing to file: ' + dest)
+        destination = open(dest, 'wb+')
         for chunk in f.chunks():
             destination.write(chunk)
 
@@ -2063,8 +2082,27 @@ def _handle_uploaded_file(f, name, experiment_id):
     except Exception, e:
         retval = False
         logger.exception('Exception uploading file')
-    print '*** _handle_uploaded_file: exit ***'
+    logger.debug('*** _handle_uploaded_file: exit ***')
     return retval
+
+@mastr_users_only
+def newFolder(request):
+    if not request.POST:
+        return HttpResponseBadRequest("POST method only")
+
+    if "experiment_id" not in request.POST or "name" not in request.POST:
+        output = { "success": False, "msg": "Need to supply experiment_id and name" }
+        return HttpResponse(json.dumps(output))
+
+    try:
+        exp = Experiment.objects.get(id=request.POST["experiment_id"])
+    except Experiment.DoesNotExist:
+        output = { "success": False, "msg": "Experiment does not exist" }
+        return HttpResponse(json.dumps(output))
+    else:
+        output = { "success": True, "msg": "fixme" }
+        # fixme: make directory
+        return HttpResponse(json.dumps(output))
 
 class CSVUploadView(View):
     http_method_names = ['post']

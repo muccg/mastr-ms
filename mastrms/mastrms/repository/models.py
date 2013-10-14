@@ -205,14 +205,21 @@ class Experiment(models.Model):
                 relpath is the path, relative to the settings.REPO_FILES_ROOT
         '''
 
+        subdirs = ["Raw Data", "QC Data", "Project Background",
+                   "Data Processing", "Bioinformatics Analysis", "Report"]
+
         yearpath = os.path.join('experiments', str(self.created_on.year) )
         monthpath = os.path.join(yearpath, str(self.created_on.month) )
         exppath = os.path.join(monthpath, str(self.id) )
 
-        try:
-            ensure_repo_filestore_dir_with_owner(exppath)
-        except Exception, e:
-            print "ensure dir exception: ", e
+        subdirs = [os.path.join(exppath, subdir) for subdir in subdirs]
+
+        for dir in [exppath] + subdirs:
+            try:
+                ensure_repo_filestore_dir_with_owner(dir)
+            except Exception, e:
+                pass # the exception is already logged in the ensure function
+
         return (os.path.join(settings.REPO_FILES_ROOT, exppath), exppath)
 
 
@@ -319,10 +326,7 @@ class Sample(models.Model):
 
     def is_valid_for_run(self):
         '''Test to determine whether this sample can be used in a run'''
-        if not self.sample_class or not self.sample_class.enabled:
-            return False
-        return True
-
+        return bool(self.sample_class and self.sample_class.enabled)
 
 class RUN_STATES:
     NEW = (0, u"New")
