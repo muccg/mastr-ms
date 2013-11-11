@@ -2,6 +2,7 @@
 import grp
 import os
 from datetime import datetime, date, time
+from itertools import chain
 import logging
 from django.db import models
 from django.core.files.storage import FileSystemStorage
@@ -212,7 +213,11 @@ class Experiment(models.Model):
         monthpath = os.path.join(yearpath, str(self.created_on.month) )
         exppath = os.path.join(monthpath, str(self.id) )
 
-        subdirs = [os.path.join(exppath, subdir) for subdir in subdirs]
+        full_exppath = os.path.join(settings.REPO_FILES_ROOT, exppath)
+        existing_dirs = set(chain(*(d for r, d, f in os.walk(full_exppath))))
+
+        subdirs = [os.path.join(exppath, subdir) for subdir in subdirs
+                   if subdir not in existing_dirs]
 
         for dir in [exppath] + subdirs:
             try:
@@ -220,7 +225,7 @@ class Experiment(models.Model):
             except Exception, e:
                 pass # the exception is already logged in the ensure function
 
-        return (os.path.join(settings.REPO_FILES_ROOT, exppath), exppath)
+        return (full_exppath, exppath)
 
 
     def __unicode__(self):
