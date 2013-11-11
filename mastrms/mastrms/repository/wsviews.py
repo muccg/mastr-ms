@@ -1617,39 +1617,86 @@ def recordsSamplesForClient(request, client):
 
 @mastr_users_only
 def moveFile(request):
-
     output = {'success':'', 'newlocation':''}
 
-    if request.GET:
-        args = request.GET
-    else:
-        args = request.POST
+    if not request.POST:
+        return HttpResponseBadRequest("need to POST the request")
 
-    target = args['target']
-    fname = args['file']
+    target = request.POST.get('target', None)
+    fname = request.POST.get('file', None)
+    experiment_id = request.POST.get('experiment_id', None)
 
-    exp = Experiment.objects.get(id=args['experiment_id'])
+    if not target or not fname or experiment_id is None:
+        return HttpResponseBadRequest("need target and file params")
+
+    exp = get_object_or_404(Experiment, id=experiment_id)
     exp.ensure_dir()
 
-    exppath = exp.experiment_dir
-    pendingPath = os.path.join(settings.REPO_FILES_ROOT, 'pending', fname)
+    if target == "experimentRoot":
+        target = exp.experiment_dir
 
-    (path, filename) = os.path.split(pendingPath)
+    exppath = os.path.abspath(exp.experiment_dir)
+    source = os.path.abspath(os.path.join(exppath, fname))
+    dest = os.path.abspath(os.path.join(exppath, target))
+    dest_filename = os.path.join(dest, os.path.split(source)[1])
 
-    destpath = exppath
-    if not target == '':
-        if not target == 'experimentRoot':
-            destpath = os.path.join(destpath, target)
+    # try to prevent file system traversal attacks
+    if not source.startswith(exppath) or not dest.startswith(exppath):
+        return HttpResponseBadRequest("path is outside of experiment directory")
 
-    #see if pendingpath exists
-    if os.path.exists(pendingPath):
-        os.rename(pendingPath, os.path.join(destpath, filename) )
+    # don't allow overwriting of files
+    if not os.path.isdir(dest) or os.path.exists(dest_filename):
+        return HttpResponseBadRequest("can't overwrite %s" % dest_filename)
 
-    output['success'] = True
-    output['newlocation'] = os.path.join(exppath, filename)
+    try:
+        logger.debug("Renaming \"%s\" -> \"%s\"" % (source, dest))
+        os.rename(source, dest_filename)
+    except OSError, e:
+        logger.exception("rename didn't work")
+        output['msg'] = str(e)
+    else:
+        output['success'] = True
+        output['newlocation'] = dest
 
     return HttpResponse(json.dumps(output))
 
+@mastr_users_only
+def deleteFile(request):
+    output = {'success':False}
+
+    if not request.POST:
+        return HttpResponseBadRequest("need to POST the request")
+
+    target = request.POST.get('target', None)
+    experiment_id = request.POST.get('experiment_id', None)
+
+    if not target or experiment_id is None:
+        return HttpResponseBadRequest("need target and experiment_id params")
+
+    exp = get_object_or_404(Experiment, id=experiment_id)
+
+    if target == "experimentRoot":
+        return HttpResponseBadRequest("can't delete experiment directory");
+
+    exppath = os.path.abspath(exp.experiment_dir)
+    target = os.path.abspath(os.path.join(exppath, target))
+
+    # try to prevent file system traversal attacks
+    if not target.startswith(exppath):
+        return HttpResponseBadRequest("path is outside of experiment directory")
+
+    try:
+        if os.path.isdir(target):
+            os.rmdir(target)
+        else:
+            os.unlink(target)
+    except OSError, e:
+        logger.exception("couldn't remove file/directory", e)
+        output = {'success': False, 'msg': str(e)}
+    else:
+        output['success'] = True
+
+    return HttpResponse(json.dumps(output))
 
 @mastr_users_only
 def experimentFilesList(request):

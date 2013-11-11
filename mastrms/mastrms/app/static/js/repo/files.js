@@ -165,6 +165,66 @@ MA.Files = {
                });
 
                }
+           }, {
+               text: 'Delete',
+               id:'delete',
+               handler: function(){
+                 var tree = Ext.getCmp('filesTree');
+                 var nodes = tree.getSelectionModel().getSelectedNodes();
+                 var node = null;
+
+                 if (nodes.length == 0) {
+                   node = tree.getRootNode();
+                 } else if (nodes.length > 1) {
+                   Ext.Msg.alert("Please select just one item.",
+                                 "(this message will auto-close in 2 seconds)");
+                   window.setTimeout(function() {Ext.Msg.hide();}, 2000);
+                   return;
+                 } else {
+                   node = nodes[0];
+                 }
+
+                 var name = node.id == tree.getRootNode() ? "Experiment" : node.id;
+
+                 if (node.id == tree.getRootNode().id || node.childNodes.length > 0) {
+                   Ext.Msg.alert("Folder " + name + " is not empty.",
+                                 "(this message will auto-close in 2 seconds)");
+                   window.setTimeout(function() {Ext.Msg.hide();}, 2000);
+                   return;
+                 }
+
+                 Ext.Msg.show({
+                   title: "Are you sure?",
+                   msg: "Really delete " + name + "?",
+                   buttons: Ext.Msg.YESNO,
+                   icon: Ext.MessageBox.QUESTION,
+                   fn: function(btn) {
+                     if (btn == 'yes') {
+                       Ext.Ajax.request({
+                         method:'POST',
+                         url: wsBaseUrl + 'deleteFile',
+                         success: function() {
+                           Ext.Msg.alert("Deleted " + name, "(this message will auto-close in 1 second)");
+                           window.setTimeout(function() {Ext.Msg.hide();}, 1000);
+
+                           //reload the pending files tree
+                           tree.getLoader().clearOnLoad = true;
+                           tree.getLoader().load(Ext.getCmp('filesTree').getRootNode());
+                           tree.getRootNode().expand();
+                         },
+                         failure: function() {
+                           Ext.Msg.alert("Fail", "Could not delete " + name + ".");
+                         },
+                         params: {
+                           target: node.id,
+                           csrfmiddlewaretoken: Ext.util.Cookies.get("csrftoken_mastrms"),
+                           experiment_id: MA.ExperimentController.currentId()
+                         }
+                       });
+                     }
+                   }
+                 });
+               }
            }, { xtype: "tbseparator" },{
                text: 'Download ',
                handler: function(){
@@ -229,7 +289,7 @@ MA.Files = {
                animate: true,
                region:'center',
                enableDrop:true,
-               //enableDD: true,
+               enableDD: true,
                useArrows: true,
                dropConfig: { appendOnly: true },
                dataUrl:wsBaseUrl + 'files',
@@ -251,7 +311,7 @@ MA.Files = {
                     },
                    nodedrop: function(de) {
                         Ext.Ajax.request({
-                                         method:'GET',
+                                         method:'POST',
                                     url: wsBaseUrl + 'moveFile',
                                          success: function() { Ext.getCmp('filesTree').getLoader().load(Ext.getCmp('filesTree').getRootNode());
                                          Ext.getCmp('filesTree').getRootNode().expand(); },

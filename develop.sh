@@ -33,8 +33,10 @@ settings() {
     export DJANGO_SETTINGS_MODULE="${PROJECT_NAME}.settings"
 }
 
+VIRTUALENV="${TOPDIR}/virt_${PROJECT_NAME}"
+
 activate_virtualenv() {
-    source ${TOPDIR}/virt_${PROJECT_NAME}/bin/activate
+    source ${VIRTUALENV}/bin/activate
 }
 
 # ssh setup, make sure our ccg commands can run in an automated environment
@@ -209,22 +211,26 @@ installapp() {
     which virtualenv >/dev/null
 
     echo "Install ${PROJECT_NAME}"
-    virtualenv --system-site-packages ${TOPDIR}/virt_${PROJECT_NAME}
+    virtualenv --system-site-packages ${VIRTUALENV}
     pushd ${TOPDIR}/${PROJECT_NAME}
-    ../virt_${PROJECT_NAME}/bin/pip install ${PIP_OPTS} -e .
+    ${VIRTUALENV}/bin/pip install ${PIP_OPTS} -e .
     popd
-    ${TOPDIR}/virt_${PROJECT_NAME}/bin/pip install ${PIP_OPTS} ${MODULES}
+    ${VIRTUALENV}/bin/pip install ${PIP_OPTS} ${MODULES}
+
+    mkdir -p ${HOME}/bin
+    ln -sf ${VIRTUALENV}/bin/python ${HOME}/bin/vpython-${PROJECT_NAME}
+    ln -sf ${VIRTUALENV}/bin/django-admin.py ${HOME}/bin/${PROJECT_NAME}
 }
 
 
 # django syncdb, migrate and collect static
 syncmigrate() {
     echo "syncdb"
-    ${TOPDIR}/virt_${PROJECT_NAME}/bin/django-admin.py syncdb --noinput --settings=${DJANGO_SETTINGS_MODULE} 1> syncdb-develop.log
+    ${VIRTUALENV}/bin/django-admin.py syncdb --noinput --settings=${DJANGO_SETTINGS_MODULE} 1> syncdb-develop.log
     echo "migrate"
-    ${TOPDIR}/virt_${PROJECT_NAME}/bin/django-admin.py migrate --settings=${DJANGO_SETTINGS_MODULE} 1> migrate-develop.log
+    ${VIRTUALENV}/bin/django-admin.py migrate --settings=${DJANGO_SETTINGS_MODULE} 1> migrate-develop.log
     echo "collectstatic"
-    ${TOPDIR}/virt_${PROJECT_NAME}/bin/django-admin.py collectstatic --noinput --settings=${DJANGO_SETTINGS_MODULE} 1> collectstatic-develop.log
+    ${VIRTUALENV}/bin/django-admin.py collectstatic --noinput --settings=${DJANGO_SETTINGS_MODULE} 1> collectstatic-develop.log
 }
 
 ipaddress() {
@@ -239,18 +245,18 @@ ipaddress() {
 # start runserver
 startserver() {
     echo "Visit http://$(ipaddress eth0):${PORT}/"
-    ${TOPDIR}/virt_${PROJECT_NAME}/bin/django-admin.py runserver_plus 0.0.0.0:${PORT}
+    ${VIRTUALENV}/bin/django-admin.py runserver_plus 0.0.0.0:${PORT}
 }
 
 
 pythonversion() {
-    ${TOPDIR}/virt_${PROJECT_NAME}/bin/python -V
+    ${VIRTUALENV}/bin/python -V
 }
 
 
 pipfreeze() {
     echo "${PROJECT_NAME} pip freeze"
-    ${TOPDIR}/virt_${PROJECT_NAME}/bin/pip freeze
+    ${VIRTUALENV}/bin/pip freeze
     echo '' 
 }
 
@@ -261,7 +267,7 @@ clean() {
 
 
 purge() {
-    rm -rf ${TOPDIR}/virt_${PROJECT_NAME}
+    rm -rf ${VIRTUALENV}
     rm *.log
 }
 

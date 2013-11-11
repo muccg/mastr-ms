@@ -10,10 +10,7 @@
             "is_superuser": true,
             "is_staff": true,
             "last_login": "2012-02-15 15:02:41",
-            "groups": [
-                1,
-                2
-            ],
+            "groups": [],
             "user_permissions": [],
             "password": "sha1$a8a68$18c83f486556e36c747bb6f39f6210e260ca21ce",
             "email": "",
@@ -53,10 +50,7 @@
             "is_superuser": true,
             "is_staff": true,
             "last_login": "2012-04-15 15:02:41",
-            "groups": [
-                1,
-                2
-            ],
+            "groups": [],
             "user_permissions": [],
             "password": "sha1$a8a68$18c83f486556e36c747bb6f39f6210e260ca21ce",
             "email": "",
