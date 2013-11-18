@@ -1,6 +1,6 @@
 %define name mastrms
-%define version 1.5.1
-%define unmangled_version 1.5.1
+%define version 1.5.2
+%define unmangled_version 1.5.2
 %define release 1
 %define webapps /usr/local/webapps
 %define installdir %{webapps}/%{name}
@@ -26,8 +26,8 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Prefix: %{_prefix}
 BuildArch: x86_64
 Vendor: Centre for Comparative Genomics <web@ccg.murdoch.edu.au>
-BuildRequires: python-setuptools openldap-devel python-devel openssl-devel
-Requires: python-setuptools openldap-clients httpd mod_wsgi rsync
+BuildRequires: python-setuptools python-devel openssl-devel
+Requires: python-setuptools httpd mod_wsgi rsync
 
 %description
 MastrMS web application

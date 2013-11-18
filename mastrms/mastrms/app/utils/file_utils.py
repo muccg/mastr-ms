@@ -29,6 +29,8 @@ def ensure_repo_filestore_dir_with_owner(relpath, ownerid=os.getuid(), groupname
         logger.critical('Exception in ensure_repo_filestore_dir_with_owner: %s' % (e))
         raise
 
+    clean_temp_files(abspath)
+
 def set_repo_file_ownerships(filepath, ownerid=os.getuid(), groupname=settings.CHMOD_GROUP):
     try:
         groupinfo = grp.getgrnam(groupname)
@@ -52,3 +54,20 @@ def set_repo_file_ownerships(filepath, ownerid=os.getuid(), groupname=settings.C
         return False
 
     return True
+
+def clean_temp_files(repodir):
+    """
+    Just in case the client happens to upload temp files, get rid of
+    them here.
+    """
+    targets = set(["TEMPBASE", "TEMPDAT", "TEMPDIR"])
+    istemp = lambda f: f in targets
+
+    for root, dirs, files in os.walk(repodir):
+        for name in filter(istemp, files):
+            path = os.path.join(root, name)
+            logger.info("Deleting temp file %s" % path)
+            try:
+                os.remove(path)
+            except EnvironmentError, e:
+                logger.error(e)
