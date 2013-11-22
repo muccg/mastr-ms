@@ -5,6 +5,7 @@ import csv
 import logging
 from decimal import Decimal, DecimalException
 from datetime import datetime, timedelta
+from itertools import groupby
 from django.db import transaction
 from django.db.models import get_model, Q
 from django.core import urlresolvers
@@ -713,78 +714,52 @@ def recordsClientList(request):
     return HttpResponse(json.dumps(output))
 
 def recordsClientFiles(request):
+    args = request.GET
 
-    if request.GET:
-        args = request.GET
-    else:
-        args = request.POST
+    if not args:
+        return HttpResponseBadRequest("need to use a GET request")
+
+    root = 'dashboardFilesRoot'
+    node = args.get('node', root)
 
     # basic json that we will fill in
     output = []
 
-    if args.get('node','dashboardFilesRoot') == 'dashboardFilesRoot':
-        print 'node is dashboardFilesRoot'
+    if node == root:
         rows = ClientFile.objects.filter(experiment__users=request.user).order_by('experiment')
 
         # add rows
-        current_exp = {}
-        current_exp['id'] = None
-        for row in rows:
-            # compare current exp
-            if row.experiment.id != current_exp['id']:
-                if current_exp['id'] != None:
-                    output.append(current_exp)
-                current_exp = {}
-                current_exp['id'] = row.experiment.id
-                current_exp['text'] = 'Experiment: ' + row.experiment.title
-                current_exp['leaf'] = False
-                current_exp['metafile'] = True
-                current_exp['children'] = []
+        for exp, client_files in groupby(rows, lambda f: f.experiment):
+            (abspath, exppath) = exp.ensure_dir()
 
-            file = {}
-            file['text'] = row.filepath
+            def file_entry(client_file):
+                return {
+                    'text': client_file.filepath,
+                    'leaf': not os.path.isdir(os.path.join(abspath, client_file.filepath)),
+                    'id': client_file.id,
+                }
 
-            (abspath, exppath) = row.experiment.ensure_dir()
-
-            filepath = abspath + os.sep + row.filepath
-
-            print filepath
-
-            if os.path.isdir(filepath):
-                file['leaf'] = False
-            else:
-                file['leaf'] = True
-            file['id'] = row.id
-
-            current_exp['children'].append(file)
-
-        if current_exp['id'] != None:
-            output.append(current_exp)
-
-        return HttpResponse(json.dumps(output))
+            output.append({
+                'id': exp.id,
+                'text': 'Experiment: %s' % exp.title,
+                'leaf': False,
+                'metafile': True,
+                'children': map(file_entry, client_files),
+            })
     else:
         # parse the node id as something useful
         # it will be in the format: id/path/path
+        fileid, path = node.split("/", 1) if "/" in node else (node, "")
 
-        print args.get('node')
-        pathbits = args.get('node').split('/')
+        baseFile = get_object_or_404(ClientFile, id=fileid, experiment__users=request.user)
 
-        print 'pathbits[0] is ' + pathbits[0]
+        (abspath, exppath) = baseFile.experiment.ensure_dir()
 
-        baseFile = ClientFile.objects.get(id=pathbits[0],experiment__users=request.user)
+        joinedpath = os.path.join(baseFile.filepath, path)
 
-        if baseFile is not None:
-            (abspath, exppath) = baseFile.experiment.ensure_dir()
+        output = _fileList(abspath, joinedpath, replacementBasepath=str(baseFile.id))
 
-            joinedpath = baseFile.filepath + os.sep + os.sep.join(pathbits[1:])
-
-            print 'joinedPath is ' + joinedpath
-            print 'abspath is ' + abspath
-
-            return _fileList(request, abspath + os.sep, joinedpath, False, [], str(baseFile.id))
-        else:
-            return HttpResponse(json.dumps([]))
-
+    return HttpResponse(json.dumps(output))
 
 @mastr_users_only
 def populate_select(request, model=None, key=None, value=None, field=None, match=None):
@@ -1700,156 +1675,99 @@ def deleteFile(request):
 
 @mastr_users_only
 def experimentFilesList(request):
+    args = request.GET
 
-    if request.GET:
-        args = request.GET
-    else:
-        args = request.POST
+    if not (args and 'node' in args and 'experiment' in args):
+        return HttpResponseBadRequest("need 'node' and 'experiment' args in a GET request")
 
     path = args['node']
 
     if path == 'experimentRoot':
         path = ''
 
-    if not 'experiment' in args or args['experiment'] == '0':
-        logger.error("invalid experiment: %s" % args.get("experiment", None))
-        return HttpResponse('[]')
+    exp = get_object_or_404(Experiment, id=args['experiment'])
 
-    exp = Experiment.objects.get(id=args['experiment'])
     exp.ensure_dir()
+    sharedList = set(exp.clientfile_set.values_list("filepath", flat=True))
+    files = _fileList(exp.experiment_dir, path, sharedList)
 
-    exppath = exp.experiment_dir
-
-    sharedList = ClientFile.objects.filter(experiment=exp)
-    print sharedList
-    return _fileList(request, exppath, path, True, sharedList)
+    return HttpResponse(json.dumps(files))
 
 
 @mastr_users_only
 def runFilesList(request):
+    args = request.GET
 
-    if request.GET:
-        args = request.GET
-    else:
-        args = request.POST
+    if not (args and 'node' in args and 'run' in args):
+        return HttpResponseBadRequest("need 'node' and 'run' args in a GET request")
 
     path = args['node']
 
     if path == 'runsRoot':
         path = ''
 
-    if not 'run' in args or args['run'] == '0':
-        print 'invalid run'
-        return HttpResponse('[]')
+    run = get_object_or_404(Run, id=args['run'])
 
-    run = Run.objects.get(id=args['run'])
-    (abspath, relpath) = run.ensure_dir()
+    (runpath, relpath) = run.ensure_dir()
 
-    runpath = abspath + os.sep
+    files = _fileList(runpath, path)
 
-    print 'outputting file listing for ' + runpath + ' ' + path
+    return HttpResponse(json.dumps(files))
 
-    return _fileList(request, runpath, path, False, [])
+def _fileList(basepath, subdir="", sharedList=None, replacementBasepath=None):
+    """
+    Returns a list of filenames in the directory basepath/subdir.
+    The list of filenames are not prefixed with basepath.
 
+    If sharedList is given, then files which appear in that list will
+    get the "checked" property.
 
-@mastr_users_only
-def pendingFilesList(request):
-
-    if request.GET:
-        args = request.GET
-    else:
-        args = request.POST
-
-    nodepath = args['node']
-
-    if nodepath == 'pendingRoot':
-        nodepath = ''
-
-    pendingpath = os.path.join(settings.REPO_FILES_ROOT, 'pending')
-    ensure_repo_filestore_dir_with_owner(os.path.join('pending', nodepath))
-
-    return _fileList(request, pendingpath, nodepath, False, [])
-
-
-@mastr_users_only
-def _fileList(request, basepath, path, withChecks, sharedList, replacementBasepath = None):
+    If replacementBasepath is given, the returned list will have IDs
+    starting with that instead of subdir.
+    """
+    logger.debug("_filelist(%r, %r, %r, %r)" % (basepath, subdir, sharedList, replacementBasepath))
 
     output = []
 
+    basepath = os.path.abspath(basepath)
+    files_dir = os.path.join(basepath, subdir)
+
     #verify that there is no up-pathing hack happening
-    if len(os.path.abspath(basepath)) > len(os.path.commonprefix((basepath, os.path.abspath(basepath + path)))):
-        return HttpResponse(json.dumps(output))
+    if not files_dir.startswith(basepath) or not os.path.isdir(files_dir):
+        return []
 
-    if not os.path.exists(os.path.join(basepath, path)):
-        return HttpResponse('[]')
-
-    files = os.listdir(os.path.join(basepath,path))
-    files.sort()
-
-    for filename in files:
-        filepath = os.path.join(basepath, filename)
-        if not path == '':
-            filepath = os.path.join(basepath, path, filename)
+    for filename in sorted(os.listdir(files_dir)):
+        filepath = os.path.join(files_dir, filename)
 
         if os.access(filepath, os.R_OK):
-            file = {}
-            file['text'] = filename
-            if os.path.isdir(filepath):
-                file['leaf'] = False
-            else:
-                file['leaf'] = True
-            file['id'] = filename
+            entry = {
+                'text': filename,
+                'leaf': not os.path.isdir(filepath),
+                'id': os.path.join(replacementBasepath or subdir, filename),
+            }
+            if sharedList is not None:
+                entry["checked"] = entry["id"] in sharedList
+            output.append(entry)
 
-            if not path == '':
-                file['id'] = os.path.join(path, filename)
-                if replacementBasepath is not None:
-                    file['id'] = os.path.join(replacementBasepath, filename)
-            if withChecks:
-                file['checked'] = False
-
-                for cf in sharedList:
-                    import unicodedata as ud
-                    import sys
-
-                    try:
-                        a = ud.normalize('NFD',unicode(file['id'], sys.getfilesystemencoding(), errors="ignore"))
-                    except:
-                        a = ud.normalize('NFD',unicode(file['id'].encode('iso-8859-1'), encoding='iso-8859-1', errors="ignore"))
-
-                    b = ud.normalize('NFD',unicode(cf.filepath.encode('iso-8859-1'), encoding='iso-8859-1', errors="ignore"))
-
-                    if a == b:
-                        file['checked'] = True
-
-            output.append(file)
-
-    return HttpResponse(json.dumps(output))
+    return output
 
 @mastr_users_only
 def shareFile(request, *args):
-    print 'shareFile:', str('')
-
     args = request.POST
 
     file = args['file']
-    checked = args['checked']
+    checked = args['checked'] == 'true'
 
-    exp = Experiment.objects.get(id=args['experiment_id'])
+    exp = get_object_or_404(Experiment, id=args['experiment_id'])
     exp.ensure_dir()
 
-    if checked == 'true':
-        try:
-            client_file = ClientFile.objects.get(filepath=file, experiment=exp)
-        except:
-            client_file = ClientFile.objects.create(filepath=file, experiment=exp, sharedby=request.user)
+    if checked:
+        client_file, created = ClientFile.objects.get_or_create(filepath=file, experiment=exp,
+                                                                defaults={"sharedby": request.user})
         client_file.sharedby=request.user
         client_file.save()
     else:
-        try:
-            client_file = ClientFile.objects.get(filepath=file, experiment=exp)
-            client_file.delete()
-        except:
-            pass
+        client_file = ClientFile.objects.filter(filepath=file, experiment=exp).delete()
 
     return HttpResponse(json.dumps({'success':True}))
 
