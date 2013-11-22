@@ -17,14 +17,14 @@
 
 MA.Dashboard.CreatePendingUserRequests = function() {
     var dataurl = MA.BaseUrl + "admin/adminrequests";
-    var selectionModel = new Ext.grid.RowSelectionModel({ 
+    var selectionModel = new Ext.grid.RowSelectionModel({
         singleSelect: true
     });
     var madasReader = new Ext.data.JsonReader({
             root: 'response.value.items',
             versionProperty: 'response.value.version',
             totalProperty: 'response.value.total_count'
-        }, 
+        },
         [
             { name: 'isClient', sortType : Ext.data.SortTypes.asText },
             { name: 'username', sortType : Ext.data.SortTypes.asText },
@@ -102,7 +102,7 @@ MA.Dashboard.CreatePendingUserRequests = function() {
    };
 
 MA.Dashboard.CreateQuotesRequiringAttention = function() {
-    var selectionModel = new Ext.grid.RowSelectionModel({ 
+    var selectionModel = new Ext.grid.RowSelectionModel({
         singleSelect: true
     });
     var madasReader = new Ext.data.JsonReader({
@@ -216,7 +216,7 @@ MA.Dashboard.CreateQuotesRequiringAttention = function() {
    };
 
 MA.Dashboard.CreateRecentProjects = function() {
-    var selectionModel = new Ext.grid.RowSelectionModel({ 
+    var selectionModel = new Ext.grid.RowSelectionModel({
         singleSelect: true
     });
     var madasReader = new Ext.data.JsonReader({
@@ -264,7 +264,7 @@ MA.Dashboard.CreateRecentProjects = function() {
                 reader     : madasReader,
                 url        : dataurl
             }),
-            sm: selectionModel, 
+            sm: selectionModel,
             listeners: {
                 rowdblclick: function(grid, rowIndex, evt) {
                     var record = grid.store.getAt(rowIndex);
@@ -294,7 +294,7 @@ MA.Dashboard.CreateRecentProjects = function() {
 
 
 MA.Dashboard.CreateRecentExperiments = function() {
-    var selectionModel = new Ext.grid.RowSelectionModel({ 
+    var selectionModel = new Ext.grid.RowSelectionModel({
         singleSelect: true
     });
     var madasReader = new Ext.data.JsonReader({
@@ -316,7 +316,7 @@ MA.Dashboard.CreateRecentExperiments = function() {
             editExperiment(selectionModel.getSelected().data.id);
         }
     };
-    
+
     MA.LoadMachineAndRuleGeneratorDatastores();
 
     var toolbar = new Ext.Toolbar({
@@ -344,7 +344,7 @@ MA.Dashboard.CreateRecentExperiments = function() {
                 reader     : madasReader,
                 url        : dataurl
             }),
-            sm: selectionModel, 
+            sm: selectionModel,
             listeners: {
                 rowdblclick: function(grid, rowIndex, evt) {
                     var record = grid.store.getAt(rowIndex);
@@ -372,7 +372,7 @@ MA.Dashboard.CreateRecentExperiments = function() {
    };
 
 MA.Dashboard.CreateRecentRuns = function() {
-    var selectionModel = new Ext.grid.RowSelectionModel({ 
+    var selectionModel = new Ext.grid.RowSelectionModel({
         singleSelect: true
     });
     var madasReader = new Ext.data.JsonReader({
@@ -420,7 +420,7 @@ MA.Dashboard.CreateRecentRuns = function() {
                         reader     : madasReader,
                         url        : dataurl
                     }),
-                    sm: selectionModel, 
+                    sm: selectionModel,
                     columns: [
                         {
                             header: 'ID',
@@ -459,7 +459,9 @@ MA.Dashboard.CreateRecentRuns = function() {
 
 MA.Dashboard.CreateAvailableFiles = function() {
     var downloadClientFile = function(fileID) {
-        window.location = MA.BaseUrl + "ws/downloadClientFile/" + fileID;
+      if (fileID.toString().substr(0, 5) !== "xnode") {
+          window.location = MA.BaseUrl + "ws/downloadClientFile/" + fileID;
+      }
     };
 
     return new Ext.Panel({
@@ -486,7 +488,8 @@ MA.Dashboard.CreateAvailableFiles = function() {
                        text: 'Files',
                        draggable: false,
                        id: 'dashboardFilesRoot',
-                       'metafile': true
+                       expanded: true,
+                       metafile: true
                    },
                    selModel: new Ext.tree.DefaultSelectionModel(
                        { listeners:
@@ -520,7 +523,7 @@ MA.Dashboard.CreateToolbar = function() {
             handler: function() {
                     var dashboard = Ext.getCmp('dashboard-panel');
                     dashboard.init();
-                }    
+                }
             }]
     };
 };
@@ -592,7 +595,6 @@ MA.Dashboard.Create = function() {
     if (MA.CurrentUser.IsAdmin || MA.CurrentUser.IsNodeRep) {
         return MA.Dashboard.CreateAdminDashboard();
     } else if (MA.CurrentUser.IsClient) {
-        console.log("client detected");
         return MA.Dashboard.CreateClientDashboard();
     } else {
         return MA.Dashboard.CreateStaffDashboard();
@@ -612,4 +614,3 @@ MA.Dashboard.Init = function(){
         Ext.getCmp('dashboard-panel').init();
     }
 };
-

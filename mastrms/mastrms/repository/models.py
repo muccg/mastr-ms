@@ -208,8 +208,6 @@ class Experiment(models.Model):
         Creates all the experiment storage directories if they don't
         exist, and sets their permissions.
         """
-        folder_map = [("experiments", "Raw Data"), ("runs", "QC Data")]
-
         other_dirs = ["Project Background", "Data Processing", "Bioinformatics Analysis", "Report"]
 
         # filter the other_dirs to remove ones which exist somewhere
@@ -229,18 +227,28 @@ class Experiment(models.Model):
 
     def get_file_path(self, filename):
         "Returns the full path of an experiment file"
-        exp_dir = os.path.abspath(self.experiment_dir)
-        file_path = os.path.abspath(os.path.join(exp_dir, filename))
+        exp_dir = self.experiment_dir
+        return safe_path_join(exp_dir, filename) or exp_dir
 
-        if not file_path.startswith(exp_dir):
-            # Can't get files from outside of experiment directory.
-            # Make up a name within the experiment directory.
-            file_path = os.path.join(exp_dir, os.path.basename(filename))
-
-        return file_path
+    def get_other_file_path(self, filename):
+        "Returns the full path of a file"
+        other_dir = self.other_files_dir
+        return safe_path_join(other_dir, filename) or other_dir
 
     def __unicode__(self):
         return self.title
+
+def safe_path_join(base, filename, alternative=None):
+    """Joins a relative path with a base directory, preventing the result
+    from being outside of the base tree."""
+    abs_base = os.path.abspath(base)
+    file_path = os.path.abspath(os.path.join(abs_base, filename))
+
+    if file_path.startswith(abs_base):
+        return file_path
+    else:
+        # Can't get files from outside of base directory.
+        return alternative
 
 sopdir = 'sops'
 sopfs = FileSystemStorage(location=os.path.join(settings.REPO_FILES_ROOT, sopdir))
@@ -453,15 +461,8 @@ class Run(models.Model):
 
     def get_file_path(self, filename):
         "Returns the full path of a run file"
-        run_dir = os.path.abspath(self.run_dir)
-        file_path = os.path.abspath(os.path.join(run_dir, filename))
-
-        if not file_path.startswith(run_dir):
-            # Can't get files from outside of runs directory.
-            # Make up a name within the runs directory.
-            file_path = os.path.join(run_dir, os.path.basename(filename))
-
-        return file_path
+        run_dir = self.run_dir
+        return safe_path_join(run_dir, filename) or run_dir
 
     def is_method_type_individual_vial(self):
         return (self.order_of_methods == 2)
