@@ -726,16 +726,15 @@ def recordsClientFiles(request):
     output = []
 
     if node == root:
-        rows = ClientFile.objects.filter(experiment__users=request.user).order_by('experiment')
+        rows = ClientFile.objects.filter(experiment__users=request.user)
+        rows = rows.exclude(filepath__contains="/").order_by("experiment")
 
         # add rows
         for exp, client_files in groupby(rows, lambda f: f.experiment):
-            (abspath, exppath) = exp.ensure_dir()
-
             def file_entry(client_file):
                 return {
                     'text': client_file.filepath,
-                    'leaf': not os.path.isdir(os.path.join(abspath, client_file.filepath)),
+                    'leaf': not os.path.isdir(exp.get_file_path(client_file.filepath)),
                     'id': client_file.id,
                 }
 
@@ -752,12 +751,9 @@ def recordsClientFiles(request):
         fileid, path = node.split("/", 1) if "/" in node else (node, "")
 
         baseFile = get_object_or_404(ClientFile, id=fileid, experiment__users=request.user)
-
-        (abspath, exppath) = baseFile.experiment.ensure_dir()
-
+        exp_dir = baseFile.experiment.ensure_dir()
         joinedpath = os.path.join(baseFile.filepath, path)
-
-        output = _fileList(abspath, joinedpath, replacementBasepath=str(baseFile.id))
+        output = _fileList(exp_dir, joinedpath, replacementBasepath=str(baseFile.id))
 
     return HttpResponse(json.dumps(output))
 
@@ -1605,19 +1601,13 @@ def moveFile(request):
         return HttpResponseBadRequest("need target and file params")
 
     exp = get_object_or_404(Experiment, id=experiment_id)
-    exp.ensure_dir()
 
     if target == "experimentRoot":
-        target = exp.experiment_dir
+        target = ""
 
-    exppath = os.path.abspath(exp.experiment_dir)
-    source = os.path.abspath(os.path.join(exppath, fname))
-    dest = os.path.abspath(os.path.join(exppath, target))
+    source = exp.get_file_path(fname)
+    dest = exp.get_file_path(target)
     dest_filename = os.path.join(dest, os.path.split(source)[1])
-
-    # try to prevent file system traversal attacks
-    if not source.startswith(exppath) or not dest.startswith(exppath):
-        return HttpResponseBadRequest("path is outside of experiment directory")
 
     # don't allow overwriting of files
     if not os.path.isdir(dest) or os.path.exists(dest_filename):
@@ -1653,12 +1643,7 @@ def deleteFile(request):
     if target == "experimentRoot":
         return HttpResponseBadRequest("can't delete experiment directory");
 
-    exppath = os.path.abspath(exp.experiment_dir)
-    target = os.path.abspath(os.path.join(exppath, target))
-
-    # try to prevent file system traversal attacks
-    if not target.startswith(exppath):
-        return HttpResponseBadRequest("path is outside of experiment directory")
+    target = exp.get_file_path(target)
 
     try:
         if os.path.isdir(target):
@@ -1687,9 +1672,8 @@ def experimentFilesList(request):
 
     exp = get_object_or_404(Experiment, id=args['experiment'])
 
-    exp.ensure_dir()
     sharedList = set(exp.clientfile_set.values_list("filepath", flat=True))
-    files = _fileList(exp.experiment_dir, path, sharedList)
+    files = _fileList(exp.ensure_dir(), path, sharedList)
 
     return HttpResponse(json.dumps(files))
 
@@ -1708,7 +1692,7 @@ def runFilesList(request):
 
     run = get_object_or_404(Run, id=args['run'])
 
-    (runpath, relpath) = run.ensure_dir()
+    runpath = run.ensure_dir()
 
     files = _fileList(runpath, path)
 
@@ -1780,7 +1764,7 @@ def normalise_files(exp, files):
     if 'experimentRoot' in files:
         files[files.index('experimentRoot')] = ''
     # Add full path for every file
-    files = [os.path.join(exp.experiment_dir, f) for f in files]
+    files = map(exp.get_file_path, files)
     # If a parent dir has been selected we want to avoid adding subdirs and files included in it
     dirs = [f + os.path.sep if not f.endswith(os.path.sep) else f for f in files if os.path.isdir(f)]
     # Add each item that isn't contained in a dir
@@ -1794,7 +1778,7 @@ def normalise_files(exp, files):
 def packageFilesForDownload(request):
     args = request.REQUEST
 
-    exp = Experiment.objects.get(id=args['experiment_id'])
+    exp = get_object_or_404(Experiment, id=args['experiment_id'])
     exp.ensure_dir()
 
     package_type = args.get('package_type')
@@ -1838,30 +1822,22 @@ def downloadPackage(request):
 
 @mastr_users_only
 def downloadFile(request, *args):
-    print 'downloadFile:', str('')
-
     args = request.REQUEST
 
-    file = args['file']
-
-    exp = Experiment.objects.get(id=args['experiment_id'])
+    exp = get_object_or_404(Experiment, id=args['experiment_id'])
     exp.ensure_dir()
 
-    filename = os.path.join(settings.REPO_FILES_ROOT, 'experiments', str(exp.created_on.year), str(exp.created_on.month), str(exp.id), file)
-    from django.core.servers.basehttp import FileWrapper
-    from django.http import HttpResponse
+    filename = exp.get_file_path(args['file'])
 
-    pathbits = filename.split('/')
-
-    lastbit = pathbits[-1]
+    name = os.path.basename(filename)
 
     if os.path.isdir(filename):
-        tmpfilename = "/tmp/madas-zip-"+lastbit
+        tmpfilename = "/tmp/madas-zip-"+name
         zipdir(filename, tmpfilename)
         filename = tmpfilename
-        lastbit = lastbit + ".zip"
+        name = name + ".zip"
 
-    return fileDownloadResponse(filename, lastbit)
+    return fileDownloadResponse(filename, name)
 
 @mastr_users_only
 def downloadSOPFileById(request, sop_id):
@@ -1885,8 +1861,6 @@ def downloadSOPFile(request, sop_id, filename):
     return response
 
 def downloadClientFile(request, filepath):
-    print 'downloadClientFile:', str('')
-
     pathbits = filepath.split('/')
 
     file_id = pathbits[0]
@@ -1899,10 +1873,7 @@ def downloadClientFile(request, filepath):
     exp = cf.experiment
     exp.ensure_dir()
 
-
-    (abspath, exppath) = cf.experiment.ensure_dir()
-
-    joinedpath = os.path.join(abspath, cf.filepath)
+    joinedpath = exp.get_file_path(cf.filepath)
     if len(pathbits) > 1:
         joinedpath = joinedpath + os.sep + os.sep.join(pathbits[1:])
 
@@ -1937,32 +1908,25 @@ def downloadClientFile(request, filepath):
         return response
 
 def downloadRunFile(request):
-    print 'downloadFile:', str('')
-
     args = request.REQUEST
 
-    file = args['file']
-    lastbit = file.split('/')[-1]
+    run = get_object_or_404(Run, id=args['run_id'])
+    run.ensure_dir()
 
-    run = Run.objects.get(id=args['run_id'])
-    (abspath, relpath) = run.ensure_dir()
+    filename = run.get_file_path(args['file'])
+    name = os.path.basename(filename)
 
-    filename = os.path.join(abspath, file)
-
-    print 'download run file: ' + filename
+    logger.debug('download run file: ' + filename)
 
     if os.path.isdir(filename):
-        tmpfilename = "/tmp/madas-zip-"+lastbit
+        tmpfilename = "/tmp/madas-zip-"+name
         zipdir(filename, tmpfilename)
         filename = tmpfilename
-        lastbit = lastbit + ".zip"
-
-    from django.core.servers.basehttp import FileWrapper
-    from django.http import HttpResponse
+        name += ".zip"
 
     from django.core.files import File
     wrapper = File(open(filename, "rb"))
-    content_disposition = 'attachment;  filename=\"%s\"' % (str(lastbit))
+    content_disposition = 'attachment;  filename=\"%s\"' % name
     response = HttpResponse(wrapper, content_type='application/download')
     response['Content-Disposition'] = content_disposition
     response['Content-Length'] = os.path.getsize(filename)
@@ -2015,11 +1979,11 @@ def _handle_uploaded_file(f, name, experiment_id, parent_folder):
         logger.debug('exp is ' + experiment_id)
 
         exp = Experiment.objects.get(id=experiment_id)
-        (exppath, blah) = exp.ensure_dir()
+        exppath = exp.ensure_dir()
 
         # clean folder name
         if parent_folder:
-            dest = os.path.join(exppath, parent_folder)
+            dest = exp.get_file_path(parent_folder)
         else:
             dest = exppath
 
