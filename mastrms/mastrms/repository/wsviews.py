@@ -1775,15 +1775,16 @@ def real_file_path(experiment, path):
         return experiment.get_file_path(path or "")
     def get_run_path(path, runid):
         return experiment.run_set.get(id=runid).get_file_path(path or "")
-    # def get_all_runs_path(prefix):
-    #     return os.path.join(settings.REPO_FILES_ROOT, "runs")
+    def get_all_runs_path():
+        #return os.path.join(settings.REPO_FILES_ROOT, "runs")
+        return None
     def get_other_path(path):
         return experiment.get_other_file_path(path or "")
 
     paths = [
         (r"^Raw Data(/(?P<path>.*))?", get_experiment_path),
-        (r"^QC Data/(?P<runid>\w+)(/(?P<path>.*))?", get_run_path),
-        #(r"^QC Data$", get_all_runs_path),
+        (r"^QC Data/(?P<runid>\d+)(/(?P<path>.*))?", get_run_path),
+        (r"^QC Data$", get_all_runs_path),
         (r"^(?P<path>.*)", get_other_path),
     ]
 
@@ -2138,9 +2139,14 @@ def newFolder(request):
     if not request.POST:
         return HttpResponseBadRequest("POST method only")
 
-    if "experiment_id" not in request.POST or "name" not in request.POST:
+    if "experiment_id" not in request.POST or not request.POST.get("name", None):
         output = { "success": False, "msg": "Need to supply experiment_id and name" }
         return HttpResponse(json.dumps(output))
+
+    parent = request.POST.get("parent", "")
+    name = request.POST["name"]
+    if parent:
+        name = os.path.join(parent, name)
 
     try:
         exp = Experiment.objects.get(id=request.POST["experiment_id"])
@@ -2148,8 +2154,18 @@ def newFolder(request):
         output = { "success": False, "msg": "Experiment does not exist" }
         return HttpResponse(json.dumps(output))
     else:
-        output = { "success": True, "msg": "fixme" }
-        # fixme: make directory
+        path = real_file_path(exp, name)
+        if path:
+            try:
+                os.mkdir(path)
+            except OSError, e:
+                logger.exception("Couldn't create new folder")
+                output = { "success": False, "msg": str(e) }
+            else:
+                output = { "success": True }
+        else:
+            output = { "success": False, "msg": "Can't create a folder here." }
+
         return HttpResponse(json.dumps(output))
 
 class CSVUploadView(View):

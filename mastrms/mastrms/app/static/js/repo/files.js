@@ -124,9 +124,16 @@ MA.Files = {
                      Ext.Ajax.request({
                        method:'POST',
                        url: wsBaseUrl + 'newFolder',
-                       success: function() {
-                         Ext.Msg.alert("Folder Created", "(this message will auto-close in 1 second)");
-                         window.setTimeout(function() {Ext.Msg.hide();}, 1000);
+                       success: function(response) {
+                         var result = Ext.util.JSON.decode(response.responseText);
+                         if (result.success) {
+                           Ext.Msg.alert("Folder Created", "(this message will auto-close in 1 second)");
+                           window.setTimeout(function() {Ext.Msg.hide();}, 1000);
+                         } else {
+                           Ext.Msg.alert("Could not create the folder here",
+                                         "(this message will auto-close in 2 seconds)");
+                           window.setTimeout(function() {Ext.Msg.hide();}, 2000);
+                         }
 
                          //reload the pending files tree
                          tree.getLoader().clearOnLoad = true;
@@ -137,31 +144,13 @@ MA.Files = {
                          Ext.Msg.alert("Fail", "Could not create the folder.");
                        },
                        params: {
-                         parent: node.id,
-                         name: name,
-                         csrfmiddlewaretoken: Ext.util.Cookies.get("csrftoken_mastrms"),
-                         experiment_id: MA.ExperimentController.currentId()
+                         parent: node.id === tree.getRootNode().id ? '' : node.id,
+                         name: text,
+                         experiment_id: MA.ExperimentController.currentId(),
+                         csrfmiddlewaretoken: Ext.util.Cookies.get("csrftoken_mastrms")
                        }
                      });
                    }
-
-                   Ext.getCmp('pendingFileUpload').getForm().submit(
-                   {   successProperty: 'success',
-                       success: function (form, action) {
-                           if (action.result.success === true) {
-                               form.reset();
-
-                               //reload the pending files tree
-                               Ext.getCmp('filesTree').getLoader().load(Ext.getCmp('filesTree').getRootNode());
-                               Ext.getCmp('filesTree').getRootNode().expand();
-
-                           }
-                       },
-                       failure: function (form, action) {
-                           //do nothing special. this gets called on validation failures and server errors
-                           alert('error submitting form\n' + action.response );
-                       }
-                   });
                });
 
                }
