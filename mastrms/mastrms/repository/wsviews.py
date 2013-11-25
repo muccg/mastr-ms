@@ -1672,6 +1672,18 @@ def moveFile(request):
         logger.exception("rename didn't work")
         output['msg'] = str(e)
     else:
+        # rename the shared client files as well
+        for client_file in exp.clientfile_set.filter(filepath__startswith=fname):
+            endpart = client_file.filepath[len(os.path.dirname(fname)):].lstrip("/")
+            filepath = os.path.join(target, endpart).lstrip("/")
+            logger.debug("rename ClientFile %r -> %r" % (client_file.filepath, filepath))
+            if os.path.exists(real_file_path(exp, filepath)):
+                client_file.filepath = filepath
+                client_file.save()
+            else:
+                logger.debug(" -> doesn't exist!")
+                client_file.delete()
+
         output['success'] = True
         output['newlocation'] = dest
 
@@ -1695,17 +1707,20 @@ def deleteFile(request):
     if target == "experimentRoot":
         return HttpResponseBadRequest("can't delete experiment directory");
 
-    target = real_file_path(exp, target)
+    file_path = real_file_path(exp, target)
 
     try:
-        if os.path.isdir(target):
-            os.rmdir(target)
+        if os.path.isdir(file_path):
+            os.rmdir(file_path)
         else:
-            os.unlink(target)
+            os.unlink(file_path)
     except OSError, e:
         logger.exception("couldn't remove file/directory", e)
         output = {'success': False, 'msg': str(e)}
     else:
+        # delete the shared files entries as well
+        exp.clientfile_set.filter(filepath=target).delete()
+
         output['success'] = True
 
     return HttpResponse(json.dumps(output))

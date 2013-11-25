@@ -584,6 +584,9 @@ class ClientFile(models.Model):
     sharetimestamp = models.DateTimeField(auto_now=True)
     sharedby = models.ForeignKey(User)
 
+    def __unicode__(self):
+        return "Experiment \"%s\" file %s" % (self.experiment.title, self.filepath)
+
 class InstrumentSOP(models.Model):
     title = models.CharField(max_length=255)
     enabled = models.BooleanField(default=True)
