@@ -2199,7 +2199,6 @@ class CSVUploadViewFile(CSVUploadView):
                    "num_created": 0,
                    "num_updated": 0 }
 
-
         for sid, label, weight, comment in _read_uploaded_sample_csv(csvfile, output):
             # If a valid sample id is provided, try to update exising
             # sample, otherwise create a new one.
@@ -2212,7 +2211,8 @@ class CSVUploadViewFile(CSVUploadView):
                 output["num_created"] += 1
 
             s.label = label
-            s.weight = weight
+            if weight is not None:
+                s.weight = weight
             s.comment = comment
             s.experiment = experiment
             s.save()
@@ -2291,8 +2291,9 @@ def _read_uploaded_sample_csv(csvfile, output):
     This generates (sample_id, label, weight, comment) triples from
     the CSV text.
     """
+    maybe_decimal = lambda v: Decimal(v) if v else None
     required = ["LABEL", "WEIGHT", "COMMENT"]
-    cleanup = lambda label, weight, comment: (label, Decimal(weight), comment)
+    cleanup = lambda label, weight, comment: (label, maybe_decimal(weight), comment)
     return _read_csv(csvfile, output, required, cleanup)
 
 def _read_csv(csvfile, output, column_names, convert_fn):
