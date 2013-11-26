@@ -2,9 +2,11 @@ import os, stat
 import copy
 import io
 import csv
+import re
 import logging
 from decimal import Decimal, DecimalException
 from datetime import datetime, timedelta
+from itertools import groupby, chain
 from django.db import transaction
 from django.db.models import get_model, Q
 from django.core import urlresolvers
@@ -712,79 +714,100 @@ def recordsClientList(request):
     output = makeJsonFriendly(output)
     return HttpResponse(json.dumps(output))
 
+def _merge_duplicate_entries(entries):
+    "Merges duplicate folders within an extjs node tree."
+    merged = []
+    text = lambda e: e["text"]
+    entries.sort(key=text)
+    for k, items in groupby(entries, text):
+        items = list(items)
+        head = items[0]
+        children = list(chain(*(item.get("children", []) or [] for item in items)))
+        head["children"] = _merge_duplicate_entries(children) if children else None
+        merged.append(head)
+    return merged
+
+def _client_files_subtree(client_files, path):
+    """
+    Produces an extjs node tree for the client_files queryset, within
+    the subtree given by path.
+    """
+    entries = []
+    client_files = client_files.filter(filepath__startswith=path)
+
+    for client_file in client_files:
+        text = client_file.filepath[len(path):]
+        subfiles = client_files.filter(filepath__startswith=client_file.filepath + "/")
+        if "/" not in text:
+            filepath = real_file_path(client_file.experiment, client_file.filepath)
+            entries.append({
+                'text': text,
+                'leaf': filepath is not None and not os.path.isdir(filepath),
+                'id': client_file.id,
+            })
+        elif not subfiles.exists():
+            # create parent folders for this entry
+            entry = None
+            for part in reversed(client_file.filepath[len(path):].split("/")):
+                entry = {
+                    'id': client_file.id if entry is None else None,
+                    'text': part,
+                    'leaf': entry is None,
+                    'children': [entry] if entry else None,
+                }
+            entries.append(entry)
+
+    return entries
+
+def _client_files_experiments(client_files):
+    "Makes an extjs tree node list of experiments which the client has access to"
+    exps = [f.experiment for f in client_files.distinct("experiment")]
+    return [{
+        'id': "exp%s" % exp.id,
+        'text': 'Experiment: %s' % exp.title,
+        'leaf': False,
+        'metafile': True,
+    } for exp in exps]
+
+def _client_files_list(client_files, nodeid):
+    if nodeid.startswith("exp"):
+        # Experiment top level -- seed list with the 2 standard folders.
+        exp_id = nodeid[3:]
+        client_files = client_files.filter(experiment_id=exp_id)
+        path = ""
+        output = [{
+            "text": folder,
+            "leaf": False,
+            "metafile": True,
+            "children": _client_files_subtree(client_files, folder + "/"),
+        } for folder in ("Raw Data", "QC Data")]
+    elif nodeid.startswith("xnode"):
+        # if nodeid is an xnode then client wants to expand an empty node
+        return []
+    else:
+        # Sub-folder within an experiment
+        client_file = client_files.get(id=nodeid)
+        client_files = client_files.filter(experiment_id=client_file.experiment_id)
+        path = client_file.filepath + "/"
+        output = []
+
+    output.extend(_client_files_subtree(client_files, path))
+
+    return _merge_duplicate_entries(output)
+
 def recordsClientFiles(request):
+    root = 'dashboardFilesRoot'
+    node = request.REQUEST.get('node', None) or root
 
-    if request.GET:
-        args = request.GET
+    rows = ClientFile.objects.filter(experiment__users=request.user)
+    rows = rows.order_by("experiment", "filepath")
+
+    if node == root:
+        output = _client_files_experiments(rows)
     else:
-        args = request.POST
+        output = _client_files_list(rows, node)
 
-    # basic json that we will fill in
-    output = []
-
-    if args.get('node','dashboardFilesRoot') == 'dashboardFilesRoot':
-        print 'node is dashboardFilesRoot'
-        rows = ClientFile.objects.filter(experiment__users=request.user).order_by('experiment')
-
-        # add rows
-        current_exp = {}
-        current_exp['id'] = None
-        for row in rows:
-            # compare current exp
-            if row.experiment.id != current_exp['id']:
-                if current_exp['id'] != None:
-                    output.append(current_exp)
-                current_exp = {}
-                current_exp['id'] = row.experiment.id
-                current_exp['text'] = 'Experiment: ' + row.experiment.title
-                current_exp['leaf'] = False
-                current_exp['metafile'] = True
-                current_exp['children'] = []
-
-            file = {}
-            file['text'] = row.filepath
-
-            (abspath, exppath) = row.experiment.ensure_dir()
-
-            filepath = abspath + os.sep + row.filepath
-
-            print filepath
-
-            if os.path.isdir(filepath):
-                file['leaf'] = False
-            else:
-                file['leaf'] = True
-            file['id'] = row.id
-
-            current_exp['children'].append(file)
-
-        if current_exp['id'] != None:
-            output.append(current_exp)
-
-        return HttpResponse(json.dumps(output))
-    else:
-        # parse the node id as something useful
-        # it will be in the format: id/path/path
-
-        print args.get('node')
-        pathbits = args.get('node').split('/')
-
-        print 'pathbits[0] is ' + pathbits[0]
-
-        baseFile = ClientFile.objects.get(id=pathbits[0],experiment__users=request.user)
-
-        if baseFile is not None:
-            (abspath, exppath) = baseFile.experiment.ensure_dir()
-
-            joinedpath = baseFile.filepath + os.sep + os.sep.join(pathbits[1:])
-
-            print 'joinedPath is ' + joinedpath
-            print 'abspath is ' + abspath
-
-            return _fileList(request, abspath + os.sep, joinedpath, False, [], str(baseFile.id))
-        else:
-            return HttpResponse(json.dumps([]))
-
+    return HttpResponse(json.dumps(output))
 
 @mastr_users_only
 def populate_select(request, model=None, key=None, value=None, field=None, match=None):
@@ -1630,19 +1653,13 @@ def moveFile(request):
         return HttpResponseBadRequest("need target and file params")
 
     exp = get_object_or_404(Experiment, id=experiment_id)
-    exp.ensure_dir()
 
     if target == "experimentRoot":
-        target = exp.experiment_dir
+        target = ""
 
-    exppath = os.path.abspath(exp.experiment_dir)
-    source = os.path.abspath(os.path.join(exppath, fname))
-    dest = os.path.abspath(os.path.join(exppath, target))
+    source = real_file_path(exp, fname)
+    dest = real_file_path(exp, target)
     dest_filename = os.path.join(dest, os.path.split(source)[1])
-
-    # try to prevent file system traversal attacks
-    if not source.startswith(exppath) or not dest.startswith(exppath):
-        return HttpResponseBadRequest("path is outside of experiment directory")
 
     # don't allow overwriting of files
     if not os.path.isdir(dest) or os.path.exists(dest_filename):
@@ -1655,6 +1672,18 @@ def moveFile(request):
         logger.exception("rename didn't work")
         output['msg'] = str(e)
     else:
+        # rename the shared client files as well
+        for client_file in exp.clientfile_set.filter(filepath__startswith=fname):
+            endpart = client_file.filepath[len(os.path.dirname(fname)):].lstrip("/")
+            filepath = os.path.join(target, endpart).lstrip("/")
+            logger.debug("rename ClientFile %r -> %r" % (client_file.filepath, filepath))
+            if os.path.exists(real_file_path(exp, filepath)):
+                client_file.filepath = filepath
+                client_file.save()
+            else:
+                logger.debug(" -> doesn't exist!")
+                client_file.delete()
+
         output['success'] = True
         output['newlocation'] = dest
 
@@ -1678,178 +1707,206 @@ def deleteFile(request):
     if target == "experimentRoot":
         return HttpResponseBadRequest("can't delete experiment directory");
 
-    exppath = os.path.abspath(exp.experiment_dir)
-    target = os.path.abspath(os.path.join(exppath, target))
-
-    # try to prevent file system traversal attacks
-    if not target.startswith(exppath):
-        return HttpResponseBadRequest("path is outside of experiment directory")
+    file_path = real_file_path(exp, target)
 
     try:
-        if os.path.isdir(target):
-            os.rmdir(target)
+        if os.path.isdir(file_path):
+            os.rmdir(file_path)
         else:
-            os.unlink(target)
+            os.unlink(file_path)
     except OSError, e:
         logger.exception("couldn't remove file/directory", e)
         output = {'success': False, 'msg': str(e)}
     else:
+        # delete the shared files entries as well
+        exp.clientfile_set.filter(filepath=target).delete()
+
         output['success'] = True
 
     return HttpResponse(json.dumps(output))
 
+
+def _experiment_files(exp, sharedList, path):
+    """
+    Generates extjs tree nodes for a certain node id path under an
+    experiment.
+
+    It's complicated because experiment data is grafted onto the "Raw
+    Data" folder and run data is grafted onto the "QC Data" folder.
+    """
+    def list_experiment_files(exp, path, prefix):
+        return _fileList(exp.experiment_dir, path or "", sharedList, prefix=prefix)
+
+    def list_run_files(exp, runid, path, prefix):
+        run = get_object_or_404(Run, experiment_id=exp.id, id=runid)
+        return _fileList(run.run_dir, path or "", sharedList, prefix="%s/%s" % (prefix, runid))
+
+    def list_runs(exp, prefix):
+        def make_entry(runid):
+            return {
+                'text': str(runid),
+                'leaf': False,
+                'id': "%s/%s" % (prefix, runid),
+            }
+        return map(make_entry, exp.run_set.values_list("id", flat=True))
+
+    def list_other_files(exp, path, prefix):
+        if path:
+            files = []
+        else:
+            # graft experiment and runs data at toplevel
+            files = [{
+                'text': "Raw Data",
+                'leaf': False,
+                'id': "Raw Data",
+            }, {
+                'text': "QC Data",
+                'leaf': False,
+                'id': "QC Data",
+            }]
+
+        return files + _fileList(exp.other_files_dir, path, sharedList, prefix=prefix)
+
+    routes = [
+        (r"^(?P<prefix>Raw Data)(/(?P<path>.*))?", list_experiment_files),
+        (r"^(?P<prefix>QC Data)/(?P<runid>\w+)(/(?P<path>.*))?", list_run_files),
+        (r"^(?P<prefix>QC Data)", list_runs),
+        (r"^(?P<prefix>)(experimentRoot)?(?P<path>.*)", list_other_files),
+    ]
+
+    for route, list_files in routes:
+        m = re.match(route, path)
+        if m:
+            return list_files(exp, **m.groupdict())
+
+    return []
+
+def real_file_path(experiment, path):
+    """
+    Translates an imaginary files tree path name into a real path name
+    in the repo for an experiment.
+    """
+    def get_experiment_path(path):
+        return experiment.get_file_path(path or "")
+    def get_run_path(path, runid):
+        return experiment.run_set.get(id=runid).get_file_path(path or "")
+    def get_all_runs_path():
+        #return os.path.join(settings.REPO_FILES_ROOT, "runs")
+        return None
+    def get_other_path(path):
+        return experiment.get_other_file_path(path or "")
+
+    paths = [
+        (r"^Raw Data(/(?P<path>.*))?", get_experiment_path),
+        (r"^QC Data/(?P<runid>\d+)(/(?P<path>.*))?", get_run_path),
+        (r"^QC Data$", get_all_runs_path),
+        (r"^(?P<path>.*)", get_other_path),
+    ]
+
+    for route, get_base_path in paths:
+        m = re.match(route, path)
+        if m:
+            return get_base_path(**m.groupdict())
+
+    return None
+
 @mastr_users_only
 def experimentFilesList(request):
-
-    if request.GET:
-        args = request.GET
-    else:
-        args = request.POST
+    args = request.GET
+    if not (args and 'node' in args and 'experiment' in args):
+        return HttpResponseBadRequest("need 'node' and 'experiment' args in a GET request")
 
     path = args['node']
-
     if path == 'experimentRoot':
         path = ''
 
-    if not 'experiment' in args or args['experiment'] == '0':
-        logger.error("invalid experiment: %s" % args.get("experiment", None))
-        return HttpResponse('[]')
-
-    exp = Experiment.objects.get(id=args['experiment'])
+    exp = get_object_or_404(Experiment, id=args['experiment'])
     exp.ensure_dir()
 
-    exppath = exp.experiment_dir
+    sharedList = set(exp.clientfile_set.values_list("filepath", flat=True))
 
-    sharedList = ClientFile.objects.filter(experiment=exp)
-    print sharedList
-    return _fileList(request, exppath, path, True, sharedList)
+    files = _experiment_files(exp, sharedList, path)
 
+    return HttpResponse(json.dumps(files))
 
 @mastr_users_only
 def runFilesList(request):
+    args = request.GET
 
-    if request.GET:
-        args = request.GET
-    else:
-        args = request.POST
+    if not (args and 'node' in args and 'run' in args):
+        return HttpResponseBadRequest("need 'node' and 'run' args in a GET request")
 
     path = args['node']
 
     if path == 'runsRoot':
         path = ''
 
-    if not 'run' in args or args['run'] == '0':
-        print 'invalid run'
-        return HttpResponse('[]')
+    run = get_object_or_404(Run, id=args['run'])
 
-    run = Run.objects.get(id=args['run'])
-    (abspath, relpath) = run.ensure_dir()
+    runpath = run.ensure_dir()
 
-    runpath = abspath + os.sep
+    files = _fileList(runpath, path)
 
-    print 'outputting file listing for ' + runpath + ' ' + path
+    return HttpResponse(json.dumps(files))
 
-    return _fileList(request, runpath, path, False, [])
+def _fileList(basepath, subdir="", sharedList=None, replace_subdir=None, prefix=None):
+    """
+    Returns a list of filenames in the directory basepath/subdir.
+    The list of filenames are not prefixed with basepath. They are
+    prefixed with prefix if it's given.
 
+    If sharedList is given, then files which appear in that list will
+    get the "checked" property.
 
-@mastr_users_only
-def pendingFilesList(request):
-
-    if request.GET:
-        args = request.GET
-    else:
-        args = request.POST
-
-    nodepath = args['node']
-
-    if nodepath == 'pendingRoot':
-        nodepath = ''
-
-    pendingpath = os.path.join(settings.REPO_FILES_ROOT, 'pending')
-    ensure_repo_filestore_dir_with_owner(os.path.join('pending', nodepath))
-
-    return _fileList(request, pendingpath, nodepath, False, [])
-
-
-@mastr_users_only
-def _fileList(request, basepath, path, withChecks, sharedList, replacementBasepath = None):
+    If replace_subdir is given, the returned list will have IDs
+    starting with that instead of subdir.
+    """
+    logger.debug("_filelist(%r, %r, %r, %r)" % (basepath, subdir, sharedList, replace_subdir))
 
     output = []
 
+    basepath = os.path.abspath(basepath)
+    files_dir = os.path.join(basepath, subdir)
+
     #verify that there is no up-pathing hack happening
-    if len(os.path.abspath(basepath)) > len(os.path.commonprefix((basepath, os.path.abspath(basepath + path)))):
-        return HttpResponse(json.dumps(output))
+    if not files_dir.startswith(basepath) or not os.path.isdir(files_dir):
+        return []
 
-    if not os.path.exists(os.path.join(basepath, path)):
-        return HttpResponse('[]')
-
-    files = os.listdir(os.path.join(basepath,path))
-    files.sort()
-
-    for filename in files:
-        filepath = os.path.join(basepath, filename)
-        if not path == '':
-            filepath = os.path.join(basepath, path, filename)
+    for filename in sorted(os.listdir(files_dir)):
+        filepath = os.path.join(files_dir, filename)
 
         if os.access(filepath, os.R_OK):
-            file = {}
-            file['text'] = filename
-            if os.path.isdir(filepath):
-                file['leaf'] = False
-            else:
-                file['leaf'] = True
-            file['id'] = filename
+            nodeid = os.path.join(replace_subdir or subdir, filename)
+            if prefix:
+                nodeid = os.path.join(prefix, nodeid)
+            entry = {
+                'text': filename,
+                'leaf': not os.path.isdir(filepath),
+                'id': nodeid,
+            }
+            if sharedList is not None:
+                entry["checked"] = entry["id"] in sharedList
+            output.append(entry)
 
-            if not path == '':
-                file['id'] = os.path.join(path, filename)
-                if replacementBasepath is not None:
-                    file['id'] = os.path.join(replacementBasepath, filename)
-            if withChecks:
-                file['checked'] = False
-
-                for cf in sharedList:
-                    import unicodedata as ud
-                    import sys
-
-                    try:
-                        a = ud.normalize('NFD',unicode(file['id'], sys.getfilesystemencoding(), errors="ignore"))
-                    except:
-                        a = ud.normalize('NFD',unicode(file['id'].encode('iso-8859-1'), encoding='iso-8859-1', errors="ignore"))
-
-                    b = ud.normalize('NFD',unicode(cf.filepath.encode('iso-8859-1'), encoding='iso-8859-1', errors="ignore"))
-
-                    if a == b:
-                        file['checked'] = True
-
-            output.append(file)
-
-    return HttpResponse(json.dumps(output))
+    return output
 
 @mastr_users_only
 def shareFile(request, *args):
-    print 'shareFile:', str('')
-
     args = request.POST
 
     file = args['file']
-    checked = args['checked']
+    checked = args['checked'] == 'true'
 
-    exp = Experiment.objects.get(id=args['experiment_id'])
+    exp = get_object_or_404(Experiment, id=args['experiment_id'])
     exp.ensure_dir()
 
-    if checked == 'true':
-        try:
-            client_file = ClientFile.objects.get(filepath=file, experiment=exp)
-        except:
-            client_file = ClientFile.objects.create(filepath=file, experiment=exp, sharedby=request.user)
+    if checked:
+        client_file, created = ClientFile.objects.get_or_create(filepath=file, experiment=exp,
+                                                                defaults={"sharedby": request.user})
         client_file.sharedby=request.user
         client_file.save()
     else:
-        try:
-            client_file = ClientFile.objects.get(filepath=file, experiment=exp)
-            client_file.delete()
-        except:
-            pass
+        client_file = ClientFile.objects.filter(filepath=file, experiment=exp).delete()
 
     return HttpResponse(json.dumps({'success':True}))
 
@@ -1862,12 +1919,12 @@ def normalise_files(exp, files):
     if 'experimentRoot' in files:
         files[files.index('experimentRoot')] = ''
     # Add full path for every file
-    files = [os.path.join(exp.experiment_dir, f) for f in files]
+    files = [(real_file_path(exp, filename), filename) for filename in files]
     # If a parent dir has been selected we want to avoid adding subdirs and files included in it
-    dirs = [f + os.path.sep if not f.endswith(os.path.sep) else f for f in files if os.path.isdir(f)]
+    dirs = [f + os.path.sep if not f.endswith(os.path.sep) else f for (f, n) in files if os.path.isdir(f)]
     # Add each item that isn't contained in a dir
     for d in dirs:
-        files = filter(lambda f: f == d or not f.startswith(d), files)
+        files = filter(lambda (f, n): f == d or not f.startswith(d), files)
 
     logger.debug('files, post normalise: %s' % (str(files)) )
     return files
@@ -1876,10 +1933,10 @@ def normalise_files(exp, files):
 def packageFilesForDownload(request):
     args = request.REQUEST
 
-    exp = Experiment.objects.get(id=args['experiment_id'])
+    exp = get_object_or_404(Experiment, id=args['experiment_id'])
     exp.ensure_dir()
 
-    package_type = args.get('package_type')
+    package_type = args.get('package_type', '')
     if package_type not in ('zip', 'tgz', 'tbz2', 'tar'):
         package_type = 'zip'
     package_name = "experiment_%s_files.%s" % (exp.id, package_type)
@@ -1912,38 +1969,30 @@ def downloadPackage(request):
     package_name = args['packageName']
     package_info = request.session.pop(package_name)
     files = package_info['files']
-    experiment = Experiment.objects.get(pk=package_info['experiment_id'])
+    experiment = get_object_or_404(Experiment, pk=package_info['experiment_id'])
 
-    package_path = pack_files(files, experiment.experiment_dir, package_name)
+    package_path = pack_files(files, package_name)
 
     return fileDownloadResponse(package_path, package_name)
 
 @mastr_users_only
 def downloadFile(request, *args):
-    print 'downloadFile:', str('')
-
     args = request.REQUEST
 
-    file = args['file']
-
-    exp = Experiment.objects.get(id=args['experiment_id'])
+    exp = get_object_or_404(Experiment, id=args['experiment_id'])
     exp.ensure_dir()
 
-    filename = os.path.join(settings.REPO_FILES_ROOT, 'experiments', str(exp.created_on.year), str(exp.created_on.month), str(exp.id), file)
-    from django.core.servers.basehttp import FileWrapper
-    from django.http import HttpResponse
+    filename = real_file_path(exp, args['file'])
 
-    pathbits = filename.split('/')
-
-    lastbit = pathbits[-1]
+    name = os.path.basename(filename)
 
     if os.path.isdir(filename):
-        tmpfilename = "/tmp/madas-zip-"+lastbit
+        tmpfilename = "/tmp/madas-zip-"+name
         zipdir(filename, tmpfilename)
         filename = tmpfilename
-        lastbit = lastbit + ".zip"
+        name = name + ".zip"
 
-    return fileDownloadResponse(filename, lastbit)
+    return fileDownloadResponse(filename, name)
 
 @mastr_users_only
 def downloadSOPFileById(request, sop_id):
@@ -1967,39 +2016,21 @@ def downloadSOPFile(request, sop_id, filename):
     return response
 
 def downloadClientFile(request, filepath):
-    print 'downloadClientFile:', str('')
-
     pathbits = filepath.split('/')
-
     file_id = pathbits[0]
 
-    try:
-        cf = ClientFile.objects.get(id=file_id, experiment__users=request.user)
-    except:
-        return HttpResponseNotFound("You do not have permission to a file with that ID ("+file_id+")")
-
+    cf = get_object_or_404(ClientFile, id=file_id, experiment__users=request.user)
     exp = cf.experiment
     exp.ensure_dir()
 
-
-    (abspath, exppath) = cf.experiment.ensure_dir()
-
-    joinedpath = os.path.join(abspath, cf.filepath)
+    filename = real_file_path(exp, cf.filepath)
     if len(pathbits) > 1:
-        joinedpath = joinedpath + os.sep + os.sep.join(pathbits[1:])
+        filename = os.path.join(filename, *pathbits[1:])
 
+    logger.debug('filename is '+filename)
 
-    filename = joinedpath
-
-    print 'filename is '+filename
-
-    outputname = pathbits[-1]
-    if len(pathbits) == 1:
-        outputname = cf.filepath
-
-    if not os.path.exists(filename):
-        return HttpResponseNotFound("Cannot download file")
-    else:
+    if os.path.exists(filename):
+        outputname = os.path.basename(filename)
 
         if os.path.isdir(filename):
             tmpfilename = "/tmp/madas-zip-"+outputname
@@ -2007,44 +2038,37 @@ def downloadClientFile(request, filepath):
             filename = tmpfilename
             outputname = outputname + ".zip"
 
-        from django.core.servers.basehttp import FileWrapper
-        from django.http import HttpResponse
-
         from django.core.files import File
         wrapper = File(open(filename, "rb"))
         content_disposition = 'attachment;  filename=\"%s\"' % outputname
         response = HttpResponse(wrapper, content_type='application/download')
         response['Content-Disposition'] = content_disposition
         response['Content-Length'] = os.path.getsize(filename)
-        return response
+    else:
+        response = HttpResponseNotFound("Cannot download file")
+
+    return response
 
 def downloadRunFile(request):
-    print 'downloadFile:', str('')
-
     args = request.REQUEST
 
-    file = args['file']
-    lastbit = file.split('/')[-1]
+    run = get_object_or_404(Run, id=args['run_id'])
+    run.ensure_dir()
 
-    run = Run.objects.get(id=args['run_id'])
-    (abspath, relpath) = run.ensure_dir()
+    filename = run.get_file_path(args['file'])
+    name = os.path.basename(filename)
 
-    filename = os.path.join(abspath, file)
-
-    print 'download run file: ' + filename
+    logger.debug('download run file: ' + filename)
 
     if os.path.isdir(filename):
-        tmpfilename = "/tmp/madas-zip-"+lastbit
+        tmpfilename = "/tmp/madas-zip-"+name
         zipdir(filename, tmpfilename)
         filename = tmpfilename
-        lastbit = lastbit + ".zip"
-
-    from django.core.servers.basehttp import FileWrapper
-    from django.http import HttpResponse
+        name += ".zip"
 
     from django.core.files import File
     wrapper = File(open(filename, "rb"))
-    content_disposition = 'attachment;  filename=\"%s\"' % (str(lastbit))
+    content_disposition = 'attachment;  filename=\"%s\"' % name
     response = HttpResponse(wrapper, content_type='application/download')
     response['Content-Disposition'] = content_disposition
     response['Content-Length'] = os.path.getsize(filename)
@@ -2097,19 +2121,12 @@ def _handle_uploaded_file(f, name, experiment_id, parent_folder):
         logger.debug('exp is ' + experiment_id)
 
         exp = Experiment.objects.get(id=experiment_id)
-        (exppath, blah) = exp.ensure_dir()
+        exppath = exp.ensure_dir()
 
         # clean folder name
-        if parent_folder:
-            dest = os.path.join(exppath, parent_folder)
-        else:
-            dest = exppath
-
-        dest = os.path.abspath(os.path.join(dest, name))
-
-        # try to stop naughty path traversals
-        if not dest.startswith(os.path.abspath(exppath)):
-            raise PermissionDenied
+        dest_dir = real_file_path(exp, parent_folder) if parent_folder else None
+        dest_dir = dest_dir or exp.other_files_dir
+        dest = os.path.join(dest_dir, name)
 
         logger.debug('writing to file: ' + dest)
         destination = open(dest, 'wb+')
@@ -2137,9 +2154,14 @@ def newFolder(request):
     if not request.POST:
         return HttpResponseBadRequest("POST method only")
 
-    if "experiment_id" not in request.POST or "name" not in request.POST:
+    if "experiment_id" not in request.POST or not request.POST.get("name", None):
         output = { "success": False, "msg": "Need to supply experiment_id and name" }
         return HttpResponse(json.dumps(output))
+
+    parent = request.POST.get("parent", "")
+    name = request.POST["name"]
+    if parent:
+        name = os.path.join(parent, name)
 
     try:
         exp = Experiment.objects.get(id=request.POST["experiment_id"])
@@ -2147,8 +2169,18 @@ def newFolder(request):
         output = { "success": False, "msg": "Experiment does not exist" }
         return HttpResponse(json.dumps(output))
     else:
-        output = { "success": True, "msg": "fixme" }
-        # fixme: make directory
+        path = real_file_path(exp, name)
+        if path:
+            try:
+                os.mkdir(path)
+            except OSError, e:
+                logger.exception("Couldn't create new folder")
+                output = { "success": False, "msg": str(e) }
+            else:
+                output = { "success": True }
+        else:
+            output = { "success": False, "msg": "Can't create a folder here." }
+
         return HttpResponse(json.dumps(output))
 
 class CSVUploadView(View):
@@ -2182,7 +2214,6 @@ class CSVUploadViewFile(CSVUploadView):
                    "num_created": 0,
                    "num_updated": 0 }
 
-
         for sid, label, weight, comment in _read_uploaded_sample_csv(csvfile, output):
             # If a valid sample id is provided, try to update exising
             # sample, otherwise create a new one.
@@ -2195,7 +2226,8 @@ class CSVUploadViewFile(CSVUploadView):
                 output["num_created"] += 1
 
             s.label = label
-            s.weight = weight
+            if weight is not None:
+                s.weight = weight
             s.comment = comment
             s.experiment = experiment
             s.save()
@@ -2274,8 +2306,9 @@ def _read_uploaded_sample_csv(csvfile, output):
     This generates (sample_id, label, weight, comment) triples from
     the CSV text.
     """
+    maybe_decimal = lambda v: Decimal(v) if v else None
     required = ["LABEL", "WEIGHT", "COMMENT"]
-    cleanup = lambda label, weight, comment: (label, Decimal(weight), comment)
+    cleanup = lambda label, weight, comment: (label, maybe_decimal(weight), comment)
     return _read_csv(csvfile, output, required, cleanup)
 
 def _read_csv(csvfile, output, column_names, convert_fn):

@@ -188,48 +188,67 @@ class Experiment(models.Model):
 
     @property
     def experiment_dir(self):
-        return os.path.join(settings.REPO_FILES_ROOT, self.experiment_reldir)
+        return self.experiment_subdir("experiments")
 
     @property
-    def experiment_reldir(self):
-        yearpath = os.path.join('experiments', str(self.created_on.year) )
-        monthpath = os.path.join(yearpath, str(self.created_on.month) )
-        exppath = os.path.join(monthpath, str(self.id) )
-        return exppath
+    def other_files_dir(self):
+        """The other files dir is for user uploads such as documents and
+        processed data."""
+        return self.experiment_subdir("other")
 
+
+    def experiment_subdir(self, base):
+        return os.path.join(settings.REPO_FILES_ROOT, base,
+                            str(self.created_on.year),
+                            str(self.created_on.month),
+                            str(self.id))
 
     def ensure_dir(self):
-        ''' This function calculates where the storage area should be for the experiment data.
-            It create the directory if it does not exist.
-            It returns a tuple in form (abspath, relpath) where
-                abspath is the absolute path
-                relpath is the path, relative to the settings.REPO_FILES_ROOT
-        '''
+        """
+        Creates all the experiment storage directories if they don't
+        exist, and sets their permissions.
+        """
+        other_dirs = ["Project Background", "Data Processing", "Bioinformatics Analysis", "Report"]
 
-        subdirs = ["Raw Data", "QC Data", "Project Background",
-                   "Data Processing", "Bioinformatics Analysis", "Report"]
+        # filter the other_dirs to remove ones which exist somewhere
+        # within the tree
+        existing_dirs = set(chain(*(d for r, d, f in os.walk(self.other_files_dir))))
+        other_dirs = [os.path.join(self.other_files_dir, subdir)
+                      for subdir in other_dirs
+                      if subdir not in existing_dirs]
 
-        yearpath = os.path.join('experiments', str(self.created_on.year) )
-        monthpath = os.path.join(yearpath, str(self.created_on.month) )
-        exppath = os.path.join(monthpath, str(self.id) )
-
-        full_exppath = os.path.join(settings.REPO_FILES_ROOT, exppath)
-        existing_dirs = set(chain(*(d for r, d, f in os.walk(full_exppath))))
-
-        subdirs = [os.path.join(exppath, subdir) for subdir in subdirs
-                   if subdir not in existing_dirs]
-
-        for dir in [exppath] + subdirs:
+        for dir in [self.experiment_dir] + other_dirs:
             try:
                 ensure_repo_filestore_dir_with_owner(dir)
             except Exception, e:
                 pass # the exception is already logged in the ensure function
 
-        return (full_exppath, exppath)
+        return self.experiment_dir
 
+    def get_file_path(self, filename):
+        "Returns the full path of an experiment file"
+        exp_dir = self.experiment_dir
+        return safe_path_join(exp_dir, filename) or exp_dir
+
+    def get_other_file_path(self, filename):
+        "Returns the full path of a file"
+        other_dir = self.other_files_dir
+        return safe_path_join(other_dir, filename) or other_dir
 
     def __unicode__(self):
         return self.title
+
+def safe_path_join(base, filename, alternative=None):
+    """Joins a relative path with a base directory, preventing the result
+    from being outside of the base tree."""
+    abs_base = os.path.abspath(base)
+    file_path = os.path.abspath(os.path.join(abs_base, filename))
+
+    if file_path.startswith(abs_base):
+        return file_path
+    else:
+        # Can't get files from outside of base directory.
+        return alternative
 
 sopdir = 'sops'
 sopfs = FileSystemStorage(location=os.path.join(settings.REPO_FILES_ROOT, sopdir))
@@ -426,22 +445,24 @@ class Run(models.Model):
 
         self.save()
 
+    @property
+    def run_dir(self):
+        """Returns where the storage area should be for the run data (blanks
+        and QC files)."""
+        return os.path.join(settings.REPO_FILES_ROOT, "runs",
+                            str(self.created_on.year),
+                            str(self.created_on.month),
+                            str(self.id))
+
     def ensure_dir(self):
-        ''' This function calculates where the storage area should be for the run data (blanks and QC files)
-            It create the directory if it does not exist.
-            It returns a tuple in form (abspath, relpath) where
-                abspath is the absolute path
-                relpath is the path, relative to the settings.REPO_FILES_ROOT
-        '''
-        import stat
+        "Creates the data directory if it doesn't exist, and sets permissions."
+        ensure_repo_filestore_dir_with_owner(self.run_dir)
+        return self.run_dir
 
-        yearpath = os.path.join('runs', str(self.created_on.year) )
-        monthpath = os.path.join(yearpath, str(self.created_on.month) )
-        runpath = os.path.join(monthpath, str(self.id) )
-
-        ensure_repo_filestore_dir_with_owner(runpath)
-
-        return (os.path.join(settings.REPO_FILES_ROOT, runpath), runpath)
+    def get_file_path(self, filename):
+        "Returns the full path of a run file"
+        run_dir = self.run_dir
+        return safe_path_join(run_dir, filename) or run_dir
 
     def is_method_type_individual_vial(self):
         return (self.order_of_methods == 2)
@@ -562,6 +583,9 @@ class ClientFile(models.Model):
     downloaded = models.BooleanField(default=False, db_index=True)
     sharetimestamp = models.DateTimeField(auto_now=True)
     sharedby = models.ForeignKey(User)
+
+    def __unicode__(self):
+        return "Experiment \"%s\" file %s" % (self.experiment.title, self.filepath)
 
 class InstrumentSOP(models.Model):
     title = models.CharField(max_length=255)

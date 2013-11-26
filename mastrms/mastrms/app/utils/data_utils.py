@@ -203,17 +203,18 @@ def jsonResponse(data={}, items=None, mainContentFunction=None, params=None):
 
 class ZipPacker(object):
 
-    def pack(self, files, drop_prefix, filename):
+    def pack(self, files, filename):
         import zipfile
         zipf = zipfile.ZipFile(filename, 'w', compression=zipfile.ZIP_DEFLATED, allowZip64=True)
-        for f in files:
+        for f, n in files:
             if os.path.isfile(f):
-                zipf.write(f, f[len(drop_prefix)+1:])
+                zipf.write(f, n)
             elif os.path.isdir(f):
                 for (archiveDirPath, dirNames, fileNames) in os.walk(f):
                     for fileName in fileNames:
                         filePath = os.path.join(archiveDirPath, fileName)
-                        zipf.write(filePath, filePath[len(drop_prefix)+1:])
+                        archive_name = os.path.join(n, fileName)
+                        zipf.write(filePath, archive_name)
 
         zipf.close()
         return filename
@@ -223,16 +224,14 @@ class TarPacker(object):
         assert compression is None or compression in ('gz','bz2'), "Invalid compression type"
         self.compression = compression
 
-    def pack(self, files, drop_prefix, filename):
+    def pack(self, files, filename):
         import tarfile
         mode = 'w'
         if self.compression is not None:
             mode = "%s:%s" % (mode, self.compression)
         tar = tarfile.open(filename, mode)
-        for f in files:
-            print f
-            print f[len(drop_prefix)+1:]
-            tar.add(f, f[len(drop_prefix):])
+        for f, n in files:
+            tar.add(f, n)
         tar.close()
         return filename
 
@@ -254,13 +253,13 @@ def guess_package_type(filename):
 
     return packer
 
-def pack_files(files, drop_prefix, package_name):
+def pack_files(files, package_name):
     import tempfile
     packer = guess_package_type(package_name)
     assert packer is not None, 'Invalid package type for ' + package_name
     dummy, filename = tempfile.mkstemp()
     print "FILENAME: " + filename
-    package_path = packer.pack(files, drop_prefix, filename)
+    package_path = packer.pack(files, filename)
 
     return package_path
 
