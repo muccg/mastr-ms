@@ -16,12 +16,16 @@ class Migration(DataMigration):
         for exp in Experiment.objects.all():
             expdir = exp.experiment_dir
             if os.path.exists(expdir):
-                for f in os.listdir(expdir):
-                    if f in presets:
+                try:
+                    dirs = [f for f in os.listdir(expdir) if f in presets]
+                except OSError, e:
+                    print "Couldn't remove directory: %s" % e
+                else:
+                    for f in dirs:
                         try:
                             os.rmdir(os.path.join(expdir, f))
-                        except OSError:
-                            pass
+                        except OSError, e:
+                            print "Warning: %s" % e
 
     def backwards(self, orm):
         "Write your backwards methods here."
