@@ -188,20 +188,26 @@ class Experiment(models.Model):
 
     @property
     def experiment_dir(self):
-        return self.experiment_subdir("experiments")
+        return self.experiment_datadir("experiments")
+
+    @property
+    def experiment_subdir(self):
+        return self.experiment_reldir("experiments")
 
     @property
     def other_files_dir(self):
         """The other files dir is for user uploads such as documents and
         processed data."""
-        return self.experiment_subdir("other")
+        return self.experiment_datadir("other")
 
 
-    def experiment_subdir(self, base):
-        return os.path.join(settings.REPO_FILES_ROOT, base,
-                            str(self.created_on.year),
-                            str(self.created_on.month),
-                            str(self.id))
+    def experiment_datadir(self, base):
+        return os.path.join(settings.REPO_FILES_ROOT,
+                            self.experiment_reldir(base))
+
+    def experiment_reldir(self, base):
+        return os.path.join(base, str(self.created_on.year),
+                            str(self.created_on.month), str(self.id))
 
     def ensure_dir(self):
         """
@@ -449,10 +455,12 @@ class Run(models.Model):
     def run_dir(self):
         """Returns where the storage area should be for the run data (blanks
         and QC files)."""
-        return os.path.join(settings.REPO_FILES_ROOT, "runs",
-                            str(self.created_on.year),
-                            str(self.created_on.month),
-                            str(self.id))
+        return os.path.join(settings.REPO_FILES_ROOT, self.run_subdir)
+
+    @property
+    def run_subdir(self):
+        return os.path.join("runs", str(self.created_on.year),
+                            str(self.created_on.month), str(self.id))
 
     def ensure_dir(self):
         "Creates the data directory if it doesn't exist, and sets permissions."
@@ -548,9 +556,12 @@ class RunSample(models.Model):
 
     def filepaths(self):
         if self.is_sample():
-            return self.run.experiment.ensure_dir()
+            exp = self.run.experiment
+            exp.ensure_dir()
+            return exp.experiment_dir, exp.experiment_subdir
         else:
-            return self.run.ensure_dir()
+            self.run.ensure_dir()
+            return self.run.run_dir, self.run.run_subdir
 
     def run_filename(self):
         filename = self.sample.run_filename(self.run)
