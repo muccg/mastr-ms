@@ -19,7 +19,7 @@ class Migration(DataMigration):
                 try:
                     dirs = [f for f in os.listdir(expdir) if f in presets]
                 except OSError, e:
-                    print "Couldn't remove directory: %s" % e
+                    print "Couldn't list directory: %s" % e
                 else:
                     for f in dirs:
                         try:
