@@ -24,6 +24,10 @@ class NodeClient(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
 
+    samplefile_ext = models.CharField(max_length=255, default=".d", blank=True,
+                                      verbose_name="Sample file extension",
+                                      help_text="File suffix that the instrument software uses for sample files. Include the dot if necessary.")
+
     def __unicode__(self):
         return "[%s]-[%s]-[%s]" % (self.organisation_name, self.site_name, self.station_name)
 
