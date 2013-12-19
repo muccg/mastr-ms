@@ -314,7 +314,7 @@ MA.Files = {
                             method: 'POST',
                             params: {
                                 'experiment_id': MA.ExperimentController.currentId(),
-                                'files': filesToDownload.join(","),
+                                'files': Ext.util.JSON.encode(filesToDownload),
                                 'package_type': Ext.getCmp('downloadPackageTypeCmb').getValue()
                             },
                             success: function(response, opts) {

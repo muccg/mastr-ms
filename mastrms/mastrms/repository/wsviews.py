@@ -1,5 +1,4 @@
 import os, stat
-import copy
 import io
 import csv
 import re
@@ -1915,17 +1914,24 @@ def shareFile(request, *args):
     return HttpResponse(json.dumps({'success':True}))
 
 def normalise_files(exp, files):
-    files = copy.copy(files)
-
     logger.debug('files, pre normalise: %s' % (str(files)) )
 
-    # Replace special value 'experimentDir' with the ''
-    if 'experimentRoot' in files:
-        files[files.index('experimentRoot')] = ''
-    # Add full path for every file
-    files = [(real_file_path(exp, filename), filename) for filename in files]
+    def get_path(filename):
+        # Replace special value 'experimentDir' with the ''
+        if filename == "experimentRoot":
+            filename = ""
+
+        # Add full path for every file
+        return (real_file_path(exp, filename), filename)
+
+    files = map(get_path, files)
+
+    def ensure_sep(f):
+        return f + os.path.sep if not f.endswith(os.path.sep) else f
+
     # If a parent dir has been selected we want to avoid adding subdirs and files included in it
-    dirs = [f + os.path.sep if not f.endswith(os.path.sep) else f for (f, n) in files if os.path.isdir(f)]
+    dirs = [ensure_sep(f) for (f, n) in files if os.path.isdir(f)]
+
     # Add each item that isn't contained in a dir
     for d in dirs:
         files = filter(lambda (f, n): f == d or not f.startswith(d), files)
@@ -1945,7 +1951,7 @@ def packageFilesForDownload(request):
         package_type = 'zip'
     package_name = "experiment_%s_files.%s" % (exp.id, package_type)
 
-    files = args['files'].split(',')
+    files = json.loads(args['files'])
 
     request.session[package_name] = {
         'experiment_id': exp.id,
