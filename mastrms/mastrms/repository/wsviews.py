@@ -1648,6 +1648,7 @@ def moveFile(request):
     target = request.POST.get('target', None)
     fname = request.POST.get('file', None)
     experiment_id = request.POST.get('experiment_id', None)
+    rename = request.POST.get('rename', False)
 
     if not target or not fname or experiment_id is None:
         return HttpResponseBadRequest("need target and file params")
@@ -1659,10 +1660,13 @@ def moveFile(request):
 
     source = real_file_path(exp, fname)
     dest = real_file_path(exp, target)
-    dest_filename = os.path.join(dest, os.path.split(source)[1])
+    if rename:
+        dest_filename = dest
+    else:
+        dest_filename = os.path.join(dest, os.path.split(source)[1])
 
     # don't allow overwriting of files
-    if not os.path.isdir(dest) or os.path.exists(dest_filename):
+    if not (rename or os.path.isdir(dest)) or os.path.exists(dest_filename):
         return HttpResponseBadRequest("can't overwrite %s" % dest_filename)
 
     try:
