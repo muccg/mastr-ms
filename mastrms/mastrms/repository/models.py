@@ -563,23 +563,31 @@ class RunSample(models.Model):
             self.run.ensure_dir()
             return self.run.run_dir, self.run.run_subdir
 
+    def _get_samplefile_ext(self):
+        return self.run.machine.samplefile_ext
+
     def run_filename(self):
         filename = self.sample.run_filename(self.run)
         if self.method_number:
             filename += '_m%d' % self.method_number
-        filename += '.d'
+        filename += self._get_samplefile_ext()
         return filename
 
     def generate_filename(self):
         if self.is_sample():
             return self.run_filename()
         else:
-            return "%s_%s-%s.d"  % (self.component.filename_prefix, self.run.id, self.id)
+            return "%(prefix)s_%(runid)s-%(sampleid)s%(suffix)s" % {
+                "prefix": self.component.filename_prefix,
+                "runid": self.run.id,
+                "sampleid": self.id,
+                "suffix": self._get_samplefile_ext(),
+            }
 
     @property
     def sample_name(self):
         "Just returns the filename without the .d suffix"
-        return self.filename.rstrip(".d")
+        return self.filename.rstrip(self._get_samplefile_ext())
 
     def is_sample(self):
         return self.component_id == 0

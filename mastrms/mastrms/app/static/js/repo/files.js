@@ -214,6 +214,86 @@ MA.Files = {
                    }
                  });
                }
+           }, {
+               text: 'Rename',
+               id:'rename',
+               handler: function(){
+                 var tree = Ext.getCmp('filesTree');
+                 var nodes = tree.getSelectionModel().getSelectedNodes();
+                 var node = null;
+
+                 if (nodes.length === 0 || nodes.length > 1) {
+                   Ext.Msg.alert("Please select just one item.",
+                                 "(this message will auto-close in 2 seconds)");
+                   window.setTimeout(function() {Ext.Msg.hide();}, 2000);
+                   return;
+                 } else {
+                   node = nodes[0];
+                 }
+
+                 if (node.id === tree.getRootNode() ||
+                     node.id === "Raw Data" ||
+                     node.id === "QC Data") {
+                   Ext.Msg.alert("Can't rename this folder.",
+                                 "(this message will auto-close in 2 seconds)");
+                   window.setTimeout(function() {Ext.Msg.hide();}, 2000);
+                   return;
+                 }
+
+                 var pieces = node.id.split("/")
+                 var path = "", name = node.id;
+
+                 if (pieces.length >= 2) {
+                   path = pieces.slice(0, -1).join("/") + "/";
+                   name = pieces[pieces.length - 1];
+                 } else {
+                   path = ""
+                   name = node.id;
+                 }
+
+                 Ext.Msg.show({
+                   title: "Rename",
+                   msg: "Please enter a new filename.",
+                   value: name,
+                   prompt: true,
+                   buttons: Ext.MessageBox.OKCANCEL,
+                   icon: Ext.MessageBox.QUESTION,
+                   fn: function(btn, text) {
+                     if (btn == 'ok' && text.length > 0) {
+                       Ext.Ajax.request({
+                         method:'POST',
+                         url: wsBaseUrl + 'moveFile',
+                         success: function(response) {
+                           var result = Ext.util.JSON.decode(response.responseText);
+                           if (result.success) {
+                             Ext.Msg.alert("Renamed", "(this message will auto-close in 1 second)");
+                             window.setTimeout(function() {Ext.Msg.hide();}, 1000);
+                           } else {
+                             Ext.Msg.alert("Could not rename the file",
+                                           "(this message will auto-close in 2 seconds)");
+                             window.setTimeout(function() {Ext.Msg.hide();}, 2000);
+                           }
+
+                           //reload the pending files tree
+                           tree.getLoader().clearOnLoad = true;
+                           tree.getLoader().load(Ext.getCmp('filesTree').getRootNode());
+                           tree.getRootNode().expand();
+                         },
+                         failure: function() {
+                           Ext.Msg.alert("Fail", "Could not rename the file.");
+                         },
+                         params: {
+                           file: node.id === tree.getRootNode().id ? '' : node.id,
+                           target: path + text,
+                           rename: true,
+                           experiment_id: MA.ExperimentController.currentId(),
+                           csrfmiddlewaretoken: Ext.util.Cookies.get("csrftoken_mastrms")
+                         }
+                       });
+                     }
+                   }
+                 });
+               }
            }, { xtype: "tbseparator" },{
                text: 'Download ',
                handler: function(){
@@ -234,7 +314,7 @@ MA.Files = {
                             method: 'POST',
                             params: {
                                 'experiment_id': MA.ExperimentController.currentId(),
-                                'files': filesToDownload.join(","),
+                                'files': Ext.util.JSON.encode(filesToDownload),
                                 'package_type': Ext.getCmp('downloadPackageTypeCmb').getValue()
                             },
                             success: function(response, opts) {
