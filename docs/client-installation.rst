@@ -139,6 +139,8 @@ and select *Open Main Window*.
 To fully quit the program you must choose *File → Quit*.
 
 
+.. _client-upgrade:
+
 Program Updates
 ---------------
 

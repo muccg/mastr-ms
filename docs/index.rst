@@ -47,5 +47,6 @@ Table of Contents
     server-installation
     client-installation
     usage
+    changelog
     credits
     development

@@ -193,6 +193,8 @@ The CentOS wiki contains `instructions`_ on how to disable SELinux.
    http://wiki.centos.org/HowTos/SELinux#head-430e52f7f8a7b41ad5fc42a2f95d3e495d13d348
 
 
+.. _server-upgrade:
+
 Upgrading to a new version
 --------------------------
 
