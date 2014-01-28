@@ -23,11 +23,10 @@ Name: %{app}
 Version: %{version}
 Release: %{release}
 Source0: %{app}-%{unmangled_version}.tar.gz
-License: GNU GPL v2
+License: GPLv2+
 Group: Applications/Internet
-BuildRoot: %{_tmppath}/%{app}-%{version}-%{release}-buildroot
 Prefix: %{_prefix}
-BuildArch: x86_64
+BuildArch: noarch
 Vendor: Centre for Comparative Genomics <web@ccg.murdoch.edu.au>
 BuildRequires: python%{pyver}-virtualenv python-devel openssl-devel
 Requires: python%{pyver}-psycopg2 python%{pyver}-mod_wsgi httpd rsync
