@@ -1,26 +1,22 @@
 # Generic WSGI application for use with CCG Django projects
 # Installed by RPM package
 
-import os, sys
+import os
 
-webapp_root = os.path.dirname(os.path.abspath(__file__))
+# snippet to enable the virtualenv
+activate_this=os.path.join(os.path.dirname(os.path.realpath(__file__)), 'bin', 'activate_this.py')
+if os.path.exists(activate_this):
+    exec(compile(open(activate_this).read(), activate_this, 'exec'), dict(__file__=activate_this))
+del activate_this
 
-# Path hackery to make sure all the project's paths appear
-# before the system paths in sys.path. addsitedir always
-# appends unfortunately.
+app_name = os.path.basename(os.path.dirname(os.path.realpath(__file__)))
+
+# Allow appsettings to be imported
 import site
-oldpath = sys.path[1:]
-sys.path = sys.path[:1]
-site.addsitedir(webapp_root)
-site.addsitedir(os.path.join(webapp_root, "lib"))
 site.addsitedir("/etc/ccgapps")
-site.addsitedir("/usr/local/etc/ccgapps")
-sys.path.extend(oldpath)
 
 # setup the settings module for the WSGI app
-os.environ['DJANGO_SETTINGS_MODULE'] = 'defaultsettings.mastrms'
-os.environ['PROJECT_DIRECTORY'] = webapp_root
-os.environ['WEBAPP_ROOT'] = webapp_root
+os.environ['DJANGO_SETTINGS_MODULE'] = '%s.settings' % app_name
 os.environ['PYTHON_EGG_CACHE'] = '/tmp/.python-eggs'
 
 import django.core.handlers.wsgi

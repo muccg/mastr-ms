@@ -3,7 +3,7 @@ import os
 import logging
 import logging.handlers
 
-CCG_INSTALL_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CCG_INSTALL_ROOT = os.path.dirname(os.path.realpath(__file__))
 
 CCG_WRITEABLE_DIRECTORY = os.path.join(CCG_INSTALL_ROOT,"scratch")
 
