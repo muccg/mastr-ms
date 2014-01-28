@@ -60,8 +60,12 @@ mkdir -p %{buildinstalldir}
 virtualenv-%{pybasever} %{buildinstalldir}
 . %{buildinstalldir}/bin/activate
 
+# Use specific version of pip -- avoids surprises with deprecated
+# options, etc.
+pip install --force-reinstall --upgrade 'pip>=1.5,<1.6'
+
 # Install package into the prefix
-pip install ./%{app}
+pip install --process-dependency-links ./%{app}
 
 # Fix up paths in virtualenv, enable use of global site-packages
 virtualenv-%{pybasever} --relocatable %{buildinstalldir}
