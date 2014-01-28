@@ -60,10 +60,9 @@ mkdir -p %{mediadir}
 mkdir -p %{buildinstalldir}
 virtualenv-%{pybasever} %{buildinstalldir}
 . %{buildinstalldir}/bin/activate
-pip install -r %{app}/requirements.txt
 
 # Install package into the prefix
-pip install --no-deps ./%{app}
+pip install ./%{app}
 
 # Fix up paths in virtualenv, enable use of global site-packages
 virtualenv-%{pybasever} --relocatable %{buildinstalldir}

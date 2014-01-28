@@ -4,14 +4,44 @@ from setuptools import setup
 from mastrms import VERSION
 
 data_files = {}
-start_dir = os.getcwd()
+start_dir = os.path.dirname(os.path.abspath(__file__))
 for package in ('app', 'admin', 'dashboard', 'login', 'mdatasync_server', 'quote', 'registration', 'repository', 'users'):
     data_files['mastrms.' + package] = []
-    os.chdir(os.path.join('mastrms', package))
+    os.chdir(os.path.join(start_dir, 'mastrms', package))
     for data_dir in ('templates', 'static', 'migrations', 'fixtures', 'views', 'utils'):
         data_files['mastrms.' + package].extend(
             [os.path.join(subdir,f) for (subdir, dirs, files) in os.walk(data_dir) for f in files])
     os.chdir(start_dir)
+
+install_requires = [
+    'Django==1.5.5',
+    'South==0.8.2',
+    'django-extensions>=1.2.5',
+    'django-userlog',
+    'django-nose',
+    'ccg-extras',
+    'wsgiref==0.1.2',
+    'python-memcached==1.48',
+]
+
+dev_requires = [
+    'flake8',
+    'Werkzeug',
+    'django-debug-toolbar',
+]
+
+test_requires = [
+    'dingus',
+]
+
+postgres_requires = [
+    'psycopg2>=2.5.0,<2.6.0',
+]
+
+dependency_links = [
+    'https://bitbucket.org/ccgmurdoch/django-userlog/downloads/django_userlog-0.1.tar.gz',
+    'https://bitbucket.org/ccgmurdoch/ccg-django-extras/downloads/ccg-extras-0.1.6.tar.gz',
+]
 
 setup(name='django-mastrms',
     version=VERSION,
@@ -43,16 +73,12 @@ setup(name='django-mastrms',
     ],
     package_data=data_files,
     zip_safe=False,
-    install_requires=[
-        'Django',
-        'South',
-        'ccg-extras',
-        'wsgiref',
-        'python-memcached',
-        'django-userlog',
-        'django-extensions',
-        'django-nose',
-        'dingus',
-    ],
+    install_requires=install_requires,
+    dependency_links=dependency_links,
+    extras_require={
+        'test': test_requires,
+        'dev': dev_requires,
+        'postgres': postgres_requires,
+    },
     scripts=["scripts/mastrms-manage.py"],
 )
