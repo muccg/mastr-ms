@@ -26,7 +26,7 @@ Source0: %{app}-%{unmangled_version}.tar.gz
 License: GPLv2+
 Group: Applications/Internet
 Prefix: %{_prefix}
-BuildArch: noarch
+BuildArch: x86_64
 Vendor: Centre for Comparative Genomics <web@ccg.murdoch.edu.au>
 BuildRequires: python%{pyver}-virtualenv python-devel openssl-devel
 Requires: python%{pyver}-psycopg2 python%{pyver}-mod_wsgi httpd rsync
