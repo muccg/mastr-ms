@@ -7,9 +7,6 @@ TOPDIR=$(cd `dirname $0`; pwd)
 ACTION=$1
 shift
 
-# break on error
-set -e
-
 PORT='8000'
 
 PROJECT_NAME='mastrms'
@@ -28,15 +25,22 @@ PIP_OPTS="-v --download-cache ~/.pip/cache --index-url=https://pypi.python.org/s
 TEST_LIST="mastrms.repository.tests mastrms.mdatasync_client.client.test.tests mastrms.mdatasync_server.tests"
 NOSE_TEST_LIST="mastrms.mdatasync_client.client.test.tests:DataSyncServerTests mastrms.mdatasync_client.client.test.tests:MSDataSyncAPITests mastrms.mdatasync_client.client.test.tests:MSDSImplTests"
 
-
-settings() {
-    export DJANGO_SETTINGS_MODULE="${PROJECT_NAME}.settings"
-}
+# Use specific version of virtualenv, if it exists.
+# For python3, the command is pyvenv-3.3 or pyvenv.
+if which virtualenv-2.7 > /dev/null 2>&1; then
+    PYVENV=virtualenv-2.7
+else
+    PYVENV=virtualenv
+fi
 
 VIRTUALENV="${TOPDIR}/virt_${PROJECT_NAME}"
 
 activate_virtualenv() {
     source ${VIRTUALENV}/bin/activate
+}
+
+settings() {
+    export DJANGO_SETTINGS_MODULE="${PROJECT_NAME}.settings"
 }
 
 # ssh setup, make sure our ccg commands can run in an automated environment
@@ -207,11 +211,8 @@ dropdb() {
 
 
 installapp() {
-    # check requirements
-    which virtualenv >/dev/null
-
     echo "Install ${PROJECT_NAME}"
-    virtualenv --system-site-packages ${VIRTUALENV}
+    ${PYVENV} --system-site-packages ${VIRTUALENV}
     pushd ${TOPDIR}/${PROJECT_NAME}
     ${VIRTUALENV}/bin/pip install --force-reinstall --upgrade 'pip>=1.5,<1.6'
     ${VIRTUALENV}/bin/pip install ${PIP_OPTS} -e .
@@ -278,6 +279,9 @@ usage() {
     echo "Usage ./develop.sh (test|nosetests|lint|jslint|dropdb|start|install|clean|purge|pipfreeze|pythonversion|ci_remote_build|ci_staging|ci_staging_tests|ci_rpm_publish|rpm_release VERSION|ci_remote_destroy)"
     echo ""
 }
+
+# break on error
+set -e
 
 case ${ACTION} in
 pythonversion)
