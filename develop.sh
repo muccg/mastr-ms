@@ -19,7 +19,7 @@ TARGET_DIR="/usr/local/src/${PROJECT_NAME}"
 CLOSURE="/usr/local/closure/compiler.jar"
 TESTING_MODULES="argparse dingus xvfbwrapper nose"
 MODULES="MySQL-python==1.2.3 psycopg2==2.4.6 Werkzeug flake8 ${TESTING_MODULES}"
-PIP_OPTS="-v -M --download-cache ~/.pip/cache --index-url=https://simple.crate.io"
+PIP_OPTS="-v --download-cache ~/.pip/cache --index-url=https://pypi.python.org/simple --process-dependency-links"
 
 # A lot of tests need a database and/or X display to run. So the full
 # test suite TEST_LIST and the tests which don't need a database or X
@@ -213,6 +213,7 @@ installapp() {
     echo "Install ${PROJECT_NAME}"
     virtualenv --system-site-packages ${VIRTUALENV}
     pushd ${TOPDIR}/${PROJECT_NAME}
+    ${VIRTUALENV}/bin/pip install --force-reinstall --upgrade 'pip>=1.5,<1.6'
     ${VIRTUALENV}/bin/pip install ${PIP_OPTS} -e .
     popd
     ${VIRTUALENV}/bin/pip install ${PIP_OPTS} ${MODULES}
