@@ -22,6 +22,7 @@ install_requires = [
     'ccg-extras',
     'wsgiref==0.1.2',
     'python-memcached==1.48',
+    'dingus',
 ]
 
 dev_requires = [
@@ -31,7 +32,7 @@ dev_requires = [
 ]
 
 test_requires = [
-    'dingus',
+    'nose',
 ]
 
 postgres_requires = [
