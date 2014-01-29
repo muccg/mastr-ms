@@ -85,18 +85,25 @@ rm %{buildinstalldir}/bin/python*
 #ln -sf /opt/pyenv/%{ENVNAME}/lib $RPM_BUILD_ROOT/opt/pyenv/%{ENVNAME}/lib64
 
 # Create symlinks under install directory to real persistent data directories
-APP_SETTINGS_FILE=`find %{buildinstalldir} -path "*/$NAME/settings.py" | sed s:^%{buildinstalldir}::`
+APP_SETTINGS_FILE=`find %{buildinstalldir} -path "*/$NAME/settings.py" | sed s:^%{buildinstalldir}/::`
 APP_PACKAGE_DIR=`dirname ${APP_SETTINGS_FILE}`
-ln -sfT /var/log/%{app} %{buildinstalldir}${APP_PACKAGE_DIR}/log
-ln -sfT /var/lib/%{app}/scratch %{buildinstalldir}${APP_PACKAGE_DIR}/scratch
-ln -sfT /var/lib/%{app}/media %{buildinstalldir}${APP_PACKAGE_DIR}/media
-ln -sfT .${APP_PACKAGE_DIR}/static %{staticdir}
+ln -sfT /var/log/%{app} %{buildinstalldir}/${APP_PACKAGE_DIR}/log
+ln -sfT /var/lib/%{app}/scratch %{buildinstalldir}/${APP_PACKAGE_DIR}/scratch
+ln -sfT /var/lib/%{app}/media %{buildinstalldir}/${APP_PACKAGE_DIR}/media
+ln -sfT ${APP_PACKAGE_DIR}/static %{staticdir}
 
 # Install WSGI configuration into httpd/conf.d
 install -D centos/%{app}.ccg %{buildroot}/etc/httpd/conf.d/%{app}.ccg
-install -D centos/django.wsgi %{buildinstalldir}/django.wsgi
+ln -sfT ${APP_PACKAGE_DIR}/wsgi.py %{buildinstalldir}/django.wsgi
+
+# Create manage script symlink
 mkdir -p %{buildroot}/%{_bindir}
 ln -sfT %{installdir}/bin/%{app}-manage.py %{buildroot}/%{_bindir}/%{app}
+
+# Install prodsettings conf file to /etc, and replace with symlink
+install --mode=0600 -D centos/mastrms.conf.example %{buildroot}/etc/mastrms/mastrms.conf
+install --mode=0600 -D %{app}/%{app}/prodsettings.py %{buildroot}/etc/mastrms/settings.py
+ln -sfT /etc/mastrms/settings.py %{buildinstalldir}/${APP_PACKAGE_DIR}/prodsettings.py
 
 %post
 # Clear out staticfiles data and regenerate
@@ -118,10 +125,11 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,apache,apache,-)
-/etc/httpd/conf.d/*
 %{_bindir}/%{app}
 %attr(-,apache,,apache) %{webapps}/%{app}
 %attr(-,apache,,apache) /var/log/%{app}
 %attr(-,apache,,apache) /var/lib/%{app}
 
 %config /etc/httpd/conf.d/%{app}.ccg
+%config(noreplace) /etc/mastrms/settings.py
+%config(noreplace) /etc/mastrms/mastrms.conf
