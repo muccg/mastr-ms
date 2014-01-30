@@ -13,22 +13,22 @@ Yum repository setup
 ~~~~~~~~~~~~~~~~~~~~
 
 Mastr-MS is distributed as RPM, tested on Centos 6.x (x86_64). To
-satisfy dependencies, `Epel`_ and `REMI`_ repos need to be enabled::
+satisfy dependencies, `Epel`_ and `IUS`_ repos need to be enabled::
 
     sudo rpm -Uvh http://repo.ccgapps.com.au/repo/ccg/centos/6/os/noarch/CentOS/RPMS/ccg-release-6-2.noarch.rpm
     sudo rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
-    sudo rpm -Uvh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
+    sudo rpm -Uvh http://dl.iuscommunity.org/pub/ius/stable/CentOS/6/x86_64/ius-release-1.0-11.ius.centos6.noarch.rpm
 
 .. _Epel: http://fedoraproject.org/wiki/EPEL
-.. _REMI: http://rpms.famillecollet.com/
+.. _IUS: http://iuscommunity.org
 
 Dependencies
 ~~~~~~~~~~~~
 
-The database and python database driver aren't dependencies of the
-Mastr-MS RPM, so have to be installed manually::
+The database server package isn't a dependency of the Mastr-MS RPM, so
+it has to be installed manually::
 
-    sudo yum install postgresql-server python-psycopg2
+    sudo yum install postgresql-server
 
 .. note:: These instructions are written for PostgreSQL. With minor
    alterations (issue `MAS-32`_) Mastr-MS could work with
@@ -162,20 +162,14 @@ read/write the data which ``maupload`` has rsynced in::
 Django Settings File
 ~~~~~~~~~~~~~~~~~~~~
 
-The default settings for Mastr-MS are installed at
-``/usr/local/webapps/mastrms/defaultsettings/mastrms.py``. In case any
-settings need to be overridden, this can be done by creating an
-optional appsettings file. To set up the appsettings file, do::
+The config file for Mastr-MS is installed at
+``/etc/mastrms/mastrms.conf``. It contains basic settings that need to
+be changed for most sites, for example the database password.
 
-    mkdir -p /etc/ccgapps/appsettings
-    touch /etc/ccgapps/appsettings/{__init__,mastrms}.py
+More advanced options appear in ``/etc/mastrms/settings.py``. Any of
+the `Django Settings`_ can be changed in this file.
 
-The Python variable declarations in
-``/etc/ccgapps/appsettings/mastrms.py`` will override the defaults,
-which can be seen in `settings.py`_.
-
-.. _settings.py:
-   https://bitbucket.org/ccgmurdoch/mastr-ms/src/default/mastrms/mastrms/settings.py
+.. _`Django Settings`: https://docs.djangoproject.com/en/1.5/ref/settings/
 
 SELinux and Mastr-MS
 ~~~~~~~~~~~~~~~~~~~~
@@ -208,6 +202,8 @@ repository`_.
 
        su - postgres -c "pg_dump mastrms | gzip > /tmp/mastrms-$(date +%Y%m%d).sql.gz"
 
+Before upgrading, please check the :ref:`changelog` for any
+special information relating the new version.
 
 Install the Mastr-MS RPM, replacing ``X.X.X`` with the desired version::
 
