@@ -3,6 +3,7 @@ import grp
 import os
 from datetime import datetime, date, time
 from itertools import chain
+import re
 import logging
 from django.db import models
 from django.core.files.storage import FileSystemStorage
@@ -566,23 +567,27 @@ class RunSample(models.Model):
     def _get_samplefile_ext(self):
         return self.run.machine.samplefile_ext
 
-    def run_filename(self):
-        filename = self.sample.run_filename(self.run)
-        if self.method_number:
-            filename += '_m%d' % self.method_number
-        filename += self._get_samplefile_ext()
-        return filename
-
     def generate_filename(self):
         if self.is_sample():
-            return self.run_filename()
+            base = self.sample.run_filename(self.run)
+            if self.method_number:
+                base += '_m%d' % self.method_number
         else:
-            return "%(prefix)s_%(runid)s-%(sampleid)s%(suffix)s" % {
+            base = "%(prefix)s_%(runid)s-%(sampleid)s" % {
                 "prefix": self.component.filename_prefix,
                 "runid": self.run.id,
                 "sampleid": self.id,
-                "suffix": self._get_samplefile_ext(),
             }
+        return self.sanitize_filename(base) + self._get_samplefile_ext()
+
+    @staticmethod
+    def sanitize_filename(filename):
+        """
+        Remove excess full stops from the filename because these confuse
+        the data collection software. Also remove colons and slashes
+        because these have special meanings for file systems.
+        """
+        return re.sub(r"[\.:/\\](?!d$)", "_", filename)
 
     @property
     def sample_name(self):
