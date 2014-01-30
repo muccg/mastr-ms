@@ -6,8 +6,8 @@
 
 %define app mastrms
 %define name %{app}
-%define version 1.7.0
-%define unmangled_version 1.7.0
+%define version 1.8.0
+%define unmangled_version 1.8.0
 %define release 1
 %define webapps /usr/local/webapps
 %define installdir %{webapps}/%{app}
