@@ -1,7 +1,9 @@
+.. _changelog:
+
 Release Notes
 =============
 
-This page lists what changed in each Mastr-MS version.  For
+This page lists what changed in each Mastr-MS version. For
 instructions on how to upgrade the server, see
 :ref:`server-upgrade`. For instructions on how to upgrade the datasync
 client, see :ref:`client-upgrade`.
@@ -9,20 +11,37 @@ client, see :ref:`client-upgrade`.
 
 .. _1.8.0:
 
-1.8.0 (unreleased)
-------------------
+1.8.0 (30th Jan 2014)
+-------------------------
 
-New feature release
+New feature and bug fix release.
 
- * [MAS-49] - General File Extension (Issue 132)
- * [MAS-50] - Renaming files in file manager
+Mastr-MS now requires the IUS repo. It can be added according to the
+instructions in :ref:`Yum repository setup`. If you get dependency
+errors on installation, it is probably because the ius-release_ RPM
+isn't installed.
 
+.. _ius-release: http://dl.iuscommunity.org/pub/ius/stable/CentOS/6/x86_64/repoview/ius-release.html
+
+.. note:: In this version the format of the config file has
+   changed. You will need to manually update the settings.
+
+The settings are no longer stored in
+``/etc/ccgapps/appsettings``. They are now in ``/etc/mastrms``. After
+installing the RPM, edit ``/etc/mastrms/mastrms.conf`` and copy in
+just the listed settings from ``/etc/ccgapps/appsettings/mastrms.py``.
+
+After restarting the web server and checking that it works, the old
+settings file can be moved into a backup location.
+
+ * [MAS-52] - Switch RPM to new build method
+ * [MAS-53] - Fix file extension in worklist
 
 
 .. _1.7.0:
 
-1.7.0
------
+1.7.0 (19th Dec 2013)
+--------------------------
 
 New feature release
 
@@ -32,7 +51,7 @@ New feature release
 
 .. _1.6.2:
 
-1.6.2 (26th November 2013)
+1.6.2 (26th Nov 2013)
 --------------------------
 
 Bug fix release
@@ -42,7 +61,7 @@ Bug fix release
 
 .. _1.6.0:
 
-1.6.0 (25th November 2013)
+1.6.0 (25th Nov 2013)
 --------------------------
 
 New feature release

@@ -1,7 +1,6 @@
 from mastrms.repository.models import RunSample, RUN_STATES, SampleNotInClassException, InstrumentSOP
 from django.http import HttpResponse
 import random
-import re
 
 class RunBuilderException(Exception):
     pass
@@ -37,22 +36,13 @@ class RunBuilder(object):
 
         #write filenames into DB
         for rs in RunSample.objects.filter(run=self.run):
-            rs.filename = self.sanitize_filename(rs.generate_filename())
+            rs.filename = rs.generate_filename()
             rs.save()
 
         #mark the run as in-progress and save it
         if self.run.state == RUN_STATES.NEW[0]:
             self.run.state = RUN_STATES.IN_PROGRESS[0]
             self.run.save()
-
-    @staticmethod
-    def sanitize_filename(filename):
-        """
-        Remove excess full stops from the filename because these confuse
-        the data collection software. Also remove colons and slashes
-        because these have special meanings for file systems.
-        """
-        return re.sub(r"[\.:/\\](?!d$)", "_", filename)
 
 class RunLayout(object):
     def __init__(self, run):

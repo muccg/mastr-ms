@@ -9,8 +9,8 @@ mastrms/dist
 mastrms/build
 virt_mastrms
 mastrms/scratch
-mastrms/log
-mastrms/static
+mastrms/mastrms/log
+mastrms/mastrms/static
 mastrms/mastrms/mdatasync_client/client/build/*
 mastrms/mastrms/mdatasync_client/client/dist/*
 mastrms/mastrms/mdatasync_client/client/client.log*

@@ -1,0 +1,16 @@
+# Config for mastrms application.
+# You can also edit /etc/mastrms/settings.py.
+
+secret_key = changeme
+
+dbtype = pgsql
+dbname = mastrms
+dbuser = mastrms
+dbpass = mastrms
+#dbserver =
+#dbport =
+
+#memcache = 
+
+# See: https://docs.djangoproject.com/en/1.5/releases/1.5/#allowed-hosts-required-in-production
+allowed_hosts = *

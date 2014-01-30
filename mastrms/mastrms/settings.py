@@ -3,9 +3,12 @@ import os
 import logging
 import logging.handlers
 
-CCG_INSTALL_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+CCG_INSTALL_ROOT = os.path.dirname(os.path.realpath(__file__))
 CCG_WRITEABLE_DIRECTORY = os.path.join(CCG_INSTALL_ROOT,"scratch")
+PROJECT_NAME = os.path.basename(CCG_INSTALL_ROOT)
+
+# see ccg-django-extras/ccg/utils/webhelpers.py
+BASE_URL_PATH = os.environ.get("SCRIPT_NAME", "")
 
 DATABASES = {
     'default': {
@@ -81,7 +84,7 @@ STATIC_ROOT=os.path.join(CCG_INSTALL_ROOT, 'static')
 
 # These may be overridden, but it would be nice to stick to this convention
 # see: https://docs.djangoproject.com/en/1.4/ref/settings/#static-url
-STATIC_URL = '{0}/static/'.format(os.environ.get("SCRIPT_NAME", ""))
+STATIC_URL = '{0}/static/'.format(BASE_URL_PATH)
 
 # Another puppet-enforced content for location of user-uploaded data
 # see: https://docs.djangoproject.com/en/1.4/ref/settings/#media-root
@@ -89,7 +92,7 @@ MEDIA_ROOT = os.path.join(CCG_WRITEABLE_DIRECTORY,"static","media")
 
 # This may be overridden
 # see: https://docs.djangoproject.com/en/1.4/ref/settings/#media-url
-MEDIA_URL = '{0}/static/media/'.format(os.environ.get("SCRIPT_NAME", ""))
+MEDIA_URL = '{0}/static/media/'.format(BASE_URL_PATH)
 
 # All templates must be loaded from within an app, so these are the only
 # ones that should be enabled.
@@ -118,7 +121,7 @@ SERVER_EMAIL = "apache@localhost"  # from address
 # Default cookie settings
 # see: https://docs.djangoproject.com/en/1.4/ref/settings/#session-cookie-age and following
 SESSION_COOKIE_AGE = 60*60
-SESSION_COOKIE_PATH = '{0}/'.format(os.environ.get("SCRIPT_NAME", ""))
+SESSION_COOKIE_PATH = '{0}/'.format(BASE_URL_PATH)
 SESSION_COOKIE_NAME = 'mastrms_sessionid'
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_COOKIE_HTTPONLY = False # CHange from True
@@ -246,12 +249,3 @@ RETURN_EMAIL = "example - noreply@yoursite.com"
 LOGS_TO_EMAIL = "log_email@yoursite.com" #email address to receive datasync client log notifications
 KEYS_TO_EMAIL = "key_email@yoursite.com" #email address to receive datasync key upload notifications
 REGISTRATION_TO_EMAIL = "reg_email@yoursite.com" #email address to receive registration requests
-
-#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-#
-
-try:
-    print "Attempting to import local settings as appsettings.mastrms"
-    from appsettings.mastrms import *
-    print "Successfully imported appsettings.mastrms"
-except ImportError, e:
-    print "Failed to import appsettings.mastrms"

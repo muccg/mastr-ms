@@ -3,8 +3,7 @@ import datetime
 from south.db import db
 from south.v2 import DataMigration
 from django.db import models
-from mastrms.repository.runbuilder import RunBuilder
-from mastrms.repository.models import RUN_STATES
+from mastrms.repository.models import RUN_STATES, RunSample
 
 class Migration(DataMigration):
 
@@ -15,7 +14,7 @@ class Migration(DataMigration):
         changed = 0
         for sample in incomplete:
             old = sample.filename
-            sample.filename = RunBuilder.sanitize_filename(old)
+            sample.filename = RunSample.sanitize_filename(old)
             if old != sample.filename:
                 sample.save()
                 changed += 1
