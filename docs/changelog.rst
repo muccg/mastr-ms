@@ -17,9 +17,9 @@ client, see :ref:`client-upgrade`.
 New feature and bug fix release.
 
 Mastr-MS now requires the IUS repo. It can be added according to the
-instructions in :ref:`Yum repository setup`. If you get dependency
-errors on installation, it is probably because the ius-release_ RPM
-isn't installed.
+instructions in :ref:`yum-repos`. If you get dependency errors on
+installation, it is probably because the ius-release_ RPM isn't
+installed.
 
 .. _ius-release: http://dl.iuscommunity.org/pub/ius/stable/CentOS/6/x86_64/repoview/ius-release.html
 
