@@ -8,6 +8,15 @@ instructions on how to upgrade the server, see
 :ref:`server-upgrade`. For instructions on how to upgrade the datasync
 client, see :ref:`client-upgrade`.
 
+.. _1.8.1:
+
+1.8.1 (31st Jan 2014)
+-------------------------
+
+Bug fix release. More options were added to the default config files.
+
+ * [MAS-54] - Add wider menu of settings in mastrms.conf
+
 
 .. _1.8.0:
 
