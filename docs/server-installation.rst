@@ -9,6 +9,8 @@ experiment data.
 Installation
 ------------
 
+..  _yum-repos:
+
 Yum repository setup
 ~~~~~~~~~~~~~~~~~~~~
 
