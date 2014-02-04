@@ -8,7 +8,7 @@ from django.test.client import Client
 from django.utils import unittest
 from io import StringIO
 from decimal import Decimal
-from mastrms.repository.wsviews import CSVUploadViewCaptureCSV, CSVUploadViewFile
+from mastrms.repository.views import CSVUploadViewCaptureCSV, CSVUploadViewFile
 from mastrms.repository.models import Project, Experiment, Sample, InstrumentMethod, RunSample
 from mastrms.mdatasync_server.models import NodeClient
 import json, logging
@@ -20,7 +20,7 @@ class SampleCsvUploadTest(TestCase):
     function is `_handle_uploaded_sample_csv`.
     """
 
-    urls = 'mastrms.repository.wsurls'
+    urls = 'mastrms.repository.urls'
     def setUp(self):
         project = Project.objects.create(title="Test Project",
                                          description="Test",
@@ -448,7 +448,7 @@ class UploadRunCaptureCSVTest(TestCase):
     not replicated here.
     """
 
-    urls = 'mastrms.repository.wsurls'
+    urls = 'mastrms.repository.urls'
     def upload_csv(self, text):
         return CSVUploadViewCaptureCSV.handle_csv(
             StringIO(text),

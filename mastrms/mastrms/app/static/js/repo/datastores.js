@@ -7,14 +7,14 @@ var storesNeededForRendering = [];
 MA.DSLoaded = function(ds, recs, opts) {
     storesNeededForRendering[ds.storeId] = 'loaded';
     ds.removeListener('load', MA.DSLoaded);
-    
+
     var allLoaded = true;
     for (index in storesNeededForRendering) {
         if (storesNeededForRendering[index] != 'loaded') {
             allLoaded = false;
         }
     }
-    
+
 //    if (allLoaded && MA.InitUI !== undefined) {
 //        MA.InitUI();
 //    }
@@ -27,7 +27,7 @@ MA.DSLoadException = function(status, text, c, d, e) {
     if (status !== undefined) {
         title = "Error";
     }
-    
+
     if (text === undefined) {
         text = "An unidentified error occurred, please try again. (Code: "+status+")";
     } else if (Ext.isObject(text)) {
@@ -37,9 +37,9 @@ MA.DSLoadException = function(status, text, c, d, e) {
             text = "An error occurred, code: "+c.status+" message: "+c.statusText;
         }
     }
-    
+
     Ext.Msg.alert(title, text);
-    
+
     storesNeededForRendering[this.storeId] = 'loaded';
     MA.DSLoaded(this, null, null);
 };
@@ -56,7 +56,7 @@ MA.CurrentBioSourceId = function() {
     if (biologicalSourceStore.getTotalCount() < 1) {
         return 0;
     }
-    
+
     return biologicalSourceStore.getAt(0).get("id");
 };
 
@@ -68,7 +68,7 @@ MA.CurrentAnimalId = function() {
     if (animalStore.getTotalCount() < 1) {
         return 0;
     }
-    
+
     return animalStore.getAt(0).get("id");
 };
 
@@ -76,7 +76,7 @@ MA.CurrentTreatmentId = function() {
     if (MA.CurrentTreatmentIdValue !== undefined) {
         return MA.CurrentTreatmentIdValue;
     }
-    
+
     return 0;
 };
 
@@ -84,7 +84,7 @@ MA.CurrentSampleClassId = function() {
     if (MA.CurrentSampleClassIdValue !== undefined) {
         return MA.CurrentSampleClassIdValue;
     }
-    
+
     return 0;
 };
 
@@ -100,7 +100,7 @@ MA.StoreFilter = function(component, keyevent, filterparam) {
     {
         component.store.clearFilter();
     }
-    //don't fire on non alpha 
+    //don't fire on non alpha
     else if ((k >= keyevent.A) && (k <= keyevent.Z)) {
         component.store.filter(filterparam, String.fromCharCode(keyevent.getCharCode()), true, true);
     }
@@ -124,7 +124,7 @@ var organStore = new Ext.data.JsonStore(
                             }
                         }
                     );
-                    
+
 var timelineStore = new Ext.data.JsonStore(
                         {
                             storeId: 'timeline',
@@ -144,7 +144,7 @@ var timelineStore = new Ext.data.JsonStore(
                             }
                         }
                     );
-                    
+
 var treatmentStore = new Ext.data.JsonStore(
                         {
                             storeId: 'treatment',
@@ -160,7 +160,7 @@ var treatmentStore = new Ext.data.JsonStore(
                             }
                         }
                     );
-                    
+
 var sopStore = new Ext.data.JsonStore(
                         {
                             storeId: 'sop',
@@ -176,7 +176,7 @@ var sopStore = new Ext.data.JsonStore(
                             }
                         }
                     );
-                    
+
 var sopLookupStore = new Ext.data.JsonStore(
                         {
                             storeId: 'sopLookup',
@@ -201,10 +201,10 @@ var userStore = new Ext.data.JsonStore(
                             }
                         }
                     );
-                    
+
 /* By rights, this should use the ExtJsonInterface, but because
  * recordsExperiments does some magic to fill in the principal, for now I'm
- * just going to hack the appropriate row filtering into repository.wsviews and
+ * just going to hack the appropriate row filtering into repository.views and
  * come back to this at a later stage. */
 var experimentListStore = new Ext.data.GroupingStore(
                         {
@@ -219,7 +219,7 @@ var experimentListStore = new Ext.data.GroupingStore(
                                 direction: 'DESC'
                             },
                             reader:new Ext.data.JsonReader({}),
-                            groupField:'status_text'      
+                            groupField:'status_text'
                         }
                     );
 
@@ -235,7 +235,7 @@ var runRelatedExperimentStore = new Ext.data.JsonStore(
         field: 'id',
         direction: 'DESC'
     },
-    reader:new Ext.data.JsonReader({})     
+    reader:new Ext.data.JsonReader({})
 }
 );
 
@@ -255,7 +255,7 @@ var projectsListStore = new Ext.data.JsonStore(
                             }
                         }
                     );
-                    
+
 var clientsListStore = new Ext.data.JsonStore(
                         {
                             storeId: 'clientsList',
@@ -267,7 +267,7 @@ var clientsListStore = new Ext.data.JsonStore(
                                 field: 'username',
                                 direction: 'DESC'
                             }
-                                    
+
                         }
                     );
 
@@ -297,7 +297,7 @@ var sorteduserListStore = new Ext.data.JsonStore(
 
                         }
                         );
-                    
+
 var experimentStore = new Ext.data.ArrayStore({
                                              storeId:'experiment',
                                              fields: ['id', 'title', 'description', 'comment', 'status_id', 'created_on', 'client_id']
@@ -330,7 +330,7 @@ var randomisableSampleStore = new Ext.data.JsonStore(
                                               //}
                                               }
                                               );
- 
+
 var sampleStore = new Ext.data.JsonStore(
                                               {
                                               storeId: 'samples',
@@ -345,7 +345,7 @@ var sampleStore = new Ext.data.JsonStore(
                                               }
                                               }
                                               );
-                                              
+
 var sampleLogStore = new Ext.data.JsonStore(
                                               {
                                               storeId: 'samplelogs',
@@ -392,7 +392,7 @@ var plantStore = new Ext.data.JsonStore(
                                           }}
                                     }
                                           );
-                    
+
 var animalStore = new Ext.data.JsonStore(
                         {
                             storeId: 'animal',
@@ -403,13 +403,13 @@ var animalStore = new Ext.data.JsonStore(
                                             Ext.getCmp('animalGender').clearValue();
                                             Ext.getCmp('animalAge').setValue('');
                                             Ext.getCmp('animalParentalLine').clearValue();
-                                            
+
                                             if (rs.length > 0) {
                                                 Ext.getCmp('animalGender').setValue(rs[0].data.sex);
                                                 Ext.getCmp('animalAge').setValue(rs[0].data.age);
                                                 Ext.getCmp('animalParentalLine').setValue(rs[0].data.parental_line);
                                             }
-                                            
+
                                         }}
                             }
                     );
@@ -425,14 +425,14 @@ var humanStore = new Ext.data.JsonStore(
                                          Ext.getCmp('human_dob').setValue('');
                                          Ext.getCmp('human_bmi').setValue('');
                                          Ext.getCmp('human_diagnosis').setValue('');
-                                         
+
                                          if (rs.length > 0) {
                                          Ext.getCmp('humanGender').setValue(rs[0].data.sex);
                                          Ext.getCmp('human_dob').setValue(rs[0].data.date_of_birth);
                                          Ext.getCmp('human_bmi').setValue(rs[0].data.bmi);
                                          Ext.getCmp('human_diagnosis').setValue(rs[0].data.diagnosis);
                                          }
-                                         
+
                                          }}
                                          }
                                          );
@@ -469,7 +469,7 @@ var newRunsStore = new Ext.data.JsonStore(
                             }
                         }
                     );
-                                         
+
 var runStore = new Ext.data.JsonStore(
                         {
                             storeId: 'run',
@@ -554,7 +554,7 @@ var machineStore = new Ext.data.JsonStore(
 }
 );
 
-                                        
+
 // ---------- COMBO STORES ---------- (used for comboboxes)
 var organismTypeComboStore = new Ext.data.JsonStore(
                         {
@@ -600,7 +600,7 @@ var organNameComboStore = new Ext.data.JsonStore(
                             listeners: {'load':MA.DSLoaded}
                         }
                     );
-                    
+
 var tissueComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'tissueCombo',
@@ -611,7 +611,7 @@ var tissueComboStore = new Ext.data.JsonStore(
                             listeners: {'load':MA.DSLoaded}
                         }
                     );
-                    
+
 var cellTypeComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'celltypeCombo',
@@ -622,7 +622,7 @@ var cellTypeComboStore = new Ext.data.JsonStore(
                             listeners: {'load':MA.DSLoaded}
                         }
                     );
-                    
+
 var subcellularCellTypeComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'subcellularcelltypeCombo',
@@ -633,8 +633,8 @@ var subcellularCellTypeComboStore = new Ext.data.JsonStore(
                             listeners: {'load':MA.DSLoaded}
                         }
                     );
-                    
-                   
+
+
 var plantGrowingPlaceComboStore = new Ext.data.JsonStore(
                                                              {
                                                              storeId: 'plantGrowingPlaceCombo',
@@ -645,7 +645,7 @@ var plantGrowingPlaceComboStore = new Ext.data.JsonStore(
                                                              listeners: {'load':MA.DSLoaded}
                                                              }
                                                              );
-                    
+
 var treatmentComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'treatmentCombo',
@@ -667,7 +667,7 @@ var sopComboStore = new Ext.data.JsonStore(
                             listeners: {'load':MA.DSLoaded}
                         }
                     );
-                    
+
 var maStaffComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'userCombo',
@@ -691,7 +691,7 @@ var clientComboStore = new Ext.data.JsonStore(
                             'loadexception':MA.DSLoadIgnoreException}
                         }
                     );
-                    
+
 var involvementComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'involvementCombo',
@@ -703,7 +703,7 @@ var involvementComboStore = new Ext.data.JsonStore(
                                         'loadexception':MA.DSLoadIgnoreException}
                         }
                     );
-                    
+
 var expStatusComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'expStatusCombo',
@@ -739,4 +739,3 @@ var enabledRuleGeneratorStore = new Ext.data.JsonStore(
                             }
                         }
                     );
-
