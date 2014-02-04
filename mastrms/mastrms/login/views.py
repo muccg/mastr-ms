@@ -187,7 +187,7 @@ def serveIndex(request, *args, **kwargs):
 
     return render_to_response('index.html', {
                         'APP_SECURE_URL': siteurl(request),
-                        'username': request.user.username,
+                        'user': request.user,
                         'mainContentFunction': mcf,
                         'wh': webhelpers,
                         'params': jsonparams,
