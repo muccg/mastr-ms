@@ -166,7 +166,8 @@ Django Settings File
 
 The config file for Mastr-MS is installed at
 ``/etc/mastrms/mastrms.conf``. It contains basic settings that need to
-be changed for most sites, for example the database password.
+be changed for most sites, for example the database password. There
+are comments about each setting within this config file.
 
 More advanced options appear in ``/etc/mastrms/settings.py``. Any of
 the `Django Settings`_ can be changed in this file.
