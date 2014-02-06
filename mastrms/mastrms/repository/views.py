@@ -17,7 +17,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden, HttpResponseNotAllowed, HttpResponseRedirect, HttpResponseBadRequest, HttpResponseServerError
 from django.shortcuts import render_to_response, get_object_or_404
 from django.utils import simplejson as json
-from django.utils.encoding import smart_str
+from django.utils.encoding import smart_bytes, smart_text
 from ccg.utils import webhelpers
 from mastrms.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RUN_STATES, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure, RuleGenerator, Component, NodeClient
 from mastrms.quote.models import Organisation, Formalquote
@@ -2429,7 +2429,7 @@ def _universal_newlines(csvfile):
     else:
         # This csv upload was smaller than the limit so Django
         # stored the data in memory -- make a copy.
-        return io.StringIO(csvfile.read(), newline=None)
+        return io.StringIO(smart_text(csvfile.read(), errors='ignore'), newline=None)
 
 @mastr_users_only
 def sample_class_enable(request, id):
@@ -2579,7 +2579,7 @@ def _display_worklist_csv(request, run, samples):
                sample.filename,
                run.method.method_path, run.method.method_name,
                sample.sample_name]
-        w.writerow(map(smart_str, row))
+        w.writerow(map(smart_bytes, row))
 
     return response
 
