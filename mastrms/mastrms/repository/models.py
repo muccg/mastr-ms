@@ -343,7 +343,8 @@ class Sample(models.Model):
     sample_class_sequence = models.SmallIntegerField(default=1, db_index=True)
 
     def __unicode__(self):
-        return u"%s-%s" % (self.sample_class.class_id, self.sample_class_sequence)
+        return u"%s-%s" % (self.sample_class.class_id if self.sample_class else "",
+                           self.sample_class_sequence)
 
     def run_filename(self, run):
         if self.sample_class is None:
