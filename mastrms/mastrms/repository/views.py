@@ -166,14 +166,12 @@ def clone_experiment(base_experiment):
 
     #users need to be brought across if this is cloned
     base_exp_users = UserExperiment.objects.filter(experiment=base_exp)
-    print 'setting user'
     for base_exp_user in base_exp_users:
         exp_user = UserExperiment(user=base_exp_user.user,
                                     experiment=exp,
                                     type=base_exp_user.type,
                                     additional_info=base_exp_user.additional_info)
         exp_user.save()
-    print 'finished setting users'
     #Source
     source = BiologicalSource(experiment=exp)
     base_source = BiologicalSource.objects.get(experiment=base_exp)
@@ -228,14 +226,15 @@ def clone_experiment(base_experiment):
         base_sampleclass = base_sampleclass_dict[classname]
         exp_sampleclass = exp_sampleclass_dict.get(classname, None)
         if exp_sampleclass is not None:
-            #
-            numsamples = len(Sample.objects.filter(sample_class = base_sampleclass))
-            for num in range(numsamples):
+            for orig in Sample.objects.filter(sample_class=base_sampleclass):
                 s = Sample()
                 s.sample_class = exp_sampleclass
+                s.label = orig.label
+                s.comment = orig.comment
+                s.weight = orig.weight
+                s.sample_class_sequence = orig.sample_class_sequence
                 s.experiment = exp
                 s.save()
-
 
     return exp
 
