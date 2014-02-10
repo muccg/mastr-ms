@@ -16,8 +16,9 @@ import yaphc
 from httplib2 import Http
 
 import os
-import time
 import os.path
+import sys
+import time
 import shutil
 import pipes
 import tempfile
@@ -536,7 +537,7 @@ class MSDSImpl(object):
         #the sourcedir name with /cygdrive
         #we also make sure the path is 'normalised', so that they look like posix paths,
         #since both mac, linux, and cygwin all use it.
-        if self.controller.isMSWINDOWS:
+        if sys.platform.startswith("win"):
             #print 'WINDOWS SOURCE DIR HACK IN PROGRESS'
             #os.path.normpath makes sure slashes are native - on windows this is an escaped backslash \\
             #os.sep gives you the dir sepator for this platform (windows = \\)

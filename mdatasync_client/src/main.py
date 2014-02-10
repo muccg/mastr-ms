@@ -25,19 +25,7 @@ class MDataSyncApp(wx.PySimpleApp):
 
         win = MainWindow(self.config, None)
         self.win = win
-        self.msds = MSDataSyncAPI(self.config, win.getLog())#, False) #false is no threading
-
-        self.msds.isMSWINDOWS = False
-        if wx.Platform == "__WXMSW__":
-            sys.stderr = open(os.path.join(DATADIR, "errorlogfile.txt"),"w")  #log to file
-            sys.stdout = open(os.path.join(DATADIR, "outlogfile.txt"),"w")  #log to file
-            win.getLog()("Running on Windows")
-            self.msds.isMSWINDOWS = True
-        elif wx.Platform == "__WXMAC__":
-            win.getLog()("Running on Macintosh")
-        elif wx.Platform == "__WXGTK__":
-            win.getLog()("Running on Linux (GTK)")
-
+        self.msds = MSDataSyncAPI(self.config, win.getLog())
 
         #let the jobs execute in threads
         #disable this for debugging
