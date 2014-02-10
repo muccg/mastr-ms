@@ -1,8 +1,6 @@
 syntax: glob
 
 *.pyc
-*.DS_Store
-*.log
 bootstrap
 build
 mastrms/dist
@@ -11,13 +9,19 @@ virt_mastrms
 mastrms/scratch
 mastrms/mastrms/log
 mastrms/mastrms/static
-mastrms/mastrms/mdatasync_client/client/build/*
-mastrms/mastrms/mdatasync_client/client/dist/*
-mastrms/mastrms/mdatasync_client/client/client.log*
-mastrms/mastrms/mdatasync_client/data
-mastrms/mastrms/mdatasync_client/id_rsa*
 docs/_build/*
 mastrms/django_mastrms.egg-info
 tests.xml
 build-number.txt
-.gitignore
+
+mdatasync_client/msDataSync.egg-info
+mdatasync_client/build/*
+mdatasync_client/dist/*
+mdatasync_client/client.log*
+mdatasync_client/data
+mdatasync_client/id_rsa*
+mdatasync_client/supportwin32/nsis-2.46-setup.exe
+mdatasync_client/supportwin32/py2exe-0.6.9.win32-py2.7.exe
+mdatasync_client/supportwin32/python-2.7.6.msi
+mdatasync_client/supportwin32/wxPython2.8-win32-unicode-2.8.12.1-py27.exe
+mdatasync_client/supportwin32/wxPython3.0-win32-3.0.0.0-py27.exe
