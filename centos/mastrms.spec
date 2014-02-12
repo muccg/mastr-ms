@@ -44,6 +44,9 @@ fi
 %build
 # Nothing, all handled by install
 
+# Turn off brp-python-bytecompile because it compiles the settings file.
+%global __os_install_post %(echo '%{__os_install_post}' | sed -e 's!/usr/lib[^[:space:]]*/brp-python-bytecompile[[:space:]].*$!!g')
+
 %install
 NAME=%{app}
 
@@ -67,11 +70,19 @@ pip install --force-reinstall --upgrade 'pip>=1.5,<1.6'
 # Install package into the prefix
 pip install --process-dependency-links ./%{app}
 
+# Generate pyc bytecode files
+#python -mcompileall %{buildinstalldir}/lib
+# Generate optimized (.pyo) byte-compiled files
+#python -O -mcompileall %{buildinstalldir}/lib
+
 # Fix up paths in virtualenv, enable use of global site-packages
 virtualenv-%{pybasever} --relocatable %{buildinstalldir}
 find %{buildinstalldir} -name \*py[co] -exec rm {} \;
 find %{buildinstalldir} -name no-global-site-packages.txt -exec rm {} \;
 sed -i "s|`readlink -f ${RPM_BUILD_ROOT}`||g" %{buildinstalldir}/bin/*
+
+# Strip out mention of rpm buildroot from the pip install record
+find %{buildinstalldir} -name RECORD -exec sed -i -e "s|${RPM_BUILD_ROOT}||" {} \;
 
 # don't need a copy of python interpreter in the virtualenv
 rm %{buildinstalldir}/bin/python*
