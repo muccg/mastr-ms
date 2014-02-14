@@ -70,6 +70,9 @@ pip install --force-reinstall --upgrade 'pip>=1.5,<1.6'
 # Install package into the prefix
 pip install --process-dependency-links ./%{app}
 
+# Throw in datasync client so it can be used for testing
+pip install ./mdatasync_client
+
 # Generate pyc bytecode files
 #python -mcompileall %{buildinstalldir}/lib
 # Generate optimized (.pyo) byte-compiled files
