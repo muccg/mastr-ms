@@ -1,26 +1,12 @@
 # -*- coding: utf-8 -*-
-from django.test import TestCase, LiveServerTestCase
-from django.test.utils import override_settings
-from django.conf import settings
-from mastrms.users.models import User
-from mastrms.mdatasync_server.models import *
-from mastrms.repository.models import *
-from mastrms.repository.runbuilder import RunBuilder
-from mastrms.mdatasync_client.client.Simulator import Simulator, WorkList
-from mastrms.mdatasync_client.client.test import TestClient, FakeRsync
-from mastrms.mdatasync_client.client.config import MSDSConfig, plogging
-from mastrms.testutils import *
-import tempfile
-import mastrms.mdatasync_client.client.plogging  # wtf
-import time
-import logging
-import os
-import pipes
-import re
+from django.utils import unittest
+from nose.plugins.attrib import attr
 import dingus
-from contextlib import contextmanager
 
-logger = logging.getLogger(__name__)
+from mdatasync_client.Simulator import Simulator, WorkList
+from mdatasync_client.test import TestClient, FakeRsync
+from mdatasync_client.config import MSDSConfig, plogging
+from mdatasync_client import plogging
 
 TESTING_REPO = tempfile.mkdtemp(prefix="testrepo-")
 logger.info("Created testing repo %s" % TESTING_REPO)
@@ -142,6 +128,7 @@ class WithFixtures(object):
         user.save()
         return user
 
+@attr("synctest", "xdisplay")
 @override_settings(REPO_FILES_ROOT=TESTING_REPO)
 class SyncTests(LiveServerTestCase, XDisplayTest, WithFixtures):
     def setUp(self):
@@ -870,179 +857,3 @@ def runsample_filename(run, sample_filename):
                         str(run.created_on.year),
                         str(run.created_on.month),
                         str(run.id), sample_filename)
-
-
-# Trying out selenium tests
-# fixme: maybe use splinter for testing
-# http://splinter.cobrateam.info/
-#from selenium.webdriver.chrome.webdriver import WebDriver
-from selenium.webdriver.firefox.webdriver import WebDriver
-from splinter import Browser
-import re
-from django.test.client import Client
-from django.conf import settings
-
-# dependencies
-# yum -y install firefox
-# pip install splinter selenium WebDriver
-
-def create_session_store():
-    """ Creates a session storage object. """
-
-    from django.utils.importlib import import_module
-    engine = import_module(settings.SESSION_ENGINE)
-    # Implement a database session store object that will contain the session key.
-    store = engine.SessionStore()
-    store.save()
-    return store
-
-class AdminTests(LiveServerTestCase, XDisplayTest, WithFixtures):
-    def setUp(self):
-        self.client = Client()
-
-    @classmethod
-    def setUpClass(cls):
-        cls.setup_display()
-        super(AdminTests, cls).setUpClass()
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.teardown_display()
-        super(AdminTests, cls).tearDownClass()
-
-    def test1_login(self):
-        """
-        Login to the admin page. This test is given as an example in
-        the django docs.
-        """
-        self.setup_more_fixtures()
-        self.selenium = WebDriver()
-        self.selenium.get(self.url("/repoadmin/login/"))
-        username_input = self.selenium.find_element_by_name("username")
-        username_input.send_keys(self.admin.username)
-        password_input = self.selenium.find_element_by_name("password")
-        password_input.send_keys(self.admin_password)
-        self.selenium.find_element_by_xpath("//input[@value='Log in']").click()
-        self.selenium.quit()
-
-    def junk_code(self):
-        session_store = create_session_store()
-        session_items = session_store
-        # Add a session key/value pair.
-        session_items['uid'] = 1
-        session_items.save()
-
-        #test user setup
-        username = "testuser"
-        self.assertTrue(User.objects.filter(username=username).exists(),
-                        "Test user exists")
-        #success = self.client.login(username=username, password=password)
-        #self.assertTrue(success, "Log in as test user")
-
-            #logger.info("adding cookie %s=%s" % (settings.SESSION_COOKIE_NAME, session_store.session_key))
-            #browser.cookies.add({settings.SESSION_COOKIE_NAME:
-            #                     session_store.session_key})
-            # logger.info("adding cookies %s" % str(self.client.cookies))
-            # browser.cookies.add(dict((k, m.value) for (k, m) in self.client.cookies.items()))
-            # self.assertEqual(unicode(browser.cookies[settings.SESSION_COOKIE_NAME]),
-            #                  unicode(self.client.cookies[settings.SESSION_COOKIE_NAME].value))
-
-
-    def test2_mark_incomplete(self):
-        """
-        Tests the admin action where a run can be set as incomplete.
-        """
-
-        # run setup
-        self.setup_more_fixtures()
-        self.assertEqual(Run.objects.count(), 1)
-
-        # make the run complete
-        self.run.runsample_set.update(complete=True)
-        self.run.update_sample_counts()
-        self.assertEqual(self.run.state, RUN_STATES.COMPLETE[0])
-
-        with Browser() as browser:
-            # select the run
-            browser.visit(self.url("/repoadmin/repository/run/"))
-
-            # fill out login form
-            if browser.is_element_present_by_xpath("//input[@value='Log in']"):
-                browser.fill("username", self.admin.username)
-                browser.fill("password", self.admin_password)
-                browser.find_by_xpath("//input[@value='Log in']").click()
-
-            browser.find_by_name("_selected_action").first.check()
-
-            # Select the "Mark Run Incomplete" action from dropdown box
-            browser.select("action", "mark_run_incomplete")
-
-            # Click "Go" button
-            button = browser.find_by_name("index")
-            button.click()
-
-            self.assertTrue(browser.is_text_present("changed to incomplete"),
-                            "Check for a status message")
-
-            # grab status message
-            message = browser.find_by_css(".messagelist").text
-            logger.debug("message is: %s" % message)
-
-            # check the number of samples and runs
-            pat = re.compile(r"(\d+) runs? and (\d+) samples? changed to incomplete")
-            m = pat.match(message)
-            self.assertEqual(int(m.group(1)), 1, "Check num. runs changed")
-            self.assertEqual(int(m.group(2)), 2, "Check num. samples changed")
-
-    def url(self, path):
-        return "%s%s" % (self.live_server_url, path)
-
-@override_settings(REPO_FILES_ROOT=TESTING_REPO)
-class DeleteTempFilesTests(TestCase):
-    """
-    Tests the delete_temp_files management command.
-    Todo:
-    1. test permissions problems (chmod 000 directory)
-    2. test symlinks in tree (shouldn't be followed)
-    """
-
-    def setUp(self):
-        self.experiments = ["experiment1", "experiment2", "experiment2/subdir",
-                            "experiment3"]
-        self.worklist = ["runsample1_filename", "runsample2_filename",
-                         "teststuff1.d", "teststuff2.d"]
-
-        self.experiments.sort()
-
-        def cleanup_experiments():
-            self.experiments.sort(reverse=True)
-            for exp in self.experiments:
-                try:
-                    os.rmdir(os.path.join(TESTING_REPO, exp))
-                except OSError:
-                    logger.exception("tearDown rmdir")
-
-        self.addCleanup(cleanup_experiments)
-
-        self.temp_files = []
-        istemp = lambda f: "TEMP" in f
-
-        for exp in self.experiments:
-            destdir = os.path.join(TESTING_REPO, exp)
-            os.makedirs(destdir)
-            simulator = Simulator(destdir, temp_files=True)
-            self.addCleanup(simulator.cleanup)
-            simulator.process_worklist(self.worklist)
-
-            self.temp_files.extend(filter(istemp, simulator._created_files))
-            self.temp_files.extend(filter(istemp, simulator._created_dirs))
-
-    def test_delete_temp_files(self):
-        for f in self.temp_files:
-            self.assertTrue(os.path.exists(f), "%s exists" % f)
-
-        from django.core.management import call_command
-        call_command("delete_temp_files")
-
-        for f in self.temp_files:
-            self.assertFalse(os.path.exists(f), "%s doesn't exist" % f)

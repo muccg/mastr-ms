@@ -1,4 +1,5 @@
 from django.utils import unittest
+from nose.plugins.attrib import attr
 import dingus
 import os.path
 import tempfile
@@ -6,13 +7,13 @@ from StringIO import StringIO
 import logging
 logger = logging.getLogger(__name__)
 
-from mastrms.testutils import XDisplayTest
-from mastrms.mdatasync_client.client.MSDataSyncAPI import DataSyncServer, MSDataSyncAPI, MSDSImpl
-from mastrms.mdatasync_client.client.config import MSDSConfig
-from mastrms.mdatasync_client.client.test.testclient import TestClient
-from mastrms.mdatasync_client.client.version import VERSION
+from mdatasync_client.MSDataSyncAPI import DataSyncServer, MSDataSyncAPI, MSDSImpl
+from mdatasync_client.config import MSDSConfig
+from mdatasync_client.version import VERSION
+from .testclient import TestClient
 
-class BasicClientTests(unittest.TestCase, XDisplayTest):
+@attr("testclient")
+class BasicClientTests(unittest.TestCase):
     """
     These are simple tests just to exercise all the dialogs in the
     data sync client.
@@ -23,13 +24,6 @@ class BasicClientTests(unittest.TestCase, XDisplayTest):
 
     def tearDown(self):
         self.client.quit()
-
-    @classmethod
-    def setUpClass(cls):
-        cls.setup_display()
-    @classmethod
-    def tearDownClass(cls):
-        cls.teardown_display()
 
     def test1_mainwindow(self):
         """Show main window on screen, check if it's visible."""
@@ -314,7 +308,7 @@ class MSDSImplTests(unittest.TestCase):
         an API call marking complete the correct samples.
         """
         Server = dingus.Dingus()
-        with dingus.patch("mastrms.mdatasync_client.client.MSDataSyncAPI.DataSyncServer", Server):
+        with dingus.patch("mdatasync_client.MSDataSyncAPI.DataSyncServer", Server):
             self.impl.serverCheckRunSampleFiles(self.rsyncconfig,
                                                 self.filename_id_map)
 
@@ -353,7 +347,7 @@ class MSDSImplTests(unittest.TestCase):
         self.create_data_file("test", "dir", "filename2", "TEMP")
 
         Server = dingus.Dingus()
-        with dingus.patch("mastrms.mdatasync_client.client.MSDataSyncAPI.DataSyncServer", Server):
+        with dingus.patch("mdatasync_client.MSDataSyncAPI.DataSyncServer", Server):
             self.impl.serverCheckRunSampleFiles(self.rsyncconfig,
                                                 self.filename_id_map)
 

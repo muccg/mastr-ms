@@ -5,10 +5,8 @@ import signal
 import time
 import logging
 import wx
-import mastrms.mdatasync_client.client
-# client has some libs in subdirectories
-sys.path.append(os.path.dirname(mastrms.mdatasync_client.client.__file__))
-from mastrms.mdatasync_client.client.main import MDataSyncApp
+
+from mdatasync_client.main import MDataSyncApp
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
