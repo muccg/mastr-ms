@@ -155,7 +155,7 @@ ci_staging_tests() {
     # This unit test run is a little dodgy becaue we use system python 2.6
     # (because of wxPython) but the installer bundles python 2.7.
     REMOTE_CLIENT_TEST_RESULTS=${REMOTE_TEST_DIR}/client_tests.xml
-    ccg ${AWS_STAGING_INSTANCE} drun:"PYTHONPATH=/usr/local/webapps/mastrms/lib/python2.7/site-packages nosetests mdatasync_client --attr '!testclient' --with-xunit --xunit-file ${REMOTE_CLIENT_TEST_RESULTS} || true"
+    ccg ${AWS_STAGING_INSTANCE} drun:"PYTHONPATH\=/usr/local/webapps/mastrms/lib/python2.7/site-packages /usr/local/webapps/mastrms/bin/nosetests mdatasync_client --attr '!testclient' --with-xunit --xunit-file ${REMOTE_CLIENT_TEST_RESULTS} || true"
     ccg ${AWS_STAGING_INSTANCE} getfile:${REMOTE_CLIENT_TEST_RESULTS},./
 }
 
