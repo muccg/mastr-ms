@@ -391,7 +391,8 @@ def update_object(request, model, id):
 
     for row in rows:
         for key in args:
-            row.__setattr__(key, args[key])
+            val = None if args[key] == "null" else args[key]
+            row.__setattr__(key, val)
 
         #TODO clean this stuff up!
         if model == 'run':

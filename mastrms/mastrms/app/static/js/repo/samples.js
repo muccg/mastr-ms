@@ -27,7 +27,7 @@ MA.SampleLoadBySampleClass = function () {
 MA.SaveSampleRow = function(roweditor, changes, rec, i) {
     var bundledData = {};
 
-    if (rec.data.weight == '') {
+    if (!rec.data.weight) {
         rec.data.weight = '0.00';
     }
 
@@ -335,7 +335,7 @@ MA.SaveSampleOnlyRow = function(roweditor, changes, rec, i) {
 
     bundledData.label = rec.data.label;
     bundledData.comment = rec.data.comment;
-    if (rec.data.weight == '') {
+    if (!rec.data.weight) {
         rec.data.weight = '0.00';
     }
     bundledData.weight = rec.data.weight;
