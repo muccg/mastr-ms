@@ -14,7 +14,7 @@ for package in ('app', 'admin', 'dashboard', 'login', 'mdatasync_server', 'quote
     os.chdir(start_dir)
 
 install_requires = [
-    'Django==1.5.5',
+    'Django==1.6.1',
     'South==0.8.2',
     'django-extensions>=1.2.5',
     'django-userlog',
@@ -56,13 +56,6 @@ setup(name='django-mastrms',
         'mastrms.admin',
         'mastrms.dashboard',
         'mastrms.login',
-        'mastrms.mdatasync_client',
-        'mastrms.mdatasync_client.client',
-        'mastrms.mdatasync_client.client.plogging',
-        'mastrms.mdatasync_client.client.yaphc',
-        'mastrms.mdatasync_client.client.httplib2',
-        'mastrms.mdatasync_client.client.tendo',
-        'mastrms.mdatasync_client.client.test',
         'mastrms.mdatasync_server',
         'mastrms.mdatasync_server.management',
         'mastrms.mdatasync_server.management.commands',

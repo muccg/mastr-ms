@@ -8,6 +8,20 @@ instructions on how to upgrade the server, see
 :ref:`server-upgrade`. For instructions on how to upgrade the datasync
 client, see :ref:`client-upgrade`.
 
+.. _1.8.2:
+
+1.8.2 (20th Feb 2014)
+-------------------------
+
+Bug fix release. You can now put multiple space-separated values for
+``allowed_hosts`` and ``memcache`` in ``/etc/mastrms/mastrms.conf``.
+
+ * [MAS-55] - Missing samples labels etc when cloning experiments
+ * [MAS-56] - CSV upload broke with python27-mod_wsgi
+ * [MAS-57] - Client code using extjs grid is saving null sample weights
+ * [MAS-60] - Settings: multiple memcache servers and allowed hosts
+
+
 .. _1.8.1:
 
 1.8.1 (31st Jan 2014)

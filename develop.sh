@@ -14,16 +14,15 @@ AWS_BUILD_INSTANCE='aws_rpmbuild_centos6'
 AWS_STAGING_INSTANCE='aws_syd_mastrms_staging'
 TARGET_DIR="/usr/local/src/${PROJECT_NAME}"
 CLOSURE="/usr/local/closure/compiler.jar"
-TESTING_MODULES="argparse dingus xvfbwrapper nose"
-MODULES="MySQL-python==1.2.3 psycopg2==2.4.6 Werkzeug flake8 ${TESTING_MODULES}"
-PIP_OPTS="-v --download-cache ~/.pip/cache --index-url=https://pypi.python.org/simple --process-dependency-links"
+PIP_OPTS="-v --download-cache ~/.pip/cache --index-url=https://pypi.python.org/simple"
+PIP5_OPTS="${PIP_OPTS} --process-dependency-links"
 
 # A lot of tests need a database and/or X display to run. So the full
 # test suite TEST_LIST and the tests which don't need a database or X
 # are in NOSE_TEST_LIST, because they can be run outside the django
 # test runner.
-TEST_LIST="mastrms.repository.tests mastrms.mdatasync_client.client.test.tests mastrms.mdatasync_server.tests"
-NOSE_TEST_LIST="mastrms.mdatasync_client.client.test.tests:DataSyncServerTests mastrms.mdatasync_client.client.test.tests:MSDataSyncAPITests mastrms.mdatasync_client.client.test.tests:MSDSImplTests"
+TEST_LIST="mastrms.repository.tests mdatasync_client.test.tests mastrms.mdatasync_server.test"
+NOSE_TEST_LIST="mdatasync_client.test.tests:DataSyncServerTests mdatasync_client.test.tests:MSDataSyncAPITests mdatasync_client.test.tests:MSDSImplTests"
 
 # Use specific version of virtualenv, if it exists.
 # For python3, the command is pyvenv-3.3 or pyvenv.
@@ -91,7 +90,7 @@ ci_remote_build() {
         build_number_head >> build-number.txt
     fi
 
-    EXCLUDES="('bootstrap'\, '.hg*'\, '.git'\, 'virt*'\, '*.log'\, '*.rpm'\, 'mastrms/build'\, 'mastrms/dist'\, '*.egg-info'\, 'mastrms/mastrms/mdatasync_client/supportwin32')"
+    EXCLUDES="('bootstrap'\, '.hg*'\, '.git'\, 'virt*'\, '*.log'\, '*.rpm'\, 'mastrms/build'\, 'mastrms/dist'\, '*.egg-info'\, 'mdatasync_client/supportwin32')"
     SSH_OPTS="-o StrictHostKeyChecking\=no"
     RSYNC_OPTS="-l"
     time ccg ${AWS_BUILD_INSTANCE} rsync_project:local_dir=./,remote_dir=${TARGET_DIR}/,ssh_opts="${SSH_OPTS}",extra_opts="${RSYNC_OPTS}",exclude="${EXCLUDES}",delete=True
@@ -145,19 +144,19 @@ ci_staging_tests() {
     # fixme: this config should be put in nose.cfg or settings.py or similar
     EXCLUDES="--exclude\=yaphc --exclude\=esky --exclude\=httplib2"
 
-    # Start virtual X server here to work around a problem starting it
-    # from xvfbwrapper.
-    ccg ${AWS_STAGING_INSTANCE} drunbg:"Xvfb \:0"
-
-    sleep 2
-
     # firefox won't run without a profile directory, dbus and gconf
     # also need to write in home directory.
     ccg ${AWS_STAGING_INSTANCE} dsudo:"chown apache:apache /var/www"
 
     # Run tests, collect results
-    ccg ${AWS_STAGING_INSTANCE} dsudo:"cd ${REMOTE_TEST_DIR} && env DISPLAY\=\:0 dbus-launch timeout -sHUP 30m ${PROJECT_NAME} test --verbosity\=2 --liveserver\=localhost\:8082\,8090-8100\,9000-9200\,7041 --noinput --with-xunit --xunit-file\=${REMOTE_TEST_RESULTS} ${TEST_LIST} ${EXCLUDES} || true"
+    ccg ${AWS_STAGING_INSTANCE} dsudo:"cd ${REMOTE_TEST_DIR} && xvfb-run dbus-launch timeout -sHUP 30m ${PROJECT_NAME} test --verbosity\=2 --liveserver\=localhost\:8082\,8090-8100\,9000-9200\,7041 --noinput --with-xunit --xunit-file\=${REMOTE_TEST_RESULTS} ${TEST_LIST} ${EXCLUDES} || true"
     ccg ${AWS_STAGING_INSTANCE} getfile:${REMOTE_TEST_RESULTS},./
+
+    # This unit test run is a little dodgy becaue we use system python 2.6
+    # (because of wxPython) but the installer bundles python 2.7.
+    REMOTE_CLIENT_TEST_RESULTS=${REMOTE_TEST_DIR}/client_tests.xml
+    ccg ${AWS_STAGING_INSTANCE} drun:"PYTHONPATH\=/usr/local/webapps/mastrms/lib/python2.7/site-packages /usr/local/webapps/mastrms/bin/nosetests mdatasync_client --attr '!testclient' --with-xunit --xunit-file ${REMOTE_CLIENT_TEST_RESULTS} || true"
+    ccg ${AWS_STAGING_INSTANCE} getfile:${REMOTE_CLIENT_TEST_RESULTS},./
 }
 
 
@@ -214,10 +213,9 @@ installapp() {
     echo "Install ${PROJECT_NAME}"
     ${PYVENV} --system-site-packages ${VIRTUALENV}
     pushd ${TOPDIR}/${PROJECT_NAME}
-    ${VIRTUALENV}/bin/pip install --force-reinstall --upgrade 'pip>=1.5,<1.6'
-    ${VIRTUALENV}/bin/pip install ${PIP_OPTS} -e .
-    popd
-    ${VIRTUALENV}/bin/pip install ${PIP_OPTS} ${MODULES}
+    ${VIRTUALENV}/bin/pip install ${PIP_OPTS} --force-reinstall --upgrade 'pip>=1.5,<1.6'
+    ${VIRTUALENV}/bin/pip install ${PIP5_OPTS} -e .[dev,postgres,test]
+    ${VIRTUALENV}/bin/pip install ${PIP5_OPTS} -e ../mdatasync_client
 
     mkdir -p ${HOME}/bin
     ln -sf ${VIRTUALENV}/bin/python ${HOME}/bin/vpython-${PROJECT_NAME}

@@ -33,8 +33,12 @@ setup_prod_env()
 # file. This includes Django's development server, if the WSGI_APPLICATION
 # setting points here.
 from django.core.wsgi import get_wsgi_application
-application = get_wsgi_application()
+_application = get_wsgi_application()
 
-# Apply WSGI middleware here.
-# from helloworld.wsgi import HelloWorldApplication
-# application = HelloWorldApplication(application)
+def application(environ, start_response):
+    # Before entering the django app, transfer the SCRIPT_NAME http
+    # header into an environment variable so settings can pick it up.
+    mount_point = environ.get("HTTP_SCRIPT_NAME", environ.get("SCRIPT_NAME", None))
+    if mount_point:
+        os.environ["SCRIPT_NAME"] = mount_point
+    return _application(environ, start_response)

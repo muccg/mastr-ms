@@ -167,12 +167,74 @@ Django Settings File
 The config file for Mastr-MS is installed at
 ``/etc/mastrms/mastrms.conf``. It contains basic settings that need to
 be changed for most sites, for example the database password. There
-are comments about each setting within this config file.
+are comments and example values for each setting within this config
+file.
+
++---------------------------+-----------------------------------------------------+
+| Option                    | Description                                         |
++===========================+=====================================================+
+| ``dbtype``                | Database backend -- always use ``pgsql``.           |
++---------------------------+-----------------------------------------------------+
+| ``dbname``                | The rest are standard database connection           |
++---------------------------+ options.                                            |
+| ``dbuser``                |                                                     |
++---------------------------+                                                     |
+| ``dbpass``                |                                                     |
++---------------------------+-----------------------------------------------------+
+| ``dbserver``              | Optional settings for remote database               |
++---------------------------+ connection.                                         |
+| ``dbport``                |                                                     |
++---------------------------+-----------------------------------------------------+
+| ``memcache``              | Optional connection string(s) for ``memcached``.    |
+|                           | Multiple servers are separated by spaces.           |
++---------------------------+-----------------------------------------------------+
+| ``allowed_hosts``         | Space-separated list of address permitted to access |
+|                           | the server.  Wildcards can be used as in the        |
+|                           | `ALLOWED_HOSTS`_ docs.                              |
++---------------------------+-----------------------------------------------------+
+| ``server_email``          | "From" e-mail address for server-generated error    |
+|                           | mails.                                              |
++---------------------------+-----------------------------------------------------+
+| ``email_host``            | Details for SMTP server. User and password are      |
++---------------------------+ optional.                                           |
+| ``email_port``            |                                                     |
++---------------------------+                                                     |
+| ``email_host_user``       |                                                     |
++---------------------------+                                                     |
+| ``email_host_password``   |                                                     |
++---------------------------+-----------------------------------------------------+
+| ``alert_email``           | Where error messages are sent.                      |
++---------------------------+-----------------------------------------------------+
+| ``return_email``          | The "From" address on e-mail sent by mastr-ms.      |
++---------------------------+-----------------------------------------------------+
+| ``logs_to_email``         | E-mail address to receive datasync client log       |
+|                           | notifications.                                      |
++---------------------------+-----------------------------------------------------+
+| ``keys_to_email``         | E-mail address to receive datasync key upload       |
+|                           | notifications.                                      |
++---------------------------+-----------------------------------------------------+
+| ``registration_to_email`` | E-mail address to receive registration              |
+|                           | requests.                                           |
++---------------------------+-----------------------------------------------------+
+| ``repo_user``             | Mastr-MS will attempt to change ownership of data   |
++---------------------------+ files to this user and group.                       |
+| ``repo_group``            |                                                     |
++---------------------------+-----------------------------------------------------+
+| ``repo_files_root``       | Location of data files for experiments and quotes.  |
++---------------------------+                                                     |
+| ``quote_files_root``      |                                                     |
++---------------------------+-----------------------------------------------------+
+| ``secret_key``            | Needs to be a secret random string, can be          |
+|                           | generated by a `key generator program`_.            |
++---------------------------+-----------------------------------------------------+
+
+.. _`ALLOWED_HOSTS`: https://docs.djangoproject.com/en/1.5/releases/1.5/#allowed-hosts-required-in-production
+.. _`key generator program`: http://www.miniwebtool.com/django-secret-key-generator/
 
 More advanced options appear in ``/etc/mastrms/settings.py``. Any of
 the `Django Settings`_ can be changed in this file.
 
-.. _`Django Settings`: https://docs.djangoproject.com/en/1.5/ref/settings/
+.. _`Django Settings`: https://docs.djangoproject.com/en/1.6/ref/settings/
 
 SELinux and Mastr-MS
 ~~~~~~~~~~~~~~~~~~~~

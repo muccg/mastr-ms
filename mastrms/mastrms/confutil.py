@@ -11,7 +11,8 @@ def setup_prod_env():
     os.environ.setdefault('PYTHON_EGG_CACHE', '/tmp/.python-eggs')
 
     # ccg.utils.webhelpers expects SCRIPT_NAME to be a path such as /mastrms
-    os.environ["SCRIPT_NAME"] = "/" + project_name
+    # This is a fallback value if the variable isn't set through wsgi.
+    os.environ.setdefault("SCRIPT_NAME", "/" + project_name)
 
     os.environ["PROJECT_NAME"] = project_name
 

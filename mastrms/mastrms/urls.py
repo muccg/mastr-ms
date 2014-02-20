@@ -15,7 +15,7 @@ urlpatterns = patterns('',
     (r'^sync/', include('mastrms.mdatasync_server.urls')),
 
     # mastrms.epo
-    (r'^ws/', include('mastrms.repository.wsurls')),
+    (r'^ws/', include('mastrms.repository.urls')),
 
     # repoadmin
     (r'^repoadmin/', include(admin.site.urls)),

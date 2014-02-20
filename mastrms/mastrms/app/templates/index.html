@@ -98,9 +98,8 @@ function callbacker(){
         return;
     }
 
-    MA.InitApplication('{{ APP_SECURE_URL }}', '{{ username }}', '{{ mainContentFunction }}', '{{ params|safe }}');
+    MA.InitApplication('{{ APP_SECURE_URL }}', '{{ user.username }}', '{{ mainContentFunction }}', '{{ params|safe }}');
     document.getElementById("appLoad").style.display = "none";
-    //document.getElementById('loginDiv').style.display = 'none';
 }
 </script>
 

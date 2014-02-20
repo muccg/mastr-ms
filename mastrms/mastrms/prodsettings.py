@@ -3,15 +3,16 @@ from os import environ
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-#
 
-def get_env_setting(setting, default=None):
+def get_env_setting(setting, default=None, islist=False):
     """
     Get the environment setting, return a default value, or raise
     an exception.
     Values used by this function will likely come from
     /etc/mastrms/mastrms.conf.
     """
+    parse = lambda x: x.split() if islist else x
     try:
-        return environ["_".join([PROJECT_NAME, setting])]
+        return parse(environ["_".join([PROJECT_NAME, setting])])
     except KeyError:
         if default is None:
             from django.core.exceptions import ImproperlyConfigured
@@ -70,7 +71,7 @@ EMAIL_USE_TLS = False
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-#
 
 # See: https://docs.djangoproject.com/en/1.5/releases/1.5/#allowed-hosts-required-in-production
-ALLOWED_HOSTS = get_env_setting("allowed_hosts", [])
+ALLOWED_HOSTS = get_env_setting("allowed_hosts", [], True)
 
 engines = {
     'pgsql': 'django.db.backends.postgresql_psycopg2',
@@ -105,7 +106,7 @@ if get_env_setting("memcache", ""):
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-            'LOCATION': get_env_setting("memcache"),
+            'LOCATION': get_env_setting("memcache", "", True),
             'KEYSPACE': "%s-prod" % PROJECT_NAME,
         }
     }
