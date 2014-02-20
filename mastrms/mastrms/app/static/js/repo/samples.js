@@ -1,9 +1,9 @@
 MA.ExperimentSamplesInit = function() {
     var expId = MA.ExperimentController.currentId();
-    
+
     sampleClassStore.proxy.conn.url = wsBaseUrl + 'recreate_sample_classes/' + expId;
     sampleClassStore.load();
-    
+
     sampleStore.removeAll();
     randomisableSampleStore.removeAll();
 };
@@ -14,7 +14,7 @@ MA.SampleLoadByExperiment = function (randomise) {
         params.randomise = true;
     }
     randomisableSampleStore.load({ params: params});
-    // lastOptions will be used again when sorting by header click etc. so we 
+    // lastOptions will be used again when sorting by header click etc. so we
     // have to remove randomise or all consequent responses will be randomised
     var lastOptions = randomisableSampleStore.lastOptions;
     delete lastOptions.params.randomise;
@@ -26,21 +26,21 @@ MA.SampleLoadBySampleClass = function () {
 
 MA.SaveSampleRow = function(roweditor, changes, rec, i) {
     var bundledData = {};
-    
+
     if (rec.data.weight == '') {
         rec.data.weight = '0.00';
     }
-    
+
     bundledData.label = rec.data.label;
     bundledData.comment = rec.data.comment;
     bundledData.weight = rec.data.weight;
-    
+
     MA.SaveRowLiterals('sample', roweditor, bundledData, rec, i, MA.SampleLoadBySampleClass);
 };
 
 MA.SaveSampleClassRow = function(roweditor, changes, rec, i) {
     var bundledData = {};
-    
+
     bundledData.class_id = rec.data.class_id;
 
     MA.SaveRowLiterals('sampleclass', roweditor, bundledData, rec, i, MA.ExperimentSamplesInit);
@@ -73,9 +73,9 @@ MA.ExperimentSamples = {
                     sm: new Ext.grid.RowSelectionModel({
                                                        listeners:{'rowselect':function(sm, idx, rec) {
                                                        MA.CurrentSampleClassIdValue = rec.data.id;
-                                                       
+
                                                       MA.SampleLoadBySampleClass();
-                                                       
+
                                                        var grid = Ext.getCmp("samples");
                                                        grid.enable();
                                                        Ext.getCmp('addsamplebutton').enable();
@@ -97,26 +97,26 @@ MA.ExperimentSamples = {
                             text: 'Enable/Disable Sample Class',
                             handler : function(){
                                var grid = Ext.getCmp('sampleClasses');
-                               var delIds = []; 
-                               
+                               var delIds = [];
+
                                var selections = grid.getSelectionModel().getSelections();
                                if (!Ext.isArray(selections)) {
                                selections = [selections];
                                }
-                               
+
                                for (var index = 0; index < selections.length; index++) {
                                if (!Ext.isObject(selections[index])) {
                                continue;
                                }
-                               
+
                                delIds.push(selections[index].data.id);
                                }
-                               
+
                                for (var i = 0; i < delIds.length; i++) {
                                MA.CRUDSomething('sample_class_enable/'+delIds[i], {}, function() { var expId = MA.ExperimentController.currentId(); sampleClassStore.proxy.conn.url = wsBaseUrl + 'recreate_sample_classes/' + expId;
                                                       sampleClassStore.load(); });
                                }
-                               
+
                             }
                         }
                     ],
@@ -127,23 +127,23 @@ MA.ExperimentSamples = {
                             icon: 'static/images/create-samples.png',
                             handler: function() {
                                 var reps = Ext.getCmp('replicateField').getValue();
-                                
+
                                 var grid = Ext.getCmp('sampleClasses');
-                                var selIds = []; 
-                                
+                                var selIds = [];
+
                                 var selections = grid.getSelectionModel().getSelections();
                                 if (!Ext.isArray(selections)) {
                                     selections = [selections];
                                 }
-                                
+
                                 for (var index = 0; index < selections.length; index++) {
                                     if (!Ext.isObject(selections[index])) {
                                         continue;
                                     }
-                                    
+
                                     selIds.push(selections[index].data.id);
                                 }
-                                
+
                                 for (var i = 0; i < selIds.length; i++) {
                                     MA.CRUDSomething('createSamples/', {'sample_class_id':selIds[i], 'experiment_id':MA.ExperimentController.currentId(), 'replicates':reps}, function() { var sm = Ext.getCmp('sampleClasses').getSelectionModel(); var selected = sm.getSelected(); sm.clearSelections(); sm.selectRecords([selected]);  MA.ExperimentSamplesInit(); });
                                 }
@@ -165,16 +165,16 @@ MA.ExperimentSamples = {
                     viewConfig: {
                         forceFit: true,
                         autoFill:true,
-                        getRowClass : function (row, index) { 
-                            var cls = ''; 
+                        getRowClass : function (row, index) {
+                            var cls = '';
                             var data = row.data;
                             //console.log(data);
-                            if (data.enabled) { 
-                                cls = ''; 
+                            if (data.enabled) {
+                                cls = '';
                             } else {
-                                cls = 'x-row-gray'; 
-                            }//end switch 
-                            return cls; 
+                                cls = 'x-row-gray';
+                            }//end switch
+                            return cls;
                         }
                     },
                     columns: [
@@ -222,18 +222,18 @@ MA.ExperimentSamples = {
                     icon: 'static/images/delete.png',
                     handler: function () {
                         var grid = Ext.getCmp('samples');
-                        var delIds = []; 
-                       
+                        var delIds = [];
+
                         var selections = grid.getSelectionModel().getSelections();
                         if (!Ext.isArray(selections)) {
                             selections = [selections];
                         }
-                       
+
                         for (var index = 0; index < selections.length; index++) {
                             if (!Ext.isObject(selections[index])) {
                                 continue;
                             }
-                       
+
                             delIds.push(selections[index].data.id);
                         }
 
@@ -254,22 +254,22 @@ MA.ExperimentSamples = {
                         //save changes to selected entries
                         var grid = Ext.getCmp('samples');
                         var selections = grid.getSelectionModel().getSelections();
-        
+
                         if (!Ext.isArray(selections)) {
                             selections = [selections];
                         }
-        
+
                         if (selections.length > 0) {
-                            
+
                             var ids = [];
                             for (var idx in selections) {
                                 if (!Ext.isObject(selections[idx])) {
                                     continue;
                                 }
-                                
+
                                 ids.push(selections[idx].data.id);
                             }
-                            
+
                             Ext.getCmp("runDetails").clearSamples();
                             Ext.getCmp("runDetails").addSample(ids);
                             MA.RunCmp.show();
@@ -308,10 +308,10 @@ MA.ExperimentSamples = {
 
 MA.ExperimentSamplesOnlyInit = function() {
     var expId = MA.ExperimentController.currentId();
-    
-    var classLoader = new Ajax.Request(wsBaseUrl + 'populate_select/sampleclass/id/class_id/experiment__id/'+encodeURIComponent(expId), 
-                                     { 
-                                     asynchronous:false, 
+
+    var classLoader = new Ajax.Request(wsBaseUrl + 'populate_select/sampleclass/id/class_id/experiment__id/'+encodeURIComponent(expId),
+                                     {
+                                     asynchronous:false,
                                      evalJSON:'force',
                                      onSuccess: function(response) {
                                          var classComboStore = Ext.StoreMgr.get('classCombo');
@@ -321,18 +321,18 @@ MA.ExperimentSamplesOnlyInit = function() {
                                          for (var idx in data) {
                                              massagedData[idx] = [data[idx]['key'], data[idx]['value']];
                                          }
-                                         
+
                                          classComboStore.loadData(massagedData);
                                          }
                                      }
                                      );
-    
+
     MA.SampleLoadByExperiment();
 };
 
 MA.SaveSampleOnlyRow = function(roweditor, changes, rec, i) {
     var bundledData = {};
-    
+
     bundledData.label = rec.data.label;
     bundledData.comment = rec.data.comment;
     if (rec.data.weight == '') {
@@ -340,7 +340,7 @@ MA.SaveSampleOnlyRow = function(roweditor, changes, rec, i) {
     }
     bundledData.weight = rec.data.weight;
     bundledData.sample_class_id = rec.data.sample_class;
-    
+
     MA.SaveRowLiterals('sample', roweditor, bundledData, rec, i, MA.SampleLoadByExperiment);
 };
 
@@ -355,7 +355,7 @@ MA.SampleCSVUploadForm = new Ext.Window({
     defaults: {
         bodyStyle:'padding:15px;background:transparent;'
     },
-    
+
     items:[
         {
             id:'sampleCSVUpload',
@@ -365,7 +365,7 @@ MA.SampleCSVUploadForm = new Ext.Window({
             waitTitle: 'Uploading...',
             border:false,
             items:[
-                { 
+                {
                     xtype: 'hidden',
                     name: 'experiment_id',
                     itemId: 'expIdField'
@@ -397,23 +397,23 @@ MA.SampleCSVUploadForm = new Ext.Window({
             itemId:'csvUploadBtn',
             handler: function(){
                 Ext.getCmp('sampleCSVUpload').getComponent('expIdField').setValue( MA.ExperimentController.currentId() );
-            
+
                 Ext.getCmp('sampleCSVUpload').getForm().submit(
-                    {   
-                        successProperty: 'success',        
+                    {
+                        successProperty: 'success',
                         success: function (form, action) {
                             var res = action.result;
                             if (res.success === true) {
                                 var created = res.num_created + " sample" + (res.num_created == 1 ? "" : "s") + " added";
                                 var updated = res.num_updated + " sample" + (res.num_updated == 1 ? "" : "s") + " updated";
                                 var msg = ((res.num_created && res.num_updated) ? (created + " and " + updated) : (res.num_created ? created : updated)) + "."
-                                form.reset(); 
+                                form.reset();
                                 MA.ExperimentSamplesOnlyInit();
 
                                 Ext.Msg.alert('CSV Upload', msg);
 
                                 Ext.getCmp('sampleCSVUploadWindow').hide();
-                            } 
+                            }
                         },
                         failure: function (form, action) {
                             // this gets called both on server errors
@@ -447,7 +447,7 @@ MA.SampleCSVUploadForm = new Ext.Window({
 });
 
 var createSampleCSV = function(records){
-    var csvtext = "<html><head></head><body>";
+    var csvtext = "<html><head></head><body><pre>";
     var fields = [];
     if (records.length > 0)
     {
@@ -463,23 +463,23 @@ var createSampleCSV = function(records){
                 header += ", ";
             }
         }
-        
-        csvtext += header + "</br>";
+
+        csvtext += header + "\n";
 
         for (var count=0; count < records.length; count++)
         {
             line = ""
             for (var fieldindex=0; fieldindex<fields.length; fieldindex++){
-                line += records[count][fields[fieldindex]];
+                line += records[count][fields[fieldindex]] || "";
                 if (fieldindex < fields.length-1){
                     line += ","
                 }
             }
-            csvtext += line + "</br>";       
+            csvtext += line + "\n";
         }
     }
 
-    csvtext += "</body></html>";
+    csvtext += "</pre></body></html>";
 
     return csvtext;
 };
@@ -492,10 +492,6 @@ var exportCSV = function(records){
     doc.charset='utf-8';
     doc.write(csvtext);
     doc.close();
-    //var fileName='experiment.csv';
-    //doc.execCommand("SaveAs", null, fileName);
-    
-
 };
 
 
@@ -524,7 +520,7 @@ MA.ExperimentSamplesOnly = {
             icon: 'static/images/delete.png',
             handler: function () {
                 var grid = Ext.getCmp('samplesOnly');
-                var delIds = []; 
+                var delIds = [];
 
                 var selections = grid.getSelectionModel().getSelections();
                 if (!Ext.isArray(selections)) {
@@ -580,25 +576,25 @@ MA.ExperimentSamplesOnly = {
                 //save changes to selected entries
                 var grid = Ext.getCmp('samplesOnly');
                 var selections = grid.getSelectionModel().getSelections();
-        
+
                 if (!Ext.isArray(selections)) {
                     selections = [selections];
                 }
-        
+
                 if (selections.length > 0) {
-                    
+
                     var ids = [];
                     for (var idx in selections) {
                         if (!Ext.isObject(selections[idx])) {
                             continue;
                         }
-                        
+
                         ids.push(selections[idx].data.id);
                     }
-                    
+
                     Ext.getCmp("runDetails").clearSamples();
                     Ext.getCmp("runDetails").addSample(ids);
-        
+
                     MA.RunCmp.show();
                 }
             }
