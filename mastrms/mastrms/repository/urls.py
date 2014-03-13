@@ -1,6 +1,8 @@
 from django.conf.urls import *
 from django.conf import settings
-from mastrms.repository.views import CSVUploadViewFile, CSVUploadViewCaptureCSV
+from .views import CSVUploadViewFile, CSVUploadViewCaptureCSV
+from .isatab import ISATabExportView
+from mastrms.decorators import mastr_users_only
 
 urlpatterns = patterns('mastrms.repository.views',
     (r'^populate_select/(?P<model>\w+)/(?P<key>\w+)[/]*$', 'populate_select', {'SSL':settings.SSL_ENABLED}),
@@ -65,5 +67,5 @@ urlpatterns = patterns('mastrms.repository.views',
     url(r'^create_new_version_of_rule_generator[/]*$', 'create_new_version_of_rule_generator', {'SSL':settings.SSL_ENABLED}, name='create_new_version_of_rule_generator'),
     url(r'^check_experiment_cloneable/(?P<experiment_id>\d+)[/]*$', 'check_experiment_cloneable', {'SSL':settings.SSL_ENABLED}),
     url(r'^clone_run/(?P<run_id>\d+)[/]*$', 'clone_run', {'SSL':settings.SSL_ENABLED}),
-
+    url(r'^isatab/(?P<project_id>\w+)[/]$', mastr_users_only(ISATabExportView.as_view()), {'SSL':settings.SSL_ENABLED}),
 )
