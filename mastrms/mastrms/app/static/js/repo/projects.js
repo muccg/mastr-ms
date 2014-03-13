@@ -9,11 +9,11 @@ MA.Blur = function(invoker) {
     }
 
     invoker.init.call();
-    Ext.getCmp("expContent").getLayout().setActiveItem(invoker.index); 
+    Ext.getCmp("expContent").getLayout().setActiveItem(invoker.index);
     Ext.currentExperimentNavItem = invoker.index;
-    
+
     MA.ExperimentDeferredInvocation = {'init':MA.Null, 'index':-1};
-    
+
     (function () {
         MA.ExperimentController.mask.hide();
     }).defer(500);
@@ -23,13 +23,13 @@ MA.Null = function() {};
 
 MA.CRUDSomething = function(remainderURL, params, callbackfn) {
     var paramString = '?';
-    
+
     for (var index in params) {
         paramString += encodeURIComponent(index) + '=' + encodeURIComponent(params[index]) + '&';
     }
-    
-    //TODO append the parameters to the url 
-    var crudStore = new Ext.data.JsonStore( 
+
+    //TODO append the parameters to the url
+    var crudStore = new Ext.data.JsonStore(
                                              {
                                              autoLoad: false,
                                              method:'GET',
@@ -49,19 +49,19 @@ function ExperimentController() {
     this.init = function() {
         self.loadExperiment(self.currentId());
     };
-    
+
     this.currentId = function() {
         if (!self._currentExpId) {
             return 0;
         }
-        
+
         return self._currentExpId;
     };
-    
+
     this.setCurrentId = function(newID) {
         self._currentExpId = newID;
     };
-    
+
     this.blur = function(invoker) {
 
         var saver;
@@ -81,58 +81,58 @@ function ExperimentController() {
         if (expJobNumber === null) {
             expJobNumber = '';
         }
-        
+
         if (!Ext.isDefined(expName) ||
             expName === "") {
             //seriously, this should never happen
             self.blurSuccess();
             return;
         }
-        
+
         MA.ExperimentDeferredInvocation = invoker;
-    
+
         if (expId === 0) {
-            
-            saver = new Ajax.Request(wsBaseUrl + 'create/experiment/?title='+encodeURIComponent(expName)+'&description='+encodeURIComponent(expDescription)+'&comment='+encodeURIComponent(expComment)+'&status_id=2&formal_quote_id='+encodeURIComponent(expFQuoteId)+'&job_number='+encodeURIComponent(expJobNumber)+'&project_id='+encodeURIComponent(MA.currentProjectId)+'&status_id='+encodeURIComponent(expStatus), 
-                                                 { 
-                                                 asynchronous:true, 
+
+            saver = new Ajax.Request(wsBaseUrl + 'create/experiment/?title='+encodeURIComponent(expName)+'&description='+encodeURIComponent(expDescription)+'&comment='+encodeURIComponent(expComment)+'&status_id=2&formal_quote_id='+encodeURIComponent(expFQuoteId)+'&job_number='+encodeURIComponent(expJobNumber)+'&project_id='+encodeURIComponent(MA.currentProjectId)+'&status_id='+encodeURIComponent(expStatus),
+                                                 {
+                                                 asynchronous:true,
                                                  evalJSON:'force',
                                          onSuccess:     self.blurSuccess,
                                          onFailure:    MA.DSLoadException
                                          });
         } else {
-            saver = new Ajax.Request(wsBaseUrl + 'update/experiment/'+expId+'/?title='+encodeURIComponent(expName)+'&description='+encodeURIComponent(expDescription)+'&comment='+encodeURIComponent(expComment)+'&status_id=2&formal_quote_id='+encodeURIComponent(expFQuoteId)+'&job_number='+encodeURIComponent(expJobNumber)+'&project_id='+encodeURIComponent(MA.currentProjectId)+'&status_id='+encodeURIComponent(expStatus), 
-                                         { 
-                                         asynchronous:true, 
+            saver = new Ajax.Request(wsBaseUrl + 'update/experiment/'+expId+'/?title='+encodeURIComponent(expName)+'&description='+encodeURIComponent(expDescription)+'&comment='+encodeURIComponent(expComment)+'&status_id=2&formal_quote_id='+encodeURIComponent(expFQuoteId)+'&job_number='+encodeURIComponent(expJobNumber)+'&project_id='+encodeURIComponent(MA.currentProjectId)+'&status_id='+encodeURIComponent(expStatus),
+                                         {
+                                         asynchronous:true,
                                          evalJSON:'force',
                                          onSuccess:     self.blurSuccess,
                                           onFailure:    MA.DSLoadException
                                          });
         }
-        
+
         self.mask.show();
     };
 
     this.blurSuccess = function(response) {
         self.mask.hide();
-    
+
         if (Ext.isDefined(response)) {
             if (!Ext.isDefined(response.responseJSON)) {
                 Ext.Msg.alert('Error', 'An unexpected error has occurred. Your session may have timed out. Please reload your browser window.');
                 return;
             }
-            
+
             self.setCurrentId(response.responseJSON.rows[0].id);
         }
-        
+
         var index = MA.ExperimentDeferredInvocation.index;
-    
+
         if (index >= 0) {
-            Ext.getCmp("expContent").getLayout().setActiveItem(index); 
+            Ext.getCmp("expContent").getLayout().setActiveItem(index);
             Ext.currentExperimentNavItem = index;
         }
         MA.ExperimentDeferredInvocation.init();
-        
+
         MA.ExperimentDeferredInvocation = {'index':-1, 'init':MA.Null};
     };
 
@@ -162,11 +162,11 @@ function ExperimentController() {
         Ext.getCmp('rankfield').hide();
         Ext.getCmp('upperrankfield').setVisible(false);
         Ext.getCmp('ncbifield').setVisible(false);
-        
+
         if (organismType === undefined) {
             return;
         }
-        
+
         if (organismType > 4) {  //4 here refers to food & beverage, or synthetic compound. everything else is an organism
             Ext.getCmp('rankfield').hide();
             Ext.getCmp('organismFieldset').setTitle('Subtype');
@@ -177,46 +177,46 @@ function ExperimentController() {
             Ext.getCmp('rankfield').show();
             Ext.getCmp('upperrankfield').setVisible(true);
             Ext.getCmp('ncbifield').setVisible(true);
-            
+
         }
-        
+
         if (organismType != 2) {
             Ext.getCmp("plantFieldset").hide();
         } else {
             Ext.getCmp("plantFieldset").show();
         }
-        
+
         Ext.getCmp('speciesfield').enable();
     };
-    
+
     this.loadExperiment = function(expId) {
-        
-        var fquoLoader = new Ajax.Request(wsBaseUrl + 'populate_select/formalquote/id/toemail/', 
-                                         { 
-                                         asynchronous:true, 
+
+        var fquoLoader = new Ajax.Request(wsBaseUrl + 'populate_select/formalquote/id/toemail/',
+                                         {
+                                         asynchronous:true,
                                          evalJSON:'force',
                                          onSuccess: function(response) {
                                              var fquoCombo = Ext.getCmp('formalQuote');
                                              var data = response.responseJSON.response.value.items;
                                              var massagedData = [];
-                                             
+
                                              for (var idx = 0; idx < data.length; idx++) {
                                                 massagedData[idx] = [data[idx].key, '#'+data[idx].key + '  ' + data[idx].value];
                                              }
-    
+
                                              //ensure that there is a blank entry
                                              massagedData.unshift(['','  none  ']);
-                                             
+
                                              fquoCombo.getStore().loadData(massagedData);
-                                             
+
                                              fquoCombo.setValue(fquoCombo.getValue());
                                              }
                                          }
                                          );
-        
-        var expLoader = new Ajax.Request(wsBaseUrl + "records/experiment/id/" + expId, 
-                                         { 
-                                         asynchronous:true, 
+
+        var expLoader = new Ajax.Request(wsBaseUrl + "records/experiment/id/" + expId,
+                                         {
+                                         asynchronous:true,
                                          evalJSON:'force',
                                          onSuccess: function(response) {
                                                  var namefield = Ext.getCmp('experimentName');
@@ -224,7 +224,7 @@ function ExperimentController() {
                                                  var comment = Ext.getCmp('experimentComment');
                                                  var formalQuote = Ext.getCmp('formalQuote');
                                                  var jobNumber = Ext.getCmp('jobNumber');
-    
+
                                                  //update the fields on the sample tracking page
                                                  var tnamefield = Ext.getCmp('trackingExperimentName');
                                                  var tcomment = Ext.getCmp('trackingExperimentComment');
@@ -234,18 +234,18 @@ function ExperimentController() {
                                                  // and the ones on sample preparation page
                                                  var spnotes = Ext.getCmp('samplePreparationNotes');
 
-                                                 
+
                                                  if (!namefield || !desc || !comment || !formalQuote || !jobNumber) {
                                                      return;
                                                  }
-                                                 
+
                                                  namefield.setValue('');
                                                  desc.setValue('');
                                                  comment.setValue('');
                                                  formalQuote.clearValue();
                                                  jobNumber.setValue('');
                                                  Ext.getCmp('expFieldset').getComponent('status').setValue('');
-                                                    
+
                                                  //tracking fields
                                                  tnamefield.setValue('');
                                                  tcomment.setValue('');
@@ -253,18 +253,18 @@ function ExperimentController() {
                                                  tjobNumber.setValue('');
 
                                                  spnotes.setValue('');
-    
+
                                                  var rs = response.responseJSON.rows;
-                                                 
+
                                                  if (rs.length > 0) {
                                                      namefield.setValue(rs[0].title);
                                                      desc.setValue(rs[0].description);
                                                      comment.setValue(rs[0].comment);
                                                      formalQuote.setValue(rs[0].formal_quote);
                                                      jobNumber.setValue(rs[0].job_number);
-                                                     
+
                                                      Ext.getCmp('expFieldset').getComponent('status').setValue(rs[0].status);
-                                                     
+
                                                      //tracking fields
                                                      tnamefield.setValue(rs[0].title);
                                                      tcomment.setValue(rs[0].comment);
@@ -275,20 +275,20 @@ function ExperimentController() {
                                                      //Set the project id so that the 'back to project' button works.
                                                      MA.currentProjectId = rs[0].project;
                                                  }
-                                         
+
                                                  self.updateNav();
-    
+
                                              }
                                          }
                                          );
-    
+
         var changingExperiment = (self.currentId() != expId);
         self.setCurrentId(expId);
-        
+
         MA.MenuHandler({ id:'experiment:view' });
-    
+
         MA.skipBlur = true;
-    
+
         // Eh, we'll check for IE 6 as well just in case.
         if ((Ext.isIE6 || Ext.isIE7) && changingExperiment) {
             /* This works around an apparent DOM manipulation timing bug in IE 7
@@ -296,9 +296,9 @@ function ExperimentController() {
              * navigation and select the experiment details pane manages to confuse
              * it, as ExtJS will continue to make calls to manipulate elements that
              * are hidden, and things break. */
-            
+
             self.mask.show();
-    
+
             (function () {
                 Ext.getCmp('expNav').select(0);
                 self.mask.hide();
@@ -307,36 +307,36 @@ function ExperimentController() {
         else {
             Ext.getCmp('expContent').getLayout().setActiveItem(0);
         }
-        
+
         MA.skipBlur = false;
-        
+
         Ext.getCmp('center-panel').layout.setActiveItem('expProjTitle');
     };
-    
+
     this.updateNav = function(index) {
         var en = Ext.getCmp("experimentName");
         var ds = Ext.StoreMgr.get("navDS");
         var et = Ext.getCmp("experimentTitle");
         var na = Ext.getCmp("expNav");
-        
+
         if (na.getSelectionCount() === 0 || index !== null) {
             na.select(index,index,false);
         }
-        
+
         var counter = 1;
         if (en.getValue() === '') {
             na.disable();
         } else {
             na.enable();
         }
-                
+
         if (self.currentId() === 0) {
             et.setTitle('New Experiment');
         } else {
             et.setTitle('Experiment: '+en.getValue());
         }
     };
-    
+
     this.createExperiment = function() {
         self.setCurrentId(0);
         var namefield = Ext.getCmp('experimentName');
@@ -347,10 +347,10 @@ function ExperimentController() {
         var jobNumber = Ext.getCmp('jobNumber');
         var et = Ext.getCmp("experimentTitle");
         et.setTitle('New Experiment');
-        
+
         namefield.setValue('');
 
-        self.updateNav(0);       
+        self.updateNav(0);
 
         statuscombo.setValue(1);
         desc.setValue('');
@@ -361,14 +361,14 @@ function ExperimentController() {
         Ext.getCmp('center-panel').layout.setActiveItem('expProjTitle');
 //        Ext.getCmp('expNav').getSelectionModel().selectFirstRow();
     };
-    
+
     this.selectionChangeHandler = function(list, nodes) {
         var currItem;
         var blurFn;
         if (list.getSelectionCount() === 0) {
             return;
         }
-     
+
         var index = list.getSelectedIndexes()[0];
         var r = list.getSelectedRecords()[0];
 
@@ -387,7 +387,7 @@ function ExperimentController() {
                 blurFn({'init':r.get("init"), 'index':index});
             }
         }
-    };    
+    };
 
 
     this.initialSave = function() {
@@ -420,30 +420,30 @@ MA.ExperimentDetails = {
             autoScroll:true,
             layout:'form',
             minSize: 75,
-            items: [ 
-                { xtype:'fieldset', 
+            items: [
+                { xtype:'fieldset',
                 title:'Experiment',
                 id:'expFieldset',
                 autoHeight:true,
                 items: [
-                    { xtype:'textfield', 
-                      fieldLabel:'Experiment name', 
-                      width:700, 
-                      enableKeyEvents:true, 
-                      id:'experimentName', 
-                      allowBlank:false, 
+                    { xtype:'textfield',
+                      fieldLabel:'Experiment name',
+                      width:700,
+                      enableKeyEvents:true,
+                      id:'experimentName',
+                      allowBlank:false,
                       listeners:{
-                        'keydown':function(t, e){ 
-                            MA.ExperimentController.updateNav(); 
-                            return true; 
-                        }, 
-                        'keyup':function(t, e){ 
-                            MA.ExperimentController.updateNav(); 
-                            return true; 
+                        'keydown':function(t, e){
+                            MA.ExperimentController.updateNav();
+                            return true;
+                        },
+                        'keyup':function(t, e){
+                            MA.ExperimentController.updateNav();
+                            return true;
                         },
                         'blur': function() {
-                            MA.ExperimentController.initialSave(); 
-                            return true; 
+                            MA.ExperimentController.initialSave();
+                            return true;
                         }
                       }
                     },
@@ -469,7 +469,7 @@ MA.ExperimentDetails = {
                         new Ext.form.ComboBox({
                                               width:300,
                                               fieldLabel:'Formal quote',
-                                              id:'formalQuote', 
+                                              id:'formalQuote',
                                               editable:false,
                                               forceSelection:true,
                                               displayField:'value',
@@ -495,7 +495,7 @@ MA.ExperimentDetails = {
 
 
 
-MA.ExperimentCmp = { 
+MA.ExperimentCmp = {
 id:'expProjTitle',
 layout:'fit',
 title:'Project',
@@ -544,7 +544,7 @@ items:[
                                hideMode:'offsets',
                                style:'background:white;',
                                selectedClass:'ma-list-selected',
-                               xtype:'listview', 
+                               xtype:'listview',
                                //                        border: false,
                                //                        trackMouseOver: false,
                                hideHeaders:true,
@@ -566,7 +566,7 @@ items:[
                                                                {
                                                                storeId:"navDS",
                                                                fields: ["nav", "init", "blur", "enabled"],
-                                                               data: [ 
+                                                               data: [
                                                                       [ "Experiment Details", MA.ExperimentController.init, MA.ExperimentController.blur, true ],
                                                                       [ "Access", MA.AccessInit, MA.Blur, false ],
                                                                       [ "Source", MA.BioSourceInit, MA.BioSourceBlur, false ],
@@ -579,7 +579,7 @@ items:[
                                                                       [ "Files", MA.FilesInit, MA.Blur, false ]
                                                                       ]
                                                                }
-                                                               )  
+                                                               )
                                }
                                ]
                        }
@@ -706,7 +706,7 @@ MA.ProjectList = Ext.extend(Ext.Panel, {
     select: function (id) {
         var record = this.getStore().getById(id);
         this.getComponent("grid").getSelectionModel().selectRecords([record], false);
-    }, 
+    },
     createNewProject: function () {
         MA.ChangeMainContent("project:new");
     }
@@ -728,7 +728,7 @@ MA.ProjectListCmp = new MA.ProjectList({
     }
 });
 
-MA.ProjectCmp = { 
+MA.ProjectCmp = {
     id:'projectCmpTitle',
     title:'New Project',
     layout:'border',
@@ -746,7 +746,7 @@ MA.ProjectCmp = {
         width:720,
         autoHeight: true,
         title:'Project details',
-        items: [ 
+        items: [
                 { xtype:'textfield', fieldLabel:'Project title', width:700, id:'projectTitle', name:'title', allowBlank:false},
                 { xtype:'textarea', fieldLabel:'Description', id:'projectDescription', width:700, height:100, name:'description' },
                 new Ext.form.ComboBox({
@@ -770,7 +770,7 @@ MA.ProjectCmp = {
                                 MA.StoreFilter(component, e, 'name');
                             }
                         },
-                
+
                         store: sorteduserListStore,
                         itemSelector: 'div.search-item',
                         tpl:new Ext.XTemplate(
@@ -840,17 +840,17 @@ MA.ProjectCmp = {
                                         }
                                     ]
                                 });
-                                
+
                                 addWindow.show();
-                                
+
                                 addWindow.buttons[0].on('click', function() { addWindow.close(); } );
-                                addWindow.buttons[1].on('click', function() { 
+                                addWindow.buttons[1].on('click', function() {
                                     var id = addWindow.getComponent('projManagerCombo').getValue();
                                     var value = addWindow.getComponent('projManagerCombo').getRawValue();
                                     if (addWindow.getComponent('projManagerCombo').isValid()) {
-                                        Ext.getCmp('projManagerList').getStore().add(new Ext.data.Record({'id':id, 'username':value})); 
+                                        Ext.getCmp('projManagerList').getStore().add(new Ext.data.Record({'id':id, 'username':value}));
                                         Ext.getCmp('projManagerList').refresh();
-                                        addWindow.close(); 
+                                        addWindow.close();
                                     }
                                 } );
                             }
@@ -878,8 +878,8 @@ MA.ProjectCmp = {
                         loadingText:'Loading...',
                         columnSort:false,
                         columns: [{
-                            header: "username", 
-                            dataIndex: 'username', 
+                            header: "username",
+                            dataIndex: 'username',
                             tpl: '<div style="padding:4px">{username}</div>'
                         }],
                         viewConfig:{
@@ -903,7 +903,7 @@ MA.ProjectCmp = {
                 // so they get submitted on form.submit()
                 var projManagerIds = Ext.getCmp('projManagerList').getStore().collect('id').join(',');
                 Ext.getCmp('project-form').getForm().findField('projectManagers').setValue(projManagerIds);
-                Ext.getCmp('project-form').getForm().submit({ 
+                Ext.getCmp('project-form').getForm().submit({
                     url: wsBaseUrl + 'update/project/' + MA.currentProjectId,
                     successProperty: 'success',
                     success: function (form, action) {
@@ -921,6 +921,16 @@ MA.ProjectCmp = {
                     }
                 });
             }
+        }, {
+          xtype: 'spacer',
+        }, {
+          text: 'ISA-Tab Export',
+          cls: 'x-btn-text-icon',
+          icon: 'static/images/isatools.png',
+          id: 'export-isa-tab',
+          handler: function() {
+            window.location = wsBaseUrl + "isatab/" + MA.currentProjectId;
+          }
         }]
     },{
             title: 'Experiments',
@@ -963,27 +973,27 @@ MA.ProjectCmp = {
                 icon:'static/images/delete.png',
                 handler : function(){
                    var grid = Ext.getCmp('project-experiments');
-                   var delIds = []; 
-                   
+                   var delIds = [];
+
                    var selections = grid.getSelectionModel().getSelections();
                    if (!Ext.isArray(selections)) {
                    selections = [selections];
                    }
-                   
+
                    for (var index = 0; index < selections.length; index++) {
                    if (!Ext.isObject(selections[index])) {
                    continue;
                    }
-                   
+
                    delIds.push(selections[index].data.id);
                    }
                    //console.log(delIds);
                    for (var i = 0; i < delIds.length; i++) {
                        MA.CRUDSomething('delete/experiment/'+delIds[i], {}, function() { experimentListStore.proxy.conn.url = wsBaseUrl + 'recordsExperiments/' + MA.currentProjectId;
                        experimentListStore.load(); });
-                   }                        
                    }
-                   
+                   }
+
                 }
             ],
             items: [
@@ -1048,12 +1058,12 @@ MA.CloneExperiment = function(base_exp_id) {
     //var exp_store = proj_experiment_grid.getStore();
     //console.log("requesting.");
     var req = new Ajax.Request(wsBaseUrl + 'create/experiment/?base_experiment_id='+encodeURIComponent(base_exp_id),
-                                                 { 
-                                                 asynchronous:true, 
+                                                 {
+                                                 asynchronous:true,
                                                  evalJSON:'force',
                                          onSuccess:    function(){
                                                                 experimentListStore.proxy.conn.url = wsBaseUrl + 'recordsExperiments/' + MA.currentProjectId;
-                                                                experimentListStore.load();    
+                                                                experimentListStore.load();
                                                                 //exp_store.load();
                                                         },
                                          onFailure:    MA.DSLoadException
@@ -1064,12 +1074,12 @@ MA.CloneExperiment = function(base_exp_id) {
 MA.LoadProject = function (projId) {
     projectsListStore.load();
     MA.currentProjectId = projId;
-    
+
     Ext.getCmp('projectCmpTitle').setTitle('Loading project...');
-    
-    var projLoader = new Ajax.Request(wsBaseUrl + "recordsProject/" + projId, 
-                                         { 
-                                         asynchronous:true, 
+
+    var projLoader = new Ajax.Request(wsBaseUrl + "recordsProject/" + projId,
+                                         {
+                                         asynchronous:true,
                                          evalJSON:'force',
                                          onSuccess: function(response) {
                                                  clientsListStore.load({
@@ -1083,12 +1093,12 @@ MA.LoadProject = function (projId) {
                                                      var projBarTitle = Ext.getCmp('expProjTitle');
                                                      //projBarTitle.setTitle('');
 
-                                                     titleCmp.setTitle('');    
+                                                     titleCmp.setTitle('');
                                                      titlefield.setValue('');
                                                      desc.setValue('');
-    
+
                                                      var rs = response.responseJSON.rows;
-    
+
                                                      //enable or disable Add/Remove project managers based on access
                                                      var showAddRemove = false;
                                                      if (MA.CurrentUser.IsAdmin || MA.CurrentUser.IsMastrAdmin || MA.CurrentUser.IsProjectLeader) {
@@ -1101,7 +1111,7 @@ MA.LoadProject = function (projId) {
                                                          titlefield.setValue(rs[0].title);
                                                          desc.setValue(rs[0].description);
                                                          clientCmp.setValue(rs[0].client);
-                                                                                                     
+
                                                          var pmList = Ext.getCmp('projManagerList');
                                                          var pmStore = pmList.getStore();
                                                          pmStore.removeAll(false);
@@ -1112,9 +1122,9 @@ MA.LoadProject = function (projId) {
                                                              }
                                                              pmStore.add(new Ext.data.Record(val));
                                                          }
-                                                     
+
                                                      }
-                                         
+
                                                      if (showAddRemove) {
                                                          Ext.getCmp("projManagersAddButton").enable();
                                                          Ext.getCmp("projManagersRemoveButton").enable();
@@ -1126,9 +1136,9 @@ MA.LoadProject = function (projId) {
                                             }
                                          }
                                          );
-    
+
     experimentListStore.proxy.conn.url = wsBaseUrl + 'recordsExperiments/' + projId;
     experimentListStore.load();
-  
+
     MA.MenuHandler({ id:'project:view' });
 };

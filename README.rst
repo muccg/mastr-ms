@@ -19,6 +19,12 @@ require a licence other than GPL for legal or commercial reasons.
 Latest Releases
 ---------------
 
+1.9.0_ (13th Mar 2014)
+  New feature release.
+
+.. _1.9.0: http://mastr-ms.readthedocs.org/en/latest/changelog.html#1.9.0
+
+
 1.8.2_ (20th Feb 2014)
   Bugfix release. Contains config file changes.
 
@@ -29,6 +35,7 @@ Latest Releases
   Bugfix release. Contains config file changes.
 
 .. _1.8.1: http://mastr-ms.readthedocs.org/en/latest/changelog.html#1.8.1
+
 
 1.8.0_ (30th Jan 2014)
   New feature and bugfix release. Contains config file changes.

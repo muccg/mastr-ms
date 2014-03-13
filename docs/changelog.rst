@@ -8,6 +8,16 @@ instructions on how to upgrade the server, see
 :ref:`server-upgrade`. For instructions on how to upgrade the datasync
 client, see :ref:`client-upgrade`.
 
+.. _1.9.0:
+
+1.9.0 (13th Mar 2014)
+-------------------------
+
+New feature release.
+
+ * [MAS-59] - ISA-TAB format export
+
+
 .. _1.8.2:
 
 1.8.2 (20th Feb 2014)

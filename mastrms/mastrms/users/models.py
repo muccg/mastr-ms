@@ -272,6 +272,8 @@ class User(AbstractUser):
 
         return True
 
+    def get_address(self):
+        return "\n".join(filter(bool, [self.postalAddress, self.carLicense]))
 
 # Gets MAUser for currently logged in user, or a dummy MAUser object
 def getCurrentUser(request, force_refresh = False):

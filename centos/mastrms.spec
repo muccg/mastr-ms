@@ -6,8 +6,8 @@
 
 %define app mastrms
 %define name %{app}
-%define version 1.8.2
-%define unmangled_version 1.8.2
+%define version 1.9.0
+%define unmangled_version 1.9.0
 %define release 1
 %define webapps /usr/local/webapps
 %define installdir %{webapps}/%{app}
@@ -104,7 +104,8 @@ APP_PACKAGE_DIR=`dirname ${APP_SETTINGS_FILE}`
 ln -sfT /var/log/%{app} %{buildinstalldir}/${APP_PACKAGE_DIR}/log
 ln -sfT /var/lib/%{app}/scratch %{buildinstalldir}/${APP_PACKAGE_DIR}/scratch
 ln -sfT /var/lib/%{app}/media %{buildinstalldir}/${APP_PACKAGE_DIR}/media
-ln -sfT ${APP_PACKAGE_DIR}/static %{staticdir}
+mkdir -p %{staticdir}
+ln -sfT %{installdir}/static %{buildinstalldir}/${APP_PACKAGE_DIR}/static
 
 # Install WSGI configuration into httpd/conf.d
 install -D centos/%{app}.ccg %{buildroot}/etc/httpd/conf.d/%{app}.ccg
@@ -127,6 +128,16 @@ rm -rf %{installdir}/static/*
 rm -rf /var/log/%{app}/*
 # Touch the wsgi file to get the app reloaded by mod_wsgi
 touch %{installdir}/django.wsgi
+
+%pre
+if [ "$1" -gt "1" ]; then
+  # Nuke any staticfiles before upgrading to this version
+  rm -rf %{installdir}/static
+
+  # Fix staticfiles from 1.8.2, will remove this line in the version
+  # after 1.9.0.
+  rm -rf %{installdir}
+fi
 
 %preun
 if [ "$1" = "0" ]; then
