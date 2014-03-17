@@ -922,7 +922,7 @@ MA.ProjectCmp = {
                 });
             }
         }, {
-          xtype: 'spacer',
+          xtype: 'spacer'
         }, {
           text: 'ISA-Tab Export',
           cls: 'x-btn-text-icon',
