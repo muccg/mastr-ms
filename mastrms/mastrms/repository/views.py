@@ -960,17 +960,10 @@ def update_single_source(request, exp_id):
         #bs.label = arg_str('label')
         bs.save()
 
-        def get_bio_info(Cls):
-            # check for existing items
-            infos = Cls.objects.filter(source=bs)
-            if len(infos) == 0:
-                return Cls(source=bs)
-            else:
-                return infos[0]
+        info = bs.get_info()
 
         #process additional info
-        if arg_int('type') == 1:
-            info = get_bio_info(MicrobialInfo)
+        if isinstance(info, MicrobialInfo):
             info.genus = arg_str('genus')
             info.species = arg_str('species')
             info.culture_collection_id = arg_str('culture')
@@ -985,26 +978,21 @@ def update_single_source(request, exp_id):
             info.gas_type = arg_str('gastype')
             info.gas_flow_rate = arg_decimal('flowrate')
             info.gas_delivery_method = arg_str('delivery')
-        elif arg_int('type') == 2:
-            info = get_bio_info(PlantInfo)
+        elif isinstance(info, PlantInfo):
             info.development_stage = arg_str('development_stage')
-        elif arg_int('type') == 3:
-            info = get_bio_info(AnimalInfo)
+        elif isinstance(info, AnimalInfo):
             info.sex = arg_sex()
             info.age = arg_int('age')
             info.parental_line = arg_str('parental_line')
             info.location = arg_str('location')
             # info.notes = arg_str('notes')
-        elif arg_int('type') == 4:
-            info = get_bio_info(HumanInfo)
+        elif isinstance(info, HumanInfo):
             info.sex = arg_sex()
             info.date_of_birth = arg_date('date_of_birth')
             info.bmi = arg_decimal('bmi')
             info.diagnosis = arg_str('diagnosis')
             info.location = arg_str('location')
             # info.notes = arg_str('notes')
-        else:
-            info = None
 
         if info:
             try:
