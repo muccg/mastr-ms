@@ -38,6 +38,28 @@ class BiologicalSource(models.Model):
         return "%s %s %s %s" % (self.abbreviation, self.type,
                                 self.ncbi_id or '--', self.label or '--')
 
+    def get_info_cls(self):
+        return {
+            "Animal": AnimalInfo,
+            "Plant": PlantInfo,
+            "Human": HumanInfo,
+            "Microbial": MicrobialInfo,
+        }.get(self.type.name, None)
+
+    def get_info(self):
+        """
+        Returns the biological info instance for this source, or None if
+        this source has a bad type field. If no biological info is
+        attached, a new instance is created, but not saved to the
+        database.
+        """
+        cls = self.get_info_cls()
+        if cls:
+            infos = cls.objects.filter(source=self)
+            return infos[0] if len(infos) else cls(source=self)
+
+        return None
+
 class AnimalInfo(models.Model):
     class Meta:
         verbose_name_plural = "Animal information"
