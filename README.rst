@@ -8,7 +8,7 @@ Documentation
 -------------
 
 Full documentation is available at https://mastr-ms.readthedocs.org/
-or within the `docs` subdirectory of this source distribution.
+or within the ``docs`` subdirectory of this source distribution.
 
 Licence
 -------
@@ -18,6 +18,12 @@ require a licence other than GPL for legal or commercial reasons.
 
 Latest Releases
 ---------------
+
+1.9.1_ (1st May 2014)
+  New feature release.
+
+.. _1.9.1: http://mastr-ms.readthedocs.org/en/latest/changelog.html#1.9.1
+
 
 1.9.0_ (13th Mar 2014)
   New feature release.

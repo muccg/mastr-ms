@@ -8,10 +8,20 @@ instructions on how to upgrade the server, see
 :ref:`server-upgrade`. For instructions on how to upgrade the datasync
 client, see :ref:`client-upgrade`.
 
+.. _1.9.1:
+
+1.9.1 (1st May 2014)
+---------------------
+
+New feature release.
+
+ * [MAS-61] - Improved ISA-TAB format export
+
+
 .. _1.9.0:
 
 1.9.0 (13th Mar 2014)
--------------------------
+---------------------
 
 New feature release.
 
@@ -21,7 +31,7 @@ New feature release.
 .. _1.8.2:
 
 1.8.2 (20th Feb 2014)
--------------------------
+---------------------
 
 Bug fix release. You can now put multiple space-separated values for
 ``allowed_hosts`` and ``memcache`` in ``/etc/mastrms/mastrms.conf``.
@@ -35,7 +45,7 @@ Bug fix release. You can now put multiple space-separated values for
 .. _1.8.1:
 
 1.8.1 (31st Jan 2014)
--------------------------
+---------------------
 
 Bug fix release. More options were added to the default config files.
 
@@ -45,7 +55,7 @@ Bug fix release. More options were added to the default config files.
 .. _1.8.0:
 
 1.8.0 (30th Jan 2014)
--------------------------
+---------------------
 
 New feature and bug fix release.
 
@@ -74,7 +84,7 @@ settings file can be moved into a backup location.
 .. _1.7.0:
 
 1.7.0 (19th Dec 2013)
---------------------------
+---------------------
 
 New feature release
 
@@ -85,7 +95,7 @@ New feature release
 .. _1.6.2:
 
 1.6.2 (26th Nov 2013)
---------------------------
+---------------------
 
 Bug fix release
 
@@ -95,7 +105,7 @@ Bug fix release
 .. _1.6.0:
 
 1.6.0 (25th Nov 2013)
---------------------------
+---------------------
 
 New feature release
 
