@@ -8,6 +8,17 @@ instructions on how to upgrade the server, see
 :ref:`server-upgrade`. For instructions on how to upgrade the datasync
 client, see :ref:`client-upgrade`.
 
+.. _1.9.2:
+
+1.9.2 (5th May 2014)
+---------------------
+
+New feature release.
+
+ * [MAS-61] - Produce ISA-Tab study and assay files
+ * [MAS-62] - Update Django to 1.6.4
+
+
 .. _1.9.1:
 
 1.9.1 (1st May 2014)
@@ -15,7 +26,7 @@ client, see :ref:`client-upgrade`.
 
 New feature release.
 
- * [MAS-61] - Improved ISA-TAB format export
+ * [MAS-61] - Add ISA-Tab fields for study and assay
 
 
 .. _1.9.0:

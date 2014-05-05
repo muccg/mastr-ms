@@ -19,6 +19,12 @@ require a licence other than GPL for legal or commercial reasons.
 Latest Releases
 ---------------
 
+1.9.2_ (5th May 2014)
+  New feature release.
+
+.. _1.9.2: http://mastr-ms.readthedocs.org/en/latest/changelog.html#1.9.2
+
+
 1.9.1_ (1st May 2014)
   New feature release.
 
