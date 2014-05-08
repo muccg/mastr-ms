@@ -35,10 +35,11 @@ setup_prod_env()
 from django.core.wsgi import get_wsgi_application
 _application = get_wsgi_application()
 
-def application(environ, start_response):
+def application(wenv, start_response):
     # Before entering the django app, transfer the SCRIPT_NAME http
     # header into an environment variable so settings can pick it up.
-    mount_point = environ.get("HTTP_SCRIPT_NAME", environ.get("SCRIPT_NAME", None))
+    mount_point = wenv.get("HTTP_SCRIPT_NAME", wenv.get("SCRIPT_NAME", None))
     if mount_point:
         os.environ["SCRIPT_NAME"] = mount_point
-    return _application(environ, start_response)
+        wenv["HTTP_SCRIPT_NAME"] = wenv["SCRIPT_NAME"] = mount_point
+    return _application(wenv, start_response)
