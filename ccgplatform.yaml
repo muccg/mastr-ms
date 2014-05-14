@@ -1,0 +1,41 @@
+project:
+  name: mastrms
+
+ccgplatform:
+  version: ahunter-1
+
+ccgpuppet:
+  version: ahunter-1
+
+instances:
+
+  mastrms:
+    extends: centos_64_lxc
+    pre_puppet: 
+      - which git || sudo yum install -y -q git
+      - which librarian-puppet || sudo gem install librarian-puppet
+    puppet_manifest: dev.pp
+    post_puppet: 
+      - ./develop.sh install
+      - ./develop.sh syncmigrate
+
+  local-staging:
+    extends: centos_64_lxc
+    pre_puppet: 
+      - which git || sudo yum install -y -q git
+      - which librarian-puppet || sudo gem install librarian-puppet
+    puppet_manifest: staging.pp
+
+  aws_syd_mastrms_staging:
+    extends: centos_65_aws_syd
+    pre_puppet:
+      - which git || sudo yum install -y -q git
+      - which librarian-puppet || sudo gem install librarian-puppet
+    puppet_manifest: staging.pp
+
+  aws_syd_mastrms_demo:
+    extends: centos_65_aws_syd
+    aws_instance_type: m1.small
+    key_filename: ~/.ssh/ccg-syd-ops.pem
+    aws_key_name: ccg-syd-ops
+    puppet_manifest: demo.pp
