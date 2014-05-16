@@ -26,8 +26,8 @@ del activate_this
 SITE_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 path.append(SITE_ROOT)
 
-from mastrms.confutil import setup_prod_env
-setup_prod_env()
+from ccg_django_utils.conf import setup_prod_env
+setup_prod_env(os.path.basename(os.path.dirname(__file__)))
 
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION

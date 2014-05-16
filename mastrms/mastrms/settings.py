@@ -2,22 +2,28 @@
 import os
 import logging
 import logging.handlers
+from ccg_django_utils.conf import EnvConfig
+
+env = EnvConfig()
 
 CCG_INSTALL_ROOT = os.path.dirname(os.path.realpath(__file__))
 CCG_WRITEABLE_DIRECTORY = os.path.join(CCG_INSTALL_ROOT,"scratch")
 PROJECT_NAME = os.path.basename(CCG_INSTALL_ROOT)
 
-# see ccg-django-extras/ccg/utils/webhelpers.py
+# see ccg_django_utils.webhelpers
 BASE_URL_PATH = os.environ.get("SCRIPT_NAME", "")
+
+# See: https://docs.djangoproject.com/en/1.5/releases/1.5/#allowed-hosts-required-in-production
+ALLOWED_HOSTS = env.getlist("allowed_hosts", ["*"])
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'mastrms',
-        'USER': 'mastrms',
-        'PASSWORD': 'mastrms',
-        'HOST': '',
-        'PORT': '',
+        'ENGINE': env.get_db_engine("dbtype", "pgsql"),
+        'NAME': env.get("dbname", "mastrms"),
+        'USER': env.get("dbuser", "mastrms"),
+        'PASSWORD': env.get("dbpass", "mastrms"),
+        'HOST': env.get("dbserver", ""),
+        'PORT': env.get("dbport", ""),
     }
 }
 
@@ -62,15 +68,16 @@ AUTHENTICATION_BACKENDS = [
 # New feature in Django 1.5 -- custom user models
 AUTH_USER_MODEL = 'users.User'
 
-# We have a puppet function to generate these by hashing appname and a secret
-SECRET_KEY = 'change-it'
+# Make this unique, and don't share it with anybody.
+# see: https://docs.djangoproject.com/en/dev/ref/settings/#secret-key
+SECRET_KEY = env.get("secret_key", "" if env.get("production", False) else "change-it")
 
 # Default SSL on and forced, turn off if necessary
-SSL_ENABLED = False # Changed from True
-SSL_FORCE = False # Changed from True
+SSL_ENABLED = env.get("production", False)
+SSL_FORCE = env.get("production", False)
 
 # Debug off by default
-DEBUG = True # Changed from False
+DEBUG = not env.get("production", False)
 
 # Default the site ID to 1, even if the sites framework isn't being used
 SITE_ID = 1
@@ -103,20 +110,53 @@ TEMPLATE_LOADERS = [
 
 # Default all email to ADMINS and MANAGERS to root@localhost.
 # Puppet redirects this to something appropriate depend on the environment.
-# see: https://docs.djangoproject.com/en/1.4/ref/settings/#admins
-# see: https://docs.djangoproject.com/en/1.4/ref/settings/#managers
+# see: https://docs.djangoproject.com/en/1.6/ref/settings/#admins
+# see: https://docs.djangoproject.com/en/1.6/ref/settings/#managers
 ADMINS = [
-    ( 'alert', 'root@localhost' )
+    ( 'alert', env.get("alert_email", "root@localhost") )
 ]
 MANAGERS = ADMINS
 
-# Mail relay settings for those projects that need it
-# Local non-smtp delivery and forwarding is the alternative
-EMAIL_USE_TLS = False
-EMAIL_HOST = '127.0.0.1'
-EMAIL_PORT = 25
-EMAIL_APP_NAME = "mastrms"
-SERVER_EMAIL = "apache@localhost"  # from address
+# email settings so yabi can send email error alerts etc
+# See: https://docs.djangoproject.com/en/1.6/ref/settings/#email-host
+EMAIL_HOST = env.get("email_host", "")
+# See: https://docs.djangoproject.com/en/1.6/ref/settings/#email-port
+EMAIL_PORT = env.get("email_port", 25)
+
+# See: https://docs.djangoproject.com/en/1.6/ref/settings/#email-host-user
+EMAIL_HOST_USER = env.get("email_host_user", "")
+# See: https://docs.djangoproject.com/en/1.6/ref/settings/#email-host-password
+EMAIL_HOST_PASSWORD = env.get("email_host_password", "")
+
+# See: https://docs.djangoproject.com/en/1.6/ref/settings/#email-use-tls
+EMAIL_USE_TLS = env.get("email_use_tls", False)
+
+# see: https://docs.djangoproject.com/en/1.6/ref/settings/#email-subject-prefix
+EMAIL_APP_NAME = "Mastr-MS "
+EMAIL_SUBJECT_PREFIX = env.get("email_subject_prefix", "PROD: " if env.get("production", False) else "DEV ")
+
+# See: https://docs.djangoproject.com/en/1.6/ref/settings/#email-backend
+if EMAIL_HOST:
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+elif DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+    EMAIL_FILE_PATH = os.path.join(CCG_WRITABLE_DIRECTORY, "mail")
+    if not os.path.exists(EMAIL_FILE_PATH):
+        os.mkdir(EMAIL_FILE_PATH)
+
+# See: https://docs.djangoproject.com/en/1.6/ref/settings/#server-email
+SERVER_EMAIL = env.get("server_email", "noreply@ccg_yabiadmin_prod")
+
+RETURN_EMAIL = env.get("return_email", "Mastr-MS <noreply@yoursite.com>")
+
+# email address to receive datasync client log notifications
+LOGS_TO_EMAIL = env.get("logs_to_email", "log_email@yoursite.com")
+# email address to receive datasync key upload notifications
+KEYS_TO_EMAIL = env.get("keys_to_email", "key_email@yoursite.com")
+# email address to receive registration requests
+REGISTRATION_TO_EMAIL = env.get("registration_to_email", "reg_email@yoursite.com")
 
 # Default cookie settings
 # see: https://docs.djangoproject.com/en/1.4/ref/settings/#session-cookie-age and following
@@ -233,19 +273,32 @@ LOGGING = {
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-#
 
+if env.get("memcache", False):
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+            'LOCATION': env.getlist("memcache", []),
+            'KEYSPACE': "%s-prod" % PROJECT_NAME,
+        }
+    }
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        }
+    }
+
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-#
+
 TEST_RUNNER = "django_nose.NoseTestSuiteRunner"
 NOSE_PLUGINS = ["mastrms.testutils.noseplugins.SilenceSouthPlugin"]
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-#
 
-CHMOD_USER = 'apache'
-CHMOD_GROUP = 'maupload'
+CHMOD_USER = env.get("repo_user", "apache")
+CHMOD_GROUP = env.get("repo_group", "apache")
 
-REPO_FILES_ROOT = os.path.join(CCG_WRITEABLE_DIRECTORY, 'files')
-QUOTE_FILES_ROOT = os.path.join(CCG_WRITEABLE_DIRECTORY, 'quotes')
+REPO_FILES_ROOT = env.get("repo_files_root", os.path.join(CCG_WRITEABLE_DIRECTORY, 'files'))
+QUOTE_FILES_ROOT = env.get("quote_files_root", os.path.join(CCG_WRITEABLE_DIRECTORY, 'quotes'))
 
-RETURN_EMAIL = "example - noreply@yoursite.com"
-
-LOGS_TO_EMAIL = "log_email@yoursite.com" #email address to receive datasync client log notifications
-KEYS_TO_EMAIL = "key_email@yoursite.com" #email address to receive datasync key upload notifications
-REGISTRATION_TO_EMAIL = "reg_email@yoursite.com" #email address to receive registration requests
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-#

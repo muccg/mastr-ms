@@ -20,7 +20,7 @@ if production_user:
 if __name__ == "__main__":
     if production_user:
         # setup the settings module for the django app
-        from mastrms.confutil import setup_prod_env
+        from ccg_django_utils.conf import setup_prod_env
         setup_prod_env()
     else:
         os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mastrms.settings")
