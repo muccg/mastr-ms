@@ -17,6 +17,7 @@ New feature release.
 
  * [MAS-61] - Produce ISA-Tab study and assay files
  * [MAS-62] - Update Django to 1.6.4
+ * [MAS-63] - Improve environment variable config code
 
 
 .. _1.9.1:
