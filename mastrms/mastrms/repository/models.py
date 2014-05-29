@@ -44,6 +44,8 @@ class BiologicalSource(models.Model):
             "Plant": PlantInfo,
             "Human": HumanInfo,
             "Microbial": MicrobialInfo,
+            "Synthetic": None,
+            "Other": None,
         }.get(self.type.name, None)
 
     def get_info(self):
@@ -590,7 +592,7 @@ class RunSample(models.Model):
     def _get_samplefile_ext(self):
         return self.run.machine.samplefile_ext
 
-    def generate_filename(self):
+    def generate_filename_no_ext(self):
         if self.is_sample():
             base = self.sample.run_filename(self.run)
             if self.method_number:
@@ -601,7 +603,9 @@ class RunSample(models.Model):
                 "runid": self.run.id,
                 "sampleid": self.id,
             }
-        return self.sanitize_filename(base) + self._get_samplefile_ext()
+        return self.sanitize_filename(base)
+    def generate_filename(self):
+        return self.generate_filename_no_ext() + self._get_samplefile_ext()
 
     @staticmethod
     def sanitize_filename(filename):
