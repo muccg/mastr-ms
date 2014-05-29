@@ -237,11 +237,10 @@ class InstrumentMethodAdmin(ExtJsonInterface, admin.ModelAdmin):
 class StandardOperationProcedureAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ('responsible', 'label', 'area_where_valid', 'comment', 'organisation', 'version', 'defined_by', 'replaces_document', 'content', 'attached_pdf')
 
-    def get_form(self, request, obj=None):
-        form = super(StandardOperationProcedureAdmin, self).get_form(request, obj)
-        if is_superuser(request):
-            return form
-        form.base_fields['experiments'].queryset = Experiment.objects.filter(users=request.user)
+    def get_form(self, request, *args, **kwargs):
+        form = super(StandardOperationProcedureAdmin, self).get_form(request, *args, **kwargs)
+        if not is_superuser(request):
+            form.base_fields['experiments'].queryset = Experiment.objects.filter(users=request.user)
         return form
 
 
