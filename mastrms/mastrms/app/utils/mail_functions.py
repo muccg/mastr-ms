@@ -1,6 +1,6 @@
 from django.core.mail import send_mail
 from django.conf import settings
-from ccg.utils.webhelpers import siteurl
+from ccg_django_utils.webhelpers import siteurl
 from django.core.mail import EmailMessage
 import logging
 from mastrms.users.models import MADAS_USER_GROUP

@@ -1,5 +1,5 @@
 from django.http import HttpResponse, HttpResponseForbidden
-from ccg.http import HttpResponseUnauthorized
+from ccg_django_utils.http import HttpResponseUnauthorized
 from functools import wraps
 
 def restricted_view(f, restriction):

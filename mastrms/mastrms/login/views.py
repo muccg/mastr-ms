@@ -4,8 +4,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render_to_response
 from django.utils import simplejson
 from django.conf import settings
-from ccg.utils import webhelpers
-from ccg.utils.webhelpers import siteurl, wsgibase
+from ccg_django_utils import webhelpers
+from ccg_django_utils.webhelpers import siteurl, wsgibase
 from mastrms.app.utils.data_utils import jsonResponse, jsonErrorResponse
 from mastrms.users.models import *
 from mastrms.login.URLState import getCurrentURLState

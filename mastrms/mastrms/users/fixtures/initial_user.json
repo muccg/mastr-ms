@@ -38,45 +38,5 @@
             "homePhone": "09 123465",
             "sn": "User"
         }
-    },
-    {
-        "pk": 2,
-        "model": "users.user",
-        "fields": {
-            "username": "another@example.com",
-            "first_name": "",
-            "last_name": "",
-            "is_active": true,
-            "is_superuser": true,
-            "is_staff": true,
-            "last_login": "2012-04-15 15:02:41",
-            "groups": [],
-            "user_permissions": [],
-            "password": "sha1$a8a68$18c83f486556e36c747bb6f39f6210e260ca21ce",
-            "email": "",
-            "date_joined": "2012-02-14 16:08:20"
-        }
-    },
-    {
-        "pk": 2,
-        "model": "users.userdetail",
-        "fields": {
-            "telephoneNumber": "09 123456",
-            "registeredAddress": "Prof Antoher Example",
-            "physicalDeliveryOfficeName": "Another Office",
-            "description": "Another",
-            "businessCategory": "Another Institute",
-            "title": "Another Position",
-            "passwordResetKey": null,
-            "commonName": "User",
-            "carLicense": "Australia (WA)",
-            "destinationIndicator": "Another Department",
-            "user": 2,
-            "mail": "another@example.com",
-            "postalAddress": "123 Anoter Lane",
-            "givenName": "Another",
-            "homePhone": "09 234651",
-            "sn": "User"
-        }
     }
 ]

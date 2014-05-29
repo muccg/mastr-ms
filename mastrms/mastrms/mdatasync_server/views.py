@@ -12,7 +12,7 @@ from django.utils import simplejson
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.core.mail import EmailMessage
-import ccg.utils.webhelpers as webhelpers
+from ccg_django_utils import webhelpers
 from mastrms.mdatasync_server.models import *
 from mastrms.repository.models import *
 from mastrms.mdatasync_server.rules import *

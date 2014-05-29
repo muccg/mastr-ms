@@ -14,12 +14,12 @@ for package in ('app', 'admin', 'dashboard', 'login', 'mdatasync_server', 'quote
     os.chdir(start_dir)
 
 install_requires = [
-    'Django==1.6.1',
+    'Django==1.6.4',
     'South==0.8.2',
     'django-extensions>=1.2.5',
     'django-userlog',
     'django-nose',
-    'ccg-extras',
+    'ccg-django-utils',
     'wsgiref==0.1.2',
     'python-memcached==1.48',
     'dingus',
@@ -41,7 +41,7 @@ postgres_requires = [
 
 dependency_links = [
     'https://bitbucket.org/ccgmurdoch/django-userlog/downloads/django_userlog-0.1.tar.gz',
-    'https://bitbucket.org/ccgmurdoch/ccg-django-extras/downloads/ccg-extras-0.1.6.tar.gz',
+    'https://bitbucket.org/ccgmurdoch/ccg-django-utils/downloads/ccg-django-utils-0.2.0.tar.gz',
 ]
 
 setup(name='django-mastrms',
