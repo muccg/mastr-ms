@@ -213,7 +213,7 @@ installapp() {
     echo "Install ${PROJECT_NAME}"
     ${PYVENV} --system-site-packages ${VIRTUALENV}
     pushd ${TOPDIR}/${PROJECT_NAME}
-    ${VIRTUALENV}/bin/pip install ${PIP_OPTS} --force-reinstall --upgrade 'pip>=1.5,<1.6'
+    ${VIRTUALENV}/bin/pip install ${PIP_OPTS} --upgrade 'pip>=1.5,<1.6'
     ${VIRTUALENV}/bin/pip install ${PIP5_OPTS} -e .[dev,postgres,test]
     ${VIRTUALENV}/bin/pip install ${PIP5_OPTS} -e ../mdatasync_client
 

@@ -10,7 +10,7 @@ client, see :ref:`client-upgrade`.
 
 .. _1.9.2:
 
-1.9.2 (5th May 2014)
+1.9.2 (29th May 2014)
 ---------------------
 
 New feature release.
