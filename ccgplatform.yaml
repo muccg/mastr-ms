@@ -2,10 +2,10 @@ project:
   name: mastrms
 
 ccgplatform:
-  version: ahunter-1
+  version: "1.10"
 
 ccgpuppet:
-  version: ahunter-1
+  version: "1.10"
 
 instances:
 
