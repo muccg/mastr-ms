@@ -8,6 +8,14 @@ instructions on how to upgrade the server, see
 :ref:`server-upgrade`. For instructions on how to upgrade the datasync
 client, see :ref:`client-upgrade`.
 
+.. _1.9.3:
+
+1.9.3 (5th June 2014)
+---------------------
+
+ * [MAS-64] - Make ISA-Tab output validate with isatools validator
+
+
 .. _1.9.2:
 
 1.9.2 (29th May 2014)
