@@ -4,7 +4,7 @@
         "model": "users.group",
         "fields": {
             "name": "User",
-            "user": [1, 2]
+            "user": [1]
         }
     },
     {
@@ -77,14 +77,6 @@
         "fields": {
             "name": "Example Node",
             "user": [ 1 ]
-        }
-    },
-    {
-        "pk": 11,
-        "model": "users.group",
-        "fields": {
-            "name": "Another Example Node",
-            "user": [ 2 ]
         }
     }
 ]

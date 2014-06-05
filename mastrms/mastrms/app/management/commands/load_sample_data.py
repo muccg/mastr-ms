@@ -3,11 +3,10 @@ import datetime
 import logging
 from django.contrib.sites.models import Site
 from django.core.management.base import NoArgsCommand, CommandError
-from django.contrib.auth.models import Group
 
 from ....mdatasync_server.models import NodeClient
 from ....repository.models import Project, InstrumentMethod, Experiment, ExperimentStatus, Run, RuleGenerator
-from ....users.models import User
+from ....users.models import User, Group
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +30,11 @@ class Command(NoArgsCommand):
                                                    carLicense="Australia (WA)",
                                                    destinationIndicator="Another Department",
                                                    postalAddress="123 Anoter Lane")
+
+        user.groups.add(Group.objects.get(name="User"))
+        group, created = Group.objects.get_or_create(name="Another Example Node")
+        user.groups.add(group)
+        user.save()
 
         nc, created = NodeClient.objects.get_or_create(organisation_name="org", site_name="site", station_name="station")
 
