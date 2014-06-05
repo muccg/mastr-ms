@@ -58,10 +58,10 @@ class ISATabExportView(View):
 
         fields = [
             ("ONTOLOGY SOURCE REFERENCE", None),
-            ("Term Source Name", "OBI"),
-            ("Term Source File", "http://obi-ontology.org"),
-            ("Term Source Version", ""),
-            ("Term Source Description", "Ontology for Biomedical Investigations"),
+            ("Term Source Name", ("OBI", "SNOMEDCT")),
+            ("Term Source File", ("http://obi-ontology.org", "http://bioportal.bioontology.org/ontologies/46896")),
+            ("Term Source Version", ("", "")),
+            ("Term Source Description", ("Ontology for Biomedical Investigations", "SNOMED Clinical Terms")),
             ("INVESTIGATION", None),
             ("Investigation Identifier", self._investigation_identifier(project)),
             ("Investigation Title", project.title),
@@ -119,10 +119,10 @@ class ISATabExportView(View):
                 ("Study Publication Status Term Accession Number", ""),
                 ("Study Publication Status Term Source REF", ""),
                 ("STUDY FACTORS", None),
-                ("Study Factor Name", ""),
-                ("Study Factor Type", ""),
-                ("Study Factor Type Term Accession Number", ""),
-                ("Study Factor Type Term Source REF", ""),
+                ("Study Factor Name", ("Treatment", "Timeline")),
+                ("Study Factor Type", ("", "")),
+                ("Study Factor Type Term Accession Number", ("", "")),
+                ("Study Factor Type Term Source REF", ("", "")),
                 ("STUDY ASSAYS", None),
                 ("Study Assay Measurement Type", "metabolite profiling"),
                 ("Study Assay Measurement Type Term Source REF", "OBI"),
@@ -133,8 +133,7 @@ class ISATabExportView(View):
                 ("Study Assay Technology Platform", machines),
                 ("Study Assay File Name", self._assay_filename(exp)),
                 ("STUDY PROTOCOLS", None),
-                # fixme: protocols need to be TAB separated
-                ("Study Protocol Name", ("Sample collection", "Extraction", "Chromatography", "Mass spectrometry")),
+                ("Study Protocol Name", ("Sample collection", "Metabolite extraction", "Chromatography", "Mass spectrometry")),
                 ("Study Protocol Type", ("Sample collection", "Extraction", "Chromatography", "Mass spectrometry")),
                 ("Study Protocol Type Term Accession Number", ""),
                 ("Study Protocol Type Term Source REF", ""),
@@ -154,7 +153,7 @@ class ISATabExportView(View):
                 ("Study Protocol Components Type Term Accession Number", ""),
                 ("Study Protocol Components Type Term Source REF", ""),
 
-                ("STUDY CONTACT", None),
+                ("STUDY CONTACTS", None),
                 ("Study Person Last Name", md["last_name"]),
                 ("Study Person First Name", md["first_name"]),
                 ("Study Person Mid Initials", ""),
@@ -165,7 +164,7 @@ class ISATabExportView(View):
                 ("Study Person Affiliation", md["businessCategory"]),
                 ("Study Person Roles", ("Operational research officer",) * len(managers)),
                 ("Study Person Roles Term Accession Number", ("",) * len(managers)),
-                ("Study Person Roles Term Source REF", ("SNOMEDCT",) * len(managers)),
+                ("Study Person Roles Term Source REF", ("",) * len(managers)),
 
                 ("", None),  # Empty Line
             ])
