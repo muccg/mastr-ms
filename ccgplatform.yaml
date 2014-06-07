@@ -39,3 +39,6 @@ instances:
     key_filename: ~/.ssh/ccg-syd-ops.pem
     aws_key_name: ccg-syd-ops
     puppet_manifest: demo.pp
+
+  aws_rpmbuild_centos6:
+    extends: centos_6_rpmbuild
