@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #^syntax detection
 
-forge "http://forge.puppetlabs.com"
+forge "https://forge.puppetlabs.com"
 
 mod "puppetlabs/stdlib", "4.1.0"
 mod "puppetlabs/postgresql", "2.5.0"
