@@ -142,7 +142,7 @@ elif DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 else:
     EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
-    EMAIL_FILE_PATH = os.path.join(CCG_WRITABLE_DIRECTORY, "mail")
+    EMAIL_FILE_PATH = os.path.join(CCG_WRITEABLE_DIRECTORY, "mail")
     if not os.path.exists(EMAIL_FILE_PATH):
         os.mkdir(EMAIL_FILE_PATH)
 
