@@ -13,6 +13,8 @@ client, see :ref:`client-upgrade`.
 1.9.3 (5th June 2014)
 ---------------------
 
+Bug fix release.
+
  * [MAS-64] - Make ISA-Tab output validate with isatools validator
 
 
