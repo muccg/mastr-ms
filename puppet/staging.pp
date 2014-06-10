@@ -12,16 +12,21 @@ node default {
 
   # There are some leaked local secrets here we don't care about
   $django_config = {
-    'deployment'  => 'staging',
-    'dbdriver'    => 'django.db.backends.postgresql_psycopg2',
-    'dbhost'      => '',
-    'dbname'      => 'mastrms',
-    'dbuser'      => 'mastrms',
-    'dbpass'      => 'mastrms',
-    'upload_user' => 'maupload',
-    'httpd_user'  => 'apache',
-    'memcache'    => $globals::memcache_syd,
-    'secretkey'   => 'sdfsdkj*&^*&^hhggHGHG3434'}
+    'deployment'       => 'staging',
+    'dbdriver'         => 'django.db.backends.postgresql_psycopg2',
+    'dbhost'           => '',
+    'dbname'           => 'mastrms',
+    'dbuser'           => 'mastrms',
+    'dbpass'           => 'mastrms',
+    'upload_user'      => 'maupload',
+    'httpd_user'       => 'apache',
+    'repo_user'        => 'apache',
+    'repo_group'       => 'maupload',
+    'repo_files_root'  => '/var/lib/mastrms/scratch/files',
+    'quote_files_root' => '/var/lib/mastrms/scratch/quotes',
+    'memcache'         => $globals::memcache_syd,
+    'secret_key'       => 'sdfsdkj*&^*&^hhggHGHG3434'
+  }
 
   # tests need wxPython and virtual X server, firefox required for selenium
   $packages = [
@@ -41,7 +46,7 @@ node default {
   package { 'mastrms': ensure => installed, provider => 'yum_nogpgcheck'}
 
   django::config { 'mastrms':
-    config_hash   => $django_config,
+    config_hash => $django_config,
   }
 
   django::syncdbmigrate{'mastrms':
@@ -65,35 +70,35 @@ node default {
   } ->
 
   file {"/home/${upload_user}/.ssh":
-    ensure     => directory,
-    owner      => $django_config['upload_user'],
-    group      => $django_config['upload_user'],
-    mode       => '0700'
+    ensure => directory,
+    owner  => $django_config['upload_user'],
+    group  => $django_config['upload_user'],
+    mode   => '0700'
   } ->
 
   file {'/data':
-    ensure     => directory,
-    mode       => '0755',
+    ensure => directory,
+    mode   => '0755',
   } ->
 
   file {'/data/mastrms':
-    ensure     => directory,
-    owner      => $django_config['httpd_user'],
-    group      => $django_config['upload_user'],
-    mode       => '2770',
+    ensure => directory,
+    owner  => $django_config['httpd_user'],
+    group  => $django_config['upload_user'],
+    mode   => '2770',
   } ->
 
   file {'/data/mastrms/files':
-    ensure     => directory,
-    owner      => $django_config['httpd_user'],
-    group      => $django_config['upload_user'],
-    mode       => '2770',
+    ensure => directory,
+    owner  => $django_config['httpd_user'],
+    group  => $django_config['upload_user'],
+    mode   => '2770',
   } ->
 
   file {'/data/mastrms/quotes':
-    ensure     => directory,
-    owner      => $django_config['httpd_user'],
-    group      => $django_config['upload_user'],
-    mode       => '2770',
+    ensure => directory,
+    owner  => $django_config['httpd_user'],
+    group  => $django_config['upload_user'],
+    mode   => '2770',
   }
 }
