@@ -12,20 +12,20 @@ node default {
 
   # There are some leaked local secrets here we don't care about
   $django_config = {
-    'deployment'       => 'staging',
-    'dbdriver'         => 'django.db.backends.postgresql_psycopg2',
-    'dbhost'           => '',
-    'dbname'           => 'mastrms',
-    'dbuser'           => 'mastrms',
-    'dbpass'           => 'mastrms',
-    'upload_user'      => 'maupload',
-    'httpd_user'       => 'apache',
-    'repo_user'        => 'apache',
-    'repo_group'       => 'maupload',
-    'repo_files_root'  => '/var/lib/mastrms/scratch/files',
-    'quote_files_root' => '/var/lib/mastrms/scratch/quotes',
-    'memcache'         => $globals::memcache_syd,
-    'secret_key'       => 'sdfsdkj*&^*&^hhggHGHG3434'
+    deployment       => 'staging',
+    dbdriver         => 'django.db.backends.postgresql_psycopg2',
+    dbserver         => '',
+    dbname           => 'mastrms',
+    dbuser           => 'mastrms',
+    dbpass           => 'mastrms',
+    upload_user      => 'maupload',
+    httpd_user       => 'apache',
+    repo_user        => 'apache',
+    repo_group       => 'maupload',
+    repo_files_root  => '/var/lib/mastrms/scratch/files',
+    quote_files_root => '/var/lib/mastrms/scratch/quotes',
+    memcache         => $globals::memcache_syd,
+    secret_key       => 'sdfsdkj*&^*&^hhggHGHG3434'
   }
 
   # tests need wxPython and virtual X server, firefox required for selenium
