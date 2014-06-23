@@ -8,6 +8,16 @@ instructions on how to upgrade the server, see
 :ref:`server-upgrade`. For instructions on how to upgrade the datasync
 client, see :ref:`client-upgrade`.
 
+.. _1.9.4:
+
+1.9.4 (23rd June 2014)
+---------------------
+
+Bug fix release.
+
+ * [MAS-65] - Change title MA LIMS to MASTR-MS
+
+
 .. _1.9.3:
 
 1.9.3 (5th June 2014)

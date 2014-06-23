@@ -17,7 +17,14 @@ GNU GPL v3. Please contact the Centre for Comparative Genomics if you
 require a licence other than GPL for legal or commercial reasons.
 
 Latest Releases
+
 ---------------
+
+1.9.4_ (23rd June 2014)
+  Bug fix release.
+
+.. _1.9.4: http://mastr-ms.readthedocs.org/en/latest/changelog.html#1.9.4
+
 
 1.9.3_ (5th June 2014)
   Bug fix release.
