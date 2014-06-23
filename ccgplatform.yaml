@@ -13,7 +13,7 @@ instances:
     extends: centos_64_lxc
     pre_puppet: 
       - which git || sudo yum install -y -q git
-      - which librarian-puppet || sudo gem install librarian-puppet
+      - which librarian-puppet || sudo gem install librarian-puppet -v 1.0.3
     puppet_manifest: dev.pp
     post_puppet: 
       - ./develop.sh install
@@ -23,14 +23,14 @@ instances:
     extends: centos_64_lxc
     pre_puppet: 
       - which git || sudo yum install -y -q git
-      - which librarian-puppet || sudo gem install librarian-puppet
+      - which librarian-puppet || sudo gem install librarian-puppet -v 1.0.3
     puppet_manifest: staging.pp
 
   aws_syd_mastrms_staging:
     extends: centos_65_aws_syd
     pre_puppet:
       - which git || sudo yum install -y -q git
-      - which librarian-puppet || sudo gem install librarian-puppet
+      - which librarian-puppet || sudo gem install librarian-puppet -v 1.0.3
     puppet_manifest: staging.pp
 
   aws_syd_mastrms_demo:
