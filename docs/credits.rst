@@ -20,8 +20,8 @@ MA Team
 -------
 
 **MA Informatics Group Leader**
-  Dr. Vladimir Likic
-**Computer Scientist**
   Dr. Saravanan Dayalan
-**System Administrator**
-  Thu Nguyen
+**Analytical Lead**
+  Mr. David De Souza
+**IT Manager**
+  Mr. Thu Nguyen
