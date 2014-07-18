@@ -15,15 +15,9 @@ The Mastr-MS code is hosted at BitBucket.
 
     https://bitbucket.org/ccgmurdoch/mastr-ms
 
-Mastr-MS was originally hosted on Google Code. Until the project is
-deleted, or Google Code is discontinued, new versions of the code will
-occasionally be pushed there.
+Git_ is required to check out the code.
 
-    https://code.google.com/p/mastr-ms/
-
-Mercurial_ is required to check out the code.
-
-.. _Mercurial: http://mercurial.selenic.com/
+.. _Mercurial: http://git-scm.com/
 
 
 Issue Tracking
@@ -36,7 +30,8 @@ All new bugs/feature requests should be submitted to the JIRA tracker:
 If all significant changes have a JIRA ticket associated, then release
 notes can be accurately generated.
 
-There still remains a small bug list on Google Code:
+Mastr-MS was originally hosted on Google Code, where there still
+remains a small bug list:
 
     http://code.google.com/p/mastr-ms/issues/list
 
@@ -52,7 +47,7 @@ recommended::
         python-wxgtk2.8 xvfb xserver-xephyr
 
 
-Packages not really required::
+Packages helpful but not really required::
 
         python-django \
         python-werkzeug python-django-extensions \
