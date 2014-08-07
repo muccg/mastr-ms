@@ -8,6 +8,16 @@ instructions on how to upgrade the server, see
 :ref:`server-upgrade`. For instructions on how to upgrade the datasync
 client, see :ref:`client-upgrade`.
 
+.. _1.10.1:
+
+1.10.1 (7th August 2014)
+------------------------
+
+Bug fix release. Contains database migrations.
+
+ * [MAS-68] - Handle migration of users with no e-mail address
+
+
 .. _1.10.0:
 
 1.10.0 (7th August 2014)
