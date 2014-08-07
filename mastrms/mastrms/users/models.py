@@ -2,8 +2,8 @@ import logging
 import json
 from django.db import models
 from django.db.models import Q
-from django.contrib.auth.models import AbstractUser, Group
-from mastrms.users.user_manager import GroupManager
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, UserManager, Group
+from django.utils import timezone
 
 MADAS_USER_GROUP = 'User'
 MADAS_PENDING_GROUP = 'Pending'
@@ -20,11 +20,22 @@ MADAS_ADMIN_GROUPS = [MADAS_ADMIN_GROUP, MADAS_NODEREP_GROUP, MASTR_ADMIN_GROUP,
 logger = logging.getLogger('mastrms.users')
 
 
-class User(AbstractUser):
+class User(AbstractBaseUser, PermissionsMixin):
     """
     Extended user model.
     Some attributes still need to be renamed.
     """
+    email = models.EmailField(verbose_name='email address', max_length=255,
+                              unique=True, db_index=True)
+    first_name = models.CharField('first name', max_length=50, blank=True)
+    last_name = models.CharField('last name', max_length=50, blank=True)
+    is_staff = models.BooleanField('staff status', default=False,
+        help_text='Designates whether the user can log into this admin '
+                    'site.')
+    is_active = models.BooleanField('active', default=True,
+        help_text='Designates whether this user should be treated as '
+                    'active. Unselect this instead of deleting accounts.')
+    date_joined = models.DateTimeField('date joined', default=timezone.now)
     telephoneNumber = models.CharField(max_length=255, blank=True)
     homePhone = models.CharField(max_length=255, blank=True) # homephone
     physicalDeliveryOfficeName = models.CharField(max_length=255, blank=True)
@@ -37,9 +48,34 @@ class User(AbstractUser):
     carLicense = models.CharField(max_length=255, blank=True) # country
     passwordResetKey = models.CharField(max_length=255, blank=True)
 
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
+    objects = UserManager()
+
+    def __unicode__(self):
+        return self.email
+
+    def get_full_name(self):
+        """
+        Returns the first_name plus the last_name, with a space in between.
+        """
+        full_name = '%s %s' % (self.first_name, self.last_name)
+        return full_name.strip()
+
+    def get_short_name(self):
+        "Returns the short name for the user."
+        return self.first_name
+
+    def email_user(self, subject, message, from_email=None):
+        """
+        Sends an email to this User.
+        """
+        send_mail(subject, message, from_email, [self.email])
+
     def to_dict(self, ldap_style=True):
         d = {
-            'uid' if ldap_style else 'username': self.username,
+            'uid' if ldap_style else 'email': self.email,
             'firstname': self.first_name,
             'lastname': self.last_name,
             'email': self.email,
@@ -117,13 +153,6 @@ class User(AbstractUser):
         return self.is_authenticated()
 
     @property
-    def Username(self):
-        return self.username
-    @Username.setter
-    def Username(self, value):
-        self.username = value
-
-    @property
     def IsPrivileged(self):
         return (self.IsAdmin or self.IsMastrAdmin or self.IsNodeRep or self.IsProjectLeader)
 
@@ -132,11 +161,11 @@ class User(AbstractUser):
         status = self.groups.filter(name__in=MADAS_STATUS_GROUPS)
         status = status.values_list("name", flat=True)
         if len(status) == 0:
-            logger.warning("User %s has no status group, assuming deleted." % self.username)
+            logger.warning("User %s has no status group, assuming deleted." % self.email)
             return MADAS_DELETED_GROUP
         if len(status) > 1:
             logger.warning("User %s somehow got multiple groups: %s. Using the"
-                           " first one." % (self.username, ", ".join(status)))
+                           " first one." % (self.email, ", ".join(status)))
         return status[0]
 
     @StatusGroup.setter
@@ -186,10 +215,10 @@ class User(AbstractUser):
         for group in groups:
             in_group = self.groups.filter(id=group.id).exists()
             if is_member and not in_group:
-                logger.info("Adding user %s to group \"%s\"" % (self.username, group.name))
+                logger.info("Adding user %s to group \"%s\"" % (self.email, group.name))
                 self.groups.add(group)
             elif not is_member and in_group:
-                logger.info("Removing user %s from group \"%s\"" % (self.username, group.name))
+                logger.info("Removing user %s from group \"%s\"" % (self.email, group.name))
                 self.groups.remove(group)
 
     @property
@@ -205,7 +234,7 @@ class User(AbstractUser):
 
     #Just a class to encapsulate data to send to the frontend (as json)
     def getData(self):
-        attrs = [ "Username", "IsLoggedIn", "IsAdmin", "IsClient", "IsNodeRep",
+        attrs = [ "email", "IsLoggedIn", "IsAdmin", "IsClient", "IsNodeRep",
                   "IsStaff", "IsMastrAdmin", "IsProjectLeader", "IsMastrStaff",
                   "Nodes" ]
 
@@ -253,14 +282,14 @@ class User(AbstractUser):
 
         return details
 
-    def update_user(self, newusername, newpassword, detailsDict):
-        if newusername is None:
-            newusername = self.username
-        elif newusername != self.username:
-            if type(self).objects.filter(username=newusername).exists():
-                logger.warning('New Username %s already existed.' % newusername)
+    def update_user(self, newemail, newpassword, detailsDict):
+        if newemail is None:
+            newemail = self.email
+        elif newemail != self.email:
+            if type(self).objects.filter(email=newemail).exists():
+                logger.warning('New Username %s already existed.' % newemail)
             else:
-                self.username = newusername
+                self.email = newemail
 
         if newpassword:
             self.set_password(newpassword)
@@ -290,9 +319,9 @@ def getCurrentUser(request, force_refresh = False):
         user.toJson = lambda: anon_json
     return user
 
-def getMadasUser(username):
+def getMadasUser(email):
     try:
-        return User.objects.get(username=username)
+        return User.objects.get(email=email)
     except User.DoesNotExist:
         return None
 
@@ -321,13 +350,13 @@ def getMadasUsersFromGroups(grouplist, method='and', ldap_style=False) :
     users = list_users(grouplist, method)
     return [u.to_dict(ldap_style) for u in users]
 
-def addMadasUser(username, detailsdict, password):
-    logger.info("Adding new user %s" % username)
-    if User.objects.filter(username=username).exists():
-        logger.warning('A user called %s already existed. Refusing to add.' % username)
+def addMadasUser(email, detailsdict, password):
+    logger.info("Adding new user %s" % email)
+    if User.objects.filter(email=email).exists():
+        logger.warning('A user with e-mail %s already existed. Refusing to add.' % email)
         user = None
     else:
-        detailsdict["username"] = username
+        detailsdict["email"] = email
         user = User.objects.create(**detailsdict)
         user.StatusGroup = MADAS_PENDING_GROUP
         user.set_password(password)
@@ -335,33 +364,33 @@ def addMadasUser(username, detailsdict, password):
 
     return user
 
-def updateMadasUserDetails(currentUser, existingUser, username, password, detailsdict):
+def updateMadasUserDetails(currentUser, existingUser, email, password, detailsdict):
     #The only people who can edit a record is an admin, or the actual user
     if currentUser.IsAdmin or currentUser.IsMastrAdmin or currentUser == existingUser:
-        existingUser.update_user(username, password, detailsdict)
+        existingUser.update_user(email, password, detailsdict)
         return True
     return False
 
-def saveMadasUser(currentUser, username, changeddetails, changedstatus, password):
+def saveMadasUser(currentUser, email, changeddetails, changedstatus, password):
     '''
         the current user is the currently logged in madas user
-        the username is the username of the person being edited
+        the email is the username of the person being edited
         changeddetails is a dict containing only the changed details
         changedstatus is a dict containing {admin:bool, noderep:bool, node:str, status:str}
     '''
     #load the existing user
-    existingUser = getMadasUser(username)
+    existingUser = getMadasUser(email)
 
     #If the user doesn't exist yet, add them first.
     if existingUser is None:
-        existingUser = addMadasUser(username.strip(), changeddetails, password)
+        existingUser = addMadasUser(email.strip(), changeddetails, password)
 
     if not currentUser.is_authenticated():
         # if not logged in, the rest of the changes are only doable by
         # adminish users or the user himself, so quit here, job done.
         return True
 
-    if not updateMadasUserDetails(currentUser, existingUser, username, password, changeddetails):
+    if not updateMadasUserDetails(currentUser, existingUser, email, password, changeddetails):
         return False
 
     if currentUser.IsAdmin:

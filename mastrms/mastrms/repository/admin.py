@@ -327,7 +327,7 @@ class SampleLogAdmin(ExtJsonInterface, admin.ModelAdmin):
 
 class RunAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ['title', 'method', 'creator', 'created_on', 'output_link', 'experiments_link', 'samples_link']
-    search_fields = ['title', 'method__title', 'creator__username', 'creator__first_name', 'creator__last_name']
+    search_fields = ['title', 'method__title', 'creator__email', 'creator__first_name', 'creator__last_name']
     inlines = [RunSampleInline]
 
     def queryset(self, request):

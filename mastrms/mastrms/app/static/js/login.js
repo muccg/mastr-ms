@@ -18,41 +18,41 @@
 MA.ResetUser = function()
 {
     MA.CurrentUser = {
+        email: "",
         IsAdmin: false,
         IsNodeRep: false,
         IsClient: false,
         IsStaff: false,
         IsLoggedIn: false,
-        Username: "",
         // Mastr MS membership
         IsMastrAdmin: false,
-        IsProjectLeader: false, 
+        IsProjectLeader: false,
         IsMastrStaff: false
     };
 };
 
 MA.LoginExecute = function(paramArray){
                             Ext.getCmp('login-panel').getForm().submit(
-                                {   successProperty: 'success',        
+                                {   successProperty: 'success',
                                     success: function (form, action) {
                                         var resultContent;
                                         var params;
                                         if (action.result.success === true) {
-                                            form.reset(); 
+                                            form.reset();
                                             //load up the menu and next content area as declared in response
-                                            if (action.result.username) {
-                                                Ext.getCmp('userMenu').setText('User: aaa '+action.result.username);
+                                            if (action.result.email) {
+                                                Ext.getCmp('userMenu').setText('User: aaa '+action.result.email);
                                             }
-                                            
+
                                             resultContent = action.result.mainContentFunction;
                                             params = action.result.params;
                                             if (MA.PostLoginParamArray) {
                                                 resultContent = MA.PostLoginParamArray[0];
                                                 params = MA.PostLoginParamArray[1];
                                             }
-                                            
+
                                             MA.ChangeMainContent(resultContent, params);
-                                        } 
+                                        }
                                     },
                                     failure: function (form, action) {
                                         Ext.Msg.alert('Login failure', '(this dialog will auto-close in 3 seconds)');
@@ -60,16 +60,16 @@ MA.LoginExecute = function(paramArray){
                                     }
                                 });
                         };
-                        
+
 MA.ForgotPasswordExecute = function(){
                             Ext.getCmp('forgot-password-panel').getForm().submit(
-                                {   successProperty: 'success',        
+                                {   successProperty: 'success',
                                     success: function (form, action) {
                                         if (action.result.success === true) {
-                                            form.reset(); 
+                                            form.reset();
                                             //load up the menu and next content area as declared in response
                                             MA.ChangeMainContent(action.result.mainContentFunction, action.result.params);
-                                        } 
+                                        }
                                     },
                                     failure: function (form, action) {
                                         Ext.Msg.alert('Submit failure', '(this dialog will auto-close in 3 seconds)');
@@ -82,8 +82,8 @@ MA.RequestQuoteButtonHandler = function() {
     MA.ChangeMainContent('quote:request');
 };
 
-MA.LoginCmp = {id:'login-container-panel', 
-                layout:'absolute', 
+MA.LoginCmp = {id:'login-container-panel',
+                layout:'absolute',
                 items:[
                        { xtype:'panel',
                        frame:true,
@@ -104,8 +104,8 @@ MA.LoginCmp = {id:'login-container-panel',
                                }
                                ]
                        },
-                    
-                    {  xtype:'form', 
+
+                    {  xtype:'form',
                     labelWidth: 75, // label settings here cascade unless overridden
                     id:'login-panel',
                     url:MA.BaseUrl + 'login/processLogin',
@@ -118,7 +118,7 @@ MA.LoginCmp = {id:'login-container-panel',
                     y: 10,
                     defaults: {width: 230},
                     defaultType: 'textfield',
-                    
+
                     items: [{
                             xtype:'panel',
                             el:"loginDiv"
@@ -128,14 +128,14 @@ MA.LoginCmp = {id:'login-container-panel',
                     ]}
                     ]
                 };
-                
+
 /**
  * madasForgotPassword
  */
-MA.ForgotPasswordCmp = {id:'forgot-password-container-panel', 
-                layout:'absolute', 
+MA.ForgotPasswordCmp = {id:'forgot-password-container-panel',
+                layout:'absolute',
                 items:[
-                    {  xtype:'form', 
+                    {  xtype:'form',
                     labelWidth: 75, // label settings here cascade unless overridden
                     id:'forgot-password-panel',
                     url:MA.BaseUrl + 'login/processForgotPassword',
@@ -148,10 +148,10 @@ MA.ForgotPasswordCmp = {id:'forgot-password-container-panel',
                     y: 10,
                     defaults: {width: 230},
                     defaultType: 'textfield',
-                    
+
                     items: [{
                             fieldLabel: 'Email address',
-                            name: 'username',
+                            name: 'email',
                             //vtype: 'email',
                             allowBlank:false
                             }
@@ -159,7 +159,7 @@ MA.ForgotPasswordCmp = {id:'forgot-password-container-panel',
                     buttons: [{
                         text: 'Cancel',
                         handler: function(){
-                            Ext.getCmp('forgot-password-panel').getForm().reset(); 
+                            Ext.getCmp('forgot-password-panel').getForm().reset();
                             MA.ChangeMainContent('login');
                             }
                         },{
@@ -170,7 +170,7 @@ MA.ForgotPasswordCmp = {id:'forgot-password-container-panel',
                     ],
                     keys: [{key: [10,13], fn: MA.ForgotPasswordExecute}]
                 };
-                
+
 MA.NotAuthorizedCmp = { id: 'notauthorized-panel', title: 'Not Authorized', html: 'You are not authorized to access this page' };
 
 MA.GetUserInfo = function(callback) {
@@ -189,18 +189,18 @@ MA.GetUserInfo = function(callback) {
 };
 
 MA.LoginInit = function(paramArray) {
-    
+
     MA.PostLoginParamArray = paramArray;
-    
+
     document.getElementById('loginDiv').style.display = 'block';
     Ext.getCmp('login-panel').getForm().reset();
-    
+
 };
 
 MA.ForgotPasswordInit = function() {
-    
+
     Ext.getCmp('forgot-password-panel').getForm().reset();
-    
+
 };
 
 MA.LogoutInit = function(){
@@ -211,19 +211,19 @@ MA.LogoutInit = function(){
         });
 
     var submitOptions = {
-        successProperty: 'success',        
+        successProperty: 'success',
         success: function (form, action) {
-            if (action.result.success === true) { 
+            if (action.result.success === true) {
                 MA.CurrentUser.IsAdmin = false;
                 Ext.getCmp('userMenu').setText('User: none');
                 MA.CurrentUser.IsLoggedIn = false;
-            
+
                 Ext.Msg.alert('Successfully logged out', '(this dialog will auto-close in 3 seconds)');
                 setTimeout(Ext.Msg.hide, 3000);
-            
+
                 //load up the menu and next content area as declared in response
                 MA.ChangeMainContent(action.result.mainContentFunction);
-            } 
+            }
         },
         failure: function (form, action) {
             Ext.Msg.alert('Logout failure', '(this dialog will auto-close in 3 seconds)');
@@ -243,15 +243,15 @@ MA.ResetPasswordValidatePassword = function (textfield, event) {
     var passEl = Ext.getCmp('resetPasswordPassword');
     var confirmEl = Ext.getCmp('resetPasswordConfirmPassword');
     var submitEl = Ext.getCmp('resetPasswordSubmit');
-    
+
     var passVal = Ext.getDom('resetPasswordPassword').value;
     var confirmVal = Ext.getDom('resetPasswordConfirmPassword').value;
 
     if (passVal == confirmVal) {
         confirmEl.clearInvalid();
         submitEl.enable();
-        return true; 
-    } else { 
+        return true;
+    } else {
         confirmEl.markInvalid('Password and Confirm Password must match');
         submitEl.disable();
         return false;
@@ -260,33 +260,33 @@ MA.ResetPasswordValidatePassword = function (textfield, event) {
 
 MA.ResetPasswordInit = function() {
 
-    var resetPasswordCmp = Ext.getCmp('resetpassword-panel');   
+    var resetPasswordCmp = Ext.getCmp('resetpassword-panel');
 
     //fetch details for this request
     resetPasswordCmp.load({url: MA.BaseUrl + 'login/populateResetPasswordForm', waitMsg:'Loading'});
-    
+
     //attach validator that ext cannot deal with
     Ext.getCmp("resetPasswordPassword").on('blur', MA.ResetPasswordValidatePassword);
     Ext.getCmp("resetPasswordConfirmPassword").on('blur', MA.ResetPasswordValidatePassword);
-    
+
     Ext.getCmp('resetPasswordSubmit').disable();
 
-    
+
 };
 
-MA.ResetPasswordCmp = {id:'resetpassword-container-panel', 
+MA.ResetPasswordCmp = {id:'resetpassword-container-panel',
                 layout:'absolute',
                 forceLayout:true,
-                deferredRender:false, 
+                deferredRender:false,
                 items:[
-                    {  xtype:'form', 
+                    {  xtype:'form',
                     labelWidth: 100, // label settings here cascade unless overridden
                     id:'resetpassword-panel',
                     url:MA.BaseUrl + 'login/processResetPassword',
                     method:'POST',
                     frame:true,
                     forceLayout:true,
-                    deferredRender:false, 
+                    deferredRender:false,
                     reader: new Ext.data.JsonReader({
                                   root            : 'response.value.items',
                                   versionProperty : 'response.value.version',
@@ -302,7 +302,7 @@ MA.ResetPasswordCmp = {id:'resetpassword-container-panel',
                     defaultType: 'textfield',
                     trackResetOnLoad: true,
                     waitMsgTarget: true,
-                    
+
                     items: [
                         {   name: 'email',
                             inputType: 'hidden'
@@ -327,7 +327,7 @@ MA.ResetPasswordCmp = {id:'resetpassword-container-panel',
                     buttons: [{
                         text: 'Cancel',
                         handler: function(){
-                            Ext.getCmp('resetpassword-panel').getForm().reset(); 
+                            Ext.getCmp('resetpassword-panel').getForm().reset();
                             MA.ChangeMainContent('login');
                             }
                         },{
@@ -335,18 +335,18 @@ MA.ResetPasswordCmp = {id:'resetpassword-container-panel',
                         id:'resetPasswordSubmit',
                         handler: function(){
                             Ext.getCmp('resetpassword-panel').getForm().submit(
-                                {   successProperty: 'success',        
+                                {   successProperty: 'success',
                                     success: function (form, action) {
                                         if (action.result.success === true) {
-                                            form.reset(); 
-                                            
+                                            form.reset();
+
                                             //display a success alert that auto-closes in 5 seconds
                                             Ext.Msg.alert("Password reset successfully", "(this message will auto-close in 5 seconds)");
                                             setTimeout(Ext.Msg.hide, 5000);
-                                            
+
                                             //load up the menu and next content area as declared in response
                                             MA.ChangeMainContent(action.result.mainContentFunction);
-                                        } 
+                                        }
                                     },
                                     failure: function (form, action) {
                                         //do nothing special. this gets called on validation failures and server errors

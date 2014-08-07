@@ -67,15 +67,15 @@ def userSave(request, *args):
     parsedform = getDetailsFromRequest(request)
 
     #With a usersave, you are always editing your own user
-    parsedform['username'] = currentuser.Username
-    success = saveMadasUser(currentuser, parsedform['username'], parsedform['details'], parsedform['status'], parsedform['password'])
+    parsedform['email'] = currentuser.email
+    success = saveMadasUser(currentuser, parsedform['email'], parsedform['details'], parsedform['status'], parsedform['password'])
     #refresh the user in case their details were just changed
     currentuser = getCurrentUser(request, force_refresh=True)
 
     if success:
-        sendAccountModificationEmail(request, parsedform['username'])
+        sendAccountModificationEmail(request, parsedform['email'])
     else:
-        logger.error('Error saving user: %s' % (parsedform['username']))
+        logger.error('Error saving user: %s' % (parsedform['email']))
         raise Exception('Error saving user.')
 
     logger.debug('***users/userSave : exit ***')

@@ -38,8 +38,8 @@ class WithFixtures(object):
                                        username=os.environ["LOGNAME"],
                                        flags="-rz")
 
-        #user = User.objects.get(username__istartswith="admin")
-        #user = User.objects.create(username="testuser", is_staff=True)
+        #user = User.objects.get(email__istartswith="admin")
+        #user = User.objects.create(email="testuser", is_staff=True)
         self.admin_password = "admin"
         self.admin = self.create_user("admin@example.com", self.admin_password, True)
         self.user_password = "testing"
@@ -117,11 +117,11 @@ class WithFixtures(object):
         """
         Creates a django user and returns it.
         """
-        user = User.objects.filter(username=email)
+        user = User.objects.filter(email=email)
         if user.exists():
             user = user[0]
         else:
-            user = User(username=email, email=email)
+            user = User(email=email)
         user.set_password(password)
         user.save()
         user.IsAdmin = is_admin

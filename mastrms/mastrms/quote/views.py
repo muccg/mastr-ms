@@ -132,7 +132,7 @@ def listQuotes(request, *args):
        Accessible by Administrators, Node Reps and Clients but it filters down to just Client's quote requests if it is a Client
     '''
     # Show own quotes
-    qq = Q(emailaddressid__emailaddress=request.user.username)
+    qq = Q(emailaddressid__emailaddress=request.user.email)
 
     if request.user.IsNodeRep:
         #retrieve quotes for the first node in the list (there shouldnt be more than 1)
@@ -192,7 +192,7 @@ def listFormal(request, *args, **kwargs):
        Accessible by Everyone
     '''
     logger.debug('*** listFormal : enter ***')
-    uname = request.user.username
+    uname = request.user.email
     nodelist = request.user.Nodes
 
     qid = kwargs.get('qid', request.REQUEST.get('qid', '') )
@@ -327,8 +327,7 @@ def save(request, *args):
     id = int(id)
     comment = request.POST.get('comment', '')
     completed = request.POST.get('completed', '')
-    #TODO: this only works because usernames are email addresses in this app.
-    email = request.user.username
+    email = request.user.email
 
     qr = Quoterequest.objects.get(id=id)
     toNode = request.POST.get('tonode', None)
@@ -379,7 +378,7 @@ def formalLoad(request, *args, **kwargs):
 
             #get the details of the auth user in the toemail
             try:
-                user = User.objects.get(username=retvals['fromemail'])
+                user = User.objects.get(email=retvals['fromemail'])
             except User.DoesNotExist:
                 pass
             else:
@@ -460,7 +459,7 @@ def formalSave(request, *args):
     '''Called when the user clicks the 'Send Formal Quote' button'''
     logger.debug('***formalSave : enter ***')
     qid = request.REQUEST.get('quoterequestid', 'wasnt there')
-    email = request.user.username
+    email = request.user.email
     attachmentname = ''
 
     # Get initial details
@@ -630,7 +629,7 @@ def downloadPDF(request, *args):
         response['Content-Disposition'] = content_disposition
         response['Content-Length'] = os.path.getsize(filename)
 
-        if fqr['fromemail'] != request.user.username:
+        if fqr['fromemail'] != request.user.email:
             setFormalQuoteStatus(qrobj, QUOTE_STATE_DOWNLOADED)
 
         _addQuoteHistory(qrobj, qr['emailaddressid__emailaddress'], qrobj.tonode, qrobj.tonode, 'Formal quote downloaded', qrobj.completed, qrobj.completed)

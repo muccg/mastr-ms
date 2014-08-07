@@ -15,28 +15,27 @@
  * along with Madas.  If not, see <http://www.gnu.org/licenses/>.
  */
 MA.AdminRequestsInit = function(){
-    
+
 	var dataurl = MA.BaseUrl + "admin/adminrequests";
-    
+
     var madasReader = new Ext.data.JsonReader({
                                               root            : 'response.value.items',
                                               versionProperty : 'response.value.version',
                                               totalProperty   : 'response.value.total_count'
                                               }, [
-                                                  { name: 'username', sortType : Ext.data.SortTypes.asText },
+                                                  { name: 'email', sortType : Ext.data.SortTypes.asText },
                                                   { name: 'firstname', sortType : Ext.data.SortTypes.asText },
                                                   { name: 'lastname', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'email', sortType : Ext.data.SortTypes.asText },
                                                   { name: 'telephoneNumber', sortType : Ext.data.SortTypes.asText },
                                                   { name: 'physicalDeliveryOfficeName', sortType : Ext.data.SortTypes.asText },
                                                   { name: 'title', sortType : Ext.data.SortTypes.asText }
                                                   ]);
-    
+
     var dataStore = new Ext.data.Store({
                                        id         : 'bSId',
                                        autoLoad   : true,
                                        reader     : madasReader,
-                                       sortInfo   : {field: 'username', direction: 'ASC'},
+                                       sortInfo   : {field: 'email', direction: 'ASC'},
                                        url        : dataurl
                                        });
     var gridView = new Ext.grid.GridView({
@@ -45,7 +44,7 @@ MA.AdminRequestsInit = function(){
                                          });
     var editHandler = function(el, ev) {
         if (selectionModel.hasSelection()) {
-            MA.ChangeMainContent('admin:useredit', [selectionModel.getSelected().data['username']]);
+            MA.ChangeMainContent('admin:useredit', [selectionModel.getSelected().data['email']]);
         }
     };
     var topToolbar = new Ext.Toolbar({
@@ -54,8 +53,8 @@ MA.AdminRequestsInit = function(){
                                                 ]
                                      });
     var selectionModel = new Ext.grid.RowSelectionModel({ singleSelect: true });
-    var colModel = new Ext.grid.ColumnModel([	
-                                             {header: 'Username', width:185, align : 'left', sortable: true, dataIndex: 'username', sortable: true },
+    var colModel = new Ext.grid.ColumnModel([
+                                             {header: 'E-mail', width:185, align : 'left', sortable: true, dataIndex: 'email', sortable: true },
                                              {header: 'First Name', align : 'left', sortable: true, dataIndex: 'firstname', sortable: true },
                                              {header: 'Last Name', align : 'left', sortable: true, dataIndex: 'lastname', sortable: true },
                                              {header: 'Phone', align : 'left', sortable: true, dataIndex: 'telephoneNumber', sortable: true },
@@ -85,37 +84,36 @@ MA.AdminRequestsInit = function(){
                                       });
     selectionModel.on('selectionchange', function() { var editBtn = Ext.getCmp('adminrequestsEditBtn'); if (selectionModel.hasSelection()) { editBtn.enable(); } else { editBtn.disable(); } } );
     grid.on('rowdblclick', editHandler);
-    
+
     //add this component to the center component
     var center = Ext.getCmp('center-panel');
     center.add(grid);
-    
+
 };
 
 MA.UserSearchInit = function(){
-    
+
 	var dataurl = MA.BaseUrl + "admin/usersearch";
-    
+
     var madasReader = new Ext.data.JsonReader({
                                               root            : 'response.value.items',
                                               versionProperty : 'response.value.version',
                                               totalProperty   : 'response.value.total_count'
                                               }, [
                                                   { name: 'isClient', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'username', sortType : Ext.data.SortTypes.asText },
+                                                  { name: 'email', sortType : Ext.data.SortTypes.asText },
                                                   { name: 'firstname', sortType : Ext.data.SortTypes.asText },
                                                   { name: 'lastname', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'email', sortType : Ext.data.SortTypes.asText },
                                                   { name: 'telephoneNumber', sortType : Ext.data.SortTypes.asText },
                                                   { name: 'physicalDeliveryOfficeName', sortType : Ext.data.SortTypes.asText },
                                                   { name: 'title', sortType : Ext.data.SortTypes.asText }
                                                   ]);
-    
+
     var dataStore = new Ext.data.Store({
                                        id         : 'bSId',
                                        autoLoad   : true,
                                        reader     : madasReader,
-                                       sortInfo   : {field: 'username', direction: 'ASC'},
+                                       sortInfo   : {field: 'email', direction: 'ASC'},
                                        url        : dataurl
                                        });
     var gridView = new Ext.grid.GridView({
@@ -123,9 +121,9 @@ MA.UserSearchInit = function(){
                                          forceFit: true
                                          });
     var selectionModel = new Ext.grid.RowSelectionModel({ singleSelect: true });
-    var colModel = new Ext.grid.ColumnModel([	
+    var colModel = new Ext.grid.ColumnModel([
                                              {header: 'Client?', width:35, sortable:true, dataIndex:'isClient', renderer: MA.Utils.GridCheckboxRenderer},
-                                             {header: 'Username', width:185, align : 'left', sortable: true, dataIndex: 'username', sortable: true },
+                                             {header: 'E-mail', width:185, align : 'left', sortable: true, dataIndex: 'email', sortable: true },
                                              {header: 'First Name', align : 'left', sortable: true, dataIndex: 'firstname', sortable: true },
                                              {header: 'Last Name', align : 'left', sortable: true, dataIndex: 'lastname', sortable: true },
                                              {header: 'Phone', align : 'left', sortable: true, dataIndex: 'telephoneNumber', sortable: true },
@@ -134,7 +132,7 @@ MA.UserSearchInit = function(){
                                              ]);
     var editHandler = function(el, ev) {
         if (selectionModel.hasSelection()) {
-            MA.ChangeMainContent('admin:useredit', [selectionModel.getSelected().data['username']]);
+            MA.ChangeMainContent('admin:useredit', [selectionModel.getSelected().data['email']]);
         }
     };
     var topToolbar = new Ext.Toolbar({
@@ -165,36 +163,35 @@ MA.UserSearchInit = function(){
                                       });
     selectionModel.on('selectionchange', function() { var editBtn = Ext.getCmp('usersearchEditBtn'); if (selectionModel.hasSelection()) { editBtn.enable(); } else { editBtn.disable(); } } );
     grid.on('rowdblclick', editHandler);
-    
+
     //add this component to the center component
     var center = Ext.getCmp('center-panel');
     center.add(grid);
-    
+
 };
 
 MA.RejectedUserSearchInit = function(){
-    
+
 	var dataurl = MA.BaseUrl + "admin/rejectedUsersearch";
-    
+
     var madasReader = new Ext.data.JsonReader({
                                               root            : 'response.value.items',
                                               versionProperty : 'response.value.version',
                                               totalProperty   : 'response.value.total_count'
                                               }, [
-                                                  { name: 'username', sortType : Ext.data.SortTypes.asText },
+                                                  { name: 'email', sortType : Ext.data.SortTypes.asText },
                                                   { name: 'firstname', sortType : Ext.data.SortTypes.asText },
                                                   { name: 'lastname', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'email', sortType : Ext.data.SortTypes.asText },
                                                   { name: 'telephoneNumber', sortType : Ext.data.SortTypes.asText },
                                                   { name: 'physicalDeliveryOfficeName', sortType : Ext.data.SortTypes.asText },
                                                   { name: 'title', sortType : Ext.data.SortTypes.asText }
                                                   ]);
-    
+
     var dataStore = new Ext.data.Store({
                                        id         : 'bSId',
                                        autoLoad   : true,
                                        reader     : madasReader,
-                                       sortInfo   : {field: 'username', direction: 'ASC'},
+                                       sortInfo   : {field: 'email', direction: 'ASC'},
                                        url        : dataurl
                                        });
     var gridView = new Ext.grid.GridView({
@@ -202,8 +199,8 @@ MA.RejectedUserSearchInit = function(){
                                          forceFit: true
                                          });
     var selectionModel = new Ext.grid.RowSelectionModel({ singleSelect: true });
-    var colModel = new Ext.grid.ColumnModel([	
-                                             {header: 'Username', width:185, align : 'left', sortable: true, dataIndex: 'username', sortable: true },
+    var colModel = new Ext.grid.ColumnModel([
+                                             {header: 'E-mail', width:185, align : 'left', sortable: true, dataIndex: 'email', sortable: true },
                                              {header: 'First Name', align : 'left', sortable: true, dataIndex: 'firstname', sortable: true },
                                              {header: 'Last Name', align : 'left', sortable: true, dataIndex: 'lastname', sortable: true },
                                              {header: 'Phone', align : 'left', sortable: true, dataIndex: 'telephoneNumber', sortable: true },
@@ -212,7 +209,7 @@ MA.RejectedUserSearchInit = function(){
                                              ]);
     var editHandler = function(el, ev) {
         if (selectionModel.hasSelection()) {
-            MA.ChangeMainContent('admin:useredit', [selectionModel.getSelected().data['username']]);
+            MA.ChangeMainContent('admin:useredit', [selectionModel.getSelected().data['email']]);
         }
     };
     var topToolbar = new Ext.Toolbar({
@@ -243,36 +240,35 @@ MA.RejectedUserSearchInit = function(){
                                       });
     selectionModel.on('selectionchange', function() { var editBtn = Ext.getCmp('rejectedusersearchEditBtn'); if (selectionModel.hasSelection()) { editBtn.enable(); } else { editBtn.disable(); } } );
     grid.on('rowdblclick', editHandler);
-    
+
     //add this component to the center component
     var center = Ext.getCmp('center-panel');
     center.add(grid);
-    
+
 };
 
 MA.DeletedUserSearchInit = function(){
-    
+
 	var dataurl = MA.BaseUrl + "admin/deletedUsersearch";
-    
+
     var madasReader = new Ext.data.JsonReader({
                                               root            : 'response.value.items',
                                               versionProperty : 'response.value.version',
                                               totalProperty   : 'response.value.total_count'
                                               }, [
-                                                  { name: 'username', sortType : Ext.data.SortTypes.asText },
+                                                  { name: 'email', sortType : Ext.data.SortTypes.asText },
                                                   { name: 'firstname', sortType : Ext.data.SortTypes.asText },
                                                   { name: 'lastname', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'email', sortType : Ext.data.SortTypes.asText },
                                                   { name: 'telephoneNumber', sortType : Ext.data.SortTypes.asText },
                                                   { name: 'physicalDeliveryOfficeName', sortType : Ext.data.SortTypes.asText },
                                                   { name: 'title', sortType : Ext.data.SortTypes.asText }
                                                   ]);
-    
+
     var dataStore = new Ext.data.Store({
                                        id         : 'bSId',
                                        autoLoad   : true,
                                        reader     : madasReader,
-                                       sortInfo   : {field: 'username', direction: 'ASC'},
+                                       sortInfo   : {field: 'email', direction: 'ASC'},
                                        url        : dataurl
                                        });
     var gridView = new Ext.grid.GridView({
@@ -280,8 +276,8 @@ MA.DeletedUserSearchInit = function(){
                                          forceFit: true
                                          });
     var selectionModel = new Ext.grid.RowSelectionModel({ singleSelect: true });
-    var colModel = new Ext.grid.ColumnModel([	
-                                             {header: 'Username', width:185, align : 'left', sortable: true, dataIndex: 'username', sortable: true },
+    var colModel = new Ext.grid.ColumnModel([
+                                             {header: 'E-mail', width:185, align : 'left', sortable: true, dataIndex: 'email', sortable: true },
                                              {header: 'First Name', align : 'left', sortable: true, dataIndex: 'firstname', sortable: true },
                                              {header: 'Last Name', align : 'left', sortable: true, dataIndex: 'lastname', sortable: true },
                                              {header: 'Phone', align : 'left', sortable: true, dataIndex: 'telephoneNumber', sortable: true },
@@ -290,7 +286,7 @@ MA.DeletedUserSearchInit = function(){
                                              ]);
     var editHandler = function(el, ev) {
         if (selectionModel.hasSelection()) {
-            MA.ChangeMainContent('admin:useredit', [selectionModel.getSelected().data['username']]);
+            MA.ChangeMainContent('admin:useredit', [selectionModel.getSelected().data['email']]);
         }
     };
     var topToolbar = new Ext.Toolbar({
@@ -321,26 +317,26 @@ MA.DeletedUserSearchInit = function(){
                                       });
     selectionModel.on('selectionchange', function() { var editBtn = Ext.getCmp('deletedusersearchEditBtn'); if (selectionModel.hasSelection()) { editBtn.enable(); } else { editBtn.disable(); } } );
     grid.on('rowdblclick', editHandler);
-    
+
     //add this component to the center component
     var center = Ext.getCmp('center-panel');
     center.add(grid);
-    
+
 };
 
 
 MA.AdminUserEditInit = function (paramArray) {
-    var username = paramArray[0];
-    var adminUserEditCmp = Ext.getCmp('adminuseredit-panel');   
+    var email = paramArray[0];
+    var adminUserEditCmp = Ext.getCmp('adminuseredit-panel');
     var user = MA.CurrentUser;
-    
+
     //fetch user details
-    adminUserEditCmp.load({url: MA.BaseUrl + 'admin/userload', params: {'username': username}, waitMsg:'Loading'});
-    
+    adminUserEditCmp.load({url: MA.BaseUrl + 'admin/userload', params: {'email': email}, waitMsg:'Loading'});
+
     //attach validator that ext cannot deal with
     Ext.getCmp("adminUserEditPassword").on('blur', MA.AdminUserEditValidatePassword);
     Ext.getCmp("adminUserEditConfirmPassword").on('blur', MA.AdminUserEditValidatePassword);
-    
+
     Ext.getCmp('adminUserEditSubmit').enable();
 
     //Just in case a non admin/noderep has gotten here, disable the form so that changes can't be made.
@@ -354,12 +350,12 @@ MA.AdminUserEditInit = function (paramArray) {
     Ext.getCmp('adminUserEditIsMastrAdmin').setDisabled(!(user.IsAdmin || user.IsMastrAdmin));
     Ext.getCmp('adminUserEditIsProjectLeader').setDisabled(!(user.IsAdmin || user.IsMastrAdmin || user.isProjectLeader));
     Ext.getCmp('adminUserEditIsMastrStaff').setDisabled(!(user.IsAdmin || user.IsMastrAdmin || user.isProjectLeader));
-    
+
     //reload the combobox
     if (Ext.StoreMgr.containsKey('adminUserEditNodeDS')) {
         Ext.StoreMgr.get('adminUserEditNodeDS').reload();
     }
-    
+
     //allow the madas changeMainContent function to handle the rest from here
     return;
 };
@@ -372,23 +368,23 @@ MA.AdminUserEditValidatePassword = function (textfield, event) {
     var passEl = Ext.getCmp('adminUserEditPassword');
     var confirmEl = Ext.getCmp('adminUserEditConfirmPassword');
     var submitEl = Ext.getCmp('adminUserEditSubmit');
-    
+
     var passVal = Ext.getDom('adminUserEditPassword').value;
     var confirmVal = Ext.getDom('adminUserEditConfirmPassword').value;
-    
+
     if (passVal == confirmVal) {
         confirmEl.clearInvalid();
         submitEl.enable();
-        return true; 
-    } else { 
+        return true;
+    } else {
         confirmEl.markInvalid('Password and Confirm Password must match');
         submitEl.disable();
         return false;
     }
 };
 
-MA.AdminUserEditCmp = {id:'adminuseredit-container-panel', 
-    layout:'absolute', 
+MA.AdminUserEditCmp = {id:'adminuseredit-container-panel',
+    layout:'absolute',
     autoScroll:true,
     deferredRender:false,
     forceLayout:true,
@@ -397,7 +393,7 @@ MA.AdminUserEditCmp = {id:'adminuseredit-container-panel',
         forceLayout:true
     },
     items:[
-           {  xtype:'form', 
+           {  xtype:'form',
            labelWidth: 100, // label settings here cascade unless overridden
            id:'adminuseredit-panel',
            url:MA.BaseUrl + 'admin/userSave',
@@ -405,15 +401,14 @@ MA.AdminUserEditCmp = {id:'adminuseredit-container-panel',
            frame:true,
            reader: new Ext.data.JsonReader({
                                                  root            : 'data',
-                                                 idProperty      : 'username',
+                                                 idProperty      : 'email',
                                                  versionProperty : 'response.value.version',
                                                  totalProperty   : 'response.value.total_count',
                                                  successProperty : 'success'
                                                  }, [
-                                                     { name: 'username', sortType : Ext.data.SortTypes.asText },
+                                                     { name: 'email', sortType : Ext.data.SortTypes.asText },
                                                      { name: 'firstname', sortType : Ext.data.SortTypes.asText },
                                                      { name: 'lastname', sortType : Ext.data.SortTypes.asText },
-                                                     { name: 'email', sortType : Ext.data.SortTypes.asText },
                                                      { name: 'telephoneNumber', sortType : Ext.data.SortTypes.asText },
                                                      { name: 'physicalDeliveryOfficeName', sortType : Ext.data.SortTypes.asText },
                                                      { name: 'title', sortType : Ext.data.SortTypes.asText },
@@ -442,12 +437,12 @@ MA.AdminUserEditCmp = {id:'adminuseredit-container-panel',
        defaultType: 'textfield',
        trackResetOnLoad: true,
        waitMsgTarget: true,
-       
+
        items: [
                {   name: 'originalEmail',
                inputType: 'hidden'
                },{
-               fieldLabel: 'Email address',
+               fieldLabel: 'E-mail address',
                name: 'email',
                vtype: 'email',
                allowBlank:false,
@@ -503,9 +498,9 @@ MA.AdminUserEditCmp = {id:'adminuseredit-container-panel',
                inputValue: 'true',
                fieldLabel: 'Administrator'
                },{
-               xtype:'checkbox', 
+               xtype:'checkbox',
                id: 'adminUserEditIsNodeRep',
-               name: 'isNodeRep', 
+               name: 'isNodeRep',
                inputValue: 'true',
                fieldLabel: 'Node Rep'
                },{
@@ -630,7 +625,7 @@ MA.AdminUserEditCmp = {id:'adminuseredit-container-panel',
        buttons: [{
                  text: 'Cancel',
                  handler: function(){
-                    Ext.getCmp('adminuseredit-panel').getForm().reset(); 
+                    Ext.getCmp('adminuseredit-panel').getForm().reset();
                     MA.ChangeMainContent(MA.CancelBackTarget);
                  }
                  },{
@@ -638,18 +633,18 @@ MA.AdminUserEditCmp = {id:'adminuseredit-container-panel',
                  id: 'adminUserEditSubmit',
                  handler: function(){
                  Ext.getCmp('adminuseredit-panel').getForm().submit(
-                                                                    {   successProperty: 'success',        
+                                                                    {   successProperty: 'success',
                                                                     success: function (form, action) {
                                                                     if (action.result.success === true) {
-                                                                        form.reset(); 
-                                                                    
+                                                                        form.reset();
+
                                                                         //display a success alert that auto-closes in 5 seconds
                                                                         Ext.Msg.alert("User details saved successfully", "(this message will auto-close in 5 seconds)");
                                                                         setTimeout(Ext.Msg.hide, 5000);
-                                                                    
+
                                                                         //MA.ChangeMainContent(action.result.mainContentFunction);
                                                                         MA.ChangeMainContent(MA.CancelBackTarget);
-                                                                    } 
+                                                                    }
                                                                     },
                                                                     failure: function (form, action) {
                                                                     //do nothing special. this gets called on validation failures and server errors
@@ -663,19 +658,19 @@ MA.AdminUserEditCmp = {id:'adminuseredit-container-panel',
 };
 
 //handles selection and loading of node details
-MA.NodeManagementSelectionManager = function(selModel) { 
-    if (selModel.hasSelection()) { 
+MA.NodeManagementSelectionManager = function(selModel) {
+    if (selModel.hasSelection()) {
         Ext.getCmp('nodedetails-name').setValue(selModel.getSelected().data['name']);
         Ext.getCmp('nodedetails-originalName').setValue(selModel.getSelected().data['name']);
-        
-        Ext.getCmp('nodedetails-panel').enable(); 
-    } else { 
+
+        Ext.getCmp('nodedetails-panel').enable();
+    } else {
         //clear details when nothing is selected
         Ext.getCmp('nodedetails-name').setValue('');
         Ext.getCmp('nodedetails-originalName').setValue('');
-        
-        Ext.getCmp('nodedetails-panel').disable(); 
-    } 
+
+        Ext.getCmp('nodedetails-panel').disable();
+    }
 };
 
 //clearing the form on a Cancel click
@@ -687,10 +682,10 @@ MA.NodeManagementClearForm = function() {
 //handle the click on the 'add' tool button
 MA.NodeManagementAddTool = function(event, toolEl, panel) {
     Ext.getCmp('nodeListGrid').getSelectionModel().clearSelections();
-    
+
     Ext.getCmp('nodedetails-name').setValue('New node');
     Ext.getCmp('nodedetails-originalName').setValue('');
-    
+
     Ext.getCmp('nodedetails-panel').enable();
 };
 
@@ -699,30 +694,30 @@ MA.NodeManagementDeleteTool = function(event, toolEl, panel) {
     if (! Ext.getCmp('nodeListGrid').getSelectionModel().hasSelection()) {
         return false;
     }
-    
+
     var nodename = Ext.getCmp('nodeListGrid').getSelectionModel().getSelected().data['name'];
-    
+
     //only perform the deletion if the user confirms their action
     Ext.Msg.confirm('Confirm deletion', 'Are you sure you wish to delete the node: ' + nodename + ' ?', function(btn, text) {
                     if (btn == 'yes'){
-                    
+
                     var nodename = Ext.getCmp('nodeListGrid').getSelectionModel().getSelected().data['name'];
-                    
+
                     //execute the delete
-                    //submit form   
+                    //submit form
                     var simple = new Ext.BasicForm('hiddenForm', {
                                                    url:MA.BaseUrl + 'admin/nodeDelete',
                                                    baseParams:{'name':nodename},
                                                    method:'POST'
-                                                   });         
-                    
-                    var submitOptions = {   
+                                                   });
+
+                    var submitOptions = {
                     successProperty: 'success',
                     success: function (form, action) {
                     //display a success alert that auto-closes in 5 seconds
                     Ext.Msg.alert("Node deleted successfully", "(this message will auto-close in 5 seconds)");
                     setTimeout(Ext.Msg.hide, 5000);
-                    
+
                     //load up the menu and next content area as declared in response
                     MA.ChangeMainContent(action.result.mainContentFunction);
                     },
@@ -731,30 +726,30 @@ MA.NodeManagementDeleteTool = function(event, toolEl, panel) {
                     MA.ChangeMainContent(action.result.mainContentFunction);
                     }
                     };
-                    
+
                     simple.submit(submitOptions);
-                    
-                    
+
+
                     //clear the form, ready for future use
                     Ext.getCmp('nodeListGrid').getSelectionModel().clearSelections();
-                    
+
                     Ext.getCmp('nodedetails-name').setValue('');
                     Ext.getCmp('nodedetails-originalName').setValue('');
-                    
+
                     Ext.getCmp('nodedetails-panel').disable();
-                    
+
                     }
                     });
-    
+
 };
 
 //initialize node management grid and the event handlers
 MA.NodeManagementInit = function() {
     Ext.getCmp('nodeListGrid').getStore().reload();
-    
+
     //enable/disable the details panel when selection is changed (and load the details for the selected item)
     Ext.getCmp('nodeListGrid').getSelectionModel().on('selectionchange', MA.NodeManagementSelectionManager );
-    
+
     //disable the node details panel by default
     Ext.getCmp('nodedetails-panel').disable();
 };
@@ -774,21 +769,21 @@ defaults: {width: 230},
 defaultType: 'textfield',
 trackResetOnLoad: true,
 waitMsgTarget: true,
-    
+
 items: [
         {   name: 'originalName', id: 'nodedetails-originalName', xtype: 'hidden' },
         {   name: 'name', id: 'nodedetails-name', fieldLabel: 'Node Name', maskRe: /[^,=]/ }
         ],
 buttons: [
           { text: 'Reset', handler: MA.NodeManagementClearForm },
-        { text: 'Save', handler: function() { Ext.getCmp('nodedetails-panel').getForm().submit({   
+        { text: 'Save', handler: function() { Ext.getCmp('nodedetails-panel').getForm().submit({
                              successProperty: 'success',
                              success: function (form, action) {
                              if (action.result.success === true) {
                              //display a success alert that auto-closes in 5 seconds
                              Ext.Msg.alert("Node details saved successfully", "(this message will auto-close in 5 seconds)");
                              setTimeout(Ext.Msg.hide, 5000);
-                             
+
                              //load up the menu and next content area as declared in response
                              MA.ChangeMainContent(action.result.mainContentFunction);
                              }
@@ -848,21 +843,21 @@ items: [
 //org management component ------------------------------------------------------------------------------------//
 
 //handles selection and loading of org details
-MA.OrgManagementSelectionManager = function(selModel) { 
-    if (selModel.hasSelection()) { 
+MA.OrgManagementSelectionManager = function(selModel) {
+    if (selModel.hasSelection()) {
         Ext.getCmp('orgdetails-name').setValue(selModel.getSelected().data['name']);
         Ext.getCmp('orgdetails-id').setValue(selModel.getSelected().data['id']);
         Ext.getCmp('orgdetails-abn').setValue(selModel.getSelected().data['abn']);
-        
-        Ext.getCmp('orgdetails-panel').enable(); 
-    } else { 
+
+        Ext.getCmp('orgdetails-panel').enable();
+    } else {
         //clear details when nothing is selected
         Ext.getCmp('orgdetails-name').setValue('');
         Ext.getCmp('orgdetails-id').setValue('');
         Ext.getCmp('orgdetails-abn').setValue('');
-        
-        Ext.getCmp('orgdetails-panel').disable(); 
-    } 
+
+        Ext.getCmp('orgdetails-panel').disable();
+    }
 };
 
 //clearing the form on a Cancel click
@@ -874,11 +869,11 @@ MA.OrgManagementClearForm = function() {
 //handle the click on the 'add' tool button
 MA.OrgManagementAddTool = function(event, toolEl, panel) {
     Ext.getCmp('orgListGrid').getSelectionModel().clearSelections();
-    
+
     Ext.getCmp('orgdetails-name').setValue('New Organisation');
     Ext.getCmp('orgdetails-id').setValue('0');
     Ext.getCmp('orgdetails-abn').setValue('');
-    
+
     Ext.getCmp('orgdetails-panel').enable();
 };
 
@@ -887,31 +882,31 @@ MA.OrgManagementDeleteTool = function(event, toolEl, panel) {
     if (! Ext.getCmp('orgListGrid').getSelectionModel().hasSelection()) {
         return false;
     }
-    
+
     var orgname = Ext.getCmp('orgListGrid').getSelectionModel().getSelected().data['name'];
-    
+
     //only perform the deletion if the user confirms their action
     Ext.Msg.confirm('Confirm deletion', 'Are you sure you wish to delete the organisation: ' + orgname + ' ?', function(btn, text) {
                     if (btn == 'yes'){
-                    
+
                     var orgid = Ext.getCmp('orgListGrid').getSelectionModel().getSelected().data['id'];
-                    
+
                     //execute the delete
-                    //submit form   
+                    //submit form
                     var simple = new Ext.BasicForm('hiddenForm', {
                                                    url:MA.BaseUrl + 'admin/orgDelete',
                                                    baseParams:{'id':orgid},
                                                    method:'POST'
-                                                   });         
-                    
-                    var submitOptions = {   
+                                                   });
+
+                    var submitOptions = {
                     successProperty: 'success',
                     success: function (form, action) {
                     //display a success alert that auto-closes in 5 seconds
                     Ext.getCmp('orgListGrid').getStore().reload();
                     Ext.Msg.alert("Organisation deleted successfully", "(this message will auto-close in 5 seconds)");
                     setTimeout(Ext.Msg.hide, 5000);
-                    
+
                     //load up the menu and next content area as declared in response
                     MA.ChangeMainContent(action.result.mainContentFunction);
                     },
@@ -920,32 +915,32 @@ MA.OrgManagementDeleteTool = function(event, toolEl, panel) {
                     MA.ChangeMainContent(action.result.mainContentFunction);
                     }
                     };
-                    
+
                     simple.submit(submitOptions);
-                    
-                    
+
+
                     //clear the form, ready for future use
                     Ext.getCmp('orgListGrid').getSelectionModel().clearSelections();
-                    
+
                     Ext.getCmp('orgdetails-name').setValue('');
                     Ext.getCmp('orgdetails-abn').setValue('');
                     Ext.getCmp('orgdetails-id').setValue('0');
-                    
+
                     Ext.getCmp('orgdetails-panel').disable();
-                    
+
                     }
                     });
-    
+
 };
 
 
 //initialize org management grid and the event handlers
 MA.OrgManagementInit = function() {
     Ext.getCmp('orgListGrid').getStore().reload();
-    
+
     //enable/disable the details panel when selection is changed (and load the details for the selected item)
     Ext.getCmp('orgListGrid').getSelectionModel().on('selectionchange', MA.OrgManagementSelectionManager );
-    
+
     //disable the node details panel by default
     Ext.getCmp('orgdetails-panel').disable();
 };
@@ -965,7 +960,7 @@ MA.OrgDetailsCmp = {
     defaultType: 'textfield',
     trackResetOnLoad: true,
     waitMsgTarget: true,
-        
+
     items: [
             {   name: 'id', id: 'orgdetails-id', xtype: 'hidden' },
             {   name: 'name', id: 'orgdetails-name', fieldLabel: 'Organisation Name', maskRe: /[^,=]/ },
@@ -973,9 +968,9 @@ MA.OrgDetailsCmp = {
             ],
     buttons: [
               { text: 'Reset', handler: MA.OrgManagementClearForm },
-              { text: 'Save', 
-                  handler: function() { 
-                      Ext.getCmp('orgdetails-panel').getForm().submit({   
+              { text: 'Save',
+                  handler: function() {
+                      Ext.getCmp('orgdetails-panel').getForm().submit({
                                         successProperty: 'success',
                                         success: function (form, action) {
                                         if (action.result.success === true) {
@@ -983,7 +978,7 @@ MA.OrgDetailsCmp = {
                                         Ext.getCmp('orgListGrid').getStore().reload();
                                         Ext.Msg.alert("Organisation details saved successfully", "(this message will auto-close in 5 seconds)");
                                         setTimeout(Ext.Msg.hide, 5000);
-                                        
+
                                         //load up the menu and next content area as declared in response
                                         MA.ChangeMainContent(action.result.mainContentFunction);
                                         }

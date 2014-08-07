@@ -9,7 +9,7 @@ def getDetailsFromRequest(request):
     '''This is a generic function for parsing the form data passed in
        via one of the user edit forms
        it returns a dictionary with the following format:
-       username: <username supplied in form>
+       email: <email supplied in form>
        password: <password supplied in form>
        details: <dict of other details as supplied in form>
        status: <dict of status information (node, admin, noderep etc)
@@ -18,10 +18,9 @@ def getDetailsFromRequest(request):
         return str(request.REQUEST.get(key, default)).strip()
 
     # updateDict keys correspond to User model fields
-    updatedusername = getReqVarSTR('email')
+    updatedemail = getReqVarSTR('email')
     updateDict = {}
-    updateDict['username'] = updatedusername
-    updateDict['email'] = updatedusername
+    updateDict['email'] = updatedemail
     updateDict['telephoneNumber'] = getReqVarSTR('telephoneNumber')
     updateDict['physicalDeliveryOfficeName'] =  getReqVarSTR('physicalDeliveryOfficeName')
     updateDict['title'] = getReqVarSTR('title')
@@ -54,13 +53,13 @@ def getDetailsFromRequest(request):
     password = getReqVarSTR('password').strip() #empty password is ignored anyway
 
     retdict = {}
-    retdict['username'] =  updatedusername
+    retdict['email'] =  updatedemail
     retdict['password'] = password
     retdict['details'] = updateDict
     retdict['status'] = statusDict
 
     logger.debug('Parsed Form results:')
-    logger.debug('Username: %s', updatedusername)
+    logger.debug('Email: %s', updatedemail)
     logger.debug('Password: %s', "*" * len(password))
     logger.debug('Details:')
     for key in updateDict.keys():

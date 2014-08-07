@@ -28,17 +28,17 @@ def processLogin(request, *args):
     if request.method == "POST":
         post = request.POST.copy()
 
-        username = post.get('username', '')
+        email = post.get('email', '')
         password = post.get('password', '')
-        logger.debug('username is: %s', username)
+        logger.debug('email is: %s', email)
 
         try:
-            user = authenticate(username=username, password=password)
+            user = authenticate(email=email, password=password)
         except:
             # fixme: don't think normal django auth will ever raise an
             # exception.
             user = None
-            logger.exception("Error authenticating user: %s" % username)
+            logger.exception("Error authenticating user: %s" % email)
 
         if user is not None:
             if user.is_active:
@@ -72,8 +72,8 @@ def processForgotPassword(request, *args):
     regardless of success it should return success, to obfsucate user existence
     sets a validaton key in the user's ldap entry which is used to validate the user when they click the link in email
     '''
-    emailaddress = request.REQUEST['username'].strip()
-    user = User.objects.get(username=emailaddress)
+    emailaddress = request.REQUEST['email'].strip()
+    user = User.objects.get(email=emailaddress)
     u = user.to_dict()
     m = md5.new()
     m.update('madas' + str(time.time()) + 'resetPasswordToken123')
@@ -119,14 +119,14 @@ def populateResetPasswordForm(request, *args):
 
 def processResetPassword(request, *args):
 
-    username = request.REQUEST.get('email', '')
+    email = request.REQUEST.get('email', '')
     vk = request.REQUEST.get('validationKey', '')
     passw = request.REQUEST.get('password', '')
     success = True
-    if username is not '' and vk is not '' and passw is not '':
+    if email and vk and passw:
 
         #get existing details
-        user = User.objects.get(username=request.REQUEST['email'])
+        user = User.objects.get(email=email)
         userdetails = user_manager.to_dict()
         if userdetails.has_key('groups'):
             del userdetails['groups'] #remove 'groups' - they don't belong in an update.
@@ -134,8 +134,8 @@ def processResetPassword(request, *args):
             #clear out the pager vk
             del userdetails['passwordResetKey']
             #update the password
-            user.update_user(username, passw, userdetails)
-            sendPasswordChangedEmail(request, username)
+            user.update_user(email, passw, userdetails)
+            sendPasswordChangedEmail(request, email)
 
         else:
             logger.warning('\tEither no vk stored in ldap, or key mismatch. uservk was %s, storedvk was %s' % (vk, userdetails.get('pager', None)) )

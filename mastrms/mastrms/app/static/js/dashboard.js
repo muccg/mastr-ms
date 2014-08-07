@@ -27,23 +27,22 @@ MA.Dashboard.CreatePendingUserRequests = function() {
         },
         [
             { name: 'isClient', sortType : Ext.data.SortTypes.asText },
-            { name: 'username', sortType : Ext.data.SortTypes.asText },
+            { name: 'email', sortType : Ext.data.SortTypes.asText },
             { name: 'firstname', sortType : Ext.data.SortTypes.asText },
             { name: 'lastname', sortType : Ext.data.SortTypes.asText },
-            { name: 'email', sortType : Ext.data.SortTypes.asText },
             { name: 'telephoneNumber', sortType : Ext.data.SortTypes.asText },
             { name: 'physicalDeliveryOfficeName', sortType : Ext.data.SortTypes.asText },
             { name: 'title', sortType : Ext.data.SortTypes.asText }
         ]);
 
 
-    function editUser(username) {
-        MA.ChangeMainContent('admin:useredit', [username]);
+    function editUser(email) {
+        MA.ChangeMainContent('admin:useredit', [email]);
     }
 
     var editHandler = function(el, ev) {
         if (selectionModel.hasSelection()) {
-            editUser(selectionModel.getSelected().data.username);
+            editUser(selectionModel.getSelected().data.email);
         }
     };
 
@@ -67,7 +66,7 @@ MA.Dashboard.CreatePendingUserRequests = function() {
             autoScroll: true,
             stripeRows: true,
             height: 110,
-            autoExpandColumn: 'username',
+            autoExpandColumn: 'email',
             ds: new Ext.data.Store({
                 id: 'bSId',
                 reader     : madasReader,
@@ -78,7 +77,7 @@ MA.Dashboard.CreatePendingUserRequests = function() {
             listeners: {
                 rowdblclick: function(grid, rowIndex, evt) {
                     var record = grid.store.getAt(rowIndex);
-                    editUser(record.get('username'));
+                    editUser(record.get('email'));
                 }
             },
             columns: [{
@@ -92,9 +91,9 @@ MA.Dashboard.CreatePendingUserRequests = function() {
                     width: 100,
                     dataIndex: 'lastname'
                 },{
-                    id: 'username',
-                    header: 'Username',
-                    dataIndex: 'username'
+                    id: 'email',
+                    header: 'E-mail',
+                    dataIndex: 'email'
                 }
             ]
         }]
@@ -181,7 +180,7 @@ MA.Dashboard.CreateQuotesRequiringAttention = function() {
                             dataIndex: 'unread'
                         },
                         {
-                            header: 'Email',
+                            header: 'E-mail',
                             width: 185,
                             dataIndex: 'email'
                         },

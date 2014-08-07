@@ -12,20 +12,19 @@ def submit(request, *args):
     '''
     detailsDict = getDetailsFromRequest(request)
 
-    username = detailsDict['username']
-    user_exists = User.objects.filter(username=username).exists()
+    email = detailsDict['email']
+    user_exists = User.objects.filter(email=email).exists()
 
     if not user_exists:
         #saveMadasUser will add the user if they do not exist already.
-        user_exists = saveMadasUser(request.user, username, detailsDict['details'], detailsDict['status'], detailsDict['password'])
+        user_exists = saveMadasUser(request.user, email, detailsDict['details'], detailsDict['status'], detailsDict['password'])
 
         if not user_exists:
-            logger.warning("Could not add new user %s" % (username))
+            logger.warning("Could not add new user %s" % email)
     else:
-        logger.warning("User %s already existed, skipping registration" % (username))
+        logger.warning("User %s already existed, skipping registration" % email)
 
     if user_exists:
-        sendRegistrationToAdminEmail(request, username,
-                                     settings.REGISTRATION_TO_EMAIL)
+        sendRegistrationToAdminEmail(request, email, settings.REGISTRATION_TO_EMAIL)
 
     return jsonResponse()

@@ -167,10 +167,8 @@ class Project(models.Model):
     managers = models.ManyToManyField(User, related_name='managed_projects')
 
     def __unicode__(self):
-        client_username = 'No client'
-        if self.client:
-            client_username = self.client.username
-        return "%s (%s)" % (self.title, client_username)
+        client = self.client.email if self.client else "No client"
+        return "%s (%s)" % (self.title, client)
 
 class InstrumentMethod(models.Model):
     title = models.CharField(max_length=255, help_text="Text which will be shown in Mastr-MS")

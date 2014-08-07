@@ -1,13 +1,18 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin, GroupAdmin
-from django.contrib.auth.forms import UserChangeForm, UserCreationForm
-from django.contrib.auth.models import User as DjangoUser, Group
+from django.contrib.auth.forms import UserCreationForm, ReadOnlyPasswordHashField
+from django.contrib.auth.models import Group
 from mastrms.users.models import User
 from django import forms
 
-class MAUserChangeForm(UserChangeForm):
-    class Meta(UserChangeForm.Meta):
-        model = User
+
+class MAUserChangeForm(forms.ModelForm):
+    "Mostly copied from django.contrib.auth.forms.UserChangeForm"
+
+    password = ReadOnlyPasswordHashField(label="Password",
+        help_text="Raw passwords are not stored, so there is no way to see "
+                  "this user's password, but you can change the password "
+                  "using <a href=\"password/\">this form</a>.")
 
     physicalDeliveryOfficeName = forms.CharField(label="Office", required=False)
     telephoneNumber = forms.CharField(label="Office Phone", required=False)
@@ -21,48 +26,104 @@ class MAUserChangeForm(UserChangeForm):
     carLicense = forms.CharField(label="Country", required=False)
     passwordResetKey = forms.CharField(label="Password Reset Key", required=False)
 
-class MAUserCreationForm(UserCreationForm):
-    class Meta(UserCreationForm.Meta):
+    class Meta:
         model = User
-        fields = ("username",)
+        fields = '__all__'
 
+    def __init__(self, *args, **kwargs):
+        super(MAUserChangeForm, self).__init__(*args, **kwargs)
+        f = self.fields.get('user_permissions', None)
+        if f is not None:
+            f.queryset = f.queryset.select_related('content_type')
+
+    def clean_password(self):
+        # Regardless of what the user provides, return the initial value.
+        # This is done here, rather than on the field, because the
+        # field does not have access to the initial value
+        return self.initial["password"]
+
+
+class MAUserCreationForm(forms.ModelForm):
+    "Adapted from django.contrib.auth.forms.UserCreationForm"
     INITIAL_GROUPS = ["User"]
 
-    username = forms.EmailField(label="E-mail address", max_length=30)
+    error_messages = {
+        'duplicate_email': "A user with that e-mail already exists.",
+        'password_mismatch': "The two password fields didn't match.",
+    }
+    email = forms.EmailField(label="E-mail address", max_length=100)
+    #username = forms.HiddenInput()
+    password1 = forms.CharField(label="Password",
+        widget=forms.PasswordInput)
+    password2 = forms.CharField(label="Password confirmation",
+        widget=forms.PasswordInput,
+        help_text="Enter the same password as above, for verification.")
 
-    def clean_username(self):
-        """
-        Need to override this method because django refers to
-        auth.User directly.
-        """
-        username = self.cleaned_data["username"]
+    class Meta:
+        model = User
+        fields = ("email",)
+
+    def clean_email(self):
+        # Since User.email is unique, this check is redundant,
+        # but it sets a nicer error message than the ORM. See #13147.
+        email = self.cleaned_data["email"]
         try:
-            self.Meta.model.objects.get(username=username)
+            User._default_manager.get(email=email)
         except User.DoesNotExist:
-            return username
-        raise forms.ValidationError(self.error_messages['duplicate_username'])
+            return email
+        raise forms.ValidationError(
+            self.error_messages['duplicate_email'],
+            code='duplicate_email',
+        )
+
+    def clean_password2(self):
+        password1 = self.cleaned_data.get("password1")
+        password2 = self.cleaned_data.get("password2")
+        if password1 and password2 and password1 != password2:
+            raise forms.ValidationError(
+                self.error_messages['password_mismatch'],
+                code='password_mismatch',
+            )
+        return password2
 
     def save(self, commit=True):
         user = super(MAUserCreationForm, self).save(commit=False)
-        user.email = user.username
-        user.save()
-        # Add the user to a group
-        for g in Group.objects.filter(name__in=self.INITIAL_GROUPS):
-            user.groups.add(g)
+        user.set_password(self.cleaned_data["password1"])
+        if commit:
+            user.save()
+            # Add the user to a group
+            for g in Group.objects.filter(name__in=self.INITIAL_GROUPS):
+                user.groups.add(g)
         return user
+
 
 class MAUserAdmin(UserAdmin):
     form = MAUserChangeForm
     add_form = MAUserCreationForm
-    ma_fieldsets = (
-        ("Other info", {'fields': (
-                    "physicalDeliveryOfficeName",
-                    "telephoneNumber", "homePhone",
-                    "title", "destinationIndicator",
-                    "businessCategory", "registeredAddress",
-                    "postalAddress", "description", "carLicense")}),)
 
-    fieldsets = UserAdmin.fieldsets + ma_fieldsets
+    fieldsets = (
+        (None, {'fields': ('email', 'password')}),
+        ('Personal info', {'fields': ('first_name', 'last_name')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser',
+                                    'groups', 'user_permissions')}),
+        ('Important dates', {'fields': ('last_login', 'date_joined')}),
+        ("Other info", {'fields': (
+            "physicalDeliveryOfficeName",
+            "telephoneNumber", "homePhone",
+            "title", "destinationIndicator",
+            "businessCategory", "registeredAddress",
+            "postalAddress", "description", "carLicense")}),
+    )
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('email', 'password1', 'password2')}
+        ),
+    )
+    list_display = ('email', 'first_name', 'last_name', 'is_staff')
+    search_fields = ('first_name', 'last_name', 'email')
+    ordering = ('email',)
+
 
 # register the django auth admins
 try:

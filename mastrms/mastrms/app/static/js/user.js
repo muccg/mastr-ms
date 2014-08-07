@@ -14,20 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with Madas.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
 MA.UserEditInit = function () {
 
-    var userEditCmp = Ext.getCmp('useredit-panel');   
+    var userEditCmp = Ext.getCmp('useredit-panel');
 
     //fetch user details
     userEditCmp.load({url: MA.BaseUrl + 'user/userload', waitMsg:'Loading'});
-    
+
     //attach validator that ext cannot deal with
     Ext.getCmp("userEditPassword").on('blur', MA.UserEditValidatePassword);
     Ext.getCmp("userEditConfirmPassword").on('blur', MA.UserEditValidatePassword);
-    
+
     Ext.getCmp('userEditSubmit').enable();
-    
+
     //allow the madas changeMainContent function to handle the rest from here
     return;
 };
@@ -40,23 +40,23 @@ MA.UserEditValidatePassword = function (textfield, event) {
     var passEl = Ext.getCmp('userEditPassword');
     var confirmEl = Ext.getCmp('userEditConfirmPassword');
     var submitEl = Ext.getCmp('userEditSubmit');
-    
+
     var passVal = Ext.getDom('userEditPassword').value;
     var confirmVal = Ext.getDom('userEditConfirmPassword').value;
 
     if (passVal == confirmVal) {
         confirmEl.clearInvalid();
         submitEl.enable();
-        return true; 
-    } else { 
+        return true;
+    } else {
         confirmEl.markInvalid('Password and Confirm Password must match');
         submitEl.disable();
         return false;
     }
 };
 
-MA.UserEditCmp = {id:'useredit-container-panel', 
-                layout:'absolute', 
+MA.UserEditCmp = {id:'useredit-container-panel',
+                layout:'absolute',
                 deferredRender:false,
                 forceLayout:true,
                 defaults: {
@@ -64,7 +64,7 @@ MA.UserEditCmp = {id:'useredit-container-panel',
                     forceLayout:true
                 },
                 items:[
-                    {  xtype:'form', 
+                    {  xtype:'form',
                     labelWidth: 100, // label settings here cascade unless overridden
                     id:'useredit-panel',
                     url:MA.BaseUrl + 'user/userSave',
@@ -77,10 +77,9 @@ MA.UserEditCmp = {id:'useredit-container-panel',
                                                               totalProperty   : 'totalRows',
                                                               successProperty : 'success',
                                                               fields: [
-                                                                  { name: 'username', sortType : 'string' },
+                                                                  { name: 'email', sortType : 'string' },
                                                                   { name: 'firstname', sortType : 'string' },
                                                                   { name: 'lastname', sortType : 'string' },
-                                                                  { name: 'email', sortType : 'string' },
                                                                   { name: 'telephoneNumber', sortType : 'string' },
                                                                   { name: 'physicalDeliveryOfficeName', sortType : 'string' },
                                                                   { name: 'title', sortType : 'string' },
@@ -105,7 +104,7 @@ MA.UserEditCmp = {id:'useredit-container-panel',
                     defaultType: 'textfield',
                     trackResetOnLoad: true,
                     waitMsgTarget: true,
-                    
+
                     items: [
                         {   name: 'originalEmail',
                             inputType: 'hidden'
@@ -171,7 +170,7 @@ MA.UserEditCmp = {id:'useredit-container-panel',
                             name: 'dept',
                             allowBlank:true,
                             maskRe: /[^,=]/
-                        },{ 
+                        },{
                             fieldLabel: 'Institute',
                             name: 'institute',
                             allowBlank:true,
@@ -210,7 +209,7 @@ MA.UserEditCmp = {id:'useredit-container-panel',
                     buttons: [{
                         text: 'Cancel',
                         handler: function(){
-                            Ext.getCmp('useredit-panel').getForm().reset(); 
+                            Ext.getCmp('useredit-panel').getForm().reset();
                             MA.ChangeMainContent('dashboard');
                             }
                         },{
@@ -218,18 +217,18 @@ MA.UserEditCmp = {id:'useredit-container-panel',
                         id:'userEditSubmit',
                         handler: function(){
                             Ext.getCmp('useredit-panel').getForm().submit(
-                                {   successProperty: 'success',        
+                                {   successProperty: 'success',
                                     success: function (form, action) {
                                         if (action.result.success === true) {
-                                            form.reset(); 
-                                            
+                                            form.reset();
+
                                             //display a success alert that auto-closes in 5 seconds
                                             Ext.Msg.alert("User details saved successfully", "(this message will auto-close in 5 seconds)");
                                             setTimeout(Ext.Msg.hide, 5000);
-                                            
+
                                             //load up the menu and next content area as declared in response
                                             MA.ChangeMainContent(action.result.mainContentFunction);
-                                        } 
+                                        }
                                     },
                                     failure: function (form, action) {
                                         //do nothing special. this gets called on validation failures and server errors

@@ -1,6 +1,6 @@
-MA.MenuRender = function(username) {
+MA.MenuRender = function(email) {
 
-    var userText =  'User: '+username;
+    var userText =  'User: '+email;
 
     var tb = new Ext.Toolbar(
 
@@ -47,7 +47,7 @@ MA.MenuRender = function(username) {
                             items: [
                                     {text:'Requesting a Quote', id:'help:screencasts-quoterequest', handler: MA.MenuHandler}
                                     ]
-                            } 
+                            }
                             },
                             {text:'Admin screencasts', id:'helpadmin:screencasts', menu: {
                             items: [
@@ -56,13 +56,13 @@ MA.MenuRender = function(username) {
                                     {text:'Sending a Formal Quote', id:'helpadmin:screencasts-forwardformal', handler: MA.MenuHandler},
                                     {text:'Replacing a Formal Quote', id:'helpadmin:screencasts-replaceformal', handler: MA.MenuHandler}
                                     ]
-                            } 
+                            }
                             },
                             {text:'Contact Us', id:'help:contactus', handler: MA.MenuHandler }
                             ]
                     }
                 },
-                    
+
                 { xtype: 'tbfill'},
                 { xtype: 'tbbutton', text:userText, id: 'userMenu', menu:{
                     items: [
@@ -151,4 +151,3 @@ MA.MenuHide = function() {
     Ext.get('repo').hide();
     Ext.getCmp('helpadmin:screencasts').disable();
 };
-

@@ -42,5 +42,5 @@ class GroupManager(object):
         return True
 
     @staticmethod
-    def get_user_groups(username):
-        return [g.name for g in Group.objects.filter(user__username=username)]
+    def get_user_groups(email):
+        return [g.name for g in Group.objects.filter(user__email=email)]

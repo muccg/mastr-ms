@@ -15,8 +15,7 @@ class Command(NoArgsCommand):
 
     def handle(self, *args, **options):
         admin = User.objects.order_by("id").first()
-        user, created = User.objects.get_or_create(username="another@example.com",
-                                                   email="another@example.com",
+        user, created = User.objects.get_or_create(email="another@example.com",
                                                    first_name="Another", last_name="User",
                                                    is_active=True, is_superuser=True,
                                                    is_staff=True,
@@ -56,8 +55,7 @@ class Command(NoArgsCommand):
 
 def load_debug_data():
     s, _ = User.objects.get_or_create(
-        username="client@example.com", defaults={
-            "email": "client@example.com",
+        email="client@example.com", defaults={
             "is_superuser": False, "is_staff": True,
             "first_name": "Rodney", "last_name": "Lorrimar",
             "dob": datetime.date(1983, 11, 10), "sex": "M",
@@ -119,7 +117,7 @@ def load_debug_data():
     l.save()
 
 
-    t, _ = User.objects.get_or_create(username="admin", defaults={"email": "admin@example.com", "is_superuser": True, "is_staff": True, "first_name": "Another Admin", "last_name": "User", "second_name": "The"})
+    t, _ = User.objects.get_or_create(email="admin@example.com", defaults={"is_superuser": True, "is_staff": True, "first_name": "Another Admin", "last_name": "User", "second_name": "The"})
     t.first_name = "Admin"
     t.last_name = "User"
     t.save()

@@ -20,7 +20,7 @@ MA.LoadMachineAndRuleGeneratorDatastores = function(){
     //should only be called when initialising components that can only
     //have been created because the logged in user is an admin.
     //For instance, being able to click on certain admin menu items,
-    //or the 'recent experiments' component, which only shows if you are 
+    //or the 'recent experiments' component, which only shows if you are
     //an admin.
     machineStore.load();
     enabledRuleGeneratorStore.load();
@@ -29,10 +29,10 @@ MA.LoadMachineAndRuleGeneratorDatastores = function(){
 
 
 /**
- * madasChangeMainContent 
+ * madasChangeMainContent
  * acts as a shallow controller between string function names and initialization/display of pages
  * it should only be called directly when processing the return from an ajax request
- * any time you wish to change the display based on a user action you should call 
+ * any time you wish to change the display based on a user action you should call
  * to MA.Authorize() instead, as that will check authorization first, which can prevent odd
  * situations where a page displays but the content fails
  */
@@ -44,11 +44,11 @@ MA.ChangeMainContent = function(contentName, paramArray){
     Ext.QuickTips.init();
 
     switch (contentName) {
-    
-        case "dashboard": 
+
+        case "dashboard":
             //default
             MA.Dashboard.Init();
-            Ext.getCmp('center-panel').layout.setActiveItem('dashboard-panel'); 
+            Ext.getCmp('center-panel').layout.setActiveItem('dashboard-panel');
             break;
 
         case "registration":
@@ -56,48 +56,48 @@ MA.ChangeMainContent = function(contentName, paramArray){
             cancelBackTarget = false;
             Ext.getCmp('center-panel').layout.setActiveItem('registration-container-panel');
             break;
-            
+
         case "login":
             showMenu = false;
             cancelBackTarget = false;
             MA.LoginInit(paramArray);
             Ext.getCmp('center-panel').layout.setActiveItem('login-container-panel');
             break;
-            
+
         case "login:forgotpassword":
             showMenu = false;
             cancelBackTarget = false;
             MA.ForgotPasswordInit();
             Ext.getCmp('center-panel').layout.setActiveItem('forgot-password-container-panel');
             break;
-            
+
         case "login:resetpassword":
             showMenu = false;
             cancelBackTarget = false;
             MA.ResetPasswordInit();
             Ext.getCmp('center-panel').layout.setActiveItem('resetpassword-container-panel');
             break;
-            
+
         case "login:processLogout":
             cancelBackTarget = false;
             MA.LogoutInit();
             break;
-            
+
         case "admin:adminrequests":
             MA.AdminRequestsInit();
             Ext.getCmp('center-panel').layout.setActiveItem('adminrequests-panel');
             break;
-            
+
         case "admin:usersearch":
             MA.UserSearchInit();
             Ext.getCmp('center-panel').layout.setActiveItem('usersearch-panel');
             break;
-            
+
         case "admin:rejectedUsersearch":
             MA.RejectedUserSearchInit();
             Ext.getCmp('center-panel').layout.setActiveItem('rejectedusersearch-panel');
             break;
-            
+
         case "admin:deletedUsersearch":
             MA.DeletedUserSearchInit();
             Ext.getCmp('center-panel').layout.setActiveItem('deletedusersearch-panel');
@@ -107,29 +107,29 @@ MA.ChangeMainContent = function(contentName, paramArray){
             MA.NodeManagementInit();
             Ext.getCmp('center-panel').layout.setActiveItem('nodeManagementCmp');
             break;
-            
+
         case "admin:orglist":
             MA.OrgManagementInit();
             Ext.getCmp('center-panel').layout.setActiveItem('orgManagementCmp');
             break;
-            
+
         case "admin:useredit":
             cancelBackTarget = false;
             MA.AdminUserEditInit(paramArray);
             Ext.getCmp('center-panel').layout.setActiveItem('adminuseredit-container-panel');
             break;
-            
+
         case "user:myaccount":
             cancelBackTarget = false;
             MA.UserEditInit(paramArray);
             Ext.getCmp('center-panel').layout.setActiveItem('useredit-container-panel');
             break;
-            
+
         case "notauthorized":
             cancelBackTarget = false;
             Ext.getCmp('center-panel').layout.setActiveItem('notauthorized-panel');
             break;
-            
+
         case "message":
             cancelBackTarget = false;
             affectMenu = false;
@@ -142,7 +142,7 @@ MA.ChangeMainContent = function(contentName, paramArray){
             affectMenu = false;
             showMenu = false;
             break;
-         
+
         case "quote:list":
             MA.QuoteRequestListInit();
             Ext.getCmp('center-panel').layout.setActiveItem('quotelistpanel');
@@ -152,7 +152,7 @@ MA.ChangeMainContent = function(contentName, paramArray){
             MA.QuoteRequestEditInit(paramArray);
             Ext.getCmp('center-panel').layout.setActiveItem('quoterequestedit-container-panel');
             break;
-            
+
         case "quote:listAll":
             MA.QuoteRequestListAllInit();
             Ext.getCmp('center-panel').layout.setActiveItem('quoterequestsall-panel');
@@ -164,7 +164,7 @@ MA.ChangeMainContent = function(contentName, paramArray){
             affectMenu = false;
             showMenu = false;
             break;
-            
+
         case "quote:listFormal":
         	MA.FormalQuoteUserListInit();
         	Ext.getCmp('center-panel').layout.setActiveItem('fquolist-panel');
@@ -270,38 +270,38 @@ MA.ChangeMainContent = function(contentName, paramArray){
     	    MA.ScreencastsInit('madas_requesting_quote.flv');
     	    Ext.getCmp('center-panel').layout.setActiveItem('screencasts-container-panel');
     	    break;
-            
+
         case "help:contactus":
             cancelBackTarget = false;
             affectMenu = false;
             MA.Message({'message':"For any queries and issues please contact,<br><br>Dr.Saravanan Dayalan<br>sdayalan@unimelb.edu.au<br>+61 3 8344 2201"});
             break;
-    	    
+
         case "helpadmin:screencasts-forwardquoterequest":
     	    MA.ScreencastsInit('madas_forwarding_quoterequest.flv');
     	    Ext.getCmp('center-panel').layout.setActiveItem('screencasts-container-panel');
     	    break;
-    	    
+
 	    case "helpadmin:screencasts-forwardformal":
     	    MA.ScreencastsInit('madas_sending_formalquote.flv');
     	    Ext.getCmp('center-panel').layout.setActiveItem('screencasts-container-panel');
     	    break;
-    	    
+
 	    case "helpadmin:screencasts-replaceformal":
     	    MA.ScreencastsInit('madas_fixing_formalquote.flv');
     	    Ext.getCmp('center-panel').layout.setActiveItem('screencasts-container-panel');
     	    break;
-    	    
+
 	    case "helpadmin:screencasts-authrequest":
     	    MA.ScreencastsInit('madas_auth_request.flv');
     	    Ext.getCmp('center-panel').layout.setActiveItem('screencasts-container-panel');
     	    break;
-            
-            
+
+
         default:
             cancelBackTarget = false;
     }
-    
+
     //always affect menu if we are initing the app
     if (contentName == MA.InitFunction) {
         affectMenu = true;
@@ -320,7 +320,7 @@ MA.ChangeMainContent = function(contentName, paramArray){
     if (cancelBackTarget) {
         MA.CancelBackTarget = contentName;
     }
-    
+
     //append the application path onto the URL as a means of making things bookmarkable
     //var regex = /\#.*$/;
     //window.location = window.location.replace(regex, "#" + contentName);
@@ -331,12 +331,12 @@ MA.ChangeMainContent = function(contentName, paramArray){
  * madasInitApplication
  * initializes the main application interface and any required variables
  */
-MA.InitApplication = function(appSecureUrl, username, mainContentFunction, params) {
+MA.InitApplication = function(appSecureUrl, email, mainContentFunction, params) {
    //various global settings for Ext
    Ext.BLANK_IMAGE_URL = appSecureUrl + 'static/ext-3.4.0/resources/images/default/s.gif';
    Ext.QuickTips.init();
    MA.BaseUrl = appSecureUrl;
-   
+
    MA.LoginSubmitURL = appSecureUrl + 'login/processLogin';
    MA.ResetUser();
    MA.InitFunction = mainContentFunction;
@@ -348,7 +348,7 @@ MA.InitApplication = function(appSecureUrl, username, mainContentFunction, param
 
    //the ViewPort defines the main layout for the entire Madas app
    //the center-panel component is the main area where content is switched in and out
-   
+
    var viewport = new Ext.Viewport({
         layout:'border',
 
@@ -368,12 +368,12 @@ MA.InitApplication = function(appSecureUrl, username, mainContentFunction, param
                 id:'center-panel',
                 layout: 'card',
                 activeItem:0,
-                items: [MA.LoginCmp, MA.RegistrationCmp, MA.NotAuthorizedCmp, MA.AdminUserEditCmp, 
+                items: [MA.LoginCmp, MA.RegistrationCmp, MA.NotAuthorizedCmp, MA.AdminUserEditCmp,
                         MA.UserEditCmp, MA.ForgotPasswordCmp, MA.ResetPasswordCmp, MA.NodeManagementCmp,
                         MA.OrgManagementCmp,
                         MA.RequestQuoteCmp, MA.QuoteRequestEditCmp, MA.ViewFormalCmp,
                         MA.ExperimentCmp,
-                        MA.ProjectListCmp, MA.ProjectCmp, 
+                        MA.ProjectListCmp, MA.ProjectCmp,
                         MA.ClientsListCmp,
                         MA.RunListCmp,
                         MA.RuleGeneratorListCmp,
@@ -382,8 +382,8 @@ MA.InitApplication = function(appSecureUrl, username, mainContentFunction, param
             ]
     });
 
-    MA.MenuRender(username);
-    
+    MA.MenuRender(email);
+
     var paramArray;
     if (params) {
         paramArray = JSON.parse(params); //eval is evil
@@ -392,7 +392,7 @@ MA.InitApplication = function(appSecureUrl, username, mainContentFunction, param
     MA.ExperimentController.mask = new Ext.LoadMask("center-panel", {
         removeMask: true
     });
-   
+
     MA.GetUserInfo(function() {
         MA.ChangeMainContent(mainContentFunction, paramArray);
     });
@@ -404,4 +404,3 @@ MA.Message = function(paramArray) {
     Ext.Msg.alert("", paramArray.message);
 
 };
-

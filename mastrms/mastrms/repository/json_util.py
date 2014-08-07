@@ -26,7 +26,7 @@ def makeJsonFriendly(data):
             return str(data.hour) + ':' + str(data.minute).rjust(2,'0')
 
         elif isinstance(data, User):
-            return {'id':data.id, 'username':data.username}
+            return {'id':data.id, 'email':data.email}
 
         elif isinstance(data, Sample):
             return data.id

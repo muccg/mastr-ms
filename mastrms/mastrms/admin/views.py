@@ -60,7 +60,7 @@ def user_search(request, *args):
     #for each user in newlist, set the client flag if applicable.
     #This is potentially pretty inefficient, because we are loading every user.
     for user_n in newlist:
-        u = getMadasUser(user_n['username'])
+        u = getMadasUser(user_n['email'])
         user_n['isClient'] = u.IsClient
     return jsonResponse(items=newlist)
 
@@ -89,7 +89,7 @@ def user_load(request, *args):
        Accessible by Administrators, Node Reps
     '''
     logger.debug('***admin/user_load : enter ***' )
-    u = User.objects.get(username=request.REQUEST['username'])
+    u = User.objects.get(email=request.REQUEST['email'])
     d = u.get_client_dict()
     logger.debug('***admin/user_load : exit ***' )
     return jsonResponse(data=[d])
@@ -104,17 +104,16 @@ def user_save(request, *args):
     currentuser = getCurrentUser(request)
     parsedform = getDetailsFromRequest(request)
     #look up the user they are editing:
-    existingUser = getMadasUser(parsedform['username'])
+    existingUser = getMadasUser(parsedform['email'])
     existingstatus = existingUser.StatusGroup
-    success = saveMadasUser(currentuser, parsedform['username'], parsedform['details'], parsedform['status'], parsedform['password'])
+    success = saveMadasUser(currentuser, parsedform['email'], parsedform['details'], parsedform['status'], parsedform['password'])
     newstatus = existingUser.StatusGroup
 
     if newstatus != existingstatus:
         if newstatus == MADAS_USER_GROUP or newstatus == MADAS_REJECTED_GROUP:
-            #email to usernames works since usernames are email addresses
-            sendApprovedRejectedEmail(request, parsedform['username'], newstatus)
+            sendApprovedRejectedEmail(request, parsedform['email'], newstatus)
         else:
-            sendAccountModificationEmail(request, parsedform['username'])
+            sendAccountModificationEmail(request, parsedform['email'])
     #do something based on 'status' (either '' or something new)
     nextview = 'admin:usersearch'
     if newstatus != '':
@@ -127,15 +126,7 @@ def user_save(request, *args):
 
     #apply organisational changes
     mail = request.REQUEST['email']
-    try:
-        targetUser = User.objects.get(username=mail)
-    except User.DoesNotExist:
-        try:
-            targetUser = User.objects.get(email=mail)
-        except User.DoesNotExist:
-            targetUser = User(username=mail, email=mail)
-
-    targetUser.save()
+    targetUser, created = User.objects.get_or_create(email=mail)
 
     try:
         UserOrganisation.objects.filter(user=targetUser).delete()

@@ -561,7 +561,7 @@ def recordsProject(request, project_id):
     output = json_records_template(['id', 'title', 'client', 'managers'])
     project = Project.objects.get(pk=project_id)
     def manager_details(manager):
-        return {"id": manager.id, "username": "%s (%s)" % (manager.Name, manager.email)}
+        return {"id": manager.id, "email": "%s (%s)" % (manager.Name, manager.email)}
     managers = map(manager_details, project.managers.all())
     managers = filter(lambda x: x is not None, managers)
     output['rows'].append({
@@ -590,7 +590,7 @@ def recent_projects(request):
         output['rows'].append({
             'id': project.id,
             'title': project.title,
-            'client': project.client.username
+            'client': project.client.email
         })
 
     output['results'] = len(output['rows'])
@@ -676,8 +676,6 @@ def recordsClientList(request):
     clients = []
 
     for user in qs:
-        logger.debug('Getting %s', user.username)
-
         record = {
             "id": user.id,
             "is_client": "Yes" if user.IsClient else "No",
@@ -826,7 +824,7 @@ def populate_select(request, model=None, key=None, value=None, field=None, match
                        'treatmentvariation': ['id','name','treatment'],
                        'treatment': ['id','name','source','description','type'],
                        'treatmenttype': ['id','name'],
-                       'user': ['id','username'],
+                       'user': ['id','email'],
                        'standardoperationprocedure' : ['id', 'label'],
                        'organismtype' : ['id','name'],
                        'userinvolvementtype' : ['id', 'name'],
@@ -1485,11 +1483,11 @@ def recordsExperimentsForProject(request, project_id):
         d['description'] = row.description
         d['job_number'] = row.job_number
         try:
-            d['client'] = UserExperiment.objects.filter(type__id=3, experiment__id=row.id)[0].user.username
+            d['client'] = UserExperiment.objects.filter(type__id=3, experiment__id=row.id)[0].user.email
         except:
             d['client'] = ''
         try:
-            d['principal'] = UserExperiment.objects.filter(type__id=1, experiment__id=row.id)[0].user.username
+            d['principal'] = UserExperiment.objects.filter(type__id=1, experiment__id=row.id)[0].user.email
         except:
             d['principal'] = ''
 
@@ -1595,7 +1593,7 @@ def recordsSamplesForClient(request, client):
               'rows': []
               }
 
-    rows = Sample.objects.filter(experiment__users__username=client)
+    rows = Sample.objects.filter(experiment__users__email=client)
 
     # add row count
     output['results'] = len(rows);
@@ -2562,7 +2560,7 @@ def _display_worklist_csv(request, run, samples):
     w = csv.writer(response)
 
     for sample in samples:
-        row = [request.user.username, run.machine.default_data_path,
+        row = [request.user.email, run.machine.default_data_path,
                sample.filename,
                run.method.method_path, run.method.method_name,
                sample.sample_name]
@@ -2584,7 +2582,7 @@ def mark_run_complete(request, run_id):
 
 
     try:
-        e = FixedEmailMessage(subject='MASTR-MS Run ('+run.title+') Complete', body='Run ('+run.title+') has been marked as complete', from_email = settings.RETURN_EMAIL, to = [run.creator.username])
+        e = FixedEmailMessage(subject='MASTR-MS Run ('+run.title+') Complete', body='Run ('+run.title+') has been marked as complete', from_email = settings.RETURN_EMAIL, to = [run.creator.email])
         e.send()
     except e:
         pass

@@ -54,10 +54,10 @@ Ext.Ajax.on('requestexception', function(conn, response, options, e)
 MA.reportError = function(type, errorMsg) {
     var fullMsg = 'Error Type: ' + type;
     fullMsg += '\nOccured at: ' + new Date();
-    fullMsg += '\nUser: ' + MA.CurrentUser.Username;
-    fullMsg += '\nUser Agent: ' + navigator.userAgent; 
+    fullMsg += '\nUser: ' + MA.CurrentUser.email;
+    fullMsg += '\nUser Agent: ' + navigator.userAgent;
     fullMsg += '\n' + errorMsg;
-    MA.ErrorReportWindow.show(); 
+    MA.ErrorReportWindow.show();
     MA.ErrorReportForm.getForm().setValues({
         'notes': '',
         'details': fullMsg
@@ -113,7 +113,7 @@ MA.ErrorReportForm = new Ext.form.FormPanel({
             plugins: [ Ext.ux.FieldLabeler ],
             name: 'details',
             readOnly: true,
-            xtype: 'textarea', 
+            xtype: 'textarea',
             fieldLabel: 'Details',
             height: 200
           }]
@@ -151,5 +151,3 @@ MA.ErrorReportWindow = new Ext.Window({
             text: 'Cancel', handler: function(b, e) { b.ownerCt.ownerCt.hide(); }
         }]
     });
-
-

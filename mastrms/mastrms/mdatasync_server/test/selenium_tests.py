@@ -60,10 +60,10 @@ class AdminTests(LiveServerTestCase, XDisplayTest, WithFixtures):
         session_items.save()
 
         #test user setup
-        username = "testuser"
-        self.assertTrue(User.objects.filter(username=username).exists(),
+        email = "testuser"
+        self.assertTrue(User.objects.filter(email=email).exists(),
                         "Test user exists")
-        #success = self.client.login(username=username, password=password)
+        #success = self.client.login(email=email, password=password)
         #self.assertTrue(success, "Log in as test user")
 
             #logger.info("adding cookie %s=%s" % (settings.SESSION_COOKIE_NAME, session_store.session_key))
@@ -95,7 +95,7 @@ class AdminTests(LiveServerTestCase, XDisplayTest, WithFixtures):
 
             # fill out login form
             if browser.is_element_present_by_xpath("//input[@value='Log in']"):
-                browser.fill("username", self.admin.username)
+                browser.fill("username", self.admin.email)
                 browser.fill("password", self.admin_password)
                 browser.find_by_xpath("//input[@value='Log in']").click()
 
