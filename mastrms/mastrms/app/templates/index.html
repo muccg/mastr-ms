@@ -72,16 +72,16 @@ if(Ext.isIE6 || Ext.isIE7 || Ext.isAir){ Ext.BLANK_IMAGE_URL = "{{ STATIC_URL }}
 <script>
 var callbackCount = 0;
 function callbacker(){
-    var username = document.getElementById('username').value;
+    var email = document.getElementById('email').value;
     
-    if (username == "" && callbackCount < 5) {
+    if (email == "" && callbackCount < 5) {
         //console.log("waiting...");
         callbackCount += 1;
         window.setTimeout("callbacker();", 100);
         return;
     }
 
-    MA.InitApplication('{{ APP_SECURE_URL }}', '{{ user.username }}', '{{ mainContentFunction }}', '{{ params|safe }}');
+    MA.InitApplication('{{ APP_SECURE_URL }}', '{{ user.email }}', '{{ mainContentFunction }}', '{{ params|safe }}');
     document.getElementById("appLoad").style.display = "none";
 }
 </script>
@@ -101,7 +101,7 @@ function callbacker(){
 {% csrf_token %}
 <label class="x-form-item-label">Email address:</label>
 <div class="x-form-element" style="margin-top:-10px;">
-<input id="username" name="username">
+<input id="email" name="email">
 </div>
 <div class="x-form-clear-left">
 </div>
