@@ -17,7 +17,7 @@ install_requires = [
     'Django==1.6.5',
     'South==0.8.2',
     'django-extensions>=1.2.5',
-    'django-userlog',
+    'django-userlog==2.0.0',
     'django-nose',
     'ccg-django-utils==0.2.1',
     'wsgiref==0.1.2',
@@ -40,7 +40,7 @@ postgres_requires = [
 ]
 
 dependency_links = [
-    'https://bitbucket.org/ccgmurdoch/django-userlog/downloads/django_userlog-0.1.tar.gz',
+    'https://bitbucket.org/ccgmurdoch/django-userlog/downloads/django-userlog-2.0.0.tar.gz',
     'https://bitbucket.org/ccgmurdoch/ccg-django-utils/downloads/ccg-django-utils-0.2.1.tar.gz',
 ]
 
