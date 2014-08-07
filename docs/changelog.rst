@@ -8,10 +8,21 @@ instructions on how to upgrade the server, see
 :ref:`server-upgrade`. For instructions on how to upgrade the datasync
 client, see :ref:`client-upgrade`.
 
+.. _1.10.0:
+
+1.10.0 (7th August 2014)
+------------------------
+
+New feature release. This release contains database migrations which
+need to be run after upgrading the RPM.
+
+ * [MAS-66] - Increase length of usernames
+
+
 .. _1.9.4:
 
 1.9.4 (23rd June 2014)
----------------------
+----------------------
 
 Bug fix release.
 
