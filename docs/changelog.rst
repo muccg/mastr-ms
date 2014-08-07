@@ -15,13 +15,21 @@ client, see :ref:`client-upgrade`.
 
 New feature release.
 
+ * [MAS-66] - Increase length of usernames
+ * [MAS-67] - Enable user logging in production again
+
 This release contains database migrations which need to be run after
 upgrading the RPM. User e-mail addresses must be unique now. The
 migration process will change duplicate e-mail addresses. If any
 e-mail addresses were changed, it will say so. You must then clean up
 those users from the admin page.
 
- * [MAS-66] - Increase length of usernames
+If the database migration fails due to an error with the ``userlog_*``
+tables, just drop them and try the migration again::
+
+    # mastrms dbshell
+    DROP TABLE "userlog_loginlog";
+    DROP TABLE "userlog_failedloginlog";
 
 
 .. _1.9.4:
