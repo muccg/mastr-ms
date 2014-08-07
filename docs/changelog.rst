@@ -13,8 +13,13 @@ client, see :ref:`client-upgrade`.
 1.10.0 (7th August 2014)
 ------------------------
 
-New feature release. This release contains database migrations which
-need to be run after upgrading the RPM.
+New feature release.
+
+This release contains database migrations which need to be run after
+upgrading the RPM. User e-mail addresses must be unique now. The
+migration process will change duplicate e-mail addresses. If any
+e-mail addresses were changed, it will say so. You must then clean up
+those users from the admin page.
 
  * [MAS-66] - Increase length of usernames
 
