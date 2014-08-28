@@ -14,7 +14,7 @@ for package in ('app', 'admin', 'dashboard', 'login', 'mdatasync_server', 'quote
     os.chdir(start_dir)
 
 install_requires = [
-    'Django==1.6.5',
+    'Django==1.6.6',
     'South==0.8.2',
     'django-extensions>=1.2.5',
     'django-userlog==2.0.0',
