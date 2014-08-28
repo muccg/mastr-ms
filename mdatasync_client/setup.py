@@ -67,6 +67,7 @@ setup(name='msDataSync',
       package_dir={"mdatasync_client": "src"},
       packages=[
           "mdatasync_client",
+          "mdatasync_client.test",
           "mdatasync_client.plogging",
           "esky",
           "httplib2",
