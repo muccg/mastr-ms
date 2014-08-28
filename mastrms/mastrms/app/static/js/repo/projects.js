@@ -42,6 +42,25 @@ MA.CRUDSomething = function(remainderURL, params, callbackfn) {
 };
 
 
+MA.investigationStore = new Ext.data.JsonStore({
+  autoDestroy: false,
+  autoSave: true,
+  url: MA.apiBaseUrl + "investigation",
+  restful: true,
+  root: "objects",
+  idProperty: "id",
+  successProperty: "_success",
+  storeId: 'investigationStore',
+  fields: ['id', 'title', 'description', 'project'],
+  reader: new Ext.data.JsonReader({
+    successProperty: "_success"
+  }),
+  writer: new Ext.data.JsonWriter({
+    encode: false,
+    writeAllFields: true
+  })
+});
+
 
 function ExperimentController() {
     var self = this;
@@ -81,6 +100,7 @@ function ExperimentController() {
         if (expJobNumber === null) {
             expJobNumber = '';
         }
+        var expInvestigation = Ext.getCmp("experimentInvestigation").getValue() || '';
 
         if (!Ext.isDefined(expName) ||
             expName === "") {
@@ -93,7 +113,7 @@ function ExperimentController() {
 
         if (expId === 0) {
 
-            saver = new Ajax.Request(wsBaseUrl + 'create/experiment/?title='+encodeURIComponent(expName)+'&description='+encodeURIComponent(expDescription)+'&comment='+encodeURIComponent(expComment)+'&status_id=2&formal_quote_id='+encodeURIComponent(expFQuoteId)+'&job_number='+encodeURIComponent(expJobNumber)+'&project_id='+encodeURIComponent(MA.currentProjectId)+'&status_id='+encodeURIComponent(expStatus),
+            saver = new Ajax.Request(wsBaseUrl + 'create/experiment/?title='+encodeURIComponent(expName)+'&description='+encodeURIComponent(expDescription)+'&comment='+encodeURIComponent(expComment)+'&status_id=2&formal_quote_id='+encodeURIComponent(expFQuoteId)+'&job_number='+encodeURIComponent(expJobNumber)+'&project_id='+encodeURIComponent(MA.currentProjectId)+'&status_id='+encodeURIComponent(expStatus)+'&investigation_id='+encodeURIComponent(expInvestigation),
                                                  {
                                                  asynchronous:true,
                                                  evalJSON:'force',
@@ -101,7 +121,7 @@ function ExperimentController() {
                                          onFailure:    MA.DSLoadException
                                          });
         } else {
-            saver = new Ajax.Request(wsBaseUrl + 'update/experiment/'+expId+'/?title='+encodeURIComponent(expName)+'&description='+encodeURIComponent(expDescription)+'&comment='+encodeURIComponent(expComment)+'&status_id=2&formal_quote_id='+encodeURIComponent(expFQuoteId)+'&job_number='+encodeURIComponent(expJobNumber)+'&project_id='+encodeURIComponent(MA.currentProjectId)+'&status_id='+encodeURIComponent(expStatus),
+            saver = new Ajax.Request(wsBaseUrl + 'update/experiment/'+expId+'/?title='+encodeURIComponent(expName)+'&description='+encodeURIComponent(expDescription)+'&comment='+encodeURIComponent(expComment)+'&status_id=2&formal_quote_id='+encodeURIComponent(expFQuoteId)+'&job_number='+encodeURIComponent(expJobNumber)+'&project_id='+encodeURIComponent(MA.currentProjectId)+'&status_id='+encodeURIComponent(expStatus)+'&investigation_id='+encodeURIComponent(expInvestigation),
                                          {
                                          asynchronous:true,
                                          evalJSON:'force',
@@ -224,6 +244,7 @@ function ExperimentController() {
                                                  var comment = Ext.getCmp('experimentComment');
                                                  var formalQuote = Ext.getCmp('formalQuote');
                                                  var jobNumber = Ext.getCmp('jobNumber');
+                                                 var expInvestigation = Ext.getCmp('experimentInvestigation');
 
                                                  //update the fields on the sample tracking page
                                                  var tnamefield = Ext.getCmp('trackingExperimentName');
@@ -262,6 +283,7 @@ function ExperimentController() {
                                                      comment.setValue(rs[0].comment);
                                                      formalQuote.setValue(rs[0].formal_quote);
                                                      jobNumber.setValue(rs[0].job_number);
+                                                     expInvestigation.setValue(rs[0].investigation);
 
                                                      Ext.getCmp('expFieldset').getComponent('status').setValue(rs[0].status);
 
@@ -281,6 +303,8 @@ function ExperimentController() {
                                              }
                                          }
                                          );
+
+        MA.investigationStore.load();
 
         var changingExperiment = (self.currentId() != expId);
         self.setCurrentId(expId);
@@ -484,7 +508,28 @@ MA.ExperimentDetails = {
                                               store: new Ext.data.ArrayStore({fields: ['key', 'value']})
                                               }),
                         { xtype:'displayfield', fieldLabel:'Organisation', id:'expOrg', disabled:true},
-                        { xtype:'textfield', fieldLabel:'Job number', id:'jobNumber' }
+                        { xtype:'textfield', fieldLabel:'Job number', id:'jobNumber' },
+                        { xtype: 'combo',
+                          width:300,
+                          fieldLabel:'Investigation',
+                          id:'experimentInvestigation',
+                          editable:false,
+                          forceSelection:true,
+                          store: MA.investigationStore,
+                          mode: 'local',
+                          // store: new Ext.data.ArrayStore({
+                          //   id: 0,
+                          //   fields: ['id', 'title'],
+                          //   data: [[1, 'item1'], [2, 'item2'], [3, 'blah']]  // data is local
+                          // }),
+                          displayField:'title',
+                          valueField:'id',
+                          triggerAction:'all',
+                          clearFilterOnReset:false,
+                          allowBlank:true,
+                          typeAhead:false,
+                          listWidth:300
+                        }
                     ]
                 }
             ]
@@ -504,7 +549,7 @@ tools: [
         id:'left',
         qtip: "Back to the project",
         handler: function() {
-        MA.LoadProject(MA.currentProjectId);
+          MA.LoadProject(MA.currentProjectId);
         }
         }
         ],
@@ -892,6 +937,74 @@ MA.ProjectCmp = {
                         autoScroll:true,
                         reserveScrollOffset:true
                     }]
+                },
+                {
+                    fieldLabel:'Investigations',
+                    width:525,
+                    autoHeight:true,
+                    bbar:[{
+                        text: 'Add',
+                        cls: 'x-btn-text-icon',
+                        icon:'static/images/add.png',
+                        id:'invAddButton',
+                        handler: function() {
+                          MA.editInvestigation();
+                        }
+                        },
+                        {
+                            text: 'Remove',
+                            cls: 'x-btn-text-icon',
+                            icon:'static/images/delete.png',
+                            id:'invRemoveButton',
+                            handler : function(){
+                                   //remove currently selected users
+                                   var recs = Ext.getCmp('projInvestigationList').getSelectedRecords();
+                                   for (i = 0; i < recs.length; i++) {
+                                       var rec = recs[i];
+                                       Ext.getCmp('projInvestigationList').getStore().remove(rec);
+                                   }
+                            }
+                        },
+                        {
+                            text: 'Edit',
+                            cls: 'x-btn-text-icon',
+                            icon:'static/images/edit.png',
+                            id:'invEditButton',
+                            handler : function(){
+                                   //remove currently selected users
+                                   var recs = Ext.getCmp('projInvestigationList').getSelectedRecords();
+                                   for (i = 0; i < recs.length; i++) {
+                                       var rec = recs[i];
+                                       MA.editInvestigation(rec);
+                                   }
+                            }
+                        }
+                    ],
+                    items:[{
+                        xtype:'listview',
+                        id:'projInvestigationList',
+                        store: MA.investigationStore,
+                        height: 80,
+                        columnSort:false,
+                        columns: [{
+                          header: "Title",
+                          dataIndex: 'title',
+                          width: 0.33
+                        }, {
+                          header: "Description lah",
+                          dataIndex: 'description',
+                          width: 0.66
+                        }],
+                        viewConfig:{
+                          forceFit:true
+                        },
+                        singleSelect:true,
+                        multiSelect:false,
+                        hideHeaders:true,
+                        style:'background:white;',
+                        autoScroll:true,
+                        reserveScrollOffset:true
+                    }]
                 }
         ],
         buttonAlign: 'left',
@@ -1030,6 +1143,82 @@ MA.ProjectCmp = {
     ]
 };
 
+MA.editInvestigation = function(rec) {
+  var addWindow = new Ext.Window({
+    title: (rec ? 'Edit' : 'Add') + ' an Investigation',
+    width:480,
+    height:230,
+    minHeight:230,
+    border:false,
+    bodyStyle:'padding:20px;background-color:transparent;',
+    x:290,
+    y:250,
+    layout:'form',
+    modal:true,
+    items:[
+      new Ext.form.TextField({
+        fieldLabel:'Title',
+        labelWidth:50,
+        itemId:'invTitleField',
+        name:'invTitle',
+        width:300,
+        forceSelection:true,
+        allowBlank:false,
+        typeAhead:false,
+        value: rec ? rec.get("title") : ""
+      }),
+      new Ext.form.TextArea({
+        fieldLabel:'Description',
+        labelWidth:50,
+        itemId:'invDescField',
+        name:'invDesc',
+        width:300,
+        forceSelection:true,
+        allowBlank:true,
+        typeAhead:false,
+        value: rec ? rec.get("description") : ""
+      })
+    ],
+    buttons:[
+      {
+        text:'Cancel',
+        itemId:'cancel'
+      },
+      {
+        text:'Add',
+        itemId:'add'
+      }
+    ]
+  });
+
+  addWindow.show();
+
+  addWindow.buttons[0].on('click', function() { addWindow.close(); } );
+  addWindow.buttons[1].on('click', function() {
+    var InvestigationRecord = Ext.data.Record.create([
+      "title", "description", "project"
+    ]);
+    var value = {
+      title: addWindow.getComponent('invTitleField').getValue(),
+      description: addWindow.getComponent('invDescField').getValue(),
+      project: MA.apiBaseUrl + "project/" + MA.currentProjectId + "/"
+    };
+    var list = Ext.getCmp('projInvestigationList');
+    var store = list.getStore();
+    if (rec) {
+      rec.beginEdit();
+      rec.set("title", value.title);
+      rec.set("description", value.description);
+      rec.endEdit();
+      rec.commit();
+    } else {
+      store.add(new InvestigationRecord(value));
+    }
+    list.refresh();
+    addWindow.close();
+  });
+};
+
 MA.AttemptCloneExperiment = function(base_exp_id) {
     var req = new Ajax.Request(wsBaseUrl + 'check_experiment_cloneable/'+encodeURIComponent(base_exp_id),
             {
@@ -1082,6 +1271,7 @@ MA.LoadProject = function (projId) {
                                          asynchronous:true,
                                          evalJSON:'force',
                                          onSuccess: function(response) {
+                                                 MA.investigationStore.load();
                                                  clientsListStore.load({
                                                         callback: afterCombosFilled
                                                  });
