@@ -33,18 +33,45 @@ class ISATabExportView(View):
 
     def _assemble_archive(self, project, response, prefix=""):
         archive = zipfile.ZipFile(response, "w", zipfile.ZIP_DEFLATED)
-        inv = self._create_investigation(project)
-        archive.writestr(prefix + self._investigation_filename(project), inv)
 
-        for exp in project.experiment_set.all():
+        # output experiments grouped by investigation
+        for inv in project.investigation_set.all():
+            print "investigation %s" % inv.title
+            exps = project.experiment_set.filter(investigation=inv)
+
+            if len(exps) > 0:
+                print "we are going to write an inv"
+                invtab = self._create_investigation(inv, exps)
+                archive.writestr(prefix + self._investigation_filename(project, inv), invtab)
+                self._write_project_experiments(archive, exps, prefix)
+
+        # output any experiments which don't have an investigation
+        other_exps = project.experiment_set.filter(investigation__isnull=True)
+        if len(other_exps) > 0:
+            print "there are other %d experiments without investigation" % len(other_exps)
+            invtab = self._create_investigation_project(project, other_exps)
+            archive.writestr(prefix + self._investigation_filename(project), invtab)
+            self._write_project_experiments(archive, other_exps, prefix)
+
+        return response
+
+    def _write_project_experiments(self, archive, experiments, prefix):
+        for exp in experiments:
             study = self._create_study(exp)
             archive.writestr(prefix + self._study_filename(exp), study)
             assay = self._create_assay(exp)
             archive.writestr(prefix + self._assay_filename(exp), assay)
 
-        return response
+    def _create_investigation(self, inv, experiments):
+        return self._create_investigation_base(inv.project, inv, inv.title,
+                                               inv.description, experiments)
 
-    def _create_investigation(self, project):
+    def _create_investigation_project(self, project, experiments):
+        return self._create_investigation_base(project, None, project.title,
+                                               project.description, experiments)
+
+    def _create_investigation_base(self, project, inv, title, description, experiments):
+        identifier = self._investigation_identifier(project, inv)
         managers = project.managers.order_by("last_name")
 
         def getdesc(o, a):
@@ -63,9 +90,9 @@ class ISATabExportView(View):
             ("Term Source Version", ("", "")),
             ("Term Source Description", ("Ontology for Biomedical Investigations", "SNOMED Clinical Terms")),
             ("INVESTIGATION", None),
-            ("Investigation Identifier", self._investigation_identifier(project)),
-            ("Investigation Title", project.title),
-            ("Investigation Description", project.description),
+            ("Investigation Identifier", identifier),
+            ("Investigation Title", title),
+            ("Investigation Description", description),
             ("Investigation Submission Date", ""),
             ("Investigation Public Release Date", ""),
             ("INVESTIGATION PUBLICATIONS", None),
@@ -91,7 +118,7 @@ class ISATabExportView(View):
             ("", None),  # Empty Line
         ]
 
-        for exp in project.experiment_set.all():
+        for exp in experiments:
             # Each experiment in mastr-ms is be detailed in a STUDY
 
             machines = exp.run_set.values_list("machine")
@@ -368,11 +395,12 @@ class ISATabExportView(View):
     def _archive_filename(self, project):
         return "mastrmsPR_%s_%s" % (project.id, self._choose_basename(project.title))
 
-    def _investigation_identifier(self, project):
-        return "mastrmsPR_%s" % project.id
+    def _investigation_identifier(self, project, inv=None):
+        suffix = "_%s" % inv.id if inv else ""
+        return "mastrmsPR_%s_INV%s" % (project.id, suffix)
 
-    def _investigation_filename(self, project):
-        return "i_mastrmsPR_%s.txt" % project.id
+    def _investigation_filename(self, project, inv=None):
+        return "i_%s.txt" % self._investigation_identifier(project, inv)
 
     def _study_identifier(self, exp):
         return "mastrmsPR_%s_EX_%s" % (exp.project.id, exp.id)

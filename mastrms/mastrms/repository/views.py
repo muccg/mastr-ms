@@ -161,6 +161,7 @@ def clone_experiment(base_experiment):
     exp.project = base_exp.project
     exp.instrument_method = base_exp.instrument_method
     exp.status = base_exp.status
+    exp.investigation = base_exp.investigation
     exp.save()
 
     #users need to be brought across if this is cloned

@@ -196,6 +196,7 @@ class InstrumentMethod(models.Model):
         return "%s (%s)" % (self.title, self.version)
 
 class Experiment(models.Model):
+    project = models.ForeignKey(Project)
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     comment = models.TextField(blank=True)
@@ -204,7 +205,7 @@ class Experiment(models.Model):
     created_on = models.DateField(null=False, default=date.today)
     formal_quote = models.ForeignKey(Formalquote, null=True, blank=True)
     job_number = models.CharField(max_length=30)
-    project = models.ForeignKey(Project)
+    investigation = models.ForeignKey("Investigation", null=True, blank=True)
     instrument_method = models.ForeignKey(InstrumentMethod, null=True, blank=True)
     sample_preparation_notes = models.TextField(blank=True)
     # ? files
@@ -786,3 +787,12 @@ class RuleGeneratorEndBlock(models.Model):
     index = models.PositiveIntegerField()
     count = models.PositiveIntegerField()
     component = models.ForeignKey(Component)
+
+
+class Investigation(models.Model):
+    """
+    An investigation groups samples together for the purpose of ISA-Tab export.
+    """
+    project = models.ForeignKey(Project)
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
