@@ -23,6 +23,7 @@ install_requires = [
     'wsgiref==0.1.2',
     'python-memcached==1.48',
     'dingus',
+    'django-tastypie==0.11.1',
 ]
 
 dev_requires = [

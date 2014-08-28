@@ -1,21 +1,23 @@
-from django.conf.urls import *
+from django.conf.urls import patterns, url, include
 from django.conf import settings
 
 from django.contrib import admin
 admin.autodiscover()
 
-from mastrms.repository import admin as repoadmin
-from mastrms.quote import admin as mastrmsadmin
-from mastrms.mdatasync_server import admin as mdatasync_admin
+from . import api
 
 urlpatterns = patterns('',
-    (r'^/?$', 'mastrms.login.views.serveIndex', {'SSL': settings.SSL_ENABLED}),
+    url(r'^/?$', 'mastrms.login.views.serveIndex',
+        {'SSL': settings.SSL_ENABLED}, name="home"),
 
     (r'^userinfo', 'mastrms.users.views.userinfo'),
     (r'^sync/', include('mastrms.mdatasync_server.urls')),
 
-    # mastrms.epo
+    # hand-written api
     (r'^ws/', include('mastrms.repository.urls')),
+
+    # auto-generated rest api
+    url(r'^api/', include(api.v1.urls), name="api"),
 
     # repoadmin
     (r'^repoadmin/', include(admin.site.urls)),

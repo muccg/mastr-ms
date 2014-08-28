@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'userlog',
     'south',
     'django_nose',
+    'tastypie',
 ]
 
 # these determine which authentication method to use
@@ -182,6 +183,10 @@ USE_L10N = False
 DATE_INPUT_FORMATS = ('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y','%d %m %Y','%d %m %y', '%d %b %Y')
 DATE_FORMAT = "d-m-Y"
 SHORT_DATE_FORMAT = "d/m/Y"
+
+# This setting allows your URLs to be missing the final slash. Useful
+# for integrating with other systems.
+TASTYPIE_ALLOW_MISSING_SLASH = True
 
 # This honours the X-Forwarded-Host header set by our nginx frontend when
 # constructing redirect URLS.

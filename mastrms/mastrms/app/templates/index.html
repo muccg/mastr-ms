@@ -27,6 +27,7 @@
 <script>
 Ext.ns('MA', 'MA.Dashboard', 'MA.Utils');
 MA.BaseUrl = '{{ APP_SECURE_URL }}';
+MA.apiBaseUrl = "{% url 'home' %}api/v1/";
 if(Ext.isIE6 || Ext.isIE7 || Ext.isAir){ Ext.BLANK_IMAGE_URL = "{{ STATIC_URL }}images/default/s.gif"; }
 </script>
 
