@@ -8,6 +8,19 @@ instructions on how to upgrade the server, see
 :ref:`server-upgrade`. For instructions on how to upgrade the datasync
 client, see :ref:`client-upgrade`.
 
+.. _1.11.0:
+
+1.11.0 (28th August 2014)
+-------------------------
+
+New feature release. Contains database migrations.
+
+ * [MAS-69] - ISA-TAB export: Put experiment samples in the same
+   investigation if they are the same samples
+
+ * [MAS-71] - Update Django to 1.6.6
+
+
 .. _1.10.1:
 
 1.10.1 (7th August 2014)
