@@ -118,7 +118,7 @@ class InvestigationResource(BaseResource):
 @register
 class ExperimentResource(BaseResource):
     project = fields.ForeignKey(ProjectResource, "project")
-    users = fields.ToManyField(User, "users", null=True)
+    users = fields.ToManyField(UserResource, "users", null=True)
     status = fields.ForeignKey(ExperimentStatusResource, "status", full=True, null=True)
     investigation = fields.ForeignKey(InvestigationResource, "investigation", full=True, null=True)
 
