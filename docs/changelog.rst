@@ -8,6 +8,16 @@ instructions on how to upgrade the server, see
 :ref:`server-upgrade`. For instructions on how to upgrade the datasync
 client, see :ref:`client-upgrade`.
 
+.. _1.11.1:
+
+1.11.1 (1st September 2014)
+-------------------------
+
+Bug fix release.
+
+ * [MAS-72] - Always output JSON format from API
+
+
 .. _1.11.0:
 
 1.11.0 (28th August 2014)
