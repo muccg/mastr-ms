@@ -187,6 +187,7 @@ SHORT_DATE_FORMAT = "d/m/Y"
 # This setting allows your URLs to be missing the final slash. Useful
 # for integrating with other systems.
 TASTYPIE_ALLOW_MISSING_SLASH = True
+TASTYPIE_DEFAULT_FORMATS = ['json']
 
 # This honours the X-Forwarded-Host header set by our nginx frontend when
 # constructing redirect URLS.
