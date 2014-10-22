@@ -163,7 +163,7 @@ def unauthorized(request, *args):
 def index(request, *args):
     return jsonResponse()
 
-def serveIndex(request, *args, **kwargs):
+def serveIndex(request, force_mcf=None):
     currentuser = getCurrentUser(request)
     mcf = 'dashboard'
     params = ''
@@ -173,8 +173,10 @@ def serveIndex(request, *args, **kwargs):
     else:
         urlstate = getCurrentURLState(request)
 
-    if urlstate.redirectMainContentFunction:
-            mcf = urlstate.redirectMainContentFunction
+    if force_mcf:
+        mcf = force_mcf
+    elif urlstate.redirectMainContentFunction:
+        mcf = urlstate.redirectMainContentFunction
     if urlstate.params:
         params = urlstate.params
 

@@ -4,6 +4,7 @@ from mastrms.users.forms import getDetailsFromRequest
 from mastrms.app.utils.mail_functions import sendRegistrationToAdminEmail
 import logging
 from django.conf import settings
+from django.contrib.auth.models import AnonymousUser
 
 logger = logging.getLogger('mastrms.general')
 
@@ -17,7 +18,8 @@ def submit(request, *args):
 
     if not user_exists:
         #saveMadasUser will add the user if they do not exist already.
-        user_exists = saveMadasUser(request.user, email, detailsDict['details'], detailsDict['status'], detailsDict['password'])
+        user_exists = saveMadasUser(AnonymousUser(), email, detailsDict['details'],
+                                    detailsDict['status'], detailsDict['password'])
 
         if not user_exists:
             logger.warning("Could not add new user %s" % email)

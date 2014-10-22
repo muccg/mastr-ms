@@ -27,6 +27,8 @@ urlpatterns = patterns('',
     # mastrms.quotes
     (r'^quote/', include('mastrms.quote.urls')),
     # mastrms.registration
+    url(r'^(?P<force_mcf>registration)/?$', 'mastrms.login.views.serveIndex',
+        {'SSL': settings.SSL_ENABLED}, name="register"),
     (r'^registration/', include('mastrms.registration.urls')),
     # mastrms.login
     (r'^login/', include('mastrms.login.urls')),
