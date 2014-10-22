@@ -20,6 +20,12 @@ Latest Releases
 
 ---------------
 
+client-0.4.9_ (22nd October 2014)
+  Datasync client bug fix release.
+
+.. _client-0.4.9: http://mastr-ms.readthedocs.org/en/latest/changelog.html#client-0.4.9
+
+
 1.11.2_  (22nd October 2014)
   New feature release.
 

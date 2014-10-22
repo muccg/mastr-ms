@@ -8,6 +8,16 @@ instructions on how to upgrade the server, see
 :ref:`server-upgrade`. For instructions on how to upgrade the datasync
 client, see :ref:`client-upgrade`.
 
+
+
+.. _client-0.4.9:
+
+Client 0.4.9 (22nd October 2014)
+--------------------------------
+
+  Datasync client bug fix release.
+
+ * [MAS-75] - Datasync client doesn't support quoting in rsync config
 .. _1.11.2:
 
 1.11.2 (22nd October 2014)
