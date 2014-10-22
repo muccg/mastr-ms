@@ -19,6 +19,7 @@ import os
 import time
 import os.path
 import shutil
+import shlex
 import pipes
 import tempfile
 
@@ -60,7 +61,8 @@ class RemoteSyncParams(object):
         if self.flags in ['', '!', [] ]: #The config didn't specify anything
             self.flags = ['-rvz']
         else:
-            self.flags = self.flags.split(' ') #space separated string from config
+            # unquote and split args string from config
+            self.flags = shlex.split(self.flags)
 
         #Username is client authoritative
         if username not in ['', '!']:
