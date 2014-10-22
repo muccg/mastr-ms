@@ -8,6 +8,16 @@ instructions on how to upgrade the server, see
 :ref:`server-upgrade`. For instructions on how to upgrade the datasync
 client, see :ref:`client-upgrade`.
 
+.. _1.11.2:
+
+1.11.2 (22nd October 2014)
+-------------------------
+
+New feature release.
+
+ * [MAS-73] Provide a direct URL to the registration screen
+
+
 .. _1.11.1:
 
 1.11.1 (1st September 2014)
