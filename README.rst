@@ -20,6 +20,12 @@ Latest Releases
 
 ---------------
 
+1.11.3_  (19th November 2014)
+  Bug fix release.
+
+.. _1.11.3: http://mastr-ms.readthedocs.org/en/latest/changelog.html#1.11.3
+
+
 client-0.4.9_ (22nd October 2014)
   Datasync client bug fix release.
 
