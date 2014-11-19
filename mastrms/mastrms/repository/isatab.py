@@ -36,31 +36,28 @@ class ISATabExportView(View):
 
         # output experiments grouped by investigation
         for inv in project.investigation_set.all():
-            print "investigation %s" % inv.title
             exps = project.experiment_set.filter(investigation=inv)
 
             if len(exps) > 0:
-                print "we are going to write an inv"
                 invtab = self._create_investigation(inv, exps)
                 archive.writestr(prefix + self._investigation_filename(project, inv), invtab)
-                self._write_project_experiments(archive, exps, prefix)
+                self._write_project_experiments(archive, inv, exps, prefix)
 
         # output any experiments which don't have an investigation
         other_exps = project.experiment_set.filter(investigation__isnull=True)
         if len(other_exps) > 0:
-            print "there are other %d experiments without investigation" % len(other_exps)
             invtab = self._create_investigation_project(project, other_exps)
             archive.writestr(prefix + self._investigation_filename(project), invtab)
-            self._write_project_experiments(archive, other_exps, prefix)
+            self._write_project_experiments(archive, None, other_exps, prefix)
 
         return response
 
-    def _write_project_experiments(self, archive, experiments, prefix):
+    def _write_project_experiments(self, archive, inv, experiments, prefix):
         for exp in experiments:
             study = self._create_study(exp)
-            archive.writestr(prefix + self._study_filename(exp), study)
+            archive.writestr(prefix + self._study_filename(inv, exp), study)
             assay = self._create_assay(exp)
-            archive.writestr(prefix + self._assay_filename(exp), assay)
+            archive.writestr(prefix + self._assay_filename(inv, exp), assay)
 
     def _create_investigation(self, inv, experiments):
         return self._create_investigation_base(inv.project, inv, inv.title,
@@ -132,7 +129,7 @@ class ISATabExportView(View):
                 ("Study Submission Date", ""),
                 ("Study Public Release Date", ""),
                 ("Study Description", exp.description),
-                ("Study File Name", self._study_filename(exp)),
+                ("Study File Name", self._study_filename(inv, exp)),
                 ("STUDY DESIGN DESCRIPTORS", None),
                 ("Study Design Type", ""),
                 ("Study Design Type Term Accession Number", ""),
@@ -158,7 +155,7 @@ class ISATabExportView(View):
                 ("Study Assay Technology Type Term Source REF", "OBI"),
                 ("Study Assay Technology Type Term Accession Number", ""),
                 ("Study Assay Technology Platform", machines),
-                ("Study Assay File Name", self._assay_filename(exp)),
+                ("Study Assay File Name", self._assay_filename(inv, exp)),
                 ("STUDY PROTOCOLS", None),
                 ("Study Protocol Name", ("Sample collection", "Metabolite extraction", "Chromatography", "Mass spectrometry")),
                 ("Study Protocol Type", ("Sample collection", "Extraction", "Chromatography", "Mass spectrometry")),
@@ -396,8 +393,8 @@ class ISATabExportView(View):
         return "mastrmsPR_%s_%s" % (project.id, self._choose_basename(project.title))
 
     def _investigation_identifier(self, project, inv=None):
-        suffix = "_%s" % inv.id if inv else ""
-        return "mastrmsPR_%s_INV%s" % (project.id, suffix)
+        suffix = "_INV_%s" % inv.id if inv else ""
+        return "mastrmsPR_%s%s" % (project.id, suffix)
 
     def _investigation_filename(self, project, inv=None):
         return "i_%s.txt" % self._investigation_identifier(project, inv)
@@ -405,11 +402,11 @@ class ISATabExportView(View):
     def _study_identifier(self, exp):
         return "mastrmsPR_%s_EX_%s" % (exp.project.id, exp.id)
 
-    def _study_filename(self, exp):
+    def _study_filename(self, inv, exp):
         # return "s_%s-%s.txt" % (self._choose_basename(exp.title), exp.id)
-        return "s_mastrmsPR_%s_EX_%s.txt" % (exp.project.id, exp.id)
+        return "s_%s_EX_%s.txt" % (self._investigation_identifier(exp.project, inv), exp.id)
 
-    def _assay_filename(self, exp):
-        return "a_mastrmsPR_%s_EX_%s.txt" % (exp.project.id, exp.id)
+    def _assay_filename(self, inv, exp):
+        return "a_%s_EX_%s.txt" % (self._investigation_identifier(exp.project, inv), exp.id)
 
 const = lambda c: lambda x: c
