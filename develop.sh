@@ -14,7 +14,7 @@ AWS_BUILD_INSTANCE='aws_rpmbuild_centos6'
 AWS_STAGING_INSTANCE='aws_syd_mastrms_staging'
 TARGET_DIR="/usr/local/src/${PROJECT_NAME}"
 CLOSURE="/usr/local/closure/compiler.jar"
-PIP_OPTS="-v --download-cache ~/.pip/cache --index-url=https://pypi.python.org/simple"
+PIP_OPTS="-v --download-cache ~/.pip/cache"
 PIP5_OPTS="${PIP_OPTS} --process-dependency-links"
 
 # A lot of tests need a database and/or X display to run. So the full

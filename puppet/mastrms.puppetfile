@@ -4,7 +4,7 @@
 forge "https://forge.puppetlabs.com"
 
 mod "puppetlabs/stdlib", "4.1.0"
-mod "puppetlabs/postgresql", "2.5.0"
+mod "puppetlabs/postgresql", "3.3.3"
 
 mod "saz/timezone",
   :git => "git://github.com/saz/puppet-timezone.git"
