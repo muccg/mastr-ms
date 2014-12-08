@@ -4,9 +4,10 @@ node default {
   include ccgcommon::source
   include ccgapache
   include python
-  include postgresql::devel
+  include ccgdatabase::postgresql::devel
   include repo::epel
   include repo::ius
+  include repo::pgrpms
   include repo::ccgtesting
 
   # tests need wxPython and virtual X server, firefox required for selenium
@@ -19,7 +20,7 @@ node default {
     'firefox']
   package { $packages: ensure => installed }
 
-  ccgdatabase::postgresql { 'mastrms':
+  ccgdatabase::postgresql::db { 'mastrms':
     user     => 'mastrms',
     password => 'mastrms',
   }

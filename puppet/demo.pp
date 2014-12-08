@@ -5,9 +5,10 @@ node default {
   include ccgcommon::source
   include ccgapache
   include python
-  include postgresql::devel
+  include ccgdatabase::postgresql::devel
   include repo::epel
   include repo::ius
+  include repo::pgrpms
   include repo::ccgtesting
 
   # There are some leaked local secrets here we don't care about
@@ -21,7 +22,7 @@ node default {
     'memcache'   => $globals::memcache_syd,
     'secretkey'  => 'ouit!ry6lz_@u!6ctd4o)fgnm73eqkp1+rp3bi^=08&6c!+7bq'}
 
-  ccgdatabase::postgresql { $django_config['dbname']:
+  ccgdatabase::postgresql::db { $django_config['dbname']:
     user     => $django_config['dbuser'],
     password => $django_config['dbpass'],
   }
@@ -35,7 +36,7 @@ node default {
   django::syncdbmigrate{'mastrms':
     dbsync  => true,
     require => [
-      Ccgdatabase::Postgresql[$django_config['dbname']],
+      Ccgdatabase::Postgresql::Db[$django_config['dbname']],
       Package['mastrms'] ]
   }
 }
