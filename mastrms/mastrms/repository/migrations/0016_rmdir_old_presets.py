@@ -13,8 +13,8 @@ class Migration(DataMigration):
                        "Bioinformatics Analysis", "Report",
                        "Raw Data", "QC Data"])
 
-        for exp in Experiment.objects.all():
-            expdir = exp.experiment_dir
+        for exp in orm["repository.experiment"].objects.all():
+            expdir = Experiment.objects.get(id=exp.id).experiment_dir
             if os.path.exists(expdir):
                 try:
                     dirs = [f for f in os.listdir(expdir) if f in presets]
