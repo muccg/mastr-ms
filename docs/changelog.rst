@@ -9,6 +9,16 @@ instructions on how to upgrade the server, see
 client, see :ref:`client-upgrade`.
 
 
+.. _1.11.4:
+
+1.11.4 (8th December 2014)
+-------------------------
+
+Bug fix release.
+
+ * [MAS-76] - Migration from empty database broke
+
+
 .. _1.11.3:
 
 1.11.3 (19th November 2014)
