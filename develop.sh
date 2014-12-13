@@ -77,7 +77,7 @@ build_number_head() {
 ci_remote_build() {
     time ccg ${AWS_BUILD_INSTANCE} boot
     time ccg ${AWS_BUILD_INSTANCE} puppet
-    time ccg ${AWS_BUILD_INSTANCE} shutdown:50
+    time ccg ${AWS_BUILD_INSTANCE} shutdown:240
 
     cd ${TOPDIR}
 
@@ -126,7 +126,7 @@ ci_remote_destroy() {
 ci_staging() {
     ccg ${AWS_STAGING_INSTANCE} boot
     ccg ${AWS_STAGING_INSTANCE} puppet
-    ccg ${AWS_STAGING_INSTANCE} shutdown:50
+    ccg ${AWS_STAGING_INSTANCE} shutdown:120
 }
 
 # run tests on staging
