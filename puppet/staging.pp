@@ -1,5 +1,6 @@
 #
 node default {
+  $custom_hostname = 'aws-syd-mastrms-staging.ec2.ccgapps.com.au'
   include globals
   include ccgcommon
   include ccgcommon::source
