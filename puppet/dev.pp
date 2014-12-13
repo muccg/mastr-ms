@@ -5,10 +5,13 @@ node default {
   include ccgapache
   include python
   include ccgdatabase::postgresql::devel
-  include repo::epel
-  include repo::ius
-  include repo::pgrpms
-  include repo::ccgtesting
+  include repo
+  include repo::upgrade
+  include repo::repo::ius
+  include repo::repo::ccgtesting
+  class { 'yum::repo::pgdg93':
+    stage => 'setup',
+  }
 
   # tests need wxPython and virtual X server, firefox required for selenium
   $packages = [
