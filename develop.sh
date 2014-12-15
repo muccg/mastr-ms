@@ -21,7 +21,7 @@ PIP5_OPTS="${PIP_OPTS} --process-dependency-links"
 # test suite TEST_LIST and the tests which don't need a database or X
 # are in NOSE_TEST_LIST, because they can be run outside the django
 # test runner.
-TEST_LIST="mastrms.repository.tests mdatasync_client.test.tests mastrms.mdatasync_server.test"
+TEST_LIST="mastrms.repository.tests mastrms.mdatasync_server.test"
 NOSE_TEST_LIST="mdatasync_client.test.tests:DataSyncServerTests mdatasync_client.test.tests:MSDataSyncAPITests mdatasync_client.test.tests:MSDSImplTests"
 
 # Use specific version of virtualenv, if it exists.
