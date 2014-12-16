@@ -11,6 +11,7 @@ node default {
   include repo::upgrade
   include repo::repo::ius
   include repo::repo::ccgtesting
+  include repo::repo::ccgdeps
   class { 'yum::repo::pgdg93':
     stage => 'setup',
   }
