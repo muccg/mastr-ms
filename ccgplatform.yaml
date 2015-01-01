@@ -34,10 +34,8 @@ instances:
     puppet_manifest: staging.pp
 
   aws_syd_mastrms_demo:
-    extends: centos_66_aws_syd
+    extends: centos_prod_aws_syd
     aws_instance_type: m1.small
-    key_filename: ~/.ssh/ccg-syd-ops.pem
-    aws_key_name: ccg-syd-ops
     puppet_manifest: demo.pp
 
   aws_rpmbuild_centos6:
