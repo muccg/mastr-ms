@@ -20,6 +20,12 @@ Latest Releases
 
 ---------------
 
+1.12.0_  (UNRELEASED)
+  Bug fix release.
+
+.. _1.12.0: http://mastr-ms.readthedocs.org/en/latest/changelog.html#1.12.0
+
+
 1.11.4_  (8th December 2014)
   Bug fix release.
 

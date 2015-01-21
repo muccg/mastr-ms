@@ -6,8 +6,8 @@
 
 %define app mastrms
 %define name %{app}
-%define version 1.11.4
-%define unmangled_version 1.11.4
+%define version 1.12.0
+%define unmangled_version 1.12.0
 %define release 1
 %define webapps /usr/local/webapps
 %define installdir %{webapps}/%{app}
@@ -18,7 +18,6 @@
 %define staticdir %{buildinstalldir}/static
 
 Summary: mastrms
-#Name: python%{pyver}-django-%{app}
 Name: %{app}
 Version: %{version}
 Release: %{release}

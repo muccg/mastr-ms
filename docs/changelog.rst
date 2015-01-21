@@ -9,10 +9,18 @@ instructions on how to upgrade the server, see
 client, see :ref:`client-upgrade`.
 
 
+.. _1.12.0:
+
+1.12.0 (UNRELEASED)
+-------------------
+
+Bug fix release.
+
+
 .. _1.11.4:
 
 1.11.4 (8th December 2014)
--------------------------
+--------------------------
 
 Bug fix release.
 
@@ -22,7 +30,7 @@ Bug fix release.
 .. _1.11.3:
 
 1.11.3 (19th November 2014)
--------------------------
+---------------------------
 
 Bug fix release.
 
@@ -42,7 +50,7 @@ Client 0.4.9 (22nd October 2014)
 .. _1.11.2:
 
 1.11.2 (22nd October 2014)
--------------------------
+--------------------------
 
 New feature release.
 
@@ -52,7 +60,7 @@ New feature release.
 .. _1.11.1:
 
 1.11.1 (1st September 2014)
--------------------------
+---------------------------
 
 Bug fix release.
 
@@ -141,7 +149,7 @@ New feature release.
 .. _1.9.1:
 
 1.9.1 (1st May 2014)
----------------------
+--------------------
 
 New feature release.
 
