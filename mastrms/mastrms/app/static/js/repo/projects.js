@@ -893,7 +893,7 @@ MA.ProjectCmp = {
                                     var id = addWindow.getComponent('projManagerCombo').getValue();
                                     var value = addWindow.getComponent('projManagerCombo').getRawValue();
                                     if (addWindow.getComponent('projManagerCombo').isValid()) {
-                                        Ext.getCmp('projManagerList').getStore().add(new Ext.data.Record({'id':id, 'username':value}));
+                                        Ext.getCmp('projManagerList').getStore().add(new Ext.data.Record({'id':id, 'email':value}));
                                         Ext.getCmp('projManagerList').refresh();
                                         addWindow.close();
                                     }
@@ -923,9 +923,9 @@ MA.ProjectCmp = {
                         loadingText:'Loading...',
                         columnSort:false,
                         columns: [{
-                            header: "username",
-                            dataIndex: 'username',
-                            tpl: '<div style="padding:4px">{username}</div>'
+                            header: "email",
+                            dataIndex: 'email',
+                            tpl: '<div style="padding:4px">{email}</div>'
                         }],
                         viewConfig:{
                             forceFit:true

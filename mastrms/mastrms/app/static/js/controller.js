@@ -37,7 +37,6 @@ MA.LoadMachineAndRuleGeneratorDatastores = function(){
  * situations where a page displays but the content fails
  */
 MA.ChangeMainContent = function(contentName, paramArray){
-    //Ext.get('center').dom.innerHTML = '';
     var showMenu = true;
     var affectMenu = true;
     var cancelBackTarget = true; //whether or not this action should be invoked if a user clicks Cancel (where the variable is obeyed)
