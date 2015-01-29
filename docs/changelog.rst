@@ -16,6 +16,11 @@ client, see :ref:`client-upgrade`.
 
 Bug fix release.
 
+Mastr-MS stops using JIRA and starts using the BitBucket issue
+tracker.
+
+ * #3: Project manager drop-down appears empty 
+ *
 
 .. _1.11.4:
 

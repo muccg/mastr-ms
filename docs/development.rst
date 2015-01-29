@@ -17,17 +17,17 @@ The Mastr-MS code is hosted at BitBucket.
 
 Git_ is required to check out the code.
 
-.. _Mercurial: http://git-scm.com/
+.. _Git: http://git-scm.com/
 
 
 Issue Tracking
 --------------
 
-All new bugs/feature requests should be submitted to the JIRA tracker:
+All new bugs/feature requests should be submitted to the issue tracker:
 
-    https://ccgmurdoch.atlassian.net/browse/MAS
+    https://bitbucket.org/ccgmurdoch/mastr-ms/issues/new
 
-If all significant changes have a JIRA ticket associated, then release
+If all significant changes have a ticket associated, then release
 notes can be accurately generated.
 
 Mastr-MS was originally hosted on Google Code, where there still
