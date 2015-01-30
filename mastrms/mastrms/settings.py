@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'mastrms.admin',
     'mastrms.repository',
     'mastrms.app',
+    'mastrms.api',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
