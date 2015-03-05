@@ -9,6 +9,17 @@ instructions on how to upgrade the server, see
 client, see :ref:`client-upgrade`.
 
 
+.. _1.12.1:
+
+1.12.1 (6th March 2015)
+-----------------------
+
+Bug fix release. Contains database migrations.
+
+ * #10: Disable cascading delete for nullable foreign key fields
+ * #11: Investigations carried over between projects
+
+
 .. _1.12.0:
 
 1.12.0 (5th March 2015)
