@@ -11,16 +11,18 @@ client, see :ref:`client-upgrade`.
 
 .. _1.12.0:
 
-1.12.0 (UNRELEASED)
--------------------
+1.12.0 (5th March 2015)
+-----------------------
 
-Bug fix release.
+Bug fix release. Contains database migrations.
 
 Mastr-MS stops using JIRA and starts using the BitBucket issue
 tracker.
 
- * #3: Project manager drop-down appears empty 
- *
+ * #3: Project manager drop-down appears empty
+ * #7: Sends out e-mails with "Madas"
+ * #9: Deleting investigation also deletes experiment
+
 
 .. _1.11.4:
 
