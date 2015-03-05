@@ -205,7 +205,8 @@ class Experiment(models.Model):
     created_on = models.DateField(null=False, default=date.today)
     formal_quote = models.ForeignKey(Formalquote, null=True, blank=True)
     job_number = models.CharField(max_length=30)
-    investigation = models.ForeignKey("Investigation", null=True, blank=True)
+    investigation = models.ForeignKey("Investigation", null=True, blank=True,
+                                      on_delete=models.SET_NULL)
     instrument_method = models.ForeignKey(InstrumentMethod, null=True, blank=True)
     sample_preparation_notes = models.TextField(blank=True)
     # ? files
