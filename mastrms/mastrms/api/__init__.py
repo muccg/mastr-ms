@@ -30,5 +30,6 @@ def register_all(app_label):
         module_name = "%s.%s" % (__name__, app_label)
         make_generic_resource(model, module_name=module_name)
 
-for appname in mastrms_apps():
-    register_all(appname)
+# # Might be nice to enable this, but it could leak information
+# for appname in mastrms_apps():
+#     register_all(appname)

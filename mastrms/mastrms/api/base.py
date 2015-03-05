@@ -33,14 +33,9 @@ def make_generic_resource(model_cls, module_name=__name__, paging=True):
 
     resource = GenericResource()
     if resource._meta.resource_name not in v1._canonicals:
-        logger.debug("%s registered in %s.%s" % (resource._meta.resource_name,
-                                                 module_name,
-                                                 GenericResource.__name__))
         v1.register(resource)
         if module_name in sys.modules:
             setattr(sys.modules[module_name], GenericResource.__name__, GenericResource)
-    else:
-        logger.debug("%s already registered" % resource._meta.resource_name)
     return GenericResource
 
 

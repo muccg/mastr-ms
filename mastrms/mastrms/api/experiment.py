@@ -45,33 +45,39 @@ class ExperimentResource(BaseResource):
         return qs
 
 
-@register
+# @register
 class BiologicalSourceResource(BaseResource):
     experiment = fields.ForeignKey(ExperimentResource, "experiment")
-    type = fields.ForeignKey("mastrms.api.repository.OrganismTypeResource", "type", full=True)
+    type = fields.ForeignKey("mastrms.api.repository.OrganismTypeResource",
+                             "type", full=True)
 
 
 class SourceInfoResource(BaseResource):
     source = fields.ForeignKey(BiologicalSourceResource, "source")
 
     class Meta(BaseResource.Meta):
-        filtering = ["source"]
+        filtering = {
+            "source": tastypie.constants.ALL,
+        }
 
 
-@register
+# @register
 class PlantInfoResource(SourceInfoResource):
     class Meta(SourceInfoResource.Meta):
         queryset = PlantInfo.objects.all()
 
 
-@register
+# @register
 class MicrobialResource(SourceInfoResource):
     class Meta(SourceInfoResource.Meta):
         queryset = MicrobialInfo.objects.all()
 
 
-@register
+# @register
 class OrganResource(BaseResource):
     experiment = fields.ForeignKey(ExperimentResource, "experiment")
+
     class Meta(BaseResource.Meta):
-        filtering = ["experiment"]
+        filtering = {
+            "experiment": tastypie.constants.ALL,
+        }
