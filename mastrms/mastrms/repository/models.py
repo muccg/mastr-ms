@@ -163,7 +163,8 @@ class Project(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     created_on = models.DateField(null=False, default=date.today)
-    client = models.ForeignKey(User, null=True, blank=True)
+    client = models.ForeignKey(User, null=True, blank=True,
+                               on_delete=models.SET_NULL)
     managers = models.ManyToManyField(User, related_name='managed_projects')
 
     def __unicode__(self):
@@ -176,7 +177,8 @@ class InstrumentMethod(models.Model):
     method_name = models.CharField(max_length=255, help_text="Text which will be put in the worklist")
     version = models.CharField(max_length=255, default="1")
     created_on = models.DateField(default=date.today)
-    creator = models.ForeignKey(User, null=True, blank=True)
+    creator = models.ForeignKey(User, null=True, blank=True,
+                                on_delete=models.SET_NULL)
     template = models.CharField(max_length=10, choices=(("csv", "CSV"),),
                                 default="csv",
                                 help_text="Determines the worklist format")
@@ -201,13 +203,17 @@ class Experiment(models.Model):
     description = models.TextField(blank=True)
     comment = models.TextField(blank=True)
     users = models.ManyToManyField(User, through='UserExperiment', null=True, blank=True)
-    status = models.ForeignKey(ExperimentStatus, null=True, blank=True)
+    status = models.ForeignKey(ExperimentStatus, null=True, blank=True,
+                               on_delete=models.SET_NULL)
     created_on = models.DateField(null=False, default=date.today)
-    formal_quote = models.ForeignKey(Formalquote, null=True, blank=True)
+    formal_quote = models.ForeignKey(Formalquote, null=True, blank=True,
+                                     on_delete=models.SET_NULL)
     job_number = models.CharField(max_length=30)
     investigation = models.ForeignKey("Investigation", null=True, blank=True,
                                       on_delete=models.SET_NULL)
-    instrument_method = models.ForeignKey(InstrumentMethod, null=True, blank=True)
+    instrument_method = models.ForeignKey(InstrumentMethod, null=True,
+                                          blank=True,
+                                          on_delete=models.SET_NULL)
     sample_preparation_notes = models.TextField(blank=True)
     # ? files
 
@@ -409,14 +415,16 @@ class Run(models.Model):
         (2, 'individual vial')
     )
 
-    experiment = models.ForeignKey(Experiment, null=True)
+    experiment = models.ForeignKey(Experiment, null=True,
+                                   on_delete=models.SET_NULL)
 
     method = models.ForeignKey(InstrumentMethod)
     created_on = models.DateField(null=False, default=date.today)
     creator = models.ForeignKey(User)
     title = models.CharField(max_length=255,blank=True)
     samples = models.ManyToManyField(Sample, through="RunSample")
-    machine = models.ForeignKey(NodeClient, null=True, blank=True, db_index=True)
+    machine = models.ForeignKey(NodeClient, null=True, blank=True,
+                                db_index=True, on_delete=models.SET_NULL)
     generated_output = models.TextField(blank=True)
     state = models.SmallIntegerField(choices=RUN_STATES_TUPLES, default=0, db_index=True)
     sample_count = models.IntegerField(default=0)
@@ -519,7 +527,8 @@ class SampleLog(models.Model):
     type = models.PositiveIntegerField(choices=LOG_TYPES, default=0)
     changetimestamp = models.DateTimeField(auto_now=True)
     description = models.CharField(max_length=255)
-    user = models.ForeignKey(User, null=True, blank=True)
+    user = models.ForeignKey(User, null=True, blank=True,
+                             on_delete=models.SET_NULL)
     sample = models.ForeignKey(Sample)
 
     def __unicode__(self):
@@ -690,7 +699,8 @@ class RuleGenerator(models.Model):
     accessibility = models.PositiveIntegerField(default=ACCESSIBILITY_USER, choices=ACCESSIBILITY)
     apply_sweep_rule = models.BooleanField(default=True)
     version = models.PositiveIntegerField(null=True, blank=True)
-    previous_version = models.ForeignKey('RuleGenerator', null=True, blank=True)
+    previous_version = models.ForeignKey('RuleGenerator', null=True, blank=True,
+                                         on_delete=models.SET_NULL)
     created_by = models.ForeignKey(User)
     created_on = models.DateTimeField(auto_now_add=True)
     node = models.CharField(max_length=255, blank=True)
