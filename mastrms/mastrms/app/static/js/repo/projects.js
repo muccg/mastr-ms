@@ -304,7 +304,9 @@ function ExperimentController() {
                                          }
                                          );
 
-        MA.investigationStore.load();
+        MA.investigationStore.load({
+          params: { project: MA.currentProjectId }
+        });
 
         var changingExperiment = (self.currentId() != expId);
         self.setCurrentId(expId);
@@ -1271,7 +1273,9 @@ MA.LoadProject = function (projId) {
                                          asynchronous:true,
                                          evalJSON:'force',
                                          onSuccess: function(response) {
-                                                 MA.investigationStore.load();
+                                                 MA.investigationStore.load({
+                                                   params: { project: projId }
+                                                 });
                                                  clientsListStore.load({
                                                         callback: afterCombosFilled
                                                  });
