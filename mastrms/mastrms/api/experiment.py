@@ -2,7 +2,7 @@ from tastypie import fields
 import tastypie.constants
 
 from ..repository.models import PlantInfo, MicrobialInfo
-from ..repository.models import Investigation, Experiment, UserExperiment, ExperimentStatus
+from ..repository.models import Experiment, ExperimentStatus
 
 from .base import BaseResource, register
 
@@ -15,27 +15,18 @@ class ExperimentStatusResource(BaseResource):
 
 
 @register
-class InvestigationResource(BaseResource):
-    project = fields.ForeignKey("mastrms.api.repository.ProjectResource", "project", full=False)
-
-    class Meta(BaseResource.Meta):
-        queryset = Investigation.objects.all()
-
-    # def get_object_list(self, request):
-    #     qs = super(InvestigationResource, self).get_object_list(request)
-    #     projects = get_user_projects(request.user)
-    #     return qs.filter(project__in=projects)
-
-
-@register
 class ExperimentResource(BaseResource):
     project = fields.ForeignKey("mastrms.api.repository.ProjectResource", "project")
     users = fields.ToManyField("mastrms.api.users.UserResource", "users", null=True)
     status = fields.ForeignKey(ExperimentStatusResource, "status", full=True, null=True)
-    investigation = fields.ForeignKey(InvestigationResource, "investigation", full=True, null=True)
+    investigation = fields.ForeignKey("mastrms.api.repository.InvestigationResource",
+                                      "investigation", full=True, null=True)
 
     class Meta(BaseResource.Meta):
         queryset = Experiment.objects.all()
+        filtering = {
+            "project": tastypie.constants.ALL,
+        }
 
     def get_object_list(self, request):
         qs = super(ExperimentResource, self).get_object_list(request)
