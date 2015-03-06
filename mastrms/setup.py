@@ -53,6 +53,7 @@ setup(name='django-mastrms',
     author_email='web@ccg.murdoch.edu.au',
     packages=[
         'mastrms',
+        'mastrms.api',
         'mastrms.app',
         'mastrms.admin',
         'mastrms.dashboard',
