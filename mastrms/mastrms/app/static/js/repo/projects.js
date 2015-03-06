@@ -298,15 +298,15 @@ function ExperimentController() {
                                                      MA.currentProjectId = rs[0].project;
                                                  }
 
+                                                 MA.investigationStore.load({
+                                                   params: MA.currentProjectId ? { project: MA.currentProjectId } : {}
+                                                 });
+
                                                  self.updateNav();
 
                                              }
                                          }
                                          );
-
-        MA.investigationStore.load({
-          params: { project: MA.currentProjectId }
-        });
 
         var changingExperiment = (self.currentId() != expId);
         self.setCurrentId(expId);
