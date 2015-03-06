@@ -9,6 +9,16 @@ instructions on how to upgrade the server, see
 client, see :ref:`client-upgrade`.
 
 
+.. _1.12.2:
+
+1.12.2 (6th March 2015)
+-----------------------
+
+Brown paper bag release.
+
+ * #12: RPM for 1.12.1 was faulty
+
+
 .. _1.12.1:
 
 1.12.1 (6th March 2015)
