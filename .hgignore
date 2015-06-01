@@ -1,6 +1,7 @@
 syntax: glob
 
 *.pyc
+*.log
 bootstrap
 build
 mastrms/dist
@@ -25,3 +26,5 @@ mdatasync_client/supportwin32/py2exe-0.6.9.win32-py2.7.exe
 mdatasync_client/supportwin32/python-2.7.6.msi
 mdatasync_client/supportwin32/wxPython2.8-win32-unicode-2.8.12.1-py27.exe
 mdatasync_client/supportwin32/wxPython3.0-win32-3.0.0.0-py27.exe
+
+mastrms/mastrms/scratch/*
