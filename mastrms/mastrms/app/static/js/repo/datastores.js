@@ -287,7 +287,7 @@ var userListStore = new Ext.data.JsonStore(
 var sorteduserListStore = new Ext.data.JsonStore(
                         {
                             storeId: 'sorteduserList',
-                            autoLoad: false,
+                            autoLoad: true,
                             url: wsBaseUrl + 'recordsClientList?allUsers=1&sortUsers=1',
                             listeners: {'load':MA.DSLoaded},
                             sortInfo: {
@@ -707,7 +707,7 @@ var involvementComboStore = new Ext.data.JsonStore(
 var expStatusComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'expStatusCombo',
-                            autoLoad: false,
+                            autoLoad: true,
                             url: wsBaseUrl + 'populate_select/experimentstatus/id/name',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
