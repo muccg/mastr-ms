@@ -24,6 +24,7 @@ install_requires = [
     'python-memcached==1.48',
     'dingus',
     'django-tastypie==0.11.1',
+    'zipstream'
 ]
 
 dev_requires = [

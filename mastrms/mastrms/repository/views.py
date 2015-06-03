@@ -3,6 +3,7 @@ import io
 import csv
 import re
 import logging
+import zipstream
 from decimal import Decimal, DecimalException
 from datetime import datetime, timedelta
 from itertools import groupby, chain
@@ -1970,9 +1971,13 @@ def downloadPackage(request):
     files = package_info['files']
     experiment = get_object_or_404(Experiment, pk=package_info['experiment_id'])
 
-    package_path = pack_files(files, package_name)
+    zipped = zipstream.ZipFile(mode="w", compression=zipstream.ZIP_DEFLATED)
+    for f in files:
+        zipped.write(f[0])
 
-    return fileDownloadResponse(package_path, package_name)
+    response = StreamingHttpResponse(zipped, mimetype='application/download')
+    response['Content-Disposition'] = 'attachment; filename={}'.format(package_name)
+    return response    
 
 @mastr_users_only
 def downloadFile(request, *args):
