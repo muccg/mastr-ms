@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Script to control Mastrms in dev and test
 #
@@ -35,7 +35,7 @@ fi
 VIRTUALENV="${TOPDIR}/virt_${PROJECT_NAME}"
 
 activate_virtualenv() {
-    source ${VIRTUALENV}/bin/activate
+    . ${VIRTUALENV}/bin/activate
 }
 
 settings() {
@@ -58,7 +58,7 @@ ci_ssh_agent() {
 
 ci_ssh_agent_start() {
     ssh-agent > /tmp/agent.env.sh
-    source /tmp/agent.env.sh
+    . /tmp/agent.env.sh
     rm -f /tmp/agent.env.sh
     ssh-add ~/.ssh/$KEYFILE
     trap ci_ssh_agent_kill EXIT
@@ -67,7 +67,7 @@ ci_ssh_agent_start() {
 ci_ssh_agent_kill() {
     if [ -n "${SSH_AGENT_PID}" ]; then
         ssh-agent -k > /tmp/agent.env.sh
-        source /tmp/agent.env.sh
+        . /tmp/agent.env.sh
         rm -f /tmp/agent.env.sh
     fi
 }
