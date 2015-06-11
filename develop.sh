@@ -267,7 +267,7 @@ purge() {
 
 usage() {
     echo ""
-    echo "Usage ./develop.sh (test|nosetests|lint|jslint|dropdb|start|install|clean|purge|pipfreeze|pythonversion|ci_remote_build|ci_staging|ci_staging_tests|ci_rpm_publish|rpm_release VERSION|ci_remote_destroy)"
+    echo "Usage ./develop.sh (test|nosetests|lint|jslint|dropdb|start|install|clean|purge|pipfreeze|pythonversion|rpmbuild|ci_staging|ci_staging_tests|rpm_publish|rpm_release VERSION|ci_remote_destroy)"
     echo ""
 }
 
