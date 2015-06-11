@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # Script to control Mastrms in dev and test
 #
@@ -135,7 +135,7 @@ ci_staging_tests() {
     ccg ${AWS_STAGING_INSTANCE} dsudo:"su postgres -c \"psql -c 'ALTER ROLE ${DATABASE_USER} CREATEDB;'\""
 
     # fixme: this config should be put in nose.cfg or settings.py or similar
-    EXCLUDES="--exclude\=yaphc --exclude\=esky --exclude\=httplib2"
+    EXCLUDES="--exclude\=yaphc --exclude\=esky --exclude\=httplib2 --exclude\=mdatasync_client"
 
     # firefox won't run without a profile directory, dbus and gconf
     # also need to write in home directory.
