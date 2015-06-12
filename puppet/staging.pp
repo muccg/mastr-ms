@@ -6,7 +6,6 @@ node default {
   include ccgcommon::source
   include ccgapache
   include python
-  include ccgdatabase::postgresql::devel
   include repo::sydney
   include repo::upgrade
   include repo::repo::ius
@@ -15,6 +14,7 @@ node default {
   class { 'yum::repo::pgdg93':
     stage => 'setup',
   }
+  include ccgdatabase::postgresql::devel
 
   # There are some leaked local secrets here we don't care about
   $django_config = {
