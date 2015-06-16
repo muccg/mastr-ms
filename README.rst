@@ -19,6 +19,12 @@ require a licence other than GPL for legal or commercial reasons.
 Latest Releases
 ---------------
 
+1.12.3_  (16th June 2015)
+  Bug fix release.
+
+.. _1.12.3: http://mastr-ms.readthedocs.org/en/latest/changelog.html#1.12.3
+
+
 1.12.2_  (6th March 2015)
   Brown paper bag release.
 
