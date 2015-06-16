@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?><testsuite name="nosetests" tests="1" errors="1" failures="0" skip="0"><testcase classname="nose.failure.Failure" name="runTest" time="0.000"><error type="exceptions.ImportError" message="No module named wx"><![CDATA[Traceback (most recent call last):
+  File "/usr/lib64/python2.7/unittest/case.py", line 367, in run
+    testMethod()
+  File "/usr/local/webapps/mastrms/lib/python2.7/site-packages/nose/loader.py", line 418, in loadTestsFromName
+    addr.filename, addr.module)
+  File "/usr/local/webapps/mastrms/lib/python2.7/site-packages/nose/importer.py", line 47, in importFromPath
+    return self.importFromDir(dir_path, fqname)
+  File "/usr/local/webapps/mastrms/lib/python2.7/site-packages/nose/importer.py", line 94, in importFromDir
+    mod = load_module(part_fqname, fh, filename, desc)
+  File "/usr/local/webapps/mastrms/lib/python2.7/site-packages/mdatasync_client/test/__init__.py", line 1, in <module>
+    from testclient import *
+  File "/usr/local/webapps/mastrms/lib/python2.7/site-packages/mdatasync_client/test/testclient.py", line 7, in <module>
+    import wx
+ImportError: No module named wx
+]]></error></testcase></testsuite>
