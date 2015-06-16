@@ -3,6 +3,7 @@ import io
 import csv
 import re
 import logging
+import zipstream
 from decimal import Decimal, DecimalException
 from datetime import datetime, timedelta
 from itertools import groupby, chain
@@ -15,6 +16,8 @@ from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden, HttpResponseNotAllowed, HttpResponseRedirect, HttpResponseBadRequest, HttpResponseServerError
+from django.http import StreamingHttpResponse
+from django.core.servers.basehttp import FileWrapper
 from django.shortcuts import render_to_response, get_object_or_404
 from django.utils import simplejson as json
 from django.utils.encoding import smart_bytes, smart_text
@@ -1949,12 +1952,13 @@ def packageFilesForDownload(request):
         }))
 
 def fileDownloadResponse(realfile, filename=None):
-    from django.core.files import File
     if filename is None:
         filename = os.path.basename(realfile)
-    wrapper = File(open(realfile, "rb"))
+    chunk = 8192
+    wrapper = FileWrapper(open(realfile, "rb"), chunk)
+    
     content_disposition = 'attachment;  filename=\"%s\"' % filename
-    response = HttpResponse(wrapper, content_type='application/download')
+    response = StreamingHttpResponse(wrapper, content_type='application/download')
     response['Content-Disposition'] = content_disposition
     response['Content-Length'] = os.path.getsize(realfile)
     return response
@@ -1967,9 +1971,13 @@ def downloadPackage(request):
     files = package_info['files']
     experiment = get_object_or_404(Experiment, pk=package_info['experiment_id'])
 
-    package_path = pack_files(files, package_name)
+    zipped = zipstream.ZipFile(mode="w", compression=zipstream.ZIP_DEFLATED)
+    for f in files:
+        zipped.write(f[0])
 
-    return fileDownloadResponse(package_path, package_name)
+    response = StreamingHttpResponse(zipped, mimetype='application/download')
+    response['Content-Disposition'] = 'attachment; filename={}'.format(package_name)
+    return response    
 
 @mastr_users_only
 def downloadFile(request, *args):

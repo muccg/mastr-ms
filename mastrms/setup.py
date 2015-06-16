@@ -8,7 +8,7 @@ start_dir = os.path.dirname(os.path.abspath(__file__))
 for package in ('app', 'admin', 'dashboard', 'login', 'mdatasync_server', 'quote', 'registration', 'repository', 'users'):
     data_files['mastrms.' + package] = []
     os.chdir(os.path.join(start_dir, 'mastrms', package))
-    for data_dir in ('templates', 'static', 'migrations', 'fixtures', 'views', 'utils'):
+    for data_dir in ('templates', 'templatetags', 'static', 'migrations', 'fixtures', 'views', 'utils', 'test'):
         data_files['mastrms.' + package].extend(
             [os.path.join(subdir,f) for (subdir, dirs, files) in os.walk(data_dir) for f in files])
     os.chdir(start_dir)
@@ -24,6 +24,7 @@ install_requires = [
     'python-memcached==1.48',
     'dingus',
     'django-tastypie==0.11.1',
+    'zipstream'
 ]
 
 dev_requires = [

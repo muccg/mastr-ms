@@ -10,8 +10,8 @@ shift
 PORT='8000'
 
 PROJECT_NAME='mastrms'
-AWS_BUILD_INSTANCE='aws_rpmbuild_centos6'
 AWS_STAGING_INSTANCE='aws_syd_mastrms_staging'
+
 TARGET_DIR="/usr/local/src/${PROJECT_NAME}"
 CLOSURE="/usr/local/closure/compiler.jar"
 PIP_OPTS="-v --download-cache ~/.pip/cache"
@@ -35,22 +35,30 @@ fi
 VIRTUALENV="${TOPDIR}/virt_${PROJECT_NAME}"
 
 activate_virtualenv() {
-    source ${VIRTUALENV}/bin/activate
+    . ${VIRTUALENV}/bin/activate
 }
 
 settings() {
     export DJANGO_SETTINGS_MODULE="${PROJECT_NAME}.settings"
 }
 
+make_virtualenv() {
+    # check requirements
+    which virtualenv > /dev/null
+    if [ ! -e ${VIRTUALENV} ]; then
+        virtualenv ${VIRTUALENV}
+    fi
+}
+
 # ssh setup, make sure our ccg commands can run in an automated environment
-KEYFILE="ccg-syd-staging.pem"
+KEYFILE="ccg-syd-staging-2014.pem"
 ci_ssh_agent() {
     ssh-add -l | grep $KEYFILE > /dev/null || ci_ssh_agent_start
 }
 
 ci_ssh_agent_start() {
     ssh-agent > /tmp/agent.env.sh
-    source /tmp/agent.env.sh
+    . /tmp/agent.env.sh
     rm -f /tmp/agent.env.sh
     ssh-add ~/.ssh/$KEYFILE
     trap ci_ssh_agent_kill EXIT
@@ -59,7 +67,7 @@ ci_ssh_agent_start() {
 ci_ssh_agent_kill() {
     if [ -n "${SSH_AGENT_PID}" ]; then
         ssh-agent -k > /tmp/agent.env.sh
-        source /tmp/agent.env.sh
+        . /tmp/agent.env.sh
         rm -f /tmp/agent.env.sh
     fi
 }
@@ -73,36 +81,21 @@ build_number_head() {
     echo "build.tip=\"$TIP\""
 }
 
-# build RPMs on a remote host from ci environment
-ci_remote_build() {
-    time ccg ${AWS_BUILD_INSTANCE} boot
-    time ccg ${AWS_BUILD_INSTANCE} puppet
-    time ccg ${AWS_BUILD_INSTANCE} shutdown:240
+# build RPMs
+rpmbuild() {
+    mkdir -p data/rpmbuild
+    chmod o+rwx data/rpmbuild
 
-    cd ${TOPDIR}
+    make_virtualenv
+    . ${VIRTUALENV}/bin/activate
+    pip install fig
 
-    if [ -z "$BAMBOO_BUILDKEY" ]; then
-        # We aren't running under Bamboo, create new build-number.txt.
-        build_number_head > build-number.txt
-    else
-        # Bamboo has already put some useful information in
-        # build-number.txt, so append to it.
-        build_number_head >> build-number.txt
-    fi
-
-    EXCLUDES="('bootstrap'\, '.hg*'\, '.git'\, 'virt*'\, '*.log'\, '*.rpm'\, 'mastrms/build'\, 'mastrms/dist'\, '*.egg-info'\, 'mdatasync_client/supportwin32')"
-    SSH_OPTS="-o StrictHostKeyChecking\=no"
-    RSYNC_OPTS="-l"
-    time ccg ${AWS_BUILD_INSTANCE} rsync_project:local_dir=./,remote_dir=${TARGET_DIR}/,ssh_opts="${SSH_OPTS}",extra_opts="${RSYNC_OPTS}",exclude="${EXCLUDES}",delete=True
-    time ccg ${AWS_BUILD_INSTANCE} build_rpm:centos/${PROJECT_NAME}.spec,src=${TARGET_DIR}
-
-    mkdir -p build
-    ccg ${AWS_BUILD_INSTANCE} getfile:rpmbuild/RPMS/x86_64/${PROJECT_NAME}*.rpm,build/
+    fig --project-name mastr-ms -f fig-rpmbuild.yml up
 }
 
 # publish rpms to testing repo
-ci_rpm_publish() {
-    time ccg publish_testing_rpm:build/${PROJECT_NAME}*.rpm,release=6
+rpm_publish() {
+    time ccg publish_testing_rpm:data/rpmbuild/RPMS/x86_64/mastrms*.rpm,release=6
 }
 
 # copy a version from testing repo to release repo
@@ -142,7 +135,7 @@ ci_staging_tests() {
     ccg ${AWS_STAGING_INSTANCE} dsudo:"su postgres -c \"psql -c 'ALTER ROLE ${DATABASE_USER} CREATEDB;'\""
 
     # fixme: this config should be put in nose.cfg or settings.py or similar
-    EXCLUDES="--exclude\=yaphc --exclude\=esky --exclude\=httplib2"
+    EXCLUDES="--exclude\=yaphc --exclude\=esky --exclude\=httplib2 --exclude\=mdatasync_client"
 
     # firefox won't run without a profile directory, dbus and gconf
     # also need to write in home directory.
@@ -274,7 +267,7 @@ purge() {
 
 usage() {
     echo ""
-    echo "Usage ./develop.sh (test|nosetests|lint|jslint|dropdb|start|install|clean|purge|pipfreeze|pythonversion|ci_remote_build|ci_staging|ci_staging_tests|ci_rpm_publish|rpm_release VERSION|ci_remote_destroy)"
+    echo "Usage ./develop.sh (test|nosetests|lint|jslint|dropdb|start|install|clean|purge|pipfreeze|pythonversion|rpmbuild|ci_staging|ci_staging_tests|rpm_publish|rpm_release VERSION|ci_remote_destroy)"
     echo ""
 }
 
@@ -314,17 +307,16 @@ install)
     settings
     installapp
     ;;
-ci_remote_build)
-    ci_ssh_agent
-    ci_remote_build
+rpmbuild)
+    rpmbuild
     ;;
 ci_remote_destroy)
     ci_ssh_agent
     ci_remote_destroy
     ;;
-ci_rpm_publish)
+rpm_publish)
     ci_ssh_agent
-    ci_rpm_publish
+    rpm_publish
     ;;
 rpm_release)
     ci_ssh_agent

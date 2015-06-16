@@ -9,6 +9,18 @@ instructions on how to upgrade the server, see
 client, see :ref:`client-upgrade`.
 
 
+.. _1.12.3:
+
+1.12.3 (16th June 2015)
+-----------------------
+
+Bug fix release.
+
+ * #4: Drop-down lists sometimes show a number instead of the field value
+ * #5: Times out when downloading large files
+ * #13: Browser times out when a request to zip up large files is sent
+
+
 .. _1.12.2:
 
 1.12.2 (6th March 2015)
