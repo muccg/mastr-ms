@@ -161,12 +161,19 @@ lint() {
 }
 
 
-# lint js, assumes closure compiler
+# lint js
 jslint() {
     JSFILES="${TOPDIR}/mastrms/mastrms/app/static/js/*.js ${TOPDIR}/mastrms/mastrms/app/static/js/repo/*.js"
+    OPTS="--exclude_files=${TOPDIR}/mastrms/mastrms/app/static/js/swfobject.js,${TOPDIR}/mastrms/mastrms/app/static/js/repo/prototype.js"
+    DISABLE="--disable 0131,0200,0210,0217,0220,0110,120"
+
+    make_virtualenv
+    activate_virtualenv
+    ${VIRTUALENV}/bin/pip install 'closure-linter==2.3.13'
+    echo '##### WARNING --max_line_length !!!! #####'
     for JS in $JSFILES
     do
-        java -jar ${CLOSURE} --js $JS --js_output_file output.js --warning_level DEFAULT --summary_detail_level 3
+        ${VIRTUALENV}/bin/gjslint ${OPTS} ${DISABLE} $JS
     done
 }
 
