@@ -1,14 +1,14 @@
 /**
  * a re-imagining of a DisplayField that submits its value rather than frustrating the developer
  */
-Ext.form.MADisplayField = Ext.extend(Ext.form.Field,  {
-    validationEvent : false,
-    validateOnBlur : false,
-    defaultAutoCreate : {tag: "div"},
+Ext.form.MADisplayField = Ext.extend(Ext.form.Field, {
+    validationEvent: false,
+    validateOnBlur: false,
+    defaultAutoCreate: {tag: "div"},
     /**
      * @cfg {String} fieldClass The default CSS class for the field (defaults to <tt>"x-form-display-field"</tt>)
      */
-    fieldClass : "x-form-display-field",
+    fieldClass: "x-form-display-field",
     /**
      * @cfg {Boolean} htmlEncode <tt>false</tt> to skip HTML-encoding the text when rendering it (defaults to
      * <tt>false</tt>). This might be useful if you want to include tags in the field's innerHTML rather than
@@ -17,37 +17,37 @@ Ext.form.MADisplayField = Ext.extend(Ext.form.Field,  {
     htmlEncode: false,
 
     // private
-    initEvents : Ext.emptyFn,
+    initEvents: Ext.emptyFn,
 
-    isValid : function(){
+    isValid: function() {
         return true;
     },
 
-    validate : function(){
+    validate: function() {
         return true;
     },
 
-    getRawValue : function(){
+    getRawValue: function() {
         var v = this.rendered ? this.el.dom.innerHTML : Ext.value(this.value, '');
-        if(v === this.emptyText){
+        if (v === this.emptyText) {
             v = '';
         }
-        if(this.htmlEncode){
+        if (this.htmlEncode) {
             v = Ext.util.Format.htmlDecode(v);
         }
         return v;
     },
 
-    getValue : function(){
+    getValue: function() {
         return this.getRawValue();
     },
-    
+
     getName: function() {
         return this.name;
     },
 
-    setRawValue : function(v){
-        if(this.htmlEncode){
+    setRawValue: function(v) {
+        if (this.htmlEncode) {
             v = Ext.util.Format.htmlEncode(v);
         }
         if (this.rendered) {
@@ -58,39 +58,39 @@ Ext.form.MADisplayField = Ext.extend(Ext.form.Field,  {
         return this.rendered ? (this.el.dom.innerHTML = (Ext.isEmpty(v) ? '' : v)) : (this.value = v);
     },
 
-    setValue : function(v){
+    setValue: function(v) {
         this.setRawValue(v);
         return this;
     },
-    onRender : function(ct, position){
+    onRender: function(ct, position) {
             this.doc = Ext.isIE ? Ext.getBody() : Ext.getDoc();
             Ext.form.MADisplayField.superclass.onRender.call(this, ct, position);
-    
+
             this.wrap = this.el.wrap({cls: 'x-blahblahblahblah'});
-            this.inputEl = this.wrap.createChild({tag: "input", type:'hidden', name:this.getName(), value:this.getValue()});
+            this.inputEl = this.wrap.createChild({tag: "input", type: 'hidden', name: this.getName(), value: this.getValue()});
     }
-    /** 
-     * @cfg {String} inputType 
+    /**
+     * @cfg {String} inputType
      * @hide
      */
-    /** 
-     * @cfg {Boolean} disabled 
+    /**
+     * @cfg {Boolean} disabled
      * @hide
      */
-    /** 
-     * @cfg {Boolean} readOnly 
+    /**
+     * @cfg {Boolean} readOnly
      * @hide
      */
-    /** 
-     * @cfg {Boolean} validateOnBlur 
+    /**
+     * @cfg {Boolean} validateOnBlur
      * @hide
      */
-    /** 
-     * @cfg {Number} validationDelay 
+    /**
+     * @cfg {Number} validationDelay
      * @hide
      */
-    /** 
-     * @cfg {String/Boolean} validationEvent 
+    /**
+     * @cfg {String/Boolean} validationEvent
      * @hide
      */
 });

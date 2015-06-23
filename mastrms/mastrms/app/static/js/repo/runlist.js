@@ -8,52 +8,52 @@ runListStore = new Ext.data.GroupingStore({
 
 MA.RunCaptureCSVUploadForm = new Ext.Window({
     title: 'Upload CSV of Completed External Run',
-    closeAction:'hide',
-    width:450,
-    height:450,
-    minHeight:450,
-    minWidth:450,
-    id:'runCaptureCSVUploadWindow',
+    closeAction: 'hide',
+    width: 450,
+    height: 450,
+    minHeight: 450,
+    minWidth: 450,
+    id: 'runCaptureCSVUploadWindow',
     defaults: {
-        bodyStyle:'padding:15px;background:transparent;'
+        bodyStyle: 'padding:15px;background:transparent;'
     },
-    
-    items:[
+
+    items: [
         {
-            id:'runCaptureCSVUpload',
-            xtype:'form',
+            id: 'runCaptureCSVUpload',
+            xtype: 'form',
             fileUpload: true,
             url: wsBaseUrl + 'uploadRunCaptureCSV',
             waitTitle: 'Uploading...',
-            border:false,
-            items:[
-                { 
+            border: false,
+            items: [
+                {
                     xtype: 'hidden',
                     name: 'experiment_id',
                     itemId: 'expIdField'
                 },
                 {
-                    fieldLabel:'Title',
-                    xtype:'textfield',
-                    itemId:'title',
-                    name:'title',
-                    value:'New Captured External Run',
-                    allowBlank:false
+                    fieldLabel: 'Title',
+                    xtype: 'textfield',
+                    itemId: 'title',
+                    name: 'title',
+                    value: 'New Captured External Run',
+                    allowBlank: false
                 },
                 new Ext.form.ComboBox({
                     fieldLabel: 'Instrument method',
                     itemId: 'method',
                     name: 'method_id',
-                    editable:false,
-                    forceSelection:true,
-                    displayField:'value',
-                    valueField:'key',
-                    hiddenName:'method_id',
-                    lazyRender:true,
-                    allowBlank:false,
-                    typeAhead:false,
-                    triggerAction:'all',
-                    listWidth:230,
+                    editable: false,
+                    forceSelection: true,
+                    displayField: 'value',
+                    valueField: 'key',
+                    hiddenName: 'method_id',
+                    lazyRender: true,
+                    allowBlank: false,
+                    typeAhead: false,
+                    triggerAction: 'all',
+                    listWidth: 230,
                     width: 200,
                     store: methodStore
                 }),
@@ -61,21 +61,21 @@ MA.RunCaptureCSVUploadForm = new Ext.Window({
                     fieldLabel: 'Machine',
                     itemId: 'machine',
                     name: 'machine_id',
-                    editable:false,
-                    forceSelection:true,
-                    displayField:'station_name',
-                    valueField:'id',
-                    hiddenName:'machine_id',
-                    lazyRender:true,
-                    allowBlank:false,
-                    typeAhead:false,
-                    triggerAction:'all',
-                    mode:'local',
-                    listWidth:230,
+                    editable: false,
+                    forceSelection: true,
+                    displayField: 'station_name',
+                    valueField: 'id',
+                    hiddenName: 'machine_id',
+                    lazyRender: true,
+                    allowBlank: false,
+                    typeAhead: false,
+                    triggerAction: 'all',
+                    mode: 'local',
+                    listWidth: 230,
                     width: 200,
                     store: machineStore,
                     itemSelector: 'div.search-item',
-                    tpl:new Ext.XTemplate(
+                    tpl: new Ext.XTemplate(
                     '<tpl for="."><div style="padding:8px;padding-top:5px;padding-bottom:5px;border-bottom:1px solid #ccc;" class="search-item">',
                     '{station_name}<br /><span style="color:#666;">{organisation_name} > {site_name}</span>',
                     '</div></tpl>'
@@ -84,7 +84,7 @@ MA.RunCaptureCSVUploadForm = new Ext.Window({
                 {
                     xtype: 'panel',
                     border: false,
-                    bodyStyle:'padding:15px;background:transparent;',
+                    bodyStyle: 'padding:15px;background:transparent;',
                     html: 'Uploaded CSVs must be of the format:<br><br><code>filename</code><br><br>or contain a header line with these words.'
                 },
                 {
@@ -105,25 +105,25 @@ MA.RunCaptureCSVUploadForm = new Ext.Window({
     buttons: [
         {
             text: 'Upload',
-            itemId:'csvUploadBtn',
-            handler: function(){
-                Ext.getCmp('runCaptureCSVUpload').getComponent('expIdField').setValue( MA.ExperimentController.currentId() );
-            
+            itemId: 'csvUploadBtn',
+            handler: function() {
+                Ext.getCmp('runCaptureCSVUpload').getComponent('expIdField').setValue(MA.ExperimentController.currentId());
+
                 Ext.getCmp('runCaptureCSVUpload').getForm().submit(
-                    {   
-                        successProperty: 'success',        
-                        success: function (form, action) {
+                    {
+                        successProperty: 'success',
+                        success: function(form, action) {
                             var res = action.result;
                             if (res.success === true) {
                                 var msg = res.num_created + " file" + (res.num_created == 1 ? "" : "s") + " from external run will be captured.";
-                                form.reset(); 
+                                form.reset();
                                 MA.ExperimentSamplesOnlyInit();
                                 Ext.Msg.alert('CSV Upload', msg);
                                 Ext.getCmp('runCaptureCSVUploadWindow').hide();
                                 runListStore.reload();
-                            } 
+                            }
                         },
-                        failure: function (form, action) {
+                        failure: function(form, action) {
                             // this gets called both on server errors
                             // and when view returns success: false
                             MA.ExperimentSamplesOnlyInit();
@@ -155,7 +155,7 @@ MA.RunCaptureCSVUploadForm = new Ext.Window({
 });
 
 MA.RunList = Ext.extend(Ext.Panel, {
-    constructor: function (config) {
+    constructor: function(config) {
         var self = this;
 
         var defaultConfig = {
@@ -164,20 +164,20 @@ MA.RunList = Ext.extend(Ext.Panel, {
                 new Ext.grid.GridPanel({
                     border: false,
                     itemId: "grid",
-                    loadMask : true,
+                    loadMask: true,
                     selModel: new Ext.grid.RowSelectionModel({ singleSelect: true }),
                     view: new Ext.grid.GroupingView({
                         forceFit: true,
                         autoFill: true,
                         hideGroupedColumn: true
                     }),
-                    plugins:[new Ext.ux.grid.Search({
-                         mode:'local'
-                        ,iconCls:false
-                        ,dateFormat:'m/d/Y'
-                        ,minLength:0
-                        ,width:150
-                        ,position:'top'
+                    plugins: [new Ext.ux.grid.Search({
+                         mode: 'local'
+                        , iconCls: false
+, dateFormat: 'm/d/Y'
+                        , minLength: 0
+                        , width: 150
+                        , position: 'top'
                     })],
                     columns: [
                         { header: "ID", sortable: false, menuDisabled: true, dataIndex: "id", width: 50 },
@@ -195,17 +195,17 @@ MA.RunList = Ext.extend(Ext.Panel, {
                             text: "Remove Run",
                             cls: "x-btn-text-icon",
                             icon: "static/images/delete.png",
-                            handler: function () {
+                            handler: function() {
                                 var selModel = self.getComponent("grid").getSelectionModel();
 
                                 if (selModel.hasSelection()) {
                                     var agreed = window.confirm("Are you sure you want to remove the selected run?");
                                     if (agreed) {
                                         var id = selModel.getSelected().data.id;
-                                        MA.CRUDSomething("delete/run/"+id+"/", null, function () {
+                                        MA.CRUDSomething("delete/run/" + id + "/", null, function() {
                                             self.getStore().reload();
                                             self.fireEvent("delete", id);
-                                            
+
                                             //runStore.reload(); //BP:fixtimeouts
                                         });
                                     }
@@ -216,7 +216,7 @@ MA.RunList = Ext.extend(Ext.Panel, {
                             text: "Clone Run",
                             cls: "x-btn-text-icon",
                             icon: "static/images/add-to-run.png",
-                            handler: function () {
+                            handler: function() {
                                 var selModel = self.getComponent("grid").getSelectionModel();
 
                                 if (selModel.hasSelection()) {
@@ -226,25 +226,25 @@ MA.RunList = Ext.extend(Ext.Panel, {
                                         var msg = Ext.Msg.wait("Cloning Run");
                                         var req = new Ajax.Request(wsBaseUrl + 'clone_run/' + encodeURIComponent(id),
                                                 {
-                                                    asynchronous:true,
-                                                    evalJSON:'force',
-                                                    onSuccess: function(response){
+                                                    asynchronous: true,
+                                                    evalJSON: 'force',
+                                                    onSuccess: function(response) {
                                                         msg.hide();
                                                         console.log(response.responseJSON);
-                                                        if (response.responseJSON.success !== true){
+                                                        if (response.responseJSON.success !== true) {
                                                             console.log('couldnt clone run');
                                                             Ext.Msg.alert("Error Cloning Run", response.responseJSON.message);
                                                         }
-                                                        
+
                                                         self.getStore().reload();
                                                                },
-                                                    onFailure: function(response){
-                                                                
+                                                    onFailure: function(response) {
+
                                                         msg.hide();
                                                         Ext.Msg.alert("Communication Error", "Call to clone run failed.");
                                                         }
                                                 });
-                                        
+
                                     }
                                 }
                             }
@@ -253,7 +253,7 @@ MA.RunList = Ext.extend(Ext.Panel, {
                             text: "Capture Completed External Run",
                             cls: "x-btn-text-icon",
                             icon: "static/images/arrow-up.png",
-                            handler: function () {
+                            handler: function() {
                                 var selModel = self.getComponent("grid").getSelectionModel();
                                 MA.RunCaptureCSVUploadForm.show();
                             }
@@ -263,7 +263,7 @@ MA.RunList = Ext.extend(Ext.Panel, {
 //                        "rowclick": function () {
 //                            self.fireEvent("click", this.getSelectionModel().getSelected().data.id);
 //                        },
-                        "rowdblclick": function () {
+                        "rowdblclick": function() {
                             self.fireEvent("dblclick", this.getSelectionModel().getSelected().data.id);
                         }
                     }
@@ -278,20 +278,20 @@ MA.RunList = Ext.extend(Ext.Panel, {
 
         self.addEvents("click", "dblclick", "delete");
     },
-    getStore: function () {
+    getStore: function() {
         return this.getComponent("grid").getStore();
     },
-    select: function (id) {
+    select: function(id) {
         var record = this.getStore().getById(id);
         this.getComponent("grid").getSelectionModel().selectRecords([record], false);
     }
 });
 
-MA.RunListCmp  = {
+MA.RunListCmp = {
     title: "Runs",
     region: "center",
     cmargins: "0 0 0 0",
-    border:false,
+    border: false,
     collapsible: false,
     id: "runs-list",
     bodyStyle: "padding: 0",
@@ -299,16 +299,16 @@ MA.RunListCmp  = {
     defaults: {
         split: true
     },
-    items: [ new MA.RunList({
+    items: [new MA.RunList({
             border: false,
             id: "runs",
             region: "center",
             listeners: {
-                click: function (id) {
+                click: function(id) {
                     var detail = Ext.getCmp("run-list-detail");
                     detail.selectRun(runListStore.getById(id));
                 },
-                "delete": function (id) {
+                "delete": function(id) {
                     var detail = Ext.getCmp("run-list-detail");
                     if (detail.runId == id) {
                         detail.clearRun();
@@ -322,23 +322,23 @@ MA.RunListCmp  = {
             width: 520,
             border: false,
             bodyStyle: "background: #d0def0;",
-            autoScroll:true,
+            autoScroll: true,
             items: [
                 new MA.RunDetail({
-                    bodyStyle:'padding:10px;background:transparent;border-top:none;border-bottom:none;border-right:none;',
+                    bodyStyle: 'padding:10px;background:transparent;border-top:none;border-bottom:none;border-right:none;',
                     border: false,
                     flex: 0,
                     id: "run-list-detail",
                     listeners: {
-                        "delete": function () { runListStore.reload(); /*runStore.reload();*/ },
-                        "save": function () { runListStore.reload(); /*runStore.reload();*/ }
+                        "delete": function() { runListStore.reload(); /*runStore.reload();*/ },
+                        "save": function() { runListStore.reload(); /*runStore.reload();*/ }
                     }
                 })
             ]
         })
-    ] 
+    ]
 };
-   
+
 MA.ExperimentRunsInit = function() {
     Ext.getCmp('center-panel').layout.setActiveItem('experiment-runs-list');
     //Ext.getCmp('experiment-run-list-detail').clearRun();
@@ -362,36 +362,36 @@ items: [
                        id: "experimentruns",
                        region: "center",
                        listeners: {
-                       click: function (id) {
+                       click: function(id) {
                        var detail = Ext.getCmp("experiment-run-list-detail");
                        detail.selectRun(runListStore.getById(id));
                        },
-                       "delete": function (id) {
+                       "delete": function(id) {
                        var detail = Ext.getCmp("experiment-run-list-detail");
                        if (detail.runId == id) {
                        detail.clearRun();
                        }
                        }
                        },
-                       store:experimentRunStore
-                       }, mode='editor'),
+                       store: experimentRunStore
+                       }, mode = 'editor'),
         new Ext.Panel({
                       region: "east",
                       width: 520,
                       border: false,
                       bodyStyle: "background: #d0def0;",
-                      autoScroll:true,
+                      autoScroll: true,
                       items: [
                               new MA.RunDetail({
-                                               bodyStyle:'padding:10px;background:transparent;border-top:none;border-bottom:none;border-right:none;',
+                                               bodyStyle: 'padding:10px;background:transparent;border-top:none;border-bottom:none;border-right:none;',
                                                border: false,
                                                flex: 0,
                                                id: "experiment-run-list-detail",
                                                listeners: {
-                                               "delete": function () { 
+                                               "delete": function() {
         //runListStore.proxy.conn.url = adminBaseUrl + "repository/run/ext/json?samples__experiment="+MA.ExperimentController.currentId();
 runListStore.reload(); /*runStore.reload();*/ },
-                                               "save": function () { 
+                                               "save": function() {
         //runListStore.proxy.conn.url = adminBaseUrl + "repository/run/ext/json?samples__experiment="+MA.ExperimentController.currentId();
 runListStore.reload(); /*runStore.reload();*/ }
                                                }
@@ -415,7 +415,7 @@ runListStore.reload(); /*runStore.reload();*/ }
 };
 
 
-MA.LoadRun = function (id) {
+MA.LoadRun = function(id) {
     Ext.getCmp("runs").select(id);
     Ext.getCmp("run-list-detail").selectRun(runListStore.getById(id));
     MA.MenuHandler({ id: "runs:list" });

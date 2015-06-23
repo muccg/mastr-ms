@@ -1,73 +1,73 @@
 MA.MenuRender = function(email) {
 
-    var userText =  'User: '+email;
+    var userText = 'User: ' + email;
 
     var tb = new Ext.Toolbar(
 
         {
             id: 'toolbara',
             items: [
-                { xtype: 'tbbutton', text:'Login', id:'login', handler: MA.MenuHandler},
-                { xtype: 'tbbutton', text:'Dashboard', id:'dashboard', handler: MA.MenuHandler},
-                { xtype: 'tbbutton', text:'Admin', id:'admin', menu:{
+                { xtype: 'tbbutton', text: 'Login', id: 'login', handler: MA.MenuHandler},
+                { xtype: 'tbbutton', text: 'Dashboard', id: 'dashboard', handler: MA.MenuHandler},
+                { xtype: 'tbbutton', text: 'Admin', id: 'admin', menu: {
                     items: [
-                        {text:'Admin Requests', id:'admin:adminrequests', handler: MA.MenuHandler},
-                        {text:'Active User Search', id:'admin:usersearch', handler: MA.MenuHandler},
-                        {text:'Rejected User Search', id:'admin:rejectedUsersearch', handler: MA.MenuHandler},
-                        {text:'Deleted User Search', id:'admin:deletedUsersearch', handler: MA.MenuHandler},
+                        {text: 'Admin Requests', id: 'admin:adminrequests', handler: MA.MenuHandler},
+                        {text: 'Active User Search', id: 'admin:usersearch', handler: MA.MenuHandler},
+                        {text: 'Rejected User Search', id: 'admin:rejectedUsersearch', handler: MA.MenuHandler},
+                        {text: 'Deleted User Search', id: 'admin:deletedUsersearch', handler: MA.MenuHandler},
                         new Ext.menu.Separator(),
-                        {text:'Node Management', id:'admin:nodelist', handler: MA.MenuHandler},
-                        {text:'Organisation Management', id:'admin:orglist', handler: MA.MenuHandler}
+                        {text: 'Node Management', id: 'admin:nodelist', handler: MA.MenuHandler},
+                        {text: 'Organisation Management', id: 'admin:orglist', handler: MA.MenuHandler}
                     ]
                     }
                 },
-                { xtype: 'tbbutton', text:'Quotes', id:'quote', menu:{
+                { xtype: 'tbbutton', text: 'Quotes', id: 'quote', menu: {
                     items: [
-                        {text:'Make an Inquiry', id:'quote:request', handler: MA.MenuHandler},
-                        {text:'View Quote Requests', id:'quote:list', handler: MA.MenuHandler},
-                        {text:'My Formal Quotes', id:'quote:listFormal', handler: MA.MenuHandler},
-                        {text:'Overview List', id:'quote:listAll', handler: MA.MenuHandler}
+                        {text: 'Make an Inquiry', id: 'quote:request', handler: MA.MenuHandler},
+                        {text: 'View Quote Requests', id: 'quote:list', handler: MA.MenuHandler},
+                        {text: 'My Formal Quotes', id: 'quote:listFormal', handler: MA.MenuHandler},
+                        {text: 'Overview List', id: 'quote:listAll', handler: MA.MenuHandler}
                     ]
                     }
                 },
-                { xtype: 'tbbutton', text:'Repository', id:'repo', menu:{
+                { xtype: 'tbbutton', text: 'Repository', id: 'repo', menu: {
                     items: [
-                        {text:'Projects', id:'project:list', handler: MA.MenuHandler},
-                        {text:'Clients', id:'client:list', handler: MA.MenuHandler},
-                        {text:'Runs', id:'run:list', handler: MA.MenuHandler},
-                        {text:'Rule Generators', id:'rulegenerator:list', handler: MA.MenuHandler},
+                        {text: 'Projects', id: 'project:list', handler: MA.MenuHandler},
+                        {text: 'Clients', id: 'client:list', handler: MA.MenuHandler},
+                        {text: 'Runs', id: 'run:list', handler: MA.MenuHandler},
+                        {text: 'Rule Generators', id: 'rulegenerator:list', handler: MA.MenuHandler},
                         new Ext.menu.Separator(),
-                        {text:'Admin', id:'repo:admin', handler: MA.MenuHandler}
+                        {text: 'Admin', id: 'repo:admin', handler: MA.MenuHandler}
                     ]
                     }
                 },
-                { xtype: 'tbbutton', text:'Help', id:'help', menu:{
+                { xtype: 'tbbutton', text: 'Help', id: 'help', menu: {
                     items: [
-                            {text:'Screencasts', id:'help:screencasts', menu: {
+                            {text: 'Screencasts', id: 'help:screencasts', menu: {
                             items: [
-                                    {text:'Requesting a Quote', id:'help:screencasts-quoterequest', handler: MA.MenuHandler}
+                                    {text: 'Requesting a Quote', id: 'help:screencasts-quoterequest', handler: MA.MenuHandler}
                                     ]
                             }
                             },
-                            {text:'Admin screencasts', id:'helpadmin:screencasts', menu: {
+                            {text: 'Admin screencasts', id: 'helpadmin:screencasts', menu: {
                             items: [
-                                    {text:'Accepting/rejecting users', id:'helpadmin:screencasts-authrequest', handler: MA.MenuHandler},
-                                    {text:'Forwarding a Quote Request', id:'helpadmin:screencasts-forwardquoterequest', handler: MA.MenuHandler},
-                                    {text:'Sending a Formal Quote', id:'helpadmin:screencasts-forwardformal', handler: MA.MenuHandler},
-                                    {text:'Replacing a Formal Quote', id:'helpadmin:screencasts-replaceformal', handler: MA.MenuHandler}
+                                    {text: 'Accepting/rejecting users', id: 'helpadmin:screencasts-authrequest', handler: MA.MenuHandler},
+                                    {text: 'Forwarding a Quote Request', id: 'helpadmin:screencasts-forwardquoterequest', handler: MA.MenuHandler},
+                                    {text: 'Sending a Formal Quote', id: 'helpadmin:screencasts-forwardformal', handler: MA.MenuHandler},
+                                    {text: 'Replacing a Formal Quote', id: 'helpadmin:screencasts-replaceformal', handler: MA.MenuHandler}
                                     ]
                             }
                             },
-                            {text:'Contact Us', id:'help:contactus', handler: MA.MenuHandler }
+                            {text: 'Contact Us', id: 'help:contactus', handler: MA.MenuHandler }
                             ]
                     }
                 },
 
                 { xtype: 'tbfill'},
-                { xtype: 'tbbutton', text:userText, id: 'userMenu', menu:{
+                { xtype: 'tbbutton', text: userText, id: 'userMenu', menu: {
                     items: [
-                        {text:'Logout', id:'login:processLogout', handler: MA.LogoutHandler},
-                        {text:'My Account', id:'user:myaccount', handler: MA.MenuHandler}
+                        {text: 'Logout', id: 'login:processLogout', handler: MA.LogoutHandler},
+                        {text: 'My Account', id: 'user:myaccount', handler: MA.MenuHandler}
                     ]
                     }
                 }
@@ -96,7 +96,7 @@ MA.MenuShow = function() {
     if (isPrivileged) {
         Ext.get('admin').show();
     } else {
-	    Ext.get('admin').hide();
+        Ext.get('admin').hide();
 
     }
     Ext.getCmp('admin:nodelist').setDisabled(!MA.CurrentUser.IsAdmin);

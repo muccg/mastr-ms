@@ -15,7 +15,7 @@
  * along with Madas.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-MA.LoadMachineAndRuleGeneratorDatastores = function(){
+MA.LoadMachineAndRuleGeneratorDatastores = function() {
     //These datastores are only loadable by admins, so this function
     //should only be called when initialising components that can only
     //have been created because the logged in user is an admin.
@@ -36,7 +36,7 @@ MA.LoadMachineAndRuleGeneratorDatastores = function(){
  * to MA.Authorize() instead, as that will check authorization first, which can prevent odd
  * situations where a page displays but the content fails
  */
-MA.ChangeMainContent = function(contentName, paramArray){
+MA.ChangeMainContent = function(contentName, paramArray) {
     var showMenu = true;
     var affectMenu = true;
     var cancelBackTarget = true; //whether or not this action should be invoked if a user clicks Cancel (where the variable is obeyed)
@@ -44,137 +44,137 @@ MA.ChangeMainContent = function(contentName, paramArray){
 
     switch (contentName) {
 
-        case "dashboard":
+        case 'dashboard':
             //default
             MA.Dashboard.Init();
             Ext.getCmp('center-panel').layout.setActiveItem('dashboard-panel');
             break;
 
-        case "registration":
+        case 'registration':
             showMenu = false;
             cancelBackTarget = false;
             Ext.getCmp('center-panel').layout.setActiveItem('registration-container-panel');
             break;
 
-        case "login":
+        case 'login':
             showMenu = false;
             cancelBackTarget = false;
             MA.LoginInit(paramArray);
             Ext.getCmp('center-panel').layout.setActiveItem('login-container-panel');
             break;
 
-        case "login:forgotpassword":
+        case 'login:forgotpassword':
             showMenu = false;
             cancelBackTarget = false;
             MA.ForgotPasswordInit();
             Ext.getCmp('center-panel').layout.setActiveItem('forgot-password-container-panel');
             break;
 
-        case "login:resetpassword":
+        case 'login:resetpassword':
             showMenu = false;
             cancelBackTarget = false;
             MA.ResetPasswordInit();
             Ext.getCmp('center-panel').layout.setActiveItem('resetpassword-container-panel');
             break;
 
-        case "login:processLogout":
+        case 'login:processLogout':
             cancelBackTarget = false;
             MA.LogoutInit();
             break;
 
-        case "admin:adminrequests":
+        case 'admin:adminrequests':
             MA.AdminRequestsInit();
             Ext.getCmp('center-panel').layout.setActiveItem('adminrequests-panel');
             break;
 
-        case "admin:usersearch":
+        case 'admin:usersearch':
             MA.UserSearchInit();
             Ext.getCmp('center-panel').layout.setActiveItem('usersearch-panel');
             break;
 
-        case "admin:rejectedUsersearch":
+        case 'admin:rejectedUsersearch':
             MA.RejectedUserSearchInit();
             Ext.getCmp('center-panel').layout.setActiveItem('rejectedusersearch-panel');
             break;
 
-        case "admin:deletedUsersearch":
+        case 'admin:deletedUsersearch':
             MA.DeletedUserSearchInit();
             Ext.getCmp('center-panel').layout.setActiveItem('deletedusersearch-panel');
             break;
 
-        case "admin:nodelist":
+        case 'admin:nodelist':
             MA.NodeManagementInit();
             Ext.getCmp('center-panel').layout.setActiveItem('nodeManagementCmp');
             break;
 
-        case "admin:orglist":
+        case 'admin:orglist':
             MA.OrgManagementInit();
             Ext.getCmp('center-panel').layout.setActiveItem('orgManagementCmp');
             break;
 
-        case "admin:useredit":
+        case 'admin:useredit':
             cancelBackTarget = false;
             MA.AdminUserEditInit(paramArray);
             Ext.getCmp('center-panel').layout.setActiveItem('adminuseredit-container-panel');
             break;
 
-        case "user:myaccount":
+        case 'user:myaccount':
             cancelBackTarget = false;
             MA.UserEditInit(paramArray);
             Ext.getCmp('center-panel').layout.setActiveItem('useredit-container-panel');
             break;
 
-        case "notauthorized":
+        case 'notauthorized':
             cancelBackTarget = false;
             Ext.getCmp('center-panel').layout.setActiveItem('notauthorized-panel');
             break;
 
-        case "message":
+        case 'message':
             cancelBackTarget = false;
             affectMenu = false;
             MA.Message(paramArray);
             break;
 
-        case "quote:request":
+        case 'quote:request':
             MA.RequestQuoteInit();
             Ext.getCmp('center-panel').layout.setActiveItem('requestquote-container-panel');
             affectMenu = false;
             showMenu = false;
             break;
 
-        case "quote:list":
+        case 'quote:list':
             MA.QuoteRequestListInit();
             Ext.getCmp('center-panel').layout.setActiveItem('quotelistpanel');
             break;
 
-        case "quote:edit":
+        case 'quote:edit':
             MA.QuoteRequestEditInit(paramArray);
             Ext.getCmp('center-panel').layout.setActiveItem('quoterequestedit-container-panel');
             break;
 
-        case "quote:listAll":
+        case 'quote:listAll':
             MA.QuoteRequestListAllInit();
             Ext.getCmp('center-panel').layout.setActiveItem('quoterequestsall-panel');
             break;
 
-        case "quote:viewformal":
+        case 'quote:viewformal':
             MA.ViewFormalInit(paramArray);
             Ext.getCmp('center-panel').layout.setActiveItem('viewformalquote-container-panel');
             affectMenu = false;
             showMenu = false;
             break;
 
-        case "quote:listFormal":
-        	MA.FormalQuoteUserListInit();
-        	Ext.getCmp('center-panel').layout.setActiveItem('fquolist-panel');
-        	break;
+        case 'quote:listFormal':
+            MA.FormalQuoteUserListInit();
+            Ext.getCmp('center-panel').layout.setActiveItem('fquolist-panel');
+            break;
 
         case 'client:list':
             clientsListStore.reload();
             Ext.getCmp('center-panel').layout.setActiveItem('clients-list');
             break;
 
-        case "project:list":
+        case 'project:list':
             clientsListStore.load();
             projectsListStore.load();
 
@@ -236,65 +236,65 @@ MA.ChangeMainContent = function(contentName, paramArray){
             break;
 
 
-        case "rulegenerator:list":
+        case 'rulegenerator:list':
             ruleComponentStore.load();
             ruleGeneratorListStore.load();
-            Ext.getCmp("center-panel").layout.setActiveItem("ruleGeneratorListCmp");
+            Ext.getCmp('center-panel').layout.setActiveItem('ruleGeneratorListCmp');
             break;
 
-        case "run:list":
+        case 'run:list':
             methodStore.load();
             MA.LoadMachineAndRuleGeneratorDatastores();
             runListStore.load({callback: function() {
                 runListStore.sort([
                     {
-                        field: "state",
-                        direction: "DESC"
+                        field: 'state',
+                        direction: 'DESC'
                     },
                     {
-                        field: "id",
-                        direction: "DESC"
+                        field: 'id',
+                        direction: 'DESC'
                     }
                 ]);
             }});
 
-            Ext.getCmp("center-panel").layout.setActiveItem("runs-list");
+            Ext.getCmp('center-panel').layout.setActiveItem('runs-list');
             break;
 
-        case "repo:admin":
+        case 'repo:admin':
             document.location = 'repoadmin/';
             break;
 
-    	case "help:screencasts-quoterequest":
-    	    MA.ScreencastsInit('madas_requesting_quote.flv');
-    	    Ext.getCmp('center-panel').layout.setActiveItem('screencasts-container-panel');
-    	    break;
-
-        case "help:contactus":
-            cancelBackTarget = false;
-            affectMenu = false;
-            MA.Message({'message':"For any queries and issues please contact,<br><br>Dr.Saravanan Dayalan<br>sdayalan@unimelb.edu.au<br>+61 3 8344 2201"});
+        case 'help:screencasts-quoterequest':
+            MA.ScreencastsInit('madas_requesting_quote.flv');
+            Ext.getCmp('center-panel').layout.setActiveItem('screencasts-container-panel');
             break;
 
-        case "helpadmin:screencasts-forwardquoterequest":
-    	    MA.ScreencastsInit('madas_forwarding_quoterequest.flv');
-    	    Ext.getCmp('center-panel').layout.setActiveItem('screencasts-container-panel');
-    	    break;
+        case 'help:contactus':
+            cancelBackTarget = false;
+            affectMenu = false;
+            MA.Message({'message': 'For any queries and issues please contact,<br><br>Dr.Saravanan Dayalan<br>sdayalan@unimelb.edu.au<br>+61 3 8344 2201'});
+            break;
 
-	    case "helpadmin:screencasts-forwardformal":
-    	    MA.ScreencastsInit('madas_sending_formalquote.flv');
-    	    Ext.getCmp('center-panel').layout.setActiveItem('screencasts-container-panel');
-    	    break;
+        case 'helpadmin:screencasts-forwardquoterequest':
+            MA.ScreencastsInit('madas_forwarding_quoterequest.flv');
+            Ext.getCmp('center-panel').layout.setActiveItem('screencasts-container-panel');
+            break;
 
-	    case "helpadmin:screencasts-replaceformal":
-    	    MA.ScreencastsInit('madas_fixing_formalquote.flv');
-    	    Ext.getCmp('center-panel').layout.setActiveItem('screencasts-container-panel');
-    	    break;
+        case 'helpadmin:screencasts-forwardformal':
+            MA.ScreencastsInit('madas_sending_formalquote.flv');
+            Ext.getCmp('center-panel').layout.setActiveItem('screencasts-container-panel');
+            break;
 
-	    case "helpadmin:screencasts-authrequest":
-    	    MA.ScreencastsInit('madas_auth_request.flv');
-    	    Ext.getCmp('center-panel').layout.setActiveItem('screencasts-container-panel');
-    	    break;
+        case 'helpadmin:screencasts-replaceformal':
+            MA.ScreencastsInit('madas_fixing_formalquote.flv');
+            Ext.getCmp('center-panel').layout.setActiveItem('screencasts-container-panel');
+            break;
+
+        case 'helpadmin:screencasts-authrequest':
+            MA.ScreencastsInit('madas_auth_request.flv');
+            Ext.getCmp('center-panel').layout.setActiveItem('screencasts-container-panel');
+            break;
 
 
         default:
@@ -349,24 +349,24 @@ MA.InitApplication = function(appSecureUrl, email, mainContentFunction, params) 
    //the center-panel component is the main area where content is switched in and out
 
    var viewport = new Ext.Viewport({
-        layout:'border',
+        layout: 'border',
 
-        items:[
+        items: [
             new Ext.BoxComponent({
-                region:'north',
+                region: 'north',
                 el: 'north',
-                height:54
+                height: 54
             }),
             {
-                region:'south',
+                region: 'south',
                 contentEl: 'south',
-                height:20
+                height: 20
             },
             {
-                region:'center',
-                id:'center-panel',
+                region: 'center',
+                id: 'center-panel',
                 layout: 'card',
-                activeItem:0,
+                activeItem: 0,
                 items: [MA.LoginCmp, MA.RegistrationCmp, MA.NotAuthorizedCmp, MA.AdminUserEditCmp,
                         MA.UserEditCmp, MA.ForgotPasswordCmp, MA.ResetPasswordCmp, MA.NodeManagementCmp,
                         MA.OrgManagementCmp,
@@ -388,7 +388,7 @@ MA.InitApplication = function(appSecureUrl, email, mainContentFunction, params) 
         paramArray = JSON.parse(params); //eval is evil
     }
 
-    MA.ExperimentController.mask = new Ext.LoadMask("center-panel", {
+    MA.ExperimentController.mask = new Ext.LoadMask('center-panel', {
         removeMask: true
     });
 
@@ -400,6 +400,6 @@ MA.InitApplication = function(appSecureUrl, email, mainContentFunction, params) 
 
 MA.Message = function(paramArray) {
 
-    Ext.Msg.alert("", paramArray.message);
+    Ext.Msg.alert('', paramArray.message);
 
 };

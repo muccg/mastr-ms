@@ -8,7 +8,7 @@ MA.ExperimentSamplesInit = function() {
     randomisableSampleStore.removeAll();
 };
 
-MA.SampleLoadByExperiment = function (randomise) {
+MA.SampleLoadByExperiment = function(randomise) {
     var params = { experiment__id__exact: MA.ExperimentController.currentId() };
     if (typeof(randomise) !== 'undefined' && randomise === true) {
         params.randomise = true;
@@ -20,7 +20,7 @@ MA.SampleLoadByExperiment = function (randomise) {
     delete lastOptions.params.randomise;
 };
 
-MA.SampleLoadBySampleClass = function () {
+MA.SampleLoadBySampleClass = function() {
     sampleStore.load({ params: { sample_class__id__exact: MA.CurrentSampleClassId() } });
 };
 
@@ -48,30 +48,30 @@ MA.SaveSampleClassRow = function(roweditor, changes, rec, i) {
 
 MA.ExperimentSamples = {
     baseCls: 'x-plain',
-    border:'false',
-    layout:'border',
+    border: 'false',
+    layout: 'border',
     defaults: {
-        bodyStyle:'padding:15px;background:transparent;'
+        bodyStyle: 'padding:15px;background:transparent;'
     },
-    items:[
+    items: [
         {
             title: 'Sample Classes',
             region: 'north',
-            bodyStyle:'padding:0px;background:transparent;',
+            bodyStyle: 'padding:0px;background:transparent;',
             collapsible: false,
-            layout:'fit',
-            height:200,
+            layout: 'fit',
+            height: 200,
             split: true,
             minSize: 155,
             items: [
                 {
-                    xtype:'grid',
+                    xtype: 'grid',
                     border: false,
-                    id:'sampleClasses',
+                    id: 'sampleClasses',
                     trackMouseOver: false,
-                    loadMask:true,
+                    loadMask: true,
                     sm: new Ext.grid.RowSelectionModel({
-                                                       listeners:{'rowselect':function(sm, idx, rec) {
+                                                       listeners: {'rowselect': function(sm, idx, rec) {
                                                        MA.CurrentSampleClassIdValue = rec.data.id;
 
                                                       MA.SampleLoadBySampleClass();
@@ -81,7 +81,7 @@ MA.ExperimentSamples = {
                                                        Ext.getCmp('addsamplebutton').enable();
                                                        Ext.getCmp('removesamplebutton').enable();
                                                        },
-                                                       'selectionchange':{buffer:10, fn:function(sm) {
+                                                       'selectionchange': {buffer: 10, fn: function(sm) {
                                                        var grid;
                                                        if (! sm.hasSelection()) {
                                                             grid = Ext.getCmp("samples");
@@ -90,12 +90,12 @@ MA.ExperimentSamples = {
                                                        Ext.getCmp('removesamplebutton').disable();
                                                        MA.CurrentSampleClassIdValue = undefined;
                                                        }
-                                                       }}                        }
+                                                       }} }
                     }),
                     tbar: [
                         {
                             text: 'Enable/Disable Sample Class',
-                            handler : function(){
+                            handler: function() {
                                var grid = Ext.getCmp('sampleClasses');
                                var delIds = [];
 
@@ -113,7 +113,7 @@ MA.ExperimentSamples = {
                                }
 
                                for (var i = 0; i < delIds.length; i++) {
-                               MA.CRUDSomething('sample_class_enable/'+delIds[i], {}, function() { var expId = MA.ExperimentController.currentId(); sampleClassStore.proxy.conn.url = wsBaseUrl + 'recreate_sample_classes/' + expId;
+                               MA.CRUDSomething('sample_class_enable/' + delIds[i], {}, function() { var expId = MA.ExperimentController.currentId(); sampleClassStore.proxy.conn.url = wsBaseUrl + 'recreate_sample_classes/' + expId;
                                                       sampleClassStore.load(); });
                                }
 
@@ -122,7 +122,7 @@ MA.ExperimentSamples = {
                     ],
                     bbar: [
                         {
-                            text:'Create',
+                            text: 'Create',
                             cls: 'x-btn-text-icon',
                             icon: 'static/images/create-samples.png',
                             handler: function() {
@@ -145,27 +145,27 @@ MA.ExperimentSamples = {
                                 }
 
                                 for (var i = 0; i < selIds.length; i++) {
-                                    MA.CRUDSomething('createSamples/', {'sample_class_id':selIds[i], 'experiment_id':MA.ExperimentController.currentId(), 'replicates':reps}, function() { var sm = Ext.getCmp('sampleClasses').getSelectionModel(); var selected = sm.getSelected(); sm.clearSelections(); sm.selectRecords([selected]);  MA.ExperimentSamplesInit(); });
+                                    MA.CRUDSomething('createSamples/', {'sample_class_id': selIds[i], 'experiment_id': MA.ExperimentController.currentId(), 'replicates': reps}, function() { var sm = Ext.getCmp('sampleClasses').getSelectionModel(); var selected = sm.getSelected(); sm.clearSelections(); sm.selectRecords([selected]); MA.ExperimentSamplesInit(); });
                                 }
                             }
                         },
                         {
-                            xtype:'numberfield',
-                            id:'replicateField',
-                            value:'6',
-                            width:28
+                            xtype: 'numberfield',
+                            id: 'replicateField',
+                            value: '6',
+                            width: 28
                         },
                         {
-                            xtype:'panel',
-                            html:' Samples for Selected Classes',
-                            border:false,
-                            bodyStyle:'background:transparent;padding:4px; color: #333'
+                            xtype: 'panel',
+                            html: ' Samples for Selected Classes',
+                            border: false,
+                            bodyStyle: 'background:transparent;padding:4px; color: #333'
                         }
                     ],
                     viewConfig: {
                         forceFit: true,
-                        autoFill:true,
-                        getRowClass : function (row, index) {
+                        autoFill: true,
+                        getRowClass: function(row, index) {
                             var cls = '';
                             var data = row.data;
                             //console.log(data);
@@ -178,13 +178,13 @@ MA.ExperimentSamples = {
                         }
                     },
                     columns: [
-                        { header: "ID", sortable:true, dataIndex:"id" },
-                        { header: "Class", sortable:true, editor:new Ext.form.TextField(), dataIndex:"class_id" },
-                        { header: "Samples", sortable:true, dataIndex:"count" },
-                              { header: "Treatment Variation", sortable:true, dataIndex:"treatment" },
-                              { header: "Timeline", sortable:true, dataIndex:"timeline" },
-                              { header: "Organ", sortable:true, dataIndex:"organ" },
-                              { header: "Enabled", dataIndex:"enabled" }
+                        { header: "ID", sortable: true, dataIndex: "id" },
+                        { header: "Class", sortable: true, editor: new Ext.form.TextField(), dataIndex: "class_id" },
+                        { header: "Samples", sortable: true, dataIndex: "count" },
+                              { header: "Treatment Variation", sortable: true, dataIndex: "treatment" },
+                              { header: "Timeline", sortable: true, dataIndex: "timeline" },
+                              { header: "Organ", sortable: true, dataIndex: "organ" },
+                              { header: "Enabled", dataIndex: "enabled" }
                       ],
                     store: sampleClassStore
                 }
@@ -196,7 +196,7 @@ MA.ExperimentSamples = {
             cmargins: '0 0 0 0',
             collapsible: false,
             bodyStyle: 'padding:0px;',
-            layout:'fit',
+            layout: 'fit',
             tbar: [
                 {
                     text: 'Add Sample',
@@ -204,11 +204,11 @@ MA.ExperimentSamples = {
                     disabled: true,
                     id: 'addsamplebutton',
                     icon: 'static/images/add.png',
-                    handler: function () {
+                    handler: function() {
                         MA.CRUDSomething('create/sample/', {
                             'sample_class_id': MA.CurrentSampleClassId(),
                             'experiment_id': MA.ExperimentController.currentId()
-                        }, function () {
+                        }, function() {
                             MA.SampleLoadBySampleClass();
                             MA.ExperimentSamplesInit();
                         });
@@ -220,7 +220,7 @@ MA.ExperimentSamples = {
                     disabled: true,
                     id: 'removesamplebutton',
                     icon: 'static/images/delete.png',
-                    handler: function () {
+                    handler: function() {
                         var grid = Ext.getCmp('samples');
                         var delIds = [];
 
@@ -238,7 +238,7 @@ MA.ExperimentSamples = {
                         }
 
                         for (var i = 0; i < delIds.length; i++) {
-                            MA.CRUDSomething("delete/sample/" + delIds[i], {}, function () {
+                            MA.CRUDSomething("delete/sample/" + delIds[i], {}, function() {
                                 MA.SampleLoadBySampleClass();
                                 MA.ExperimentSamplesInit();
                             });
@@ -280,24 +280,24 @@ MA.ExperimentSamples = {
             ],
             items: [
                 {
-                    xtype:'grid',
+                    xtype: 'grid',
                     border: false,
-                    id:'samples',
-                    loadMask:true,
+                    id: 'samples',
+                    loadMask: true,
                     trackMouseOver: false,
-                    plugins: [new Ext.ux.grid.MARowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':MA.SaveSampleRow}})],
+                    plugins: [new Ext.ux.grid.MARowEditor({saveText: 'Update', errorSummary: false, listeners: {'afteredit': MA.SaveSampleRow}})],
                     sm: new Ext.grid.RowSelectionModel(),
 //                    autoHeight:true,
                     viewConfig: {
                         forceFit: true,
-                        autoFill:true
+                        autoFill: true
                     },
                     columns: [
-                        { header: "ID", sortable:true, dataIndex:'id' },
-                        { header: "Seq", sortable:true, dataIndex:'sample_class_sequence' },
-                        { header: "Label", sortable:true, editor:new Ext.form.TextField(), dataIndex:'label' },
-                          { header: "Weight", sortable:true, editor:new Ext.form.NumberField({editable:true, maxValue:9999.99}), dataIndex:'weight' },
-                        { header: "Comment", sortable:false, sortable:true, width:300, editor:new Ext.form.TextField(), dataIndex:'comment' }
+                        { header: "ID", sortable: true, dataIndex: 'id' },
+                        { header: "Seq", sortable: true, dataIndex: 'sample_class_sequence' },
+                        { header: "Label", sortable: true, editor: new Ext.form.TextField(), dataIndex: 'label' },
+                          { header: "Weight", sortable: true, editor: new Ext.form.NumberField({editable: true, maxValue: 9999.99}), dataIndex: 'weight' },
+                        { header: "Comment", sortable: false, sortable: true, width: 300, editor: new Ext.form.TextField(), dataIndex: 'comment' }
                     ],
                     store: sampleStore
                 }
@@ -309,10 +309,10 @@ MA.ExperimentSamples = {
 MA.ExperimentSamplesOnlyInit = function() {
     var expId = MA.ExperimentController.currentId();
 
-    var classLoader = new Ajax.Request(wsBaseUrl + 'populate_select/sampleclass/id/class_id/experiment__id/'+encodeURIComponent(expId),
+    var classLoader = new Ajax.Request(wsBaseUrl + 'populate_select/sampleclass/id/class_id/experiment__id/' + encodeURIComponent(expId),
                                      {
-                                     asynchronous:false,
-                                     evalJSON:'force',
+                                     asynchronous: false,
+                                     evalJSON: 'force',
                                      onSuccess: function(response) {
                                          var classComboStore = Ext.StoreMgr.get('classCombo');
                                          var data = response.responseJSON.response.value.items;
@@ -346,25 +346,25 @@ MA.SaveSampleOnlyRow = function(roweditor, changes, rec, i) {
 
 MA.SampleCSVUploadForm = new Ext.Window({
     title: 'Upload CSV of Samples',
-    closeAction:'hide',
-    width:330,
-    height:250,
-    minHeight:250,
-    minWidth:330,
-    id:'sampleCSVUploadWindow',
+    closeAction: 'hide',
+    width: 330,
+    height: 250,
+    minHeight: 250,
+    minWidth: 330,
+    id: 'sampleCSVUploadWindow',
     defaults: {
-        bodyStyle:'padding:15px;background:transparent;'
+        bodyStyle: 'padding:15px;background:transparent;'
     },
 
-    items:[
+    items: [
         {
-            id:'sampleCSVUpload',
-            xtype:'form',
+            id: 'sampleCSVUpload',
+            xtype: 'form',
             fileUpload: true,
             url: wsBaseUrl + 'uploadSampleCSV',
             waitTitle: 'Uploading...',
-            border:false,
-            items:[
+            border: false,
+            items: [
                 {
                     xtype: 'hidden',
                     name: 'experiment_id',
@@ -373,7 +373,7 @@ MA.SampleCSVUploadForm = new Ext.Window({
                 {
                     xtype: 'panel',
                     border: false,
-                    bodyStyle:'padding:15px;background:transparent;',
+                    bodyStyle: 'padding:15px;background:transparent;',
                     html: 'Uploaded CSVs must be of the format:<br><br><code>label,weight,comment</code><br><br>or contain a header line with these words. If an <code>id</code> header is included, samples can be updated by their ID.'
                 },
                 {
@@ -394,19 +394,19 @@ MA.SampleCSVUploadForm = new Ext.Window({
     buttons: [
         {
             text: 'Upload',
-            itemId:'csvUploadBtn',
-            handler: function(){
-                Ext.getCmp('sampleCSVUpload').getComponent('expIdField').setValue( MA.ExperimentController.currentId() );
+            itemId: 'csvUploadBtn',
+            handler: function() {
+                Ext.getCmp('sampleCSVUpload').getComponent('expIdField').setValue(MA.ExperimentController.currentId());
 
                 Ext.getCmp('sampleCSVUpload').getForm().submit(
                     {
                         successProperty: 'success',
-                        success: function (form, action) {
+                        success: function(form, action) {
                             var res = action.result;
                             if (res.success === true) {
                                 var created = res.num_created + " sample" + (res.num_created == 1 ? "" : "s") + " added";
                                 var updated = res.num_updated + " sample" + (res.num_updated == 1 ? "" : "s") + " updated";
-                                var msg = ((res.num_created && res.num_updated) ? (created + " and " + updated) : (res.num_created ? created : updated)) + "."
+                                var msg = ((res.num_created && res.num_updated) ? (created + " and " + updated) : (res.num_created ? created : updated)) + ".";
                                 form.reset();
                                 MA.ExperimentSamplesOnlyInit();
 
@@ -415,7 +415,7 @@ MA.SampleCSVUploadForm = new Ext.Window({
                                 Ext.getCmp('sampleCSVUploadWindow').hide();
                             }
                         },
-                        failure: function (form, action) {
+                        failure: function(form, action) {
                             // this gets called both on server errors
                             // and when view returns success: false
                             MA.ExperimentSamplesOnlyInit();
@@ -446,15 +446,15 @@ MA.SampleCSVUploadForm = new Ext.Window({
     ]
 });
 
-var createSampleCSV = function(records){
+var createSampleCSV = function(records) {
     var csvtext = "<html><head></head><body><pre>";
     var fields = [];
     if (records.length > 0)
     {
-        var header = "# "
+        var header = "# ";
         //first write the header
         var r = records[0];
-        for (var propname in r){
+        for (var propname in r) {
             fields.push(propname);
         }
         for (var i = 0; i < fields.length; i++) {
@@ -466,13 +466,13 @@ var createSampleCSV = function(records){
 
         csvtext += header + "\n";
 
-        for (var count=0; count < records.length; count++)
+        for (var count = 0; count < records.length; count++)
         {
-            line = ""
-            for (var fieldindex=0; fieldindex<fields.length; fieldindex++){
+            line = "";
+            for (var fieldindex = 0; fieldindex < fields.length; fieldindex++) {
                 line += records[count][fields[fieldindex]] || "";
-                if (fieldindex < fields.length-1){
-                    line += ","
+                if (fieldindex < fields.length - 1) {
+                    line += ",";
                 }
             }
             csvtext += line + "\n";
@@ -484,12 +484,12 @@ var createSampleCSV = function(records){
     return csvtext;
 };
 
-var exportCSV = function(records){
+var exportCSV = function(records) {
     var csvtext = createSampleCSV(records);
     var expWindow = window.open('', '', 'width=600, height=600');
     var doc = expWindow.document;
     doc.open('text/html', true);
-    doc.charset='utf-8';
+    doc.charset = 'utf-8';
     doc.write(csvtext);
     doc.close();
 };
@@ -502,15 +502,15 @@ MA.ExperimentSamplesOnly = {
     cmargins: '0 0 0 0',
     collapsible: false,
     bodyStyle: 'padding:0px;',
-    layout:'fit',
+    layout: 'fit',
     tbar: [
         {
             text: 'Add Sample',
             cls: 'x-btn-text-icon',
             id: 'addsamplesbutton',
             icon: 'static/images/add.png',
-            handler: function () {
-                MA.CRUDSomething('create/sample/', {'experiment_id':MA.ExperimentController.currentId()}, MA.SampleLoadByExperiment);
+            handler: function() {
+                MA.CRUDSomething('create/sample/', {'experiment_id': MA.ExperimentController.currentId()}, MA.SampleLoadByExperiment);
             }
         },
         {
@@ -518,7 +518,7 @@ MA.ExperimentSamplesOnly = {
             cls: 'x-btn-text-icon',
             id: 'removesamplesbutton',
             icon: 'static/images/delete.png',
-            handler: function () {
+            handler: function() {
                 var grid = Ext.getCmp('samplesOnly');
                 var delIds = [];
 
@@ -546,7 +546,7 @@ MA.ExperimentSamplesOnly = {
             cls: 'x-btn-text-icon',
             id: 'uploadsamplesbutton',
             icon: 'static/images/add.png',
-            handler: function () {
+            handler: function() {
                 MA.SampleCSVUploadForm.show();
             }
         },
@@ -555,13 +555,13 @@ MA.ExperimentSamplesOnly = {
             cls: 'x-btn-text-icon',
             id: 'downloadsamplesbutton',
             icon: 'static/images/arrow-down.png',
-            handler: function () {
+            handler: function() {
                 var grid = Ext.getCmp('samplesOnly');
                 var gridstore = grid.getStore();
-                records = []
-                gridstore.each(function(record){
+                records = [];
+                gridstore.each(function(record) {
                     //console.log("Record: " + record.id + "," + record.sample_id + "," + record.sample_class);
-                    records.push(record.data)
+                    records.push(record.data);
                 });
 
                     exportCSV(records);
@@ -614,39 +614,39 @@ MA.ExperimentSamplesOnly = {
     ],
     items: [
             {
-            xtype:'grid',
+            xtype: 'grid',
             border: false,
-            id:'samplesOnly',
+            id: 'samplesOnly',
             trackMouseOver: false,
-            loadMask:true,
-            plugins: [new Ext.ux.grid.MARowEditor({saveText: 'Update', errorSummary:false, listeners:{'afteredit':MA.SaveSampleOnlyRow}})],
+            loadMask: true,
+            plugins: [new Ext.ux.grid.MARowEditor({saveText: 'Update', errorSummary: false, listeners: {'afteredit': MA.SaveSampleOnlyRow}})],
             sm: new Ext.grid.RowSelectionModel(),
             //                    autoHeight:true,
             viewConfig: {
             forceFit: true,
-            autoFill:true
+            autoFill: true
             },
             columns: [
                       new Ext.grid.RowNumberer(),
-                      { header: "Class", sortable:true, dataIndex:'sample_class', editor:new Ext.form.ComboBox({
-                               editable:true,
-                               forceSelection:false,
-                               displayField:'value',
-                               valueField:'key',
-                               lazyRender:true,
-                               allowBlank:true,
-                               typeAhead:false,
-                               triggerAction:'all',
-                               listWidth:230,
-                               mode:'local',
-                               store: new Ext.data.ArrayStore({storeId:'classCombo', fields: ['key', 'value']})                               }),
-                      renderer:renderClass },
-                      { header: "Seq", sortable:false, dataIndex:'sample_class_sequence' },
-                      { header: "Label", sortable:true, editor:new Ext.form.TextField(), dataIndex:'label' },
-                      { header: "Weight", sortable:true, editor:new Ext.form.NumberField({editable:true, maxValue:9999.99}), dataIndex:'weight' },
-                      { header: "Comment", sortable:true, sortable:true, width:300, editor:new Ext.form.TextField(), dataIndex:'comment' },
-                      { header: "Last Status", sortable:true, width:300, dataIndex:'last_status' },
-                      { header: "ID", sortable:true, dataIndex:'id' }
+                      { header: "Class", sortable: true, dataIndex: 'sample_class', editor: new Ext.form.ComboBox({
+                               editable: true,
+                               forceSelection: false,
+                               displayField: 'value',
+                               valueField: 'key',
+                               lazyRender: true,
+                               allowBlank: true,
+                               typeAhead: false,
+                               triggerAction: 'all',
+                               listWidth: 230,
+                               mode: 'local',
+                               store: new Ext.data.ArrayStore({storeId: 'classCombo', fields: ['key', 'value']}) }),
+                      renderer: renderClass },
+                      { header: "Seq", sortable: false, dataIndex: 'sample_class_sequence' },
+                      { header: "Label", sortable: true, editor: new Ext.form.TextField(), dataIndex: 'label' },
+                      { header: "Weight", sortable: true, editor: new Ext.form.NumberField({editable: true, maxValue: 9999.99}), dataIndex: 'weight' },
+                      { header: "Comment", sortable: true, sortable: true, width: 300, editor: new Ext.form.TextField(), dataIndex: 'comment' },
+                      { header: "Last Status", sortable: true, width: 300, dataIndex: 'last_status' },
+                      { header: "ID", sortable: true, dataIndex: 'id' }
                       ],
             store: randomisableSampleStore
             }

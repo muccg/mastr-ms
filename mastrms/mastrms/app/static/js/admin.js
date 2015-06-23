@@ -14,32 +14,32 @@
  * You should have received a copy of the GNU General Public License
  * along with Madas.  If not, see <http://www.gnu.org/licenses/>.
  */
-MA.AdminRequestsInit = function(){
+MA.AdminRequestsInit = function() {
 
-	var dataurl = MA.BaseUrl + "admin/adminrequests";
+    var dataurl = MA.BaseUrl + 'admin/adminrequests';
 
     var madasReader = new Ext.data.JsonReader({
-                                              root            : 'response.value.items',
-                                              versionProperty : 'response.value.version',
-                                              totalProperty   : 'response.value.total_count'
+                                              root: 'response.value.items',
+                                              versionProperty: 'response.value.version',
+                                              totalProperty: 'response.value.total_count'
                                               }, [
-                                                  { name: 'email', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'firstname', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'lastname', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'telephoneNumber', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'physicalDeliveryOfficeName', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'title', sortType : Ext.data.SortTypes.asText }
+                                                  { name: 'email', sortType: Ext.data.SortTypes.asText },
+                                                  { name: 'firstname', sortType: Ext.data.SortTypes.asText },
+                                                  { name: 'lastname', sortType: Ext.data.SortTypes.asText },
+                                                  { name: 'telephoneNumber', sortType: Ext.data.SortTypes.asText },
+                                                  { name: 'physicalDeliveryOfficeName', sortType: Ext.data.SortTypes.asText },
+                                                  { name: 'title', sortType: Ext.data.SortTypes.asText }
                                                   ]);
 
     var dataStore = new Ext.data.Store({
-                                       id         : 'bSId',
-                                       autoLoad   : true,
-                                       reader     : madasReader,
-                                       sortInfo   : {field: 'email', direction: 'ASC'},
-                                       url        : dataurl
+                                       id: 'bSId',
+                                       autoLoad: true,
+                                       reader: madasReader,
+                                       sortInfo: {field: 'email', direction: 'ASC'},
+                                       url: dataurl
                                        });
     var gridView = new Ext.grid.GridView({
-                                         loadMask : { msg : 'Please wait...' },
+                                         loadMask: { msg: 'Please wait...' },
                                          forceFit: true
                                          });
     var editHandler = function(el, ev) {
@@ -48,41 +48,41 @@ MA.AdminRequestsInit = function(){
         }
     };
     var topToolbar = new Ext.Toolbar({
-                                     items   : [
-                                                {  id: 'adminrequestsEditBtn', text: 'Edit', handler: editHandler, disabled: true }
+                                     items: [
+                                                { id: 'adminrequestsEditBtn', text: 'Edit', handler: editHandler, disabled: true }
                                                 ]
                                      });
     var selectionModel = new Ext.grid.RowSelectionModel({ singleSelect: true });
     var colModel = new Ext.grid.ColumnModel([
-                                             {header: 'E-mail', width:185, align : 'left', sortable: true, dataIndex: 'email', sortable: true },
-                                             {header: 'First Name', align : 'left', sortable: true, dataIndex: 'firstname', sortable: true },
-                                             {header: 'Last Name', align : 'left', sortable: true, dataIndex: 'lastname', sortable: true },
-                                             {header: 'Phone', align : 'left', sortable: true, dataIndex: 'telephoneNumber', sortable: true },
-                                             {header: 'Office', align : 'left', sortable: true, dataIndex: 'physicalDeliveryOfficeName', sortable: true },
-                                             {header: 'Title', align : 'left', sortable: true, dataIndex: 'title', sortable: true }
+                                             {header: 'E-mail', width: 185, align: 'left', sortable: true, dataIndex: 'email', sortable: true },
+                                             {header: 'First Name', align: 'left', sortable: true, dataIndex: 'firstname', sortable: true },
+                                             {header: 'Last Name', align: 'left', sortable: true, dataIndex: 'lastname', sortable: true },
+                                             {header: 'Phone', align: 'left', sortable: true, dataIndex: 'telephoneNumber', sortable: true },
+                                             {header: 'Office', align: 'left', sortable: true, dataIndex: 'physicalDeliveryOfficeName', sortable: true },
+                                             {header: 'Title', align: 'left', sortable: true, dataIndex: 'title', sortable: true }
                                              ]);
     var grid = new Ext.grid.GridPanel({
-                                      id             : 'adminrequests-panel',
-                                      ds             : dataStore,
-                                      enableDragDrop : false,
+                                      id: 'adminrequests-panel',
+                                      ds: dataStore,
+                                      enableDragDrop: false,
                                       enableColumnMove: false,
-                                      cm             : colModel,
-                                      sm             : selectionModel,
-                                      loadMask       : { msg : 'Loading...' },
-                                      view           : gridView,
-                                      title          : 'Administrator Requests',
-                                      tbar           : topToolbar,
-                                      trackMouseOver : false,
-                                      plugins:[new Ext.ux.grid.Search({
-                                                                      mode:'local',
-                                                                      iconCls:false,
-                                                                      dateFormat:'m/d/Y',
-                                                                      minLength:0,
-                                                                      width:150,
-                                                                      position:'top'
+                                      cm: colModel,
+                                      sm: selectionModel,
+                                      loadMask: { msg: 'Loading...' },
+                                      view: gridView,
+                                      title: 'Administrator Requests',
+                                      tbar: topToolbar,
+                                      trackMouseOver: false,
+                                      plugins: [new Ext.ux.grid.Search({
+                                                                      mode: 'local',
+                                                                      iconCls: false,
+                                                                      dateFormat: 'm/d/Y',
+                                                                      minLength: 0,
+                                                                      width: 150,
+                                                                      position: 'top'
                                                                       })]
                                       });
-    selectionModel.on('selectionchange', function() { var editBtn = Ext.getCmp('adminrequestsEditBtn'); if (selectionModel.hasSelection()) { editBtn.enable(); } else { editBtn.disable(); } } );
+    selectionModel.on('selectionchange', function() { var editBtn = Ext.getCmp('adminrequestsEditBtn'); if (selectionModel.hasSelection()) { editBtn.enable(); } else { editBtn.disable(); } });
     grid.on('rowdblclick', editHandler);
 
     //add this component to the center component
@@ -91,44 +91,44 @@ MA.AdminRequestsInit = function(){
 
 };
 
-MA.UserSearchInit = function(){
+MA.UserSearchInit = function() {
 
-	var dataurl = MA.BaseUrl + "admin/usersearch";
+    var dataurl = MA.BaseUrl + 'admin/usersearch';
 
     var madasReader = new Ext.data.JsonReader({
-                                              root            : 'response.value.items',
-                                              versionProperty : 'response.value.version',
-                                              totalProperty   : 'response.value.total_count'
+                                              root: 'response.value.items',
+                                              versionProperty: 'response.value.version',
+                                              totalProperty: 'response.value.total_count'
                                               }, [
-                                                  { name: 'isClient', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'email', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'firstname', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'lastname', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'telephoneNumber', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'physicalDeliveryOfficeName', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'title', sortType : Ext.data.SortTypes.asText }
+                                                  { name: 'isClient', sortType: Ext.data.SortTypes.asText },
+                                                  { name: 'email', sortType: Ext.data.SortTypes.asText },
+                                                  { name: 'firstname', sortType: Ext.data.SortTypes.asText },
+                                                  { name: 'lastname', sortType: Ext.data.SortTypes.asText },
+                                                  { name: 'telephoneNumber', sortType: Ext.data.SortTypes.asText },
+                                                  { name: 'physicalDeliveryOfficeName', sortType: Ext.data.SortTypes.asText },
+                                                  { name: 'title', sortType: Ext.data.SortTypes.asText }
                                                   ]);
 
     var dataStore = new Ext.data.Store({
-                                       id         : 'bSId',
-                                       autoLoad   : true,
-                                       reader     : madasReader,
-                                       sortInfo   : {field: 'email', direction: 'ASC'},
-                                       url        : dataurl
+                                       id: 'bSId',
+                                       autoLoad: true,
+                                       reader: madasReader,
+                                       sortInfo: {field: 'email', direction: 'ASC'},
+                                       url: dataurl
                                        });
     var gridView = new Ext.grid.GridView({
-                                         loadMask : { msg : 'Please wait...' },
+                                         loadMask: { msg: 'Please wait...' },
                                          forceFit: true
                                          });
     var selectionModel = new Ext.grid.RowSelectionModel({ singleSelect: true });
     var colModel = new Ext.grid.ColumnModel([
-                                             {header: 'Client?', width:35, sortable:true, dataIndex:'isClient', renderer: MA.Utils.GridCheckboxRenderer},
-                                             {header: 'E-mail', width:185, align : 'left', sortable: true, dataIndex: 'email', sortable: true },
-                                             {header: 'First Name', align : 'left', sortable: true, dataIndex: 'firstname', sortable: true },
-                                             {header: 'Last Name', align : 'left', sortable: true, dataIndex: 'lastname', sortable: true },
-                                             {header: 'Phone', align : 'left', sortable: true, dataIndex: 'telephoneNumber', sortable: true },
-                                             {header: 'Office', align : 'left', sortable: true, dataIndex: 'physicalDeliveryOfficeName', sortable: true },
-                                             {header: 'Title', align : 'left', sortable: true, dataIndex: 'title', sortable: true }
+                                             {header: 'Client?', width: 35, sortable: true, dataIndex: 'isClient', renderer: MA.Utils.GridCheckboxRenderer},
+                                             {header: 'E-mail', width: 185, align: 'left', sortable: true, dataIndex: 'email', sortable: true },
+                                             {header: 'First Name', align: 'left', sortable: true, dataIndex: 'firstname', sortable: true },
+                                             {header: 'Last Name', align: 'left', sortable: true, dataIndex: 'lastname', sortable: true },
+                                             {header: 'Phone', align: 'left', sortable: true, dataIndex: 'telephoneNumber', sortable: true },
+                                             {header: 'Office', align: 'left', sortable: true, dataIndex: 'physicalDeliveryOfficeName', sortable: true },
+                                             {header: 'Title', align: 'left', sortable: true, dataIndex: 'title', sortable: true }
                                              ]);
     var editHandler = function(el, ev) {
         if (selectionModel.hasSelection()) {
@@ -136,32 +136,32 @@ MA.UserSearchInit = function(){
         }
     };
     var topToolbar = new Ext.Toolbar({
-                                     items   : [
+                                     items: [
                                                 { id: 'usersearchEditBtn', text: 'Edit', handler: editHandler, disabled: true }
                                                 ]
                                      });
     var grid = new Ext.grid.GridPanel({
-                                      id             : 'usersearch-panel',
-                                      ds             : dataStore,
-                                      enableDragDrop : false,
+                                      id: 'usersearch-panel',
+                                      ds: dataStore,
+                                      enableDragDrop: false,
                                       enableColumnMove: false,
-                                      cm             : colModel,
-                                      sm             : selectionModel,
-                                      loadMask       : { msg : 'Loading...' },
-                                      view           : gridView,
-                                      title          : 'Active User Search',
-                                      tbar           : topToolbar,
-                                      trackMouseOver : false,
-                                      plugins:[new Ext.ux.grid.Search({
-                                                                      mode:'local',
-                                                                      iconCls:false,
-                                                                      dateFormat:'m/d/Y',
-                                                                      minLength:0,
-                                                                      width:150,
-                                                                      position:'top'
+                                      cm: colModel,
+                                      sm: selectionModel,
+                                      loadMask: { msg: 'Loading...' },
+                                      view: gridView,
+                                      title: 'Active User Search',
+                                      tbar: topToolbar,
+                                      trackMouseOver: false,
+                                      plugins: [new Ext.ux.grid.Search({
+                                                                      mode: 'local',
+                                                                      iconCls: false,
+                                                                      dateFormat: 'm/d/Y',
+                                                                      minLength: 0,
+                                                                      width: 150,
+                                                                      position: 'top'
                                                                       })]
                                       });
-    selectionModel.on('selectionchange', function() { var editBtn = Ext.getCmp('usersearchEditBtn'); if (selectionModel.hasSelection()) { editBtn.enable(); } else { editBtn.disable(); } } );
+    selectionModel.on('selectionchange', function() { var editBtn = Ext.getCmp('usersearchEditBtn'); if (selectionModel.hasSelection()) { editBtn.enable(); } else { editBtn.disable(); } });
     grid.on('rowdblclick', editHandler);
 
     //add this component to the center component
@@ -170,42 +170,42 @@ MA.UserSearchInit = function(){
 
 };
 
-MA.RejectedUserSearchInit = function(){
+MA.RejectedUserSearchInit = function() {
 
-	var dataurl = MA.BaseUrl + "admin/rejectedUsersearch";
+    var dataurl = MA.BaseUrl + 'admin/rejectedUsersearch';
 
     var madasReader = new Ext.data.JsonReader({
-                                              root            : 'response.value.items',
-                                              versionProperty : 'response.value.version',
-                                              totalProperty   : 'response.value.total_count'
+                                              root: 'response.value.items',
+                                              versionProperty: 'response.value.version',
+                                              totalProperty: 'response.value.total_count'
                                               }, [
-                                                  { name: 'email', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'firstname', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'lastname', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'telephoneNumber', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'physicalDeliveryOfficeName', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'title', sortType : Ext.data.SortTypes.asText }
+                                                  { name: 'email', sortType: Ext.data.SortTypes.asText },
+                                                  { name: 'firstname', sortType: Ext.data.SortTypes.asText },
+                                                  { name: 'lastname', sortType: Ext.data.SortTypes.asText },
+                                                  { name: 'telephoneNumber', sortType: Ext.data.SortTypes.asText },
+                                                  { name: 'physicalDeliveryOfficeName', sortType: Ext.data.SortTypes.asText },
+                                                  { name: 'title', sortType: Ext.data.SortTypes.asText }
                                                   ]);
 
     var dataStore = new Ext.data.Store({
-                                       id         : 'bSId',
-                                       autoLoad   : true,
-                                       reader     : madasReader,
-                                       sortInfo   : {field: 'email', direction: 'ASC'},
-                                       url        : dataurl
+                                       id: 'bSId',
+                                       autoLoad: true,
+                                       reader: madasReader,
+                                       sortInfo: {field: 'email', direction: 'ASC'},
+                                       url: dataurl
                                        });
     var gridView = new Ext.grid.GridView({
-                                         loadMask : { msg : 'Please wait...' },
+                                         loadMask: { msg: 'Please wait...' },
                                          forceFit: true
                                          });
     var selectionModel = new Ext.grid.RowSelectionModel({ singleSelect: true });
     var colModel = new Ext.grid.ColumnModel([
-                                             {header: 'E-mail', width:185, align : 'left', sortable: true, dataIndex: 'email', sortable: true },
-                                             {header: 'First Name', align : 'left', sortable: true, dataIndex: 'firstname', sortable: true },
-                                             {header: 'Last Name', align : 'left', sortable: true, dataIndex: 'lastname', sortable: true },
-                                             {header: 'Phone', align : 'left', sortable: true, dataIndex: 'telephoneNumber', sortable: true },
-                                             {header: 'Office', align : 'left', sortable: true, dataIndex: 'physicalDeliveryOfficeName', sortable: true },
-                                             {header: 'Title', align : 'left', sortable: true, dataIndex: 'title', sortable: true }
+                                             {header: 'E-mail', width: 185, align: 'left', sortable: true, dataIndex: 'email', sortable: true },
+                                             {header: 'First Name', align: 'left', sortable: true, dataIndex: 'firstname', sortable: true },
+                                             {header: 'Last Name', align: 'left', sortable: true, dataIndex: 'lastname', sortable: true },
+                                             {header: 'Phone', align: 'left', sortable: true, dataIndex: 'telephoneNumber', sortable: true },
+                                             {header: 'Office', align: 'left', sortable: true, dataIndex: 'physicalDeliveryOfficeName', sortable: true },
+                                             {header: 'Title', align: 'left', sortable: true, dataIndex: 'title', sortable: true }
                                              ]);
     var editHandler = function(el, ev) {
         if (selectionModel.hasSelection()) {
@@ -213,32 +213,32 @@ MA.RejectedUserSearchInit = function(){
         }
     };
     var topToolbar = new Ext.Toolbar({
-                                     items   : [
+                                     items: [
                                                 { id: 'rejectedusersearchEditBtn', text: 'Edit', handler: editHandler, disabled: true }
                                                 ]
                                      });
     var grid = new Ext.grid.GridPanel({
-                                      id             : 'rejectedusersearch-panel',
-                                      ds             : dataStore,
-                                      enableDragDrop : false,
+                                      id: 'rejectedusersearch-panel',
+                                      ds: dataStore,
+                                      enableDragDrop: false,
                                       enableColumnMove: false,
-                                      cm             : colModel,
-                                      sm             : selectionModel,
-                                      loadMask       : { msg : 'Loading...' },
-                                      view           : gridView,
-                                      title          : 'Rejected User Search',
-                                      tbar           : topToolbar,
-                                      trackMouseOver : false,
-                                      plugins:[new Ext.ux.grid.Search({
-                                                                      mode:'local',
-                                                                      iconCls:false,
-                                                                      dateFormat:'m/d/Y',
-                                                                      minLength:0,
-                                                                      width:150,
-                                                                      position:'top'
+                                      cm: colModel,
+                                      sm: selectionModel,
+                                      loadMask: { msg: 'Loading...' },
+                                      view: gridView,
+                                      title: 'Rejected User Search',
+                                      tbar: topToolbar,
+                                      trackMouseOver: false,
+                                      plugins: [new Ext.ux.grid.Search({
+                                                                      mode: 'local',
+                                                                      iconCls: false,
+                                                                      dateFormat: 'm/d/Y',
+                                                                      minLength: 0,
+                                                                      width: 150,
+                                                                      position: 'top'
                                                                       })]
                                       });
-    selectionModel.on('selectionchange', function() { var editBtn = Ext.getCmp('rejectedusersearchEditBtn'); if (selectionModel.hasSelection()) { editBtn.enable(); } else { editBtn.disable(); } } );
+    selectionModel.on('selectionchange', function() { var editBtn = Ext.getCmp('rejectedusersearchEditBtn'); if (selectionModel.hasSelection()) { editBtn.enable(); } else { editBtn.disable(); } });
     grid.on('rowdblclick', editHandler);
 
     //add this component to the center component
@@ -247,42 +247,42 @@ MA.RejectedUserSearchInit = function(){
 
 };
 
-MA.DeletedUserSearchInit = function(){
+MA.DeletedUserSearchInit = function() {
 
-	var dataurl = MA.BaseUrl + "admin/deletedUsersearch";
+    var dataurl = MA.BaseUrl + 'admin/deletedUsersearch';
 
     var madasReader = new Ext.data.JsonReader({
-                                              root            : 'response.value.items',
-                                              versionProperty : 'response.value.version',
-                                              totalProperty   : 'response.value.total_count'
+                                              root: 'response.value.items',
+                                              versionProperty: 'response.value.version',
+                                              totalProperty: 'response.value.total_count'
                                               }, [
-                                                  { name: 'email', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'firstname', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'lastname', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'telephoneNumber', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'physicalDeliveryOfficeName', sortType : Ext.data.SortTypes.asText },
-                                                  { name: 'title', sortType : Ext.data.SortTypes.asText }
+                                                  { name: 'email', sortType: Ext.data.SortTypes.asText },
+                                                  { name: 'firstname', sortType: Ext.data.SortTypes.asText },
+                                                  { name: 'lastname', sortType: Ext.data.SortTypes.asText },
+                                                  { name: 'telephoneNumber', sortType: Ext.data.SortTypes.asText },
+                                                  { name: 'physicalDeliveryOfficeName', sortType: Ext.data.SortTypes.asText },
+                                                  { name: 'title', sortType: Ext.data.SortTypes.asText }
                                                   ]);
 
     var dataStore = new Ext.data.Store({
-                                       id         : 'bSId',
-                                       autoLoad   : true,
-                                       reader     : madasReader,
-                                       sortInfo   : {field: 'email', direction: 'ASC'},
-                                       url        : dataurl
+                                       id: 'bSId',
+                                       autoLoad: true,
+                                       reader: madasReader,
+                                       sortInfo: {field: 'email', direction: 'ASC'},
+                                       url: dataurl
                                        });
     var gridView = new Ext.grid.GridView({
-                                         loadMask : { msg : 'Please wait...' },
+                                         loadMask: { msg: 'Please wait...' },
                                          forceFit: true
                                          });
     var selectionModel = new Ext.grid.RowSelectionModel({ singleSelect: true });
     var colModel = new Ext.grid.ColumnModel([
-                                             {header: 'E-mail', width:185, align : 'left', sortable: true, dataIndex: 'email', sortable: true },
-                                             {header: 'First Name', align : 'left', sortable: true, dataIndex: 'firstname', sortable: true },
-                                             {header: 'Last Name', align : 'left', sortable: true, dataIndex: 'lastname', sortable: true },
-                                             {header: 'Phone', align : 'left', sortable: true, dataIndex: 'telephoneNumber', sortable: true },
-                                             {header: 'Office', align : 'left', sortable: true, dataIndex: 'physicalDeliveryOfficeName', sortable: true },
-                                             {header: 'Title', align : 'left', sortable: true, dataIndex: 'title', sortable: true }
+                                             {header: 'E-mail', width: 185, align: 'left', sortable: true, dataIndex: 'email', sortable: true },
+                                             {header: 'First Name', align: 'left', sortable: true, dataIndex: 'firstname', sortable: true },
+                                             {header: 'Last Name', align: 'left', sortable: true, dataIndex: 'lastname', sortable: true },
+                                             {header: 'Phone', align: 'left', sortable: true, dataIndex: 'telephoneNumber', sortable: true },
+                                             {header: 'Office', align: 'left', sortable: true, dataIndex: 'physicalDeliveryOfficeName', sortable: true },
+                                             {header: 'Title', align: 'left', sortable: true, dataIndex: 'title', sortable: true }
                                              ]);
     var editHandler = function(el, ev) {
         if (selectionModel.hasSelection()) {
@@ -290,32 +290,32 @@ MA.DeletedUserSearchInit = function(){
         }
     };
     var topToolbar = new Ext.Toolbar({
-                                     items   : [
+                                     items: [
                                                 { id: 'deletedusersearchEditBtn', text: 'Edit', handler: editHandler, disabled: true }
                                                 ]
                                      });
     var grid = new Ext.grid.GridPanel({
-                                      id             : 'deletedusersearch-panel',
-                                      ds             : dataStore,
-                                      enableDragDrop : false,
+                                      id: 'deletedusersearch-panel',
+                                      ds: dataStore,
+                                      enableDragDrop: false,
                                       enableColumnMove: false,
-                                      cm             : colModel,
-                                      sm             : selectionModel,
-                                      loadMask       : { msg : 'Loading...' },
-                                      view           : gridView,
-                                      title          : 'Deleted User Search',
-                                      tbar           : topToolbar,
-                                      trackMouseOver : false,
-                                      plugins:[new Ext.ux.grid.Search({
-                                                                      mode:'local',
-                                                                      iconCls:false,
-                                                                      dateFormat:'m/d/Y',
-                                                                      minLength:0,
-                                                                      width:150,
-                                                                      position:'top'
+                                      cm: colModel,
+                                      sm: selectionModel,
+                                      loadMask: { msg: 'Loading...' },
+                                      view: gridView,
+                                      title: 'Deleted User Search',
+                                      tbar: topToolbar,
+                                      trackMouseOver: false,
+                                      plugins: [new Ext.ux.grid.Search({
+                                                                      mode: 'local',
+                                                                      iconCls: false,
+                                                                      dateFormat: 'm/d/Y',
+                                                                      minLength: 0,
+                                                                      width: 150,
+                                                                      position: 'top'
                                                                       })]
                                       });
-    selectionModel.on('selectionchange', function() { var editBtn = Ext.getCmp('deletedusersearchEditBtn'); if (selectionModel.hasSelection()) { editBtn.enable(); } else { editBtn.disable(); } } );
+    selectionModel.on('selectionchange', function() { var editBtn = Ext.getCmp('deletedusersearchEditBtn'); if (selectionModel.hasSelection()) { editBtn.enable(); } else { editBtn.disable(); } });
     grid.on('rowdblclick', editHandler);
 
     //add this component to the center component
@@ -325,17 +325,17 @@ MA.DeletedUserSearchInit = function(){
 };
 
 
-MA.AdminUserEditInit = function (paramArray) {
+MA.AdminUserEditInit = function(paramArray) {
     var email = paramArray[0];
     var adminUserEditCmp = Ext.getCmp('adminuseredit-panel');
     var user = MA.CurrentUser;
 
     //fetch user details
-    adminUserEditCmp.load({url: MA.BaseUrl + 'admin/userload', params: {'email': email}, waitMsg:'Loading'});
+    adminUserEditCmp.load({url: MA.BaseUrl + 'admin/userload', params: {'email': email}, waitMsg: 'Loading'});
 
     //attach validator that ext cannot deal with
-    Ext.getCmp("adminUserEditPassword").on('blur', MA.AdminUserEditValidatePassword);
-    Ext.getCmp("adminUserEditConfirmPassword").on('blur', MA.AdminUserEditValidatePassword);
+    Ext.getCmp('adminUserEditPassword').on('blur', MA.AdminUserEditValidatePassword);
+    Ext.getCmp('adminUserEditConfirmPassword').on('blur', MA.AdminUserEditValidatePassword);
 
     Ext.getCmp('adminUserEditSubmit').enable();
 
@@ -364,7 +364,7 @@ MA.AdminUserEditInit = function (paramArray) {
  * madasAdminUserEditValidatePassword
  * we need to implement a custom validator because Ext cannot validate an empty field that has to be the same as another field
  */
-MA.AdminUserEditValidatePassword = function (textfield, event) {
+MA.AdminUserEditValidatePassword = function(textfield, event) {
     var passEl = Ext.getCmp('adminUserEditPassword');
     var confirmEl = Ext.getCmp('adminUserEditConfirmPassword');
     var submitEl = Ext.getCmp('adminUserEditSubmit');
@@ -383,53 +383,53 @@ MA.AdminUserEditValidatePassword = function (textfield, event) {
     }
 };
 
-MA.AdminUserEditCmp = {id:'adminuseredit-container-panel',
-    layout:'absolute',
-    autoScroll:true,
-    deferredRender:false,
-    forceLayout:true,
-    defaults:{
-        deferredRender:false,
-        forceLayout:true
+MA.AdminUserEditCmp = {id: 'adminuseredit-container-panel',
+    layout: 'absolute',
+    autoScroll: true,
+    deferredRender: false,
+    forceLayout: true,
+    defaults: {
+        deferredRender: false,
+        forceLayout: true
     },
-    items:[
-           {  xtype:'form',
+    items: [
+           { xtype: 'form',
            labelWidth: 100, // label settings here cascade unless overridden
-           id:'adminuseredit-panel',
-           url:MA.BaseUrl + 'admin/userSave',
-           method:'POST',
-           frame:true,
+           id: 'adminuseredit-panel',
+           url: MA.BaseUrl + 'admin/userSave',
+           method: 'POST',
+           frame: true,
            reader: new Ext.data.JsonReader({
-                                                 root            : 'data',
-                                                 idProperty      : 'email',
-                                                 versionProperty : 'response.value.version',
-                                                 totalProperty   : 'response.value.total_count',
-                                                 successProperty : 'success'
+                                                 root: 'data',
+                                                 idProperty: 'email',
+                                                 versionProperty: 'response.value.version',
+                                                 totalProperty: 'response.value.total_count',
+                                                 successProperty: 'success'
                                                  }, [
-                                                     { name: 'email', sortType : Ext.data.SortTypes.asText },
-                                                     { name: 'firstname', sortType : Ext.data.SortTypes.asText },
-                                                     { name: 'lastname', sortType : Ext.data.SortTypes.asText },
-                                                     { name: 'telephoneNumber', sortType : Ext.data.SortTypes.asText },
-                                                     { name: 'physicalDeliveryOfficeName', sortType : Ext.data.SortTypes.asText },
-                                                     { name: 'title', sortType : Ext.data.SortTypes.asText },
-                                                     { name: 'homephone', sortType : Ext.data.SortTypes.asText },
-                                                     { name: 'isAdmin', sortType : Ext.data.SortTypes.asText },
-                                                     { name: 'isNodeRep', sortType : Ext.data.SortTypes.asText },
-                                                     { name: 'isMastrAdmin', sortType : Ext.data.SortTypes.asText },
-                                                     { name: 'isProjectLeader', sortType : Ext.data.SortTypes.asText },
-                                                     { name: 'isMastrStaff', sortType : Ext.data.SortTypes.asText },
-                                                     { name: 'node', sortType : Ext.data.SortTypes.asText },
-                                                     { name: 'status', sortType : Ext.data.SortTypes.asText },
-                                                     { name: 'dept', sortType : Ext.data.SortTypes.asText },
-                                                     { name: 'institute', sortType : Ext.data.SortTypes.asText },
-                                                     { name: 'organisation', sortType : Ext.data.SortTypes.asText },
-                                                     { name: 'address', sortType : Ext.data.SortTypes.asText },
-                                                     { name: 'supervisor', sortType : Ext.data.SortTypes.asText },
-                                                     { name: 'areaOfInterest', sortType : Ext.data.SortTypes.asText },
-                                                     { name: 'country', sortType : Ext.data.SortTypes.asText }
+                                                     { name: 'email', sortType: Ext.data.SortTypes.asText },
+                                                     { name: 'firstname', sortType: Ext.data.SortTypes.asText },
+                                                     { name: 'lastname', sortType: Ext.data.SortTypes.asText },
+                                                     { name: 'telephoneNumber', sortType: Ext.data.SortTypes.asText },
+                                                     { name: 'physicalDeliveryOfficeName', sortType: Ext.data.SortTypes.asText },
+                                                     { name: 'title', sortType: Ext.data.SortTypes.asText },
+                                                     { name: 'homephone', sortType: Ext.data.SortTypes.asText },
+                                                     { name: 'isAdmin', sortType: Ext.data.SortTypes.asText },
+                                                     { name: 'isNodeRep', sortType: Ext.data.SortTypes.asText },
+                                                     { name: 'isMastrAdmin', sortType: Ext.data.SortTypes.asText },
+                                                     { name: 'isProjectLeader', sortType: Ext.data.SortTypes.asText },
+                                                     { name: 'isMastrStaff', sortType: Ext.data.SortTypes.asText },
+                                                     { name: 'node', sortType: Ext.data.SortTypes.asText },
+                                                     { name: 'status', sortType: Ext.data.SortTypes.asText },
+                                                     { name: 'dept', sortType: Ext.data.SortTypes.asText },
+                                                     { name: 'institute', sortType: Ext.data.SortTypes.asText },
+                                                     { name: 'organisation', sortType: Ext.data.SortTypes.asText },
+                                                     { name: 'address', sortType: Ext.data.SortTypes.asText },
+                                                     { name: 'supervisor', sortType: Ext.data.SortTypes.asText },
+                                                     { name: 'areaOfInterest', sortType: Ext.data.SortTypes.asText },
+                                                     { name: 'country', sortType: Ext.data.SortTypes.asText }
                                                      ]),
        title: 'Edit User',
-       bodyStyle:'padding:5px 5px 0',
+       bodyStyle: 'padding:5px 5px 0',
        width: 380,
        x: 50,
        y: 10,
@@ -439,31 +439,31 @@ MA.AdminUserEditCmp = {id:'adminuseredit-container-panel',
        waitMsgTarget: true,
 
        items: [
-               {   name: 'originalEmail',
+               { name: 'originalEmail',
                inputType: 'hidden'
                },{
                fieldLabel: 'E-mail address',
                name: 'email',
                vtype: 'email',
-               allowBlank:false,
-               readOnly:true,
+               allowBlank: false,
+               readOnly: true,
                maskRe: /[^,=]/
                },{
                fieldLabel: 'First name',
                name: 'firstname',
-               allowBlank:false,
+               allowBlank: false,
                maskRe: /[^,=]/
                },{
                fieldLabel: 'Last name',
                name: 'lastname',
-               allowBlank:false,
+               allowBlank: false,
                maskRe: /[^,=]/
                },{
                fieldLabel: 'Password',
                name: 'password',
                id: 'adminUserEditPassword',
                inputType: 'password',
-               allowBlank:true
+               allowBlank: true
                },{
                fieldLabel: 'Confirm Password',
                inputType: 'password',
@@ -474,49 +474,49 @@ MA.AdminUserEditCmp = {id:'adminuseredit-container-panel',
                },{
                fieldLabel: 'Office',
                name: 'physicalDeliveryOfficeName',
-               allowBlank:true,
+               allowBlank: true,
                maskRe: /[^,=]/
                },{
                fieldLabel: 'Office Phone',
                name: 'telephoneNumber',
-               allowBlank:false,
+               allowBlank: false,
                maskRe: /[^,=]/
                },{
                fieldLabel: 'Home Phone',
                name: 'homephone',
-               allowBlank:true,
+               allowBlank: true,
                maskRe: /[^,=]/
                },{
                fieldLabel: 'Position',
                name: 'title',
-               allowBlank:true,
+               allowBlank: true,
                maskRe: /[^,=]/
                },{
-               xtype:'checkbox',
+               xtype: 'checkbox',
                id: 'adminUserEditIsAdmin',
                name: 'isAdmin',
                inputValue: 'true',
                fieldLabel: 'Administrator'
                },{
-               xtype:'checkbox',
+               xtype: 'checkbox',
                id: 'adminUserEditIsNodeRep',
                name: 'isNodeRep',
                inputValue: 'true',
                fieldLabel: 'Node Rep'
                },{
-               xtype:'checkbox',
+               xtype: 'checkbox',
                id: 'adminUserEditIsMastrAdmin',
                name: 'isMastrAdmin',
                inputValue: 'true',
                fieldLabel: 'Mastr Administrator'
                },{
-               xtype:'checkbox',
+               xtype: 'checkbox',
                id: 'adminUserEditIsProjectLeader',
                name: 'isProjectLeader',
                inputValue: 'true',
                fieldLabel: 'Project Leader'
                },{
-               xtype:'checkbox',
+               xtype: 'checkbox',
                id: 'adminUserEditIsMastrStaff',
                name: 'isMastrStaff',
                inputValue: 'true',
@@ -525,15 +525,15 @@ MA.AdminUserEditCmp = {id:'adminuseredit-container-panel',
                                         fieldLabel: 'Node',
                                         id: 'adminUserEditNode',
                                         name: 'nodeDisplay',
-                                        editable:false,
-                                        forceSelection:true,
-                                        displayField:'name',
-                                        valueField:'submitValue',
-                                        hiddenName:'node',
-                                        lazyRender:true,
-                                        typeAhead:false,
-                                        triggerAction:'all',
-                                        listWidth:230,
+                                        editable: false,
+                                        forceSelection: true,
+                                        displayField: 'name',
+                                        valueField: 'submitValue',
+                                        hiddenName: 'node',
+                                        lazyRender: true,
+                                        typeAhead: false,
+                                        triggerAction: 'all',
+                                        listWidth: 230,
                                         store: new Ext.data.JsonStore({
                                                                       storeId: 'adminUserEditNodeDS',
                                                                       url: MA.BaseUrl + 'user/listAllNodes',
@@ -543,49 +543,49 @@ MA.AdminUserEditCmp = {id:'adminuseredit-container-panel',
                                         }), new Ext.form.ComboBox({
                                                                   fieldLabel: 'Status',
                                                                   name: 'statusDisplay',
-                                                                  editable:false,
-                                                                  forceSelection:true,
-                                                                  displayField:'displayLabel',
-                                                                  valueField:'submitValue',
-                                                                  hiddenName:'status',
-                                                                  lazyRender:true,
-                                                                  typeAhead:false,
-                                                                  mode:'local',
-                                                                  triggerAction:'all',
-                                                                  listWidth:230,
+                                                                  editable: false,
+                                                                  forceSelection: true,
+                                                                  displayField: 'displayLabel',
+                                                                  valueField: 'submitValue',
+                                                                  hiddenName: 'status',
+                                                                  lazyRender: true,
+                                                                  typeAhead: false,
+                                                                  mode: 'local',
+                                                                  triggerAction: 'all',
+                                                                  listWidth: 230,
                                                                   store: new Ext.data.SimpleStore({
                                                           fields: ['submitValue', 'displayLabel'],
-                                                          data : [['Pending','Pending'],
+                                                          data: [['Pending', 'Pending'],
                                                                   ['User', 'Active'],
-                                                                  ['Deleted','Deleted'],
-                                                                  ['Rejected','Rejected']]
+                                                                  ['Deleted', 'Deleted'],
+                                                                  ['Rejected', 'Rejected']]
                                                           })
-                                                                  }),{
+                                                                  }), {
                fieldLabel: 'Department',
                name: 'dept',
-               allowBlank:true,
+               allowBlank: true,
                maskRe: /[^,=]/
                },{
                fieldLabel: 'Institute',
                name: 'institute',
-               allowBlank:true,
+               allowBlank: true,
                maskRe: /[^,=]/
                },
                new Ext.form.ComboBox({
                                         fieldLabel: 'Organisation',
                                         id: 'adminUserEditOrganisation',
                                         name: 'orgDisplay',
-                                        editable:false,
-                                        forceSelection:true,
-                                        displayField:'name',
-                                        valueField:'id',
-                                        hiddenName:'organisation',
-                                        lazyRender:true,
-                                        typeAhead:false,
-                                        triggerAction:'all',
-                                        listWidth:230,
+                                        editable: false,
+                                        forceSelection: true,
+                                        displayField: 'name',
+                                        valueField: 'id',
+                                        hiddenName: 'organisation',
+                                        lazyRender: true,
+                                        typeAhead: false,
+                                        triggerAction: 'all',
+                                        listWidth: 230,
                                         store: new Ext.data.JsonStore({
-                                                                      autoLoad:false,
+                                                                      autoLoad: false,
                                                                       storeId: 'organisationDS',
                                                                       url: MA.BaseUrl + 'admin/listOrganisations',
                                                                       root: 'response.value.items',
@@ -595,58 +595,58 @@ MA.AdminUserEditCmp = {id:'adminuseredit-container-panel',
                {
                fieldLabel: 'Address',
                name: 'address',
-               allowBlank:true,
+               allowBlank: true,
                maskRe: /[^,=]/
                },{
                fieldLabel: 'Supervisor',
                name: 'supervisor',
-               allowBlank:true,
+               allowBlank: true,
                maskRe: /[^,=]/
                },{
                fieldLabel: 'Area of Interest',
                name: 'areaOfInterest',
-               allowBlank:true,
+               allowBlank: true,
                maskRe: /[^,=]/
                },new Ext.form.ComboBox({
                                        fieldLabel: 'Country',
                                        name: 'countryDisplay',
-                                       editable:false,
-                                       forceSelection:true,
-                                       displayField:'displayLabel',
-                                       valueField:'submitValue',
-                                       hiddenName:'country',
-                                       lazyRender:true,
-                                       typeAhead:false,
-                                       mode:'local',
-                                       triggerAction:'all',
-                                       listWidth:230,
+                                       editable: false,
+                                       forceSelection: true,
+                                       displayField: 'displayLabel',
+                                       valueField: 'submitValue',
+                                       hiddenName: 'country',
+                                       lazyRender: true,
+                                       typeAhead: false,
+                                       mode: 'local',
+                                       triggerAction: 'all',
+                                       listWidth: 230,
                                        store: countryStore
-                                       })                    ],
+                                       })],
        buttons: [{
                  text: 'Cancel',
-                 handler: function(){
+                 handler: function() {
                     Ext.getCmp('adminuseredit-panel').getForm().reset();
                     MA.ChangeMainContent(MA.CancelBackTarget);
                  }
                  },{
                  text: 'Save',
                  id: 'adminUserEditSubmit',
-                 handler: function(){
+                 handler: function() {
                  Ext.getCmp('adminuseredit-panel').getForm().submit(
-                                                                    {   successProperty: 'success',
-                                                                    success: function (form, action) {
+                                                                    { successProperty: 'success',
+                                                                    success: function(form, action) {
                                                                     if (action.result.success === true) {
                                                                         form.reset();
 
                                                                         //display a success alert that auto-closes in 5 seconds
-                                                                        Ext.Msg.alert("User details saved successfully", "(this message will auto-close in 5 seconds)");
+                                                                        Ext.Msg.alert('User details saved successfully', '(this message will auto-close in 5 seconds)');
                                                                         setTimeout(Ext.Msg.hide, 5000);
 
                                                                         //MA.ChangeMainContent(action.result.mainContentFunction);
                                                                         MA.ChangeMainContent(MA.CancelBackTarget);
                                                                     }
                                                                     },
-                                                                    failure: function (form, action) {
+                                                                    failure: function(form, action) {
                                                                     //do nothing special. this gets called on validation failures and server errors
                                                                     }
                                                                     });
@@ -699,29 +699,29 @@ MA.NodeManagementDeleteTool = function(event, toolEl, panel) {
 
     //only perform the deletion if the user confirms their action
     Ext.Msg.confirm('Confirm deletion', 'Are you sure you wish to delete the node: ' + nodename + ' ?', function(btn, text) {
-                    if (btn == 'yes'){
+                    if (btn == 'yes') {
 
                     var nodename = Ext.getCmp('nodeListGrid').getSelectionModel().getSelected().data['name'];
 
                     //execute the delete
                     //submit form
                     var simple = new Ext.BasicForm('hiddenForm', {
-                                                   url:MA.BaseUrl + 'admin/nodeDelete',
-                                                   baseParams:{'name':nodename},
-                                                   method:'POST'
+                                                   url: MA.BaseUrl + 'admin/nodeDelete',
+                                                   baseParams: {'name': nodename},
+                                                   method: 'POST'
                                                    });
 
                     var submitOptions = {
                     successProperty: 'success',
-                    success: function (form, action) {
+                    success: function(form, action) {
                     //display a success alert that auto-closes in 5 seconds
-                    Ext.Msg.alert("Node deleted successfully", "(this message will auto-close in 5 seconds)");
+                    Ext.Msg.alert('Node deleted successfully', '(this message will auto-close in 5 seconds)');
                     setTimeout(Ext.Msg.hide, 5000);
 
                     //load up the menu and next content area as declared in response
                     MA.ChangeMainContent(action.result.mainContentFunction);
                     },
-                    failure: function (form, action) {
+                    failure: function(form, action) {
                     //load up the menu and next content area as declared in response
                     MA.ChangeMainContent(action.result.mainContentFunction);
                     }
@@ -748,7 +748,7 @@ MA.NodeManagementInit = function() {
     Ext.getCmp('nodeListGrid').getStore().reload();
 
     //enable/disable the details panel when selection is changed (and load the details for the selected item)
-    Ext.getCmp('nodeListGrid').getSelectionModel().on('selectionchange', MA.NodeManagementSelectionManager );
+    Ext.getCmp('nodeListGrid').getSelectionModel().on('selectionchange', MA.NodeManagementSelectionManager);
 
     //disable the node details panel by default
     Ext.getCmp('nodedetails-panel').disable();
@@ -756,12 +756,12 @@ MA.NodeManagementInit = function() {
 
 //define the node details form
 MA.NodeDetailsCmp = {
-xtype:'form',
+xtype: 'form',
 labelWidth: 100, // label settings here cascade unless overridden
-id:'nodedetails-panel',
-url:MA.BaseUrl + 'admin/nodesave',
+id: 'nodedetails-panel',
+url: MA.BaseUrl + 'admin/nodesave',
 region: 'center',
-method:'POST',
+method: 'POST',
 reader: new Ext.data.JsonReader(),
 bodyStyle: 'padding:10px;',
 title: 'Node Details',
@@ -771,25 +771,25 @@ trackResetOnLoad: true,
 waitMsgTarget: true,
 
 items: [
-        {   name: 'originalName', id: 'nodedetails-originalName', xtype: 'hidden' },
-        {   name: 'name', id: 'nodedetails-name', fieldLabel: 'Node Name', maskRe: /[^,=]/ }
+        { name: 'originalName', id: 'nodedetails-originalName', xtype: 'hidden' },
+        { name: 'name', id: 'nodedetails-name', fieldLabel: 'Node Name', maskRe: /[^,=]/ }
         ],
 buttons: [
           { text: 'Reset', handler: MA.NodeManagementClearForm },
         { text: 'Save', handler: function() { Ext.getCmp('nodedetails-panel').getForm().submit({
                              successProperty: 'success',
-                             success: function (form, action) {
+                             success: function(form, action) {
                              if (action.result.success === true) {
                              //display a success alert that auto-closes in 5 seconds
-                             Ext.Msg.alert("Node details saved successfully", "(this message will auto-close in 5 seconds)");
+                             Ext.Msg.alert('Node details saved successfully', '(this message will auto-close in 5 seconds)');
                              setTimeout(Ext.Msg.hide, 5000);
 
                              //load up the menu and next content area as declared in response
                              MA.ChangeMainContent(action.result.mainContentFunction);
                              }
                              },
-                             failure: function (form, action) {
-                                Ext.Msg.alert("Error", action.result.msg);
+                             failure: function(form, action) {
+                                Ext.Msg.alert('Error', action.result.msg);
                              }
                              });
           } }
@@ -798,17 +798,17 @@ buttons: [
 
 
 MA.NodeManagementCmp = {
-id:'nodeManagementCmp',
-layout:'border',
+id: 'nodeManagementCmp',
+layout: 'border',
 items: [
         {
-        title:'Node List',
-        id:'nodeListGrid',
-        region:'west',
+        title: 'Node List',
+        id: 'nodeListGrid',
+        region: 'west',
         minWidth: 450,
         width: 450,
-        split:true,
-        xtype:'grid',
+        split: true,
+        xtype: 'grid',
         tools: [
                 { id: 'plus', qtip: 'Add a new node', handler: MA.NodeManagementAddTool },
                 { id: 'minus', qtip: 'Delete currently selected node', handler: MA.NodeManagementDeleteTool }
@@ -820,20 +820,20 @@ items: [
                                       fields: ['name', 'submitValue']
                                       }),
         columns: [
-                  {header: 'Name', sortable:true, dataIndex: 'name'}
+                  {header: 'Name', sortable: true, dataIndex: 'name'}
                   ],
         viewConfig: {
-        forceFit:true
+        forceFit: true
         },
-        sm: new Ext.grid.RowSelectionModel({singleSelect:true}),
-        lazyRender:true,
-        bbar:[{xtype:'tbspacer'}],
-        plugins:[new Ext.ux.grid.Search({
-                                        mode:'local',
-                                        iconCls:false,
-                                        dateFormat:'m/d/Y',
-                                        minLength:0,
-                                        width:150
+        sm: new Ext.grid.RowSelectionModel({singleSelect: true}),
+        lazyRender: true,
+        bbar: [{xtype: 'tbspacer'}],
+        plugins: [new Ext.ux.grid.Search({
+                                        mode: 'local',
+                                        iconCls: false,
+                                        dateFormat: 'm/d/Y',
+                                        minLength: 0,
+                                        width: 150
                                         })]
         },
         MA.NodeDetailsCmp
@@ -887,30 +887,30 @@ MA.OrgManagementDeleteTool = function(event, toolEl, panel) {
 
     //only perform the deletion if the user confirms their action
     Ext.Msg.confirm('Confirm deletion', 'Are you sure you wish to delete the organisation: ' + orgname + ' ?', function(btn, text) {
-                    if (btn == 'yes'){
+                    if (btn == 'yes') {
 
                     var orgid = Ext.getCmp('orgListGrid').getSelectionModel().getSelected().data['id'];
 
                     //execute the delete
                     //submit form
                     var simple = new Ext.BasicForm('hiddenForm', {
-                                                   url:MA.BaseUrl + 'admin/orgDelete',
-                                                   baseParams:{'id':orgid},
-                                                   method:'POST'
+                                                   url: MA.BaseUrl + 'admin/orgDelete',
+                                                   baseParams: {'id': orgid},
+                                                   method: 'POST'
                                                    });
 
                     var submitOptions = {
                     successProperty: 'success',
-                    success: function (form, action) {
+                    success: function(form, action) {
                     //display a success alert that auto-closes in 5 seconds
                     Ext.getCmp('orgListGrid').getStore().reload();
-                    Ext.Msg.alert("Organisation deleted successfully", "(this message will auto-close in 5 seconds)");
+                    Ext.Msg.alert('Organisation deleted successfully', '(this message will auto-close in 5 seconds)');
                     setTimeout(Ext.Msg.hide, 5000);
 
                     //load up the menu and next content area as declared in response
                     MA.ChangeMainContent(action.result.mainContentFunction);
                     },
-                    failure: function (form, action) {
+                    failure: function(form, action) {
                     //load up the menu and next content area as declared in response
                     MA.ChangeMainContent(action.result.mainContentFunction);
                     }
@@ -939,7 +939,7 @@ MA.OrgManagementInit = function() {
     Ext.getCmp('orgListGrid').getStore().reload();
 
     //enable/disable the details panel when selection is changed (and load the details for the selected item)
-    Ext.getCmp('orgListGrid').getSelectionModel().on('selectionchange', MA.OrgManagementSelectionManager );
+    Ext.getCmp('orgListGrid').getSelectionModel().on('selectionchange', MA.OrgManagementSelectionManager);
 
     //disable the node details panel by default
     Ext.getCmp('orgdetails-panel').disable();
@@ -947,12 +947,12 @@ MA.OrgManagementInit = function() {
 
 //define the node details form
 MA.OrgDetailsCmp = {
-    xtype:'form',
+    xtype: 'form',
     labelWidth: 100, // label settings here cascade unless overridden
-    id:'orgdetails-panel',
-    url:MA.BaseUrl + 'admin/orgsave',
+    id: 'orgdetails-panel',
+    url: MA.BaseUrl + 'admin/orgsave',
     region: 'center',
-    method:'POST',
+    method: 'POST',
     reader: new Ext.data.JsonReader(),
     bodyStyle: 'padding:10px;',
     title: 'Organisation Details',
@@ -962,9 +962,9 @@ MA.OrgDetailsCmp = {
     waitMsgTarget: true,
 
     items: [
-            {   name: 'id', id: 'orgdetails-id', xtype: 'hidden' },
-            {   name: 'name', id: 'orgdetails-name', fieldLabel: 'Organisation Name', maskRe: /[^,=]/ },
-            {   name: 'abn', id: 'orgdetails-abn', fieldLabel: 'ABN', maskRe: /[^,=]/ }
+            { name: 'id', id: 'orgdetails-id', xtype: 'hidden' },
+            { name: 'name', id: 'orgdetails-name', fieldLabel: 'Organisation Name', maskRe: /[^,=]/ },
+            { name: 'abn', id: 'orgdetails-abn', fieldLabel: 'ABN', maskRe: /[^,=]/ }
             ],
     buttons: [
               { text: 'Reset', handler: MA.OrgManagementClearForm },
@@ -972,18 +972,18 @@ MA.OrgDetailsCmp = {
                   handler: function() {
                       Ext.getCmp('orgdetails-panel').getForm().submit({
                                         successProperty: 'success',
-                                        success: function (form, action) {
+                                        success: function(form, action) {
                                         if (action.result.success === true) {
                                         //display a success alert that auto-closes in 5 seconds
                                         Ext.getCmp('orgListGrid').getStore().reload();
-                                        Ext.Msg.alert("Organisation details saved successfully", "(this message will auto-close in 5 seconds)");
+                                        Ext.Msg.alert('Organisation details saved successfully', '(this message will auto-close in 5 seconds)');
                                         setTimeout(Ext.Msg.hide, 5000);
 
                                         //load up the menu and next content area as declared in response
                                         MA.ChangeMainContent(action.result.mainContentFunction);
                                         }
                                         },
-                                        failure: function (form, action) {
+                                        failure: function(form, action) {
                                         //do nothing special. this gets called on validation failures and server errors
                                         }
                                         });
@@ -992,17 +992,17 @@ MA.OrgDetailsCmp = {
 };
 
 MA.OrgManagementCmp = {
-    id:'orgManagementCmp',
-    layout:'border',
+    id: 'orgManagementCmp',
+    layout: 'border',
     items: [
         {
-        title:'Organisations List',
-        id:'orgListGrid',
-        region:'west',
+        title: 'Organisations List',
+        id: 'orgListGrid',
+        region: 'west',
         minWidth: 450,
         width: 450,
-        split:true,
-        xtype:'grid',
+        split: true,
+        xtype: 'grid',
         tools: [
                 { id: 'plus', qtip: 'Add a new organisation', handler: MA.OrgManagementAddTool },
                 { id: 'minus', qtip: 'Delete currently selected organisation', handler: MA.OrgManagementDeleteTool }
@@ -1014,20 +1014,20 @@ MA.OrgManagementCmp = {
                                       fields: ['name', 'submitValue']
                                       }),
         columns: [
-                  {header: 'Name', sortable:true, dataIndex: 'name'}
+                  {header: 'Name', sortable: true, dataIndex: 'name'}
                   ],
         viewConfig: {
-        forceFit:true
+        forceFit: true
         },
-        sm: new Ext.grid.RowSelectionModel({singleSelect:true}),
-        lazyRender:true,
-        bbar:[{xtype:'tbspacer'}],
-        plugins:[new Ext.ux.grid.Search({
-                                        mode:'local',
-                                        iconCls:false,
-                                        dateFormat:'m/d/Y',
-                                        minLength:0,
-                                        width:150
+        sm: new Ext.grid.RowSelectionModel({singleSelect: true}),
+        lazyRender: true,
+        bbar: [{xtype: 'tbspacer'}],
+        plugins: [new Ext.ux.grid.Search({
+                                        mode: 'local',
+                                        iconCls: false,
+                                        dateFormat: 'm/d/Y',
+                                        minLength: 0,
+                                        width: 150
                                         })]
         },
         MA.OrgDetailsCmp

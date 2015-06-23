@@ -12,9 +12,9 @@ MA.Blur = function(invoker) {
     Ext.getCmp("expContent").getLayout().setActiveItem(invoker.index);
     Ext.currentExperimentNavItem = invoker.index;
 
-    MA.ExperimentDeferredInvocation = {'init':MA.Null, 'index':-1};
+    MA.ExperimentDeferredInvocation = {'init': MA.Null, 'index': -1};
 
-    (function () {
+    (function() {
         MA.ExperimentController.mask.hide();
     }).defer(500);
 };
@@ -32,10 +32,10 @@ MA.CRUDSomething = function(remainderURL, params, callbackfn) {
     var crudStore = new Ext.data.JsonStore(
                                              {
                                              autoLoad: false,
-                                             method:'GET',
+                                             method: 'GET',
                                              url: wsBaseUrl + remainderURL + paramString,
                                              listeners: {
-                                                'load':callbackfn
+                                                'load': callbackfn
                                              }
                                              });
     crudStore.load();
@@ -113,20 +113,20 @@ function ExperimentController() {
 
         if (expId === 0) {
 
-            saver = new Ajax.Request(wsBaseUrl + 'create/experiment/?title='+encodeURIComponent(expName)+'&description='+encodeURIComponent(expDescription)+'&comment='+encodeURIComponent(expComment)+'&status_id=2&formal_quote_id='+encodeURIComponent(expFQuoteId)+'&job_number='+encodeURIComponent(expJobNumber)+'&project_id='+encodeURIComponent(MA.currentProjectId)+'&status_id='+encodeURIComponent(expStatus)+'&investigation_id='+encodeURIComponent(expInvestigation),
+            saver = new Ajax.Request(wsBaseUrl + 'create/experiment/?title=' + encodeURIComponent(expName) + '&description=' + encodeURIComponent(expDescription) + '&comment=' + encodeURIComponent(expComment) + '&status_id=2&formal_quote_id=' + encodeURIComponent(expFQuoteId) + '&job_number=' + encodeURIComponent(expJobNumber) + '&project_id=' + encodeURIComponent(MA.currentProjectId) + '&status_id=' + encodeURIComponent(expStatus) + '&investigation_id=' + encodeURIComponent(expInvestigation),
                                                  {
-                                                 asynchronous:true,
-                                                 evalJSON:'force',
-                                         onSuccess:     self.blurSuccess,
-                                         onFailure:    MA.DSLoadException
+                                                 asynchronous: true,
+                                                 evalJSON: 'force',
+                                         onSuccess: self.blurSuccess,
+                                         onFailure: MA.DSLoadException
                                          });
         } else {
-            saver = new Ajax.Request(wsBaseUrl + 'update/experiment/'+expId+'/?title='+encodeURIComponent(expName)+'&description='+encodeURIComponent(expDescription)+'&comment='+encodeURIComponent(expComment)+'&status_id=2&formal_quote_id='+encodeURIComponent(expFQuoteId)+'&job_number='+encodeURIComponent(expJobNumber)+'&project_id='+encodeURIComponent(MA.currentProjectId)+'&status_id='+encodeURIComponent(expStatus)+'&investigation_id='+encodeURIComponent(expInvestigation),
+            saver = new Ajax.Request(wsBaseUrl + 'update/experiment/' + expId + '/?title=' + encodeURIComponent(expName) + '&description=' + encodeURIComponent(expDescription) + '&comment=' + encodeURIComponent(expComment) + '&status_id=2&formal_quote_id=' + encodeURIComponent(expFQuoteId) + '&job_number=' + encodeURIComponent(expJobNumber) + '&project_id=' + encodeURIComponent(MA.currentProjectId) + '&status_id=' + encodeURIComponent(expStatus) + '&investigation_id=' + encodeURIComponent(expInvestigation),
                                          {
-                                         asynchronous:true,
-                                         evalJSON:'force',
-                                         onSuccess:     self.blurSuccess,
-                                          onFailure:    MA.DSLoadException
+                                         asynchronous: true,
+                                         evalJSON: 'force',
+                                         onSuccess: self.blurSuccess,
+                                          onFailure: MA.DSLoadException
                                          });
         }
 
@@ -153,7 +153,7 @@ function ExperimentController() {
         }
         MA.ExperimentDeferredInvocation.init();
 
-        MA.ExperimentDeferredInvocation = {'index':-1, 'init':MA.Null};
+        MA.ExperimentDeferredInvocation = {'index': -1, 'init': MA.Null};
     };
 
     this.updateSamplePreparationNotes = function(notes) {
@@ -213,19 +213,19 @@ function ExperimentController() {
 
         var fquoLoader = new Ajax.Request(wsBaseUrl + 'populate_select/formalquote/id/toemail/',
                                          {
-                                         asynchronous:true,
-                                         evalJSON:'force',
+                                         asynchronous: true,
+                                         evalJSON: 'force',
                                          onSuccess: function(response) {
                                              var fquoCombo = Ext.getCmp('formalQuote');
                                              var data = response.responseJSON.response.value.items;
                                              var massagedData = [];
 
                                              for (var idx = 0; idx < data.length; idx++) {
-                                                massagedData[idx] = [data[idx].key, '#'+data[idx].key + '  ' + data[idx].value];
+                                                massagedData[idx] = [data[idx].key, '#' + data[idx].key + '  ' + data[idx].value];
                                              }
 
                                              //ensure that there is a blank entry
-                                             massagedData.unshift(['','  none  ']);
+                                             massagedData.unshift(['', '  none  ']);
 
                                              fquoCombo.getStore().loadData(massagedData);
 
@@ -236,8 +236,8 @@ function ExperimentController() {
 
         var expLoader = new Ajax.Request(wsBaseUrl + "records/experiment/id/" + expId,
                                          {
-                                         asynchronous:true,
-                                         evalJSON:'force',
+                                         asynchronous: true,
+                                         evalJSON: 'force',
                                          onSuccess: function(response) {
                                                  var namefield = Ext.getCmp('experimentName');
                                                  var desc = Ext.getCmp('experimentDescription');
@@ -311,7 +311,7 @@ function ExperimentController() {
         var changingExperiment = (self.currentId() != expId);
         self.setCurrentId(expId);
 
-        MA.MenuHandler({ id:'experiment:view' });
+        MA.MenuHandler({ id: 'experiment:view' });
 
         MA.skipBlur = true;
 
@@ -325,7 +325,7 @@ function ExperimentController() {
 
             self.mask.show();
 
-            (function () {
+            (function() {
                 Ext.getCmp('expNav').select(0);
                 self.mask.hide();
             }).defer(500);
@@ -346,7 +346,7 @@ function ExperimentController() {
         var na = Ext.getCmp("expNav");
 
         if (na.getSelectionCount() === 0 || index !== null) {
-            na.select(index,index,false);
+            na.select(index, index, false);
         }
 
         var counter = 1;
@@ -359,7 +359,7 @@ function ExperimentController() {
         if (self.currentId() === 0) {
             et.setTitle('New Experiment');
         } else {
-            et.setTitle('Experiment: '+en.getValue());
+            et.setTitle('Experiment: ' + en.getValue());
         }
     };
 
@@ -404,13 +404,13 @@ function ExperimentController() {
 
         if (MA.skipBlur) {
 
-            MA.Blur({'init':r.get("init"), 'index':index});
+            MA.Blur({'init': r.get("init"), 'index': index});
             MA.skipBlur = false;
         } else {
             currItem = Ext.StoreMgr.get("navDS").getAt(Ext.currentExperimentNavItem);
             blurFn = currItem.get("blur");
             if (blurFn !== null) {
-                blurFn({'init':r.get("init"), 'index':index});
+                blurFn({'init': r.get("init"), 'index': index});
             }
         }
     };
@@ -432,38 +432,38 @@ MA.LoadOrganismInfo = function(typeId, id) {
 
 MA.ExperimentDetails = {
     baseCls: 'x-plain',
-    border:false,
-    frame:false,
-    layout:'border',
+    border: false,
+    frame: false,
+    layout: 'border',
     defaults: {
-        bodyStyle:'padding:15px;background:transparent;'
+        bodyStyle: 'padding:15px;background:transparent;'
     },
-    items:[
+    items: [
         {
             title: 'Experiment Details',
             region: 'center',
             collapsible: false,
-            autoScroll:true,
-            layout:'form',
+            autoScroll: true,
+            layout: 'form',
             minSize: 75,
             items: [
-                { xtype:'fieldset',
-                title:'Experiment',
-                id:'expFieldset',
-                autoHeight:true,
+                { xtype: 'fieldset',
+                title: 'Experiment',
+                id: 'expFieldset',
+                autoHeight: true,
                 items: [
-                    { xtype:'textfield',
-                      fieldLabel:'Experiment name',
-                      width:700,
-                      enableKeyEvents:true,
-                      id:'experimentName',
-                      allowBlank:false,
-                      listeners:{
-                        'keydown':function(t, e){
+                    { xtype: 'textfield',
+                      fieldLabel: 'Experiment name',
+                      width: 700,
+                      enableKeyEvents: true,
+                      id: 'experimentName',
+                      allowBlank: false,
+                      listeners: {
+                        'keydown': function(t, e) {
                             MA.ExperimentController.updateNav();
                             return true;
                         },
-                        'keyup':function(t, e){
+                        'keyup': function(t, e) {
                             MA.ExperimentController.updateNav();
                             return true;
                         },
@@ -474,49 +474,49 @@ MA.ExperimentDetails = {
                       }
                     },
                     new Ext.form.ComboBox({
-                            fieldLabel:'Status',
-                            itemId:'status',
-                            name:'status',
-                            width:300,
-                            editable:false,
-                            forceSelection:true,
-                            displayField:'value',
-                            valueField:'key',
-                            hiddenName:'status',
-                            lazyRender:true,
-                            allowBlank:false,
-                            typeAhead:false,
-                            triggerAction:'all',
-                            listWidth:300,
+                            fieldLabel: 'Status',
+                            itemId: 'status',
+                            name: 'status',
+                            width: 300,
+                            editable: false,
+                            forceSelection: true,
+                            displayField: 'value',
+                            valueField: 'key',
+                            hiddenName: 'status',
+                            lazyRender: true,
+                            allowBlank: false,
+                            typeAhead: false,
+                            triggerAction: 'all',
+                            listWidth: 300,
                             store: expStatusComboStore
                         }),
-                    { xtype:'textarea', fieldLabel:'Experiment overview/aim', id:'experimentDescription', width:700, height:100 },
-                    { xtype:'textarea', fieldLabel:'Comment', id:'experimentComment', width:700, height:100 },
+                    { xtype: 'textarea', fieldLabel: 'Experiment overview/aim', id: 'experimentDescription', width: 700, height: 100 },
+                    { xtype: 'textarea', fieldLabel: 'Comment', id: 'experimentComment', width: 700, height: 100 },
                         new Ext.form.ComboBox({
-                                              width:300,
-                                              fieldLabel:'Formal quote',
-                                              id:'formalQuote',
-                                              editable:false,
-                                              forceSelection:true,
-                                              displayField:'value',
-                                              valueField:'key',
-                                              hiddenName:'formalQuoteValue',
-                                              lazyRender:true,
-                                              allowBlank:true,
-                                              typeAhead:false,
-                                              triggerAction:'all',
-                                              listWidth:300,
-                                              mode:'local',
+                                              width: 300,
+                                              fieldLabel: 'Formal quote',
+                                              id: 'formalQuote',
+                                              editable: false,
+                                              forceSelection: true,
+                                              displayField: 'value',
+                                              valueField: 'key',
+                                              hiddenName: 'formalQuoteValue',
+                                              lazyRender: true,
+                                              allowBlank: true,
+                                              typeAhead: false,
+                                              triggerAction: 'all',
+                                              listWidth: 300,
+                                              mode: 'local',
                                               store: new Ext.data.ArrayStore({fields: ['key', 'value']})
                                               }),
-                        { xtype:'displayfield', fieldLabel:'Organisation', id:'expOrg', disabled:true},
-                        { xtype:'textfield', fieldLabel:'Job number', id:'jobNumber' },
+                        { xtype: 'displayfield', fieldLabel: 'Organisation', id: 'expOrg', disabled: true},
+                        { xtype: 'textfield', fieldLabel: 'Job number', id: 'jobNumber' },
                         { xtype: 'combo',
-                          width:300,
-                          fieldLabel:'Investigation',
-                          id:'experimentInvestigation',
-                          editable:false,
-                          forceSelection:true,
+                          width: 300,
+                          fieldLabel: 'Investigation',
+                          id: 'experimentInvestigation',
+                          editable: false,
+                          forceSelection: true,
                           store: MA.investigationStore,
                           mode: 'local',
                           // store: new Ext.data.ArrayStore({
@@ -524,13 +524,13 @@ MA.ExperimentDetails = {
                           //   fields: ['id', 'title'],
                           //   data: [[1, 'item1'], [2, 'item2'], [3, 'blah']]  // data is local
                           // }),
-                          displayField:'title',
-                          valueField:'id',
-                          triggerAction:'all',
-                          clearFilterOnReset:false,
-                          allowBlank:true,
-                          typeAhead:false,
-                          listWidth:300
+                          displayField: 'title',
+                          valueField: 'id',
+                          triggerAction: 'all',
+                          clearFilterOnReset: false,
+                          allowBlank: true,
+                          typeAhead: false,
+                          listWidth: 300
                         }
                     ]
                 }
@@ -543,30 +543,30 @@ MA.ExperimentDetails = {
 
 
 MA.ExperimentCmp = {
-id:'expProjTitle',
-layout:'fit',
-title:'Project',
+id: 'expProjTitle',
+layout: 'fit',
+title: 'Project',
 tools: [
         {
-        id:'left',
+        id: 'left',
         qtip: "Back to the project",
         handler: function() {
           MA.LoadProject(MA.currentProjectId);
         }
         }
         ],
-items:[
+items: [
        {
-       id:'experimentTitle',
-       title:'New Experiment',
-       layout:'border',
+       id: 'experimentTitle',
+       title: 'New Experiment',
+       layout: 'border',
        defaults: {
        collapsible: false,
        split: true,
        bodyStyle: 'padding:15px'
        },
        items: [{
-               region:'west',
+               region: 'west',
                margins: '5 0 0 0',
                cmargins: '5 5 0 0',
                width: 175,
@@ -575,55 +575,55 @@ items:[
                border: false,
                baseCls: 'x-plain',
                bodyStyle: 'padding:0px;padding-left:5px;',
-               layout:'anchor',
-               hideMode:'offsets',
+               layout: 'anchor',
+               hideMode: 'offsets',
                items: [
                        {
                        title: 'Navigation',
                        frame: true,
-                       style:'background:white;',
-                       layout:'anchor',
-                       hideMode:'offsets',
+                       style: 'background:white;',
+                       layout: 'anchor',
+                       hideMode: 'offsets',
                        items: [
                                {
                                id: 'expNav',
                                baseCls: 'x-plain',
-                               hideMode:'offsets',
-                               style:'background:white;',
-                               selectedClass:'ma-list-selected',
-                               xtype:'listview',
+                               hideMode: 'offsets',
+                               style: 'background:white;',
+                               selectedClass: 'ma-list-selected',
+                               xtype: 'listview',
                                //                        border: false,
                                //                        trackMouseOver: false,
-                               hideHeaders:true,
+                               hideHeaders: true,
                                //                        syncFocus: false,
-                               width:270,
+                               width: 270,
                                //                        autoHeight:true,
-                               singleSelect:true,
-                               multiSelect:false,
-                               listeners:{
+                               singleSelect: true,
+                               multiSelect: false,
+                               listeners: {
                                "selectionchange": MA.ExperimentController.selectionChangeHandler,
-                               "beforeselect":function(list, nodes, sel) {
+                               "beforeselect": function(list, nodes, sel) {
                                return !list.disabled;
                                }
                                },
                                columns: [
-                                         { header: "Nav",  dataIndex:'nav', sortable:false, menuDisabled:true }
+                                         { header: "Nav", dataIndex: 'nav', sortable: false, menuDisabled: true }
                                          ],
                                store: new Ext.data.SimpleStore(
                                                                {
-                                                               storeId:"navDS",
+                                                               storeId: "navDS",
                                                                fields: ["nav", "init", "blur", "enabled"],
                                                                data: [
-                                                                      [ "Experiment Details", MA.ExperimentController.init, MA.ExperimentController.blur, true ],
-                                                                      [ "Access", MA.AccessInit, MA.Blur, false ],
-                                                                      [ "Source", MA.BioSourceInit, MA.BioSourceBlur, false ],
-                                                                      [ "Treatment", MA.TreatmentInit, MA.Blur, false ],
-                                                                      [ "Sample Preparation", MA.SamplePrepInit, MA.Blur, false ],
-                                                                      [ "Sample Classes", MA.ExperimentSamplesInit, MA.Blur, false ],
-                                                                      [ "Samples", MA.ExperimentSamplesOnlyInit, MA.Blur, false ],
-                                                                      [ "Sample Tracking", MA.SampleTrackingInit, MA.Blur, false ],
-                                                                      [ "Runs", MA.ExperimentRunsInit, MA.Blur, false],
-                                                                      [ "Files", MA.FilesInit, MA.Blur, false ]
+                                                                      ["Experiment Details", MA.ExperimentController.init, MA.ExperimentController.blur, true],
+                                                                      ["Access", MA.AccessInit, MA.Blur, false],
+                                                                      ["Source", MA.BioSourceInit, MA.BioSourceBlur, false],
+                                                                      ["Treatment", MA.TreatmentInit, MA.Blur, false],
+                                                                      ["Sample Preparation", MA.SamplePrepInit, MA.Blur, false],
+                                                                      ["Sample Classes", MA.ExperimentSamplesInit, MA.Blur, false],
+                                                                      ["Samples", MA.ExperimentSamplesOnlyInit, MA.Blur, false],
+                                                                      ["Sample Tracking", MA.SampleTrackingInit, MA.Blur, false],
+                                                                      ["Runs", MA.ExperimentRunsInit, MA.Blur, false],
+                                                                      ["Files", MA.FilesInit, MA.Blur, false]
                                                                       ]
                                                                }
                                                                )
@@ -634,19 +634,19 @@ items:[
                },{
                id: 'expContent',
                collapsible: false,
-               region:'center',
+               region: 'center',
                border: false,
                margins: '5 0 0 0',
-               layout:'card',
-               activeItem:0,
-               bodyStyle:'padding:0px;',
-               forceLayout:true,
-               deferredRender:true,
+               layout: 'card',
+               activeItem: 0,
+               bodyStyle: 'padding:0px;',
+               forceLayout: true,
+               deferredRender: true,
                defaults: {
-               forceLayout:true,
-               deferredRender:true
+               forceLayout: true,
+               deferredRender: true
                },
-               items:[
+               items: [
                       MA.ExperimentDetails,
                       MA.Access,
                       MA.BioSource,
@@ -670,7 +670,7 @@ items:[
 
 
 MA.ProjectList = Ext.extend(Ext.Panel, {
-    constructor: function (config) {
+    constructor: function(config) {
         var self = this;
 
         var store = projectsListStore;
@@ -689,7 +689,7 @@ MA.ProjectList = Ext.extend(Ext.Panel, {
                                         text: "New Project",
                                         cls: "x-btn-text-icon",
                                         icon: "static/images/add.png",
-                                        handler: function (b, e) {
+                                        handler: function(b, e) {
                                             if (MA.CurrentUser.IsAdmin || MA.CurrentUser.IsMastrAdmin || MA.CurrentUser.IsProjectLeader) {
                                                 // Toolbar.grid.ProjectList Panel
                                                 this.ownerCt.ownerCt.ownerCt.createNewProject();
@@ -700,13 +700,13 @@ MA.ProjectList = Ext.extend(Ext.Panel, {
                                     }
                           ],
                     trackMouseOver: false,
-                    plugins:[new Ext.ux.grid.Search({
-                         mode:'local'
-                        ,iconCls:false
-                        ,dateFormat:'m/d/Y'
-                        ,minLength:0
-                        ,width:150
-                        ,position:'top'
+                    plugins: [new Ext.ux.grid.Search({
+                         mode: 'local'
+                        , iconCls: false
+, dateFormat: 'm/d/Y'
+                        , minLength: 0
+                        , width: 150
+                        , position: 'top'
                     })],
                     selModel: new Ext.grid.RowSelectionModel({ singleSelect: true }),
                     viewConfig: {
@@ -721,10 +721,10 @@ MA.ProjectList = Ext.extend(Ext.Panel, {
                     ],
                     store: store,
                     listeners: {
-                        "rowclick": function () {
+                        "rowclick": function() {
                             self.fireEvent("click", this.getSelectionModel().getSelected().data.id);
                         },
-                        "rowdblclick": function () {
+                        "rowdblclick": function() {
                             self.fireEvent("dblclick", this.getSelectionModel().getSelected().data.id);
                         }
                     }
@@ -747,14 +747,14 @@ MA.ProjectList = Ext.extend(Ext.Panel, {
         MA.ProjectList.superclass.constructor.call(this, config);
         this.addEvents("click", "dblclick", "delete");
     },
-    getStore: function () {
+    getStore: function() {
         return this.getComponent("grid").getStore();
     },
-    select: function (id) {
+    select: function(id) {
         var record = this.getStore().getById(id);
         this.getComponent("grid").getSelectionModel().selectRecords([record], false);
     },
-    createNewProject: function () {
+    createNewProject: function() {
         MA.ChangeMainContent("project:new");
     }
 });
@@ -765,53 +765,53 @@ MA.ProjectListCmp = new MA.ProjectList({
     region: 'center',
     cmargins: '0 0 0 0',
     collapsible: false,
-    id:'projects-list',
+    id: 'projects-list',
     bodyStyle: 'padding:0px;',
-    border:false,
+    border: false,
     listeners: {
-        dblclick: function (id) {
+        dblclick: function(id) {
             MA.LoadProject(id);
         }
     }
 });
 
 MA.ProjectCmp = {
-    id:'projectCmpTitle',
-    title:'New Project',
-    layout:'border',
-    forceLayout:true,
-    deferredRender:false,
+    id: 'projectCmpTitle',
+    title: 'New Project',
+    layout: 'border',
+    forceLayout: true,
+    deferredRender: false,
     defaults: {
         collapsible: false,
         bodyStyle: 'padding:15px;background-color:transparent;'
     },
     items: [{
         xtype: 'form',
-        id:'project-form',
+        id: 'project-form',
         border: false,
         region: 'north',
-        width:720,
+        width: 720,
         autoHeight: true,
-        title:'Project details',
+        title: 'Project details',
         items: [
-                { xtype:'textfield', fieldLabel:'Project title', width:700, id:'projectTitle', name:'title', allowBlank:false},
-                { xtype:'textarea', fieldLabel:'Description', id:'projectDescription', width:700, height:100, name:'description' },
+                { xtype: 'textfield', fieldLabel: 'Project title', width: 700, id: 'projectTitle', name: 'title', allowBlank: false},
+                { xtype: 'textarea', fieldLabel: 'Description', id: 'projectDescription', width: 700, height: 100, name: 'description' },
                 new Ext.form.ComboBox({
-                        fieldLabel:'Client',
-                        id:'projectClientCombo',
-                        name:'client',
-                        width:700,
-                        editable:false,
-                        enableKeyEvents:true,
-                        forceSelection:true,
-                        displayField:'displayValue',
-                        valueField:'id',
-                        hiddenName:'client_id',
-                        lazyRender:false,
-                        allowBlank:false,
-                        typeAhead:true,
-                        triggerAction:'all',
-                        listWidth:400,
+                        fieldLabel: 'Client',
+                        id: 'projectClientCombo',
+                        name: 'client',
+                        width: 700,
+                        editable: false,
+                        enableKeyEvents: true,
+                        forceSelection: true,
+                        displayField: 'displayValue',
+                        valueField: 'id',
+                        hiddenName: 'client_id',
+                        lazyRender: false,
+                        allowBlank: false,
+                        typeAhead: true,
+                        triggerAction: 'all',
+                        listWidth: 400,
                         listeners: {
                             'keyup': function(component, e) {
                                 MA.StoreFilter(component, e, 'name');
@@ -820,54 +820,54 @@ MA.ProjectCmp = {
 
                         store: sorteduserListStore,
                         itemSelector: 'div.search-item',
-                        tpl:new Ext.XTemplate(
+                        tpl: new Ext.XTemplate(
                         '<tpl for="."><div style="padding:8px;padding-top:5px;padding-bottom:5px;border-bottom:1px solid #ccc;" class="search-item">',
                         '{displayValue}<br /><span style="color:#666;">{organisationName}</span>',
                         '</div></tpl>'
                         )
                 }),
                 // this will hold the ',' joined ids of project managers on the project
-                { xtype:'hidden', name: 'projectManagers' },
+                { xtype: 'hidden', name: 'projectManagers' },
                 {
-                    fieldLabel:'Project managers',
-                    width:525,
-                    autoHeight:true,
-                    bbar:[{
+                    fieldLabel: 'Project managers',
+                    width: 525,
+                    autoHeight: true,
+                    bbar: [{
                         text: 'Add',
                         cls: 'x-btn-text-icon',
-                        icon:'static/images/add.png',
-                        id:'projManagersAddButton',
-                        handler : function() {
+                        icon: 'static/images/add.png',
+                        id: 'projManagersAddButton',
+                        handler: function() {
                                 //POP UP A WINDOW TO ASK WHICH USER TO ADD
                                 var addWindow = new Ext.Window({
-                                    title:'Add a Project Manager',
-                                    width:380,
-                                    height:130,
-                                    minHeight:130,
-                                    border:false,
-                                    bodyStyle:'padding:20px;background-color:transparent;',
-                                    x:290,
-                                    y:250,
-                                    layout:'vbox',
-                                    modal:true,
-                                    items:[
+                                    title: 'Add a Project Manager',
+                                    width: 380,
+                                    height: 130,
+                                    minHeight: 130,
+                                    border: false,
+                                    bodyStyle: 'padding:20px;background-color:transparent;',
+                                    x: 290,
+                                    y: 250,
+                                    layout: 'vbox',
+                                    modal: true,
+                                    items: [
                                         new Ext.form.ComboBox({
-                                                fieldLabel:'',
-                                                labelWidth:50,
-                                                itemId:'projManagerCombo',
-                                                name:'projManager',
-                                                width:300,
-                                                editable:false,
-                                                forceSelection:true,
-                                                enableKeyEvents:true,
-                                                displayField:'value',
-                                                valueField:'key',
-                                                hiddenName:'projManagerId',
-                                                lazyRender:true,
-                                                allowBlank:false,
-                                                typeAhead:false,
-                                                triggerAction:'all',
-                                                listWidth:300,
+                                                fieldLabel: '',
+                                                labelWidth: 50,
+                                                itemId: 'projManagerCombo',
+                                                name: 'projManager',
+                                                width: 300,
+                                                editable: false,
+                                                forceSelection: true,
+                                                enableKeyEvents: true,
+                                                displayField: 'value',
+                                                valueField: 'key',
+                                                hiddenName: 'projManagerId',
+                                                lazyRender: true,
+                                                allowBlank: false,
+                                                typeAhead: false,
+                                                triggerAction: 'all',
+                                                listWidth: 300,
                                                 store: maStaffComboStore,
                                                 listeners: {
                                                     'keyup': function(component, e) {
@@ -876,38 +876,38 @@ MA.ProjectCmp = {
                                                 }
                                             })
                                     ],
-                                    buttons:[
+                                    buttons: [
                                         {
-                                            text:'Cancel',
-                                            itemId:'cancel'
+                                            text: 'Cancel',
+                                            itemId: 'cancel'
                                         },
                                         {
-                                            text:'Add',
-                                            itemId:'add'
+                                            text: 'Add',
+                                            itemId: 'add'
                                         }
                                     ]
                                 });
 
                                 addWindow.show();
 
-                                addWindow.buttons[0].on('click', function() { addWindow.close(); } );
+                                addWindow.buttons[0].on('click', function() { addWindow.close(); });
                                 addWindow.buttons[1].on('click', function() {
                                     var id = addWindow.getComponent('projManagerCombo').getValue();
                                     var value = addWindow.getComponent('projManagerCombo').getRawValue();
                                     if (addWindow.getComponent('projManagerCombo').isValid()) {
-                                        Ext.getCmp('projManagerList').getStore().add(new Ext.data.Record({'id':id, 'email':value}));
+                                        Ext.getCmp('projManagerList').getStore().add(new Ext.data.Record({'id': id, 'email': value}));
                                         Ext.getCmp('projManagerList').refresh();
                                         addWindow.close();
                                     }
-                                } );
+                                });
                             }
                         },
                         {
                             text: 'Remove',
                             cls: 'x-btn-text-icon',
-                            icon:'static/images/delete.png',
-                            id:'projManagersRemoveButton',
-                            handler : function(){
+                            icon: 'static/images/delete.png',
+                            id: 'projManagersRemoveButton',
+                            handler: function() {
                                    //remove currently selected users
                                    var recs = Ext.getCmp('projManagerList').getSelectedRecords();
                                    for (i = 0; i < recs.length; i++) {
@@ -917,38 +917,38 @@ MA.ProjectCmp = {
                             }
                         }
                     ],
-                    items:[{
-                        xtype:'listview',
-                        id:'projManagerList',
+                    items: [{
+                        xtype: 'listview',
+                        id: 'projManagerList',
                         store: new Ext.data.ArrayStore({}),
                         height: 80,
-                        loadingText:'Loading...',
-                        columnSort:false,
+                        loadingText: 'Loading...',
+                        columnSort: false,
                         columns: [{
                             header: "email",
                             dataIndex: 'email',
                             tpl: '<div style="padding:4px">{email}</div>'
                         }],
-                        viewConfig:{
-                            forceFit:true
+                        viewConfig: {
+                            forceFit: true
                         },
-                        singleSelect:true,
-                        multiSelect:false,
-                        hideHeaders:true,
-                        style:'background:white;',
-                        autoScroll:true,
-                        reserveScrollOffset:true
+                        singleSelect: true,
+                        multiSelect: false,
+                        hideHeaders: true,
+                        style: 'background:white;',
+                        autoScroll: true,
+                        reserveScrollOffset: true
                     }]
                 },
                 {
-                    fieldLabel:'Investigations',
-                    width:525,
-                    autoHeight:true,
-                    bbar:[{
+                    fieldLabel: 'Investigations',
+                    width: 525,
+                    autoHeight: true,
+                    bbar: [{
                         text: 'Add',
                         cls: 'x-btn-text-icon',
-                        icon:'static/images/add.png',
-                        id:'invAddButton',
+                        icon: 'static/images/add.png',
+                        id: 'invAddButton',
                         handler: function() {
                           MA.editInvestigation();
                         }
@@ -956,9 +956,9 @@ MA.ProjectCmp = {
                         {
                             text: 'Remove',
                             cls: 'x-btn-text-icon',
-                            icon:'static/images/delete.png',
-                            id:'invRemoveButton',
-                            handler : function(){
+                            icon: 'static/images/delete.png',
+                            id: 'invRemoveButton',
+                            handler: function() {
                                    //remove currently selected users
                                    var recs = Ext.getCmp('projInvestigationList').getSelectedRecords();
                                    for (i = 0; i < recs.length; i++) {
@@ -970,9 +970,9 @@ MA.ProjectCmp = {
                         {
                             text: 'Edit',
                             cls: 'x-btn-text-icon',
-                            icon:'static/images/edit.png',
-                            id:'invEditButton',
-                            handler : function(){
+                            icon: 'static/images/edit.png',
+                            id: 'invEditButton',
+                            handler: function() {
                                    //remove currently selected users
                                    var recs = Ext.getCmp('projInvestigationList').getSelectedRecords();
                                    for (i = 0; i < recs.length; i++) {
@@ -982,12 +982,12 @@ MA.ProjectCmp = {
                             }
                         }
                     ],
-                    items:[{
-                        xtype:'listview',
-                        id:'projInvestigationList',
+                    items: [{
+                        xtype: 'listview',
+                        id: 'projInvestigationList',
                         store: MA.investigationStore,
                         height: 80,
-                        columnSort:false,
+                        columnSort: false,
                         columns: [{
                           header: "Title",
                           dataIndex: 'title',
@@ -997,22 +997,22 @@ MA.ProjectCmp = {
                           dataIndex: 'description',
                           width: 0.66
                         }],
-                        viewConfig:{
-                          forceFit:true
+                        viewConfig: {
+                          forceFit: true
                         },
-                        singleSelect:true,
-                        multiSelect:false,
-                        hideHeaders:true,
-                        style:'background:white;',
-                        autoScroll:true,
-                        reserveScrollOffset:true
+                        singleSelect: true,
+                        multiSelect: false,
+                        hideHeaders: true,
+                        style: 'background:white;',
+                        autoScroll: true,
+                        reserveScrollOffset: true
                     }]
                 }
         ],
         buttonAlign: 'left',
         buttons: [{
             text: 'Save',
-            id:'projectSubmit',
+            id: 'projectSubmit',
             handler: function() {
                 // collect the Project Manager ids and set them into a hidden field
                 // so they get submitted on form.submit()
@@ -1021,7 +1021,7 @@ MA.ProjectCmp = {
                 Ext.getCmp('project-form').getForm().submit({
                     url: wsBaseUrl + 'update/project/' + MA.currentProjectId,
                     successProperty: 'success',
-                    success: function (form, action) {
+                    success: function(form, action) {
                         if (action.result.success === true) {
                             MA.currentProjectId = action.result.rows[0].id;
                             Ext.Msg.alert("Project saved", "(this message will auto-close in 1 second)");
@@ -1031,7 +1031,7 @@ MA.ProjectCmp = {
                             MA.ChangeMainContent(action.result.mainContentFunction);
                         }
                     },
-                    failure: function (form, action) {
+                    failure: function(form, action) {
                         //do nothing special. this gets called on validation failures and server errors
                     }
                 });
@@ -1052,41 +1052,41 @@ MA.ProjectCmp = {
             region: 'center',
             cmargins: '0 0 0 0',
             collapsible: false,
-            id:'project-experiment-list',
+            id: 'project-experiment-list',
             bodyStyle: 'padding:0px;',
-            layout:'fit',
+            layout: 'fit',
             tbar: [{
                 text: 'New Experiment',
                 cls: 'x-btn-text-icon',
-                icon:'static/images/add.png',
-                handler : function(){
-                        MA.MenuHandler({'id':'experiment:new'});
+                icon: 'static/images/add.png',
+                handler: function() {
+                        MA.MenuHandler({'id': 'experiment:new'});
                     }
                 },
                 {
                     text: 'Clone Experiment',
                     cls: 'x-btn-text-icon',
-                    icon:'static/images/add-to-run.png',
-                    handler : function(){
+                    icon: 'static/images/add-to-run.png',
+                    handler: function() {
                         var gr = Ext.getCmp('project-experiments');
                         var sels = gr.getSelectionModel().getSelections();
-                        if ( sels.length != 1 ){
+                        if (sels.length != 1) {
                             Ext.Msg.show({
                                 'title': 'Error',
                                 'msg' : 'Please select exactly one experiment to clone.',
                                 'buttons' : Ext.Msg.OK
                             });
                         }
-                        else{
-                            MA.MenuHandler({'id':'experiment:clone'}, [sels[0].data.id]);
+                        else {
+                            MA.MenuHandler({'id': 'experiment:clone'}, [sels[0].data.id]);
                         }
                     }
                 },
                 {
                 text: 'Remove Experiment',
                 cls: 'x-btn-text-icon',
-                icon:'static/images/delete.png',
-                handler : function(){
+                icon: 'static/images/delete.png',
+                handler: function() {
                    var grid = Ext.getCmp('project-experiments');
                    var delIds = [];
 
@@ -1104,7 +1104,7 @@ MA.ProjectCmp = {
                    }
                    //console.log(delIds);
                    for (var i = 0; i < delIds.length; i++) {
-                       MA.CRUDSomething('delete/experiment/'+delIds[i], {}, function() { experimentListStore.proxy.conn.url = wsBaseUrl + 'recordsExperiments/' + MA.currentProjectId;
+                       MA.CRUDSomething('delete/experiment/' + delIds[i], {}, function() { experimentListStore.proxy.conn.url = wsBaseUrl + 'recordsExperiments/' + MA.currentProjectId;
                        experimentListStore.load(); });
                    }
                    }
@@ -1113,27 +1113,27 @@ MA.ProjectCmp = {
             ],
             items: [
                 {
-                    xtype:'grid',
+                    xtype: 'grid',
                     border: false,
-                    id:'project-experiments',
+                    id: 'project-experiments',
                     trackMouseOver: false,
-                    sm: new Ext.grid.RowSelectionModel( {singleSelect:true}),
+                    sm: new Ext.grid.RowSelectionModel({singleSelect: true}),
                     view: new Ext.grid.GroupingView({
                         forceFit: true,
                         autoFill: true,
                         hideGroupedColumn: true
                     }),
                     columns: [
-                        { header: "ID", sortable:false, menuDisabled:true, dataIndex:'id', width:50 },
-                        { header: "Title", sortable:false, menuDisabled:true, dataIndex:'title' },
-                        { header: "Principal", sortable:false, menuDisabled:true, dataIndex:'principal' },
-                        { header: "Client", sortable:false, menuDisabled:true, dataIndex:'client' },
-                        { header: "Description", sortable:false, menuDisabled:true, width:300, dataIndex:'description' },
-                        { header: "Status", sortable:false, menuDisabled:true, dataIndex:'status_text' }
+                        { header: "ID", sortable: false, menuDisabled: true, dataIndex: 'id', width: 50 },
+                        { header: "Title", sortable: false, menuDisabled: true, dataIndex: 'title' },
+                        { header: "Principal", sortable: false, menuDisabled: true, dataIndex: 'principal' },
+                        { header: "Client", sortable: false, menuDisabled: true, dataIndex: 'client' },
+                        { header: "Description", sortable: false, menuDisabled: true, width: 300, dataIndex: 'description' },
+                        { header: "Status", sortable: false, menuDisabled: true, dataIndex: 'status_text' }
                     ],
                     store: experimentListStore,
                     listeners: {
-                        'rowdblclick':function(el, ev) {
+                        'rowdblclick': function(el, ev) {
                             var sm = Ext.getCmp('project-experiments').getSelectionModel();
                             var rec = sm.getSelected();
                             MA.ExperimentController.loadExperiment(rec.data.id);
@@ -1148,54 +1148,54 @@ MA.ProjectCmp = {
 MA.editInvestigation = function(rec) {
   var addWindow = new Ext.Window({
     title: (rec ? 'Edit' : 'Add') + ' an Investigation',
-    width:480,
-    height:230,
-    minHeight:230,
-    border:false,
-    bodyStyle:'padding:20px;background-color:transparent;',
-    x:290,
-    y:250,
-    layout:'form',
-    modal:true,
-    items:[
+    width: 480,
+    height: 230,
+    minHeight: 230,
+    border: false,
+    bodyStyle: 'padding:20px;background-color:transparent;',
+    x: 290,
+    y: 250,
+    layout: 'form',
+    modal: true,
+    items: [
       new Ext.form.TextField({
-        fieldLabel:'Title',
-        labelWidth:50,
-        itemId:'invTitleField',
-        name:'invTitle',
-        width:300,
-        forceSelection:true,
-        allowBlank:false,
-        typeAhead:false,
+        fieldLabel: 'Title',
+        labelWidth: 50,
+        itemId: 'invTitleField',
+        name: 'invTitle',
+        width: 300,
+        forceSelection: true,
+        allowBlank: false,
+        typeAhead: false,
         value: rec ? rec.get("title") : ""
       }),
       new Ext.form.TextArea({
-        fieldLabel:'Description',
-        labelWidth:50,
-        itemId:'invDescField',
-        name:'invDesc',
-        width:300,
-        forceSelection:true,
-        allowBlank:true,
-        typeAhead:false,
+        fieldLabel: 'Description',
+        labelWidth: 50,
+        itemId: 'invDescField',
+        name: 'invDesc',
+        width: 300,
+        forceSelection: true,
+        allowBlank: true,
+        typeAhead: false,
         value: rec ? rec.get("description") : ""
       })
     ],
-    buttons:[
+    buttons: [
       {
-        text:'Cancel',
-        itemId:'cancel'
+        text: 'Cancel',
+        itemId: 'cancel'
       },
       {
-        text:'Add',
-        itemId:'add'
+        text: 'Add',
+        itemId: 'add'
       }
     ]
   });
 
   addWindow.show();
 
-  addWindow.buttons[0].on('click', function() { addWindow.close(); } );
+  addWindow.buttons[0].on('click', function() { addWindow.close(); });
   addWindow.buttons[1].on('click', function() {
     var InvestigationRecord = Ext.data.Record.create([
       "title", "description", "project"
@@ -1222,21 +1222,21 @@ MA.editInvestigation = function(rec) {
 };
 
 MA.AttemptCloneExperiment = function(base_exp_id) {
-    var req = new Ajax.Request(wsBaseUrl + 'check_experiment_cloneable/'+encodeURIComponent(base_exp_id),
+    var req = new Ajax.Request(wsBaseUrl + 'check_experiment_cloneable/' + encodeURIComponent(base_exp_id),
             {
-                asynchronous:true,
-                evalJSON:'force',
-                onSuccess: function(response){
+                asynchronous: true,
+                evalJSON: 'force',
+                onSuccess: function(response) {
                     console.log(response.responseJSON);
-                    if (response.responseJSON.success===true){
+                    if (response.responseJSON.success === true) {
                         console.log("cloning");
                         MA.CloneExperiment(base_exp_id);}
-                    else{
+                    else {
                         console.log(response.responseJSON);
                         Ext.Msg.alert("Cloning Error", "Cannot clone experiment: " + response.responseJSON.message);
                     }
                 },
-                onFailure: function(response){
+                onFailure: function(response) {
                     var reason = 'Unknown';
                     Ext.Msg("Cannot clone experiment: " + reason);
                 }
@@ -1248,21 +1248,21 @@ MA.CloneExperiment = function(base_exp_id) {
     //var proj_experiment_grid = Ext.getCmp('project-experiments');
     //var exp_store = proj_experiment_grid.getStore();
     //console.log("requesting.");
-    var req = new Ajax.Request(wsBaseUrl + 'create/experiment/?base_experiment_id='+encodeURIComponent(base_exp_id),
+    var req = new Ajax.Request(wsBaseUrl + 'create/experiment/?base_experiment_id=' + encodeURIComponent(base_exp_id),
                                                  {
-                                                 asynchronous:true,
-                                                 evalJSON:'force',
-                                         onSuccess:    function(){
+                                                 asynchronous: true,
+                                                 evalJSON: 'force',
+                                         onSuccess: function() {
                                                                 experimentListStore.proxy.conn.url = wsBaseUrl + 'recordsExperiments/' + MA.currentProjectId;
                                                                 experimentListStore.load();
                                                                 //exp_store.load();
                                                         },
-                                         onFailure:    MA.DSLoadException
+                                         onFailure: MA.DSLoadException
                                          });
 };
 
 
-MA.LoadProject = function (projId) {
+MA.LoadProject = function(projId) {
     projectsListStore.load();
     MA.currentProjectId = projId;
 
@@ -1270,8 +1270,8 @@ MA.LoadProject = function (projId) {
 
     var projLoader = new Ajax.Request(wsBaseUrl + "recordsProject/" + projId,
                                          {
-                                         asynchronous:true,
-                                         evalJSON:'force',
+                                         asynchronous: true,
+                                         evalJSON: 'force',
                                          onSuccess: function(response) {
                                                  MA.investigationStore.load({
                                                    params: { project: projId }
@@ -1334,5 +1334,5 @@ MA.LoadProject = function (projId) {
     experimentListStore.proxy.conn.url = wsBaseUrl + 'recordsExperiments/' + projId;
     experimentListStore.load();
 
-    MA.MenuHandler({ id:'project:view' });
+    MA.MenuHandler({ id: 'project:view' });
 };

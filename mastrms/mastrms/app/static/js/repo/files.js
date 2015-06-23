@@ -9,47 +9,47 @@ MA.FilesInit = function() {
 
 MA.Files = {
     baseCls: 'x-plain',
-    border:'false',
-    layout:'fit',
+    border: 'false',
+    layout: 'fit',
     items: [{
        title: 'Files',
        //       bodyStyle:'padding:0px;background:transparent;',
        collapsible: false,
-       layout:'border',
+       layout: 'border',
        tbar: {
            items: [
-               { xtype:'tbtext', text:'Checkmarks indicate files that are visible to clients' }
+               { xtype: 'tbtext', text: 'Checkmarks indicate files that are visible to clients' }
            ]
        },
        bbar: {
            items: [{
-               xtype:'form',
-               id:'pendingFileUpload',
-               fileUpload:true,
-               method:'POST',
-               width:200,
-               height:30,
-               border:false,
-               bodyStyle:'background:transparent;padding:4px;',
-               url:wsBaseUrl + 'uploadFile',
+               xtype: 'form',
+               id: 'pendingFileUpload',
+               fileUpload: true,
+               method: 'POST',
+               width: 200,
+               height: 30,
+               border: false,
+               bodyStyle: 'background:transparent;padding:4px;',
+               url: wsBaseUrl + 'uploadFile',
                labelWidth: 120,
                items: [
                {
-                   hideLabel:true,
+                   hideLabel: true,
                    xtype: 'fileuploadfield',
                    emptyText: '',
                    fieldLabel: 'File',
                    name: 'attachfile'
                },
                {
-                   xtype:'hidden',
-                   id:'uploadExperimentId',
-                   name:'experimentId'
+                   xtype: 'hidden',
+                   id: 'uploadExperimentId',
+                   name: 'experimentId'
                },
                {
-                   xtype:'hidden',
-                   id:'uploadParentNodeId',
-                   name:'parentId'
+                   xtype: 'hidden',
+                   id: 'uploadParentNodeId',
+                   name: 'parentId'
                },
                {
                    xtype: 'hidden',
@@ -58,8 +58,8 @@ MA.Files = {
                }]
            },{
                text: 'Upload',
-               id:'upload file',
-               handler: function(){
+               id: 'upload file',
+               handler: function() {
                  var form = Ext.getCmp('pendingFileUpload').getForm();
                  var tree = Ext.getCmp('filesTree');
                  var nodes = tree.getSelectionModel().getSelectedNodes();
@@ -74,8 +74,8 @@ MA.Files = {
                  Ext.getCmp("uploadExperimentId").setValue(MA.ExperimentController.currentId());
 
                    form.submit(
-                   {   successProperty: 'success',
-                       success: function (form, action) {
+                   { successProperty: 'success',
+                       success: function(form, action) {
                            if (action.result.success === true) {
                                form.reset();
 
@@ -85,7 +85,7 @@ MA.Files = {
 
                            }
                        },
-                       failure: function (form, action, response) {
+                       failure: function(form, action, response) {
                          console.log("action", action);
                          console.log("response", response);
                            //do nothing special. this gets called on validation failures and server errors
@@ -96,8 +96,8 @@ MA.Files = {
            }, { xtype: "tbseparator" },
            {
                text: 'New Folder...',
-               id:'new folder',
-               handler: function(){
+               id: 'new folder',
+               handler: function() {
                  var tree = Ext.getCmp('filesTree');
                  var nodes = tree.getSelectionModel().getSelectedNodes();
                  var node = null;
@@ -119,10 +119,10 @@ MA.Files = {
                    msg = "Folder will be created under:<br/>" + node.id + "<br/>";
                  }
                  msg += "Please choose a name:";
-                 Ext.Msg.prompt("Folder Name", msg, function(btn, text){
+                 Ext.Msg.prompt("Folder Name", msg, function(btn, text) {
                    if (btn == 'ok' && text.length > 0) {
                      Ext.Ajax.request({
-                       method:'POST',
+                       method: 'POST',
                        url: wsBaseUrl + 'newFolder',
                        success: function(response) {
                          var result = Ext.util.JSON.decode(response.responseText);
@@ -156,8 +156,8 @@ MA.Files = {
                }
            }, {
                text: 'Delete',
-               id:'delete',
-               handler: function(){
+               id: 'delete',
+               handler: function() {
                  var tree = Ext.getCmp('filesTree');
                  var nodes = tree.getSelectionModel().getSelectedNodes();
                  var node = null;
@@ -190,7 +190,7 @@ MA.Files = {
                    fn: function(btn) {
                      if (btn == 'yes') {
                        Ext.Ajax.request({
-                         method:'POST',
+                         method: 'POST',
                          url: wsBaseUrl + 'deleteFile',
                          success: function() {
                            Ext.Msg.alert("Deleted " + name, "(this message will auto-close in 1 second)");
@@ -216,8 +216,8 @@ MA.Files = {
                }
            }, {
                text: 'Rename',
-               id:'rename',
-               handler: function(){
+               id: 'rename',
+               handler: function() {
                  var tree = Ext.getCmp('filesTree');
                  var nodes = tree.getSelectionModel().getSelectedNodes();
                  var node = null;
@@ -240,14 +240,14 @@ MA.Files = {
                    return;
                  }
 
-                 var pieces = node.id.split("/")
+                 var pieces = node.id.split("/");
                  var path = "", name = node.id;
 
                  if (pieces.length >= 2) {
                    path = pieces.slice(0, -1).join("/") + "/";
                    name = pieces[pieces.length - 1];
                  } else {
-                   path = ""
+                   path = "";
                    name = node.id;
                  }
 
@@ -261,7 +261,7 @@ MA.Files = {
                    fn: function(btn, text) {
                      if (btn == 'ok' && text.length > 0) {
                        Ext.Ajax.request({
-                         method:'POST',
+                         method: 'POST',
                          url: wsBaseUrl + 'moveFile',
                          success: function(response) {
                            var result = Ext.util.JSON.decode(response.responseText);
@@ -296,7 +296,7 @@ MA.Files = {
                }
            }, { xtype: "tbseparator" },{
                text: 'Download ',
-               handler: function(){
+               handler: function() {
                     var tree = Ext.getCmp('filesTree');
                     var checkedNodes = tree.getChecked();
                     var filesToDownload;
@@ -304,7 +304,7 @@ MA.Files = {
                         node = checkedNodes[0];
                         window.location = wsBaseUrl + 'downloadFile?file=' + node.id + '&experiment_id=' + MA.ExperimentController.currentId();
                     } else {
-                        filesToDownload = []
+                        filesToDownload = [];
                         for (var i = 0; i < checkedNodes.length; i++) {
                             node = checkedNodes[i];
                             filesToDownload.push(node.attributes.id);
@@ -331,17 +331,17 @@ MA.Files = {
                 fieldLabel: 'Package type',
                 store: new Ext.data.ArrayStore({
                     fields: ['ext', 'description'],
-                    data : [
+                    data: [
                         ['tgz', '.tgz'],
                         ['tbz2', '.tbz2'],
                         ['zip', '.zip'],
                         ['tar', '.tar']
                     ]
                 }),
-                displayField:'description',
-                valueField:'ext',
-                lazyRender:true,
-                triggerAction:'all',
+                displayField: 'description',
+                valueField: 'ext',
+                lazyRender: true,
+                triggerAction: 'all',
                 editable: false,
                 width: 80,
                 listWidth: 80,
@@ -351,18 +351,18 @@ MA.Files = {
        },
        items: [
                {
-               xtype:'treepanel',
+               xtype: 'treepanel',
                border: false,
                autoScroll: true,
-               id:'filesTree',
+               id: 'filesTree',
                animate: true,
-               region:'center',
-               enableDrop:true,
+               region: 'center',
+               enableDrop: true,
                enableDD: true,
                useArrows: true,
                dropConfig: { appendOnly: true },
-               dataUrl:wsBaseUrl + 'files',
-               requestMethod:'GET',
+               dataUrl: wsBaseUrl + 'files',
+               requestMethod: 'GET',
                root: {
                    nodeType: 'async',
                    text: 'Experiment',
@@ -371,7 +371,7 @@ MA.Files = {
                    'metafile': true
                },
                selModel: new Ext.tree.MultiSelectionModel(),
-               listeners:{
+               listeners: {
                    render: function() {
                         Ext.getCmp('filesTree').getLoader().on("beforeload", function(treeLoader, node) {
                             treeLoader.baseParams.experiment = MA.ExperimentController.currentId();
@@ -380,7 +380,7 @@ MA.Files = {
                     },
                    nodedrop: function(de) {
                         Ext.Ajax.request({
-                                         method:'POST',
+                                         method: 'POST',
                                     url: wsBaseUrl + 'moveFile',
                                          success: function() { Ext.getCmp('filesTree').getLoader().load(Ext.getCmp('filesTree').getRootNode());
                                          Ext.getCmp('filesTree').getRootNode().expand(); },
@@ -392,12 +392,12 @@ MA.Files = {
                                          params: { file: de.dropNode.id, target: de.target.id, experiment_id: MA.ExperimentController.currentId() }
                                     });
                    },
-                   checkchange: function(node, checked){
+                   checkchange: function(node, checked) {
                      Ext.Ajax.request({
-                       method:'POST',
+                       method: 'POST',
                        url: wsBaseUrl + 'shareFile',
-                       success: function() {  },
-                       failure: function() {  },
+                       success: function() { },
+                       failure: function() { },
                        params: { file: node.id, checked: checked, experiment_id: MA.ExperimentController.currentId() }
                      });
                    }

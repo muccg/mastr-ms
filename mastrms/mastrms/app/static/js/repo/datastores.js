@@ -29,12 +29,12 @@ MA.DSLoadException = function(status, text, c, d, e) {
     }
 
     if (text === undefined) {
-        text = "An unidentified error occurred, please try again. (Code: "+status+")";
+        text = "An unidentified error occurred, please try again. (Code: " + status + ")";
     } else if (Ext.isObject(text)) {
         if (c.status == 200) {
             text = "Session timeout occurred.";
         } else {
-            text = "An error occurred, code: "+c.status+" message: "+c.statusText;
+            text = "An error occurred, code: " + c.status + " message: " + c.statusText;
         }
     }
 
@@ -94,9 +94,9 @@ MA.CurrentSampleClassId = function() {
 //of the field in the store that you will be filtering by.
 //ESC, DELETE, or BS will clear the filter.
 MA.StoreFilter = function(component, keyevent, filterparam) {
-    keyevent.stopEvent() //prevent default browser handling
-    var k = keyevent.getCharCode()
-    if ( (k == keyevent.ESC) || (k == keyevent.DELETE) || (k == keyevent.BACKSPACE))
+    keyevent.stopEvent(); //prevent default browser handling
+    var k = keyevent.getCharCode();
+    if ((k == keyevent.ESC) || (k == keyevent.DELETE) || (k == keyevent.BACKSPACE))
     {
         component.store.clearFilter();
     }
@@ -116,7 +116,7 @@ var organStore = new Ext.data.JsonStore(
                             url: adminBaseUrl + "repository/organ/ext/json",
                             remoteSort: true,
                             restful: true,
-                            listeners: {'load':MA.DSLoaded
+                            listeners: {'load': MA.DSLoaded
                             },
                             sortInfo: {
                                 field: 'id',
@@ -152,7 +152,7 @@ var treatmentStore = new Ext.data.JsonStore(
                             url: adminBaseUrl + "repository/treatment/ext/json",
                             remoteSort: true,
                             restful: true,
-                            listeners: {'load':MA.DSLoaded
+                            listeners: {'load': MA.DSLoaded
                             },
                             sortInfo: {
                                 field: 'id',
@@ -168,7 +168,7 @@ var sopStore = new Ext.data.JsonStore(
                             url: adminBaseUrl + "repository/standardoperationprocedure/ext/json",
                             remoteSort: true,
                             restful: true,
-                            listeners: {'load':MA.DSLoaded
+                            listeners: {'load': MA.DSLoaded
                             },
                             sortInfo: {
                                 field: 'id',
@@ -184,8 +184,8 @@ var sopLookupStore = new Ext.data.JsonStore(
                             url: adminBaseUrl + "repository/standardoperationprocedure/ext/json",
                             remoteSort: true,
                             restful: true,
-                            listeners: {'load':MA.DSLoaded,
-                                        'loadexception':MA.DSLoadIgnoreException
+                            listeners: {'load': MA.DSLoaded,
+                                        'loadexception': MA.DSLoadIgnoreException
                             }
                         }
                     );
@@ -197,7 +197,7 @@ var userStore = new Ext.data.JsonStore(
                             url: adminBaseUrl + "repository/userexperiment/ext/json",
                             remoteSort: true,
                             restful: true,
-                            listeners: {'load':MA.DSLoaded
+                            listeners: {'load': MA.DSLoaded
                             }
                         }
                     );
@@ -211,15 +211,15 @@ var experimentListStore = new Ext.data.GroupingStore(
                             storeId: 'experimentList',
                             autoLoad: false,
                             url: wsBaseUrl + 'recordsExperiments',
-                            listeners: {'load':MA.DSLoaded },
+                            listeners: {'load': MA.DSLoaded },
                             remoteGroup: true,
                             remoteSort: true,
                             sortInfo: {
                                 field: 'id',
                                 direction: 'DESC'
                             },
-                            reader:new Ext.data.JsonReader({}),
-                            groupField:'status_text'
+                            reader: new Ext.data.JsonReader({}),
+                            groupField: 'status_text'
                         }
                     );
 
@@ -229,13 +229,13 @@ var runRelatedExperimentStore = new Ext.data.JsonStore(
     storeId: 'runRelatedExperimentStore',
     autoLoad: false,
     url: wsBaseUrl + 'recordsExperiments',
-    listeners: {'load':MA.DSLoaded
+    listeners: {'load': MA.DSLoaded
     },
     sortInfo: {
         field: 'id',
         direction: 'DESC'
     },
-    reader:new Ext.data.JsonReader({})
+    reader: new Ext.data.JsonReader({})
 }
 );
 
@@ -247,7 +247,7 @@ var projectsListStore = new Ext.data.JsonStore(
                             remoteSort: true,
                             restful: true,
                             writer: new Ext.data.JsonWriter({ encode: false }),
-                            listeners: {'load':MA.DSLoaded
+                            listeners: {'load': MA.DSLoaded
                                         },
                             sortInfo: {
                                 field: 'id',
@@ -261,7 +261,7 @@ var clientsListStore = new Ext.data.JsonStore(
                             storeId: 'clientsList',
                             autoLoad: false,
                             url: wsBaseUrl + 'recordsClientList',
-                            listeners: {'load':MA.DSLoaded
+                            listeners: {'load': MA.DSLoaded
                                         },
                             sortInfo: {
                                 field: 'username',
@@ -276,7 +276,7 @@ var userListStore = new Ext.data.JsonStore(
                             storeId: 'userList',
                             autoLoad: false,
                             url: wsBaseUrl + 'recordsClientList?allUsers=1',
-                            listeners: {'load':MA.DSLoaded},
+                            listeners: {'load': MA.DSLoaded},
                             sortInfo: {
                             field: 'username',
                             direction: 'DESC'
@@ -289,7 +289,7 @@ var sorteduserListStore = new Ext.data.JsonStore(
                             storeId: 'sorteduserList',
                             autoLoad: true,
                             url: wsBaseUrl + 'recordsClientList?allUsers=1&sortUsers=1',
-                            listeners: {'load':MA.DSLoaded},
+                            listeners: {'load': MA.DSLoaded},
                             sortInfo: {
                             field: 'username',
                             direction: 'DESC'
@@ -299,7 +299,7 @@ var sorteduserListStore = new Ext.data.JsonStore(
                         );
 
 var experimentStore = new Ext.data.ArrayStore({
-                                             storeId:'experiment',
+                                             storeId: 'experiment',
                                              fields: ['id', 'title', 'description', 'comment', 'status_id', 'created_on', 'client_id']
 });
 
@@ -308,7 +308,7 @@ var sampleClassStore = new Ext.data.JsonStore(
                                              storeId: 'sampleclass',
                                              autoLoad: false,
                                              url: wsBaseUrl + 'records/sampleclass/experiment__id/0',
-                                             listeners: {'load':MA.DSLoaded},
+                                             listeners: {'load': MA.DSLoaded},
                                              sortInfo: {
                                                  field: 'id',
                                                  direction: 'DESC'
@@ -323,7 +323,7 @@ var randomisableSampleStore = new Ext.data.JsonStore(
                                               url: wsBaseUrl + 'recordsSamplesForExperiment',
                                               remoteSort: true,
                                               restful: true,
-                                              listeners: {'load':MA.DSLoaded}//,
+                                              listeners: {'load': MA.DSLoaded}//,
                                               //sortInfo: {
                                               //    field: 'id',
                                               //    direction: 'DESC'
@@ -338,7 +338,7 @@ var sampleStore = new Ext.data.JsonStore(
                                               url: adminBaseUrl + 'repository/sample/ext/json',
                                               remoteSort: true,
                                               restful: true,
-                                              listeners: {'load':MA.DSLoaded},
+                                              listeners: {'load': MA.DSLoaded},
                                               sortInfo: {
                                                   field: 'id',
                                                   direction: 'DESC'
@@ -353,7 +353,7 @@ var sampleLogStore = new Ext.data.JsonStore(
                                               url: adminBaseUrl + 'repository/samplelog/ext/json',
                                               remoteSort: true,
                                               restful: true,
-                                              listeners: {'load':MA.DSLoaded},
+                                              listeners: {'load': MA.DSLoaded},
                                               sortInfo: {
                                                   field: 'id',
                                                   direction: 'DESC'
@@ -369,13 +369,13 @@ var clientSampleStore = new Ext.data.GroupingStore(
                                               root: 'rows',
                                               totalProperty: 'results',
                                               id: 'id',
-                                              fields: ['id','experiment_id','experiment_title','label','weight','comment','sample_class','last_status'],
-                                              reader:new Ext.data.JsonReader({}),
+                                              fields: ['id', 'experiment_id', 'experiment_title', 'label', 'weight', 'comment', 'sample_class', 'last_status'],
+                                              reader: new Ext.data.JsonReader({}),
                                               sortInfo: {
                                                   field: 'id',
                                                   direction: 'DESC'
                                               },
-                                              groupField:'experiment_id'
+                                              groupField: 'experiment_id'
                                               }
                                               );
 
@@ -384,8 +384,8 @@ var plantStore = new Ext.data.JsonStore(
                                           storeId: 'plant',
                                           autoLoad: false,
                                           url: wsBaseUrl + 'records/plant/id/0',
-                                          listeners: {'load':MA.DSLoaded,
-                                          'load':function(t, rs, o) {
+                                          listeners: {'load': MA.DSLoaded,
+                                          'load': function(t, rs, o) {
                                               if (rs.length > 0) {
                                                   Ext.getCmp('development_stage').setValue(rs[0].data.development_stage);
                                               }
@@ -398,8 +398,8 @@ var animalStore = new Ext.data.JsonStore(
                             storeId: 'animal',
                             autoLoad: false,
                             url: wsBaseUrl + 'records/animal/experiment__id/0',
-                            listeners: {'load':MA.DSLoaded,
-                                        'load':function(t, rs, o) {
+                            listeners: {'load': MA.DSLoaded,
+                                        'load': function(t, rs, o) {
                                             Ext.getCmp('animalGender').clearValue();
                                             Ext.getCmp('animalAge').setValue('');
                                             Ext.getCmp('animalParentalLine').clearValue();
@@ -419,8 +419,8 @@ var humanStore = new Ext.data.JsonStore(
                                          storeId: 'human',
                                          autoLoad: false,
                                          url: wsBaseUrl + 'records/human/experiment__id/0',
-                                         listeners: {'load':MA.DSLoaded,
-                                         'load':function(t, rs, o) {
+                                         listeners: {'load': MA.DSLoaded,
+                                         'load': function(t, rs, o) {
                                          Ext.getCmp('humanGender').clearValue();
                                          Ext.getCmp('human_dob').setValue('');
                                          Ext.getCmp('human_bmi').setValue('');
@@ -443,8 +443,8 @@ var experimentRunStore = new Ext.data.JsonStore(
                                                 autoLoad: false,
                                                 url: adminBaseUrl + "repository/run/ext/json",
                                                 restful: true,
-                                                listeners: {'load':MA.DSLoaded,
-                                                'loadexception':MA.DSLoadIgnoreException
+                                                listeners: {'load': MA.DSLoaded,
+                                                'loadexception': MA.DSLoadIgnoreException
                                                 },
                                                 sortInfo: {
                                                 field: 'id',
@@ -460,8 +460,8 @@ var newRunsStore = new Ext.data.JsonStore(
                             url: adminBaseUrl + "repository/run/ext/json",
                             baseParams: {'state': 0},
                             restful: true,
-                            listeners: {'load':MA.DSLoaded,
-                                        'loadexception':MA.DSLoadIgnoreException
+                            listeners: {'load': MA.DSLoaded,
+                                        'loadexception': MA.DSLoadIgnoreException
                             },
                             sortInfo: {
                                 field: 'id',
@@ -476,8 +476,8 @@ var runStore = new Ext.data.JsonStore(
                             autoLoad: false,
                             url: wsBaseUrl + "recordsRuns",
                             restful: true,
-                            listeners: {'load':MA.DSLoaded,
-                                        'loadexception':MA.DSLoadIgnoreException
+                            listeners: {'load': MA.DSLoaded,
+                                        'loadexception': MA.DSLoadIgnoreException
                             },
                             sortInfo: {
                                 field: 'id',
@@ -492,8 +492,8 @@ var ruleGeneratorListStore = new Ext.data.JsonStore(
                             autoLoad: false,
                             url: wsBaseUrl + "recordsRuleGeneratorsAccessibility",
                             restful: true,
-                            listeners: {'load':MA.DSLoaded,
-                                        'loadexception':MA.DSLoadIgnoreException
+                            listeners: {'load': MA.DSLoaded,
+                                        'loadexception': MA.DSLoadIgnoreException
                             },
                             sortInfo: {
                                 field: 'id',
@@ -528,8 +528,8 @@ var runSampleStore = new Ext.data.JsonStore(
                             autoLoad: false,
                             url: adminBaseUrl + "repository/sample/ext/json?run__id__exact=0",
                             restful: true,
-                            listeners: {'load':MA.DSLoaded,
-                                        'loadexception':MA.DSLoadIgnoreException
+                            listeners: {'load': MA.DSLoaded,
+                                        'loadexception': MA.DSLoadIgnoreException
                             },
                             sortInfo: {
                                 field: 'id',
@@ -544,8 +544,8 @@ var machineStore = new Ext.data.JsonStore(
     autoLoad: false,
     url: adminBaseUrl + 'mdatasync_server/nodeclient/ext/json',
     restful: false,
-    listeners: {'load':MA.DSLoaded,
-        'loadexception':MA.DSLoadIgnoreException
+    listeners: {'load': MA.DSLoaded,
+        'loadexception': MA.DSLoadIgnoreException
     },
     sortInfo: {
         field: 'id',
@@ -560,12 +560,12 @@ var organismTypeComboStore = new Ext.data.JsonStore(
                         {
                             storeId: 'organismTypeCombo',
                             autoLoad: false,
-                                                    method:'GET',
+                                                    method: 'GET',
                             url: wsBaseUrl + 'populate_select/organismtype/id/name/',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
-                            listeners: {'load':MA.DSLoaded,
-                                        'loadexception':MA.DSLoadIgnoreException}
+                            listeners: {'load': MA.DSLoaded,
+                                        'loadexception': MA.DSLoadIgnoreException}
                         }
                     );
 
@@ -576,7 +576,7 @@ var plantComboStore = new Ext.data.JsonStore(
                                                     url: wsBaseUrl + 'populate_select/plantinfo/development_stage/',
                                                     root: 'response.value.items',
                                                     fields: ['value', 'key'],
-                                                    listeners: {'load':MA.DSLoaded}
+                                                    listeners: {'load': MA.DSLoaded}
                                                     });
 
 var animalComboStore = new Ext.data.JsonStore(
@@ -586,7 +586,7 @@ var animalComboStore = new Ext.data.JsonStore(
                             url: wsBaseUrl + 'populate_select/animalinfo/parental_line/',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
-                            listeners: {'load':MA.DSLoaded}
+                            listeners: {'load': MA.DSLoaded}
                         }
                     );
 
@@ -597,7 +597,7 @@ var organNameComboStore = new Ext.data.JsonStore(
                             url: wsBaseUrl + 'populate_select/organ/name',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
-                            listeners: {'load':MA.DSLoaded}
+                            listeners: {'load': MA.DSLoaded}
                         }
                     );
 
@@ -608,7 +608,7 @@ var tissueComboStore = new Ext.data.JsonStore(
                             url: wsBaseUrl + 'populate_select/organ/tissue',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
-                            listeners: {'load':MA.DSLoaded}
+                            listeners: {'load': MA.DSLoaded}
                         }
                     );
 
@@ -619,7 +619,7 @@ var cellTypeComboStore = new Ext.data.JsonStore(
                             url: wsBaseUrl + 'populate_select/organ/cell_type',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
-                            listeners: {'load':MA.DSLoaded}
+                            listeners: {'load': MA.DSLoaded}
                         }
                     );
 
@@ -630,7 +630,7 @@ var subcellularCellTypeComboStore = new Ext.data.JsonStore(
                             url: wsBaseUrl + 'populate_select/organ/subcellular_cell_type',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
-                            listeners: {'load':MA.DSLoaded}
+                            listeners: {'load': MA.DSLoaded}
                         }
                     );
 
@@ -642,7 +642,7 @@ var plantGrowingPlaceComboStore = new Ext.data.JsonStore(
                                                              url: wsBaseUrl + 'populate_select/plant/id/location',
                                                              root: 'response.value.items',
                                                              fields: ['value', 'key'],
-                                                             listeners: {'load':MA.DSLoaded}
+                                                             listeners: {'load': MA.DSLoaded}
                                                              }
                                                              );
 
@@ -653,7 +653,7 @@ var treatmentComboStore = new Ext.data.JsonStore(
                             url: wsBaseUrl + 'populate_select/treatment/name',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
-                            listeners: {'load':MA.DSLoaded}
+                            listeners: {'load': MA.DSLoaded}
                         }
                     );
 
@@ -664,7 +664,7 @@ var sopComboStore = new Ext.data.JsonStore(
                             url: wsBaseUrl + 'populate_select/standardoperationprocedure/id/label',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
-                            listeners: {'load':MA.DSLoaded}
+                            listeners: {'load': MA.DSLoaded}
                         }
                     );
 
@@ -675,8 +675,8 @@ var maStaffComboStore = new Ext.data.JsonStore(
                             url: wsBaseUrl + 'recordsMAStaff',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
-                            listeners: {'load':MA.DSLoaded,
-                                        'loadexception':MA.DSLoadIgnoreException}
+                            listeners: {'load': MA.DSLoaded,
+                                        'loadexception': MA.DSLoadIgnoreException}
                         }
                     );
 
@@ -687,8 +687,8 @@ var clientComboStore = new Ext.data.JsonStore(
                             url: adminBaseUrl + "auth/user/ext/json?run__id__exact=0",
                             root: 'response.value.items',
                             fields: ['value', 'key'],
-                            listeners: {'load':MA.DSLoaded,
-                            'loadexception':MA.DSLoadIgnoreException}
+                            listeners: {'load': MA.DSLoaded,
+                            'loadexception': MA.DSLoadIgnoreException}
                         }
                     );
 
@@ -699,8 +699,8 @@ var involvementComboStore = new Ext.data.JsonStore(
                             url: wsBaseUrl + 'populate_select/userinvolvementtype/id/name',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
-                            listeners: {'load':MA.DSLoaded,
-                                        'loadexception':MA.DSLoadIgnoreException}
+                            listeners: {'load': MA.DSLoaded,
+                                        'loadexception': MA.DSLoadIgnoreException}
                         }
                     );
 
@@ -711,14 +711,14 @@ var expStatusComboStore = new Ext.data.JsonStore(
                             url: wsBaseUrl + 'populate_select/experimentstatus/id/name',
                             root: 'response.value.items',
                             fields: ['value', 'key'],
-                            listeners: {'load':MA.DSLoaded,
-                                        'loadexception':MA.DSLoadIgnoreException}
+                            listeners: {'load': MA.DSLoaded,
+                                        'loadexception': MA.DSLoadIgnoreException}
                         }
                     );
 
 var methodStore = new Ext.data.JsonStore({
-    autoLoad:false,
-    storeId:'methodStore',
+    autoLoad: false,
+    storeId: 'methodStore',
     url: wsBaseUrl + 'populate_select/instrumentmethod/id/title/',
     root: 'response.value.items',
     fields: ['key', 'value']
@@ -730,8 +730,8 @@ var enabledRuleGeneratorStore = new Ext.data.JsonStore(
                             autoLoad: false,
                             url: wsBaseUrl + "recordsRuleGeneratorsAccessibilityEnabled",
                             restful: true,
-                            listeners: {'load':MA.DSLoaded,
-                                        'loadexception':MA.DSLoadIgnoreException
+                            listeners: {'load': MA.DSLoaded,
+                                        'loadexception': MA.DSLoadIgnoreException
                             },
                             sortInfo: {
                                 field: 'id',

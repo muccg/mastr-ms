@@ -40,7 +40,7 @@ MA.ClearCurrentRun = function() {
 
 // Create a component we can use both here and from the run list.
 MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
-    constructor: function (config, mode) {
+    constructor: function(config, mode) {
         var self = this;
         this.allowCreatingNewRun = false;
         this.allowAddingSamples = false;
@@ -79,12 +79,12 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         });
 
         var defaultConfig = {
-            autoScroll:true,
-            labelWidth:160,
-            items:[
+            autoScroll: true,
+            labelWidth: 160,
+            items: [
                 {
-                    xtype:'hidden',
-                    itemId:'id'
+                    xtype: 'hidden',
+                    itemId: 'id'
                 },
                 new Ext.form.Label({
                     fieldLabel: "State",
@@ -99,26 +99,26 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     text: ''
                 }),
                 {
-                    fieldLabel:'Title',
-                    xtype:'textfield',
-                    itemId:'title',
-                    value:'New Untitled Run',
-                    allowBlank:false
+                    fieldLabel: 'Title',
+                    xtype: 'textfield',
+                    itemId: 'title',
+                    value: 'New Untitled Run',
+                    allowBlank: false
                 },
                 new Ext.form.ComboBox({
                     fieldLabel: 'Instrument method',
                     itemId: 'method',
                     name: 'method',
-                    editable:false,
-                    forceSelection:true,
-                    displayField:'value',
-                    valueField:'key',
-                    hiddenName:'method',
-                    lazyRender:true,
-                    allowBlank:false,
-                    typeAhead:false,
-                    triggerAction:'all',
-                    listWidth:230,
+                    editable: false,
+                    forceSelection: true,
+                    displayField: 'value',
+                    valueField: 'key',
+                    hiddenName: 'method',
+                    lazyRender: true,
+                    allowBlank: false,
+                    typeAhead: false,
+                    triggerAction: 'all',
+                    listWidth: 230,
                     width: 200,
                     store: methodStore
                 }),
@@ -126,21 +126,21 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     fieldLabel: 'Machine',
                     itemId: 'machine',
                     name: 'machine',
-                    editable:false,
-                    forceSelection:true,
-                    displayField:'station_name',
-                    valueField:'id',
-                    hiddenName:'machine',
-                    lazyRender:true,
-                    allowBlank:false,
-                    typeAhead:false,
-                    triggerAction:'all',
-                    mode:'local',
-                    listWidth:230,
+                    editable: false,
+                    forceSelection: true,
+                    displayField: 'station_name',
+                    valueField: 'id',
+                    hiddenName: 'machine',
+                    lazyRender: true,
+                    allowBlank: false,
+                    typeAhead: false,
+                    triggerAction: 'all',
+                    mode: 'local',
+                    listWidth: 230,
                     width: 200,
                     store: machineStore,
                     itemSelector: 'div.search-item',
-                    tpl:new Ext.XTemplate(
+                    tpl: new Ext.XTemplate(
                     '<tpl for="."><div style="padding:8px;padding-top:5px;padding-bottom:5px;border-bottom:1px solid #ccc;" class="search-item">',
                     '{station_name}<br /><span style="color:#666;">{organisation_name} > {site_name}</span>',
                     '</div></tpl>'
@@ -150,28 +150,28 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     fieldLabel: 'Rule Generator',
                     itemId: 'rule_generator',
                     name: 'rule_generator',
-                    editable:false,
-                    forceSelection:true,
-                    displayField:'full_name',
-                    valueField:'id',
-                    hiddenName:'rule_generator',
-                    lazyRender:true,
-                    allowBlank:false,
-                    typeAhead:false,
-                    triggerAction:'all',
-                    listWidth:230,
+                    editable: false,
+                    forceSelection: true,
+                    displayField: 'full_name',
+                    valueField: 'id',
+                    hiddenName: 'rule_generator',
+                    lazyRender: true,
+                    allowBlank: false,
+                    typeAhead: false,
+                    triggerAction: 'all',
+                    listWidth: 230,
                     width: 200,
                     queryaction: 'all',
                     lastQuery: '',
-                    store: enabledRuleGeneratorStore, 
+                    store: enabledRuleGeneratorStore,
                     mode: 'local'
-                }),{
+                }), {
                     //xtype: 'compositefield', // breaks getComponent() !
                     xtype: 'container',
                     itemId: 'methods',
                     layout: 'hbox',
                     fieldLabel: 'Number/Order of Methods',
-                    items: [                
+                    items: [
                         new Ext.form.NumberField({
                             fieldLabel: 'Number of Methods',
                             itemId: 'number_of_methods',
@@ -186,59 +186,59 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                             fieldLabel: 'Order of Methods',
                             itemId: 'order_of_methods',
                             name: 'order_of_methods',
-                            editable:false,
-                            forceSelection:true,
-                            displayField:'value',
-                            valueField:'key',
-                            hiddenName:'order_of_methods',
-                            lazyRender:true,
-                            typeAhead:false,
-                            triggerAction:'all',
+                            editable: false,
+                            forceSelection: true,
+                            displayField: 'value',
+                            valueField: 'key',
+                            hiddenName: 'order_of_methods',
+                            lazyRender: true,
+                            typeAhead: false,
+                            triggerAction: 'all',
                             mode: 'local',
-                            listWidth:150,
+                            listWidth: 150,
                             width: 150,
                             store: new Ext.data.ArrayStore({
                                 id: 0,
-                                fields: [ 'key', 'value'],
-                                data: [ ['', 'None'], [1, 'resampled vial'], [2, 'individual vial'] ]
+                                fields: ['key', 'value'],
+                                data: [['', 'None'], [1, 'resampled vial'], [2, 'individual vial']]
                             })
                         })
                     ]
                 },{
-                    fieldLabel:'Samples to Add',
-                    itemId:'samplesToAdd',
-                    xtype:'grid',
-                    width:310,
-                    height:120,
-                    store:this.pendingSampleStore,
-                    loadMask:true,
+                    fieldLabel: 'Samples to Add',
+                    itemId: 'samplesToAdd',
+                    xtype: 'grid',
+                    width: 310,
+                    height: 120,
+                    store: this.pendingSampleStore,
+                    loadMask: true,
                     columns: [
                         self.pendingSampleSelModel,
                         {header: "ID", dataIndex: 'id', sortable: true}
                     ],
-                    viewConfig:{
-                        forceFit:true
+                    viewConfig: {
+                        forceFit: true
                     },
                     sm: self.pendingSampleSelModel,
-                    style:'background:white;',
-                    autoScroll:true,
-                    reserveScrollOffset:true,
+                    style: 'background:white;',
+                    autoScroll: true,
+                    reserveScrollOffset: true,
                     bbar: {
                         items: [
-                            { 
-                                text:'Remove Samples',
+                            {
+                                text: 'Remove Samples',
                                 cls: 'x-btn-text-icon',
-                                icon:'static/images/delete.png',
+                                icon: 'static/images/delete.png',
                                 listeners: {
                                     'click': function(e) {
                                         //save changes to selected entries
                                         if (self.pendingSampleSelModel.getCount() > 0) {
                                             var selections = self.pendingSampleSelModel.getSelections();
-                                            
+
                                             if (!Ext.isArray(selections)) {
                                                 selections = [selections];
                                             }
-                                            
+
                                             var ids = [];
                                             for (var idx in selections) {
                                                 if (!Ext.isObject(selections[idx])) {
@@ -255,63 +255,63 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                     }
                 },
                 {
-                    fieldLabel:'Samples',
-                    xtype:'grid',
-                    width:310,
-                    itemId:'samples',
-                    height:120,
-                    store:this.runSampleStore,
-                    loadMask:true,
+                    fieldLabel: 'Samples',
+                    xtype: 'grid',
+                    width: 310,
+                    itemId: 'samples',
+                    height: 120,
+                    store: this.runSampleStore,
+                    loadMask: true,
                     columns: [
                         self.sampleSelModel,
                         {header: "ID", dataIndex: 'id', sortable: false, menuDisabled: true},
                         {header: "Label", dataIndex: 'label', sortable: false, menuDisabled: true},
                         {header: "Class", dataIndex: 'sample_class__unicode', sortable: false, menuDisabled: true},
-                       { header: "Seq", sortable:false, dataIndex:'sample_class_sequence', menuDisabled: true}
+                       { header: "Seq", sortable: false, dataIndex: 'sample_class_sequence', menuDisabled: true}
                     ],
-                    viewConfig:{
-                        forceFit:true
+                    viewConfig: {
+                        forceFit: true
                     },
                     sm: self.sampleSelModel,
-                    style:'background:white;',
-                    autoScroll:true,
-                    reserveScrollOffset:true,
+                    style: 'background:white;',
+                    autoScroll: true,
+                    reserveScrollOffset: true,
                     bbar: {
                         items: [
-                            { 
-                                text:'Remove Samples',
+                            {
+                                text: 'Remove Samples',
                                 cls: 'x-btn-text-icon',
-                                icon:'static/images/delete.png',
-                                itemId:'removeBtn',
+                                icon: 'static/images/delete.png',
+                                itemId: 'removeBtn',
                                 listeners: {
                                     'click': function(e) {
                                         //save changes to selected entries
                                         if (self.sampleSelModel.getCount() > 0) {
                                             var selections = self.sampleSelModel.getSelections();
-                                            
+
                                             if (!Ext.isArray(selections)) {
                                                 selections = [selections];
                                             }
-                                            
+
                                             var ids = [];
                                             for (var idx in selections) {
                                                 if (!Ext.isObject(selections[idx])) {
                                                     continue;
                                                 }
-                                                
+
                                                 ids.push(selections[idx].data.id);
                                             }
-                                            
+
                                             var saver = new Ajax.Request(
-                                                wsBaseUrl + 'remove_samples_from_run/', 
-                                                { 
-                                                    parameters:{
-                                                        run_id:self.runId,
-                                                        sample_ids:ids.join(",")
+                                                wsBaseUrl + 'remove_samples_from_run/',
+                                                {
+                                                    parameters: {
+                                                        run_id: self.runId,
+                                                        sample_ids: ids.join(",")
                                                     },
-                                                    asynchronous:true, 
-                                                    evalJSON:'force',
-                                                    onSuccess: function () {
+                                                    asynchronous: true,
+                                                    evalJSON: 'force',
+                                                    onSuccess: function() {
                                                         self.runSampleStore.load({ params: { run_id: self.runId } });
                                                     }
                                                 }
@@ -325,21 +325,21 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                 },
                 {
                    fieldLabel: 'Files - PBQCs, QCs and Sweeps',
-                   xtype:'treepanel',
+                   xtype: 'treepanel',
                    border: true,
                    autoScroll: true,
-                   itemId:'runTree',
+                   itemId: 'runTree',
                    animate: true,
                    useArrows: true,
-                   height:200,
-                   dataUrl:wsBaseUrl + 'runFiles',
-                   requestMethod:'GET',
-                    tbar:[
+                   height: 200,
+                   dataUrl: wsBaseUrl + 'runFiles',
+                   requestMethod: 'GET',
+                    tbar: [
                         {
-                            xtype:'tbtext',
-                            text:'Click a filename to download'
+                            xtype: 'tbtext',
+                            text: 'Click a filename to download'
                         }
-                    ],                   root: {
+                    ], root: {
                        nodeType: 'async',
                        text: 'Files',
                        draggable: false,
@@ -356,7 +356,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                                }
                            }
                        }),
-                   listeners:{
+                   listeners: {
                         render: function() {
                             self.getComponent('runTree').getLoader().on("beforeload", function(treeLoader, node) {
                                 treeLoader.baseParams.run = self.runId;
@@ -366,18 +366,18 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                },
                 {
                     fieldLabel: 'Related Experiments',
-                    xtype:'listview',
-                    itemId:'runRelatedExperiments',
-                    store:runRelatedExperimentStore,
-                    loadingText:'Loading...',
-                    columnSort:false,
-                    hideHeaders:true,
-                    height:50,
+                    xtype: 'listview',
+                    itemId: 'runRelatedExperiments',
+                    store: runRelatedExperimentStore,
+                    loadingText: 'Loading...',
+                    columnSort: false,
+                    hideHeaders: true,
+                    height: 50,
                     columns: [
                     {header: "Double-click to view experiment", dataIndex: 'title'}
                     ],
-                    listeners:{
-                        'dblclick':function(dv,idx,node,e) {
+                    listeners: {
+                        'dblclick': function(dv, idx, node, e) {
                             val = dv.getRecord(node);
                             if (Ext.isDefined(val)) {
                                 MA.currentProjectId = val.data.project;
@@ -387,30 +387,30 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                         'render': function() {
                         }
                     },
-                    viewConfig:{
-                        forceFit:true
+                    viewConfig: {
+                        forceFit: true
                     },
-                    singleSelect:true,
-                    multiSelect:false,
-                    style:'background:white;border: 1px solid #99BBE8;',
-                    autoScroll:true,
-                    reserveScrollOffset:true
+                    singleSelect: true,
+                    multiSelect: false,
+                    style: 'background:white;border: 1px solid #99BBE8;',
+                    autoScroll: true,
+                    reserveScrollOffset: true
                 }
             ],
-            buttons:[
+            buttons: [
                 {
-                    text:'Delete Run',
+                    text: 'Delete Run',
                     disabled: true,
-                    itemId:'deleteButton',
-                    handler:function() {
+                    itemId: 'deleteButton',
+                    handler: function() {
                         self.deleteRun();
                     }
                 },
                 {
-                    text:'Generate Worklist',
+                    text: 'Generate Worklist',
                     disabled: true,
-                    itemId:'generateWorklistButton',
-                    handler:function() {
+                    itemId: 'generateWorklistButton',
+                    handler: function() {
                         if (self.runId == 0) {
                             Ext.Msg.alert('Save Required', 'Before you can generate a worklist, this Run must be Saved');
                         } else {
@@ -422,14 +422,14 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                                 var msg = Ext.Msg.wait("Generating Worklist");
                                 Ext.Ajax.request({
                                     url: wsBaseUrl + "generate_worklist/" + self.runId,
-                                    success: function () {
+                                    success: function() {
                                         msg.hide();
                                         self.onStateChangedToInProgress();
-                                         
+
                                         window.open(wsBaseUrl + 'display_worklist/' + self.runId, 'worklist');
                                         self.fireEvent("save", self);
                                     },
-                                    failure: function () {
+                                    failure: function() {
                                         msg.hide();
                                         Ext.Msg.alert('Error', "An error occured and your worklist couldn't be generated");
                                     }
@@ -440,14 +440,14 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                 },
                 {
                     text: "Mark Complete",
-                    itemId:'markCompleteButton',
-                    disabled:true,
-                    handler: function () {
+                    itemId: 'markCompleteButton',
+                    disabled: true,
+                    handler: function() {
                         var agreed = window.confirm("Are you sure you wish to mark this run as having been fully completed?");
                         if (agreed) {
                             Ext.Ajax.request({
                                 url: wsBaseUrl + "mark_run_complete/" + self.runId,
-                                success: function () {
+                                success: function() {
                                     self.getComponent("state").setText(renderRunState(2));
                                     self.getComponent("progress").setText(renderCompleteRunProgress(), false);
                                     self.fireEvent("save", self.runId);
@@ -456,13 +456,13 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                         }
                     }
                 },
-                { 
-                    text:'Save Run',
+                {
+                    text: 'Save Run',
                     itemId: 'saveButton',
                     disabled: !this.allowCreatingNewRun,
-                    handler:function() {
+                    handler: function() {
                         if (self.isValid()) {
-                            var runSaveCallback = function (store, records, options) {
+                            var runSaveCallback = function(store, records, options) {
                                 self.runId = records[0].data.id;
                                 self.savePendingSamples();
 
@@ -487,13 +487,13 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                                 } else {
                                     //update
                                     values.id = self.runId;
-                                   
-                                    MA.CRUDSomething('update/run/'+values.id+'/', values, runSaveCallback);
+
+                                    MA.CRUDSomething('update/run/' + values.id + '/', values, runSaveCallback);
                                 }
                             };
                             if (values.number_of_methods > 5) {
-                                Ext.Msg.confirm('Large Number of Methods', 'The Number of Methods you entered (' + 
-                                    values.number_of_methods + ') is unusually high. This could cause the generation of a very long Worklist. Are you sure you want to proceed?', 
+                                Ext.Msg.confirm('Large Number of Methods', 'The Number of Methods you entered (' +
+                                    values.number_of_methods + ') is unusually high. This could cause the generation of a very long Worklist. Are you sure you want to proceed?',
                                     function(button) {
                                         if (button == 'yes') {
                                             restOfSaveFn();
@@ -551,20 +551,20 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
 
         this.pendingSampleStore.removeAll();
         this.runId = 0;
-        
+
         if (!this.allowAddingSamples) {
             this.remove("samplesToAdd");
             this.getComponent('samples').setHeight(200);
         } else {
             this.remove('runTree');
         }
-        
+
         self.setAutoScroll(true);
     },
     clearSamples: function() {
         this.pendingSampleStore.removeAll();
     },
-    addSample: function (sample_id) {
+    addSample: function(sample_id) {
         if (Ext.isArray(sample_id)) {
             for (var i = 0; i < sample_id.length; i++) {
                 this.addSample(sample_id[i]);
@@ -574,10 +574,10 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
 
         this.pendingSampleStore.add(new this.PendingSampleRecord({ 'id': sample_id }, sample_id));
     },
-    clearRun: function () {
+    clearRun: function() {
         this.createRun();
     },
-    createRun: function () {
+    createRun: function() {
         this.runId = 0;
         //this.pendingSampleStore.removeAll();
 
@@ -603,14 +603,14 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         this.getFooterToolbar().getComponent("generateWorklistButton").setText('Generate Workflow');
         this.getFooterToolbar().getComponent("markCompleteButton").disable();
         this.getFooterToolbar().getComponent("deleteButton").disable();
-        
+
         this.getComponent('samples').getBottomToolbar().getComponent('removeBtn').enable();
 
         runRelatedExperimentStore.removeAll();
 
         this.runSampleStore.load({ params: { run_id: this.runId } });
     },
-    deleteRun: function () {
+    deleteRun: function() {
         var self = this;
 
         if (this.runId == 0) {
@@ -619,20 +619,20 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
         } else {
             var agreed = window.confirm("Are you sure you wish to delete this Run?");
             if (agreed) {
-                MA.CRUDSomething('delete/run/'+this.runId+'/', null, function () {
+                MA.CRUDSomething('delete/run/' + this.runId + '/', null, function() {
                     self.clearRun();
                     self.fireEvent("delete", self.runId);
                 });
             }
         }
     },
-    savePendingSamples: function () {
+    savePendingSamples: function() {
         if (this.pendingSampleStore.getCount() > 0) {
             if (this.runId) {
                 var self = this;
 
                 var ids = [];
-                this.pendingSampleStore.each(function (record) {
+                this.pendingSampleStore.each(function(record) {
                     ids.push(record.data.id);
                 });
 
@@ -643,12 +643,12 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
                         run_id: this.runId,
                         sample_ids: ids.join(",")
                     },
-                    success: function () {
+                    success: function() {
                         self.pendingSampleStore.removeAll();
                         self.runSampleStore.load({ params: { run_id: self.runId } });
                         self.fireEvent("save-samples");
                     },
-                    failure: function (response, options) {
+                    failure: function(response, options) {
                         var message = "An error occurred while saving the "
                             + "sample list for this run. More detail may be "
                             + "available below:"
@@ -664,13 +664,13 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
             }
         }
     },
-    onStateChangedToInProgress: function () {
+    onStateChangedToInProgress: function() {
         this.getComponent("rule_generator").disable();
         this.getComponent("methods").getComponent("number_of_methods").disable();
         this.getComponent("methods").getComponent("order_of_methods").disable();
         this.getFooterToolbar().getComponent("generateWorklistButton").setText('Display Worklist');
     },
-    selectRun: function (record) {
+    selectRun: function(record) {
         var isNewRun = (record.data.state === 0);
         this.runId = record.data.id;
         //this.pendingSampleStore.removeAll();
@@ -694,7 +694,7 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
             this.getComponent("methods").getComponent("order_of_methods").setValue(orderOfMethods);
         }
 
-        
+
         this.getComponent("rule_generator").setDisabled(!isNewRun);
         this.getComponent("methods").getComponent("number_of_methods").setDisabled(!isNewRun);
         this.getComponent("methods").getComponent("order_of_methods").setDisabled(!isNewRun);
@@ -716,75 +716,75 @@ MA.RunDetail = Ext.extend(Ext.form.FormPanel, {
             this.getFooterToolbar().getComponent("markCompleteButton").disable();
             this.getFooterToolbar().getComponent("deleteButton").disable();
         }
-        
+
         if (record.data.state == 0) {
             this.getComponent('samples').getBottomToolbar().getComponent('removeBtn').enable();
         } else {
             this.getComponent('samples').getBottomToolbar().getComponent('removeBtn').disable();
         }
-       
+
         this.runSampleStore.load({ params: { run_id: this.runId } });
-        
+
         if (this.getComponent('runTree')) {
             this.getComponent('runTree').getLoader().clearOnLoad = true;
             this.getComponent('runTree').getLoader().load(this.getComponent('runTree').getRootNode());
         }
-        
+
         runRelatedExperimentStore.proxy.conn.url = wsBaseUrl + 'records/experiment/run__id/' + this.runId;
         runRelatedExperimentStore.load({ });
     }
 });
 
 MA.RunCmp = new Ext.Window({
-    id:'runCmp',
-    title:'Current Run',
-    width:680,
-    height:530,
-    minHeight:530,
-    x:170,
-    y:50,
-    closeAction:'hide',
-    layout:'border',
+    id: 'runCmp',
+    title: 'Current Run',
+    width: 680,
+    height: 530,
+    minHeight: 530,
+    x: 170,
+    y: 50,
+    closeAction: 'hide',
+    layout: 'border',
     tbar: [{
         text: 'Create New',
         cls: 'x-btn-text-icon',
-        icon:'static/images/add.png',
-        handler : function(){
+        icon: 'static/images/add.png',
+        handler: function() {
                 MA.CreateNewRun();
             }
         }
     ],
     listeners: {
-        "beforeshow": function (w) {
+        "beforeshow": function(w) {
             MA.ReloadRunStores();
             //selectableRunStore.load();
         }
     },
-    items:[
-    
+    items: [
+
         {
-            xtype:'listview',
-            id:'runlistview',
-            region:'west',
-            width:150,
-            store:newRunsStore,
-            loadingText:'Loading...',
-            columnSort:false,
+            xtype: 'listview',
+            id: 'runlistview',
+            region: 'west',
+            width: 150,
+            store: newRunsStore,
+            loadingText: 'Loading...',
+            columnSort: false,
             columns: [
-	            {header: "Or select existing", dataIndex: 'title', 
-	                tpl: '<div style="padding:4px"><b>{title}</b><br><div style="color:#666"><i>{method__unicode}<br>{creator__unicode}</i></div></div>'}
+                {header: "Or select existing", dataIndex: 'title',
+                    tpl: '<div style="padding:4px"><b>{title}</b><br><div style="color:#666"><i>{method__unicode}<br>{creator__unicode}</i></div></div>'}
             ],
-            listeners:{
-                'selectionchange':MA.RunCmpRowSelect,
+            listeners: {
+                'selectionchange': MA.RunCmpRowSelect,
                 'render': function() {
                     //register to be notified when the runstore loads so that we can update current sel
-                    
+
                     newRunsStore.addListener("load", function() {
                         var record = newRunsStore.getById(Ext.getCmp('runDetails').runId);
                         if (record != null) {
                             var list = Ext.getCmp("runlistview");
                             list.refresh();
-    
+
                             list.select(record);
                             list.getNode(record).scrollIntoView(list.innerBody.dom.parentNode);
                         } else {
@@ -794,23 +794,23 @@ MA.RunCmp = new Ext.Window({
                     //selectableRunStore.load();
                 }
             },
-            viewConfig:{
-                forceFit:true
+            viewConfig: {
+                forceFit: true
             },
-            singleSelect:true,
-            multiSelect:false,
-            style:'background:white;',
-            autoScroll:true,
-            reserveScrollOffset:true
+            singleSelect: true,
+            multiSelect: false,
+            style: 'background:white;',
+            autoScroll: true,
+            reserveScrollOffset: true
         },
         new MA.RunDetail({
-            id:'runDetails',
-            autoScroll:true,
-            region:'center',
-            bodyStyle:'padding:20px;background:transparent;border-top:none;border-bottom:none;border-right:none;',
+            id: 'runDetails',
+            autoScroll: true,
+            region: 'center',
+            bodyStyle: 'padding:20px;background:transparent;border-top:none;border-bottom:none;border-right:none;',
             listeners: {
                 "delete": MA.RunDeleteCallback,
-                "save": function (id) {
+                "save": function(id) {
                     MA.ReloadRunStores();
                 }
             }

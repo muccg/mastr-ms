@@ -3,16 +3,16 @@ MA.SamplePrepInit = function() {
 };
 
 MA.SaveSOPRow = function(changes) {
-    
+
     if (changes.originalValue !== undefined && changes.originalValue !== "" && changes.originalValue !== null && changes.originalValue !== 0) {
-        MA.CRUDSomething('dissociate/standardoperationprocedure/experiment/'+changes.value+'/'+MA.ExperimentController.currentId(), {}, MA.Null);
+        MA.CRUDSomething('dissociate/standardoperationprocedure/experiment/' + changes.value + '/' + MA.ExperimentController.currentId(), {}, MA.Null);
     }
-    MA.CRUDSomething('associate/standardoperationprocedure/experiment/'+changes.value+'/'+MA.ExperimentController.currentId(), {}, MA.SamplePrepInit);
+    MA.CRUDSomething('associate/standardoperationprocedure/experiment/' + changes.value + '/' + MA.ExperimentController.currentId(), {}, MA.SamplePrepInit);
 };
 
 MA.RemoveSOPRow = function(rec) {
     if (rec !== undefined && rec.data !== undefined && rec.data.id !== undefined && rec.data.id !== '') {
-        MA.CRUDSomething('dissociate/standardoperationprocedure/experiment/'+rec.data.id+'/'+MA.ExperimentController.currentId(), {}, MA.SamplePrepInit);
+        MA.CRUDSomething('dissociate/standardoperationprocedure/experiment/' + rec.data.id + '/' + MA.ExperimentController.currentId(), {}, MA.SamplePrepInit);
     } else {
         sopStore.remove(rec);
     }
@@ -23,58 +23,58 @@ MA.DownloadSOPFile = function(sopID) {
 };
 
 function sopFileActionRenderer(val) {
-    return '<a href="#" onclick="MA.DownloadSOPFile(\''+val+'\')">download</a>';
+    return '<a href="#" onclick="MA.DownloadSOPFile(\'' + val + '\')">download</a>';
 }
 
 MA.SamplePrep = {
     baseCls: 'x-plain',
-    border:false,
-    frame:false,
-    layout:'border',
+    border: false,
+    frame: false,
+    layout: 'border',
     defaults: {
-        bodyStyle:'padding:15px;background:transparent;'
+        bodyStyle: 'padding:15px;background:transparent;'
     },
-    items:[
+    items: [
         {
             title: 'Sample Preparation',
             region: 'center',
             collapsible: false,
-            autoScroll:true,
-            layout:'form',
+            autoScroll: true,
+            layout: 'form',
             labelAlign: 'top',
             minSize: 75,
-            items: [ 
-                { xtype:'editorgrid', 
-                    id:'standop',
-                    style:'margin-top:10px;margin-bottom:10px;',
-                    title:'Standard Operating Procedures Used',
-                    width:500,
-                    height:200,
+            items: [
+                { xtype: 'editorgrid',
+                    id: 'standop',
+                    style: 'margin-top:10px;margin-bottom:10px;',
+                    title: 'Standard Operating Procedures Used',
+                    width: 500,
+                    height: 200,
                     border: true,
                     trackMouseOver: false,
                     sm: new Ext.grid.RowSelectionModel(),
                     viewConfig: {
                         forceFit: true,
-                        autoFill:true
+                        autoFill: true
                     },
                     tbar: [{
                         text: 'Choose a SOP',
                         cls: 'x-btn-text-icon',
-                        icon:'static/images/add.png',
-                        handler : function(){
-                                sopStore.add(new Ext.data.Record({'id':'', 'description':''}));
+                        icon: 'static/images/add.png',
+                        handler: function() {
+                                sopStore.add(new Ext.data.Record({'id': '', 'description': ''}));
                             }
                         },
                         {
                         text: 'Remove SOP',
                         cls: 'x-btn-text-icon',
-                        icon:'static/images/delete.png',
-                        handler : function(){
+                        icon: 'static/images/delete.png',
+                        handler: function() {
                             var grid = Ext.getCmp('standop');
                             var store = Ext.StoreMgr.get('sopStore');
-                            
+
                             var selections = grid.getSelectionModel().getSelections();
-                            
+
                             for (var index in selections) {
                                 MA.RemoveSOPRow(selections[index]);
                             }
@@ -82,23 +82,23 @@ MA.SamplePrep = {
                         }
                     ],
                     columns: [
-                        { header: "SOP",  sortable:false, menuDisabled:true, editor:new Ext.form.ComboBox({
-                                editable:false,
-                                forceSelection:true,
-                                displayField:'value',
-                                valueField:'key',
-                                lazyRender:true, 
-                                allowBlank:false,
-                                typeAhead:false,
-                                triggerAction:'all',
-                                listWidth:230,
+                        { header: "SOP", sortable: false, menuDisabled: true, editor: new Ext.form.ComboBox({
+                                editable: false,
+                                forceSelection: true,
+                                displayField: 'value',
+                                valueField: 'key',
+                                lazyRender: true,
+                                allowBlank: false,
+                                typeAhead: false,
+                                triggerAction: 'all',
+                                listWidth: 230,
                                 store: sopComboStore,
-                                listeners:{'selectionchange':function() { }}
-                            }), dataIndex:'id', renderer: renderSOPLabel },
-                        { header: "Description", sortable:false, menuDisabled:true, dataIndex:'id', renderer: renderSOPDescription },
-                        { header: "View", sortable:false, menuDisabled:false, dataIndex:'id', renderer: sopFileActionRenderer }
+                                listeners: {'selectionchange': function() { }}
+                            }), dataIndex: 'id', renderer: renderSOPLabel },
+                        { header: "Description", sortable: false, menuDisabled: true, dataIndex: 'id', renderer: renderSOPDescription },
+                        { header: "View", sortable: false, menuDisabled: false, dataIndex: 'id', renderer: sopFileActionRenderer }
                     ],
-                    listeners: {'afteredit':function(e) { MA.SaveSOPRow(e); }},
+                    listeners: {'afteredit': function(e) { MA.SaveSOPRow(e); }},
                     store: sopStore
                 },{
                     id: 'samplePreparationNotes',
@@ -113,10 +113,10 @@ MA.SamplePrep = {
                             if (field.isValid()) {
                                 MA.ExperimentController.updateSamplePreparationNotes(newValue);
                             }
-                         } 
+                         }
                     }
                 }
-                
+
 
 //                },
 //                { xtype: 'textfield', fieldLabel: 'Weight' },

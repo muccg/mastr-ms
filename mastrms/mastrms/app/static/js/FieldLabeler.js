@@ -4,7 +4,7 @@
  * licensing@extjs.com
  * http://www.extjs.com/license
  */
-Ext.ns("Ext.ux");
+Ext.ns('Ext.ux');
 
 /**
  * @class Ext.ux.FieldLabeler
@@ -21,7 +21,7 @@ Ext.ns("Ext.ux");
     }
  * </code></pre>
  */
-Ext.ux.FieldLabeler = (function(){
+Ext.ux.FieldLabeler = (function() {
 
 //  Pulls a named property down from the first ancestor Container it's found in
     function getParentProperty(propName) {
@@ -73,7 +73,7 @@ Ext.ux.FieldLabeler = (function(){
 
 //          If our Container is hiding labels, then we're done!
             if (!Ext.isDefined(this.hideLabels)) {
-                this.hideLabels = getParentProperty.call(this, "hideLabels");
+                this.hideLabels = getParentProperty.call(this, 'hideLabels');
             }
             if (this.hideLabels) {
                 this.resizeEl.setStyle('padding-left', '0px');
@@ -82,24 +82,24 @@ Ext.ux.FieldLabeler = (function(){
 
 //          Collect the info we need to render the label from our Container.
             if (!Ext.isDefined(this.labelSeparator)) {
-                this.labelSeparator = getParentProperty.call(this, "labelSeparator");
+                this.labelSeparator = getParentProperty.call(this, 'labelSeparator');
             }
             if (!Ext.isDefined(this.labelPad)) {
-                this.labelPad = getParentProperty.call(this, "labelPad");
+                this.labelPad = getParentProperty.call(this, 'labelPad');
             }
             if (!Ext.isDefined(this.labelAlign)) {
-                this.labelAlign = getParentProperty.call(this, "labelAlign") || 'left';
+                this.labelAlign = getParentProperty.call(this, 'labelAlign') || 'left';
             }
             this.itemCt.addClass('x-form-label-' + this.labelAlign);
 
-            if(this.labelAlign == 'top'){
+            if (this.labelAlign == 'top') {
                 if (!this.labelWidth) {
                     this.labelWidth = 'auto';
                 }
                 this.resizeEl.setStyle('padding-left', '0px');
             } else {
                 if (!Ext.isDefined(this.labelWidth)) {
-                    this.labelWidth = getParentProperty.call(this, "labelWidth") || 100;
+                    this.labelWidth = getParentProperty.call(this, 'labelWidth') || 100;
                 }
                 this.resizeEl.setStyle('padding-left', (this.labelWidth + (this.labelPad || 5)) + 'px');
                 this.labelWidth += 'px';

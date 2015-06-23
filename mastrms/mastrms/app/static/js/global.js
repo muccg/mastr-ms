@@ -18,15 +18,15 @@
 // Hook into Ext.Ajax so that the Django CSRF token is sent with requests
 Ext.Ajax.on('beforerequest', function(conn, opts) {
   var headers = opts.headers || {};
-  headers["X-CSRFToken"] = Ext.util.Cookies.get("csrftoken_mastrms");
+  headers['X-CSRFToken'] = Ext.util.Cookies.get('csrftoken_mastrms');
   opts.headers = headers;
 }, this);
 
 // Change Prototype.Ajax so that the Django CSRF token is sent with requests
 Ajax.Base.prototype.initialize = Ajax.Base.prototype.initialize.wrap(
-    function (callOriginal, options) {
+    function(callOriginal, options) {
         var headers = options.requestHeaders || {};
-        headers["X-CSRFToken"] = Ext.util.Cookies.get("csrftoken_mastrms");
+        headers['X-CSRFToken'] = Ext.util.Cookies.get('csrftoken_mastrms');
         options.requestHeaders = headers;
         return callOriginal(options);
     }
@@ -71,10 +71,10 @@ MA.dataProxyErrorHandler = function(proxy, type, action, options, response, erro
         // Global Handler will take care of these
         return;
     }
-    message += "URL: " + Ext.encode(proxy.api[action].url);
-    message += "\nType: " + Ext.encode(type);
-    message += "\nResponse: " + Ext.encode(response);
-    message += "\nError: " + Ext.encode(error);
+    message += 'URL: ' + Ext.encode(proxy.api[action].url);
+    message += '\nType: ' + Ext.encode(type);
+    message += '\nResponse: ' + Ext.encode(response);
+    message += '\nError: ' + Ext.encode(error);
     MA.reportError('DataProxy Exception', message);
 };
 
@@ -104,13 +104,13 @@ MA.ErrorReportForm = new Ext.form.FormPanel({
             value: 'A system error occured. Please report it by clicking <b>Send</b> below.',
             style: { paddingTop: '10px', paddingBottom: '15px', textAlign: 'center', fontSize: 'larger' }
           },{
-            plugins: [ Ext.ux.FieldLabeler ],
+            plugins: [Ext.ux.FieldLabeler],
             name: 'notes',
             xtype: 'textarea',
             fieldLabel: 'Additional notes (optional)',
             height: 150
           },{
-            plugins: [ Ext.ux.FieldLabeler ],
+            plugins: [Ext.ux.FieldLabeler],
             name: 'details',
             readOnly: true,
             xtype: 'textarea',

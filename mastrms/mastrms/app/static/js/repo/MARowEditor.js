@@ -39,7 +39,7 @@ Ext.ux.grid.MARowEditor = Ext.extend(Ext.Panel, {
         normalWidth: true
     },
 
-    initComponent: function(){
+    initComponent: function() {
         Ext.ux.grid.MARowEditor.superclass.initComponent.call(this);
         this.addEvents(
             /**
@@ -80,14 +80,14 @@ Ext.ux.grid.MARowEditor = Ext.extend(Ext.Panel, {
         );
     },
 
-    init: function(grid){
+    init: function(grid) {
         this.grid = grid;
         this.ownerCt = grid;
-        if(this.clicksToEdit === 2){
+        if (this.clicksToEdit === 2) {
             grid.on('rowdblclick', this.onRowDblClick, this);
-        }else{
+        }else {
             grid.on('rowclick', this.onRowClick, this);
-            if(Ext.isIE){
+            if (Ext.isIE) {
                 grid.on('rowdblclick', this.onRowDblClick, this);
             }
         }
@@ -103,14 +103,14 @@ Ext.ux.grid.MARowEditor = Ext.extend(Ext.Panel, {
             columnresize: this.verifyLayout,
             columnmove: this.refreshFields,
             reconfigure: this.refreshFields,
-            beforedestroy : this.beforedestroy,
-            destroy : this.destroy,
+            beforedestroy: this.beforedestroy,
+            destroy: this.destroy,
             bodyscroll: {
                 buffer: 250,
                 fn: this.positionButtons
             }
         });
-        grid.getColumnModel().on('hiddenchange', this.verifyLayout, this, {delay:1});
+        grid.getColumnModel().on('hiddenchange', this.verifyLayout, this, {delay: 1});
         grid.getView().on('refresh', this.stopEditing.createDelegate(this, []));
     },
 
@@ -121,15 +121,15 @@ Ext.ux.grid.MARowEditor = Ext.extend(Ext.Panel, {
         Ext.destroy(this.btns, this.tooltip);
     },
 
-    refreshFields: function(){
+    refreshFields: function() {
         this.initFields();
         this.verifyLayout();
     },
 
-    isDirty: function(){
+    isDirty: function() {
         var dirty;
-        this.items.each(function(f){
-            if(String(this.values[f.id]) !== String(f.getValue())){
+        this.items.each(function(f) {
+            if (String(this.values[f.id]) !== String(f.getValue())) {
                 dirty = true;
                 return false;
             }
@@ -137,15 +137,15 @@ Ext.ux.grid.MARowEditor = Ext.extend(Ext.Panel, {
         return dirty;
     },
 
-    startEditing: function(rowIndex, doFocus){
-        if(this.editing && this.isDirty()){
+    startEditing: function(rowIndex, doFocus) {
+        if (this.editing && this.isDirty()) {
             this.showTooltip(this.commitChangesText);
             return;
         }
-        if(Ext.isObject(rowIndex)){
+        if (Ext.isObject(rowIndex)) {
             rowIndex = this.grid.getStore().indexOf(rowIndex);
         }
-        if(this.fireEvent('beforeedit', this, rowIndex) !== false){
+        if (this.fireEvent('beforeedit', this, rowIndex) !== false) {
             this.editing = true;
             var g = this.grid, view = g.getView(),
                 row = view.getRow(rowIndex),
@@ -154,42 +154,42 @@ Ext.ux.grid.MARowEditor = Ext.extend(Ext.Panel, {
             this.record = record;
             this.rowIndex = rowIndex;
             this.values = {};
-            if(!this.rendered){
+            if (!this.rendered) {
                 this.render(view.getEditorParent());
             }
             var w = Ext.fly(row).getWidth();
             this.setSize(w);
-            if(!this.initialized){
+            if (!this.initialized) {
                 this.initFields();
             }
             var cm = g.getColumnModel(), fields = this.items.items, f, val;
-            for(var i = 0, len = cm.getColumnCount(); i < len; i++){
+            for (var i = 0, len = cm.getColumnCount(); i < len; i++) {
                 val = this.preEditValue(record, cm.getDataIndex(i));
                 f = fields[i];
                 f.setValue(val);
                 this.values[f.id] = Ext.isEmpty(val) ? '' : val;
             }
             this.verifyLayout(true);
-            if(!this.isVisible()){
+            if (!this.isVisible()) {
                 this.setPagePosition(Ext.fly(row).getXY());
-            } else{
-                this.el.setXY(Ext.fly(row).getXY(), {duration:0.15});
+            } else {
+                this.el.setXY(Ext.fly(row).getXY(), {duration: 0.15});
             }
-            if(!this.isVisible()){
+            if (!this.isVisible()) {
                 this.show().doLayout();
             }
-            if(doFocus !== false){
+            if (doFocus !== false) {
                 this.doFocus.defer(this.focusDelay, this);
             }
         }
     },
 
-    stopEditing : function(saveChanges){
+    stopEditing: function(saveChanges) {
         this.editing = false;
-        if(!this.isVisible()){
+        if (!this.isVisible()) {
             return;
         }
-        if(saveChanges === false || !this.isValid()){
+        if (saveChanges === false || !this.isValid()) {
             this.hide();
             this.fireEvent('canceledit', this, saveChanges === false);
             return;
@@ -199,8 +199,8 @@ Ext.ux.grid.MARowEditor = Ext.extend(Ext.Panel, {
             hasChange = true,
             cm = this.grid.colModel,
             fields = this.items.items;
-        for(var i = 0, len = cm.getColumnCount(); i < len; i++){
-            if(!cm.isHidden(i)){
+        for (var i = 0, len = cm.getColumnCount(); i < len; i++) {
+            if (!cm.isHidden(i)) {
                 var dindex = cm.getDataIndex(i);
                 var value = this.postEditValue(fields[i].getValue(), null, r, dindex);
                 changes[dindex] = value;
@@ -208,7 +208,7 @@ Ext.ux.grid.MARowEditor = Ext.extend(Ext.Panel, {
         }
 
         r.beginEdit();
-        Ext.iterate(changes, function(name, value){
+        Ext.iterate(changes, function(name, value) {
             r.set(name, value);
         });
         r.endEdit();
@@ -217,22 +217,22 @@ Ext.ux.grid.MARowEditor = Ext.extend(Ext.Panel, {
         this.hide();
     },
 
-    verifyLayout: function(force){
-        if(this.el && (this.isVisible() || force === true)){
+    verifyLayout: function(force) {
+        if (this.el && (this.isVisible() || force === true)) {
             var row = this.grid.getView().getRow(this.rowIndex);
             this.setSize(Ext.fly(row).getWidth(), Ext.isIE ? Ext.fly(row).getHeight() + 9 : undefined);
             var cm = this.grid.colModel, fields = this.items.items;
-            for(var i = 0, len = cm.getColumnCount(); i < len; i++){
-                if(!cm.isHidden(i)){
+            for (var i = 0, len = cm.getColumnCount(); i < len; i++) {
+                if (!cm.isHidden(i)) {
                     var adjust = 0;
-                    if(i === (len - 1)){
+                    if (i === (len - 1)) {
                         adjust += 3; // outer padding
-                    } else{
+                    } else {
                         adjust += 1;
                     }
                     fields[i].show();
                     fields[i].setWidth(cm.getColumnWidth(i) - adjust);
-                } else{
+                } else {
                     fields[i].hide();
                 }
             }
@@ -241,24 +241,24 @@ Ext.ux.grid.MARowEditor = Ext.extend(Ext.Panel, {
         }
     },
 
-    slideHide : function(){
+    slideHide: function() {
         this.hide();
     },
 
-    initFields: function(){
+    initFields: function() {
         var cm = this.grid.getColumnModel(), pm = Ext.layout.ContainerLayout.prototype.parseMargins;
         this.removeAll(false);
-        for(var i = 0, len = cm.getColumnCount(); i < len; i++){
+        for (var i = 0, len = cm.getColumnCount(); i < len; i++) {
             var c = cm.getColumnAt(i),
                 ed = c.getEditor();
-            if(!ed){
+            if (!ed) {
                 ed = c.displayEditor || new Ext.form.DisplayField();
             }
-            if(i == 0){
+            if (i == 0) {
                 ed.margins = pm('0 1 2 1');
-            } else if(i == len - 1){
+            } else if (i == len - 1) {
                 ed.margins = pm('0 0 2 1');
-            } else{
+            } else {
                 if (Ext.isIE) {
                     ed.margins = pm('0 0 2 0');
                 }
@@ -268,7 +268,7 @@ Ext.ux.grid.MARowEditor = Ext.extend(Ext.Panel, {
             }
             ed.setWidth(cm.getColumnWidth(i));
             ed.column = c;
-            if(ed.ownerCt !== this){
+            if (ed.ownerCt !== this) {
                 ed.on('focus', this.ensureVisible, this);
                 ed.on('specialkey', this.onKey, this);
             }
@@ -277,17 +277,17 @@ Ext.ux.grid.MARowEditor = Ext.extend(Ext.Panel, {
         this.initialized = true;
     },
 
-    onKey: function(f, e){
-        if(e.getKey() === e.ENTER){
+    onKey: function(f, e) {
+        if (e.getKey() === e.ENTER) {
             this.stopEditing(true);
             e.stopPropagation();
         }
     },
 
-    onGridKey: function(e){
-        if(e.getKey() === e.ENTER && !this.isVisible()){
+    onGridKey: function(e) {
+        if (e.getKey() === e.ENTER && !this.isVisible()) {
             var r = this.grid.getSelectionModel().getSelected();
-            if(r){
+            if (r) {
                 var index = this.grid.store.indexOf(r);
                 this.startEditing(index);
                 e.stopPropagation();
@@ -295,17 +295,17 @@ Ext.ux.grid.MARowEditor = Ext.extend(Ext.Panel, {
         }
     },
 
-    ensureVisible: function(editor){
-        if(this.isVisible()){
+    ensureVisible: function(editor) {
+        if (this.isVisible()) {
              this.grid.getView().ensureVisible(this.rowIndex, this.grid.colModel.getIndexById(editor.column.id), true);
         }
     },
 
-    onRowClick: function(g, rowIndex, e){
-        if(this.clicksToEdit == 'auto'){
+    onRowClick: function(g, rowIndex, e) {
+        if (this.clicksToEdit == 'auto') {
             var li = this.lastClickIndex;
             this.lastClickIndex = rowIndex;
-            if(li != rowIndex && !this.isVisible()){
+            if (li != rowIndex && !this.isVisible()) {
                 return;
             }
         }
@@ -313,18 +313,18 @@ Ext.ux.grid.MARowEditor = Ext.extend(Ext.Panel, {
         this.doFocus.defer(this.focusDelay, this, [e.getPoint()]);
     },
 
-    onRowDblClick: function(g, rowIndex, e){
+    onRowDblClick: function(g, rowIndex, e) {
         this.startEditing(rowIndex, false);
         this.doFocus.defer(this.focusDelay, this, [e.getPoint()]);
     },
 
-    onRender: function(){
+    onRender: function() {
         Ext.ux.grid.MARowEditor.superclass.onRender.apply(this, arguments);
         this.el.swallowEvent(['keydown', 'keyup', 'keypress']);
         this.btns = new Ext.Panel({
             baseCls: 'x-plain',
             cls: 'x-btns',
-            elements:'body',
+            elements: 'body',
             layout: 'table',
             width: (this.minButtonWidth * 2) + (this.frameWidth * 2) + (this.buttonPad * 4), // width must be specified for IE
             items: [{
@@ -344,29 +344,29 @@ Ext.ux.grid.MARowEditor = Ext.extend(Ext.Panel, {
         this.btns.render(this.bwrap);
     },
 
-    afterRender: function(){
+    afterRender: function() {
         Ext.ux.grid.MARowEditor.superclass.afterRender.apply(this, arguments);
         this.positionButtons();
-        if(this.monitorValid){
+        if (this.monitorValid) {
             this.startMonitoring();
         }
     },
 
-    onShow: function(){
-        if(this.monitorValid){
+    onShow: function() {
+        if (this.monitorValid) {
             this.startMonitoring();
         }
         Ext.ux.grid.MARowEditor.superclass.onShow.apply(this, arguments);
     },
 
-    onHide: function(){
+    onHide: function() {
         Ext.ux.grid.MARowEditor.superclass.onHide.apply(this, arguments);
         this.stopMonitoring();
         this.grid.getView().focusRow(this.rowIndex);
     },
 
-    positionButtons: function(){
-        if(this.btns){
+    positionButtons: function() {
+        if (this.btns) {
             var g = this.grid,
                 h = this.el.dom.clientHeight,
                 view = g.getView(),
@@ -374,32 +374,32 @@ Ext.ux.grid.MARowEditor = Ext.extend(Ext.Panel, {
                 bw = this.btns.getWidth(),
                 width = Math.min(g.getWidth(), g.getColumnModel().getTotalWidth());
 
-            this.btns.el.shift({left: (width/2)-(bw/2)+scroll, top: h - 2, stopFx: true, duration:0.2});
+            this.btns.el.shift({left: (width / 2) - (bw / 2) + scroll, top: h - 2, stopFx: true, duration: 0.2});
         }
     },
 
     // private
-    preEditValue : function(r, field){
+    preEditValue: function(r, field) {
         var value = r.data[field];
         return this.autoEncode && typeof value === 'string' ? Ext.util.Format.htmlDecode(value) : value;
     },
 
     // private
-    postEditValue : function(value, originalValue, r, field){
+    postEditValue: function(value, originalValue, r, field) {
         return this.autoEncode && typeof value == 'string' ? Ext.util.Format.htmlEncode(value) : value;
     },
 
-    doFocus: function(pt){
-        if(this.isVisible()){
+    doFocus: function(pt) {
+        if (this.isVisible()) {
             var index = 0,
                 cm = this.grid.getColumnModel(),
                 c;
-            if(pt){
+            if (pt) {
                 index = this.getTargetColumnIndex(pt);
             }
-            for(var i = index||0, len = cm.getColumnCount(); i < len; i++){
+            for (var i = index || 0, len = cm.getColumnCount(); i < len; i++) {
                 c = cm.getColumnAt(i);
-                if(!c.hidden && c.getEditor()){
+                if (!c.hidden && c.getEditor()) {
                     c.getEditor().focus();
                     break;
                 }
@@ -407,16 +407,16 @@ Ext.ux.grid.MARowEditor = Ext.extend(Ext.Panel, {
         }
     },
 
-    getTargetColumnIndex: function(pt){
+    getTargetColumnIndex: function(pt) {
         var grid = this.grid,
             v = grid.view,
             x = pt.left,
             cms = grid.colModel.config,
             i = 0,
             match = false;
-        for(var len = cms.length, c; c = cms[i]; i++){
-            if(!c.hidden){
-                if(Ext.fly(v.getHeaderCell(i)).getRegion().right >= x){
+        for (var len = cms.length, c; c = cms[i]; i++) {
+            if (!c.hidden) {
+                if (Ext.fly(v.getHeaderCell(i)).getRegion().right >= x) {
                     match = i;
                     break;
                 }
@@ -425,28 +425,28 @@ Ext.ux.grid.MARowEditor = Ext.extend(Ext.Panel, {
         return match;
     },
 
-    startMonitoring : function(){
-        if(!this.bound && this.monitorValid){
+    startMonitoring: function() {
+        if (!this.bound && this.monitorValid) {
             this.bound = true;
             Ext.TaskMgr.start({
-                run : this.bindHandler,
-                interval : this.monitorPoll || 200,
+                run: this.bindHandler,
+                interval: this.monitorPoll || 200,
                 scope: this
             });
         }
     },
 
-    stopMonitoring : function(){
+    stopMonitoring: function() {
         this.bound = false;
-        if(this.tooltip){
+        if (this.tooltip) {
             this.tooltip.hide();
         }
     },
 
-    isValid: function(){
+    isValid: function() {
         var valid = true;
-        this.items.each(function(f){
-            if(!f.isValid(true)){
+        this.items.each(function(f) {
+            if (!f.isValid(true)) {
                 valid = false;
                 return false;
             }
@@ -455,22 +455,22 @@ Ext.ux.grid.MARowEditor = Ext.extend(Ext.Panel, {
     },
 
     // private
-    bindHandler : function(){
-        if(!this.bound){
+    bindHandler: function() {
+        if (!this.bound) {
             return false; // stops binding
         }
         var valid = this.isValid();
-        if(!valid && this.errorSummary){
+        if (!valid && this.errorSummary) {
             this.showTooltip(this.getErrorText().join(''));
         }
         this.btns.saveBtn.setDisabled(!valid);
         this.fireEvent('validation', this, valid);
     },
 
-    lastVisibleColumn : function() {
+    lastVisibleColumn: function() {
         var i = this.items.getCount() - 1,
             c;
-        for(; i >= 0; i--) {
+        for (; i >= 0; i--) {
             c = this.items.items[i];
             if (!c.hidden) {
                 return c;
@@ -478,9 +478,9 @@ Ext.ux.grid.MARowEditor = Ext.extend(Ext.Panel, {
         }
     },
 
-    showTooltip: function(msg){
+    showTooltip: function(msg) {
         var t = this.tooltip;
-        if(!t){
+        if (!t) {
             t = this.tooltip = new Ext.ToolTip({
                 maxWidth: 600,
                 cls: 'errorTip',
@@ -489,7 +489,7 @@ Ext.ux.grid.MARowEditor = Ext.extend(Ext.Panel, {
                 autoHide: false,
                 anchor: 'left',
                 anchorToTarget: true,
-                mouseOffset: [40,0]
+                mouseOffset: [40, 0]
             });
         }
         var v = this.grid.getView(),
@@ -497,24 +497,24 @@ Ext.ux.grid.MARowEditor = Ext.extend(Ext.Panel, {
             scroll = v.scroller.dom.scrollTop,
             h = this.el.getHeight();
 
-        if(top + h >= scroll){
+        if (top + h >= scroll) {
             t.initTarget(this.lastVisibleColumn().getEl());
-            if(!t.rendered){
+            if (!t.rendered) {
                 t.show();
                 t.hide();
             }
             t.body.update(msg);
             t.doAutoWidth(20);
             t.show();
-        }else if(t.rendered){
+        }else if (t.rendered) {
             t.hide();
         }
     },
 
-    getErrorText: function(){
+    getErrorText: function() {
         var data = ['<ul>'];
-        this.items.each(function(f){
-            if(!f.isValid(true)){
+        this.items.each(function(f) {
+            if (!f.isValid(true)) {
                 data.push('<li>', f.getActiveError(), '</li>');
             }
         });

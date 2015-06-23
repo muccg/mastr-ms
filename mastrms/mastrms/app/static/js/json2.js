@@ -164,7 +164,7 @@ if (!JSON) {
     JSON = {};
 }
 
-(function () {
+(function() {
     "use strict";
 
     function f(n) {
@@ -174,20 +174,20 @@ if (!JSON) {
 
     if (typeof Date.prototype.toJSON !== 'function') {
 
-        Date.prototype.toJSON = function (key) {
+        Date.prototype.toJSON = function(key) {
 
             return isFinite(this.valueOf()) ?
-                this.getUTCFullYear()     + '-' +
+                this.getUTCFullYear() + '-' +
                 f(this.getUTCMonth() + 1) + '-' +
-                f(this.getUTCDate())      + 'T' +
-                f(this.getUTCHours())     + ':' +
-                f(this.getUTCMinutes())   + ':' +
-                f(this.getUTCSeconds())   + 'Z' : null;
+                f(this.getUTCDate()) + 'T' +
+                f(this.getUTCHours()) + ':' +
+                f(this.getUTCMinutes()) + ':' +
+                f(this.getUTCSeconds()) + 'Z' : null;
         };
 
-        String.prototype.toJSON      =
-            Number.prototype.toJSON  =
-            Boolean.prototype.toJSON = function (key) {
+        String.prototype.toJSON =
+            Number.prototype.toJSON =
+            Boolean.prototype.toJSON = function(key) {
                 return this.valueOf();
             };
     }
@@ -216,7 +216,7 @@ if (!JSON) {
 // sequences.
 
         escapable.lastIndex = 0;
-        return escapable.test(string) ? '"' + string.replace(escapable, function (a) {
+        return escapable.test(string) ? '"' + string.replace(escapable, function(a) {
             var c = meta[a];
             return typeof c === 'string' ? c :
                 '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
@@ -351,7 +351,7 @@ if (!JSON) {
 // If the JSON object does not yet have a stringify method, give it one.
 
     if (typeof JSON.stringify !== 'function') {
-        JSON.stringify = function (value, replacer, space) {
+        JSON.stringify = function(value, replacer, space) {
 
 // The stringify method takes a value and an optional replacer, and an optional
 // space parameter, and returns a JSON text. The replacer can be a function
@@ -398,7 +398,7 @@ if (!JSON) {
 // If the JSON object does not yet have a parse method, give it one.
 
     if (typeof JSON.parse !== 'function') {
-        JSON.parse = function (text, reviver) {
+        JSON.parse = function(text, reviver) {
 
 // The parse method takes a text and an optional reviver function, and returns
 // a JavaScript value if the text is a valid JSON text.
@@ -434,7 +434,7 @@ if (!JSON) {
             text = String(text);
             cx.lastIndex = 0;
             if (cx.test(text)) {
-                text = text.replace(cx, function (a) {
+                text = text.replace(cx, function(a) {
                     return '\\u' +
                         ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
                 });

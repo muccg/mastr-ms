@@ -15,12 +15,12 @@
  * along with Madas.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-MA.UserEditInit = function () {
+MA.UserEditInit = function() {
 
     var userEditCmp = Ext.getCmp('useredit-panel');
 
     //fetch user details
-    userEditCmp.load({url: MA.BaseUrl + 'user/userload', waitMsg:'Loading'});
+    userEditCmp.load({url: MA.BaseUrl + 'user/userload', waitMsg: 'Loading'});
 
     //attach validator that ext cannot deal with
     Ext.getCmp("userEditPassword").on('blur', MA.UserEditValidatePassword);
@@ -36,7 +36,7 @@ MA.UserEditInit = function () {
  * madasAdminUserEditValidatePassword
  * we need to implement a custom validator because Ext cannot validate an empty field that has to be the same as another field
  */
-MA.UserEditValidatePassword = function (textfield, event) {
+MA.UserEditValidatePassword = function(textfield, event) {
     var passEl = Ext.getCmp('userEditPassword');
     var confirmEl = Ext.getCmp('userEditConfirmPassword');
     var submitEl = Ext.getCmp('userEditSubmit');
@@ -55,48 +55,48 @@ MA.UserEditValidatePassword = function (textfield, event) {
     }
 };
 
-MA.UserEditCmp = {id:'useredit-container-panel',
-                layout:'absolute',
-                deferredRender:false,
-                forceLayout:true,
+MA.UserEditCmp = {id: 'useredit-container-panel',
+                layout: 'absolute',
+                deferredRender: false,
+                forceLayout: true,
                 defaults: {
-                    deferredRender:false,
-                    forceLayout:true
+                    deferredRender: false,
+                    forceLayout: true
                 },
-                items:[
-                    {  xtype:'form',
+                items: [
+                    { xtype: 'form',
                     labelWidth: 100, // label settings here cascade unless overridden
-                    id:'useredit-panel',
-                    url:MA.BaseUrl + 'user/userSave',
-                    method:'POST',
-                    frame:true,
+                    id: 'useredit-panel',
+                    url: MA.BaseUrl + 'user/userSave',
+                    method: 'POST',
+                    frame: true,
                     reader: new Ext.data.JsonReader({
-                                                              root            : 'data',
+                                                              root: 'data',
                                                               //versionProperty : 'response.value.version',
                                                               //totalProperty   : 'response.value.total_count',
-                                                              totalProperty   : 'totalRows',
-                                                              successProperty : 'success',
+                                                              totalProperty: 'totalRows',
+                                                              successProperty: 'success',
                                                               fields: [
-                                                                  { name: 'email', sortType : 'string' },
-                                                                  { name: 'firstname', sortType : 'string' },
-                                                                  { name: 'lastname', sortType : 'string' },
-                                                                  { name: 'telephoneNumber', sortType : 'string' },
-                                                                  { name: 'physicalDeliveryOfficeName', sortType : 'string' },
-                                                                  { name: 'title', sortType : 'string' },
-                                                                  { name: 'homephone', sortType : 'string' },
-                                                                  { name: 'isAdmin', sortType : 'string' },
-                                                                  { name: 'isNodeRep', sortType : 'string' },
-                                                                  { name: 'node', sortType : 'string' },
-                                                                  { name: 'status', sortType : 'string' },
-                                                                  { name: 'dept', sortType : 'string' },
-                                                                  { name: 'institute', sortType : 'string' },
-                                                                  { name: 'address', sortType : 'string' },
-                                                                  { name: 'supervisor', sortType : 'string' },
-                                                                  { name: 'areaOfInterest', sortType : 'string' },
-                                                                  { name: 'country', sortType : 'string' }
+                                                                  { name: 'email', sortType: 'string' },
+                                                                  { name: 'firstname', sortType: 'string' },
+                                                                  { name: 'lastname', sortType: 'string' },
+                                                                  { name: 'telephoneNumber', sortType: 'string' },
+                                                                  { name: 'physicalDeliveryOfficeName', sortType: 'string' },
+                                                                  { name: 'title', sortType: 'string' },
+                                                                  { name: 'homephone', sortType: 'string' },
+                                                                  { name: 'isAdmin', sortType: 'string' },
+                                                                  { name: 'isNodeRep', sortType: 'string' },
+                                                                  { name: 'node', sortType: 'string' },
+                                                                  { name: 'status', sortType: 'string' },
+                                                                  { name: 'dept', sortType: 'string' },
+                                                                  { name: 'institute', sortType: 'string' },
+                                                                  { name: 'address', sortType: 'string' },
+                                                                  { name: 'supervisor', sortType: 'string' },
+                                                                  { name: 'areaOfInterest', sortType: 'string' },
+                                                                  { name: 'country', sortType: 'string' }
                                                                   ]}),
                     title: 'Edit My Details',
-                    bodyStyle:'padding:5px 5px 0',
+                    bodyStyle: 'padding:5px 5px 0',
                     width: 380,
                     x: 50,
                     y: 10,
@@ -106,119 +106,119 @@ MA.UserEditCmp = {id:'useredit-container-panel',
                     waitMsgTarget: true,
 
                     items: [
-                        {   name: 'originalEmail',
+                        { name: 'originalEmail',
                             inputType: 'hidden'
                         },{
                             fieldLabel: 'Email address',
                             name: 'email',
                             vtype: 'email',
-                            allowBlank:false,
-                            disabled:true
+                            allowBlank: false,
+                            disabled: true
                         },{
                             fieldLabel: 'First name',
                             name: 'firstname',
-                            allowBlank:false,
+                            allowBlank: false,
                             maskRe: /[^,=]/
                         },{
                             fieldLabel: 'Last name',
                             name: 'lastname',
-                            allowBlank:false,
+                            allowBlank: false,
                             maskRe: /[^,=]/
                         },{
                             fieldLabel: 'Password',
                             name: 'password',
                             id: 'userEditPassword',
                             inputType: 'password',
-                            allowBlank:true
+                            allowBlank: true
                         },{
                             fieldLabel: 'Confirm Password',
                             inputType: 'password',
                             id: 'userEditConfirmPassword',
                             xtype: 'textfield',
-                            allowBlank:true,
+                            allowBlank: true,
                             validator: MA.UserEditValidatePassword
                         },{
                             fieldLabel: 'Office',
                             name: 'physicalDeliveryOfficeName',
-                            allowBlank:true,
+                            allowBlank: true,
                             maskRe: /[^,=]/
                         },{
                             fieldLabel: 'Office Phone',
                             name: 'telephoneNumber',
-                            allowBlank:false,
+                            allowBlank: false,
                             maskRe: /[^,=]/
                         },{
                             fieldLabel: 'Home Phone',
                             name: 'homephone',
-                            allowBlank:true,
+                            allowBlank: true,
                             maskRe: /[^,=]/
                         },{
                             fieldLabel: 'Position',
                             name: 'title',
-                            allowBlank:true,
+                            allowBlank: true,
                             maskRe: /[^,=]/
                         }, {
                             fieldLabel: 'Node',
                             name: 'node',
-                            disabled:true
+                            disabled: true
                         },{
                             fieldLabel: 'Status',
                             name: 'status',
-                            disabled:true
+                            disabled: true
                         },{
                             fieldLabel: 'Department',
                             name: 'dept',
-                            allowBlank:true,
+                            allowBlank: true,
                             maskRe: /[^,=]/
                         },{
                             fieldLabel: 'Institute',
                             name: 'institute',
-                            allowBlank:true,
+                            allowBlank: true,
                             maskRe: /[^,=]/
                         },{
                             fieldLabel: 'Address',
                             name: 'address',
-                            allowBlank:true,
+                            allowBlank: true,
                             maskRe: /[^,=]/
                         },{
                             fieldLabel: 'Supervisor',
                             name: 'supervisor',
-                            allowBlank:true,
+                            allowBlank: true,
                             maskRe: /[^,=]/
                         },{
                             fieldLabel: 'Area of Interest',
                             name: 'areaOfInterest',
-                            allowBlank:true,
+                            allowBlank: true,
                             maskRe: /[^,=]/
                         },new Ext.form.ComboBox({
                             fieldLabel: 'Country',
                             name: 'countryDisplay',
-                            editable:false,
-                            forceSelection:true,
-                            displayField:'displayLabel',
-                            valueField:'submitValue',
-                            hiddenName:'country',
-                            lazyRender:true,
-                            typeAhead:false,
-                            mode:'local',
-                            triggerAction:'all',
-                            listWidth:230,
+                            editable: false,
+                            forceSelection: true,
+                            displayField: 'displayLabel',
+                            valueField: 'submitValue',
+                            hiddenName: 'country',
+                            lazyRender: true,
+                            typeAhead: false,
+                            mode: 'local',
+                            triggerAction: 'all',
+                            listWidth: 230,
                             store: countryStore
                         })
                     ],
                     buttons: [{
                         text: 'Cancel',
-                        handler: function(){
+                        handler: function() {
                             Ext.getCmp('useredit-panel').getForm().reset();
                             MA.ChangeMainContent('dashboard');
                             }
                         },{
                         text: 'Save',
-                        id:'userEditSubmit',
-                        handler: function(){
+                        id: 'userEditSubmit',
+                        handler: function() {
                             Ext.getCmp('useredit-panel').getForm().submit(
-                                {   successProperty: 'success',
-                                    success: function (form, action) {
+                                { successProperty: 'success',
+                                    success: function(form, action) {
                                         if (action.result.success === true) {
                                             form.reset();
 
@@ -230,7 +230,7 @@ MA.UserEditCmp = {id:'useredit-container-panel',
                                             MA.ChangeMainContent(action.result.mainContentFunction);
                                         }
                                     },
-                                    failure: function (form, action) {
+                                    failure: function(form, action) {
                                         //do nothing special. this gets called on validation failures and server errors
                                     }
                                 });

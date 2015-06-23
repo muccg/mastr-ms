@@ -1,6 +1,6 @@
 var countryStore = new Ext.data.SimpleStore({
     fields: ['submitValue', 'displayLabel'],
-    data : [['Australia (ACT)', 'Australia (ACT)'],
+    data: [['Australia (ACT)', 'Australia (ACT)'],
             ['Australia (NSW)', 'Australia (NSW)'],
             ['Australia (NT)', 'Australia (NT)'],
             ['Australia (QLD)', 'Australia (QLD)'],

@@ -16,7 +16,7 @@
  */
 
 MA.Dashboard.CreatePendingUserRequests = function() {
-    var dataurl = MA.BaseUrl + "admin/adminrequests";
+    var dataurl = MA.BaseUrl + 'admin/adminrequests';
     var selectionModel = new Ext.grid.RowSelectionModel({
         singleSelect: true
     });
@@ -26,13 +26,13 @@ MA.Dashboard.CreatePendingUserRequests = function() {
             totalProperty: 'response.value.total_count'
         },
         [
-            { name: 'isClient', sortType : Ext.data.SortTypes.asText },
-            { name: 'email', sortType : Ext.data.SortTypes.asText },
-            { name: 'firstname', sortType : Ext.data.SortTypes.asText },
-            { name: 'lastname', sortType : Ext.data.SortTypes.asText },
-            { name: 'telephoneNumber', sortType : Ext.data.SortTypes.asText },
-            { name: 'physicalDeliveryOfficeName', sortType : Ext.data.SortTypes.asText },
-            { name: 'title', sortType : Ext.data.SortTypes.asText }
+            { name: 'isClient', sortType: Ext.data.SortTypes.asText },
+            { name: 'email', sortType: Ext.data.SortTypes.asText },
+            { name: 'firstname', sortType: Ext.data.SortTypes.asText },
+            { name: 'lastname', sortType: Ext.data.SortTypes.asText },
+            { name: 'telephoneNumber', sortType: Ext.data.SortTypes.asText },
+            { name: 'physicalDeliveryOfficeName', sortType: Ext.data.SortTypes.asText },
+            { name: 'title', sortType: Ext.data.SortTypes.asText }
         ]);
 
 
@@ -47,21 +47,21 @@ MA.Dashboard.CreatePendingUserRequests = function() {
     };
 
     var toolbar = new Ext.Toolbar({
-        items   : [
+        items: [
             { id: 'userEditBtn', text: 'Edit', handler: editHandler }
         ]
     });
 
     return new Ext.Panel({
-        title:'Pending User Requests',
-        style:'padding:20px 20px 0px 20px',
-        id:'dashboard-pending-user-requests',
+        title: 'Pending User Requests',
+        style: 'padding:20px 20px 0px 20px',
+        id: 'dashboard-pending-user-requests',
         tbar: toolbar,
         init: function() {
             this.items.items[0].store.load();
         },
-        items:[{
-            xtype:'grid',
+        items: [{
+            xtype: 'grid',
             border: false,
             autoScroll: true,
             stripeRows: true,
@@ -69,9 +69,9 @@ MA.Dashboard.CreatePendingUserRequests = function() {
             autoExpandColumn: 'email',
             ds: new Ext.data.Store({
                 id: 'bSId',
-                reader     : madasReader,
-                sortInfo   : {field: 'lastname', direction: 'ASC'},
-                url        : dataurl
+                reader: madasReader,
+                sortInfo: {field: 'lastname', direction: 'ASC'},
+                url: dataurl
             }),
             sm: selectionModel,
             listeners: {
@@ -105,9 +105,9 @@ MA.Dashboard.CreateQuotesRequiringAttention = function() {
         singleSelect: true
     });
     var madasReader = new Ext.data.JsonReader({
-        root            : 'response.value.items',
-        versionProperty : 'response.value.version',
-        totalProperty   : 'response.value.total_count'
+        root: 'response.value.items',
+        versionProperty: 'response.value.version',
+        totalProperty: 'response.value.total_count'
         }, [
             { name: 'id', sortType: Ext.data.SortTypes.asInt },
             { name: 'firstname', sortType: Ext.data.SortTypes.asText },
@@ -122,7 +122,7 @@ MA.Dashboard.CreateQuotesRequiringAttention = function() {
             { name: 'country', sortType: Ext.data.SortTypes.asText}
         ]);
 
-    var dataurl = MA.BaseUrl + "quote/listNeedsAttention";
+    var dataurl = MA.BaseUrl + 'quote/listNeedsAttention';
     var editQuote = function(quote_id) {
         MA.ChangeMainContent('quote:edit', [quote_id]);
     };
@@ -133,30 +133,30 @@ MA.Dashboard.CreateQuotesRequiringAttention = function() {
     };
 
     var toolbar = new Ext.Toolbar({
-        items   : [
+        items: [
             { id: 'quoteEditBtn', text: 'Edit', handler: quoteEditHandler }
         ]
     });
 
     return new Ext.Panel({
-        title:'Quotes Requiring Attention',
-        style:'padding:20px 20px 0px 20px',
-        id:'dashboard-quotes-requiring-attention',
+        title: 'Quotes Requiring Attention',
+        style: 'padding:20px 20px 0px 20px',
+        id: 'dashboard-quotes-requiring-attention',
         tbar: toolbar,
         init: function() {
             this.items.items[0].store.load();
         },
-        items:[{
-            xtype:'grid',
+        items: [{
+            xtype: 'grid',
             border: false,
             autoScroll: true,
             stripeRows: true,
             height: 150,
             ds: new Ext.data.Store({
-                id         : 'bSId',
-                reader     : madasReader,
-                sortInfo   : {field: 'requesttime', direction: 'DESC'},
-                url        : dataurl
+                id: 'bSId',
+                reader: madasReader,
+                sortInfo: {field: 'requesttime', direction: 'DESC'},
+                url: dataurl
             }),
             sm: selectionModel,
             listeners: {
@@ -219,16 +219,16 @@ MA.Dashboard.CreateRecentProjects = function() {
         singleSelect: true
     });
     var madasReader = new Ext.data.JsonReader({
-        root            : 'response.value.items',
-        versionProperty : 'response.value.version',
-        totalProperty   : 'response.value.total_count'
+        root: 'response.value.items',
+        versionProperty: 'response.value.version',
+        totalProperty: 'response.value.total_count'
         }, [
             { name: 'id', sortType: Ext.data.SortTypes.asInt },
             { name: 'title', sortType: Ext.data.SortTypes.asText },
             { name: 'client', sortType: Ext.data.SortTypes.asText }
         ]);
 
-    var dataurl = MA.BaseUrl + "ws/recent_projects";
+    var dataurl = MA.BaseUrl + 'ws/recent_projects';
     var editProject = function(project_id) {
         MA.LoadProject(project_id);
     };
@@ -239,29 +239,29 @@ MA.Dashboard.CreateRecentProjects = function() {
     };
 
     var toolbar = new Ext.Toolbar({
-        items   : [
+        items: [
             { id: 'projectEditBtn', text: 'Edit', handler: projectEditHandler }
         ]
     });
 
     return new Ext.Panel({
-        title:'Recent Projects',
-        style:'padding:20px 20px 0px 20px',
-        id:'dashboard-recent-projects',
+        title: 'Recent Projects',
+        style: 'padding:20px 20px 0px 20px',
+        id: 'dashboard-recent-projects',
         tbar: toolbar,
         init: function() {
             this.items.items[0].store.load();
         },
-        items:[{
-            xtype:'grid',
+        items: [{
+            xtype: 'grid',
             border: false,
             autoScroll: true,
             stripeRows: true,
             height: 150,
             ds: new Ext.data.Store({
-                id         : 'bSId',
-                reader     : madasReader,
-                url        : dataurl
+                id: 'bSId',
+                reader: madasReader,
+                url: dataurl
             }),
             sm: selectionModel,
             listeners: {
@@ -297,16 +297,16 @@ MA.Dashboard.CreateRecentExperiments = function() {
         singleSelect: true
     });
     var madasReader = new Ext.data.JsonReader({
-        root            : 'response.value.items',
-        versionProperty : 'response.value.version',
-        totalProperty   : 'response.value.total_count'
+        root: 'response.value.items',
+        versionProperty: 'response.value.version',
+        totalProperty: 'response.value.total_count'
         }, [
             { name: 'id', sortType: Ext.data.SortTypes.asInt },
             { name: 'title', sortType: Ext.data.SortTypes.asText },
             { name: 'status', sortType: Ext.data.SortTypes.asText }
         ]);
 
-    var dataurl = MA.BaseUrl + "ws/recent_experiments";
+    var dataurl = MA.BaseUrl + 'ws/recent_experiments';
     var editExperiment = function(experiment_id) {
         MA.ExperimentController.loadExperiment(experiment_id);
     };
@@ -319,29 +319,29 @@ MA.Dashboard.CreateRecentExperiments = function() {
     MA.LoadMachineAndRuleGeneratorDatastores();
 
     var toolbar = new Ext.Toolbar({
-        items   : [
+        items: [
             { id: 'experimentEditBtn', text: 'Edit', handler: experimentEditHandler }
         ]
     });
 
     return new Ext.Panel({
-        title:'Recent Experiments',
-        style:'padding:20px 20px 0px 20px',
-        id:'dashboard-recent-experiments',
+        title: 'Recent Experiments',
+        style: 'padding:20px 20px 0px 20px',
+        id: 'dashboard-recent-experiments',
         tbar: toolbar,
         init: function() {
             this.items.items[0].store.load();
         },
-        items:[{
-            xtype:'grid',
+        items: [{
+            xtype: 'grid',
             border: false,
             autoScroll: true,
             stripeRows: true,
             height: 150,
             ds: new Ext.data.Store({
-                id         : 'bSId',
-                reader     : madasReader,
-                url        : dataurl
+                id: 'bSId',
+                reader: madasReader,
+                url: dataurl
             }),
             sm: selectionModel,
             listeners: {
@@ -375,16 +375,16 @@ MA.Dashboard.CreateRecentRuns = function() {
         singleSelect: true
     });
     var madasReader = new Ext.data.JsonReader({
-        root            : 'response.value.items',
-        versionProperty : 'response.value.version',
-        totalProperty   : 'response.value.total_count'
+        root: 'response.value.items',
+        versionProperty: 'response.value.version',
+        totalProperty: 'response.value.total_count'
         }, [
             { name: 'id', sortType: Ext.data.SortTypes.asInt },
             { name: 'title', sortType: Ext.data.SortTypes.asText },
             { name: 'status', sortType: Ext.data.SortTypes.asText }
         ]);
 
-    var dataurl = MA.BaseUrl + "ws/recent_runs";
+    var dataurl = MA.BaseUrl + 'ws/recent_runs';
     var editRun = function(run_id) {
         document.location = 'repo/run/view?id=' + run_id;
     };
@@ -395,29 +395,29 @@ MA.Dashboard.CreateRecentRuns = function() {
     };
 
     var toolbar = new Ext.Toolbar({
-        items   : [
+        items: [
             { id: 'runEditBtn', text: 'Edit', handler: runEditHandler }
         ]
     });
 
     return new Ext.Panel({
-        title:'Recent Runs',
-        style:'padding:20px 20px 0px 20px',
-        id:'dashboard-recent-runs',
+        title: 'Recent Runs',
+        style: 'padding:20px 20px 0px 20px',
+        id: 'dashboard-recent-runs',
         init: function() {
             this.items.items[0].store.load();
         },
-        items:[
+        items: [
                 {
-                    xtype:'grid',
+                    xtype: 'grid',
                     border: false,
                     autoScroll: true,
                     stripeRows: true,
                     height: 150,
                     ds: new Ext.data.Store({
-                        id         : 'bSId',
-                        reader     : madasReader,
-                        url        : dataurl
+                        id: 'bSId',
+                        reader: madasReader,
+                        url: dataurl
                     }),
                     sm: selectionModel,
                     columns: [
@@ -458,30 +458,30 @@ MA.Dashboard.CreateRecentRuns = function() {
 
 MA.Dashboard.CreateAvailableFiles = function() {
     var downloadClientFile = function(fileID) {
-      if (fileID.toString().substr(0, 5) !== "xnode") {
-          window.location = MA.BaseUrl + "ws/downloadClientFile/" + fileID;
+      if (fileID.toString().substr(0, 5) !== 'xnode') {
+          window.location = MA.BaseUrl + 'ws/downloadClientFile/' + fileID;
       }
     };
 
     return new Ext.Panel({
-        title:'Available files',
-        style:'padding:20px 20px 0px 20px',
-        id:'dashboard-available-files',
-        tbar:[{
-            xtype:'tbtext',
-            text:'Click a filename to download'
+        title: 'Available files',
+        style: 'padding:20px 20px 0px 20px',
+        id: 'dashboard-available-files',
+        tbar: [{
+            xtype: 'tbtext',
+            text: 'Click a filename to download'
         }],
         init: function() {
         },
-        items:[
+        items: [
                 {
-                   xtype:'treepanel',
+                   xtype: 'treepanel',
                    border: false,
                    autoScroll: true,
                    animate: true,
                    useArrows: true,
-                   dataUrl:MA.BaseUrl + 'ws/recordsClientFiles',
-                   requestMethod:'GET',
+                   dataUrl: MA.BaseUrl + 'ws/recordsClientFiles',
+                   requestMethod: 'GET',
                    root: {
                        nodeType: 'async',
                        text: 'Files',
@@ -500,7 +500,7 @@ MA.Dashboard.CreateAvailableFiles = function() {
                                }
                            }
                        }),
-                   listeners:{
+                   listeners: {
                         render: function() {
                         }
                     }
@@ -534,7 +534,7 @@ MA.Dashboard.CreateAdminDashboard = function() {
         autoScroll: true,
         init: function() {
             var i;
-            for (i=0; i < this.items.length; i++) {
+            for (i = 0; i < this.items.length; i++) {
                 this.items.items[i].init();
             }
         },
@@ -554,7 +554,7 @@ MA.Dashboard.CreateClientDashboard = function() {
         autoScroll: true,
         init: function() {
             var i;
-            for (i=0; i < this.items.length; i++) {
+            for (i = 0; i < this.items.length; i++) {
                 this.items.items[i].init();
             }
         },
@@ -572,7 +572,7 @@ MA.Dashboard.CreateStaffDashboard = function() {
         autoScroll: true,
         init: function() {
             var i;
-            for (i=0; i < this.items.length; i++) {
+            for (i = 0; i < this.items.length; i++) {
                 this.items.items[i].init();
             }
         },
@@ -601,7 +601,7 @@ MA.Dashboard.Create = function() {
 };
 
 MA.Dashboard.IsCreated = false;
-MA.Dashboard.Init = function(){
+MA.Dashboard.Init = function() {
     var dboard;
     if (!MA.Dashboard.IsCreated) {
         dboard = MA.Dashboard.Create();

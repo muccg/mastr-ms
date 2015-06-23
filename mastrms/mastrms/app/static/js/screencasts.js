@@ -15,29 +15,29 @@
  * along with Madas.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-MA.ScreencastsInit = function (vidFile) {
-    var s = new SWFObject(MA.BaseUrl + "static/screencasts/flvplayer.swf","player","1280","740","7");
-	s.addParam("allowfullscreen","true");
+MA.ScreencastsInit = function(vidFile) {
+    var s = new SWFObject(MA.BaseUrl + "static/screencasts/flvplayer.swf", "player", "1280", "740", "7");
+    s.addParam("allowfullscreen", "true");
     s.addParam("wmode", "opaque");
-	s.addVariable("file",vidFile);
-	s.addVariable("width","1024");
-	s.addVariable("height","762");
-	s.addVariable("displayheight","762");
-	s.addVariable("overstretch","fit");
-	s.write("screencast-placeholder");
+    s.addVariable("file", vidFile);
+    s.addVariable("width", "1024");
+    s.addVariable("height", "762");
+    s.addVariable("displayheight", "762");
+    s.addVariable("overstretch", "fit");
+    s.write("screencast-placeholder");
 
     //allow the madas changeMainContent function to handle the rest from here
     return;
 };
 
 MA.ScreencastsCmp = {
-    id:'screencasts-container-panel', 
-    layout:'absolute', 
-    style:'z-index:0',
-    deferredRender:false,
-    forceLayout:true,
+    id: 'screencasts-container-panel',
+    layout: 'absolute',
+    style: 'z-index:0',
+    deferredRender: false,
+    forceLayout: true,
     items: [
-        { html:'<p id="screencast-placeholder">You must have flash installed to view this screencast</p>'
+        { html: '<p id="screencast-placeholder">You must have flash installed to view this screencast</p>'
         }
     ]
 };
