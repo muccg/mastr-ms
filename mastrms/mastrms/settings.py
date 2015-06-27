@@ -121,7 +121,7 @@ ADMINS = [
 ]
 MANAGERS = ADMINS
 
-# email settings so yabi can send email error alerts etc
+# email settings
 # See: https://docs.djangoproject.com/en/1.6/ref/settings/#email-host
 EMAIL_HOST = env.get("email_host", "")
 # See: https://docs.djangoproject.com/en/1.6/ref/settings/#email-port
@@ -151,7 +151,7 @@ else:
         os.mkdir(EMAIL_FILE_PATH)
 
 # See: https://docs.djangoproject.com/en/1.6/ref/settings/#server-email
-SERVER_EMAIL = env.get("server_email", "noreply@ccg_yabiadmin_prod")
+SERVER_EMAIL = env.get("server_email", "noreply@mastrms")
 
 RETURN_EMAIL = env.get("return_email", "Mastr-MS <noreply@yoursite.com>")
 
