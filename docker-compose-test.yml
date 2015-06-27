@@ -1,0 +1,49 @@
+# data only container pattern
+datatest:
+  image: muccg/debian8-base:latest
+  volumes:
+    - .:/app
+    - data/dev:/data
+
+dbtest:
+  image: postgres:9.4
+  environment:
+    - POSTGRES_USER=mastrmsapp
+    - POSTGRES_PASSWORD=mastrmsapp
+  ports:
+    - ":5432"
+
+cachetest:
+  image: memcached:1.4
+
+webtest:
+  build: .
+  command: runserver
+  environment:
+    - DJANGO_SETTINGS_MODULE=mastrms.settings
+    - DBUSER=mastrmsapp
+    - WAIT_FOR_DB=1
+    - WAIT_FOR_CACHE=1
+  volumes_from:
+    - datatest
+  ports:
+    - "8000:8000"
+  links:
+    - dbtest:db
+    - cachetest:cache
+
+testhost:
+  image: mastrms_webtest
+  command: runtests
+  environment:
+    - DJANGO_SETTINGS_MODULE=mastrms.settings
+    - DBUSER=mastrmsapp
+    - WAIT_FOR_WEB=1
+    - WAIT_FOR_DB=1
+    - WAIT_FOR_CACHE=1
+  volumes_from:
+    - datatest
+  links:
+    - dbtest:db
+    - webtest:web
+    - cachetest:cache
