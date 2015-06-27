@@ -18,7 +18,7 @@ function dockerwait {
 
 
 # wait for services to become available
-# this prevents race conditions using fig
+# this prevents race conditions using docker-compose
 function wait_for_services {
     if [[ "$WAIT_FOR_DB" ]] ; then
         dockerwait $DBSERVER $DBPORT
@@ -115,8 +115,8 @@ if [ "$1" = 'runtests' ]; then
     NOSETESTS="nosetests -v --logging-clear-handlers ${XUNIT_OPTS}"
     IGNORES="-a !external_service"
 
-    # Setting TEST_CASES in fig file allows you to choose tests
-    : ${TEST_CASES="/app/tests /app/mastrms/mastrms"}
+    # Setting TEST_CASES in docker-compose file allows you to choose tests
+    : ${TEST_CASES="/app/mastrms/mastrms"}
 
     echo ${NOSETESTS} ${IGNORES} ${TEST_CASES}
     ${NOSETESTS} ${IGNORES} ${TEST_CASES} 2>&1 | tee /data/nosetests.log
