@@ -7,7 +7,10 @@ from selenium.webdriver.firefox.webdriver import WebDriver
 from splinter import Browser
 import re
 from django.test.client import Client
+from django.test import LiveServerTestCase
 from django.conf import settings
+
+from mastrms.testutils import *
 
 # dependencies
 # yum -y install firefox

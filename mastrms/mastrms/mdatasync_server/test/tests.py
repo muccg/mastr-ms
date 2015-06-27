@@ -7,6 +7,7 @@ from mastrms.mdatasync_server.models import *
 from mastrms.repository.models import *
 from mastrms.repository.runbuilder import RunBuilder
 from mastrms.testutils import *
+from mdatasync_client.Simulator import Simulator
 import tempfile
 import time
 import logging
