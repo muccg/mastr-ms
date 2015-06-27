@@ -67,6 +67,7 @@ virtualenv-%{pybasever} %{buildinstalldir}
 pip install --force-reinstall --upgrade 'pip>=1.5,<1.6'
 
 # Install package into the prefix
+pip install -r ./%{app}/requirements.txt
 pip install --process-dependency-links ./%{app}
 
 # Throw in datasync client so it can be used for testing

@@ -88,9 +88,9 @@ rpmbuild() {
 
     make_virtualenv
     . ${VIRTUALENV}/bin/activate
-    pip install fig
+    pip install docker-compose
 
-    fig --project-name mastr-ms -f fig-rpmbuild.yml up
+    docker-compose --project-name mastr-ms -f docker-compose-rpmbuild.yml up
 }
 
 # publish rpms to testing repo

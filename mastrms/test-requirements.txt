@@ -1,0 +1,5 @@
+django-nose
+lettuce
+lettuce_webdriver
+nose
+selenium

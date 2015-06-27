@@ -13,39 +13,6 @@ for package in ('app', 'admin', 'dashboard', 'login', 'mdatasync_server', 'quote
             [os.path.join(subdir,f) for (subdir, dirs, files) in os.walk(data_dir) for f in files])
     os.chdir(start_dir)
 
-install_requires = [
-    'Django==1.6.6',
-    'South==0.8.2',
-    'django-extensions>=1.2.5',
-    'django-userlog==2.0.0',
-    'django-nose',
-    'ccg-django-utils==0.2.1',
-    'wsgiref==0.1.2',
-    'python-memcached==1.48',
-    'dingus',
-    'django-tastypie==0.11.1',
-    'zipstream'
-]
-
-dev_requires = [
-    'flake8',
-    'Werkzeug',
-    'django-debug-toolbar',
-]
-
-test_requires = [
-    'nose',
-]
-
-postgres_requires = [
-    'psycopg2>=2.5.0,<2.6.0',
-]
-
-dependency_links = [
-    'https://bitbucket.org/ccgmurdoch/django-userlog/downloads/django-userlog-2.0.0.tar.gz',
-    'https://bitbucket.org/ccgmurdoch/ccg-django-utils/downloads/ccg-django-utils-0.2.1.tar.gz',
-]
-
 setup(name='django-mastrms',
     version=VERSION,
     description='Mastr MS',
@@ -70,12 +37,5 @@ setup(name='django-mastrms',
     ],
     package_data=data_files,
     zip_safe=False,
-    install_requires=install_requires,
-    dependency_links=dependency_links,
-    extras_require={
-        'test': test_requires,
-        'dev': dev_requires,
-        'postgres': postgres_requires,
-    },
     scripts=["scripts/mastrms-manage.py"],
 )
