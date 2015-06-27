@@ -209,9 +209,6 @@ LOGGING = {
         'db': {
             'format': '[%(name)s:%(duration)s:%(sql)s:%(params)s] %(message)s'
         },
-        'syslog': {
-            'format': 'mastrms: %(name)s:%(levelname)s %(message)s'
-        },
         'simple': {
             'format': '%(levelname)s %(filename)s:%(lineno)s (%(funcName)s)  %(message)s'
         },
@@ -241,14 +238,6 @@ LOGGING = {
             'when': 'midnight',
             'formatter': 'db'
         },
-        'syslog':{
-            'level': 'WARNING',
-            'filters': ['require_debug_false'],
-            'class': 'logging.handlers.SysLogHandler',
-            'address': '/dev/log',
-            'facility': 'local4',
-            'formatter': 'syslog'
-        },
         'mail_admins': {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
@@ -259,7 +248,7 @@ LOGGING = {
     },
     'loggers': {
         '': {
-            'handlers': ['console', 'file', 'syslog'],
+            'handlers': ['console', 'file', ],
             'level': 'WARNING',
         },
         'django.request': {
