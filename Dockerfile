@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   libxslt1-dev \
   libssl-dev \
   libsasl2-dev \
+  python-wxgtk2.8 \
   && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN env --unset=DEBIAN_FRONTEND
@@ -28,6 +29,7 @@ RUN chmod +x /docker-entrypoint.sh
 
 # Copy code and install the app
 COPY . /app
+RUN pip install mdatasync_client/
 RUN pip install -e mastrms
 
 EXPOSE 8000 9000 9001 9100 9101
