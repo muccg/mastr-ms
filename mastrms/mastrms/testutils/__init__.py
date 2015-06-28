@@ -1,6 +1,9 @@
 import logging
 import os
 from testcases import NonFlushingTransactionTestCaseMixin
+#from mastrms.mdatasync_server.models import NodeClient
+from mastrms.repository.models import *
+from mastrms.users.models import User
 
 __all__ = ["MockLoggingHandler", "XDisplayTest", "WithFixtures",
            "NonFlushingTransactionTestCaseMixin"]
@@ -66,7 +69,7 @@ class WithFixtures(object):
         nc = NodeClient.objects.create(organisation_name="org", site_name="site",
                                        station_name="station",
                                        default_data_path="testing data path",
-                                       username=os.environ["LOGNAME"],
+                                       username='admin',
                                        flags="-rz")
 
         #user = User.objects.get(email__istartswith="admin")

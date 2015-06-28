@@ -43,12 +43,12 @@ class SyncTests(LiveServerTestCase, XDisplayTest, WithFixtures):
 
     @classmethod
     def setUpClass(cls):
-        cls.setup_display()
+        #cls.setup_display()
         super(SyncTests, cls).setUpClass()
 
     @classmethod
     def tearDownClass(cls):
-        cls.teardown_display()
+        #cls.teardown_display()
         super(SyncTests, cls).tearDownClass()
 
     def test_sync1(self):
@@ -72,12 +72,12 @@ class SyncTests(LiveServerTestCase, XDisplayTest, WithFixtures):
         logfile = tempfile.NamedTemporaryFile(prefix="rsync-", suffix=".log")
         archivedir = tempfile.mkdtemp(prefix="archive-")
 
-        config = MSDSConfig(user=os.environ["LOGNAME"],
+        config = MSDSConfig(user=self.user,
                             sitename=self.nc.site_name,
                             stationname=self.nc.station_name,
                             organisation=self.nc.organisation_name,
                             localdir=unicode(self.simulator.destdir),
-                            synchub="%s/sync/" % self.live_server_url,
+                            synchub="%s/sync/" % 'http://web:8000',
                             logfile=logfile.name,
                             loglevel=plogging.LoggingLevels.DEBUG,
                             archivesynced=False,

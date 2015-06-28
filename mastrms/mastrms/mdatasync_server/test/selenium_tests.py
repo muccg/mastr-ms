@@ -3,7 +3,8 @@
 # Trying out selenium tests
 
 #from selenium.webdriver.chrome.webdriver import WebDriver
-from selenium.webdriver.firefox.webdriver import WebDriver
+#from selenium.webdriver.firefox.webdriver import WebDriver
+from selenium import webdriver
 from splinter import Browser
 import re
 from django.test.client import Client
@@ -32,12 +33,12 @@ class AdminTests(LiveServerTestCase, XDisplayTest, WithFixtures):
 
     @classmethod
     def setUpClass(cls):
-        cls.setup_display()
+        #cls.setup_display()
         super(AdminTests, cls).setUpClass()
 
     @classmethod
     def tearDownClass(cls):
-        cls.teardown_display()
+        #cls.teardown_display()
         super(AdminTests, cls).tearDownClass()
 
     def test1_login(self):
@@ -46,12 +47,19 @@ class AdminTests(LiveServerTestCase, XDisplayTest, WithFixtures):
         the django docs.
         """
         self.setup_more_fixtures()
-        self.selenium = WebDriver()
+        #self.selenium = WebDriver()
+        desired_capabilities = webdriver.DesiredCapabilities.FIREFOX
+        self.selenium = webdriver.Remote(
+            desired_capabilities=desired_capabilities,
+            command_executor="http://hub:4444/wd/hub"
+        )
         self.selenium.get(self.url("/repoadmin/login/"))
         username_input = self.selenium.find_element_by_name("username")
-        username_input.send_keys(self.admin.username)
+        #username_input.send_keys('admin@example.com')
+        username_input.send_keys('testuser@ccg.murdoch.edu.au')
         password_input = self.selenium.find_element_by_name("password")
-        password_input.send_keys(self.admin_password)
+        #password_input.send_keys('admin')
+        password_input.send_keys('testing')
         self.selenium.find_element_by_xpath("//input[@value='Log in']").click()
         self.selenium.quit()
 
@@ -92,7 +100,13 @@ class AdminTests(LiveServerTestCase, XDisplayTest, WithFixtures):
         self.run.update_sample_counts()
         self.assertEqual(self.run.state, RUN_STATES.COMPLETE[0])
 
-        with Browser() as browser:
+        with Browser(driver_name="remote",
+                     url='http://hub:4444/wd/hub',
+                     browser='firefox',
+                     #platform="Windows 7",
+                     #version="9",
+                     name="Test of Firefox") as browser:
+
             # select the run
             browser.visit(self.url("/repoadmin/repository/run/"))
 
@@ -125,4 +139,4 @@ class AdminTests(LiveServerTestCase, XDisplayTest, WithFixtures):
             self.assertEqual(int(m.group(2)), 2, "Check num. samples changed")
 
     def url(self, path):
-        return "%s%s" % (self.live_server_url, path)
+        return "%s%s" % ('http://web:8000', path)

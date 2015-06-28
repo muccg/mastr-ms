@@ -3,7 +3,24 @@ datatest:
   image: muccg/debian8-base:latest
   volumes:
     - .:/app
-    - data/dev:/data
+    - data/test:/data
+
+seleniumhub:
+  image: selenium/hub
+  ports:
+    - ":4444"
+
+chrome:
+  image: selenium/node-chrome
+  links:
+  - seleniumhub:hub
+  - webtest:web
+
+firefox:
+  image: selenium/node-firefox
+  links:
+  - seleniumhub:hub
+  - webtest:web
 
 dbtest:
   image: postgres:9.4
@@ -47,3 +64,4 @@ testhost:
     - dbtest:db
     - webtest:web
     - cachetest:cache
+    - seleniumhub:hub
