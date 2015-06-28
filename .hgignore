@@ -5,6 +5,7 @@ syntax: glob
 client_tests.xml
 bootstrap
 build
+data
 mastrms/dist
 mastrms/build
 virt_mastrms
