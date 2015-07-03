@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   libxslt1-dev \
   libssl-dev \
   libsasl2-dev \
+  postgresql-client-9.3 \
   python-wxgtk2.8 \
   && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
