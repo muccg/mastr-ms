@@ -288,7 +288,7 @@ else:
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-#
 
-TEST_RUNNER = "django_nose.NoseTestSuiteRunner"
+TEST_RUNNER = 'xmlrunner.extra.djangotestrunner.XMLTestRunner'
 NOSE_PLUGINS = ["mastrms.testutils.noseplugins.SilenceSouthPlugin"]
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-#

@@ -5,3 +5,4 @@ nose
 selenium
 splinter
 xvfbwrapper
+unittest-xml-reporting
