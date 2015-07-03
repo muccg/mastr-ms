@@ -9,18 +9,28 @@ MADAS_USER_GROUP = 'User'
 MADAS_PENDING_GROUP = 'Pending'
 MADAS_DELETED_GROUP = 'Deleted'
 MADAS_REJECTED_GROUP = 'Rejected'
-MADAS_STATUS_GROUPS = [MADAS_USER_GROUP, MADAS_PENDING_GROUP, MADAS_DELETED_GROUP, MADAS_REJECTED_GROUP]
+MADAS_STATUS_GROUPS = [
+    MADAS_USER_GROUP,
+    MADAS_PENDING_GROUP,
+    MADAS_DELETED_GROUP,
+    MADAS_REJECTED_GROUP]
 MADAS_ADMIN_GROUP = 'Administrators'
 MADAS_NODEREP_GROUP = 'Node Reps'
 MASTR_ADMIN_GROUP = 'Mastr Administrators'
 PROJECTLEADER_GROUP = 'Project Leaders'
 MASTR_STAFF_GROUP = 'Mastr Staff'
-MADAS_ADMIN_GROUPS = [MADAS_ADMIN_GROUP, MADAS_NODEREP_GROUP, MASTR_ADMIN_GROUP, PROJECTLEADER_GROUP, MASTR_STAFF_GROUP]
+MADAS_ADMIN_GROUPS = [
+    MADAS_ADMIN_GROUP,
+    MADAS_NODEREP_GROUP,
+    MASTR_ADMIN_GROUP,
+    PROJECTLEADER_GROUP,
+    MASTR_STAFF_GROUP]
 
 logger = logging.getLogger('mastrms.users')
 
 
 class User(AbstractBaseUser, PermissionsMixin):
+
     """
     Extended user model.
     Some attributes still need to be renamed.
@@ -29,23 +39,27 @@ class User(AbstractBaseUser, PermissionsMixin):
                               unique=True, db_index=True)
     first_name = models.CharField('first name', max_length=50, blank=True)
     last_name = models.CharField('last name', max_length=50, blank=True)
-    is_staff = models.BooleanField('staff status', default=False,
+    is_staff = models.BooleanField(
+        'staff status',
+        default=False,
         help_text='Designates whether the user can log into this admin '
-                    'site.')
-    is_active = models.BooleanField('active', default=True,
+        'site.')
+    is_active = models.BooleanField(
+        'active',
+        default=True,
         help_text='Designates whether this user should be treated as '
-                    'active. Unselect this instead of deleting accounts.')
+        'active. Unselect this instead of deleting accounts.')
     date_joined = models.DateTimeField('date joined', default=timezone.now)
     telephoneNumber = models.CharField(max_length=255, blank=True)
-    homePhone = models.CharField(max_length=255, blank=True) # homephone
+    homePhone = models.CharField(max_length=255, blank=True)  # homephone
     physicalDeliveryOfficeName = models.CharField(max_length=255, blank=True)
     title = models.CharField(max_length=255, blank=True)
-    destinationIndicator = models.CharField(max_length=255, blank=True) # dept
-    description = models.CharField(max_length=255, blank=True) # areaOfInterest
-    postalAddress = models.CharField(max_length=255, blank=True) # address
-    businessCategory = models.CharField(max_length=255, blank=True) # institute
-    registeredAddress = models.CharField(max_length=255, blank=True) # supervisor
-    carLicense = models.CharField(max_length=255, blank=True) # country
+    destinationIndicator = models.CharField(max_length=255, blank=True)  # dept
+    description = models.CharField(max_length=255, blank=True)  # areaOfInterest
+    postalAddress = models.CharField(max_length=255, blank=True)  # address
+    businessCategory = models.CharField(max_length=255, blank=True)  # institute
+    registeredAddress = models.CharField(max_length=255, blank=True)  # supervisor
+    carLicense = models.CharField(max_length=255, blank=True)  # country
     passwordResetKey = models.CharField(max_length=255, blank=True)
 
     USERNAME_FIELD = 'email'
@@ -102,6 +116,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     @property
     def IsAdmin(self):
         return self.groups.filter(name=MADAS_ADMIN_GROUP).exists()
+
     @IsAdmin.setter
     def IsAdmin(self, value):
         self.update_groups(Group.objects.filter(name=MADAS_ADMIN_GROUP), value)
@@ -111,6 +126,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     @property
     def IsNodeRep(self):
         return self.groups.filter(name=MADAS_NODEREP_GROUP).exists()
+
     @IsNodeRep.setter
     def IsNodeRep(self, value):
         self.update_groups(Group.objects.filter(name=MADAS_NODEREP_GROUP), value)
@@ -130,6 +146,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     @property
     def IsMastrAdmin(self):
         return self.groups.filter(name=MASTR_ADMIN_GROUP).exists()
+
     @IsMastrAdmin.setter
     def IsMastrAdmin(self, value):
         self.update_groups(Group.objects.filter(name=MASTR_ADMIN_GROUP), value)
@@ -137,6 +154,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     @property
     def IsProjectLeader(self):
         return self.groups.filter(name=PROJECTLEADER_GROUP).exists()
+
     @IsProjectLeader.setter
     def IsProjectLeader(self, value):
         self.update_groups(Group.objects.filter(name=PROJECTLEADER_GROUP), value)
@@ -144,6 +162,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     @property
     def IsMastrStaff(self):
         return self.groups.filter(name=MASTR_STAFF_GROUP).exists()
+
     @IsMastrStaff.setter
     def IsMastrStaff(self, value):
         self.update_groups(Group.objects.filter(name=MASTR_STAFF_GROUP), value)
@@ -171,7 +190,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     @StatusGroup.setter
     def StatusGroup(self, new_group):
         if new_group not in MADAS_STATUS_GROUPS:
-            raise ValueError, "bug: bad user status group \"%s\"" % new_group
+            raise ValueError("bug: bad user status group \"%s\"" % new_group)
         other_groups = [g for g in MADAS_STATUS_GROUPS if g != new_group]
         self.update_groups(self.groups.filter(name__in=other_groups), False)
         self.update_groups(Group.objects.filter(name=new_group), True)
@@ -196,6 +215,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         groups = groups.exclude(name__in=MADAS_ADMIN_GROUPS)
         # fixme: remove list conversion, fix json serializer
         return list(groups.values_list("name", flat=True))
+
     @Nodes.setter
     def Nodes(self, nodes):
         # remove user from all non-special groups which don't include nodes
@@ -223,7 +243,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     @property
     def PrimaryNode(self):
-        if len(self.Nodes) >=1:
+        if len(self.Nodes) >= 1:
             return self.Nodes[0]
         else:
             return 'Unknown'
@@ -232,11 +252,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     def Name(self):
         return self.get_full_name()
 
-    #Just a class to encapsulate data to send to the frontend (as json)
+    # Just a class to encapsulate data to send to the frontend (as json)
     def getData(self):
-        attrs = [ "email", "IsLoggedIn", "IsAdmin", "IsClient", "IsNodeRep",
-                  "IsStaff", "IsMastrAdmin", "IsProjectLeader", "IsMastrStaff",
-                  "Nodes" ]
+        attrs = ["email", "IsLoggedIn", "IsAdmin", "IsClient", "IsNodeRep",
+                 "IsStaff", "IsMastrAdmin", "IsProjectLeader", "IsMastrStaff",
+                 "Nodes"]
 
         return dict((attr, getattr(self, attr)) for attr in attrs)
 
@@ -249,10 +269,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 
         details = self.to_dict(ldap_style=False)
 
-        #copy one field to a new name
+        # copy one field to a new name
         details['originalEmail'] = details['email']
 
-        #groups
+        # groups
         details['node'] = self.PrimaryNode or []
         details['isAdmin'] = self.IsAdmin
         details['isNodeRep'] = self.IsNodeRep
@@ -261,12 +281,12 @@ class User(AbstractBaseUser, PermissionsMixin):
         details['isMastrStaff'] = self.IsMastrStaff
         details['isClient'] = self.IsClient
         status = self.StatusGroup
-        #This is done because the javascript wants
+        # This is done because the javascript wants
         #'Self' to be seen as 'Active'
         if status == MADAS_USER_GROUP:
             status = 'Active'
         details['status'] = status
-        #groups - for some reason the frontend code wants this limited to one?
+        # groups - for some reason the frontend code wants this limited to one?
         #         so I choose the most important.
         if self.IsAdmin:
             details['groups'] = MADAS_ADMIN_GROUP
@@ -305,19 +325,22 @@ class User(AbstractBaseUser, PermissionsMixin):
         return "\n".join(filter(bool, [self.postalAddress, self.carLicense]))
 
 # Gets MAUser for currently logged in user, or a dummy MAUser object
-def getCurrentUser(request, force_refresh = False):
+
+
+def getCurrentUser(request, force_refresh=False):
     anon_json = json.dumps({
         "Username": "nulluser",
         "IsLoggedIn": False, "IsAdmin": False, "IsClient": False,
         "IsNodeRep": False, "IsStaff": False, "IsMastrAdmin": False,
         "IsProjectLeader": False, "IsMastrStaff": False,
         "Nodes": [],
-        })
+    })
 
     user = request.user
     if user.is_anonymous():
         user.toJson = lambda: anon_json
     return user
+
 
 def getMadasUser(email):
     try:
@@ -325,7 +348,8 @@ def getMadasUser(email):
     except User.DoesNotExist:
         return None
 
-def getMadasUsersFromGroups(grouplist, method='and', ldap_style=False) :
+
+def getMadasUsersFromGroups(grouplist, method='and', ldap_style=False):
     '''Returns users who are a member of the groups given in grouplist
     The default 'method' is 'and', which will return only users who are a member
     of all groups. Passing 'or' will return users who are a member of any of the groups'''
@@ -350,6 +374,7 @@ def getMadasUsersFromGroups(grouplist, method='and', ldap_style=False) :
     users = list_users(grouplist, method)
     return [u.to_dict(ldap_style) for u in users]
 
+
 def addMadasUser(email, detailsdict, password):
     logger.info("Adding new user %s" % email)
     if User.objects.filter(email=email).exists():
@@ -364,12 +389,14 @@ def addMadasUser(email, detailsdict, password):
 
     return user
 
+
 def updateMadasUserDetails(currentUser, existingUser, email, password, detailsdict):
-    #The only people who can edit a record is an admin, or the actual user
+    # The only people who can edit a record is an admin, or the actual user
     if currentUser.IsAdmin or currentUser.IsMastrAdmin or currentUser == existingUser:
         existingUser.update_user(email, password, detailsdict)
         return True
     return False
+
 
 def saveMadasUser(currentUser, email, changeddetails, changedstatus, password):
     '''
@@ -378,10 +405,10 @@ def saveMadasUser(currentUser, email, changeddetails, changedstatus, password):
         changeddetails is a dict containing only the changed details
         changedstatus is a dict containing {admin:bool, noderep:bool, node:str, status:str}
     '''
-    #load the existing user
+    # load the existing user
     existingUser = getMadasUser(email)
 
-    #If the user doesn't exist yet, add them first.
+    # If the user doesn't exist yet, add them first.
     if existingUser is None:
         existingUser = addMadasUser(email.strip(), changeddetails, password)
 
@@ -412,7 +439,8 @@ def saveMadasUser(currentUser, email, changeddetails, changedstatus, password):
             (currentUser.IsProjectLeader and currentUser.Nodes == existingUser.Nodes)):
         existingUser.IsMastrStaff = bool(changedstatus['mastrstaff'])
 
-    if (currentUser.IsAdmin or (currentUser.IsNodeRep and currentUser.Nodes == existingUser.Nodes)):
+    if (currentUser.IsAdmin or (
+            currentUser.IsNodeRep and currentUser.Nodes == existingUser.Nodes)):
         existingUser.IsNodeRep = bool(changedstatus['noderep'])
 
         # Status: Pending, Active etc.

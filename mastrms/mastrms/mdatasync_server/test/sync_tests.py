@@ -20,6 +20,7 @@ TESTING_REPO = tempfile.mkdtemp(prefix="testrepo-")
 logger = logging.getLogger(__name__)
 logger.info("Created testing repo %s" % TESTING_REPO)
 
+
 def tearDownModule():
     global TESTING_REPO
     logger.info("Removing testing repo %s" % TESTING_REPO)
@@ -29,6 +30,7 @@ def tearDownModule():
 @attr("synctest", "xdisplay")
 @override_settings(REPO_FILES_ROOT=TESTING_REPO)
 class SyncTests(LiveServerTestCase, XDisplayTest, WithFixtures):
+
     def setUp(self):
         self.test_client = None
         self.setup_more_fixtures()
@@ -43,12 +45,12 @@ class SyncTests(LiveServerTestCase, XDisplayTest, WithFixtures):
 
     @classmethod
     def setUpClass(cls):
-        #cls.setup_display()
+        # cls.setup_display()
         super(SyncTests, cls).setUpClass()
 
     @classmethod
     def tearDownClass(cls):
-        #cls.teardown_display()
+        # cls.teardown_display()
         super(SyncTests, cls).tearDownClass()
 
     def test_sync1(self):
@@ -96,10 +98,14 @@ class SyncTests(LiveServerTestCase, XDisplayTest, WithFixtures):
 
     def cleanup_client_files(self):
         config = self.test_client.config
-        try: os.remove(config["logfile"])
-        except EnvironmentError: pass
-        try: os.system("rm -rf %s" % pipes.quote(config["archivedfilesdir"]))
-        except EnvironmentError: pass
+        try:
+            os.remove(config["logfile"])
+        except EnvironmentError:
+            pass
+        try:
+            os.system("rm -rf %s" % pipes.quote(config["archivedfilesdir"]))
+        except EnvironmentError:
+            pass
 
     def test_sync2(self):
         """
@@ -135,7 +141,6 @@ class SyncTests(LiveServerTestCase, XDisplayTest, WithFixtures):
 
         self.assertTrue(True)
 
-
     def test_sync3(self):
         rsync_results = []
         with FakeRsync(rsync_results, do_copy=True):
@@ -169,7 +174,7 @@ class SyncTests(LiveServerTestCase, XDisplayTest, WithFixtures):
             # b. check that the file was rsynced
             self.assertEqual(len(rsync_results[0]["source_files"]), 1)
             self.assertEqual(os.path.basename(rsync_results[0]["source_files"][0][1]),
-                              "runsample1_filename")
+                             "runsample1_filename")
 
             # c. check server for file
             server_filename = runsample_filename(self.run, "runsample1_filename")
@@ -194,7 +199,7 @@ class SyncTests(LiveServerTestCase, XDisplayTest, WithFixtures):
                 self.test_client.click_sync()
 
                 logger.debug("clicking sync a third time")
-                self.test_client.click_sync() # rsync should not be run here
+                self.test_client.click_sync()  # rsync should not be run here
 
                 logger.debug("finished")
 
@@ -336,7 +341,7 @@ class SyncTests(LiveServerTestCase, XDisplayTest, WithFixtures):
                 logger.debug("clicking sync again")
                 self.test_client.click_sync()
                 logger.debug("clicking sync once more")
-                self.test_client.click_sync() # this shouldn't result in an rsync
+                self.test_client.click_sync()  # this shouldn't result in an rsync
 
                 # load up received json object
                 requested_files = self.find_files_in_json(received_json)
@@ -384,7 +389,6 @@ class SyncTests(LiveServerTestCase, XDisplayTest, WithFixtures):
 
                 logger.debug("finished")
                 self.test_client.quit()
-
 
             # b. check that rsync was called four times
             self.assertEqual(len(rsync_results), 4,
@@ -484,7 +488,6 @@ class SyncTests(LiveServerTestCase, XDisplayTest, WithFixtures):
                 logger.debug("finished")
                 self.test_client.quit()
 
-
             # b. check that files are rsynced
             self.assertEqual(len(rsync_results), 3,
                              "check that rsync was called three times")
@@ -492,15 +495,12 @@ class SyncTests(LiveServerTestCase, XDisplayTest, WithFixtures):
             self.assertTrue(bool(rsync_results[1]))
             self.assertTrue(bool(rsync_results[2]))
             # b. check that both files were rsynced
-            self.assertListEqual([os.path.basename(f[1]) for f in rsync_results[0]["source_files"]],
-                                 ["runsample1_filename", "runsample2_filename"],
-                                 "first rsync transfers both files")
-            self.assertListEqual([os.path.basename(f[1]) for f in rsync_results[1]["source_files"]],
-                                 ["runsample1_filename", "runsample2_filename"],
-                                 "second rsync transfers both files")
-            self.assertListEqual([os.path.basename(f[1]) for f in rsync_results[2]["source_files"]],
-                                 ["runsample1_filename", "runsample2_filename"],
-                                 "third rsync transfers both files")
+            self.assertListEqual([os.path.basename(f[1]) for f in rsync_results[0]["source_files"]], [
+                                 "runsample1_filename", "runsample2_filename"], "first rsync transfers both files")
+            self.assertListEqual([os.path.basename(f[1]) for f in rsync_results[1]["source_files"]], [
+                                 "runsample1_filename", "runsample2_filename"], "second rsync transfers both files")
+            self.assertListEqual([os.path.basename(f[1]) for f in rsync_results[2]["source_files"]], [
+                                 "runsample1_filename", "runsample2_filename"], "third rsync transfers both files")
 
             # c. check server for presence of files
             server_filename = runsample_filename(self.run, "runsample1_filename")
@@ -546,7 +546,7 @@ class SyncTests(LiveServerTestCase, XDisplayTest, WithFixtures):
 
             # check the files in the rsync src dir
             self.assertEqual(len(rsync_results), 1)
-            istemp = lambda (srcdir, path): Simulator.istemp(path)
+            istemp = lambda srcdir_path: Simulator.istemp(srcdir_path[1])
             temps = filter(istemp, rsync_results[0]["source_files"])
             self.assertEqual(len(temps), 0, "no temp files rsynced")
 
@@ -588,7 +588,7 @@ class SyncTests(LiveServerTestCase, XDisplayTest, WithFixtures):
             # c. check server for directory
             server_filename = runsample_filename(self.run, self.worklist[0])
             self.assertFalse(os.path.exists(server_filename),
-                            "%s doesn't exist on server" % server_filename)
+                             "%s doesn't exist on server" % server_filename)
 
             # d. check sample completion status
             samples = self.run.runsample_set.order_by("filename")
@@ -597,16 +597,19 @@ class SyncTests(LiveServerTestCase, XDisplayTest, WithFixtures):
 
     class FileDoesNotExistAssertion(AssertionError):
         pass
+
     class FileExistsAssertion(AssertionError):
         pass
+
     def assertFileExists(self, filename, msg=None):
         if not os.path.exists(filename):
             msg = msg or "%s exists" % filename
-            raise FileDoesNotExistAssertion, msg
+            raise FileDoesNotExistAssertion(msg)
+
     def assertFileDoesNotExist(self, filename, msg=None):
         if os.path.exists(filename):
             msg = msg or "%s doesn't exist" % filename
-            raise FileExistsAssertion, msg
+            raise FileExistsAssertion(msg)
 
     def test_unicode1(self):
         """
@@ -683,7 +686,7 @@ class SyncTests(LiveServerTestCase, XDisplayTest, WithFixtures):
         this test doesn't work.
         """
         #self.sample.sample_class.class_id = u"⌨"
-        #self.sample.sample_class.save()
+        # self.sample.sample_class.save()
         SampleClass.objects.update(class_id=u"⌨")
 
         rb = RunBuilder(self.run)
@@ -698,7 +701,6 @@ class SyncTests(LiveServerTestCase, XDisplayTest, WithFixtures):
             with json_hooker() as received_json:
                 self.test_client.click_sync()
 
-
     @staticmethod
     def find_files_in_json(received_json):
         """
@@ -711,6 +713,7 @@ class SyncTests(LiveServerTestCase, XDisplayTest, WithFixtures):
                 for r in received_json
                 if "files" in r]
 
+
 @contextmanager
 def json_hooker(received_json=None):
     "Overrides json.loads() to record objects received from the server."
@@ -719,6 +722,7 @@ def json_hooker(received_json=None):
     logger.debug("hooking into json")
     import json
     old_loads = json.loads
+
     def loads_parasite(*args, **kwargs):
         logger.debug("parasite loads: %s" % args[0])
         ob = old_loads(*args, **kwargs)
@@ -727,6 +731,7 @@ def json_hooker(received_json=None):
     json.loads = loads_parasite
     yield received_json
     json.loads = old_loads
+
 
 def get_csv_worklist_from_run(run, user):
     """
@@ -744,6 +749,7 @@ def get_csv_worklist_from_run(run, user):
                         ]))
     runsamples = run.runsample_set.order_by("sequence", "filename")
     return "\n".join(map(csv_line, runsamples)) + "\n"
+
 
 def runsample_filename(run, sample_filename):
     """

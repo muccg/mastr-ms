@@ -9,6 +9,7 @@ from .base import BaseResource, register
 
 @register
 class ExperimentStatusResource(BaseResource):
+
     class Meta(BaseResource.Meta):
         queryset = ExperimentStatus.objects.all()
         ordering = ["name"]
@@ -54,12 +55,14 @@ class SourceInfoResource(BaseResource):
 
 # @register
 class PlantInfoResource(SourceInfoResource):
+
     class Meta(SourceInfoResource.Meta):
         queryset = PlantInfo.objects.all()
 
 
 # @register
 class MicrobialResource(SourceInfoResource):
+
     class Meta(SourceInfoResource.Meta):
         queryset = MicrobialInfo.objects.all()
 

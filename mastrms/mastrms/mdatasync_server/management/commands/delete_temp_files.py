@@ -8,6 +8,7 @@ from django.conf import settings
 import logging
 logger = logging.getLogger(__name__)
 
+
 class Command(BaseCommand):
     help = 'Deletes TEMP files which were uploaded by an older datasync client.'
 
@@ -29,7 +30,7 @@ class Command(BaseCommand):
                         logger.info("Deleting file %s" % path)
                         os.remove(path)
                         num_files += 1
-                    except EnvironmentError, e:
+                    except EnvironmentError as e:
                         logger.error(e)
                         num_errors += 1
 
@@ -40,7 +41,7 @@ class Command(BaseCommand):
                         logger.info("Deleting directory %s" % path)
                         os.rmdir(path)
                         num_dirs += 1
-                    except EnvironmentError, e:
+                    except EnvironmentError as e:
                         logger.error(e)
                         num_errors += 1
 

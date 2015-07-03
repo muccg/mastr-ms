@@ -9,6 +9,7 @@ from .base import BaseResource, register
 
 @register
 class SessionResource(BaseResource):
+
     """
     This API resource handles user login and logout.
     fixme: put it in ccg-django-utils
@@ -46,7 +47,11 @@ class SessionResource(BaseResource):
         password = data.get('password', '')
         token = str(data.get('token', '')).strip()
 
-        user = authenticate(username=username, password=password, session=request.session, token=token)
+        user = authenticate(
+            username=username,
+            password=password,
+            session=request.session,
+            token=token)
 
         if user:
             if user.is_active:

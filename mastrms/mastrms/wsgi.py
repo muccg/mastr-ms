@@ -18,9 +18,19 @@ import os.path
 from sys import path
 
 # snippet to enable the virtualenv if installed as rpm
-activate_this=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'bin', 'activate_this.py')
+activate_this = os.path.join(
+    os.path.dirname(
+        os.path.abspath(__file__)),
+    'bin',
+    'activate_this.py')
 if os.path.exists(activate_this):
-    exec(compile(open(activate_this).read(), activate_this, 'exec'), dict(__file__=activate_this))
+    exec(
+        compile(
+            open(activate_this).read(),
+            activate_this,
+            'exec'),
+        dict(
+            __file__=activate_this))
 del activate_this
 
 SITE_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -34,6 +44,7 @@ setup_prod_env(os.path.basename(os.path.dirname(__file__)))
 # setting points here.
 from django.core.wsgi import get_wsgi_application
 _application = get_wsgi_application()
+
 
 def application(wenv, start_response):
     # Before entering the django app, transfer the SCRIPT_NAME http

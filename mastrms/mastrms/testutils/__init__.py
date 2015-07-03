@@ -8,11 +8,14 @@ from mastrms.users.models import User
 __all__ = ["MockLoggingHandler", "XDisplayTest", "WithFixtures",
            "NonFlushingTransactionTestCaseMixin"]
 
+
 class MockLoggingHandler(logging.Handler):
+
     """
     Mock logging handler to check for expected logs.
     http://stackoverflow.com/a/1049375
     """
+
     def __init__(self, *args, **kwargs):
         self.reset()
         logging.Handler.__init__(self, *args, **kwargs)
@@ -29,7 +32,9 @@ class MockLoggingHandler(logging.Handler):
             'critical': [],
         }
 
+
 class XDisplayTest(object):
+
     """
     This TestCase mixin provides a virtual X server if DISPLAY is not
     set.
@@ -51,12 +56,13 @@ class XDisplayTest(object):
 
 
 class WithFixtures(object):
+
     "TestCase mixin to provide fixtures for tests."
     # For some reason, fixtures are required, or else the test case
     # won't find them.
     fixtures = [
         "mastrms/repository/fixtures/reference_data.json",
-        ]
+    ]
 
     def setup_more_fixtures(self):
         """
@@ -88,12 +94,13 @@ class WithFixtures(object):
                                                  version="", template="",
                                                  creator=self.user)
 
-        experiment = Experiment.objects.create(title="Test experiment",
-                                               description="We're testing to see if this code works",
-                                               comment="Maybe it doesn't",
-                                               job_number="job_number",
-                                               project=project,
-                                               instrument_method=method)
+        experiment = Experiment.objects.create(
+            title="Test experiment",
+            description="We're testing to see if this code works",
+            comment="Maybe it doesn't",
+            job_number="job_number",
+            project=project,
+            instrument_method=method)
 
         rulegen = RuleGenerator.objects.create(name="Rule Gen", description="test",
                                                created_by=self.user,
@@ -105,10 +112,10 @@ class WithFixtures(object):
         smp = Component.objects.get(sample_code="Smp")
 
         sample_block = RuleGeneratorStartBlock(rule_generator=rulegen, index=1, count=1,
-                                              component=pbqc)
+                                               component=pbqc)
         start_block = RuleGeneratorSampleBlock(rule_generator=rulegen, index=2,
-                                                sample_count=1, count=1,
-                                                component=smp, order=1)
+                                               sample_count=1, count=1,
+                                               component=smp, order=1)
         end_block = RuleGeneratorEndBlock(rule_generator=rulegen, index=3, count=1,
                                           component=sb)
         for block in start_block, sample_block, end_block:

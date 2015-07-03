@@ -3,7 +3,9 @@ from django.contrib.auth.models import Group
 
 logger = logging.getLogger('mastrms.general')
 
+
 class GroupManager(object):
+
     @staticmethod
     def list_groups():
         return list(Group.objects.values_list("name", flat=True))
@@ -13,7 +15,7 @@ class GroupManager(object):
         try:
             groupname = groupname.strip()
             Group.objects.create(name=groupname)
-        except Exception, e:
+        except Exception as e:
             logger.exception("Couldn't create group %s." % groupname)
             return False
         return True
@@ -26,7 +28,7 @@ class GroupManager(object):
             group = Group.objects.get(name=oldname)
             group.name = newname
             group.save()
-        except Exception, e:
+        except Exception as e:
             logger.exception("Couldn't rename group %s to group %s." % (oldname, newname))
             return False
         return True
@@ -36,7 +38,7 @@ class GroupManager(object):
         try:
             group = Group.objects.get(name=groupname)
             group.delete()
-        except Exception, e:
+        except Exception as e:
             logger.exception("Couldn't delete group %s." % groupname)
             return False
         return True

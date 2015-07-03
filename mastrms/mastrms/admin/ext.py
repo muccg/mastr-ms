@@ -7,6 +7,7 @@ from json import dumps, loads
 
 
 class ExtJsonInterface(object):
+
     def serialise(self, records):
         def field_to_ext_type(field):
             internal_type = field.get_internal_type()
@@ -133,9 +134,11 @@ class ExtJsonInterface(object):
     def get_urls(self):
         urls = super(ExtJsonInterface, self).get_urls()
         local_urls = patterns("",
-            url(r"^ext/json/{0,1}$", self.admin_site.admin_view(self.root_dispatcher)),
-            url(r"^ext/json/(?P<id>[0-9]+)$", self.admin_site.admin_view(self.id_dispatcher)),
-        )
+                              url(r"^ext/json/{0,1}$",
+                                  self.admin_site.admin_view(self.root_dispatcher)),
+                              url(r"^ext/json/(?P<id>[0-9]+)$",
+                                  self.admin_site.admin_view(self.id_dispatcher)),
+                              )
         return local_urls + urls
 
     def handle_create(self, request):
@@ -148,7 +151,7 @@ class ExtJsonInterface(object):
             try:
                 for field in row:
                     self.set_field(o, field, row[field])
-            except Exception, e:
+            except Exception as e:
                 print e
 
                 response = {
@@ -156,7 +159,9 @@ class ExtJsonInterface(object):
                     "message": "Unable to parse incoming record.",
                 }
 
-                return HttpResponseBadRequest(content_type="text/plain; charset=UTF-8", content=dumps(response))
+                return HttpResponseBadRequest(
+                    content_type="text/plain; charset=UTF-8",
+                    content=dumps(response))
         except ValueError:
             for field in request.POST:
                 self.set_field(o, field, request.POST[field])
@@ -166,7 +171,9 @@ class ExtJsonInterface(object):
                 "message": "Unable to parse incoming record.",
             }
 
-            return HttpResponseBadRequest(content_type="text/plain; charset=UTF-8", content=dumps(response))
+            return HttpResponseBadRequest(
+                content_type="text/plain; charset=UTF-8",
+                content=dumps(response))
 
         o.save(force_insert=True)
 
@@ -191,7 +198,9 @@ class ExtJsonInterface(object):
                 "message": "Record deleted.",
             }
 
-            return HttpResponse(content_type="text/plain; charset=UTF-8", content=dumps(response))
+            return HttpResponse(
+                content_type="text/plain; charset=UTF-8",
+                content=dumps(response))
         except self.model.DoesNotExist:
             transaction.rollback()
 
@@ -200,7 +209,9 @@ class ExtJsonInterface(object):
                 "message": "The record could not be found.",
             }
 
-            return HttpResponseNotFound(content_type="text/plain; charset=UTF-8", content=dumps(response))
+            return HttpResponseNotFound(
+                content_type="text/plain; charset=UTF-8",
+                content=dumps(response))
 
     def handle_read(self, request):
         qs = self.queryset(request)
@@ -216,7 +227,9 @@ class ExtJsonInterface(object):
                 qs = qs.filter(**filters)
             except FieldError:
                 # Bad parameter to QuerySet.filter.
-                return HttpResponseBadRequest(content_type="text/plain; charset=UTF-8", content=dumps("Bad search term"))
+                return HttpResponseBadRequest(
+                    content_type="text/plain; charset=UTF-8",
+                    content=dumps("Bad search term"))
 
         # Apply sorting parameters, if given.
         if "sort" in request.GET and "dir" in request.GET:
@@ -225,7 +238,9 @@ class ExtJsonInterface(object):
                 field = "-" + field
             qs = qs.order_by(field)
 
-        return HttpResponse(content_type="text/plain; charset=UTF-8", content=self.serialise(qs))
+        return HttpResponse(
+            content_type="text/plain; charset=UTF-8",
+            content=self.serialise(qs))
 
     @transaction.commit_manually
     def handle_update(self, request, id):
@@ -251,7 +266,9 @@ class ExtJsonInterface(object):
                 "success": True,
             }
 
-            return HttpResponse(content_type="text/plain; charset=UTF-8", content=dumps(response))
+            return HttpResponse(
+                content_type="text/plain; charset=UTF-8",
+                content=dumps(response))
         except self.model.DoesNotExist:
             transaction.rollback()
 
@@ -260,7 +277,9 @@ class ExtJsonInterface(object):
                 "message": "The record could not be found.",
             }
 
-            return HttpResponseNotFound(content_type="text/plain; charset=UTF-8", content=dumps(response))
+            return HttpResponseNotFound(
+                content_type="text/plain; charset=UTF-8",
+                content=dumps(response))
         except KeyError:
             transaction.rollback()
 
@@ -269,7 +288,9 @@ class ExtJsonInterface(object):
                 "message": "An internal error occurred.",
             }
 
-            return HttpResponseServerError(content_type="text/plain; charset=UTF-8", content=dumps(response))
+            return HttpResponseServerError(
+                content_type="text/plain; charset=UTF-8",
+                content=dumps(response))
 
     def id_dispatcher(self, request, id):
         if request.method == "PUT":

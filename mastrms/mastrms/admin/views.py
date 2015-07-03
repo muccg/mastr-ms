@@ -13,7 +13,7 @@ from mastrms.quote.models import Quoterequest, Formalquote, Organisation, UserOr
 from mastrms.repository.json_util import makeJsonFriendly
 from mastrms.decorators import admins_only, admins_or_nodereps, privileged_only, authentication_required
 from mastrms.users.user_manager import GroupManager
-from mastrms.users.models import * # All the MAUser functions, plus the groups information
+from mastrms.users.models import *  # All the MAUser functions, plus the groups information
 from mastrms.users.forms import getDetailsFromRequest
 from mastrms.app.utils.mail_functions import sendApprovedRejectedEmail, sendAccountModificationEmail
 
@@ -28,18 +28,19 @@ def _filter_users(groups, requestinguser):
 
     retval = []
     if not requestinguser.IsPrivileged:
-        return retval #early exit. Bad data.
-
+        return retval  # early exit. Bad data.
 
     searchGroups = []
-    if not (requestinguser.IsAdmin or requestinguser.IsMastrAdmin) and requestinguser.IsPrivileged:
+    if not (
+            requestinguser.IsAdmin or requestinguser.IsMastrAdmin) and requestinguser.IsPrivileged:
         searchGroups += requestinguser.Nodes
 
     searchGroups += groups
 
-    #The default 'method' is and
+    # The default 'method' is and
     userlist = getMadasUsersFromGroups(searchGroups)
     return userlist
+
 
 @admins_or_nodereps
 def admin_requests(request, *args):
@@ -50,6 +51,7 @@ def admin_requests(request, *args):
     newlist = _filter_users([MADAS_PENDING_GROUP], currentuser)
     return jsonResponse(items=newlist)
 
+
 @privileged_only
 def user_search(request, *args):
     '''This corresponds to Madas Dashboard->Admin->Active User Search
@@ -57,12 +59,13 @@ def user_search(request, *args):
     '''
     currentuser = getCurrentUser(request)
     newlist = _filter_users([MADAS_USER_GROUP], currentuser)
-    #for each user in newlist, set the client flag if applicable.
-    #This is potentially pretty inefficient, because we are loading every user.
+    # for each user in newlist, set the client flag if applicable.
+    # This is potentially pretty inefficient, because we are loading every user.
     for user_n in newlist:
         u = getMadasUser(user_n['email'])
         user_n['isClient'] = u.IsClient
     return jsonResponse(items=newlist)
+
 
 @admins_or_nodereps
 def rejected_user_search(request, *args):
@@ -73,6 +76,7 @@ def rejected_user_search(request, *args):
     newlist = _filter_users([MADAS_REJECTED_GROUP], currentuser)
     return jsonResponse(items=newlist)
 
+
 @admins_or_nodereps
 def deleted_user_search(request, *args):
     '''This corresponds to Madas Dashboard->Admin->Deleted User Search
@@ -82,17 +86,19 @@ def deleted_user_search(request, *args):
     newlist = _filter_users([MADAS_DELETED_GROUP], currentuser)
     return jsonResponse(items=newlist)
 
+
 @privileged_only
 def user_load(request, *args):
     '''This is called when an admin user opens up an individual user record
        from an admin view e.g. Active User Search
        Accessible by Administrators, Node Reps
     '''
-    logger.debug('***admin/user_load : enter ***' )
+    logger.debug('***admin/user_load : enter ***')
     u = User.objects.get(email=request.REQUEST['email'])
     d = u.get_client_dict()
-    logger.debug('***admin/user_load : exit ***' )
+    logger.debug('***admin/user_load : exit ***')
     return jsonResponse(data=[d])
+
 
 @privileged_only
 def user_save(request, *args):
@@ -103,10 +109,15 @@ def user_save(request, *args):
     logger.debug('***admin/user_save : enter ***')
     currentuser = getCurrentUser(request)
     parsedform = getDetailsFromRequest(request)
-    #look up the user they are editing:
+    # look up the user they are editing:
     existingUser = getMadasUser(parsedform['email'])
     existingstatus = existingUser.StatusGroup
-    success = saveMadasUser(currentuser, parsedform['email'], parsedform['details'], parsedform['status'], parsedform['password'])
+    success = saveMadasUser(
+        currentuser,
+        parsedform['email'],
+        parsedform['details'],
+        parsedform['status'],
+        parsedform['password'])
     newstatus = existingUser.StatusGroup
 
     if newstatus != existingstatus:
@@ -114,7 +125,7 @@ def user_save(request, *args):
             sendApprovedRejectedEmail(request, parsedform['email'], newstatus)
         else:
             sendAccountModificationEmail(request, parsedform['email'])
-    #do something based on 'status' (either '' or something new)
+    # do something based on 'status' (either '' or something new)
     nextview = 'admin:usersearch'
     if newstatus != '':
         if newstatus == MADAS_PENDING_GROUP:
@@ -124,7 +135,7 @@ def user_save(request, *args):
         elif newstatus == MADAS_DELETED_GROUP:
             nextview = 'admin:deletedUsersearch'
 
-    #apply organisational changes
+    # apply organisational changes
     mail = request.REQUEST['email']
     targetUser, created = User.objects.get_or_create(email=mail)
 
@@ -143,12 +154,13 @@ def user_save(request, *args):
             uo = UserOrganisation(user=targetUser, organisation=org)
             uo.save()
             logger.debug('added user to org')
-    except Exception, e:
+    except Exception as e:
         logger.warning('FATAL error adding or removing user from organisation: %s' % (str(e)))
 
-    logger.debug('***admin/user_save : exit ***' )
+    logger.debug('***admin/user_save : exit ***')
 
     return jsonResponse(mainContentFunction=nextview)
+
 
 @admins_or_nodereps
 def node_save(request, *args):
@@ -161,7 +173,7 @@ def node_save(request, *args):
     newname = str(request.REQUEST.get('name', ''))
 
     returnval = False
-    if oldname!=newname and newname !='':
+    if oldname != newname and newname != '':
         if oldname == '':
             if not GroupManager.add_group(newname):
                 raise Exception("Couldn't add new node: " + newname)
@@ -169,11 +181,12 @@ def node_save(request, *args):
             if not GroupManager.rename_group(oldname, newname):
                 raise Exception("Couldn't rename node %s to %s" % (oldname, newname))
     else:
-        #make no changes.
+        # make no changes.
         logger.warning("Node save: oldname was newname, or newname was empty. Aborting")
 
-    logger.debug( '*** node_save : exit ***' )
+    logger.debug('*** node_save : exit ***')
     return jsonResponse(mainContentFunction='admin:nodelist')
+
 
 @admins_or_nodereps
 def node_delete(request, *args):
@@ -182,17 +195,18 @@ def node_delete(request, *args):
        Accessible by Administrators, Node Reps
     '''
     logger.debug('*** node_delete : enter ***')
-    #We must make sure 'Administrator' and 'User' groups cannot be deleted.
+    # We must make sure 'Administrator' and 'User' groups cannot be deleted.
     delname = str(request.REQUEST.get('name', ''))
     ldelname = delname.lower()
     if ldelname == 'administrators' or ldelname == 'users':
-        #Don't delete these sorts of groups.
+        # Don't delete these sorts of groups.
         pass
     else:
         ret = GroupManager.delete_group(delname)
 
-    logger.debug( '*** node_delete : enter ***' )
+    logger.debug('*** node_delete : enter ***')
     return jsonResponse(mainContentFunction='admin:nodelist')
+
 
 @admins_or_nodereps
 def org_save(request):
@@ -212,6 +226,7 @@ def org_save(request):
 
     return jsonResponse()
 
+
 @admins_or_nodereps
 def org_delete(request):
 
@@ -223,6 +238,7 @@ def org_delete(request):
 
     return jsonResponse()
 
+
 @authentication_required
 def list_organisations(request):
 
@@ -231,14 +247,13 @@ def list_organisations(request):
     else:
         args = request.POST
 
-
     # basic json that we will fill in
-    output = {'metaData': { 'totalProperty': 'results',
-                            'successProperty': 'success',
-                            'root': 'rows',
-                            'id': 'id',
-                            'fields': [{'name':'id'}, {'name':'name'}, {'name':'abn'}]
-                            },
+    output = {'metaData': {'totalProperty': 'results',
+                           'successProperty': 'success',
+                           'root': 'rows',
+                           'id': 'id',
+                           'fields': [{'name': 'id'}, {'name': 'name'}, {'name': 'abn'}]
+                           },
               'results': 0,
               'authenticated': True,
               'authorized': True,
@@ -249,7 +264,7 @@ def list_organisations(request):
     rows = Organisation.objects.all()
 
     # add row count
-    output['results'] = len(rows);
+    output['results'] = len(rows)
 
     # add rows
     for row in rows:
@@ -259,7 +274,6 @@ def list_organisations(request):
         d['abn'] = row.abn
 
         output['rows'].append(d)
-
 
     output = makeJsonFriendly(output)
 

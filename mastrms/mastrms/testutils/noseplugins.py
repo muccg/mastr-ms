@@ -3,7 +3,9 @@ import logging
 
 __all__ = ["SilenceSouthPlugin"]
 
+
 class SilenceSouthPlugin(Plugin):
+
     """
     South logs a lot while it does migrations in the test setup
     stage. This nose plugin shuts it up, courtesy:
@@ -14,4 +16,5 @@ class SilenceSouthPlugin(Plugin):
     def configure(self, options, conf):
         super(SilenceSouthPlugin, self).configure(options, conf)
         logging.getLogger('south').setLevel(self.south_logging_level)
-        logging.getLogger("selenium.webdriver.remote.remote_connection").setLevel(self.south_logging_level)
+        logging.getLogger("selenium.webdriver.remote.remote_connection").setLevel(
+            self.south_logging_level)

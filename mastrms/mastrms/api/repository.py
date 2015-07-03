@@ -21,6 +21,7 @@ def get_user_projects(user, qs=None):
 
 @register
 class ProjectResource(BaseResource):
+
     class Meta(BaseResource.Meta):
         queryset = Project.objects.all()
 

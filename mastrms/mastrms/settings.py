@@ -7,7 +7,7 @@ from ccg_django_utils.conf import EnvConfig
 env = EnvConfig()
 
 CCG_INSTALL_ROOT = os.path.dirname(os.path.realpath(__file__))
-CCG_WRITEABLE_DIRECTORY = os.path.join(CCG_INSTALL_ROOT,"scratch")
+CCG_WRITEABLE_DIRECTORY = os.path.join(CCG_INSTALL_ROOT, "scratch")
 PROJECT_NAME = os.path.basename(CCG_INSTALL_ROOT)
 
 # see ccg_django_utils.webhelpers
@@ -91,7 +91,7 @@ ROOT_URLCONF = 'mastrms.urls'
 
 # This one's a constant, where puppet will have collect static files to
 # see: https://docs.djangoproject.com/en/1.4/ref/settings/#static-root
-STATIC_ROOT=os.path.join(CCG_INSTALL_ROOT, 'static')
+STATIC_ROOT = os.path.join(CCG_INSTALL_ROOT, 'static')
 
 # These may be overridden, but it would be nice to stick to this convention
 # see: https://docs.djangoproject.com/en/1.4/ref/settings/#static-url
@@ -99,7 +99,7 @@ STATIC_URL = '{0}/static/'.format(BASE_URL_PATH)
 
 # Another puppet-enforced content for location of user-uploaded data
 # see: https://docs.djangoproject.com/en/1.4/ref/settings/#media-root
-MEDIA_ROOT = os.path.join(CCG_WRITEABLE_DIRECTORY,"static","media")
+MEDIA_ROOT = os.path.join(CCG_WRITEABLE_DIRECTORY, "static", "media")
 
 # This may be overridden
 # see: https://docs.djangoproject.com/en/1.4/ref/settings/#media-url
@@ -117,7 +117,7 @@ TEMPLATE_LOADERS = [
 # see: https://docs.djangoproject.com/en/1.6/ref/settings/#admins
 # see: https://docs.djangoproject.com/en/1.6/ref/settings/#managers
 ADMINS = [
-    ( 'alert', env.get("alert_email", "root@localhost") )
+    ('alert', env.get("alert_email", "root@localhost"))
 ]
 MANAGERS = ADMINS
 
@@ -137,7 +137,11 @@ EMAIL_USE_TLS = env.get("email_use_tls", False)
 
 # see: https://docs.djangoproject.com/en/1.6/ref/settings/#email-subject-prefix
 EMAIL_APP_NAME = "Mastr-MS "
-EMAIL_SUBJECT_PREFIX = env.get("email_subject_prefix", "PROD: " if env.get("production", False) else "DEV ")
+EMAIL_SUBJECT_PREFIX = env.get(
+    "email_subject_prefix",
+    "PROD: " if env.get(
+        "production",
+        False) else "DEV ")
 
 # See: https://docs.djangoproject.com/en/1.6/ref/settings/#email-backend
 if EMAIL_HOST:
@@ -164,16 +168,16 @@ REGISTRATION_TO_EMAIL = env.get("registration_to_email", "reg_email@yoursite.com
 
 # Default cookie settings
 # see: https://docs.djangoproject.com/en/1.4/ref/settings/#session-cookie-age and following
-SESSION_COOKIE_AGE = 60*60
+SESSION_COOKIE_AGE = 60 * 60
 SESSION_COOKIE_PATH = '{0}/'.format(BASE_URL_PATH)
 SESSION_COOKIE_NAME = 'mastrms_sessionid'
 SESSION_SAVE_EVERY_REQUEST = True
-SESSION_COOKIE_HTTPONLY = False # CHange from True
-SESSION_COOKIE_SECURE = False # Changed from True
+SESSION_COOKIE_HTTPONLY = False  # CHange from True
+SESSION_COOKIE_SECURE = False  # Changed from True
 
 # see: https://docs.djangoproject.com/en/1.4/ref/settings/#csrf-cookie-name and following
 CSRF_COOKIE_NAME = "csrftoken_mastrms"
-CSRF_COOKIE_SECURE = False # Changed from True
+CSRF_COOKIE_SECURE = False  # Changed from True
 
 # Default date input formats, may be overridden
 # see: https://docs.djangoproject.com/en/1.4/ref/settings/#date-input-formats
@@ -181,7 +185,7 @@ TIME_ZONE = 'Australia/Perth'
 LANGUAGE_CODE = 'en-us'
 USE_I18N = False
 USE_L10N = False
-DATE_INPUT_FORMATS = ('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y','%d %m %Y','%d %m %y', '%d %b %Y')
+DATE_INPUT_FORMATS = ('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y', '%d %m %Y', '%d %m %y', '%d %b %Y')
 DATE_FORMAT = "d-m-Y"
 SHORT_DATE_FORMAT = "d/m/Y"
 
@@ -219,19 +223,19 @@ LOGGING = {
         }
     },
     'handlers': {
-        'console':{
+        'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
         },
-        'file':{
+        'file': {
             'level': 'DEBUG',
             'class': 'logging.handlers.TimedRotatingFileHandler',
             'filename': os.path.join(CCG_LOG_DIRECTORY, 'mastrms.log'),
             'when': 'midnight',
             'formatter': 'verbose'
         },
-        'db_logfile':{
+        'db_logfile': {
             'level': 'DEBUG',
             'class': 'logging.handlers.TimedRotatingFileHandler',
             'filename': os.path.join(CCG_LOG_DIRECTORY, 'mastrms_db.log'),
@@ -243,7 +247,7 @@ LOGGING = {
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler',
             'formatter': 'verbose',
-            'include_html':True
+            'include_html': True
         }
     },
     'loggers': {

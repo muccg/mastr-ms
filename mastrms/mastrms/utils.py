@@ -2,6 +2,7 @@ from dingus import patch
 
 __all__ = ["migration_loaddata"]
 
+
 def migration_loaddata(orm, fixture_name):
     """
     Use this function for loading bulk data in migrations.

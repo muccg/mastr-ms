@@ -1,5 +1,6 @@
 from django.conf import settings
 
+
 def summary():
     for var in ['CHMOD_USER',
                 'CHMOD_GROUP',

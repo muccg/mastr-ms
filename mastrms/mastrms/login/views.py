@@ -10,10 +10,12 @@ from mastrms.app.utils.data_utils import jsonResponse, jsonErrorResponse
 from mastrms.users.models import *
 from mastrms.login.URLState import getCurrentURLState
 from mastrms.app.utils.mail_functions import sendForgotPasswordEmail, sendPasswordChangedEmail
-import md5, time
+import md5
+import time
 import logging
 
 logger = logging.getLogger('mastrms.login')
+
 
 def processLoginView(request, *args):
     success = processLogin(request, args)
@@ -21,7 +23,7 @@ def processLoginView(request, *args):
 
 
 def processLogin(request, *args):
-    logger.debug('***processLogin : enter ***' )
+    logger.debug('***processLogin : enter ***')
 
     success = False
 
@@ -44,27 +46,29 @@ def processLogin(request, *args):
             if user.is_active:
                 try:
                     login(request, user)
-                except Exception, e:
+                except Exception as e:
                     # fixme: same as above, don't think django raises exceptions
                     logger.exception("Login error for %s" % user)
                 else:
                     logger.debug('successful login')
                     success = True
-                    #set the session to expire after
+                    # set the session to expire after
                     request.session.set_expiry(settings.SESSION_COOKIE_AGE)
             else:
                 logger.debug('inactive login')
         else:
             logger.debug('invalid login')
 
-    logger.debug( '*** processLogin : exit ***')
+    logger.debug('*** processLogin : exit ***')
     return success
 
+
 def processLogout(request, *args):
-    logger.debug( '*** processLogout : enter***')
-    logout(request) #let Django log the user out
+    logger.debug('*** processLogout : enter***')
+    logout(request)  # let Django log the user out
     logger.debug('*** processLogout : exit***')
     return HttpResponseRedirect(siteurl(request))
+
 
 def processForgotPassword(request, *args):
     '''
@@ -79,24 +83,26 @@ def processForgotPassword(request, *args):
     m.update('madas' + str(time.time()) + 'resetPasswordToken123')
     vk = m.hexdigest()
     u['passwordResetKey'] = vk
-    #remove groups info
+    # remove groups info
     try:
         del u['groups']
     except:
         pass
 
-    logger.debug( '\tUpdating user record with verification key')
+    logger.debug('\tUpdating user record with verification key')
     user.update_user(None, None, u)
     logger.debug('\tDone updating user with verification key')
 
-    #Email the user
+    # Email the user
     sendForgotPasswordEmail(request, emailaddress, vk)
 
     m = simplejson.JSONEncoder()
     p = {}
-    p['message'] = "An email has been sent to %s. Please follow the instructions in that email to continue" % (emailaddress)
+    p['message'] = "An email has been sent to %s. Please follow the instructions in that email to continue" % (
+        emailaddress)
 
     return jsonResponse(params=p, mainContentFunction='message')
+
 
 def forgotPasswordRedirect(request, *args):
     u = request.user
@@ -106,8 +112,9 @@ def forgotPasswordRedirect(request, *args):
         urlstate.resetPasswordEmail = request.REQUEST['em']
         urlstate.resetPasswordValidationKey = request.REQUEST['vk']
         return HttpResponseRedirect(siteurl(request))
-    except Exception, e:
+    except Exception as e:
         logger.warning('Exception in forgot password redirect: %s' % (str(e)))
+
 
 def populateResetPasswordForm(request, *args):
     u = request.user
@@ -117,6 +124,7 @@ def populateResetPasswordForm(request, *args):
     data['validationKey'] = urlstate.resetPasswordValidationKey
     return jsonResponse(items=[data])
 
+
 def processResetPassword(request, *args):
 
     email = request.REQUEST.get('email', '')
@@ -125,50 +133,64 @@ def processResetPassword(request, *args):
     success = True
     if email and vk and passw:
 
-        #get existing details
+        # get existing details
         user = User.objects.get(email=email)
         userdetails = user_manager.to_dict()
-        if userdetails.has_key('groups'):
-            del userdetails['groups'] #remove 'groups' - they don't belong in an update.
-        if userdetails.has_key('passwordResetKey') and len(userdetails['passwordResetKey']) == 1 and userdetails['passwordResetKey'][0] == vk:
-            #clear out the pager vk
+        if 'groups' in userdetails:
+            del userdetails['groups']  # remove 'groups' - they don't belong in an update.
+        if 'passwordResetKey' in userdetails and len(
+                userdetails['passwordResetKey']) == 1 and userdetails['passwordResetKey'][0] == vk:
+            # clear out the pager vk
             del userdetails['passwordResetKey']
-            #update the password
+            # update the password
             user.update_user(email, passw, userdetails)
             sendPasswordChangedEmail(request, email)
 
         else:
-            logger.warning('\tEither no vk stored in ldap, or key mismatch. uservk was %s, storedvk was %s' % (vk, userdetails.get('pager', None)) )
+            logger.warning(
+                '\tEither no vk stored in ldap, or key mismatch. uservk was %s, storedvk was %s' %
+                (vk,
+                 userdetails.get(
+                     'pager',
+                     None)))
 
     else:
         logger.warning('Process reset password: argument error (all blank)')
         success = False
-        request.session.flush() #if we don't flush here, we are leaving the redirect function the same.
+        # if we don't flush here, we are leaving the redirect function the same.
+        request.session.flush()
     if not success:
         raise Exception("Couldn't reset password")
     return jsonResponse(mainContentFunction='login')
 
-#TODO not sure this function is even needed
+# TODO not sure this function is even needed
+
+
 def unauthenticated(request, *args):
     return jsonResponse()
 
-#TODO not sure this function is even needed
+# TODO not sure this function is even needed
+
+
 def unauthorized(request, *args):
     authorized = False
     mainContentFunction = 'notauthorized'
-    #TODO now go to 'pager' with action 'index'
+    # TODO now go to 'pager' with action 'index'
     return jsonResponse(mainContentFunction=mainContentFunction)
 
-### TODO: not sure this function is even needed
+# TODO: not sure this function is even needed
+
+
 def index(request, *args):
     return jsonResponse()
+
 
 def serveIndex(request, force_mcf=None):
     currentuser = getCurrentUser(request)
     mcf = 'dashboard'
     params = ''
     if currentuser.is_authenticated():
-        #only clear if we were logged in.
+        # only clear if we were logged in.
         urlstate = getCurrentURLState(request, andClear=True)
     else:
         urlstate = getCurrentURLState(request)
@@ -188,9 +210,9 @@ def serveIndex(request, force_mcf=None):
     jsonparams = simplejson.dumps(sendparams)
 
     return render_to_response('index.html', {
-                        'APP_SECURE_URL': siteurl(request),
-                        'user': request.user,
-                        'mainContentFunction': mcf,
-                        'wh': webhelpers,
-                        'params': jsonparams,
-                        }, context_instance=RequestContext(request))
+        'APP_SECURE_URL': siteurl(request),
+        'user': request.user,
+        'mainContentFunction': mcf,
+        'wh': webhelpers,
+        'params': jsonparams,
+    }, context_instance=RequestContext(request))

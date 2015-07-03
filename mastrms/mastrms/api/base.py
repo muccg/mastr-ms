@@ -10,10 +10,12 @@ logger = logging.getLogger(__name__)
 
 v1 = Api(api_name="v1")
 
+
 def register(cls):
     "Resource decorator to register it with our v1 api"
     v1.register(cls())
     return cls
+
 
 def make_generic_resource(model_cls, module_name=__name__, paging=True):
     if paging:
@@ -24,6 +26,7 @@ def make_generic_resource(model_cls, module_name=__name__, paging=True):
         max_paging_limit = 0
 
     class GenericResource(BaseResource):
+
         class Meta(BaseResource.Meta):
             queryset = model_cls.objects.all()
             resource_name = model_cls._meta.object_name.lower()
@@ -40,11 +43,13 @@ def make_generic_resource(model_cls, module_name=__name__, paging=True):
 
 
 class BetterSerializer(Serializer):
+
     """
     Our own serializer to format datetimes in ISO 8601 but with timezone
     offset. Courtesy of
     http://www.tryolabs.com/Blog/2013/03/16/displaying-timezone-aware-dates-tastypie/
     """
+
     def format_datetime(self, data):
         # If naive or rfc-2822, default behavior...
         if is_naive(data) or self.datetime_formatting == 'rfc-2822':
@@ -53,10 +58,12 @@ class BetterSerializer(Serializer):
 
 
 class BetterAuthentication(SessionAuthentication):
+
     """
     Normal Django session authentication plus support for custom
     username fields.
     """
+
     def get_identifier(self, request):
         if request.user.is_authenticated():
             return super(BetterAuthentication, self).get_identifier(request)
@@ -64,6 +71,7 @@ class BetterAuthentication(SessionAuthentication):
 
 
 class BaseResource(ModelResource):
+
     class Meta:
         authorization = DjangoAuthorization()
         authentication = SessionAuthentication()

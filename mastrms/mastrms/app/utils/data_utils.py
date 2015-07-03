@@ -19,39 +19,43 @@ def makeJsonFriendly(data):
     '''Will traverse a dict or list compound data struct and
        make any datetime.datetime fields json friendly
     '''
-    #print 'makeJsonFriendly called with data: ', str(data)
-    #print 'which was a ', type(data)
+    # print 'makeJsonFriendly called with data: ', str(data)
+    # print 'which was a ', type(data)
     try:
         if isinstance(data, list):
-            #print 'handling list'
+            # print 'handling list'
             for e in data:
                 e = makeJsonFriendly(e)
         elif isinstance(data, dict):
-            #print 'handling dict'
+            # print 'handling dict'
             for key in data.keys():
                 data[key] = makeJsonFriendly(data[key])
 
         elif isinstance(data, datetime.datetime):
-            #print 'handling datetime'
-            #print 'converting datetime: ', str(data)
+            # print 'handling datetime'
+            # print 'converting datetime: ', str(data)
             return data.strftime('%Y/%m/%d %H:%M')
         else:
-            #print 'handling default case. Type was ', type(data)
-            #print 'returning unmodified'
-            return data #unmodified
-    except Exception, e:
+            # print 'handling default case. Type was ', type(data)
+            # print 'returning unmodified'
+            return data  # unmodified
+    except Exception as e:
         print 'makeJsonFriendly encountered an error: ', str(e)
-    #print 'end makeJsonFriendly'
+    # print 'end makeJsonFriendly'
     return data
 
 # ------------------------------------------------------------------------------
+
+
 class ModelJSONEncoder(DjangoJSONEncoder):
+
     """
     (simplejson) DjangoJSONEncoder subclass that knows how to encode fields.y/
 
     (adated from django.serializers, which, strangely, didn't
      factor out this part of the algorithm)
     """
+
     def handle_field(self, obj, field):
         return smart_text(getattr(obj, field.name), strings_only=True)
 
@@ -72,7 +76,7 @@ class ModelJSONEncoder(DjangoJSONEncoder):
                 smart_text(related._get_pk_val(), strings_only=True)
                 for related
                 in getattr(obj, field.name).iterator()
-                ]
+            ]
 
     def handle_model(self, obj):
         dic = {}
@@ -94,7 +98,10 @@ class ModelJSONEncoder(DjangoJSONEncoder):
             return super(ModelJSONEncoder, self).default(obj)
 
 # ------------------------------------------------------------------------------
+
+
 class LazyEncoder(ModelJSONEncoder):
+
     def default(self, o):
         if isinstance(o, Promise):
             return force_text(o)
@@ -107,19 +114,19 @@ def json_encode(data):
     try:
         d = m.encode(data)
         return d
-    except Exception, e:
+    except Exception as e:
         print 'json_encode: couldn\'t encode', data, ':', str(e)
         return None
+
 
 def json_decode(data):
     try:
         m = simplejson.JSONDecoder()
         d = m.decode(data)
         return d
-    except Exception, e:
+    except Exception as e:
         print 'json_decode: couldn\'t decode ', data, ':', str(e)
         return data
-
 
 
 def uniqueList(l):
@@ -137,7 +144,8 @@ def uniqueList(l):
 
     return result
 
-def translate_dict(data, tuplelist, includeRest = False, createEmpty=False):
+
+def translate_dict(data, tuplelist, includeRest=False, createEmpty=False):
     """takes data (should be a dict) and tuple list (list of tuples)
        for each tuple in the list, if the key (element 1) exists in the dict
        then its value is associated with a new key (element 2) in a new
@@ -152,9 +160,9 @@ def translate_dict(data, tuplelist, includeRest = False, createEmpty=False):
     for oldkey, newkey in tuplelist:
         oldkeylist.append(oldkey)
         val = data.get(oldkey, None)
-        if val != None or createEmpty:
+        if val is not None or createEmpty:
             returnval[newkey] = val
-        #otherwise dont bother adding this key, it wasnt in the original data
+        # otherwise dont bother adding this key, it wasnt in the original data
     if includeRest is True:
         for key in data.keys():
             if key not in oldkeylist:
@@ -171,6 +179,7 @@ def param_remap(d):
             d['qid'] = v
     return d
 
+
 def jsonErrorResponse(msg='An error occured'):
     retdata = json.dumps({
         'success': False,
@@ -178,19 +187,24 @@ def jsonErrorResponse(msg='An error occured'):
     })
     return HttpResponse(retdata)
 
+
 def jsonResponse(data={}, items=None, mainContentFunction=None, params=None):
-    #Sometimes we are passed 'data', and sometimes 'items'. We need to make
-    #a decision based on which one we are going to use for the 'totalRows'.
+    # Sometimes we are passed 'data', and sometimes 'items'. We need to make
+    # a decision based on which one we are going to use for the 'totalRows'.
     if items:
         totalrows = len(items)
     else:
         totalrows = len(data)
     version = 1
-    response = {'value': {'items':makeJsonFriendly(items), 'version':1, 'total_count':totalrows}}
+    response = {
+        'value': {
+            'items': makeJsonFriendly(items),
+            'version': 1,
+            'total_count': totalrows}}
 
     retval = {'success': True,
-              'data':makeJsonFriendly(data),
-              'totalRows':totalrows,
+              'data': makeJsonFriendly(data),
+              'totalRows': totalrows,
               'response': response
               }
     if params:
@@ -200,6 +214,7 @@ def jsonResponse(data={}, items=None, mainContentFunction=None, params=None):
 
     retdata = json.dumps(retval)
     return HttpResponse(retdata)
+
 
 class ZipPacker(object):
 
@@ -219,9 +234,11 @@ class ZipPacker(object):
         zipf.close()
         return filename
 
+
 class TarPacker(object):
+
     def __init__(self, compression=None):
-        assert compression is None or compression in ('gz','bz2'), "Invalid compression type"
+        assert compression is None or compression in ('gz', 'bz2'), "Invalid compression type"
         self.compression = compression
 
     def pack(self, files, filename):
@@ -234,6 +251,7 @@ class TarPacker(object):
             tar.add(f, n)
         tar.close()
         return filename
+
 
 def guess_package_type(filename):
     def endswithany(s, sa):
@@ -253,6 +271,7 @@ def guess_package_type(filename):
 
     return packer
 
+
 def pack_files(files, package_name):
     import tempfile
     packer = guess_package_type(package_name)
@@ -263,15 +282,17 @@ def pack_files(files, package_name):
 
     return package_path
 
+
 def zipdir(dirPath=None, zipFilePath=None, includeDirInZip=True):
 
     if not zipFilePath:
         zipFilePath = dirPath + ".zip"
     if not os.path.isdir(dirPath):
         raise OSError("dirPath argument must point to a directory. "
-            "'%s' does not." % dirPath)
+                      "'%s' does not." % dirPath)
     parentDir, dirToZip = os.path.split(dirPath)
-    #Little nested function to prepare the proper archive path
+    # Little nested function to prepare the proper archive path
+
     def trimPath(path):
         archivePath = path.replace(parentDir, "", 1)
         if parentDir:
@@ -285,14 +306,14 @@ def zipdir(dirPath=None, zipFilePath=None, includeDirInZip=True):
         for fileName in fileNames:
             filePath = os.path.join(archiveDirPath, fileName)
             outFile.write(filePath, trimPath(filePath))
-        #Make sure we get empty directories as well
+        # Make sure we get empty directories as well
         if not fileNames and not dirNames:
             zipInfo = zipfile.ZipInfo(trimPath(archiveDirPath) + "/")
-            #some web sites suggest doing
+            # some web sites suggest doing
             #zipInfo.external_attr = 16
-            #or
+            # or
             #zipInfo.external_attr = 48
-            #Here to allow for inserting an empty directory.  Still TBD/TODO.
+            # Here to allow for inserting an empty directory.  Still TBD/TODO.
             outFile.writestr(zipInfo, "")
 
     outFile.close()

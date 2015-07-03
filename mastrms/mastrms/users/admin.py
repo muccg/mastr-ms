@@ -7,12 +7,14 @@ from django import forms
 
 
 class MAUserChangeForm(forms.ModelForm):
+
     "Mostly copied from django.contrib.auth.forms.UserChangeForm"
 
-    password = ReadOnlyPasswordHashField(label="Password",
+    password = ReadOnlyPasswordHashField(
+        label="Password",
         help_text="Raw passwords are not stored, so there is no way to see "
-                  "this user's password, but you can change the password "
-                  "using <a href=\"password/\">this form</a>.")
+        "this user's password, but you can change the password "
+        "using <a href=\"password/\">this form</a>.")
 
     physicalDeliveryOfficeName = forms.CharField(label="Office", required=False)
     telephoneNumber = forms.CharField(label="Office Phone", required=False)
@@ -44,6 +46,7 @@ class MAUserChangeForm(forms.ModelForm):
 
 
 class MAUserCreationForm(forms.ModelForm):
+
     "Adapted from django.contrib.auth.forms.UserCreationForm"
     INITIAL_GROUPS = ["User"]
 
@@ -54,10 +57,10 @@ class MAUserCreationForm(forms.ModelForm):
     email = forms.EmailField(label="E-mail address", max_length=100)
     #username = forms.HiddenInput()
     password1 = forms.CharField(label="Password",
-        widget=forms.PasswordInput)
+                                widget=forms.PasswordInput)
     password2 = forms.CharField(label="Password confirmation",
-        widget=forms.PasswordInput,
-        help_text="Enter the same password as above, for verification.")
+                                widget=forms.PasswordInput,
+                                help_text="Enter the same password as above, for verification.")
 
     class Meta:
         model = User
@@ -118,7 +121,7 @@ class MAUserAdmin(UserAdmin):
         (None, {
             'classes': ('wide',),
             'fields': ('email', 'password1', 'password2')}
-        ),
+         ),
     )
     list_display = ('email', 'first_name', 'last_name', 'is_staff')
     search_fields = ('first_name', 'last_name', 'email')

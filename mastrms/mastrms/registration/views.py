@@ -8,6 +8,7 @@ from django.contrib.auth.models import AnonymousUser
 
 logger = logging.getLogger('mastrms.general')
 
+
 def submit(request, *args):
     '''This adds a new user into ldap with no groups
     '''
@@ -17,7 +18,7 @@ def submit(request, *args):
     user_exists = User.objects.filter(email=email).exists()
 
     if not user_exists:
-        #saveMadasUser will add the user if they do not exist already.
+        # saveMadasUser will add the user if they do not exist already.
         user_exists = saveMadasUser(AnonymousUser(), email, detailsDict['details'],
                                     detailsDict['status'], detailsDict['password'])
 

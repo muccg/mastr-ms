@@ -15,10 +15,13 @@ from mastrms.app.utils.file_utils import ensure_repo_filestore_dir_with_owner
 
 logger = logging.getLogger('mastrms.general')
 
+
 class SampleNotInClassException(Exception):
     pass
 
+
 class OrganismType(models.Model):
+
     """Currently, Microorganism, Plant, Animal or Human"""
     name = models.CharField(max_length=50)
 
@@ -62,7 +65,9 @@ class BiologicalSource(models.Model):
 
         return None
 
+
 class AnimalInfo(models.Model):
+
     class Meta:
         verbose_name_plural = "Animal information"
 
@@ -81,7 +86,9 @@ class AnimalInfo(models.Model):
     def __unicode__(self):
         return u"%s - %s - %s" % (self.sex, str(self.age), self.parental_line)
 
+
 class PlantInfo(models.Model):
+
     class Meta:
         verbose_name_plural = "Plant information"
 
@@ -95,13 +102,18 @@ class PlantInfo(models.Model):
     harvested_at = models.TimeField(null=True, blank=True)
     night_temp_cels = models.PositiveIntegerField(null=True, blank=True)
     day_temp_cels = models.PositiveIntegerField(null=True, blank=True)
-    light_hrs_per_day = models.DecimalField(null=True, max_digits=4, decimal_places=2, blank=True)
+    light_hrs_per_day = models.DecimalField(
+        null=True,
+        max_digits=4,
+        decimal_places=2,
+        blank=True)
     light_fluence = models.DecimalField(null=True, max_digits=10, decimal_places=2, blank=True)
     light_source = models.TextField(blank=True)
     lamp_details = models.TextField(blank=True)
 
     def __unicode__(self):
         return u"%s - %s" % (self.development_stage, self.growing_place)
+
 
 class HumanInfo(models.Model):
     source = models.ForeignKey(BiologicalSource)
@@ -120,6 +132,7 @@ class HumanInfo(models.Model):
     def __unicode__(self):
         return u"%s - %s - %s" % (self.sex, self.date_of_birth, self.location)
 
+
 class MicrobialInfo(models.Model):
     source = models.ForeignKey(BiologicalSource)
     genus = models.CharField(max_length=255, blank=True)
@@ -128,8 +141,16 @@ class MicrobialInfo(models.Model):
     media = models.CharField(max_length=255, blank=True)
     fermentation_vessel = models.CharField(max_length=255, blank=True)
     fermentation_mode = models.CharField(max_length=255, blank=True)
-    innoculation_density = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
-    fermentation_volume = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    innoculation_density = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        null=True,
+        blank=True)
+    fermentation_volume = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        null=True,
+        blank=True)
     temperature = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     agitation = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     ph = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
@@ -140,6 +161,7 @@ class MicrobialInfo(models.Model):
     def __unicode__(self):
         return u"%s - %s" % (self.genus, self.species)
 
+
 class Organ(models.Model):
     experiment = models.ForeignKey('Experiment')
     name = models.CharField(max_length=255, blank=True)
@@ -149,7 +171,9 @@ class Organ(models.Model):
     def __unicode__(self):
         return self.name
 
+
 class ExperimentStatus(models.Model):
+
     class Meta:
         verbose_name_plural = "Experiment statuses"
 
@@ -158,6 +182,7 @@ class ExperimentStatus(models.Model):
 
     def __unicode__(self):
         return self.name
+
 
 class Project(models.Model):
     title = models.CharField(max_length=255)
@@ -171,10 +196,15 @@ class Project(models.Model):
         client = self.client.email if self.client else "No client"
         return "%s (%s)" % (self.title, client)
 
+
 class InstrumentMethod(models.Model):
     title = models.CharField(max_length=255, help_text="Text which will be shown in Mastr-MS")
-    method_path = models.CharField(max_length=1000, help_text="A folder path on the lab machine which will be put in the worklist CSV")
-    method_name = models.CharField(max_length=255, help_text="Text which will be put in the worklist")
+    method_path = models.CharField(
+        max_length=1000,
+        help_text="A folder path on the lab machine which will be put in the worklist CSV")
+    method_name = models.CharField(
+        max_length=255,
+        help_text="Text which will be put in the worklist")
     version = models.CharField(max_length=255, default="1")
     created_on = models.DateField(default=date.today)
     creator = models.ForeignKey(User, null=True, blank=True,
@@ -192,10 +222,11 @@ class InstrumentMethod(models.Model):
     obsolescence_date = models.DateField(null=True, blank=True,
                                          help_text="Unused")
 
-    #future: quality control sample locations
+    # future: quality control sample locations
 
     def __unicode__(self):
         return "%s (%s)" % (self.title, self.version)
+
 
 class Experiment(models.Model):
     project = models.ForeignKey(Project)
@@ -231,7 +262,6 @@ class Experiment(models.Model):
         processed data."""
         return self.experiment_datadir("other")
 
-
     def experiment_datadir(self, base):
         return os.path.join(settings.REPO_FILES_ROOT,
                             self.experiment_reldir(base))
@@ -245,7 +275,11 @@ class Experiment(models.Model):
         Creates all the experiment storage directories if they don't
         exist, and sets their permissions.
         """
-        other_dirs = ["Project Background", "Data Processing", "Bioinformatics Analysis", "Report"]
+        other_dirs = [
+            "Project Background",
+            "Data Processing",
+            "Bioinformatics Analysis",
+            "Report"]
 
         # filter the other_dirs to remove ones which exist somewhere
         # within the tree
@@ -257,8 +291,8 @@ class Experiment(models.Model):
         for dir in [self.experiment_dir] + other_dirs:
             try:
                 ensure_repo_filestore_dir_with_owner(dir)
-            except Exception, e:
-                pass # the exception is already logged in the ensure function
+            except Exception as e:
+                pass  # the exception is already logged in the ensure function
 
         return self.experiment_dir
 
@@ -275,6 +309,7 @@ class Experiment(models.Model):
     def __unicode__(self):
         return self.title
 
+
 def safe_path_join(base, filename, alternative=None):
     """Joins a relative path with a base directory, preventing the result
     from being outside of the base tree."""
@@ -289,6 +324,7 @@ def safe_path_join(base, filename, alternative=None):
 
 sopdir = 'sops'
 sopfs = FileSystemStorage(location=os.path.join(settings.REPO_FILES_ROOT, sopdir))
+
 
 class StandardOperationProcedure(models.Model):
     responsible = models.CharField(max_length=255, blank=True)
@@ -305,12 +341,17 @@ class StandardOperationProcedure(models.Model):
         ensure_repo_filestore_dir_with_owner(sopdir)
         return os.path.join(sopfs.location, self.version, filename)
 
-
-    attached_pdf = models.FileField(storage=sopfs, upload_to=_filepath, null=True, blank=True, max_length=500)
+    attached_pdf = models.FileField(
+        storage=sopfs,
+        upload_to=_filepath,
+        null=True,
+        blank=True,
+        max_length=500)
     experiments = models.ManyToManyField(Experiment, null=True, blank=True)
 
     def __unicode__(self):
         return self.label
+
 
 class Treatment(models.Model):
     experiment = models.ForeignKey('Experiment')
@@ -321,6 +362,7 @@ class Treatment(models.Model):
     def __unicode__(self):
         return self.name
 
+
 class SampleTimeline(models.Model):
     experiment = models.ForeignKey('Experiment')
     abbreviation = models.CharField(max_length=5)
@@ -329,7 +371,9 @@ class SampleTimeline(models.Model):
     def __unicode__(self):
         return self.timeline
 
+
 class SampleClass(models.Model):
+
     class Meta:
         verbose_name_plural = "Sample classes"
 
@@ -337,7 +381,7 @@ class SampleClass(models.Model):
     experiment = models.ForeignKey(Experiment)
     biological_source = models.ForeignKey(BiologicalSource, null=True, blank=True)
     treatments = models.ForeignKey(Treatment, null=True, blank=True)
-    timeline = models.ForeignKey(SampleTimeline,null=True, blank=True)
+    timeline = models.ForeignKey(SampleTimeline, null=True, blank=True)
     organ = models.ForeignKey(Organ, null=True, blank=True)
     enabled = models.BooleanField(default=True)
 
@@ -362,6 +406,7 @@ class SampleClass(models.Model):
         if val == '':
             val = 'class_' + str(self.id)
         return val
+
 
 class Sample(models.Model):
     sample_id = models.CharField(max_length=255)
@@ -389,6 +434,7 @@ class Sample(models.Model):
     def is_valid_for_run(self):
         '''Test to determine whether this sample can be used in a run'''
         return bool(self.sample_class and self.sample_class.enabled)
+
 
 class RUN_STATES:
     NEW = (0, u"New")
@@ -421,7 +467,7 @@ class Run(models.Model):
     method = models.ForeignKey(InstrumentMethod)
     created_on = models.DateField(null=False, default=date.today)
     creator = models.ForeignKey(User)
-    title = models.CharField(max_length=255,blank=True)
+    title = models.CharField(max_length=255, blank=True)
     samples = models.ManyToManyField(Sample, through="RunSample")
     machine = models.ForeignKey(NodeClient, null=True, blank=True,
                                 db_index=True, on_delete=models.SET_NULL)
@@ -435,19 +481,19 @@ class Run(models.Model):
     order_of_methods = models.IntegerField(choices=METHOD_ORDERS, null=True, blank=True)
 
     def sortedSamples(self):
-        #TODO if method indicates randomisation and blanks, now is when we would do it
+        # TODO if method indicates randomisation and blanks, now is when we would do it
         return self.samples.distinct()
 
     def __unicode__(self):
         return "%s (%s v.%s)" % (self.title, self.method.title, self.method.version)
 
     def resequence_samples(self):
-        #Just a note to explain that this method assigns sequence numbers to
-        #the runsamples belonging to this run, maintaining 'id' order, strictly linearly
-        #increasing (i.e. 1,2,3,4,5,6,7,8, no gaps).
-        #This just means that we are preserving the order in which the runsamples were created for
-        #this run - it still means that samples could have been added in randomised or arbitrary order,
-        #and that will be maintained (because runsamples are created to reflect that order).
+        # Just a note to explain that this method assigns sequence numbers to
+        # the runsamples belonging to this run, maintaining 'id' order, strictly linearly
+        # increasing (i.e. 1,2,3,4,5,6,7,8, no gaps).
+        # This just means that we are preserving the order in which the runsamples were created for
+        # this run - it still means that samples could have been added in randomised or arbitrary order,
+        # and that will be maintained (because runsamples are created to reflect that order).
         logger.debug('resequencing samples')
         sequence = 1
         for rs in RunSample.objects.filter(run=self).order_by("id"):
@@ -462,7 +508,7 @@ class Run(models.Model):
         assert self.id, 'Run must have an id before samples can be added'
         for s in sampleslist:
             if s.is_valid_for_run():
-                logger.debug( 'add_samples adding %d' % (s.id) )
+                logger.debug('add_samples adding %d' % (s.id))
                 rs, created = RunSample.objects.get_or_create(run=self, sample=s)
         self.resequence_samples()
         logger.debug("add_samples complete")
@@ -516,14 +562,15 @@ class Run(models.Model):
         """
         return self.state == RUN_STATES.COMPLETE[0]
 
+
 class SampleLog(models.Model):
     LOG_TYPES = (
-            (0, u'Received'),
-            (1, u'Stored'),
-            (2, u'Prepared'),
-            (3, u'Acquired'),
-            (4, u'Data Processed')
-        )
+        (0, u'Received'),
+        (1, u'Stored'),
+        (2, u'Prepared'),
+        (3, u'Acquired'),
+        (4, u'Data Processed')
+    )
     type = models.PositiveIntegerField(choices=LOG_TYPES, default=0)
     changetimestamp = models.DateTimeField(auto_now=True)
     description = models.CharField(max_length=255)
@@ -534,12 +581,15 @@ class SampleLog(models.Model):
     def __unicode__(self):
         return "%s: %s" % (self.LOG_TYPES[self.type][1], self.description)
 
+
 class UserInvolvementType(models.Model):
+
     """Principal Investigator or Involved User"""
     name = models.CharField(max_length=25)
 
     def __unicode__(self):
         return self.name
+
 
 class UserExperiment(models.Model):
     user = models.ForeignKey(User)
@@ -549,6 +599,7 @@ class UserExperiment(models.Model):
 
     def __unicode__(self):
         return "%s-%s" % (self.user, self.experiment)
+
 
 class RunSample(models.Model):
     # TODO
@@ -572,7 +623,11 @@ class RunSample(models.Model):
 
     @classmethod
     def create_copy(self, source, method_number=None):
-        return RunSample.objects.create(run=source.run, component=source.component, sample=source.sample, method_number=method_number)
+        return RunSample.objects.create(
+            run=source.run,
+            component=source.component,
+            sample=source.sample,
+            method_number=method_number)
 
     class Meta:
         db_table = u'repository_run_samples'
@@ -613,6 +668,7 @@ class RunSample(models.Model):
                 "sampleid": self.id,
             }
         return self.sanitize_filename(base)
+
     def generate_filename(self):
         return self.generate_filename_no_ext() + self._get_samplefile_ext()
 
@@ -647,6 +703,7 @@ class ClientFile(models.Model):
     def __unicode__(self):
         return "Experiment \"%s\" file %s" % (self.experiment.title, self.filepath)
 
+
 class InstrumentSOP(models.Model):
     title = models.CharField(max_length=255)
     enabled = models.BooleanField(default=True)
@@ -655,11 +712,13 @@ class InstrumentSOP(models.Model):
     vials_per_tray = models.PositiveIntegerField(default=98)
     trays_max = models.PositiveIntegerField(default=1)
 
+
 class ComponentGroup(models.Model):
     name = models.CharField(max_length=50)
 
     def __unicode__(self):
         return self.name
+
 
 class Component(models.Model):
     sample_type = models.CharField(max_length=255)
@@ -669,6 +728,7 @@ class Component(models.Model):
 
     def __unicode__(self):
         return "%s (%s)" % (self.sample_type, self.sample_code)
+
 
 class RuleGenerator(models.Model):
 
@@ -692,11 +752,12 @@ class RuleGenerator(models.Model):
         (ACCESSIBILITY_ALL, 'Everyone')
     )
 
-
     name = models.CharField(max_length=255)
     description = models.CharField(max_length=1000)
     state = models.PositiveIntegerField(default=1, choices=STATES)
-    accessibility = models.PositiveIntegerField(default=ACCESSIBILITY_USER, choices=ACCESSIBILITY)
+    accessibility = models.PositiveIntegerField(
+        default=ACCESSIBILITY_USER,
+        choices=ACCESSIBILITY)
     apply_sweep_rule = models.BooleanField(default=True)
     version = models.PositiveIntegerField(null=True, blank=True)
     previous_version = models.ForeignKey('RuleGenerator', null=True, blank=True,
@@ -715,7 +776,6 @@ class RuleGenerator(models.Model):
     @property
     def state_name(self):
         return dict(RuleGenerator.STATES).get(self.state)
-
 
     @property
     def is_accessible_by_user(self):
@@ -753,18 +813,20 @@ class RuleGenerator(models.Model):
            (self.is_accessible_by_user and user.id == self.created_by.id) or \
            (self.is_accessible_by_node and user.PrimaryNode == self.node) or \
            (self.is_accessible_by_all):
-           return True
+            return True
         else:
             return False
 
     def __unicode__(self):
         return self.full_name
 
+
 class RuleGeneratorStartBlock(models.Model):
     rule_generator = models.ForeignKey(RuleGenerator)
     index = models.PositiveIntegerField()
     count = models.PositiveIntegerField()
     component = models.ForeignKey(Component)
+
 
 class RuleGeneratorSampleBlock(models.Model):
     ORDER_CHOICES = (
@@ -793,6 +855,7 @@ class RuleGeneratorSampleBlock(models.Model):
         else:
             return 'position'
 
+
 class RuleGeneratorEndBlock(models.Model):
     rule_generator = models.ForeignKey(RuleGenerator)
     index = models.PositiveIntegerField()
@@ -801,6 +864,7 @@ class RuleGeneratorEndBlock(models.Model):
 
 
 class Investigation(models.Model):
+
     """
     An investigation groups samples together for the purpose of ISA-Tab export.
     """

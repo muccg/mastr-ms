@@ -4,16 +4,18 @@ class ActionType:
     UPDATE_EXISTING = 4
     MOVE = 8
     ValidTypes = [EXCLUDE, INCLUDE, UPDATE_EXISTING, MOVE]
-    #Any spaces needed in the command need to be in these strings.
-    #They are joined to their arguments with no spaces
+    # Any spaces needed in the command need to be in these strings.
+    # They are joined to their arguments with no spaces
     CommandLookup = {
-                        EXCLUDE : '--exclude=',
-                        INCLUDE : '--include=',
-                        UPDATE_EXISTING : '--existing ',
-                        MOVE : '--noop',
-                    }
+        EXCLUDE: '--exclude=',
+        INCLUDE: '--include=',
+        UPDATE_EXISTING: '--existing ',
+        MOVE: '--noop',
+    }
+
 
 class FileRule(object):
+
     '''FileRules take a target pattern, and an action.
        The patterns are standard regular expressions,
        The actions are:
@@ -22,7 +24,6 @@ class FileRule(object):
        update_existing
     '''
 
-
     def __init__(self, tpattern, action):
         self.tpattern = tpattern
         if action not in ActionType.ValidTypes:
@@ -30,46 +31,44 @@ class FileRule(object):
         else:
             self.action = action
 
-
     def toString(self):
-        #find which action
+        # find which action
         if self.action is not ActionType.MOVE:
-            return ('%s%s' % (ActionType.CommandLookup[self.action], self.tpattern) )
+            return ('%s%s' % (ActionType.CommandLookup[self.action], self.tpattern))
         else:
             return None
 
+
 class NodeConfig(object):
+
     def __init__(self):
         self.nodes = {}
 
     def AddOrganisation(self, orgname):
-        #if self.nodes.has_key(org):
+        # if self.nodes.has_key(org):
         #    print "AddOrganisation: warning: node name already existed."
         self.nodes[orgname] = {}
 
     def AddSite(self, orgname, sitename):
-        if not self.nodes.has_key(orgname):
-            pass #incomplete code, abandoned class
+        if orgname not in self.nodes:
+            pass  # incomplete code, abandoned class
 
     def AddStation(self, orgname, sitename, stationname):
-        #if not self.nodes.has_key(nodename):
+        # if not self.nodes.has_key(nodename):
         #    print 'AddStation: warning: needed to create node ', nodename
-        if not self.nodes[nodename].has_key(stationname):
+        if stationname not in self.nodes[nodename]:
             self.nodes[nodename][stationname] = []
 
-
-
     def AddRule(self, nodename, stationname, ruletarget, ruleaction):
-        #first try to create the rule.
+        # first try to create the rule.
         r = FileRule(ruletarget, ruleaction)
         if r is not None:
 
-            if not self.nodes.has_key(nodename):
+            if nodename not in self.nodes:
                 self.AddNode(nodename)
-            if not self.nodes[nodename].has_key(stationname):
+            if stationname not in self.nodes[nodename]:
                 self.AddStation(nodename, stationname)
-            self.nodes[nodename][stationname].append("%s" % (r.toString()) )
+            self.nodes[nodename][stationname].append("%s" % (r.toString()))
 
     def toDict(self):
         return self.nodes
-

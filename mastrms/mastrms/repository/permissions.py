@@ -2,6 +2,7 @@ from functools import wraps
 from django.utils.decorators import available_attrs
 from django.http import *
 
+
 def user_passes_test(test_func, response=None):
     """
     Decorator for views that checks that the user passes the given test,

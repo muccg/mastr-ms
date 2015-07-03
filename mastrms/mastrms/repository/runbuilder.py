@@ -2,10 +2,13 @@ from mastrms.repository.models import RunSample, RUN_STATES, SampleNotInClassExc
 from django.http import HttpResponse
 import random
 
+
 class RunBuilderException(Exception):
     pass
 
+
 class RunBuilder(object):
+
     def __init__(self, run):
         self.run = run
 
@@ -16,35 +19,39 @@ class RunBuilder(object):
             sample.run_filename(self.run)
 
     def layout(self):
-        #validate first, this will throw an exception if failed
+        # validate first, this will throw an exception if failed
         self.validate()
 
         layout = RunLayout(self.run)
         layout.perform_layout()
-        #end result of a perform_layout is new RunSample entries to represent all other line items
+        # end result of a perform_layout is new RunSample entries to represent all
+        # other line items
 
     def generate(self):
         try:
             self.validate()
-        except Exception, e:
+        except Exception as e:
             raise RunBuilderException('Run validation error ' + str(e))
-        except SampleNotInClassException, e:
-            raise RunBuilderException('Samples in the run need to be in sample classes before they can be used in a run')
+        except SampleNotInClassException as e:
+            raise RunBuilderException(
+                'Samples in the run need to be in sample classes before they can be used in a run')
 
         if self.run.state == RUN_STATES.NEW[0]:
             self.layout()
 
-        #write filenames into DB
+        # write filenames into DB
         for rs in RunSample.objects.filter(run=self.run):
             rs.filename = rs.generate_filename()
             rs.save()
 
-        #mark the run as in-progress and save it
+        # mark the run as in-progress and save it
         if self.run.state == RUN_STATES.NEW[0]:
             self.run.state = RUN_STATES.IN_PROGRESS[0]
             self.run.save()
 
+
 class RunLayout(object):
+
     def __init__(self, run):
         self.run = run
 
@@ -65,7 +72,8 @@ class RunLayout(object):
         # Deletes all the RunSamples that aren't Samples (ie. Standards, Blanks etc.)
         RunSample.objects.filter(run=self.run, component__id__gt=0).delete()
         # TODO another reason the generator should generate a clean worklist in a different DB table
-        # We have to ensure that only method 1 Samples are kept and method_number is resetted to None
+        # We have to ensure that only method 1 Samples are kept and method_number
+        # is resetted to None
         RunSample.objects.filter(run=self.run, method_number__gt=1).delete()
         RunSample.objects.filter(run=self.run, method_number=1).update(method_number=None)
 
@@ -85,7 +93,9 @@ class RunLayout(object):
 
     def create_sample_block(self):
         samples = list(self.run.runsample_set.filter(component__id=0).order_by('sequence'))
-        insertion_map = self.create_insertion_map(samples, self.run.rule_generator.sample_block_rules)
+        insertion_map = self.create_insertion_map(
+            samples,
+            self.run.rule_generator.sample_block_rules)
         sample_block = self.combine(samples, insertion_map)
         sample_block = self.apply_method_rules(sample_block)
         return sample_block
@@ -97,10 +107,10 @@ class RunLayout(object):
             sample_count = rule.sample_count
             start_idxs = range(0, len(samples), sample_count)
             end_idxs = range(sample_count, len(samples), sample_count) + [len(samples)]
-            for start,end in zip(start_idxs, end_idxs):
+            for start, end in zip(start_idxs, end_idxs):
                 position = end
                 if rule.in_random_position:
-                    position = random.randint(start+1, end)
+                    position = random.randint(start + 1, end)
                 arr = insertion_map.setdefault(position, [])
                 for i in range(rule.count):
                     arr.append(RunSample.create(self.run, rule.component))
@@ -110,7 +120,7 @@ class RunLayout(object):
         sample_block = []
         for i, sample in enumerate(samples):
             sample_block.append(sample)
-            items = insertion_map.get(i+1)
+            items = insertion_map.get(i + 1)
             if items:
                 # if anything to insert at position i+1 insert it
                 sample_block.extend(items)
@@ -128,13 +138,13 @@ class RunLayout(object):
         extended_sample_block = []
         if self.run.is_method_type_individual_vial():
             extended_sample_block = sample_block[:]
-            for method_number in range(2, number_of_methods+1):
+            for method_number in range(2, number_of_methods + 1):
                 for sample in sample_block:
                     extended_sample_block.append(RunSample.create_copy(sample, method_number))
         else:
             for sample in sample_block:
                 extended_sample_block.append(sample)
-                for method_number in range(2, number_of_methods+1):
+                for method_number in range(2, number_of_methods + 1):
                     extended_sample_block.append(RunSample.create_copy(sample, method_number))
 
         return extended_sample_block
@@ -149,5 +159,5 @@ class RunLayout(object):
 
     def save_items(self, items):
         for seq, item in enumerate(items):
-            item.sequence = seq+1
+            item.sequence = seq + 1
             item.save()

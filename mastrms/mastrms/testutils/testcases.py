@@ -4,7 +4,9 @@
 from django.core import management
 from django.core.management.commands import flush
 
+
 class SkipFlushCommand(flush.Command):
+
     def handle_noargs(self, **options):
         return
 
@@ -17,7 +19,9 @@ class SkipFlushCommand(flush.Command):
         # unpatch flush back to the original
         management._commands['flush'] = self.original_flush_command
 
+
 class NonFlushingTransactionTestCaseMixin(object):
+
     """
     Mixin that prevents the database from being flushed in TransactionTestCase
      subclasses.
@@ -34,6 +38,7 @@ class NonFlushingTransactionTestCaseMixin(object):
     Source:
     https://github.com/brightinteractive/django-test-extras/blob/master/test_extras/testcases.py
     """
+
     def _fixture_setup(self):
         """
         Overrides TransactionTestCase._fixture_setup() and replaces the flush

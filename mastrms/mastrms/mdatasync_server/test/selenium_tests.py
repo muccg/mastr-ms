@@ -17,6 +17,7 @@ from mastrms.testutils import *
 # yum -y install firefox
 # pip install splinter selenium WebDriver
 
+
 def create_session_store():
     """ Creates a session storage object. """
 
@@ -27,18 +28,20 @@ def create_session_store():
     store.save()
     return store
 
+
 class AdminTests(LiveServerTestCase, XDisplayTest, WithFixtures):
+
     def setUp(self):
         self.client = Client()
 
     @classmethod
     def setUpClass(cls):
-        #cls.setup_display()
+        # cls.setup_display()
         super(AdminTests, cls).setUpClass()
 
     @classmethod
     def tearDownClass(cls):
-        #cls.teardown_display()
+        # cls.teardown_display()
         super(AdminTests, cls).tearDownClass()
 
     def test1_login(self):
@@ -55,10 +58,10 @@ class AdminTests(LiveServerTestCase, XDisplayTest, WithFixtures):
         )
         self.selenium.get(self.url("/repoadmin/login/"))
         username_input = self.selenium.find_element_by_name("username")
-        #username_input.send_keys('admin@example.com')
+        # username_input.send_keys('admin@example.com')
         username_input.send_keys('testuser@ccg.murdoch.edu.au')
         password_input = self.selenium.find_element_by_name("password")
-        #password_input.send_keys('admin')
+        # password_input.send_keys('admin')
         password_input.send_keys('testing')
         self.selenium.find_element_by_xpath("//input[@value='Log in']").click()
         self.selenium.quit()
@@ -70,21 +73,20 @@ class AdminTests(LiveServerTestCase, XDisplayTest, WithFixtures):
         session_items['uid'] = 1
         session_items.save()
 
-        #test user setup
+        # test user setup
         email = "testuser"
         self.assertTrue(User.objects.filter(email=email).exists(),
                         "Test user exists")
         #success = self.client.login(email=email, password=password)
         #self.assertTrue(success, "Log in as test user")
 
-            #logger.info("adding cookie %s=%s" % (settings.SESSION_COOKIE_NAME, session_store.session_key))
-            #browser.cookies.add({settings.SESSION_COOKIE_NAME:
-            #                     session_store.session_key})
-            # logger.info("adding cookies %s" % str(self.client.cookies))
-            # browser.cookies.add(dict((k, m.value) for (k, m) in self.client.cookies.items()))
-            # self.assertEqual(unicode(browser.cookies[settings.SESSION_COOKIE_NAME]),
-            #                  unicode(self.client.cookies[settings.SESSION_COOKIE_NAME].value))
-
+        #logger.info("adding cookie %s=%s" % (settings.SESSION_COOKIE_NAME, session_store.session_key))
+        # browser.cookies.add({settings.SESSION_COOKIE_NAME:
+        #                     session_store.session_key})
+        # logger.info("adding cookies %s" % str(self.client.cookies))
+        # browser.cookies.add(dict((k, m.value) for (k, m) in self.client.cookies.items()))
+        # self.assertEqual(unicode(browser.cookies[settings.SESSION_COOKIE_NAME]),
+        #                  unicode(self.client.cookies[settings.SESSION_COOKIE_NAME].value))
 
     def test2_mark_incomplete(self):
         """
@@ -104,7 +106,7 @@ class AdminTests(LiveServerTestCase, XDisplayTest, WithFixtures):
                      url='http://hub:4444/wd/hub',
                      browser='firefox',
                      #platform="Windows 7",
-                     #version="9",
+                     # version="9",
                      name="Test of Firefox") as browser:
 
             # select the run

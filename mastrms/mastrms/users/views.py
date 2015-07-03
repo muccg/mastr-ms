@@ -9,10 +9,12 @@ from .models import *
 from .user_manager import GroupManager
 from .forms import getDetailsFromRequest
 
-##The user info view, which sends the state of the logged in
-##user to the frontend.
+# The user info view, which sends the state of the logged in
+# user to the frontend.
+
+
 def userinfo(request):
-    m = getCurrentUser(request, force_refresh = True)
+    m = getCurrentUser(request, force_refresh=True)
     return HttpResponse(m.toJson())
 
 
@@ -32,18 +34,17 @@ def listAllNodes(request, *args):
     '''
     ldapgroups = GroupManager.list_groups()
     groups = []
-    if not request.REQUEST.has_key('ignoreNone'):
-        groups.append({'name':'Don\'t Know', 'submitValue':''})
+    if 'ignoreNone' not in request.REQUEST:
+        groups.append({'name': 'Don\'t Know', 'submitValue': ''})
 
     for groupname in ldapgroups:
-        #Cull out the admin groups and the status groups
+        # Cull out the admin groups and the status groups
         if groupname not in MADAS_STATUS_GROUPS and groupname not in MADAS_ADMIN_GROUPS:
-            groups.append({'name':groupname, 'submitValue':groupname})
+            groups.append({'name': groupname, 'submitValue': groupname})
     return jsonResponse(items=groups)
 
 
-
-#Use view decorator here
+# Use view decorator here
 @login_required
 def user_load_profile(request, *args):
     '''This is called when loading user details - when the user
@@ -55,21 +56,27 @@ def user_load_profile(request, *args):
     logger.debug('***userload : exit ***')
     return jsonResponse(data=d)
 
+
 def userSave(request, *args):
     '''This is called when saving user details - when the user
        clicks on the User button in the dashboard and selects 'My Account',
        changes some details, and hits 'save'
        Accessible by any logged in user
     '''
-    logger.debug('***users/userSave : enter ***' )
+    logger.debug('***users/userSave : enter ***')
     success = False
     currentuser = getCurrentUser(request)
     parsedform = getDetailsFromRequest(request)
 
-    #With a usersave, you are always editing your own user
+    # With a usersave, you are always editing your own user
     parsedform['email'] = currentuser.email
-    success = saveMadasUser(currentuser, parsedform['email'], parsedform['details'], parsedform['status'], parsedform['password'])
-    #refresh the user in case their details were just changed
+    success = saveMadasUser(
+        currentuser,
+        parsedform['email'],
+        parsedform['details'],
+        parsedform['status'],
+        parsedform['password'])
+    # refresh the user in case their details were just changed
     currentuser = getCurrentUser(request, force_refresh=True)
 
     if success:

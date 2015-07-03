@@ -4,6 +4,7 @@ import logging
 
 logger = logging.getLogger('mastrms.general')
 
+
 class JSONExceptionHandlerMiddleware(object):
 
     def process_exception(self, request, exception):
@@ -18,4 +19,3 @@ class JSONExceptionHandlerMiddleware(object):
         logger.exception(exception)
 
         return HttpResponse(json.dumps(err_response), mimetype='application/json')
-

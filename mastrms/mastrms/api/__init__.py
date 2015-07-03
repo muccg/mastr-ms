@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 __all__ = ["v1"]
 
+
 def register_all(app_label):
     for model in get_models(get_app(app_label)):
         module_name = "%s.%s" % (__name__, app_label)

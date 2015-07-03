@@ -2,6 +2,7 @@ from django.http import HttpResponse, HttpResponseForbidden
 from ccg_django_utils.http import HttpResponseUnauthorized
 from functools import wraps
 
+
 def restricted_view(f, restriction):
     @wraps(f)
     def new_function(request, *args, **kwargs):
@@ -18,17 +19,26 @@ def restricted_view(f, restriction):
 def nodereps_only(f):
     return restricted_view(f, lambda u: u.IsNodeRep)
 
+
 def admins_only(f):
     return restricted_view(f, lambda u: u.IsAdmin)
+
 
 def admins_or_nodereps(f):
     return restricted_view(f, lambda u: u.IsAdmin or u.IsNodeRep)
 
+
 def authentication_required(f):
     return restricted_view(f, lambda u: u.IsLoggedIn)
 
+
 def privileged_only(f):
-    return restricted_view(f, lambda u: u.IsAdmin or u.IsNodeRep or u.IsMastrAdmin or u.IsProjectLeader)
+    return restricted_view(
+        f,
+        lambda u: u.IsAdmin or u.IsNodeRep or u.IsMastrAdmin or u.IsProjectLeader)
+
 
 def mastr_users_only(f):
-    return restricted_view(f, lambda u: u.IsAdmin or u.IsMastrAdmin or u.IsProjectLeader or u.IsMastrStaff)
+    return restricted_view(
+        f,
+        lambda u: u.IsAdmin or u.IsMastrAdmin or u.IsProjectLeader or u.IsMastrStaff)

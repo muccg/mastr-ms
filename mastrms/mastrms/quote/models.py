@@ -1,9 +1,11 @@
 from django.db import models
 from mastrms.users.models import User
 
+
 class Emailmap(models.Model):
-    id = models.AutoField(primary_key=True) # This field type is a guess.
+    id = models.AutoField(primary_key=True)  # This field type is a guess.
     emailaddress = models.CharField(max_length=100)
+
     class Meta:
         db_table = u'emailmap'
         verbose_name = "email map"
@@ -14,11 +16,11 @@ class Emailmap(models.Model):
 
 
 class Quoterequest(models.Model):
-    id = models.AutoField(primary_key=True) # This field type is a guess.
+    id = models.AutoField(primary_key=True)  # This field type is a guess.
     emailaddressid = models.ForeignKey(Emailmap, db_column='emailaddressid')
     tonode = models.CharField(max_length=100)
     details = models.TextField()
-    requesttime = models.DateTimeField(auto_now_add=True) #generate 'now' on INSERT
+    requesttime = models.DateTimeField(auto_now_add=True)  # generate 'now' on INSERT
     unread = models.BooleanField(default=True)
     completed = models.BooleanField(default=False)
     firstname = models.CharField(max_length=50)
@@ -35,28 +37,31 @@ class Quoterequest(models.Model):
     def __unicode__(self):
         return "%s (%s,%s)" % (self.tonode, self.lastname, self.firstname)
 
+
 class Formalquote(models.Model):
-    id = models.AutoField(primary_key=True) # This field type is a guess.
-    quoterequestid = models.ForeignKey(Quoterequest, db_column='quoterequestid' ) # This field type is a guess.
+    id = models.AutoField(primary_key=True)  # This field type is a guess.
+    # This field type is a guess.
+    quoterequestid = models.ForeignKey(Quoterequest, db_column='quoterequestid')
     details = models.TextField()
-    created = models.DateTimeField(auto_now_add=True) #generate 'now' on INSERT
+    created = models.DateTimeField(auto_now_add=True)  # generate 'now' on INSERT
     fromemail = models.CharField(max_length=100)
     toemail = models.CharField(max_length=100)
     status = models.CharField(max_length=20, default='new')
     downloaded = models.BooleanField()
     purchase_order_number = models.CharField(max_length=100)
+
     class Meta:
         db_table = u'formalquote'
         verbose_name = "formal quote"
         verbose_name_plural = "formal quotes"
+
     def __unicode__(self):
         return str(self.details)
 
 
-
 class Quotehistory(models.Model):
-    id = models.AutoField(primary_key=True) # This field type is a guess.
-    quoteid = models.ForeignKey(Quoterequest, db_column='quoteid' )
+    id = models.AutoField(primary_key=True)  # This field type is a guess.
+    quoteid = models.ForeignKey(Quoterequest, db_column='quoteid')
     authoremailid = models.ForeignKey(Emailmap, db_column='authoremailid')
     newnode = models.CharField(max_length=100)
     oldnode = models.CharField(max_length=100)
@@ -64,6 +69,7 @@ class Quotehistory(models.Model):
     completed = models.BooleanField()
     oldcompleted = models.BooleanField()
     changetimestamp = models.DateTimeField(auto_now=True)
+
     class Meta:
         db_table = u'quotehistory'
         verbose_name = "quote history"
@@ -74,11 +80,14 @@ class Organisation(models.Model):
     name = models.CharField(max_length=100)
     abn = models.CharField(max_length=100)
     user = models.ManyToManyField(User, through="UserOrganisation")
+
     class Meta:
         db_table = u'm_organisation'
+
 
 class UserOrganisation(models.Model):
     user = models.ForeignKey(User)
     organisation = models.ForeignKey(Organisation)
+
     class Meta:
         db_table = 'm_userorganisation'

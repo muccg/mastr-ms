@@ -5,6 +5,8 @@ logger = logging.getLogger("mastrms.users")
 
 # fixme: this function duplicates django forms -- need to make a
 # normal form which does the same thing.
+
+
 def getDetailsFromRequest(request):
     '''This is a generic function for parsing the form data passed in
        via one of the user edit forms
@@ -22,19 +24,23 @@ def getDetailsFromRequest(request):
     updateDict = {}
     updateDict['email'] = updatedemail
     updateDict['telephoneNumber'] = getReqVarSTR('telephoneNumber')
-    updateDict['physicalDeliveryOfficeName'] =  getReqVarSTR('physicalDeliveryOfficeName')
+    updateDict['physicalDeliveryOfficeName'] = getReqVarSTR('physicalDeliveryOfficeName')
     updateDict['title'] = getReqVarSTR('title')
     updateDict['first_name'] = getReqVarSTR('firstname')
     updateDict['last_name'] = getReqVarSTR('lastname')
-    updateDict['homePhone'] = getReqVarSTR('homephone') # fixme: homePhone -> homephone
-    updateDict['postalAddress'] = getReqVarSTR('address') # fixme: postalAddress -> address
-    updateDict['description'] = getReqVarSTR('areaOfInterest') # fixme: description -> areaOfInterest
-    updateDict['destinationIndicator'] = getReqVarSTR('dept') # fixme: destinationIndicator -> dept
-    updateDict['businessCategory'] = getReqVarSTR('institute') # fixme: businessCategory -> institute
-    updateDict['registeredAddress'] = getReqVarSTR('supervisor') # fixme: registeredAddress -> supervisor
-    updateDict['carLicense'] = getReqVarSTR('country') # fixme: carLicense -> country
+    updateDict['homePhone'] = getReqVarSTR('homephone')  # fixme: homePhone -> homephone
+    updateDict['postalAddress'] = getReqVarSTR('address')  # fixme: postalAddress -> address
+    # fixme: description -> areaOfInterest
+    updateDict['description'] = getReqVarSTR('areaOfInterest')
+    # fixme: destinationIndicator -> dept
+    updateDict['destinationIndicator'] = getReqVarSTR('dept')
+    # fixme: businessCategory -> institute
+    updateDict['businessCategory'] = getReqVarSTR('institute')
+    # fixme: registeredAddress -> supervisor
+    updateDict['registeredAddress'] = getReqVarSTR('supervisor')
+    updateDict['carLicense'] = getReqVarSTR('country')  # fixme: carLicense -> country
 
-    #any that are blank, we delete
+    # any that are blank, we delete
     for key in updateDict.keys():
         if not updateDict[key]:
             del updateDict[key]
@@ -50,10 +56,10 @@ def getDetailsFromRequest(request):
     if status == 'Active':
         status = MADAS_USER_GROUP
     statusDict['status'] = status
-    password = getReqVarSTR('password').strip() #empty password is ignored anyway
+    password = getReqVarSTR('password').strip()  # empty password is ignored anyway
 
     retdict = {}
-    retdict['email'] =  updatedemail
+    retdict['email'] = updatedemail
     retdict['password'] = password
     retdict['details'] = updateDict
     retdict['status'] = statusDict
@@ -67,6 +73,5 @@ def getDetailsFromRequest(request):
     logger.debug('Status:')
     for key in statusDict.keys():
         logger.debug('%s : %s' % (key, statusDict[key]))
-
 
     return retdict

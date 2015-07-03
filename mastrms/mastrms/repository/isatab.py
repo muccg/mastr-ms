@@ -13,6 +13,8 @@ from django.views.generic.base import View
 from django.core.urlresolvers import reverse
 from django.contrib.sites.models import Site
 from .models import Project, NodeClient, MicrobialInfo, PlantInfo, AnimalInfo, HumanInfo, RunSample
+from functools import reduce
+
 
 def isa_study_view(request, project_id, experiment_id):
     from .models import Experiment
@@ -20,7 +22,9 @@ def isa_study_view(request, project_id, experiment_id):
     v = ISATabExportView()
     return HttpResponse(v._create_study(exp), content_type="text/plain")
 
+
 class ISATabExportView(View):
+
     def get(self, request, project_id):
         project = get_object_or_404(Project, id=project_id)
 
@@ -83,9 +87,13 @@ class ISATabExportView(View):
         fields = [
             ("ONTOLOGY SOURCE REFERENCE", None),
             ("Term Source Name", ("OBI", "SNOMEDCT")),
-            ("Term Source File", ("http://obi-ontology.org", "http://bioportal.bioontology.org/ontologies/46896")),
+            ("Term Source File",
+             ("http://obi-ontology.org",
+              "http://bioportal.bioontology.org/ontologies/46896")),
             ("Term Source Version", ("", "")),
-            ("Term Source Description", ("Ontology for Biomedical Investigations", "SNOMED Clinical Terms")),
+            ("Term Source Description",
+             ("Ontology for Biomedical Investigations",
+              "SNOMED Clinical Terms")),
             ("INVESTIGATION", None),
             ("Investigation Identifier", identifier),
             ("Investigation Title", title),
@@ -157,8 +165,16 @@ class ISATabExportView(View):
                 ("Study Assay Technology Platform", machines),
                 ("Study Assay File Name", self._assay_filename(inv, exp)),
                 ("STUDY PROTOCOLS", None),
-                ("Study Protocol Name", ("Sample collection", "Metabolite extraction", "Chromatography", "Mass spectrometry")),
-                ("Study Protocol Type", ("Sample collection", "Extraction", "Chromatography", "Mass spectrometry")),
+                ("Study Protocol Name",
+                 ("Sample collection",
+                  "Metabolite extraction",
+                  "Chromatography",
+                  "Mass spectrometry")),
+                ("Study Protocol Type",
+                 ("Sample collection",
+                  "Extraction",
+                  "Chromatography",
+                  "Mass spectrometry")),
                 ("Study Protocol Type Term Accession Number", ""),
                 ("Study Protocol Type Term Source REF", ""),
                 ("Study Protocol Description", exp.sample_preparation_notes),
@@ -200,21 +216,26 @@ class ISATabExportView(View):
             if rs.sample and rs.sample.sample_class and rs.sample.sample_class.biological_source:
                 return rs.sample.sample_class.biological_source.type.name
             return ""
+
         def source_name(rs):
             if rs.sample and rs.sample.sample_class and rs.sample.sample_class.organ:
                 organ = rs.sample.sample_class.organ
                 return organ.name or organ.abbreviation
             return ""
+
         def sample_notes(rs):
             if rs.sample and rs.sample.sample_class and rs.sample.sample_class.biological_source:
                 return rs.sample.sample_class.biological_source.information
             return experiment.sample_preparation_notes
+
         def ncbi_id(rs):
             if rs.sample and rs.sample.sample_class and rs.sample.sample_class.biological_source:
                 return rs.sample.sample_class.biological_source.ncbi_id
             return ""
+
         def protocol_ref(rs):
             return "; ".join(map(sop_url, experiment.standardoperationprocedure_set.all()))
+
         def sop_url(sop):
             kwargs = {"sop_id": sop.id, "filename": os.path.basename(sop.attached_pdf.name)}
             return "https://%s%s" % (Site.objects.first().domain,
@@ -226,7 +247,7 @@ class ISATabExportView(View):
                    ("Term Accession Number", const("")),
                    ("Characteristics[Organism part]", source_name),
                    #("Material Type", source_type),
-        ]
+                   ]
 
         info_columns = {
             MicrobialInfo: [
@@ -297,20 +318,24 @@ class ISATabExportView(View):
     def _create_assay(self, experiment):
         def sample_alt_name(runsample):
             return unicode(runsample.sample) if runsample.sample else unicode(runsample.id)
+
         def source_type(rs):
             if rs.sample and rs.sample.sample_class and rs.sample.sample_class.biological_source:
                 src = rs.sample.sample_class.biological_source
                 info = src.information.replace("\n", " ")
                 return "%s_%s" % (src.type.name, info) if info else src.type.name
             return ""
+
         def sample_label(runsample):
             if runsample.sample:
                 return "%s_%s" % (runsample.sample.label, runsample.sample.comment)
             return ""
+
         def sample_treatment(rs):
             if rs.sample and rs.sample.sample_class and rs.sample.sample_class.treatments:
                 return rs.sample.sample_class.treatments.name
             return ""
+
         def sample_timeline(rs):
             if rs.sample and rs.sample.sample_class and rs.sample.sample_class.timeline:
                 return rs.sample.sample_class.timeline.timeline
@@ -320,7 +345,9 @@ class ISATabExportView(View):
                    ("Material Type", source_type),
                    ("Term Source REF", const("")),
                    ("Term Accession Number", const("")),
-                   ("Protocol REF", const("Metabolite extraction")), # make sure that's in the investigation
+                   ("Protocol REF",
+                    const("Metabolite extraction")),
+                   # make sure that's in the investigation
                    ("Extract Name", RunSample.generate_filename),
                    ("Labeled Extract Name", RunSample.generate_filename),
                    ("Label", sample_label),
@@ -368,7 +395,8 @@ class ISATabExportView(View):
                 return "\t".join(map(fmt, value))
             return q(str(value))
 
-        def make_entry((name, value)):
+        def make_entry(xxx_todo_changeme):
+            (name, value) = xxx_todo_changeme
             return "%s\t%s" % (name, fmt(value)) if value is not None else name
 
         return "\n".join(map(make_entry, fields))

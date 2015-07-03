@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 TESTING_REPO = tempfile.mkdtemp(prefix="testrepo-")
 logger.info("Created testing repo %s" % TESTING_REPO)
 
+
 def tearDownModule():
     global TESTING_REPO
     logger.info("Removing testing repo %s" % TESTING_REPO)
@@ -30,6 +31,7 @@ def tearDownModule():
 
 @override_settings(REPO_FILES_ROOT=TESTING_REPO)
 class DeleteTempFilesTests(TestCase):
+
     """
     Tests the delete_temp_files management command.
     Todo:

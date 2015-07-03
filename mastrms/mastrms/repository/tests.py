@@ -11,16 +11,20 @@ from decimal import Decimal
 from mastrms.repository.views import CSVUploadViewCaptureCSV, CSVUploadViewFile
 from mastrms.repository.models import Project, Experiment, Sample, InstrumentMethod, RunSample
 from mastrms.mdatasync_server.models import NodeClient
-import json, logging
+import json
+import logging
 logger = logging.getLogger(__name__)
 
+
 class SampleCsvUploadTest(TestCase):
+
     """
     Unit tests for parsing of uploaded samples CSV. The target
     function is `_handle_uploaded_sample_csv`.
     """
 
     urls = 'mastrms.repository.urls'
+
     def setUp(self):
         project = Project.objects.create(title="Test Project",
                                          description="Test",
@@ -385,7 +389,8 @@ Sample Label
         text = """# id, sample_id, sample_class, sample_class__unicode, experiment, experiment__unicode, label, comment, weight, sample_class_sequence,
 %d,,1,class_1,1,exp,label A,comment A,42,1
 %d,,1,class_1,1,exp,label B,comment B,43,1
-""" % (samples[0].id, samples[1].id)
+""" % (
+            samples[0].id, samples[1].id)
 
         result = self.upload_csv(text)
 
@@ -417,7 +422,8 @@ Sample Label
 %d,,1,class_1,1,exp,label A,comment A,42,1
 %d,,1,class_1,1,exp,label B,comment B,43,1
 ,,1,class_1,1,exp,label C,comment C,44,1
-""" % (samples[0].id, samples[1].id)
+""" % (
+            samples[0].id, samples[1].id)
 
         result = self.upload_csv(text)
 
@@ -441,7 +447,9 @@ Sample Label
         self.assertEqual(result["num_created"], 1)
         self.assertEqual(result["num_updated"], 2)
 
+
 class UploadRunCaptureCSVTest(TestCase):
+
     """
     Unit tests for parsing of uploaded samples CSV. The target
     function is `uploadRunCaptureCSV`. CSV quirk tests are in
@@ -450,6 +458,7 @@ class UploadRunCaptureCSVTest(TestCase):
     """
 
     urls = 'mastrms.repository.urls'
+
     def upload_csv(self, text):
         FakeIO = BytesIO if isinstance(text, str) else StringIO
         return CSVUploadViewCaptureCSV.handle_csv(
@@ -471,17 +480,17 @@ class UploadRunCaptureCSVTest(TestCase):
                                                     project=project,
                                                     instrument_method=None)
         self.machine = NodeClient.objects.create(
-            organisation_name = "Murdoch University",
-            site_name = "CCG",
-            station_name = "linuxpc"
-            )
+            organisation_name="Murdoch University",
+            site_name="CCG",
+            station_name="linuxpc"
+        )
         self.method = InstrumentMethod.objects.create(
-            title = "Test Case",
-            method_path = "/test",
-            method_name = "rusty python",
-            version = "2.7.3",
-            creator = get_user_model().objects.all()[0]
-            )
+            title="Test Case",
+            method_path="/test",
+            method_name="rusty python",
+            version="2.7.3",
+            creator=get_user_model().objects.all()[0]
+        )
 
     def test_upload_runcapture(self):
         """
