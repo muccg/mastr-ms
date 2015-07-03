@@ -111,16 +111,8 @@ fi
 if [ "$1" = 'runtests' ]; then
     echo "[Run] Starting tests"
 
-    XUNIT_OPTS="--with-xunit --xunit-file=tests.xml"
-    NOSETESTS="nosetests -v --logging-clear-handlers ${XUNIT_OPTS}"
-    IGNORES="-a !external_service"
-
-    # Setting TEST_CASES in docker-compose file allows you to choose tests
     : ${TEST_CASES="/app/mastrms/mastrms"}
-
-    echo ${NOSETESTS} ${IGNORES} ${TEST_CASES}
-    ${NOSETESTS} ${IGNORES} ${TEST_CASES} 2>&1 | tee /data/nosetests.log
-
+    django-admin.py test ${TEST_CASES} --noinput --settings=${DJANGO_SETTINGS_MODULE} 2>&1 | tee /data/runtests.log
     exit $?
 fi
 
