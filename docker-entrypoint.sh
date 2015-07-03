@@ -112,7 +112,7 @@ if [ "$1" = 'runtests' ]; then
     echo "[Run] Starting tests"
 
     : ${TEST_CASES="/app/mastrms/mastrms"}
-    django-admin.py test ${TEST_CASES} --noinput --settings=${DJANGO_SETTINGS_MODULE} 2>&1 | tee /data/runtests.log
+    django-admin.py test ${TEST_CASES} 2>&1 | tee /data/runtests.log
     exit $?
 fi
 
@@ -127,7 +127,19 @@ if [ "$1" = 'lettuce' ]; then
     exit $?
 fi
 
-echo "[RUN]: Builtin command not provided [lettuce|runtests|runserver|uwsgi]"
+# selenium entrypoint
+if [ "$1" = 'selenium' ]; then
+    echo "[Run] Starting selenium"
+
+    # Hack to make sure the selenium stack is running before we hit it
+    sleep 10
+
+    : ${TEST_CASES="/app/mastrms/mastrms"}
+    django-admin.py test ${TEST_CASES} --pattern=selenium_*.py 2>&1 | tee /data/selenium.log
+    exit $?
+fi
+
+echo "[RUN]: Builtin command not provided [lettuce|selenium|runtests|runserver|uwsgi]"
 echo "[RUN]: $@"
 
 exec "$@"

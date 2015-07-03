@@ -27,7 +27,7 @@ NOSE_TEST_LIST="mdatasync_client.test.tests:DataSyncServerTests mdatasync_client
 
 usage() {
     echo ""
-    echo "Usage ./develop.sh (start|runtests|selenium)"
+    echo "Usage ./develop.sh (start|runtests|lettuce|selenium)"
     echo "Usage ./develop.sh (pythonlint|jslint)"
     echo "Usage ./develop.sh (ci_docker_staging|docker_staging_selenium|ci_rpm_staging|docker_rpm_staging_selenium)"
     echo "Usage ./develop.sh (dockerbuild_unstable)"
@@ -82,7 +82,7 @@ rpmbuild() {
 
 # publish rpms to testing repo
 rpm_publish() {
-    time ccg publish_testing_rpm:data/rpmbuild/RPMS/x86_64/mastrms*.rpm,release=6
+    time ccg publish_testing_rpm:data/rpmbuild/RPMS/x86_64/${PROJECT_NAME}*.rpm,release=6
 }
 
 
@@ -141,9 +141,33 @@ runtests() {
     make_virtualenv
 
     # clean up containers from past runs
-    ( docker-compose --project-name mastrms -f docker-compose-test.yml rm --force || exit 0 )
-    docker-compose --project-name mastrms -f docker-compose-test.yml build # --no-cache
-    docker-compose --project-name mastrms -f docker-compose-test.yml up
+    ( docker-compose --project-name ${PROJECT_NAME} -f docker-compose-test.yml rm --force || exit 0 )
+    docker-compose --project-name ${PROJECT_NAME} -f docker-compose-test.yml build # --no-cache
+    docker-compose --project-name ${PROJECT_NAME} -f docker-compose-test.yml up
+}
+
+
+lettuce() {
+    mkdir -p data/selenium
+    chmod o+rwx data/selenium
+
+    make_virtualenv
+ 
+    docker-compose --project-name ${PROJECT_NAME} -f docker-compose-lettuce.yml rm --force
+    docker-compose --project-name ${PROJECT_NAME} -f docker-compose-lettuce.yml build
+    docker-compose --project-name ${PROJECT_NAME} -f docker-compose-lettuce.yml up
+}
+
+
+selenium() {
+    mkdir -p data/selenium
+    chmod o+rwx data/selenium
+
+    make_virtualenv
+ 
+    docker-compose --project-name ${PROJECT_NAME} -f docker-compose-selenium.yml rm --force
+    docker-compose --project-name ${PROJECT_NAME} -f docker-compose-selenium.yml build
+    docker-compose --project-name ${PROJECT_NAME} -f docker-compose-selenium.yml up
 }
 
 
@@ -161,6 +185,12 @@ purge() {
 case ${ACTION} in
 runtests)
     runtests
+    ;;
+lettuce)
+    lettuce
+    ;;
+selenium)
+    selenium
     ;;
 pythonlint)
     pythonlint
