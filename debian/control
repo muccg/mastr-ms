@@ -1,0 +1,15 @@
+Source: mastr-ms
+Section: unknown
+Priority: optional
+Maintainer: Rodney Lorrimar <devops@ccg.murdoch.edu.au>
+Build-Depends: debhelper (>= 9)
+Standards-Version: 3.9.6
+Homepage: <insert the upstream URL, if relevant>
+#Vcs-Git: git://anonscm.debian.org/collab-maint/mastr-ms.git
+#Vcs-Browser: https://anonscm.debian.org/gitweb/?p=collab-maint/mastr-ms.git;a=summary
+
+Package: mastr-ms
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
