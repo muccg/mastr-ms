@@ -1,0 +1,11 @@
+# javascript libraries used by mastr-ms
+/usr/share/javascript/jquery   /usr/share/mastr-ms/www/lib/jquery
+
+# writable directories
+/var/log/mastr-ms              /usr/share/python/mastr-ms/lib/python2.7/site-packages/mastrms/log
+/var/cache/mastr-ms/static     /usr/share/python/mastr-ms/lib/python2.7/site-packages/mastrms/static
+/var/cache/mastr-ms/upload     /usr/share/python/mastr-ms/lib/python2.7/site-packages/mastrms/upload
+/var/cache/mastr-ms/scratch    /usr/share/python/mastr-ms/lib/python2.7/site-packages/mastrms/scratch
+
+# replace prodsettings with a link to /etc/mastr-ms/settings.py
+/etc/mastr-ms/settings.py      /usr/share/python/mastr-ms/lib/python2.7/site-packages/mastrms/prodsettings.py

@@ -1,6 +1,31 @@
-mastr-ms for Debian
--------------------
+Mastr-MS for Debian/Ubuntu
+--------------------------
 
-<possible notes regarding this package - if none, delete this file>
+This package automatically sets up the Mastr-MS database using
+dbconfig-common. For this to be successful, PostgreSQL must be
+installed and started before installing the mastr-ms package.
 
- -- Rodney Lorrimar <devops@ccg.murdoch.edu.au>  Thu, 30 Jul 2015 19:07:57 +0800
+If using a remote database, either answer the debconf questions
+accordingly, or edit /etc/mastr-ms/database.conf.
+
+When manually configuring the database, to initialize the tables, run:
+
+    mastr-ms syncdb; mastr-ms migrate
+
+This package will also configure apache2 to run Mastr-MS.
+
+It generally requires SSL to be enabled on the web server. If this is
+not the case, then add the following line to /etc/mastr-ms/settings.py:
+
+    SSL_FORCE = False
+
+Debconf will also maintain the SELF_URL_PATH setting, which is the
+outside URL of the Mastr-MS installation. After editing this setting,
+run:
+
+    mastr-ms set_site
+
+This will update the database with the setting.
+
+
+ -- Rodney Lorrimar <rlorrimar@ccg.murdoch.edu.au>, Tue,  4 Aug 2015 10:58:55 +0800

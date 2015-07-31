@@ -1,5 +1,5 @@
-mastr-ms (1.13.0) unstable; urgency=low
+mastr-ms (1.13.0) ccg; urgency=low
 
-  * Initial Release.
+  * Initial Debian/Ubuntu release.
 
- -- Rodney Lorrimar <devops@ccg.murdoch.edu.au>  Thu, 30 Jul 2015 19:07:57 +0800
+ -- Rodney Lorrimar <rlorrimar@ccg.murdoch.edu.au>  Thu, 30 Jul 2015 19:07:57 +0800

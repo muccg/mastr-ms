@@ -1,15 +1,26 @@
 Source: mastr-ms
-Section: unknown
-Priority: optional
-Maintainer: Rodney Lorrimar <devops@ccg.murdoch.edu.au>
-Build-Depends: debhelper (>= 9)
+Section: web
+Priority: extra
+Maintainer: CCG <devops@ccg.murdoch.edu.au>
+Build-Depends: debhelper (>= 9), python-all, python-setuptools, python-setuptools-git, dh-apache2, python-docutils, python-sphinx, dh-virtualenv (>= 0.9)
 Standards-Version: 3.9.6
-Homepage: <insert the upstream URL, if relevant>
-#Vcs-Git: git://anonscm.debian.org/collab-maint/mastr-ms.git
-#Vcs-Browser: https://anonscm.debian.org/gitweb/?p=collab-maint/mastr-ms.git;a=summary
+Homepage: https://ccgapps.com.au
+Vcs-Git: git://github.com/muccg/mastr-ms.git
+Vcs-Browser: https://github.com/muccg/mastr-ms/
 
 Package: mastr-ms
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: <insert up to 60 chars description>
- <insert long description, indented with spaces>
+Depends: ${misc:Depends},
+         ${python:Depends},
+         dbconfig-common,
+         python-tz,
+         python-psycopg2,
+         libjs-jquery,
+         libapache2-mod-wsgi,
+         apache2,
+         system-log-daemon,
+         rsync
+Recommends: postgresql-client
+Description: Metabolomics Australia Sample Tracking Repository
+ Mastr-MS is a web-based tool for experimental design, sample metadata
+ configuration, and sample data acquisition.

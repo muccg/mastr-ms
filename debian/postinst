@@ -1,0 +1,148 @@
+#!/bin/sh
+
+set -e
+#set -x
+
+# source debconf stuff
+if [ -f /usr/share/debconf/confmodule ]; then
+    . /usr/share/debconf/confmodule
+fi
+
+mastrms_config_set() {
+    KEY="$1"
+    VAL=`echo "$2" | sed 's~/~\\\/~g'`
+    perl -p -i -e "s/^$KEY[ ]*=.*/$KEY = $VAL/g" /etc/mastr-ms/mastr-ms.conf
+}
+
+mastrms_update_python() {
+    if which pycompile >/dev/null 2>&1; then
+        pycompile -p mastr-ms
+    fi
+}
+
+if [ "$1" = "configure" ]; then
+    if ! getent group mastr-ms > /dev/null 2>&1
+    then
+        addgroup --system mastr-ms >/dev/null
+    fi
+    if ! getent passwd mastr-ms > /dev/null 2>&1
+    then
+        adduser --system --home /var/cache/mastr-ms/ --ingroup mastr-ms \
+            --no-create-home --shell /bin/false mastr-ms
+    fi
+
+    setperm() {
+        MODE="$1"
+        FILE="$2"
+        dpkg-statoverride --list "$FILE" >/dev/null || \
+            dpkg-statoverride --update --add mastr-ms mastr-ms "$MODE" "$FILE"
+    }
+
+    # mastr-ms will write files into these directories
+    setperm 0775 /var/cache/mastr-ms/static
+    setperm 0770 /var/cache/mastr-ms/upload
+    setperm 0770 /var/cache/mastr-ms/scratch
+    setperm 0775 /var/cache/mastr-ms
+    setperm 0770 /var/log/mastr-ms
+fi
+
+mastrms_update_python
+
+# dbconfig-common
+if [ -f /usr/share/dbconfig-common/dpkg/postinst ]; then
+    . /usr/share/dbconfig-common/dpkg/postinst
+
+    dbc_generate_include="template:/etc/mastr-ms/database.conf"
+    dbc_generate_include_args="-o template_infile=/usr/share/mastr-ms/dbc-include-template.conf"
+    #dbc_generate_include="php:/etc/mastr-ms/database.php"
+    #dbc_generate_include="sh:/etc/mastr-ms/database.env"
+    dbc_generate_include_owner="root:mastr-ms"
+    dbc_generate_include_perms="0640"
+    dbc_dbfile_owner="mastr-ms:mastr-ms"
+    dbc_dbfile_perms="0660"
+    dbc_pgsql_createdb_encoding="UTF8"
+    dbc_mysql_createdb_encoding="UTF8"
+
+    if ! dbc_go mastr-ms $@ ; then
+        echo 'Automatic configuration using dbconfig-common failed!'
+    fi
+fi
+
+
+lighttpd_install() {
+    if which lighty-enable-mod >/dev/null 2>&1 ; then
+        lighty-enable-mod mastr-ms || true
+    fi
+}
+
+apache2_install() {
+    if [ -e /usr/share/apache2/apache2-maintscript-helper ] ; then
+        apache2_invoke enmod wsgi
+        apache2_invoke enconf mastr-ms
+    elif  dpkg-query -f '${Version}'  -W 'apache2.2-common' > /dev/null 2>&1 ; then
+        if [ -d /etc/apache2/conf.d/ ] && [ ! -L /etc/apache2/conf.d/mastr-ms.conf ] ; then
+            ln -s ../conf-available/mastr-ms.conf /etc/apache2/conf.d/mastr-ms.conf
+        fi
+    fi
+}
+
+if [ -e /usr/share/apache2/apache2-maintscript-helper ] ; then
+    . /usr/share/apache2/apache2-maintscript-helper
+fi
+
+if [ "$1" = "configure" ]; then
+    # set Mastr-MS according to config
+    db_get mastr-ms/self_url_path
+    mastrms_config_set "SELF_URL_PATH" "$RET"
+
+    db_get mastr-ms/secret_key
+    mastrms_config_set "SECRET_KEY" "$RET"
+
+    # webserver configuration
+    db_get mastr-ms/reconfigure-webserver || true
+    webservers="$RET"
+    restart=""
+
+    for webserver in $webservers; do
+        webserver=${webserver%,}
+        case "$webserver" in
+            lighttpd)
+                lighttpd_install
+                ;;
+            apache2)
+                apache2_install
+                ;;
+        esac
+        test -x /usr/sbin/$webserver || continue
+        restart="$restart $webserver"
+    done
+
+    db_get mastr-ms/restart-webserver || true
+    res="$RET"
+
+    # db_stop means no more db_gets can be run after here
+    db_stop || true
+
+    if [ "$res" = "true" ]; then
+        for webserver in $restart; do
+            webserver=${webserver%,}
+            # Redirection of 3 is needed because Debconf uses it and it might
+            # be inherited by webserver. See bug #446324.
+            if [ -x /usr/sbin/invoke-rc.d ]; then
+                invoke-rc.d $webserver reload 3>/dev/null || true
+            else
+                /etc/init.d/$webserver reload 3>/dev/null || true
+            fi
+        done
+    fi
+
+    # update staticfiles cache
+    mastr-ms collectstatic --noinput --link > /dev/null || true
+
+    # Creates a django.contrib.sites.models.Site object
+    mastr-ms set_site || true
+fi
+
+#DEBHELPER#
+
+exit 0

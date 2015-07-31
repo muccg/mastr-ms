@@ -1,0 +1,10 @@
+conf/usr/share/mastr-ms
+usr/share/dbconfig-common/data/mastr-ms/install
+usr/share/dbconfig-common/data/mastr-ms/upgrade/mysql
+usr/share/dbconfig-common/data/mastr-ms/upgrade/pgsql
+usr/share/dbconfig-common/data/mastr-ms/upgrade/sqlite3
+var/cache/mastr-ms
+var/cache/mastr-ms/static
+var/cache/mastr-ms/upload
+var/cache/mastr-ms/scratch
+var/log/mastr-ms

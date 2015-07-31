@@ -1,0 +1,47 @@
+#!/usr/bin/env python
+import os
+import sys
+import pwd
+
+PRODUCTION_USER = "mastr-ms"
+
+# activate virtualenv if this a dh-virtualenv package
+venv_activate = "/usr/share/python/mastr-ms/bin/activate_this.py"
+if os.path.exists(venv_activate):
+    execfile(venv_activate, dict(__file__=venv_activate))
+    webapp_root = "/usr/share/python/mastr-ms"
+else:
+    webapp_root = "/usr/share/pyshared/mastrms"
+
+if PRODUCTION_USER:
+    (uid, gid, gecos, homedir) = pwd.getpwnam(PRODUCTION_USER)[2:6]
+    if os.getgid() != gid:
+        try:
+            os.setgid(gid)
+        except OSError:
+            pass
+    if os.getuid() != uid:
+        try:
+            os.setuid(uid)
+        except OSError, e:
+            print >> sys.stderr, "Couldn't change to %s: %s" % (PRODUCTION_USER, e)
+    os.environ["HOME"] = homedir
+
+if __name__ == "__main__":
+    if PRODUCTION_USER:
+        # setup the settings module for the django app
+        from ccg_django_utils.conf import setup_prod_env
+        setup_prod_env("mastr-ms", config_file="/etc/mastr-ms/database.conf",
+                       package_name="mastrms")
+        setup_prod_env("mastr-ms", package_name="mastrms")
+    else:
+        os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mastrms.settings")
+
+    # setup the settings module for the WSGI app
+    os.environ.setdefault('PROJECT_DIRECTORY', webapp_root)
+    os.environ.setdefault('WEBAPP_ROOT', webapp_root)
+    os.environ.setdefault('PYTHON_EGG_CACHE', '/tmp/.python-eggs')
+
+    from django.core.management import execute_from_command_line
+
+    execute_from_command_line(sys.argv)

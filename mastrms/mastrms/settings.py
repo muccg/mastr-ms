@@ -85,6 +85,7 @@ DEBUG = not env.get("production", False)
 
 # Default the site ID to 1, even if the sites framework isn't being used
 SITE_ID = 1
+SITE_URL = env.get("self_url_path", "")
 
 # see: https://docs.djangoproject.com/en/1.4/ref/settings/#root-urlconf
 ROOT_URLCONF = 'mastrms.urls'
