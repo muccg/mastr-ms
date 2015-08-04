@@ -5,17 +5,148 @@ The Mastr-MS server is a Django application which provides a web
 interface for user management, sample management, and access to
 experiment data.
 
+Mastr-MS is distributed as a RPM for Redhat systems and as a ``deb``
+package for Debian and Ubuntu systems.
 
-Installation
-------------
+Installation on Debian/Ubuntu
+-----------------------------
+
+The deb package is known to work on Debian 8 (Jessie) and Ubuntu 14.04
+LTS (Trusty Tahr).
+
+.. _apt-repos:
+
+Apt repository setup
+~~~~~~~~~~~~~~~~~~~~
+
+To get started, put the following lines in
+``/etc/apt/sources.list.d/ccg.list``::
+
+    # Centre for Comparative Genomics Ubuntu package repository
+    deb http://repo.ccgapps.com.au/repo/ccg/ubuntu ccg ccg
+    deb-src http://repo.ccgapps.com.au/repo/ccg/ubuntu ccg ccg
+
+Then run (as root)::
+
+    curl http://repo.ccgapps.com.au/repo/ccg/ubuntu/ccg-archive.asc | apt-key add -
+    apt-get update
+
+Database Setup
+~~~~~~~~~~~~~~
+
+The database server package isn't a dependency of the Mastr-MS
+package, because it's possible to run the database on another
+host. The database therefore needs to be installed manually::
+
+    apt-get install postgresql
+    service postgresql start
+    update-rc.d postgresql enable
+
+In order to benefit from automatic database initialization, the
+database needs to be installed and running before installing Mastr-MS.
+
+Install
+~~~~~~~
+
+To download and install Mastr-MS, run::
+
+    apt-get install mastr-ms
+
+Your database and web server will be automatically configured using
+the Debconf system.
+
+Manual database initialization
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If using a remote database or otherwise manually setting up the
+database, you should edit ``/etc/mastr-ms/database.conf`` and enter
+the correct settings.
+
+To then initialize an empty database for Mastr-MS, run::
+
+    mastr-ms syncdb && mastr-ms migrate
+
+Configuration
+~~~~~~~~~~~~~
+
+You can customize ``/etc/mastr-ms/mastr-ms.conf`` as needed for your
+site. Each settings is documented in settings_.
+
+After changing ``SELF_URL_PATH``, you must run this to update the database::
+
+    mastr-ms set_site
+
+The Apache config file is installed in
+``/etc/apache2/conf-available/mastr-ms.conf`` and can be adjusted as
+required.
+
+Mastr-MS generally requires SSL to be enabled on the web server. If
+this is not possible, add the following line to ``/etc/mastr-ms/settings.py``::
+
+    SSL_FORCE = False
+
+
+Testing
+~~~~~~~
+
+Reload the web server::
+
+    service apache2 restart
+
+Mastr-MS is available at https://your-web-host/mastr-ms/. A login page
+should be visible at this URL.
+
+Data Repository and Syncing
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The default data repository location is
+``/var/cache/mastr-ms/scratch``. This can be changed in the settings_
+file or redirected with a symlink.
+
+For production use, there should be ample disk space on this
+filesystem and it should be backed up.
+
+The package creates a user called ``mastr-ms`` which owns the data
+repository directories.
+
+To support data syncing, the ``mastr-ms`` user should be enabled and a
+password-less SSH key pair generated for it.
+
+Upgrading to a new version
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+New versions of Mastr-MS are made available in the `CCG Apt
+repository`_.
+
+Before upgrading, please check the :ref:`changelog` for any
+special information relating the new version.
+
+Install the latest version, run::
+
+    apt-get update && apt-get install mastr-ms
+
+If there are any database migrations required, they will be run
+automatically. A precautionary database backup will be created in
+``/var/cache/dbconfig-common/backups``.
+
+If you would like to manually migrate the database, just run::
+
+    mastr-ms migrate
+
+.. _CCG Apt repository:
+   http://repo.ccgapps.com.au/
+
+
+Installation on CentOS
+----------------------
 
 ..  _yum-repos:
 
 Yum repository setup
 ~~~~~~~~~~~~~~~~~~~~
 
-Mastr-MS is distributed as RPM, tested on Centos 6.x (x86_64). To
-satisfy dependencies, `Epel`_ and `IUS`_ repos need to be enabled::
+The Mastr-MS RPM is made for on Centos 6.x (x86_64). To satisfy
+dependencies, `Epel`_ and `IUS`_ repos need to be enabled::
 
     sudo rpm -Uvh http://repo.ccgapps.com.au/repo/ccg/centos/6/os/noarch/CentOS/RPMS/ccg-release-6-2.noarch.rpm
     sudo rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
@@ -47,8 +178,6 @@ Install the Mastr-MS RPM, replacing ``X.X.X`` with the desired version::
 
     sudo yum install mastrms-X.X.X
 
-Server Configuration
---------------------
 
 Database Setup
 ~~~~~~~~~~~~~~
@@ -165,10 +294,76 @@ Django Settings File
 ~~~~~~~~~~~~~~~~~~~~
 
 The config file for Mastr-MS is installed at
-``/etc/mastrms/mastrms.conf``. It contains basic settings that need to
-be changed for most sites, for example the database password. There
-are comments and example values for each setting within this config
-file.
+``/etc/mastrms/mastrms.conf``. It contains basic settings_ that need
+to be changed for most sites, for example the database password.
+
+SELinux and Mastr-MS
+~~~~~~~~~~~~~~~~~~~~
+
+Mastr-MS does not yet ship with a SELinux policy (issue `MAS-21`_).
+For Mastr-MS to function correctly on a CentOS server, SELinux must be
+disabled.
+
+The CentOS wiki contains `instructions`_ on how to disable SELinux.
+
+.. _MAS-21:
+   https://ccgmurdoch.atlassian.net/browse/MAS-21
+
+.. _instructions:
+   http://wiki.centos.org/HowTos/SELinux#head-430e52f7f8a7b41ad5fc42a2f95d3e495d13d348
+
+
+.. _server-upgrade:
+
+Upgrading to a new version
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+New versions of Mastr-MS are made available in the `CCG yum
+repository`_.
+
+.. warning:: Some versions will require "database migrations" to
+   update the database. While every care is taken to ensure smooth
+   upgrades, we still advise to make a backup of the database before
+   upgrading. This can be done with a command such as::
+
+       su - postgres -c "pg_dump mastrms | gzip > /tmp/mastrms-$(date +%Y%m%d).sql.gz"
+
+Before upgrading, please check the :ref:`changelog` for any
+special information relating the new version.
+
+Install the Mastr-MS RPM, replacing ``X.X.X`` with the desired version::
+
+    sudo yum install mastrms-X.X.X
+
+Run Django syncdb and South migrate::
+
+    sudo mastrms syncdb
+    sudo mastrms migrate
+
+.. _CCG yum repository:
+   http://repo.ccgapps.com.au/
+
+Testing
+~~~~~~~
+
+After changing the configuration or upgrading, start/restart the web
+server with::
+
+    service httpd restart
+
+Mastr-MS is available at https://your-web-host/mastrms/. A login page
+should be visible at this URL.
+
+.. _settings:
+
+Mastr-MS Settings File
+----------------------
+
+The Mastr-MS settings file is called ``mastr-ms.conf`` or
+``mastrms.conf`` depending on the system.
+
+The following settings are customizable. There are also comments and
+example values for each setting within the settings file.
 
 +---------------------------+-----------------------------------------------------+
 | Option                    | Description                                         |
@@ -231,67 +426,10 @@ file.
 .. _`ALLOWED_HOSTS`: https://docs.djangoproject.com/en/1.5/releases/1.5/#allowed-hosts-required-in-production
 .. _`key generator program`: http://www.miniwebtool.com/django-secret-key-generator/
 
-More advanced options appear in ``/etc/mastrms/settings.py``. Any of
-the `Django Settings`_ can be changed in this file.
+More advanced options appear in ``settings.py``. Any of the `Django
+Settings`_ can be changed in this file.
 
 .. _`Django Settings`: https://docs.djangoproject.com/en/1.6/ref/settings/
-
-SELinux and Mastr-MS
-~~~~~~~~~~~~~~~~~~~~
-
-Mastr-MS does not yet ship with a SELinux policy (issue `MAS-21`_).
-For Mastr-MS to function correctly on a CentOS server, SELinux must be
-disabled.
-
-The CentOS wiki contains `instructions`_ on how to disable SELinux.
-
-.. _MAS-21:
-   https://ccgmurdoch.atlassian.net/browse/MAS-21
-
-.. _instructions:
-   http://wiki.centos.org/HowTos/SELinux#head-430e52f7f8a7b41ad5fc42a2f95d3e495d13d348
-
-
-.. _server-upgrade:
-
-Upgrading to a new version
---------------------------
-
-New versions of Mastr-MS are made available in the `CCG yum
-repository`_.
-
-.. warning:: Some versions will require "database migrations" to
-   update the database. While every care is taken to ensure smooth
-   upgrades, we still advise to make a backup of the database before
-   upgrading. This can be done with a command such as::
-
-       su - postgres -c "pg_dump mastrms | gzip > /tmp/mastrms-$(date +%Y%m%d).sql.gz"
-
-Before upgrading, please check the :ref:`changelog` for any
-special information relating the new version.
-
-Install the Mastr-MS RPM, replacing ``X.X.X`` with the desired version::
-
-    sudo yum install mastrms-X.X.X
-
-Run Django syncdb and South migrate::
-
-    sudo mastrms syncdb
-    sudo mastrms migrate
-
-.. _CCG yum repository:
-   http://repo.ccgapps.com.au/
-
-Testing
--------
-
-After changing the configuration or upgrading, start/restart the web
-server with::
-
-    service httpd restart
-
-Mastr-MS is available at https://your-web-host/mastrms/. A login page
-should be visible at this URL.
 
 
 .. _administration:
