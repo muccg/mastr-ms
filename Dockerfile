@@ -23,7 +23,7 @@ RUN env --unset=DEBIAN_FRONTEND
 # install python deps
 COPY mastrms/*requirements.txt /app/mastrms/
 WORKDIR /app
-RUN pip install -r mastrms/requirements.txt
+RUN pip install -r mastrms/all-requirements.txt
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh

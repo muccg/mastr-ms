@@ -1,3 +1,10 @@
--r test-requirements.txt
--r dev-requirements.txt
--r runtime-requirements.txt
+Django==1.6.11
+South==1.0.2
+django-extensions>=1.2.5
+python-memcached==1.48
+dingus==0.3.4
+django-tastypie==0.11.1
+django-nose==1.4.1
+zipstream==1.1.0
+https://github.com/muccg/django-userlog/archive/2.0.0.tar.gz
+https://bitbucket.org/ccgmurdoch/ccg-django-utils/downloads/ccg-django-utils-0.2.1.tar.gz
