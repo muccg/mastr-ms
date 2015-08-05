@@ -71,6 +71,50 @@ all the python dependencies with ``pip``, create the RPM, and output
 it to ``~/rpmbuild/RPMS`` (or the location you have configured in
 ``~/.rpmrc``).
 
+Building a Debian/Ubuntu Package
+--------------------------------
+
+To get started, you need the build dependencies::
+
+    sudo apt-get install dpkg-dev
+    sudo mk-build-deps -i debian/control
+
+To rebuild the debian package, run::
+
+    dpkg-buildpackage -us -uc
+
+The packaging method is standard Debian, except for the use of
+``dh-virtualenv``.
+
+Uploading to the CCG Apt Repo
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To upload, you need the following in ``~/.dput.cf``::
+
+    [ccg]
+    fqdn = staging.ccgapps.com.au
+    method = scp
+    login = ubuntu
+    incoming = /data/aptrepo/repo/incoming
+    post_upload_command = ssh ubuntu@staging.ccgapps.com.au 'docker run aptrepo update'
+
+Then run the ``dput`` command to upload::
+
+    dput ccg ../mastr-ms_1.13.0_amd64.deb
+
+Make sure you remember to include ``ccg`` in the command line or it
+will FTP upload your package into Debian incoming.
+
+Upgrades and database migrations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``dbconfig-common`` system will automatically migrate the database
+for the sysadmin. To let that happen, you need to define which Debian
+package version the migrations correspond to.
+
+The mapping of versions is in the script ``debian/bin/mastr-ms-migrate``.
+
+
 How to build the sync client
 ----------------------------
 
