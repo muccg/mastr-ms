@@ -91,12 +91,15 @@ Uploading to the CCG Apt Repo
 
 To upload, you need the following in ``~/.dput.cf``::
 
+    [DEFAULT]
+    default_host_main = ccg
+
     [ccg]
     fqdn = staging.ccgapps.com.au
     method = scp
     login = ubuntu
     incoming = /data/aptrepo/repo/incoming
-    post_upload_command = ssh ubuntu@staging.ccgapps.com.au 'docker run aptrepo update'
+    post_upload_command = ssh ubuntu@staging.ccgapps.com.au 'aptrepo update'
 
 Then run the ``dput`` command to upload::
 
