@@ -1,6 +1,5 @@
 from django.conf.urls import patterns, url
 from django.core.exceptions import FieldError
-from django.db import transaction
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed, HttpResponseNotFound, HttpResponseServerError
 from django.utils.encoding import smart_str
 from json import dumps, loads
@@ -183,9 +182,6 @@ class ExtJsonInterface(object):
             o = self.queryset(request).get(pk=id)
             o.delete()
 
-            # If we've gotten here, all is well.
-            transaction.commit()
-
             response = {
                 "success": True,
                 "message": "Record deleted.",
@@ -193,8 +189,6 @@ class ExtJsonInterface(object):
 
             return HttpResponse(content_type="text/plain; charset=UTF-8", content=dumps(response))
         except self.model.DoesNotExist:
-            transaction.rollback()
-
             response = {
                 "success": False,
                 "message": "The record could not be found.",
@@ -227,7 +221,6 @@ class ExtJsonInterface(object):
 
         return HttpResponse(content_type="text/plain; charset=UTF-8", content=self.serialise(qs))
 
-    @transaction.commit_manually
     def handle_update(self, request, id):
         try:
             # Grab the name of the primary key field.
@@ -244,17 +237,12 @@ class ExtJsonInterface(object):
                     self.set_field(o, name, value)
             o.save()
 
-            # If we've gotten here, all is well.
-            transaction.commit()
-
             response = {
                 "success": True,
             }
 
             return HttpResponse(content_type="text/plain; charset=UTF-8", content=dumps(response))
         except self.model.DoesNotExist:
-            transaction.rollback()
-
             response = {
                 "success": False,
                 "message": "The record could not be found.",
@@ -262,8 +250,6 @@ class ExtJsonInterface(object):
 
             return HttpResponseNotFound(content_type="text/plain; charset=UTF-8", content=dumps(response))
         except KeyError:
-            transaction.rollback()
-
             response = {
                 "success": False,
                 "message": "An internal error occurred.",
