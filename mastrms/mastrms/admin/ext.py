@@ -179,7 +179,7 @@ class ExtJsonInterface(object):
 
     def handle_delete(self, request, id):
         try:
-            o = self.queryset(request).get(pk=id)
+            o = self.get_queryset(request).get(pk=id)
             o.delete()
 
             response = {
@@ -197,7 +197,7 @@ class ExtJsonInterface(object):
             return HttpResponseNotFound(content_type="text/plain; charset=UTF-8", content=dumps(response))
 
     def handle_read(self, request):
-        qs = self.queryset(request)
+        qs = self.get_queryset(request)
 
         # Add filters.
         filters = {}
@@ -228,7 +228,7 @@ class ExtJsonInterface(object):
 
             # Pull in the JSON data that's been sent.
             row = loads(request.raw_post_data)["rows"]
-            qs = self.queryset(request)
+            qs = self.get_queryset(request)
 
             # OK, retrieve the object and update the field(s).
             o = qs.get(pk=row[pk])

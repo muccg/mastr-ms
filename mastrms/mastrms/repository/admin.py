@@ -28,8 +28,8 @@ class OrganAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ('name', 'detail')
     search_fields = ['name']
 
-    def queryset(self, request):
-        qs = super(OrganAdmin, self).queryset(request)
+    def get_queryset(self, request):
+        qs = super(OrganAdmin, self).get_queryset(request)
         if is_superuser(request):
             return qs
         return qs.filter(Q(experiment__project__managers=request.user)|Q(experiment__users=request.user))
@@ -44,8 +44,8 @@ class OrganAdmin(ExtJsonInterface, admin.ModelAdmin):
 class BiologicalSourceAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ('type',)
 
-    def queryset(self, request):
-        qs = super(BiologicalSourceAdmin, self).queryset(request)
+    def get_queryset(self, request):
+        qs = super(BiologicalSourceAdmin, self).get_queryset(request)
         if is_superuser(request):
             return qs
         return qs.filter(Q(experiment__project__managers=request.user)|Q(experiment__users=request.user))
@@ -63,8 +63,8 @@ class ProjectAdmin(ExtJsonInterface, admin.ModelAdmin):
     search_fields = ['title']
     list_filter = ['client']
 
-    def queryset(self, request):
-        qs = super(ProjectAdmin, self).queryset(request)
+    def get_queryset(self, request):
+        qs = super(ProjectAdmin, self).get_queryset(request)
         if is_superuser(request):
             return qs
         return qs.filter(Q(managers=request.user)|Q(experiment__users=request.user)|Q(client=request.user)).distinct()
@@ -86,8 +86,8 @@ class ExperimentAdmin(ExtJsonInterface, admin.ModelAdmin):
         user_exp, created = UserExperiment.objects.get_or_create(user=request.user, experiment=obj, type=involvement)
         user_exp.save()
 
-    def queryset(self, request):
-        qs = super(ExperimentAdmin, self).queryset(request)
+    def get_queryset(self, request):
+        qs = super(ExperimentAdmin, self).get_queryset(request)
         if is_superuser(request):
             return qs
         return qs.filter(Q(project__managers=request.user)|Q(users__id=request.user.id))
@@ -113,8 +113,8 @@ class ExperimentStatusAdmin(ExtJsonInterface, admin.ModelAdmin):
 class AnimalInfoAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ('sex', 'age', 'parental_line')
 
-    def queryset(self, request):
-        qs = super(AnimalInfoAdmin, self).queryset(request)
+    def get_queryset(self, request):
+        qs = super(AnimalInfoAdmin, self).get_queryset(request)
         if is_superuser(request):
             return qs
         return qs.filter(Q(source__experiment__project__managers=request.user)|Q(source__experiment__users=request.user))
@@ -129,8 +129,8 @@ class AnimalInfoAdmin(ExtJsonInterface, admin.ModelAdmin):
 class TreatmentAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ('name','description')
 
-    def queryset(self, request):
-        qs = super(TreatmentAdmin, self).queryset(request)
+    def get_queryset(self, request):
+        qs = super(TreatmentAdmin, self).get_queryset(request)
         if is_superuser(request):
             return qs
         return qs.filter(Q(experiment__project__managers=request.user)|Q(experiment__users=request.user))
@@ -148,8 +148,8 @@ class SampleAdmin(ExtJsonInterface, admin.ModelAdmin):
     actions = ['create_run']
     inlines = [RunSampleInline]
 
-    def queryset(self, request):
-        qs = super(SampleAdmin, self).queryset(request)
+    def get_queryset(self, request):
+        qs = super(SampleAdmin, self).get_queryset(request)
         if is_superuser(request):
             return qs
         return qs.filter(Q(experiment__project__managers=request.user)|Q(experiment__users=request.user))
@@ -209,8 +209,8 @@ class SampleAdmin(ExtJsonInterface, admin.ModelAdmin):
 class SampleTimelineAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ('id', 'timeline')
 
-    def queryset(self, request):
-        qs = super(SampleTimelineAdmin, self).queryset(request)
+    def get_queryset(self, request):
+        qs = super(SampleTimelineAdmin, self).get_queryset(request)
         if is_superuser(request):
             return qs
         return qs.filter(Q(experiment__project__managers=request.user)|Q(experiment__users=request.user))
@@ -251,8 +251,8 @@ class OrganismTypeAdmin(ExtJsonInterface, admin.ModelAdmin):
 class UserExperimentAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ('user', 'experiment', 'type')
 
-    def queryset(self, request):
-        qs = super(UserExperimentAdmin, self).queryset(request)
+    def get_queryset(self, request):
+        qs = super(UserExperimentAdmin, self).get_queryset(request)
         if is_superuser(request):
             return qs
         return qs.filter(Q(experiment__project__managers=request.user)|Q(experiment__users=request.user))
@@ -272,8 +272,8 @@ class UserInvolvementTypeAdmin(ExtJsonInterface, admin.ModelAdmin):
 class PlantInfoAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ('id', 'development_stage')
 
-    def queryset(self, request):
-        qs = super(PlantInfoAdmin, self).queryset(request)
+    def get_queryset(self, request):
+        qs = super(PlantInfoAdmin, self).get_queryset(request)
         if is_superuser(request):
             return qs
         return qs.filter(Q(source__experiment__project__managers=request.user)|Q(source__experiment__users=request.user))
@@ -290,8 +290,8 @@ class SampleClassAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ['id', 'experiment', 'biological_source', 'treatments', 'timeline', 'organ', 'enabled']
     search_fields = ['experiment__title']
 
-    def queryset(self, request):
-        qs = super(SampleClassAdmin, self).queryset(request)
+    def get_queryset(self, request):
+        qs = super(SampleClassAdmin, self).get_queryset(request)
         if is_superuser(request):
             return qs
         return qs.filter(Q(experiment__project__managers=request.user)|Q(experiment__users=request.user))
@@ -312,8 +312,8 @@ class SampleLogAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ['type', 'description', 'user', 'sample']
     search_fields = ['description']
 
-    def queryset(self, request):
-        qs = super(SampleLogAdmin, self).queryset(request)
+    def get_queryset(self, request):
+        qs = super(SampleLogAdmin, self).get_queryset(request)
         if is_superuser(request):
             return qs
         return qs.filter(Q(sample__experiment__project__managers=request.user)|Q(sample__experiment__users=request.user))
@@ -330,8 +330,8 @@ class RunAdmin(ExtJsonInterface, admin.ModelAdmin):
     search_fields = ['title', 'method__title', 'creator__email', 'creator__first_name', 'creator__last_name']
     inlines = [RunSampleInline]
 
-    def queryset(self, request):
-        qs = super(RunAdmin, self).queryset(request)
+    def get_queryset(self, request):
+        qs = super(RunAdmin, self).get_queryset(request)
         if is_superuser(request):
             return qs
         return qs.filter(Q(samples__experiment__project__managers=request.user)|Q(samples__experiment__users=request.user) | Q(creator=request.user)).distinct()
@@ -380,8 +380,8 @@ class RunAdmin(ExtJsonInterface, admin.ModelAdmin):
 class ClientFileAdmin(ExtJsonInterface, admin.ModelAdmin):
     list_display = ['experiment', 'filepath', 'sharetimestamp', 'sharedby', 'downloaded']
 
-    def queryset(self, request):
-        qs = super(ClientFileAdmin, self).queryset(request)
+    def get_queryset(self, request):
+        qs = super(ClientFileAdmin, self).get_queryset(request)
         if is_superuser(request):
             return qs
         return qs.filter(Q(experiment__project__managers=request.user)|Q(experiment__users=request.user)).distinct()
