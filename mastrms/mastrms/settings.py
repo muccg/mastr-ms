@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'mastrms.mdatasync_server',
     'mastrms.login',
     'mastrms.quote',
-    'mastrms.admin',
+    'mastrms.admin.apps.MastrMSAdmin',
     'mastrms.repository',
     'mastrms.app',
     'mastrms.api',
@@ -55,7 +55,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_extensions',
     'userlog',
-    'south',
     'django_nose',
     'tastypie',
 ]
@@ -75,12 +74,12 @@ AUTH_USER_MODEL = 'users.User'
 # see: https://docs.djangoproject.com/en/dev/ref/settings/#secret-key
 SECRET_KEY = env.get("secret_key", "" if env.get("production", False) else "change-it")
 
-# Default SSL on and forced, turn off if necessary
-SSL_ENABLED = env.get("production", False)
-SSL_FORCE = env.get("production", False)
-
 # Debug off by default
-DEBUG = not env.get("production", False)
+PRODUCTION = env.get("production", False)
+DEBUG = env.get("debug", not PRODUCTION)
+
+# Default SSL on and forced, turn off if necessary
+SECURE_SSL_REDIRECT = env.get("ssl_redirect", PRODUCTION)
 
 # Default the site ID to 1, even if the sites framework isn't being used
 SITE_ID = 1

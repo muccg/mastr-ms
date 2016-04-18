@@ -5,10 +5,10 @@ import posixpath, urllib, mimetypes
 import pickle
 from datetime import datetime, timedelta
 import copy
+import json
 from django.shortcuts import render_to_response, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, Http404
-from django.utils import simplejson
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.core.mail import EmailMessage
@@ -77,7 +77,7 @@ def checkClientVersion(versionstr):
     return True
 
 def jsonResponse(data):
-    jdata = simplejson.dumps(data)
+    jdata = json.dumps(data)
     return HttpResponse(jdata)
 
 
@@ -136,7 +136,7 @@ def request_sync(request, organisation=None, sitename=None, station=None):
         resp["success"] = False
         resp["message"] = "Could not find node %s-%s-%s" % (organisation, sitename, station)
 
-    return HttpResponse(simplejson.dumps(resp))
+    return HttpResponse(json.dumps(resp))
 
 def get_node_from_request(request, organisation=None, sitename=None, station=None):
     retval = None
@@ -266,7 +266,7 @@ def check_run_sample_files(request):
     ret['description'] = "No Error"
     runsamplefilesjson = request.POST.get('runsamplefiles', None)
     if runsamplefilesjson is not None:
-        runsamplefilesdict = simplejson.loads(runsamplefilesjson)
+        runsamplefilesdict = json.loads(runsamplefilesjson)
         # so now we have a dict keyed on run, of sample id's whose file should have been received.
         logger.debug('Checking run samples against: %s' % ( runsamplefilesdict) )
         # We iterate through each run, get the samples referred to, and ensure their file exists on disk.
@@ -476,7 +476,7 @@ def tail_log(request, filename=None, linesback=10, since=0):
         for l in lines:
             out += l + "\n"
 
-    return HttpResponse(simplejson.dumps({'data' : out, 'position':pos}) )
+    return HttpResponse(json.dumps({'data' : out, 'position':pos}) )
 
 @login_required
 def serve_file(request, path):

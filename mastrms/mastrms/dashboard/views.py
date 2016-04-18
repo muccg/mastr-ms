@@ -3,11 +3,9 @@ from d_madas.madas.views import AuthObject
 
 from django.http import HttpResponse
 from django.core import serializers
-from django.utils import simplejson
+import json
 
 def index(request, *args):
     a = AuthObject()
     a.mainContentFunction = 'dashboard'
-    return HttpResponse(simplejson.dumps(a.__dict__) )
-
-
+    return HttpResponse(json.dumps(a.__dict__) )

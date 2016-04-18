@@ -4,10 +4,10 @@ import csv
 import re
 import logging
 import zipstream
+import json
 from decimal import Decimal, DecimalException
 from datetime import datetime, timedelta
 from itertools import groupby, chain
-from django.db import transaction
 from django.db.models import get_model, Q
 from django.core import urlresolvers
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
@@ -19,7 +19,6 @@ from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidde
 from django.http import StreamingHttpResponse
 from django.core.servers.basehttp import FileWrapper
 from django.shortcuts import render_to_response, get_object_or_404
-from django.utils import simplejson as json
 from django.utils.encoding import smart_bytes, smart_text
 from mastrms.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RUN_STATES, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure, RuleGenerator, Component, NodeClient
 from mastrms.quote.models import Organisation, Formalquote
@@ -1956,7 +1955,7 @@ def fileDownloadResponse(realfile, filename=None):
         filename = os.path.basename(realfile)
     chunk = 8192
     wrapper = FileWrapper(open(realfile, "rb"), chunk)
-    
+
     content_disposition = 'attachment;  filename=\"%s\"' % filename
     response = StreamingHttpResponse(wrapper, content_type='application/download')
     response['Content-Disposition'] = content_disposition
@@ -1977,7 +1976,7 @@ def downloadPackage(request):
 
     response = StreamingHttpResponse(zipped, mimetype='application/download')
     response['Content-Disposition'] = 'attachment; filename={}'.format(package_name)
-    return response    
+    return response
 
 @mastr_users_only
 def downloadFile(request, *args):

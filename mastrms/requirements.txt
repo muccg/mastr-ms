@@ -1,4 +1,4 @@
-Django==1.6.11
+Django==1.8.12
 South==1.0.2
 django-extensions>=1.2.5
 python-memcached==1.48

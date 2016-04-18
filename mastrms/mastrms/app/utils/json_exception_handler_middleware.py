@@ -1,5 +1,5 @@
-from django.utils import simplejson as json
 from django.http import HttpResponse
+import json
 import logging
 
 logger = logging.getLogger('mastrms.general')
@@ -18,4 +18,3 @@ class JSONExceptionHandlerMiddleware(object):
         logger.exception(exception)
 
         return HttpResponse(json.dumps(err_response), mimetype='application/json')
-

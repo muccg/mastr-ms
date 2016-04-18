@@ -1,11 +1,9 @@
-# Create your views here.
-from django.db import transaction
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseNotFound
-from django.utils import simplejson as json
 from django.contrib.auth.decorators import login_required
+import json
 import logging
 
 from mastrms.app.utils.data_utils import jsonResponse, jsonErrorResponse
