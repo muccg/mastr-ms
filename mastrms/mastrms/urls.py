@@ -7,8 +7,7 @@ admin.autodiscover()
 from . import api
 
 urlpatterns = patterns('',
-    url(r'^/?$', 'mastrms.login.views.serveIndex',
-        {'SSL': settings.SSL_ENABLED}, name="home"),
+    url(r'^/?$', 'mastrms.login.views.serveIndex', name="home"),
 
     (r'^userinfo', 'mastrms.users.views.userinfo'),
     (r'^sync/', include('mastrms.mdatasync_server.urls')),
@@ -28,7 +27,7 @@ urlpatterns = patterns('',
     (r'^quote/', include('mastrms.quote.urls')),
     # mastrms.registration
     url(r'^(?P<force_mcf>registration)/?$', 'mastrms.login.views.serveIndex',
-        {'SSL': settings.SSL_ENABLED}, name="register"),
+        name="register"),
     (r'^registration/', include('mastrms.registration.urls')),
     # mastrms.login
     (r'^login/', include('mastrms.login.urls')),
@@ -40,5 +39,5 @@ urlpatterns = patterns('',
 if settings.DEBUG:
     print 'Running with django view for static path.'
     urlpatterns += patterns('',
-        (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root' : settings.STATIC_ROOT, 'SSL' : settings.SSL_ENABLED} ),
+        (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root' : settings.STATIC_ROOT}),
     )

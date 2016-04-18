@@ -3,11 +3,11 @@ from django.conf import settings
 
 urlpatterns = patterns(
     '',
-    (r'^processLogin', 'mastrms.login.views.processLoginView', {'SSL':settings.SSL_ENABLED}),
-    (r'^processLogout', 'mastrms.login.views.processLogout', {'SSL':settings.SSL_ENABLED}),
-    (r'^processForgotPassword', 'mastrms.login.views.processForgotPassword', {'SSL':settings.SSL_ENABLED}),
-    (r'^populateResetPasswordForm', 'mastrms.login.views.populateResetPasswordForm', {'SSL':settings.SSL_ENABLED}),
-    (r'^processResetPassword', 'mastrms.login.views.processResetPassword', {'SSL':settings.SSL_ENABLED}),
-    (r'^forgotPassword', 'mastrms.login.views.forgotPasswordRedirect', {'SSL':settings.SSL_ENABLED}),
+    (r'^processLogin', 'mastrms.login.views.processLoginView'),
+    (r'^processLogout', 'mastrms.login.views.processLogout'),
+    (r'^processForgotPassword', 'mastrms.login.views.processForgotPassword'),
+    (r'^populateResetPasswordForm', 'mastrms.login.views.populateResetPasswordForm'),
+    (r'^processResetPassword', 'mastrms.login.views.processResetPassword'),
+    (r'^forgotPassword', 'mastrms.login.views.forgotPasswordRedirect'),
 
 )
