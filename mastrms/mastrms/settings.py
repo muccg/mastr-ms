@@ -29,7 +29,7 @@ DATABASES = {
 
 # see: https://docs.djangoproject.com/en/dev/ref/settings/#middleware-classes
 MIDDLEWARE_CLASSES = [
-    'userlog.middleware.RequestToThreadLocalMiddleware',
+    'useraudit.middleware.RequestToThreadLocalMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -54,7 +54,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.staticfiles',
     'django_extensions',
-    'userlog',
+    'useraudit',
     'django_nose',
     'tastypie',
 ]
@@ -64,7 +64,7 @@ INSTALLED_APPS = [
 # see: https://docs.djangoproject.com/en/dev/ref/settings/#authentication-backends
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    'userlog.backend.AuthFailedLoggerBackend',
+    'useraudit.backend.AuthFailedLoggerBackend',
 ]
 
 # New feature in Django 1.5 -- custom user models
