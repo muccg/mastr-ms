@@ -1,74 +1,103 @@
-from tastypie import fields
-import tastypie.constants
+from rest_framework import serializers, viewsets
 
 from ..repository.models import PlantInfo, MicrobialInfo
 from ..repository.models import Experiment, ExperimentStatus
+from ..repository.models import OrganismType, BiologicalSource, Organ
+from ..repository.models import InstrumentMethod
 
-from .base import BaseResource, register
+from .base import router
+from .repository import ProjectSerializer, InvestigationSerializer
+from .users import UserSerializer
 
+class ExperimentStatusSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = ExperimentStatus
 
-@register
-class ExperimentStatusResource(BaseResource):
-    class Meta(BaseResource.Meta):
-        queryset = ExperimentStatus.objects.all()
-        ordering = ["name"]
+class ExperimentStatusViewSet(viewsets.ModelViewSet):
+    queryset = ExperimentStatus.objects.order_by("name")
+    serializer_class = ExperimentStatusSerializer
 
+class ExperimentSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Experiment
+        # exclude = ("instrument_method",)  # fixme
+    # project = ProjectSerializer(read_only=True)
+    # investigation = InvestigationSerializer(read_only=True)
+    # users = UserSerializer(many=True, read_only=True)
 
-@register
-class ExperimentResource(BaseResource):
-    project = fields.ForeignKey("mastrms.api.repository.ProjectResource", "project")
-    users = fields.ToManyField("mastrms.api.users.UserResource", "users", null=True)
-    status = fields.ForeignKey(ExperimentStatusResource, "status", full=True, null=True)
-    investigation = fields.ForeignKey("mastrms.api.repository.InvestigationResource",
-                                      "investigation", full=True, null=True)
+class ExperimentViewSet(viewsets.ModelViewSet):
+    queryset = Experiment.objects.all()
+    serializer_class = ExperimentSerializer
+    filter_fields = ("project",)
 
-    class Meta(BaseResource.Meta):
-        queryset = Experiment.objects.all()
-        filtering = {
-            "project": tastypie.constants.ALL,
-        }
-
-    def get_object_list(self, request):
-        qs = super(ExperimentResource, self).get_object_list(request)
-        if not request.user.is_superuser:
+    def get_queryset(self):
+        qs = super(ExperimentViewSet, self).get_queryset()
+        if not self.request.user.is_superuser:
             # fixme: maybe add in client and managers to access list
-            qs = qs.filter(users=request.user)
+            qs = qs.filter(users=self.request.user)
         return qs
 
 
-# @register
-class BiologicalSourceResource(BaseResource):
-    experiment = fields.ForeignKey(ExperimentResource, "experiment")
-    type = fields.ForeignKey("mastrms.api.repository.OrganismTypeResource",
-                             "type", full=True)
+class InstrumentMethodSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = InstrumentMethod
+
+class InstrumentMethodViewSet(viewsets.ModelViewSet):
+    queryset = InstrumentMethod.objects.all()
+    serializer_class = InstrumentMethodSerializer
+
+class OrganismTypeSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = OrganismType
+
+class OrganismTypeViewSet(viewsets.ModelViewSet):
+    queryset = OrganismType.objects.all()
+    serializer_class = OrganismTypeSerializer
 
 
-class SourceInfoResource(BaseResource):
-    source = fields.ForeignKey(BiologicalSourceResource, "source")
+class BiologicalSourceSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = BiologicalSource
+    # experiment = fields.ForeignKey(ExperimentResource, "experiment")
+    # type = fields.ForeignKey("mastrms.api.repository.OrganismTypeResource",
+    #                          "type", full=True)
 
-    class Meta(BaseResource.Meta):
-        filtering = {
-            "source": tastypie.constants.ALL,
-        }
-
-
-# @register
-class PlantInfoResource(SourceInfoResource):
-    class Meta(SourceInfoResource.Meta):
-        queryset = PlantInfo.objects.all()
+class BiologicalSourceViewSet(viewsets.ModelViewSet):
+    queryset = BiologicalSource.objects.all()
+    serializer_class = BiologicalSourceSerializer
 
 
-# @register
-class MicrobialResource(SourceInfoResource):
-    class Meta(SourceInfoResource.Meta):
-        queryset = MicrobialInfo.objects.all()
+class PlantInfoSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = PlantInfo
+
+class PlantInfoViewSet(viewsets.ModelViewSet):
+    queryset = PlantInfo.objects.all()
+    serializer_class = PlantInfoSerializer
+
+class MicrobialInfoSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = MicrobialInfo
+
+class MicrobialInfoViewSet(viewsets.ModelViewSet):
+    queryset = MicrobialInfo.objects.all()
+    serializer_class = MicrobialInfoSerializer
+
+class OrganSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Organ
+
+class OrganViewSet(viewsets.ModelViewSet):
+    queryset = Organ.objects.all()
+    serializer_class = OrganSerializer
+    filter_fields = ("experiment",)
 
 
-# @register
-class OrganResource(BaseResource):
-    experiment = fields.ForeignKey(ExperimentResource, "experiment")
-
-    class Meta(BaseResource.Meta):
-        filtering = {
-            "experiment": tastypie.constants.ALL,
-        }
+router.register(r'experiment', ExperimentViewSet)
+router.register(r'experimentstatus', ExperimentStatusViewSet)
+router.register(r'biologicalsource', BiologicalSourceViewSet)
+router.register(r'organismtype', OrganismTypeViewSet)
+router.register(r'instrumentmethod', InstrumentMethodViewSet)
+router.register(r'plantinfo', PlantInfoViewSet)
+router.register(r'MicrobialInfo', MicrobialInfoViewSet)
+router.register(r'organ', OrganViewSet)

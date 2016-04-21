@@ -17,7 +17,8 @@ urlpatterns = patterns('',
     (r'^ws/', include('mastrms.repository.urls')),
 
     # auto-generated rest api
-    url(r'^api/', include(api.v1.urls), name="api"),
+    url(r'^api/v1/', include('mastrms.api.urls', namespace='v1')),
+    url(r'^api/auth/', include('rest_framework.urls', namespace='rest_framework')),
 
     # repoadmin
     (r'^repoadmin/', include(admin.site.urls)),

@@ -3,7 +3,9 @@ South==1.0.2
 django-extensions>=1.2.5
 python-memcached==1.48
 dingus==0.3.4
-django-tastypie==0.11.1
+djangorestframework==3.2.5
+django-filter==0.11.0  # Filtering support in djangorestframework
+django-crispy-forms==1.6.0 # Improved HTML display for djangorestframework
 django-nose==1.4.1
 zipstream==1.1.0
 https://github.com/muccg/django-userlog/archive/2.0.0.tar.gz

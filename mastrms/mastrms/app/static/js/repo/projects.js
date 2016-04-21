@@ -47,17 +47,24 @@ MA.investigationStore = new Ext.data.JsonStore({
   autoSave: true,
   url: MA.apiBaseUrl + "investigation",
   restful: true,
-  root: "objects",
+  root: null,
   idProperty: "id",
-  successProperty: "_success",
+  successProperty: "id",
   storeId: 'investigationStore',
   fields: ['id', 'title', 'description', 'project'],
   reader: new Ext.data.JsonReader({
-    successProperty: "_success"
+    successProperty: "id"
   }),
   writer: new Ext.data.JsonWriter({
     encode: false,
-    writeAllFields: true
+    writeAllFields: true,
+    render: function(params, baseParams, data) {
+      if (this.encode === true) {
+        params = Ext.encode(data);
+      } else {
+        params.jsonData = data;
+      }
+    }
   })
 });
 
@@ -1203,7 +1210,7 @@ MA.editInvestigation = function(rec) {
     var value = {
       title: addWindow.getComponent('invTitleField').getValue(),
       description: addWindow.getComponent('invDescField').getValue(),
-      project: MA.apiBaseUrl + "project/" + MA.currentProjectId + "/"
+      project: MA.currentProjectId
     };
     var list = Ext.getCmp('projInvestigationList');
     var store = list.getStore();

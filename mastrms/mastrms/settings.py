@@ -58,7 +58,8 @@ INSTALLED_APPS = [
     'userlog',
     'south',
     'django_nose',
-    'tastypie',
+    'rest_framework',
+    'rest_framework.authtoken',
 ]
 
 # these determine which authentication method to use
@@ -186,10 +187,18 @@ DATE_INPUT_FORMATS = ('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y','%d %m %Y','%d %m %y', 
 DATE_FORMAT = "d-m-Y"
 SHORT_DATE_FORMAT = "d/m/Y"
 
-# This setting allows your URLs to be missing the final slash. Useful
-# for integrating with other systems.
-TASTYPIE_ALLOW_MISSING_SLASH = True
-TASTYPIE_DEFAULT_FORMATS = ['json']
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        # Use Django's standard `django.contrib.auth` permissions.
+        'rest_framework.permissions.DjangoModelPermissions',
+    ],
+    'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend',),
+    'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.NamespaceVersioning',
+}
 
 # This honours the X-Forwarded-Host header set by our nginx frontend when
 # constructing redirect URLS.

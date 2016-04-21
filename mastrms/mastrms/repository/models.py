@@ -807,3 +807,6 @@ class Investigation(models.Model):
     project = models.ForeignKey(Project)
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
+
+    def __unicode__(self):
+        return self.title
