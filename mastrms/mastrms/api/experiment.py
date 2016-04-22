@@ -1,11 +1,13 @@
-from rest_framework import serializers, viewsets
+from rest_framework import serializers, viewsets, fields
 
 from ..repository.models import PlantInfo, MicrobialInfo
 from ..repository.models import Experiment, ExperimentStatus
+from ..repository.models import UserExperiment, UserInvolvementType
 from ..repository.models import OrganismType, BiologicalSource, Organ
-from ..repository.models import InstrumentMethod
+from ..repository.models import InstrumentMethod, ClientFile
+from ..repository.models import RuleGenerator, NodeClient
 
-from .base import router
+from .base import router, URLPathField
 from .repository import ProjectSerializer, InvestigationSerializer
 from .users import UserSerializer
 
@@ -17,13 +19,21 @@ class ExperimentStatusViewSet(viewsets.ModelViewSet):
     queryset = ExperimentStatus.objects.order_by("name")
     serializer_class = ExperimentStatusSerializer
 
+class UserExperimentSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = UserExperiment
+
+class UserExperimentViewSet(viewsets.ModelViewSet):
+    queryset = UserExperiment.objects.order_by("experiment", "type")
+    serializer_class = UserExperimentSerializer
+
 class ExperimentSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Experiment
-        # exclude = ("instrument_method",)  # fixme
-    # project = ProjectSerializer(read_only=True)
-    # investigation = InvestigationSerializer(read_only=True)
-    # users = UserSerializer(many=True, read_only=True)
+    # fixme: how to embed the through relation?
+    # users = UserExperimentSerializer(many=True, read_only=True)
+
+    files = fields.ListField(child=URLPathField(), source="file_urls")
 
 class ExperimentViewSet(viewsets.ModelViewSet):
     queryset = Experiment.objects.all()
@@ -92,12 +102,52 @@ class OrganViewSet(viewsets.ModelViewSet):
     serializer_class = OrganSerializer
     filter_fields = ("experiment",)
 
+class UserInvolvementTypeSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = UserInvolvementType
+
+class UserInvolvementTypeViewSet(viewsets.ModelViewSet):
+    queryset = UserInvolvementType.objects.order_by("id")
+    serializer_class = UserInvolvementTypeSerializer
+
+class ClientFileSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = ClientFile
+    file_url = URLPathField()
+
+class ClientFileViewSet(viewsets.ModelViewSet):
+    queryset = ClientFile.objects.order_by("id")
+    serializer_class = ClientFileSerializer
+
+class RuleGeneratorSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = RuleGenerator
+    # start_block_set = RuleGeneratorStartBlockSerializer(many=True)
+    # sample_block_set = RuleGeneratorSampleBlockSerializer(many=True)
+    # end_block_set = RuleGeneratorEndBlockSerializer(many=True)
+
+class RuleGeneratorViewSet(viewsets.ModelViewSet):
+    queryset = RuleGenerator.objects.all()
+    serializer_class = RuleGeneratorSerializer
+
+class NodeClientSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = NodeClient
+
+class NodeClientViewSet(viewsets.ModelViewSet):
+    queryset = NodeClient.objects.all()
+    serializer_class = NodeClientSerializer
 
 router.register(r'experiment', ExperimentViewSet)
 router.register(r'experimentstatus', ExperimentStatusViewSet)
+router.register(r'userexperiment', UserExperimentViewSet)
+router.register(r'userinvolvementtype', UserInvolvementTypeViewSet)
+router.register(r'clientfile', ClientFileViewSet)
 router.register(r'biologicalsource', BiologicalSourceViewSet)
 router.register(r'organismtype', OrganismTypeViewSet)
 router.register(r'instrumentmethod', InstrumentMethodViewSet)
 router.register(r'plantinfo', PlantInfoViewSet)
-router.register(r'MicrobialInfo', MicrobialInfoViewSet)
+router.register(r'microbialinfo', MicrobialInfoViewSet)
 router.register(r'organ', OrganViewSet)
+router.register(r'rulegenerator', RuleGeneratorViewSet)
+router.register(r'nodeclient', NodeClientViewSet)

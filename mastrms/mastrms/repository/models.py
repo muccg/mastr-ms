@@ -4,10 +4,12 @@ import os
 from datetime import datetime, date, time
 from itertools import chain
 import re
+from urllib import urlencode
 import logging
 from django.db import models
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from mastrms.quote.models import Organisation, Formalquote
 from mastrms.mdatasync_server.models import NodeClient
 from mastrms.users.models import User
@@ -275,6 +277,26 @@ class Experiment(models.Model):
     def __unicode__(self):
         return self.title
 
+    @property
+    def file_urls(self):
+        "List of file URLs, for the API"
+        files = find_repo_files(self.experiment_dir)
+        other_files = find_repo_files(self.other_files_dir)
+        download_file = reverse("downloadFile")
+        return [download_file + "?" + urlencode({ "file": file, "experiment_id": self.id })
+                for file in chain(files, other_files)]
+
+def find_repo_files(base_dir):
+    """
+    Same kind of thing as mastrms.repository.views._fileList.
+    Generates a list of filenames relative to base_dir.
+    """
+    for root, dirs, files in os.walk(base_dir):
+        for name in files:
+            path = os.path.join(root, name)
+            if os.access(path, os.R_OK):
+                yield path[len(base_dir) + 1:]
+
 def safe_path_join(base, filename, alternative=None):
     """Joins a relative path with a base directory, preventing the result
     from being outside of the base tree."""
@@ -516,6 +538,13 @@ class Run(models.Model):
         """
         return self.state == RUN_STATES.COMPLETE[0]
 
+    @property
+    def file_urls(self):
+        "List of file URLs, for the API"
+        download_file = reverse("downloadRunFile")
+        return [download_file + "?" + urlencode({ "file": file, "run_id": self.id })
+                for file in find_repo_files(self.run_dir)]
+
 class SampleLog(models.Model):
     LOG_TYPES = (
             (0, u'Received'),
@@ -646,6 +675,11 @@ class ClientFile(models.Model):
 
     def __unicode__(self):
         return "Experiment \"%s\" file %s" % (self.experiment.title, self.filepath)
+
+    @property
+    def file_url(self):
+        "URL to download file, for the API"
+        return reverse("downloadClientFile", kwargs={"filepath": str(self.id)})
 
 class InstrumentSOP(models.Model):
     title = models.CharField(max_length=255)

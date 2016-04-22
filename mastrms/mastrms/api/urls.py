@@ -7,6 +7,8 @@ from .base import router
 from . import experiment
 from . import repository
 from . import users
+from . import sample
+from . import dump
 
 urlpatterns = [
     url(r'^', include(router.urls), name="api_root"),
