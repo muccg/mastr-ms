@@ -1,8 +1,0 @@
-#!/bin/sh
-
-PATH=$PATH:/usr/bin
-
-mastr-ms syncdb --noinput
-mastr-ms migrate --noinput
-
-exit 0

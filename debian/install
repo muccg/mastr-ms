@@ -1,3 +1,0 @@
-debian/dbc-include-template.conf usr/share/mastr-ms
-debian/django.wsgi usr/share/mastr-ms
-debian/bin/mastr-ms usr/bin

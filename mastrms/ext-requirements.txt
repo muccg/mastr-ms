@@ -1,4 +1,0 @@
-# Requirements which are python extension modules.
-# We don't really want these binaries in the deb package.
-wsgiref==0.1.2
-psycopg2>=2.5.0,<2.6.0
