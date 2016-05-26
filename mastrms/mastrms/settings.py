@@ -8,7 +8,6 @@ env = EnvConfig()
 
 CCG_INSTALL_ROOT = os.path.dirname(os.path.realpath(__file__))
 CCG_WRITEABLE_DIRECTORY = os.path.join(CCG_INSTALL_ROOT,"scratch")
-PROJECT_NAME = os.path.basename(CCG_INSTALL_ROOT)
 
 # see ccg_django_utils.webhelpers
 BASE_URL_PATH = os.environ.get("SCRIPT_NAME", "")
@@ -91,7 +90,7 @@ ROOT_URLCONF = 'mastrms.urls'
 
 # This one's a constant, where puppet will have collect static files to
 # see: https://docs.djangoproject.com/en/1.4/ref/settings/#static-root
-STATIC_ROOT=os.path.join(CCG_INSTALL_ROOT, 'static')
+STATIC_ROOT=env.get("static_root", os.path.join(CCG_INSTALL_ROOT, 'static'))
 
 # These may be overridden, but it would be nice to stick to this convention
 # see: https://docs.djangoproject.com/en/1.4/ref/settings/#static-url
@@ -204,7 +203,7 @@ REST_FRAMEWORK = {
 USE_X_FORWARDED_HOST = True
 
 # Log directory created and enforced by puppet
-CCG_LOG_DIRECTORY = os.path.join(CCG_INSTALL_ROOT, "log")
+CCG_LOG_DIRECTORY = env.get("log_directory", os.path.join(CCG_INSTALL_ROOT, "log"))
 
 # Default logging configuration, can be overridden
 LOGGING = {
@@ -284,7 +283,7 @@ if env.get("memcache", False):
         'default': {
             'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
             'LOCATION': env.getlist("memcache", []),
-            'KEYSPACE': "%s-prod" % PROJECT_NAME,
+            'KEYSPACE': "mastrms-prod",
         }
     }
 else:
