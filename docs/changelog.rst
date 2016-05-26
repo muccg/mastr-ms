@@ -12,7 +12,7 @@ client, see :ref:`client-upgrade`.
 .. _1.14.0:
 
 1.14.0 (27th May 2016)
------------------------
+----------------------
 
 New feature release.
 
@@ -37,7 +37,7 @@ Subsequent versions will use the normal database migration procedure.
 .. _1.13.0:
 
 1.13.0 (4th August 2015)
------------------------
+------------------------
 
  * Added Debian/Ubuntu package.
 

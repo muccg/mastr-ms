@@ -55,6 +55,18 @@ Contributing
 Latest Releases
 ---------------
 
+1.14.0_  (27th May 2016)
+  New feature release. Contains database migrations.
+
+.. _1.14.0: http://mastr-ms.readthedocs.org/en/latest/changelog.html#1.14.0
+
+
+1.13.0_  (4th August 2015)
+  Initial Debian/Ubuntu package release.
+
+.. _1.13.0: http://mastr-ms.readthedocs.org/en/latest/changelog.html#1.13.0
+
+
 1.12.3_  (16th June 2015)
   Bug fix release.
 
