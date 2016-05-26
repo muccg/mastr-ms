@@ -1,4 +1,3 @@
-# Create your views here.
 import os
 import os.path
 import posixpath, urllib, mimetypes

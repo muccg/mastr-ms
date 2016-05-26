@@ -15,6 +15,7 @@ from django.core.mail import mail_admins
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden, HttpResponseNotAllowed, HttpResponseRedirect, HttpResponseBadRequest, HttpResponseServerError
 from django.http import StreamingHttpResponse
 from django.core.servers.basehttp import FileWrapper
@@ -2197,6 +2198,8 @@ class CSVUploadView(View):
 
 class CSVUploadViewFile(CSVUploadView):
     file_field_name = 'samplecsv'
+
+    @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
         try:
             fd = CSVUploadViewFile.get_file(request)
@@ -2239,6 +2242,8 @@ class CSVUploadViewFile(CSVUploadView):
 
 class CSVUploadViewCaptureCSV(CSVUploadView):
     file_field_name = 'runcapturecsv'
+
+    @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
         try:
             fd = CSVUploadViewCaptureCSV.get_file(request)

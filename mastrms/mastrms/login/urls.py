@@ -1,13 +1,11 @@
-from django.conf.urls import *
-from django.conf import settings
+from django.conf.urls import url
+from . import views
 
-urlpatterns = patterns(
-    '',
-    (r'^processLogin', 'mastrms.login.views.processLoginView'),
-    (r'^processLogout', 'mastrms.login.views.processLogout'),
-    (r'^processForgotPassword', 'mastrms.login.views.processForgotPassword'),
-    (r'^populateResetPasswordForm', 'mastrms.login.views.populateResetPasswordForm'),
-    (r'^processResetPassword', 'mastrms.login.views.processResetPassword'),
-    (r'^forgotPassword', 'mastrms.login.views.forgotPasswordRedirect'),
-
-)
+urlpatterns = [
+    url(r'^processLogin', views.processLoginView),
+    url(r'^processLogout', views.processLogout),
+    url(r'^processForgotPassword', views.processForgotPassword),
+    url(r'^populateResetPasswordForm', views.populateResetPasswordForm),
+    url(r'^processResetPassword', views.processResetPassword),
+    url(r'^forgotPassword', views.forgotPasswordRedirect),
+]

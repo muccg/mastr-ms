@@ -1,7 +1,6 @@
-from django.conf.urls import *
-from django.conf import settings
+from django.conf.urls import url
+from . import views
 
-urlpatterns = patterns(
-    '',
-    (r'submit', 'mastrms.registration.views.submit'),
-)
+urlpatterns = [
+    url(r'submit', views.submit),
+]

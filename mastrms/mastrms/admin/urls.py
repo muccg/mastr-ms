@@ -1,18 +1,16 @@
-from django.conf.urls import *
-from django.conf import settings
+from django.conf.urls import url
+from . import views
 
-urlpatterns = patterns(
-    '',
-    #admin
-    (r'^adminrequests', 'mastrms.admin.views.admin_requests'),
-    (r'^usersearch', 'mastrms.admin.views.user_search'),
-    (r'^rejectedUsersearch', 'mastrms.admin.views.rejected_user_search'),
-    (r'^deletedUsersearch', 'mastrms.admin.views.deleted_user_search'),
-    (r'^nodesave', 'mastrms.admin.views.node_save'),
-    (r'^nodeDelete', 'mastrms.admin.views.node_delete'),
-    (r'^userload', 'mastrms.admin.views.user_load'),
-    (r'^userSave', 'mastrms.admin.views.user_save'),
-    (r'^orgsave[/]*$', 'mastrms.admin.views.org_save'),
-    (r'^orgDelete[/]*$', 'mastrms.admin.views.org_delete'),
-    (r'^listOrganisations', 'mastrms.admin.views.list_organisations'),
-)
+urlpatterns = [
+    url(r'^adminrequests', views.admin_requests),
+    url(r'^usersearch', views.user_search),
+    url(r'^rejectedUsersearch', views.rejected_user_search),
+    url(r'^deletedUsersearch', views.deleted_user_search),
+    url(r'^nodesave', views.node_save),
+    url(r'^nodeDelete', views.node_delete),
+    url(r'^userload', views.user_load),
+    url(r'^userSave', views.user_save),
+    url(r'^orgsave[/]*$', views.org_save),
+    url(r'^orgDelete[/]*$', views.org_delete),
+    url(r'^listOrganisations', views.list_organisations),
+]

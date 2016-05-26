@@ -13,7 +13,9 @@ from django.views.generic.base import View
 from django.core.urlresolvers import reverse
 from django.contrib.sites.models import Site
 from .models import Project, NodeClient, MicrobialInfo, PlantInfo, AnimalInfo, HumanInfo, RunSample
+from ..decorators import mastr_users_only, mastr_users_only_method
 
+@mastr_users_only
 def isa_study_view(request, project_id, experiment_id):
     from .models import Experiment
     exp = get_object_or_404(Experiment, project__id=project_id, id=experiment_id)
@@ -21,6 +23,7 @@ def isa_study_view(request, project_id, experiment_id):
     return HttpResponse(v._create_study(exp), content_type="text/plain")
 
 class ISATabExportView(View):
+    @mastr_users_only_method
     def get(self, request, project_id):
         project = get_object_or_404(Project, id=project_id)
 

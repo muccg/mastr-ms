@@ -1,10 +1,9 @@
-from django.conf.urls import *
-from django.conf import settings
+from django.conf.urls import url
+from . import views
 
-urlpatterns = patterns(
-    '',
-    (r'^userload', 'mastrms.users.views.user_load_profile'),
-    (r'^userSave', 'mastrms.users.views.userSave'),
-    (r'^listAllNodes', 'mastrms.users.views.listAllNodes'),
-    #(r'listRestrictedGroups', 'mastrms.users.views.listRestrictedGroups'),
-)
+urlpatterns = [
+    url(r'^userload', views.user_load_profile),
+    url(r'^userSave', views.userSave),
+    url(r'^listAllNodes', views.listAllNodes),
+    #url(r'listRestrictedGroups', views.listRestrictedGroups),
+]
