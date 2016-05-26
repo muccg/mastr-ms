@@ -1959,17 +1959,17 @@ def fileDownloadResponse(realfile, filename=None):
 
 @mastr_users_only
 def downloadPackage(request):
-    args = request.REQUEST
-    package_name = args['packageName']
-    package_info = request.session.pop(package_name)
-    files = package_info['files']
-    experiment = get_object_or_404(Experiment, pk=package_info['experiment_id'])
+    package_name = request.REQUEST.get('packageName')
+    package_info = request.session.pop(package_name, {})
+    files = package_info.get('files')
+    experiment_id = package_info.get('experiment_id')
+    experiment = get_object_or_404(Experiment, pk=experiment_id)
 
     zipped = zipstream.ZipFile(mode="w", compression=zipstream.ZIP_DEFLATED)
     for f in files:
         zipped.write(f[0])
 
-    response = StreamingHttpResponse(zipped, mimetype='application/download')
+    response = StreamingHttpResponse(zipped, content_type='application/download')
     response['Content-Disposition'] = 'attachment; filename={}'.format(package_name)
     return response
 
