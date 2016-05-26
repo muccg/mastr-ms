@@ -17,8 +17,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden, HttpResponseNotAllowed, HttpResponseRedirect, HttpResponseBadRequest, HttpResponseServerError
-from django.http import StreamingHttpResponse
-from django.core.servers.basehttp import FileWrapper
+from django.http import FileResponse, StreamingHttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
 from django.utils.encoding import smart_bytes, smart_text
 from mastrms.repository.models import Experiment, ExperimentStatus, Organ, AnimalInfo, HumanInfo, PlantInfo, MicrobialInfo, Treatment,  BiologicalSource, SampleClass, Sample, UserInvolvementType, SampleTimeline, UserExperiment, OrganismType, Project, SampleLog, Run, RUN_STATES, RunSample, InstrumentMethod, ClientFile, StandardOperationProcedure, RuleGenerator, Component, NodeClient
@@ -1954,13 +1953,8 @@ def packageFilesForDownload(request):
 def fileDownloadResponse(realfile, filename=None):
     if filename is None:
         filename = os.path.basename(realfile)
-    chunk = 8192
-    wrapper = FileWrapper(open(realfile, "rb"), chunk)
-
-    content_disposition = 'attachment;  filename=\"%s\"' % filename
-    response = StreamingHttpResponse(wrapper, content_type='application/download')
-    response['Content-Disposition'] = content_disposition
-    response['Content-Length'] = os.path.getsize(realfile)
+    response = FileResponse(open(realfile, "rb"), content_type='application/download')
+    response['Content-Disposition'] = 'attachment;  filename=\"%s\"' % filename
     return response
 
 @mastr_users_only
@@ -2012,11 +2006,9 @@ def downloadSOPFile(request, sop_id, filename):
     if filename != os.path.basename(sop.attached_pdf.name):
         return HttpResponseForbidden()
 
-    from django.core.servers.basehttp import FileWrapper
-    wrapper = FileWrapper(file(sop.attached_pdf.name))
-    response = HttpResponse(wrapper, content_type='application/download')
+    response = FileResponse(open(sop.attached_pdf.name, "rb"),
+                            content_type='application/download')
     response['Content-Disposition'] = 'attachment;'
-    response['Content-Length'] = os.path.getsize(sop.attached_pdf.name)
     return response
 
 def downloadClientFile(request, filepath):
