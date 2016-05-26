@@ -64,7 +64,7 @@ the correct settings.
 
 To then initialize an empty database for Mastr-MS, run::
 
-    mastr-ms syncdb && mastr-ms migrate
+    mastr-ms migrate
 
 Configuration
 ~~~~~~~~~~~~~
@@ -218,9 +218,8 @@ The default database, username, password are all set to
 Database Population
 ~~~~~~~~~~~~~~~~~~~
 
-Run Django syncdb and South migrate::
+Run the Django database migration::
 
-    sudo mastrms syncdb
     sudo mastrms migrate
 
 Django will prompt to create a superuser. If you choose to create a
@@ -335,9 +334,8 @@ Install the Mastr-MS RPM, replacing ``X.X.X`` with the desired version::
 
     sudo yum install mastrms-X.X.X
 
-Run Django syncdb and South migrate::
+Run Django database migration::
 
-    sudo mastrms syncdb
     sudo mastrms migrate
 
 .. _CCG yum repository:

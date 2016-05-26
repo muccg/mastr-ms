@@ -9,6 +9,39 @@ instructions on how to upgrade the server, see
 client, see :ref:`client-upgrade`.
 
 
+.. _1.14.0:
+
+1.14.0 (27th May 2016)
+-----------------------
+
+New feature release.
+
+ * Added exporting of all project information in JSON format.
+ * Updated to Django 1.8.
+
+This release contains database migrations which need to be run after
+upgrading the RPM.
+
+Before installing this version, ensure that the current Mastr-MS
+version is at least 1.12.1 and that all the database migrations have
+been run.
+
+Due to the upgrade to Django 1.8, a special migration step needs to be
+run. After installing, run this command::
+
+  sudo mastrms migrate --fake
+
+Subsequent versions will use the normal database migration procedure.
+
+
+.. _1.13.0:
+
+1.13.0 (4th August 2015)
+-----------------------
+
+ * Added Debian/Ubuntu package.
+
+
 .. _1.12.3:
 
 1.12.3 (16th June 2015)
