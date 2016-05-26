@@ -1,5 +1,3 @@
-#from django.utils import simplejson
-
 #This class holds various attributes of a request,
 #in order for them to be persisted over the course of a redirect etc. So it is good for landing pages after clicking on an external link but needing to authenticate inbetween, for example.
 #it is intended to live on the session

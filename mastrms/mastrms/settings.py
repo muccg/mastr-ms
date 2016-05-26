@@ -29,12 +29,11 @@ DATABASES = {
 
 # see: https://docs.djangoproject.com/en/dev/ref/settings/#middleware-classes
 MIDDLEWARE_CLASSES = [
-    'userlog.middleware.RequestToThreadLocalMiddleware',
+    'useraudit.middleware.RequestToThreadLocalMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'ccg_django_utils.middleware.ssl.SSLRedirect',
     'django.contrib.messages.middleware.MessageMiddleware',
 ]
 
@@ -44,7 +43,7 @@ INSTALLED_APPS = [
     'mastrms.mdatasync_server',
     'mastrms.login',
     'mastrms.quote',
-    'mastrms.admin',
+    'mastrms.admin.apps.MastrMSAdmin',
     'mastrms.repository',
     'mastrms.app',
     'mastrms.api',
@@ -55,8 +54,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.staticfiles',
     'django_extensions',
-    'userlog',
-    'south',
+    'useraudit',
     'django_nose',
     'rest_framework',
     'rest_framework.authtoken',
@@ -67,7 +65,7 @@ INSTALLED_APPS = [
 # see: https://docs.djangoproject.com/en/dev/ref/settings/#authentication-backends
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    'userlog.backend.AuthFailedLoggerBackend',
+    'useraudit.backend.AuthFailedLoggerBackend',
 ]
 
 # New feature in Django 1.5 -- custom user models
@@ -77,12 +75,12 @@ AUTH_USER_MODEL = 'users.User'
 # see: https://docs.djangoproject.com/en/dev/ref/settings/#secret-key
 SECRET_KEY = env.get("secret_key", "" if env.get("production", False) else "change-it")
 
-# Default SSL on and forced, turn off if necessary
-SSL_ENABLED = env.get("production", False)
-SSL_FORCE = env.get("production", False)
-
 # Debug off by default
-DEBUG = not env.get("production", False)
+PRODUCTION = env.get("production", False)
+DEBUG = env.get("debug", not PRODUCTION)
+
+# Default SSL on and forced, turn off if necessary
+SECURE_SSL_REDIRECT = env.get("ssl_redirect", PRODUCTION)
 
 # Default the site ID to 1, even if the sites framework isn't being used
 SITE_ID = 1

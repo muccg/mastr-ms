@@ -1,18 +1,16 @@
-from django.conf.urls import *
-from django.conf import settings
+from django.conf.urls import url
+from . import views
 
-urlpatterns = patterns(
-    '',
-    #admin
-    (r'^adminrequests', 'mastrms.admin.views.admin_requests', {'SSL':settings.SSL_ENABLED}),
-    (r'^usersearch', 'mastrms.admin.views.user_search', {'SSL':settings.SSL_ENABLED}),
-    (r'^rejectedUsersearch', 'mastrms.admin.views.rejected_user_search', {'SSL':settings.SSL_ENABLED}),
-    (r'^deletedUsersearch', 'mastrms.admin.views.deleted_user_search', {'SSL':settings.SSL_ENABLED}),
-    (r'^nodesave', 'mastrms.admin.views.node_save', {'SSL':settings.SSL_ENABLED}),
-    (r'^nodeDelete', 'mastrms.admin.views.node_delete', {'SSL':settings.SSL_ENABLED}),
-    (r'^userload', 'mastrms.admin.views.user_load', {'SSL':settings.SSL_ENABLED}),
-    (r'^userSave', 'mastrms.admin.views.user_save', {'SSL':settings.SSL_ENABLED}),
-    (r'^orgsave[/]*$', 'mastrms.admin.views.org_save', {'SSL':settings.SSL_ENABLED}),
-    (r'^orgDelete[/]*$', 'mastrms.admin.views.org_delete', {'SSL':settings.SSL_ENABLED}),
-    (r'^listOrganisations', 'mastrms.admin.views.list_organisations', {'SSL':settings.SSL_ENABLED}),
-)
+urlpatterns = [
+    url(r'^adminrequests', views.admin_requests),
+    url(r'^usersearch', views.user_search),
+    url(r'^rejectedUsersearch', views.rejected_user_search),
+    url(r'^deletedUsersearch', views.deleted_user_search),
+    url(r'^nodesave', views.node_save),
+    url(r'^nodeDelete', views.node_delete),
+    url(r'^userload', views.user_load),
+    url(r'^userSave', views.user_save),
+    url(r'^orgsave[/]*$', views.org_save),
+    url(r'^orgDelete[/]*$', views.org_delete),
+    url(r'^listOrganisations', views.list_organisations),
+]

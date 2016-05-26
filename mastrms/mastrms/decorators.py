@@ -1,4 +1,5 @@
 from django.http import HttpResponse, HttpResponseForbidden
+from django.utils.decorators import method_decorator
 from ccg_django_utils.http import HttpResponseUnauthorized
 from functools import wraps
 
@@ -32,3 +33,5 @@ def privileged_only(f):
 
 def mastr_users_only(f):
     return restricted_view(f, lambda u: u.IsAdmin or u.IsMastrAdmin or u.IsProjectLeader or u.IsMastrStaff)
+
+mastr_users_only_method = method_decorator(mastr_users_only)

@@ -1,13 +1,11 @@
-from django.conf.urls import *
-from django.conf import settings
+from django.conf.urls import url
+from . import views
 
-urlpatterns = patterns(
-    '',
-    (r'^processLogin', 'mastrms.login.views.processLoginView', {'SSL':settings.SSL_ENABLED}),
-    (r'^processLogout', 'mastrms.login.views.processLogout', {'SSL':settings.SSL_ENABLED}),
-    (r'^processForgotPassword', 'mastrms.login.views.processForgotPassword', {'SSL':settings.SSL_ENABLED}),
-    (r'^populateResetPasswordForm', 'mastrms.login.views.populateResetPasswordForm', {'SSL':settings.SSL_ENABLED}),
-    (r'^processResetPassword', 'mastrms.login.views.processResetPassword', {'SSL':settings.SSL_ENABLED}),
-    (r'^forgotPassword', 'mastrms.login.views.forgotPasswordRedirect', {'SSL':settings.SSL_ENABLED}),
-
-)
+urlpatterns = [
+    url(r'^processLogin', views.processLoginView),
+    url(r'^processLogout', views.processLogout),
+    url(r'^processForgotPassword', views.processForgotPassword),
+    url(r'^populateResetPasswordForm', views.populateResetPasswordForm),
+    url(r'^processResetPassword', views.processResetPassword),
+    url(r'^forgotPassword', views.forgotPasswordRedirect),
+]

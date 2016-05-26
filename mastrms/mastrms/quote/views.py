@@ -8,7 +8,6 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from ccg_django_utils.webhelpers import siteurl, wsgibase
 from django.core.servers.basehttp import FileWrapper
-from django.utils import simplejson
 from django.core.mail import send_mail
 import logging
 

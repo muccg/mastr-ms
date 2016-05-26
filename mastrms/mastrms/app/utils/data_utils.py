@@ -1,15 +1,14 @@
 import datetime
 import os
 import zipfile
+import json
 from decimal import Decimal
 from django.core.serializers.json import DateTimeAwareJSONEncoder
 from django.db.models import Model
 from django.db.models.query import QuerySet
-from django.utils import simplejson as json
 from django.http import HttpResponse
 from django.db.models import Model
 
-from django.utils import simplejson
 from django.utils.functional import Promise
 from django.utils.encoding import smart_text, force_text
 from django.core.serializers.json import DjangoJSONEncoder
@@ -113,7 +112,7 @@ def json_encode(data):
 
 def json_decode(data):
     try:
-        m = simplejson.JSONDecoder()
+        m = json.JSONDecoder()
         d = m.decode(data)
         return d
     except Exception, e:

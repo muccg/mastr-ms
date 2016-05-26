@@ -204,7 +204,7 @@ class Experiment(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     comment = models.TextField(blank=True)
-    users = models.ManyToManyField(User, through='UserExperiment', null=True, blank=True)
+    users = models.ManyToManyField(User, through='UserExperiment', blank=True)
     status = models.ForeignKey(ExperimentStatus, null=True, blank=True,
                                on_delete=models.SET_NULL)
     created_on = models.DateField(null=False, default=date.today)
@@ -312,6 +312,10 @@ def safe_path_join(base, filename, alternative=None):
 sopdir = 'sops'
 sopfs = FileSystemStorage(location=os.path.join(settings.REPO_FILES_ROOT, sopdir))
 
+def sop_filepath(sop, filename):
+    ensure_repo_filestore_dir_with_owner(sopdir)
+    return os.path.join(sopfs.location, sop.version, filename)
+
 class StandardOperationProcedure(models.Model):
     responsible = models.CharField(max_length=255, blank=True)
     label = models.CharField(max_length=255, blank=True)
@@ -323,16 +327,12 @@ class StandardOperationProcedure(models.Model):
     replaces_document = models.CharField(max_length=255, blank=True)
     content = models.CharField(max_length=255, blank=True)
 
-    def _filepath(self, filename):
-        ensure_repo_filestore_dir_with_owner(sopdir)
-        return os.path.join(sopfs.location, self.version, filename)
-
-
-    attached_pdf = models.FileField(storage=sopfs, upload_to=_filepath, null=True, blank=True, max_length=500)
-    experiments = models.ManyToManyField(Experiment, null=True, blank=True)
+    attached_pdf = models.FileField(storage=sopfs, upload_to=sop_filepath, null=True, blank=True, max_length=500)
+    experiments = models.ManyToManyField(Experiment, blank=True)
 
     def __unicode__(self):
         return self.label
+
 
 class Treatment(models.Model):
     experiment = models.ForeignKey('Experiment')

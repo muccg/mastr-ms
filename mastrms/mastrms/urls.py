@@ -6,40 +6,39 @@ admin.autodiscover()
 
 from . import api
 
-urlpatterns = patterns('',
-    url(r'^/?$', 'mastrms.login.views.serveIndex',
-        {'SSL': settings.SSL_ENABLED}, name="home"),
+urlpatterns = [
+    url(r'^/?$', 'mastrms.login.views.serveIndex', name="home"),
 
-    (r'^userinfo', 'mastrms.users.views.userinfo'),
-    (r'^sync/', include('mastrms.mdatasync_server.urls')),
+    url(r'^userinfo', 'mastrms.users.views.userinfo'),
+    url(r'^sync/', include('mastrms.mdatasync_server.urls')),
 
     # hand-written api
-    (r'^ws/', include('mastrms.repository.urls')),
+    url(r'^ws/', include('mastrms.repository.urls')),
 
     # auto-generated rest api
     url(r'^api/v1/', include('mastrms.api.urls', namespace='v1')),
     url(r'^api/auth/', include('rest_framework.urls', namespace='rest_framework')),
 
     # repoadmin
-    (r'^repoadmin/', include(admin.site.urls)),
+    url(r'^repoadmin/', include(admin.site.urls)),
 
     # mastrms.admin
-    (r'^admin/', include('mastrms.admin.urls')),
+    url(r'^admin/', include('mastrms.admin.urls')),
     # mastrms.quotes
-    (r'^quote/', include('mastrms.quote.urls')),
+    url(r'^quote/', include('mastrms.quote.urls')),
     # mastrms.registration
     url(r'^(?P<force_mcf>registration)/?$', 'mastrms.login.views.serveIndex',
-        {'SSL': settings.SSL_ENABLED}, name="register"),
-    (r'^registration/', include('mastrms.registration.urls')),
+        name="register"),
+    url(r'^registration/', include('mastrms.registration.urls')),
     # mastrms.login
-    (r'^login/', include('mastrms.login.urls')),
+    url(r'^login/', include('mastrms.login.urls')),
     # mastrms.users
-    (r'^user/', include('mastrms.users.urls')),
-)
+    url(r'^user/', include('mastrms.users.urls')),
+]
 
 # static
 if settings.DEBUG:
     print 'Running with django view for static path.'
     urlpatterns += patterns('',
-        (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root' : settings.STATIC_ROOT, 'SSL' : settings.SSL_ENABLED} ),
+        (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root' : settings.STATIC_ROOT}),
     )

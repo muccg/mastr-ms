@@ -2,7 +2,6 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render_to_response
-from django.utils import simplejson
 from django.conf import settings
 from ccg_django_utils import webhelpers
 from ccg_django_utils.webhelpers import siteurl, wsgibase
@@ -11,6 +10,7 @@ from mastrms.users.models import *
 from mastrms.login.URLState import getCurrentURLState
 from mastrms.app.utils.mail_functions import sendForgotPasswordEmail, sendPasswordChangedEmail
 import md5, time
+import json
 import logging
 
 logger = logging.getLogger('mastrms.login')
@@ -92,7 +92,7 @@ def processForgotPassword(request, *args):
     #Email the user
     sendForgotPasswordEmail(request, emailaddress, vk)
 
-    m = simplejson.JSONEncoder()
+    m = json.JSONEncoder()
     p = {}
     p['message'] = "An email has been sent to %s. Please follow the instructions in that email to continue" % (emailaddress)
 
@@ -185,7 +185,7 @@ def serveIndex(request, force_mcf=None):
     else:
         sendparams = ''
 
-    jsonparams = simplejson.dumps(sendparams)
+    jsonparams = json.dumps(sendparams)
 
     return render_to_response('index.html', {
                         'APP_SECURE_URL': siteurl(request),

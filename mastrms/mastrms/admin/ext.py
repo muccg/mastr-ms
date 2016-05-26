@@ -1,6 +1,5 @@
 from django.conf.urls import patterns, url
 from django.core.exceptions import FieldError
-from django.db import transaction
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed, HttpResponseNotFound, HttpResponseServerError
 from django.utils.encoding import smart_str
 from json import dumps, loads
@@ -180,11 +179,8 @@ class ExtJsonInterface(object):
 
     def handle_delete(self, request, id):
         try:
-            o = self.queryset(request).get(pk=id)
+            o = self.get_queryset(request).get(pk=id)
             o.delete()
-
-            # If we've gotten here, all is well.
-            transaction.commit()
 
             response = {
                 "success": True,
@@ -193,8 +189,6 @@ class ExtJsonInterface(object):
 
             return HttpResponse(content_type="text/plain; charset=UTF-8", content=dumps(response))
         except self.model.DoesNotExist:
-            transaction.rollback()
-
             response = {
                 "success": False,
                 "message": "The record could not be found.",
@@ -203,7 +197,7 @@ class ExtJsonInterface(object):
             return HttpResponseNotFound(content_type="text/plain; charset=UTF-8", content=dumps(response))
 
     def handle_read(self, request):
-        qs = self.queryset(request)
+        qs = self.get_queryset(request)
 
         # Add filters.
         filters = {}
@@ -227,7 +221,6 @@ class ExtJsonInterface(object):
 
         return HttpResponse(content_type="text/plain; charset=UTF-8", content=self.serialise(qs))
 
-    @transaction.commit_manually
     def handle_update(self, request, id):
         try:
             # Grab the name of the primary key field.
@@ -235,7 +228,7 @@ class ExtJsonInterface(object):
 
             # Pull in the JSON data that's been sent.
             row = loads(request.raw_post_data)["rows"]
-            qs = self.queryset(request)
+            qs = self.get_queryset(request)
 
             # OK, retrieve the object and update the field(s).
             o = qs.get(pk=row[pk])
@@ -244,17 +237,12 @@ class ExtJsonInterface(object):
                     self.set_field(o, name, value)
             o.save()
 
-            # If we've gotten here, all is well.
-            transaction.commit()
-
             response = {
                 "success": True,
             }
 
             return HttpResponse(content_type="text/plain; charset=UTF-8", content=dumps(response))
         except self.model.DoesNotExist:
-            transaction.rollback()
-
             response = {
                 "success": False,
                 "message": "The record could not be found.",
@@ -262,8 +250,6 @@ class ExtJsonInterface(object):
 
             return HttpResponseNotFound(content_type="text/plain; charset=UTF-8", content=dumps(response))
         except KeyError:
-            transaction.rollback()
-
             response = {
                 "success": False,
                 "message": "An internal error occurred.",

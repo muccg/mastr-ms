@@ -1,12 +1,19 @@
-Django==1.6.11
+Django==1.8.12
 South==1.0.2
-django-extensions>=1.2.5
+django-extensions==1.5.9
 python-memcached==1.48
-dingus==0.3.4
+django-tastypie==0.13.3
+zipstream==1.1.0
+
+# Django rest framework
 djangorestframework==3.2.5
 django-filter==0.11.0  # Filtering support in djangorestframework
 django-crispy-forms==1.6.0 # Improved HTML display for djangorestframework
+
+# Testing
+dingus==0.3.4
 django-nose==1.4.1
-zipstream==1.1.0
-https://github.com/muccg/django-userlog/archive/2.0.0.tar.gz
-https://bitbucket.org/ccgmurdoch/ccg-django-utils/downloads/ccg-django-utils-0.3.4.tar.gz
+
+# CCG packages
+ccg-django-utils==0.4.1
+django-useraudit==1.0.1
