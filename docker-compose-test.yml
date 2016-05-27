@@ -3,12 +3,12 @@ datatest:
   image: muccg/debian8-base:latest
   volumes:
     - .:/app
-    - data/test:/data
+    - ./data/test:/data
 
 seleniumhub:
   image: selenium/hub
   ports:
-    - ":4444"
+    - "4444"
 
 chrome:
   image: selenium/node-chrome
@@ -28,7 +28,7 @@ dbtest:
     - POSTGRES_USER=mastrmsapp
     - POSTGRES_PASSWORD=mastrmsapp
   ports:
-    - ":5432"
+    - "5432"
 
 cachetest:
   image: memcached:1.4
