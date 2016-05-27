@@ -63,7 +63,7 @@ make_virtualenv() {
 
     activate_virtualenv
 
-    pip install docker-compose
+    pip install 'docker-compose<1.6' --upgrade
     pip install 'flake8>=2.0,<2.1'
     pip install 'closure-linter==2.3.13'
 }
