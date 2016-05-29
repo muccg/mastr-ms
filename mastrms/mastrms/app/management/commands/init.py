@@ -27,7 +27,6 @@ class Command(BaseCommand):
         self.stdout.write("Mastr-MS data is ready.")
 
     def load_module_data(self, name, **options):
-        self.stdout.write("Loading %s..." % name)
         try:
             module = import_module("...initial_data." + name, package=__package__)
         except ImportError:
@@ -36,4 +35,5 @@ class Command(BaseCommand):
 
         for dep in getattr(module, "deps", None) or []:
             self.load_module_data(dep, **options)
+        self.stdout.write("Loading %s..." % name)
         module.load_data(**options)
