@@ -1,6 +1,6 @@
 Django==1.8.16
 django-extensions==1.5.9
-python-memcached==1.48
+python-memcached==1.58
 zipstream==1.1.4
 
 # Django rest framework
