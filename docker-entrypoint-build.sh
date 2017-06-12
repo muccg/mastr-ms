@@ -22,6 +22,8 @@ if [ "$1" = 'releasetarball' ]; then
     git clone --depth=1 --branch="${GIT_BRANCH}" "${PROJECT_SOURCE}" .
     git rev-parse HEAD > .version
     cat .version
+    pip install --upgrade -r "/app/${PROJECT_NAME}/requirements.txt"
+    pip install --upgrade -r "/app/${PROJECT_NAME}/ext-requirements.txt"
     pip install -e "${PROJECT_NAME}"
     set +x
 
@@ -29,7 +31,6 @@ if [ "$1" = 'releasetarball' ]; then
     ARTIFACTS="/env
                /app/docker-entrypoint.sh
                /app/uwsgi
-               /app/scripts
                /app/${PROJECT_NAME}"
     TARBALL="/data/${PROJECT_NAME}-${BUILD_VERSION}.tar"
     # shellcheck disable=SC2037
