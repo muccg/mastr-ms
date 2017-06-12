@@ -72,7 +72,7 @@ AUTH_USER_MODEL = 'users.User'
 
 # Make this unique, and don't share it with anybody.
 # see: https://docs.djangoproject.com/en/dev/ref/settings/#secret-key
-SECRET_KEY = env.get("secret_key", "" if env.get("production", False) else "change-it")
+SECRET_KEY = env.get("secret_key", "changeme")
 
 # Debug off by default
 PRODUCTION = env.get("production", False)
