@@ -10,7 +10,8 @@ CCG_INSTALL_ROOT = os.path.dirname(os.path.realpath(__file__))
 CCG_WRITEABLE_DIRECTORY = os.path.join(CCG_INSTALL_ROOT,"scratch")
 
 # see ccg_django_utils.webhelpers
-BASE_URL_PATH = os.environ.get("SCRIPT_NAME", "")
+SCRIPT_NAME = env.get("script_name", os.environ.get("HTTP_SCRIPT_NAME", ""))
+FORCE_SCRIPT_NAME = env.get("force_script_name", "") or SCRIPT_NAME or None
 
 # See: https://docs.djangoproject.com/en/1.5/releases/1.5/#allowed-hosts-required-in-production
 ALLOWED_HOSTS = env.getlist("allowed_hosts", ["*"])
@@ -94,7 +95,7 @@ STATIC_ROOT=env.get("static_root", os.path.join(CCG_INSTALL_ROOT, 'static'))
 
 # These may be overridden, but it would be nice to stick to this convention
 # see: https://docs.djangoproject.com/en/1.4/ref/settings/#static-url
-STATIC_URL = '{0}/static/'.format(BASE_URL_PATH)
+STATIC_URL = '{0}/static/'.format(SCRIPT_NAME)
 
 # Another puppet-enforced content for location of user-uploaded data
 # see: https://docs.djangoproject.com/en/1.4/ref/settings/#media-root
@@ -102,7 +103,7 @@ MEDIA_ROOT = os.path.join(CCG_WRITEABLE_DIRECTORY,"static","media")
 
 # This may be overridden
 # see: https://docs.djangoproject.com/en/1.4/ref/settings/#media-url
-MEDIA_URL = '{0}/static/media/'.format(BASE_URL_PATH)
+MEDIA_URL = '{0}/static/media/'.format(SCRIPT_NAME)
 
 # All templates must be loaded from within an app, so these are the only
 # ones that should be enabled.
@@ -164,7 +165,7 @@ REGISTRATION_TO_EMAIL = env.get("registration_to_email", "reg_email@yoursite.com
 # Default cookie settings
 # see: https://docs.djangoproject.com/en/1.4/ref/settings/#session-cookie-age and following
 SESSION_COOKIE_AGE = 60*60
-SESSION_COOKIE_PATH = '{0}/'.format(BASE_URL_PATH)
+SESSION_COOKIE_PATH = '{0}/'.format(SCRIPT_NAME)
 SESSION_COOKIE_NAME = 'mastrms_sessionid'
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_COOKIE_HTTPONLY = False # CHange from True
