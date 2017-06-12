@@ -7,7 +7,7 @@ from ccg_django_utils.conf import EnvConfig
 env = EnvConfig()
 
 CCG_INSTALL_ROOT = os.path.dirname(os.path.realpath(__file__))
-CCG_WRITEABLE_DIRECTORY = os.path.join(CCG_INSTALL_ROOT,"scratch")
+CCG_WRITEABLE_DIRECTORY = env.get("writable_directory", os.path.join(CCG_INSTALL_ROOT,"scratch"))
 
 # see ccg_django_utils.webhelpers
 SCRIPT_NAME = env.get("script_name", os.environ.get("HTTP_SCRIPT_NAME", ""))
@@ -147,7 +147,7 @@ else:
     EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
     EMAIL_FILE_PATH = os.path.join(CCG_WRITEABLE_DIRECTORY, "mail")
     if not os.path.exists(EMAIL_FILE_PATH):
-        os.mkdir(EMAIL_FILE_PATH)
+        os.makedirs(EMAIL_FILE_PATH, mode=0700)
 
 # See: https://docs.djangoproject.com/en/1.6/ref/settings/#server-email
 SERVER_EMAIL = env.get("server_email", "noreply@mastrms")
@@ -204,6 +204,8 @@ USE_X_FORWARDED_HOST = True
 
 # Log directory created and enforced by puppet
 CCG_LOG_DIRECTORY = env.get("log_directory", os.path.join(CCG_INSTALL_ROOT, "log"))
+if not os.path.exists(CCG_LOG_DIRECTORY):
+    os.makedirs(CCG_LOG_DIRECTORY, mode=0700)
 
 # Default logging configuration, can be overridden
 LOGGING = {

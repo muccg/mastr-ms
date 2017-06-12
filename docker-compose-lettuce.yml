@@ -1,64 +1,49 @@
-#
-dataselenium:
-  image: muccg/debian8-base:latest
-  volumes:
-    - .:/app
-    - ./data/selenium:/data
+version: '2'
+services:
 
-seleniumhub:
-  image: selenium/hub
-  ports:
-    - "4444"
+  datadevselenium:
+    extends:
+      file: docker-compose-common.yml
+      service: datadevselenium
 
-chrome:
-  image: selenium/node-chrome
-  links:
-  - seleniumhub:hub
-  - webselenium:web
+  dataprodselenium:
+    extends:
+      file: docker-compose-common.yml
+      service: dataprodselenium
 
-firefox:
-  image: selenium/node-firefox
-  links:
-  - seleniumhub:hub
-  - webselenium:web
+  # runs the aloe tests against docker-compose-teststack.yml
+  teststack:
+    image: muccg/mastrms-dev
+    command: lettuce
+    environment:
+      - WAIT_FOR_RUNSERVER=1
+      - WAIT_FOR_DB=1
+      - TEST_WAIT=10
+      - TEST_BROWSER=chrome
+      - DEBUG=0
+      - RUNSERVER=runservertest
+      - DBSERVER=dbtest
+      - CACHESERVER=cachetest
+    volumes_from:
+      - datadevselenium
 
-dbselenium:
-  image: postgres:9.3
-  environment:
-    - POSTGRES_USER=mastrmsapp
-    - POSTGRES_PASSWORD=mastrmsapp
-  ports:
-    - "5432"
-
-cacheselenium:
-  image: memcached:1.4
-
-webselenium:
-  build: .
-  command: runserver
-  environment:
-    - DJANGO_SETTINGS_MODULE=mastrms.settings
-    - DBUSER=mastrmsapp
-    - WAIT_FOR_DB=1
-    - WAIT_FOR_CACHE=1
-  volumes_from:
-    - dataselenium
-  ports:
-    - "8000"
-  links:
-    - dbselenium:db
-    - cacheselenium:cache
-
-# runs the lettuce tests against the stack above
-lettucehost:
-  image: mastrms_webselenium
-  command: lettuce
-  environment:
-    - DJANGO_SETTINGS_MODULE=mastrms.settings
-    - DBUSER=mastrmsapp
-    - WAIT_FOR_WEB=1
-  volumes_from:
-    - dataselenium
-  links:
-    - webselenium:web
-    - seleniumhub:hub
+  # runs the aloe tests against docker-compose-prod.yml
+  prod:
+    image: muccg/mastrms-dev
+    command: lettuce
+    environment:
+      - WAIT_FOR_UWSGI=1
+      - WAIT_FOR_DB=1
+      - TEST_APP_HOST=nginxtest
+      - TEST_APP_PORT=443
+      - TEST_APP_SCHEME=https
+      - TEST_APP_PATH=/app/
+      - TEST_WAIT=10
+      - TEST_BROWSER=chrome
+      - DEBUG=0
+      - RUNSERVER=runservertest
+      - DBSERVER=dbtest
+      - CACHESERVER=cachetest
+      - UWSGISERVER=uwsgitest
+    volumes_from:
+      - dataprodselenium

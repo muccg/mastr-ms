@@ -182,11 +182,11 @@ function _runserver() {
 }
 
 
-function _aloe() {
+function _lettuce() {
     export DJANGO_SETTINGS_MODULE="${DJANGO_SETTINGS_MODULE}"_test
     shift
     set -x
-    exec django-admin.py harvest --with-xunit --xunit-file="${WRITABLE_DIRECTORY}"/tests.xml --verbosity=3 "$@"
+    exec django-admin.py harvest --with-xunit --xunit-file=/data/tests.xml --verbosity=3
 }
 
 
@@ -243,40 +243,16 @@ if [ "$1" = 'runtests' ]; then
     exec django-admin.py test "${TEST_CASES}" --noinput -v 3
 fi
 
-# aloe entrypoint
-if [ "$1" = 'aloe' ]; then
-    info "[Run] Starting aloe"
+# lettuce entrypoint
+if [ "$1" = 'lettuce' ]; then
+    info "[Run] Starting lettuce"
     cd /app/mastrms || exit
-    _aloe "$@"
+    _lettuce "$@"
 fi
 
-warn "[RUN]: Builtin command not provided [aloe|runtests|runserver|runserver_plus|uwsgi|uwsgi_local]"
+warn "[RUN]: Builtin command not provided [lettuce|runtests|runserver|runserver_plus|uwsgi|uwsgi_local]"
 info "[RUN]: $*"
 
 set -x
 # shellcheck disable=SC2086 disable=SC2048
 exec "$@"
-
-## lettuce entrypoint
-#if [ "$1" = 'lettuce' ]; then
-#    echo "[Run] Starting lettuce"
-#
-#    # Hack to make sure the selenium stack is running before we hit it
-#    sleep 10
-#
-#    django-admin.py run_lettuce --with-xunit --xunit-file=/data/tests.xml 2>&1 | tee /data/lettuce.log
-#    exit $?
-#fi
-#
-## selenium entrypoint
-#if [ "$1" = 'selenium' ]; then
-#    echo "[Run] Starting selenium"
-#
-#    # Hack to make sure the selenium stack is running before we hit it
-#    sleep 10
-#
-#    : ${TEST_CASES="/app/mastrms/mastrms"}
-#    django-admin.py test ${TEST_CASES} --pattern=selenium_*.py 2>&1 | tee /data/selenium.log
-#    exit $?
-#fi
-#
