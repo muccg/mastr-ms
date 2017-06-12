@@ -1,66 +1,37 @@
-#
-dataselenium:
-  image: muccg/debian8-base:latest
-  volumes:
-    - .:/app
-    - ./data/selenium:/data
+version: '2'
+services:
 
-seleniumhub:
-  image: selenium/hub
-  ports:
-    - "4444"
+  hub:
+    image: selenium/hub:3.2
+    environment:
+      - GRID_TIMEOUT=120000
+    ports:
+      - "4444"
 
-chrome:
-  image: selenium/node-chrome
-  links:
-  - seleniumhub:hub
-  - webselenium:web
+  chrome:
+    image: selenium/node-chrome-debug:3.2
+    shm_size: 256M
+    environment:
+      - SCREEN_WIDTH=1366
+      - SCREEN_HEIGHT=768
+      - SCREEN_DEPTH=16
+      - HUB_PORT_4444_TCP_ADDR=hub
+      - HUB_PORT_4444_TCP_PORT=4444
+    ports:
+      - 5901:5900
+    depends_on:
+      - hub
 
-firefox:
-  image: selenium/node-firefox
-  links:
-  - seleniumhub:hub
-  - webselenium:web
-
-dbselenium:
-  image: postgres:9.3
-  environment:
-    - POSTGRES_USER=mastrmsapp
-    - POSTGRES_PASSWORD=mastrmsapp
-  ports:
-    - "5432"
-
-cacheselenium:
-  image: memcached:1.4
-
-webselenium:
-  build: .
-  command: runserver
-  environment:
-    - DJANGO_SETTINGS_MODULE=mastrms.settings
-    - DBUSER=mastrmsapp
-    - WAIT_FOR_DB=1
-    - WAIT_FOR_CACHE=1
-  volumes_from:
-    - dataselenium
-  ports:
-    - "8000"
-  links:
-    - dbselenium:db
-    - cacheselenium:cache
-
-# runs the lettuce tests against the stack above
-seleniumtesthost:
-  image: mastrms_webselenium
-  command: selenium
-  environment:
-    - DJANGO_SETTINGS_MODULE=mastrms.settings
-    - DBUSER=mastrmsapp
-    - WAIT_FOR_WEB=1
-    - WAIT_FOR_DB=1
-  volumes_from:
-    - dataselenium
-  links:
-    - dbselenium:db
-    - webselenium:web
-    - seleniumhub:hub
+  firefox:
+    image: selenium/node-firefox-debug:3.2
+    shm_size: 256M
+    environment:
+      - SCREEN_WIDTH=1366
+      - SCREEN_HEIGHT=768
+      - SCREEN_DEPTH=16
+      - HUB_PORT_4444_TCP_ADDR=hub
+      - HUB_PORT_4444_TCP_PORT=4444
+    ports:
+      - 5900:5900
+    depends_on:
+      - hub
