@@ -1,0 +1,27 @@
+FROM muccg/python-base:2.7-debian-8
+LABEL maintainer "https://github.com/muccg/mastr-ms"
+
+ENV PROJECT_NAME mastrms
+ENV PROJECT_SOURCE https://github.com/muccg/mastr-ms.git
+ENV DEPLOYMENT prod
+ENV PRODUCTION 1
+ENV DEBUG 0
+ENV STATIC_ROOT /data/static
+ENV WRITABLE_DIRECTORY /data/scratch
+ENV MEDIA_ROOT /data/static/media
+ENV LOG_DIRECTORY /data/log
+ENV DJANGO_SETTINGS_MODULE mastrms.settings
+
+RUN env | sort
+
+# Project specific deps
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  libpcre3 \
+  libpq5 \
+  libssl1.0.0 \
+  libxml2 \
+  libxslt1.1 \
+  mime-support \
+  && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+ENTRYPOINT ["/bin/sh"]

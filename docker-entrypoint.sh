@@ -6,140 +6,286 @@
 # $1 host
 # $2 port
 function dockerwait {
-    while ! exec 6<>/dev/tcp/$1/$2; do
-        echo "$(date) - waiting to connect $1 $2"
+    while ! exec 6<>/dev/tcp/"$1"/"$2"; do
+        warn "$(date) - waiting to connect $1 $2"
         sleep 5
     done
-    echo "$(date) - connected to $1 $2"
+    success "$(date) - connected to $1 $2"
 
     exec 6>&-
     exec 6<&-
 }
 
 
+function info () {
+    printf "\r  [\033[00;34mINFO\033[0m] %s\n" "$1"
+}
+
+
+function warn () {
+    printf "\r  [\033[00;33mWARN\033[0m] %s\n" "$1"
+}
+
+
+function success () {
+    printf "\r\033[2K  [\033[00;32m OK \033[0m] %s\n" "$1"
+}
+
+
+function fail () {
+    printf "\r\033[2K  [\033[0;31mFAIL\033[0m] %s\n" "$1"
+    echo ''
+    exit 1
+}
+
+
 # wait for services to become available
-# this prevents race conditions using docker-compose
+# this prevents race conditions using fig
 function wait_for_services {
     if [[ "$WAIT_FOR_DB" ]] ; then
-        dockerwait $DBSERVER $DBPORT
+        dockerwait "$DBSERVER" "$DBPORT"
     fi
     if [[ "$WAIT_FOR_CACHE" ]] ; then
-        dockerwait $CACHESERVER $CACHEPORT
+        dockerwait "$CACHESERVER" "$CACHEPORT"
     fi
-    if [[ "$WAIT_FOR_WEB" ]] ; then
-        dockerwait $WEBSERVER $WEBPORT
+    if [[ "$WAIT_FOR_RUNSERVER" ]] ; then
+        dockerwait "$RUNSERVER" "$RUNSERVERPORT"
+    fi
+    if [[ "$WAIT_FOR_HOST_PORT" ]]; then
+        dockerwait "$DOCKER_ROUTE" "$WAIT_FOR_HOST_PORT"
+    fi
+    if [[ "$WAIT_FOR_UWSGI" ]] ; then
+        dockerwait "$UWSGISERVER" "$UWSGIPORT"
     fi
 }
 
 
 function defaults {
-    : ${DBSERVER:="db"}
-    : ${DBPORT:="5432"}
-    : ${WEBSERVER="web"}
-    : ${WEBPORT="8000"}
-    : ${CACHESERVER="cache"}
-    : ${CACHEPORT="11211"}
+    : "${DBSERVER:=db}"
+    : "${DBPORT:=5432}"
+    : "${DBUSER:=webapp}"
+    : "${DBNAME:=${DBUSER}}"
+    : "${DBPASS:=${DBUSER}}"
 
-    : ${DBUSER="webapp"}
-    : ${DBNAME="${DBUSER}"}
-    : ${DBPASS="${DBUSER}"}
-    export DBSERVER DBPORT DBUSER DBNAME DBPASS
+    : "${DOCKER_ROUTE:=$(/sbin/ip route|awk '/default/ { print $3 }')}"
+
+    : "${UWSGISERVER:=uwsgi}"
+    : "${UWSGIPORT:=9000}"
+    : "${UWSGI_OPTS:=/app/uwsgi/docker.ini}"
+    : "${RUNSERVER:=runserver}"
+    : "${RUNSERVERPORT:=8000}"
+    : "${RUNSERVER_CMD:=runserver}"
+    : "${CACHESERVER:=cache}"
+    : "${CACHEPORT:=11211}"
+    : "${MEMCACHE:=${CACHESERVER}:${CACHEPORT}}"
+
+    # variables to control where tests will look for the app (aloe via selenium hub)
+    : "${TEST_APP_SCHEME:=http}"
+    : "${TEST_APP_HOST:=runservertest}"
+    : "${TEST_APP_PORT:=8000}"
+    : "${TEST_APP_PATH:=/}"
+    : "${TEST_APP_URL:=${TEST_APP_SCHEME}://${TEST_APP_HOST}:${TEST_APP_PORT}${TEST_APP_PATH}}"
+    #: "${TEST_BROWSER:=chrome}"
+    : "${TEST_BROWSER:=firefox}"
+    : "${TEST_WAIT:=30}"
+    : "${TEST_SELENIUM_HUB:=http://hub:4444/wd/hub}"
+
+    : "${DJANGO_FIXTURES:=none}"
+
+    export DBSERVER DBPORT DBUSER DBNAME DBPASS MEMCACHE DOCKER_ROUTE
+    export TEST_APP_URL TEST_APP_SCHEME TEST_APP_HOST TEST_APP_PORT TEST_APP_PATH TEST_BROWSER TEST_WAIT TEST_SELENIUM_HUB
+    export DJANGO_FIXTURES
 }
 
 
-function django_defaults {
-    : ${DEPLOYMENT="dev"}
-    : ${PRODUCTION=0}
-    : ${DEBUG=1}
-    : ${MEMCACHE="${CACHESERVER}:${CACHEPORT}"}
-    : ${WRITABLE_DIRECTORY="/data/scratch"}
-    : ${STATIC_ROOT="/data/static"}
-    : ${MEDIA_ROOT="/data/static/media"}
-    : ${LOG_DIRECTORY="/data/log"}
-    : ${DJANGO_SETTINGS_MODULE="django.settings"}
-
-    echo "DEPLOYMENT is ${DEPLOYMENT}"
-    echo "PRODUCTION is ${PRODUCTION}"
-    echo "DEBUG is ${DEBUG}"
-    echo "MEMCACHE is ${MEMCACHE}"
-    echo "WRITABLE_DIRECTORY is ${WRITABLE_DIRECTORY}"
-    echo "STATIC_ROOT is ${STATIC_ROOT}"
-    echo "MEDIA_ROOT is ${MEDIA_ROOT}"
-    echo "LOG_DIRECTORY is ${LOG_DIRECTORY}"
-    echo "DJANGO_SETTINGS_MODULE is ${DJANGO_SETTINGS_MODULE}"
-
-    export DEPLOYMENT PRODUCTION DEBUG DBSERVER MEMCACHE WRITABLE_DIRECTORY STATIC_ROOT MEDIA_ROOT LOG_DIRECTORY DJANGO_SETTINGS_MODULE
+function _django_check_deploy {
+    info "running check --deploy"
+    set -x
+    django-admin.py check --deploy --settings="${DJANGO_SETTINGS_MODULE}" 2>&1 | tee "${LOG_DIRECTORY}"/uwsgi-check.log
+    set +x
 }
 
 
-echo "HOME is ${HOME}"
-echo "WHOAMI is `whoami`"
+function _django_migrate {
+    info "running migrate"
+    set -x
+    django-admin.py syncdb --noinput --settings="${DJANGO_SETTINGS_MODULE}" 2>&1 | tee "${LOG_DIRECTORY}"/uwsgi-syncdb.log
+    django-admin.py migrate --noinput --settings="${DJANGO_SETTINGS_MODULE}" 2>&1 | tee "${LOG_DIRECTORY}"/uwsgi-migrate.log
+    django-admin.py update_permissions --settings="${DJANGO_SETTINGS_MODULE}" 2>&1 | tee "${LOG_DIRECTORY}"/uwsgi-permissions.log
+    set +x
+}
 
+
+function _django_collectstatic {
+    info "running collectstatic"
+    set -x
+    django-admin.py collectstatic --noinput --settings="${DJANGO_SETTINGS_MODULE}" 2>&1 | tee "${LOG_DIRECTORY}"/uwsgi-collectstatic.log
+    set +x
+}
+
+
+function _django_test_fixtures {
+    info 'loading test (iprestrict permissive) fixture'
+    set -x
+    django-admin.py init iprestrict_permissive
+    django-admin.py init adminuser
+    django-admin.py init sample
+    django-admin.py init testusers
+    django-admin.py reload_rules
+    set +x
+}
+
+
+function _django_dev_fixtures {
+    info "loading DEV fixture"
+    set -x
+    django-admin.py init adminuser
+    django-admin.py init sample
+    django-admin.py init testusers
+    django-admin.py reload_rules
+    set +x
+}
+
+
+
+function _django_fixtures {
+    if [ "${DJANGO_FIXTURES}" = 'test' ]; then
+        _django_test_fixtures
+    fi
+
+    if [ "${DJANGO_FIXTURES}" = 'dev' ]; then
+        _django_dev_fixtures
+    fi
+}
+
+
+function _safety {
+    info "safety"
+    set -x
+    safety check
+    set +x
+}
+
+
+function _runserver() {
+    : "${RUNSERVER_OPTS=${RUNSERVER_CMD} 0.0.0.0:${RUNSERVERPORT} --settings=${DJANGO_SETTINGS_MODULE}}"
+
+    _django_collectstatic
+    _django_migrate
+    _django_fixtures
+    _safety
+
+    info "RUNSERVER_OPTS is ${RUNSERVER_OPTS}"
+    set -x
+    # shellcheck disable=SC2086
+    exec django-admin.py ${RUNSERVER_OPTS}
+}
+
+
+function _aloe() {
+    export DJANGO_SETTINGS_MODULE="${DJANGO_SETTINGS_MODULE}"_test
+    shift
+    set -x
+    exec django-admin.py harvest --with-xunit --xunit-file="${WRITABLE_DIRECTORY}"/tests.xml --verbosity=3 "$@"
+}
+
+
+trap exit SIGHUP SIGINT SIGTERM
 defaults
-django_defaults
+env | grep -iv PASS | sort
 wait_for_services
 
-# uwsgi entrypoint
+# prod uwsgi entrypoint
 if [ "$1" = 'uwsgi' ]; then
-    echo "[Run] Starting uwsgi"
+    info "[Run] Starting prod uwsgi"
 
-    : ${UWSGI_OPTS="/app/uwsgi/docker.ini"}
-    echo "UWSGI_OPTS is ${UWSGI_OPTS}"
+    _django_collectstatic
+    _django_migrate
+    _django_check_deploy
 
-    django-admin.py collectstatic --noinput --settings=${DJANGO_SETTINGS_MODULE} 2>&1 | tee /data/uwsgi-collectstatic.log
-    django-admin.py syncdb --noinput --settings=${DJANGO_SETTINGS_MODULE} 2>&1 | tee /data/uwsgi-syncdb.log
-    django-admin.py migrate --noinput --settings=${DJANGO_SETTINGS_MODULE} 2>&1 | tee /data/uwsgi-migrate.log
-    uwsgi ${UWSGI_OPTS} 2>&1 | tee /data/uwsgi.log
-    exit $?
+    set -x
+    exec uwsgi --die-on-term --ini "${UWSGI_OPTS}"
+fi
+
+# local and test uwsgi entrypoint
+if [ "$1" = 'uwsgi_local' ]; then
+    info "[Run] Starting local uwsgi"
+
+    _django_collectstatic
+    _django_migrate
+    _django_fixtures
+    _django_check_deploy
+
+    set -x
+    exec uwsgi --die-on-term --ini "${UWSGI_OPTS}"
 fi
 
 # runserver entrypoint
 if [ "$1" = 'runserver' ]; then
-    echo "[Run] Starting runserver"
+    info "[Run] Starting runserver"
+    _runserver
+fi
 
-    : ${RUNSERVER_OPTS="runserver_plus 0.0.0.0:${WEBPORT} --settings=${DJANGO_SETTINGS_MODULE}"}
-    echo "RUNSERVER_OPTS is ${RUNSERVER_OPTS}"
-
-    django-admin.py syncdb --noinput --settings=${DJANGO_SETTINGS_MODULE} 2>&1 | tee /data/runserver-syncdb.log
-    django-admin.py migrate --noinput --settings=${DJANGO_SETTINGS_MODULE} 2>&1 | tee /data/runserver-migrate.log
-    django-admin.py collectstatic --noinput --settings=${DJANGO_SETTINGS_MODULE} 2>&1 | tee /data/runserver-collectstatic.log
-    django-admin.py ${RUNSERVER_OPTS} 2>&1 | tee /data/runserver.log
-    exit $?
+# runserver_plus entrypoint
+if [ "$1" = 'runserver_plus' ]; then
+    info "[Run] Starting runserver_plus"
+    RUNSERVER_CMD=runserver_plus
+    _runserver
 fi
 
 # runtests entrypoint
 if [ "$1" = 'runtests' ]; then
-    echo "[Run] Starting tests"
+    info "[Run] Starting tests"
+    export DJANGO_SETTINGS_MODULE="${DJANGO_SETTINGS_MODULE}"_test
 
-    : ${TEST_CASES="/app/mastrms/mastrms"}
-    django-admin.py test ${TEST_CASES} 2>&1 | tee /data/runtests.log
-    exit $?
+    set -x
+    exec django-admin.py test --noinput -v 3 mastrms
 fi
 
-# lettuce entrypoint
-if [ "$1" = 'lettuce' ]; then
-    echo "[Run] Starting lettuce"
-
-    # Hack to make sure the selenium stack is running before we hit it
-    sleep 10
-
-    django-admin.py run_lettuce --with-xunit --xunit-file=/data/tests.xml 2>&1 | tee /data/lettuce.log
-    exit $?
+# aloe entrypoint
+if [ "$1" = 'aloe' ]; then
+    info "[Run] Starting aloe"
+    cd /app/mastrms || exit
+    _aloe "$@"
 fi
 
-# selenium entrypoint
-if [ "$1" = 'selenium' ]; then
-    echo "[Run] Starting selenium"
+warn "[RUN]: Builtin command not provided [aloe|runtests|runserver|runserver_plus|uwsgi|uwsgi_local]"
+info "[RUN]: $*"
 
-    # Hack to make sure the selenium stack is running before we hit it
-    sleep 10
-
-    : ${TEST_CASES="/app/mastrms/mastrms"}
-    django-admin.py test ${TEST_CASES} --pattern=selenium_*.py 2>&1 | tee /data/selenium.log
-    exit $?
-fi
-
-echo "[RUN]: Builtin command not provided [lettuce|selenium|runtests|runserver|uwsgi]"
-echo "[RUN]: $@"
-
+set -x
+# shellcheck disable=SC2086 disable=SC2048
 exec "$@"
+
+#
+## runtests entrypoint
+#if [ "$1" = 'runtests' ]; then
+#    echo "[Run] Starting tests"
+#
+#    : ${TEST_CASES="/app/mastrms/mastrms"}
+#    django-admin.py test ${TEST_CASES} 2>&1 | tee /data/runtests.log
+#    exit $?
+#fi
+#
+## lettuce entrypoint
+#if [ "$1" = 'lettuce' ]; then
+#    echo "[Run] Starting lettuce"
+#
+#    # Hack to make sure the selenium stack is running before we hit it
+#    sleep 10
+#
+#    django-admin.py run_lettuce --with-xunit --xunit-file=/data/tests.xml 2>&1 | tee /data/lettuce.log
+#    exit $?
+#fi
+#
+## selenium entrypoint
+#if [ "$1" = 'selenium' ]; then
+#    echo "[Run] Starting selenium"
+#
+#    # Hack to make sure the selenium stack is running before we hit it
+#    sleep 10
+#
+#    : ${TEST_CASES="/app/mastrms/mastrms"}
+#    django-admin.py test ${TEST_CASES} --pattern=selenium_*.py 2>&1 | tee /data/selenium.log
+#    exit $?
+#fi
+#
