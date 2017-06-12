@@ -1,0 +1,66 @@
+version: '2'
+services:
+
+  # data only container pattern
+  datadev:
+    image: debian:jessie
+    volumes:
+      - .:/app
+      - ./data/dev:/data
+
+  datatest:
+    image: debian:jessie
+    volumes:
+      - .:/app
+      - ./data/tests:/data
+
+  dataprodselenium:
+    image: debian:jessie
+    volumes:
+      - .:/app
+      - ./data/selenium/prod:/data
+
+  datadevselenium:
+    image: debian:jessie
+    volumes:
+      - .:/app
+      - ./data/selenium/dev:/data
+
+  db:
+    image: postgres:9.4
+    environment:
+      - POSTGRES_USER=webapp
+      - POSTGRES_PASSWORD=webapp
+    ports:
+      - "5432"
+
+  cache:
+    image: memcached:1.4
+
+  nginx:
+    image: muccg/nginx-uwsgi:1.10
+    ports:
+      - "8443:443"
+      - "8080:80"
+    volumes:
+      - ./data/nginx:/data
+
+  runserver:
+    image: muccg/mastrms-dev
+    environment:
+      - WAIT_FOR_DB=1
+      - WAIT_FOR_CACHE=1
+
+  uwsgi:
+    image: muccg/mastrms-dev
+    command: uwsgi_local
+    environment:
+      - WAIT_FOR_DB=1
+      - WAIT_FOR_CACHE=1
+      - WAIT_FOR_RUNSERVER=1
+      # note: important to wait for runserver in dev as both will attempt to syncdb etc
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+      - "9100:9100"
+      - "9101:9101"
