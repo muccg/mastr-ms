@@ -238,8 +238,9 @@ if [ "$1" = 'runtests' ]; then
     info "[Run] Starting tests"
     export DJANGO_SETTINGS_MODULE="${DJANGO_SETTINGS_MODULE}"_test
 
+    : "${TEST_CASES=/app/mastrms/mastrms}"
     set -x
-    exec django-admin.py test --noinput -v 3 mastrms
+    exec django-admin.py test "${TEST_CASES}" --noinput -v 3
 fi
 
 # aloe entrypoint
@@ -256,16 +257,6 @@ set -x
 # shellcheck disable=SC2086 disable=SC2048
 exec "$@"
 
-#
-## runtests entrypoint
-#if [ "$1" = 'runtests' ]; then
-#    echo "[Run] Starting tests"
-#
-#    : ${TEST_CASES="/app/mastrms/mastrms"}
-#    django-admin.py test ${TEST_CASES} 2>&1 | tee /data/runtests.log
-#    exit $?
-#fi
-#
 ## lettuce entrypoint
 #if [ "$1" = 'lettuce' ]; then
 #    echo "[Run] Starting lettuce"
