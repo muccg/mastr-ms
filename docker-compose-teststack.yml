@@ -1,0 +1,35 @@
+version: '2'
+services:
+
+  datatest:
+    extends:
+      file: docker-compose-common.yml
+      service: datatest
+
+  dbtest:
+    extends:
+      file: docker-compose-common.yml
+      service: db
+
+  cachetest:
+    extends:
+      file: docker-compose-common.yml
+      service: cache
+
+  runservertest:
+    extends:
+      file: docker-compose-common.yml
+      service: runserver
+    volumes_from:
+      - datatest
+    command: runserver
+    environment:
+      - DJANGO_FIXTURES=test
+      - ALLOWED_HOSTS=*
+      - CACHESERVER=cachetest
+      - DBSERVER=dbtest
+    depends_on:
+      - dbtest
+      - cachetest
+    ports:
+      - "18000:8000"
