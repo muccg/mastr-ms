@@ -6,6 +6,7 @@ def load_data(**kwargs):
         last_name="User",
         is_staff=True,
         is_active=True,
+        is_superuser=True,
         date_joined="2012-02-14 16:08:20",
         last_login="2012-02-15 15:02:41",
         password="sha1$a8a68$18c83f486556e36c747bb6f39f6210e260ca21ce",

@@ -12,7 +12,6 @@ def load_data(**kwargs):
         is_active=True,
         date_joined="2012-02-14 16:08:20",
         last_login="2012-02-15 15:02:41",
-        password="sha1$a8a68$18c83f486556e36c747bb6f39f6210e260ca21ce",
         telephoneNumber="09 123456",
         homePhone="09 123465",
         title="Client Position",
@@ -30,32 +29,27 @@ def load_data(**kwargs):
         client.set_password("client")
         client.save()
 
-    user, created = User.objects.get_or_create(email="another@example.com", defaults=dict(
-        first_name="Another", last_name="User",
-        is_active=True, is_superuser=True,
+    staff, created = User.objects.get_or_create(email="staff@example.com", defaults=dict(
+        first_name="Staff", last_name="User",
+        is_active=True,
         is_staff=True,
         last_login=datetime.date(2015, 1, 1),
         telephoneNumber="09 123456",
         homePhone="09 234651",
-        registeredAddress="Prof Antoher Example",
-        physicalDeliveryOfficeName="Another Office",
-        description="Another",
-        businessCategory="Another Institute",
-        title="Another Position",
+        registeredAddress="Prof Staff Example",
+        physicalDeliveryOfficeName="Staff Office",
+        description="Staff member",
+        businessCategory="Staff Institute",
+        title="Staff",
         carLicense="Australia (WA)",
-        destinationIndicator="Another Department",
-        postalAddress="123 Anoter Lane"))
+        destinationIndicator="Staff Department",
+        postalAddress="111 Staff Way"))
 
     if created:
-        user.set_password("another")
-        user.save()
+        staff.set_password("staff")
+        staff.save()
 
-    client.groups.add(*Group.objects.filter(name__in=[
+    staff.groups.add(*Group.objects.filter(name__in=[
         "Mastr Staff",
         n1.name,
-    ]))
-
-    user.groups.add(*Group.objects.filter(name__in=[
-        "User",
-        n2.name,
     ]))
