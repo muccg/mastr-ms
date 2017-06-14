@@ -38,7 +38,7 @@ Some typical usages of the convenience develop.sh script are:
 - ./develop.sh up
         To start up all the docker containers needed for dev. 
         You can access the Mastrms application on http://localhost:8000.
-        You can login with *admin@example.com/admin*.
+        You can login with *admin@example.com/admin*, *client@example.com/client*, *another@example.com/another*.
 
 - ./develop.sh run-unittests
         Starts up all the docker containers and runs all our tests against them.
