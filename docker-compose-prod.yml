@@ -1,0 +1,61 @@
+version: '2'
+services:
+
+  # note: the host aliases are to allow the prod stack to be used as a test stack
+
+  dbprod:
+    extends:
+      file: docker-compose-common.yml
+      service: db
+    networks:
+      default:
+        aliases:
+          - dbtest
+
+  cacheprod:
+    extends:
+      file: docker-compose-common.yml
+      service: cache
+    networks:
+      default:
+        aliases:
+          - cachetest
+
+  nginxprod:
+    extends:
+      file: docker-compose-common.yml
+      service: nginx
+    depends_on:
+      - uwsgiprod
+    networks:
+      default:
+        aliases:
+          - nginxtest
+
+  uwsgiprod:
+    image: muccg/mastrms:${BUILD_VERSION}
+    command: uwsgi_local
+    environment:
+      - DEBUG=0
+      - WAIT_FOR_DB=1
+      - WAIT_FOR_CACHE=1
+      - DJANGO_FIXTURES=test
+      - ALLOWED_HOSTS=*
+      - CSRF_TRUSTED_ORIGINS=localhost nginxtest
+      - CACHESERVER=cacheprod
+      - DBSERVER=dbprod
+    volumes:
+        - uwsgi-prod-data:/data
+    depends_on:
+      - dbprod
+      - cacheprod
+    ports:
+      - "9000:9000"
+    networks:
+      default:
+        aliases:
+          - uwsgitest
+          - uwsgi
+
+volumes:
+  uwsgi-prod-data:

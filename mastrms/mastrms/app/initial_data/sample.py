@@ -8,8 +8,9 @@ from ...users.models import User, Group
 deps = ["testusers"]
 
 def load_data(**kwargs):
-    admin = User.objects.order_by("id").first()
+    admin = User.objects.get(email="admin@example.com")
     client = User.objects.get(email="client@example.com")
+    staff = User.objects.get(email="staff@example.com")
 
     nc, created = NodeClient.objects.get_or_create(organisation_name="org", site_name="site", station_name="station")
 
@@ -17,6 +18,8 @@ def load_data(**kwargs):
 
     proj, created = Project.objects.get_or_create(title="Test Project", description="This project is for testing Mastr-MS", client=client)
     proj.managers.add(admin)
+    proj.managers.add(staff)
+
 
     ex, created = Experiment.objects.get_or_create(title="Test experiment", description="This experiment was created for test purposes.", comment="This is a comment about the experiment", status=ExperimentStatus.objects.get(name="Designed"), job_number="000", project=proj, instrument_method=InstrumentMethod.objects.first(), sample_preparation_notes="Example sample preparation notes")
 

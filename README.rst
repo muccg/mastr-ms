@@ -21,29 +21,42 @@ For developers
 We do our development using Docker containers. See: https://www.docker.com/.
 You will have to set up Docker on your development machine.
 
-Other development dependencies are Python 2 and virtualenv (https://virtualenv.pypa.io/en/latest/).
-
 All the development tasks can be done by using the ``develop.sh`` shell script in this directory.
-Please run it without any arguments for help on its usage.
+Please run it without any arguments for help on its usage. The script is a convenience wrapper around docker-compose,
+so naturally docker-compose (or docker for that matter) can be used directly. The script will echo all the docker-compose
+commands it executes.
 
-Some typical usages are:
+We typically run a local squid proxy (https://github.com/muccg/docker-squid-deb-proxy) and pypi proxy (https://github.com/muccg/docker-devpi)
+in our dev environment. You can remove this dependency by editing the ``.env`` file in the top level directory. Specifically
+the variables CCG_PIP_PROXY and CCG_HTTP_PROXY control usage of the local proxies during builds.
 
-- ./develop.sh start
+Some typical usages of the convenience develop.sh script are:
+
+- ./develop.sh build base builder dev
+        To build all the docker containers needed for dev.
+
+- ./develop.sh up
         To start up all the docker containers needed for dev. 
-        You can access the Mastrms application on http://localhost:8000
-        (replace localhost with ``$ boot2docker ip`` if using boot2docker) after this.
-        You can login with one of the default users *demo/demo* or *admin/admin*.
+        You can access the Mastrms application on http://localhost:8000.
+        You can login with *admin@example.com/admin*, *staff@example.com/staff*, *client@example.com/client*.
 
-- ./develop.sh runtests
+- ./develop.sh run-unittests
         Starts up all the docker containers and runs all our tests against them.
 
-- ./develop.sh pythonlint
-        Lint your python code.
+Our production Docker image (``Dockerfile-prod``) is built by creating a tarball of the application and placing it the base image (``Dockerfile-base``)
+which is a Debian image and dependencies. Steps for building prod image:
 
-- ./develop.sh jslint
-        Lint your javascript code.
+- ./develop.sh build base builder
+        Build base image and builder image.
 
-Note: Our docker containers are coordinated using docker-compose (https://docs.docker.com/compose/) but docker-compose will be installed into a virtualenv environment automatically by the ``./develop.sh`` script for you.
+- ./develop.sh run-builder
+        Run the builder image to make a tarball of the application.
+
+- ./develop.sh build prod
+        Build the prod image.
+
+The prod image exposes the application via uwsgi, we typically deploy that behind nginx. We've also done RPM + Apache + mod_wsgi deployments but are not
+actively updating RPM deployments and will likely remove that from the REPO in the near future.
 
 Contributing
 ------------

@@ -1,0 +1,54 @@
+version: '2'
+services:
+
+  base:
+    build:
+      context: ./
+      dockerfile: Dockerfile-base
+      args:
+        http_proxy:
+    image: muccg/mastrms-base
+
+  builder:
+    build:
+      context: ./
+      dockerfile: Dockerfile-builder
+      args:
+        http_proxy:
+    image: muccg/mastrms-builder
+    command: releasetarball
+    network_mode: host
+    environment:
+        BUILD_VERSION:
+        GIT_BRANCH:
+        PIP_INDEX_URL:
+        PIP_TRUSTED_HOST:
+        NO_PROXY:
+    volumes:
+      - ./build:/data
+
+  dev:
+    build:
+      context: ./
+      dockerfile: Dockerfile-dev
+      args:
+        ARG_PIP_INDEX_URL: ${PIP_INDEX_URL}
+        ARG_PIP_TRUSTED_HOST: ${PIP_TRUSTED_HOST}
+        http_proxy:
+    image: muccg/mastrms-dev
+    volumes:
+      - .:/app
+
+  prod:
+    build:
+      context: ./
+      dockerfile: Dockerfile-prod
+      args:
+        ARG_BUILD_VERSION: ${BUILD_VERSION}
+    image: muccg/mastrms:${BUILD_VERSION}
+
+  lint:
+    image: muccg/linter
+    working_dir: /data
+    volumes:
+        - ./:/data
